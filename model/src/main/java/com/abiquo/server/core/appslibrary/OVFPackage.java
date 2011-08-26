@@ -28,12 +28,12 @@ public class OVFPackage extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected OVFPackage()
+    public OVFPackage()
     {
         // Just for JPA support
     }
 
-    private final static String ID_COLUMN = "ovfPackageId";
+    private final static String ID_COLUMN = "id_ovf_package";
 
     @Id
     @GeneratedValue
@@ -49,7 +49,7 @@ public class OVFPackage extends DefaultEntityBase
 
     private final static boolean APPS_LIBRARY_REQUIRED = true;
 
-    private final static String APPS_LIBRARY_ID_COLUMN = "idAppsLibrary";
+    private final static String APPS_LIBRARY_ID_COLUMN = "id_apps_library";
 
     @JoinColumn(name = APPS_LIBRARY_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -118,7 +118,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(final String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -224,7 +224,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.url;
     }
 
-    private void setUrl(final String url)
+    public void setUrl(final String url)
     {
         this.url = url;
     }
@@ -347,7 +347,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(final String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
