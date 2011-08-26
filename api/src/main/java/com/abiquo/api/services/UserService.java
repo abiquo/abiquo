@@ -56,6 +56,9 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
@@ -206,6 +209,14 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_CREATE,
+            "User " + user.getName() + "has been created [Enterprise: " + enterprise.getName()
+                + "Name: " + user.getName() + " Surname: " + user.getSurname() + "Role: "
+                + user.getRole() + "]");
+
         return user;
     }
 
@@ -334,7 +345,17 @@ public class UserService extends DefaultApiService
             flushErrors();
         }
 
-        return updateUser(old);
+        updateUser(old);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_MODIFY,
+            "User " + old.getName() + "has been modified [Enterprise: "
+                + old.getEnterprise().getName() + "Name: " + old.getName() + " Surname: "
+                + old.getSurname() + "Role: " + old.getRole() + "]");
+
+        return old;
     }
 
     public User updateUser(final User user)
@@ -362,6 +383,14 @@ public class UserService extends DefaultApiService
         }
 
         repo.removeUser(user);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_DELETE,
+            "User " + user.getName() + "has been deleted [Enterprise: "
+                + user.getEnterprise().getName() + "Name: " + user.getName() + " Surname: "
+                + user.getSurname() + "Role: " + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
@@ -444,7 +473,7 @@ public class UserService extends DefaultApiService
         // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
         // || role == Role.Type.USER)
 
-        if ((securityService.isEnterpriseAdmin() && !sameEnterprise)
+        if (securityService.isEnterpriseAdmin() && !sameEnterprise
             || securityService.isStandardUser())
         {
             throw new AccessDeniedException("");
@@ -457,7 +486,9 @@ public class UserService extends DefaultApiService
         for (User user : users)
         {
             if (user.getRole().isBlocked())
+            {
                 return user.getRole().getName().toString();
+            }
         }
         return "";
     }
@@ -473,8 +504,8 @@ public class UserService extends DefaultApiService
         // if ((role == Role.Type.ENTERPRISE_ADMIN && !enterprise.equals(user.getEnterprise()))
         // || (role == Role.Type.USER && user.getId() != selfUser.getId()))
 
-        if ((securityService.isEnterpriseAdmin() && !sameEnterprise)
-            || (securityService.isStandardUser() && !sameUser))
+        if (securityService.isEnterpriseAdmin() && !sameEnterprise
+            || securityService.isStandardUser() && !sameUser)
         {
             throw new AccessDeniedException("");
         }
@@ -488,12 +519,11 @@ public class UserService extends DefaultApiService
         // Role.Type role = user.getRole().getType();
         // if ((role == Role.Type.ENTERPRISE_ADMIN || role == Role.Type.USER) && !sameEnterprise)
         if (!sameEnterprise
-            && (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
-                && !securityService
-                    .hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES)
-                && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
-                && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL) && !securityService
-                .hasPrivilege(SecurityService.PHYS_DC_ENUMERATE)))
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)
+            && !securityService.hasPrivilege(SecurityService.PHYS_DC_ENUMERATE))
         {
             throw new AccessDeniedException("Missing privilege to get info from other enterprises");
         }
@@ -505,7 +535,7 @@ public class UserService extends DefaultApiService
         boolean sameEnterprise = enterprise.getId().equals(user.getEnterprise().getId());
 
         if (!sameEnterprise
-            && (!securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL)))
+            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
         {
             throw new AccessDeniedException("Missing privilege to manage info from other enterprises");
         }
@@ -513,7 +543,7 @@ public class UserService extends DefaultApiService
 
     private Boolean emailIsValid(final String email)
     {
-        if ((email != null) && (!email.isEmpty()))
+        if (email != null && !email.isEmpty())
         {
             final Pattern pattern;
             final Matcher matchers;
@@ -525,6 +555,8 @@ public class UserService extends DefaultApiService
             return matchers.matches();
         }
         else
+        {
             return true;
+        }
     }
 }

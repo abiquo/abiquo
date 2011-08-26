@@ -190,6 +190,20 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         if (basicResult.getSuccess())
         {
             basicResult.setMessage(resourceManager.getMessage("deleteUser.success"));
+
+            traceLog(
+                SeverityType.INFO,
+                ComponentType.USER,
+                EventType.USER_DELETE,
+                userSession,
+                null,
+                null,
+                "User '" + user.getUser() + "' has been deleted [Enterprise: "
+                    + user.getEnterprise().getName() + ", Name: " + user.getName() + ", Surname: "
+                    + user.getSurname() + ", Role: " + user.getRole().getName() + ", User: "
+                    + user.getUser() + ", Email: " + user.getEmail() + ", Description: "
+                    + user.getDescription() + "]", null, null, null, user.getUser(), user
+                    .getEnterprise().getName());
         }
         else
         {
