@@ -477,7 +477,7 @@ public class VirtualimageAllocationService
         Map<Machine, List<MachineLoadRule>> machineRulesMap =
             ruleFinder.initializeMachineLoadRuleCache(Collections.singletonList(machine));
 
-        boolean pass = false;
+        boolean pass = true;
 
         if (machineRulesMap != null) // community impl --> rules == null (so always pass)
         {
