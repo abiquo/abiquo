@@ -30,24 +30,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "bootstrap")
-@XmlType(propOrder = {"virtualMachineName", "chefConfig"})
+@XmlType(propOrder = {"nodeName", "chefConfig"})
 public class BootstrapDto implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private String virtualMachineName;
+    private String nodeName;
 
     private ChefBootstrap chefConfig;
 
-    @XmlElement(name = "virtualmachine")
-    public String getVirtualMachineName()
+    @XmlElement(name = "node")
+    public String getNodeName()
     {
-        return virtualMachineName;
+        return nodeName;
     }
 
-    public void setVirtualMachineName(final String virtualMachineName)
+    public void setNodeName(final String nodeName)
     {
-        this.virtualMachineName = virtualMachineName;
+        this.nodeName = nodeName;
     }
 
     @XmlElement(name = "chef")
