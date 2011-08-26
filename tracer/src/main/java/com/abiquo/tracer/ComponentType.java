@@ -80,7 +80,10 @@ public enum ComponentType implements Serializable
     COSTCODE_CURRENCY(8388608, "Cost Code - Currency"),
 
     // COSTCODE
-    COSTCODE(16777216, "Cost Code");
+    COSTCODE(16777216, "Cost Code"),
+
+    // STORAGE DEVICES
+    STORAGE_DEVICE(33554432, "Storage device");
 
     private final int component;
 

@@ -179,7 +179,10 @@ public enum EventType implements Serializable
         "CURRENCY_MODIFIED", "Currency updated"), CURRENCY_DELETED(1902, "CURRENCY_DELETED",
         "Currency deleted"),
 
-    ;
+    // STORAGE DEVICE
+    STORAGE_DEVICE_CREATED(2000, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
+        2001, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(2002,
+        "STORAGE DEVICE DELETED", "Storage device deleted");
 
     private final int event;
 
