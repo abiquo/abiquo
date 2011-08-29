@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans 
-        xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ws="http://jax-ws.dev.java.net/spring/core"
-        xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
-        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-                            http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd"
-        
->
- 
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core" xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                            http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd">
     <import resource="commonbeaninjection.xml" />
-    
-    <!-- applicationContextProvider: provides the application context in any place of the virtualfactory's project -->
+    <!-- applicationContextProvider: provides the application context in any place of the virtualfactory's
+        project -->
     <bean id="applicationContextProvider" class="com.abiquo.virtualfactory.context.ApplicationContextProvider" />
-    
 </beans>

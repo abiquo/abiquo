@@ -18,78 +18,59 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-.VLANRenderer
-{
-	background-color:#F4F4F4;
-	background-alpha:0.9;
+.VLANRenderer {
+	background-color: #F4F4F4;
+	background-alpha: 0.9;
 	borderThickness: 1;
 	borderColor: #cccccc;
-	border-style:solid;
+	border-style: solid;
 }
 
-.NetworkTree
-{
-	folder-open-icon:	ClassReference(null);
-	folder-closed-icon:	ClassReference(null);
-	default-leaf-icon:	ClassReference(null);
+.NetworkTree {
+	folder-open-icon: ClassReference(null);
+	folder-closed-icon: ClassReference(null);
+	default-leaf-icon: ClassReference(null);
 }
-	.PrivateIPListMagnifier
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/magnifier.png");
-	}
 
-	.PrivateIPListGateway
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/world.png");
-	}
-	
-	.VLanRendererVirtualApplianceIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/networking/vlan.png");
-	}
+.PrivateIPListMagnifier { /**custom property**/
+	source: Embed("/assets/application/icons/magnifier.png");
+}
 
-	.VLANRendererLabel1
-	{
-		font-size:"16";
-		font-weight:"bold";
+.PrivateIPListGateway { /**custom property**/
+	source: Embed("/assets/application/icons/world.png");
+}
 
-	}
-	.VLANRendererForm1
-	{
-		font-size:"11";
-		padding-bottom:"0";
-		padding-left:"20";
-		padding-right:"0";
-		padding-top:"0";
-		vertical-gap:"0";
-	}
+.VLanRendererVirtualApplianceIcon { /**custom property**/
+	source: Embed("/assets/networking/vlan.png");
+}
 
-	.NetworkTreeMagnifier
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/magnifier.png");
-	}
+.VLANRendererLabel1 {
+	font-size: "16";
+	font-weight: "bold";
+}
 
+.VLANRendererForm1 {
+	font-size: "11";
+	padding-bottom: "0";
+	padding-left: "20";
+	padding-right: "0";
+	padding-top: "0";
+	vertical-gap: "0";
+}
 
-	.PrivateNetworkManagementLabel1
-	{
-		/* font-style:"italic"; */
-		font-weight:bold;
-		vertical-center:"0";
-	}
+.NetworkTreeMagnifier { /**custom property**/
+	source: Embed("/assets/application/icons/magnifier.png");
+}
 
-	.PrivateNICSelectorMagnifier
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/magnifier.png");
-	}
+.PrivateNetworkManagementLabel1 { /* font-style:"italic"; */
+	font-weight: bold;
+	vertical-center: "0";
+}
 
-	.PrivateNICSelectorWorld
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/world.png");
-	}
+.PrivateNICSelectorMagnifier { /**custom property**/
+	source: Embed("/assets/application/icons/magnifier.png");
+}
+
+.PrivateNICSelectorWorld { /**custom property**/
+	source: Embed("/assets/application/icons/world.png");
+}

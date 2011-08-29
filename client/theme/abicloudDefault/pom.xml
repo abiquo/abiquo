@@ -1,46 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-     Copyright 2008 Marvin Herman Froeder
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
+    Copyright 2008 Marvin Herman Froeder
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- 
-    <!--                                      -->
-    <!--     POM RELATIONSHIPS                -->
-    <!--                                      -->
-
-    <!--       Maven coordinates              -->
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <artifactId>client-theme-default</artifactId>
     <packaging>swf</packaging>
-
-    <!--       Inheritances                   -->
+    <!-- Inheritances -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>client</artifactId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
-   <!--       Project properties             -->
+    <!-- Project properties -->
     <properties>
         <flexmojos.version>3.6.1</flexmojos.version>
         <flex.sdk.version>3.4.0</flex.sdk.version>
         <flex.sdk.revision>9271</flex.sdk.revision>
     </properties>
-
-    <!--       Dependences                    -->
+    <!-- Dependences -->
     <dependencies>
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
@@ -67,12 +62,10 @@
             <version>3.1</version>
             <type>swc</type>
         </dependency>
-
     </dependencies>
-   
-    <!--                                      -->
-    <!--       PROJECT INFORMATION            -->
-    <!--                                      -->
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
     <name>Client Flex Default Theme</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -82,11 +75,9 @@
             <url>http://www.gnu.org/license/lgpl.html</url>
         </license>
     </licenses>
-  
-  
-    <!--                                      -->
-    <!--       BUILD SETTINGS                 -->
-    <!--                                      -->
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <sourceDirectory>src</sourceDirectory>
         <testSourceDirectory>src/test/flex</testSourceDirectory>
@@ -124,11 +115,9 @@
                     <output>${project.build.directory}/${project.name}-${project.version}.swf</output>
                     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
                     <targetPlayer>10.0.0</targetPlayer>
-
                     <skipTests>true</skipTests>
                     <generateHtmlWrapper>false</generateHtmlWrapper>
                 </configuration>
-
                 <dependencies>
                     <dependency>
                         <groupId>com.adobe.flex</groupId>
@@ -148,143 +137,141 @@
                             <goal>wrapper</goal>
                         </goals>
                     </execution>
-
-                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos issue-->
+                    <!--all the css files must be in /src root otherwise an error is raised. Flex-mojos
+                        issue -->
                     <!-- application CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-application</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>application.css</sourceFile>
-							<output>target/themes/abicloudDefault/application.swf</output>
-					  </configuration> 
-					</execution>
-					                     
+                    <execution>
+                        <id>compile-css-to-swf-application</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>application.css</sourceFile>
+                            <output>target/themes/abicloudDefault/application.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- main CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-main</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>main.css</sourceFile>
-							<output>target/themes/abicloudDefault/main.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-main</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>main.css</sourceFile>
+                            <output>target/themes/abicloudDefault/main.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- virtualdatacenter CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-virtualdatacenter</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>virtualdatacenter.css</sourceFile>
-							<output>target/themes/abicloudDefault/virtualdatacenter.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-virtualdatacenter</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>virtualdatacenter.css</sourceFile>
+                            <output>target/themes/abicloudDefault/virtualdatacenter.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- virtualimage CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-virtualimage</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>virtualimage.css</sourceFile>
-							<output>target/themes/abicloudDefault/virtualimage.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-virtualimage</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>virtualimage.css</sourceFile>
+                            <output>target/themes/abicloudDefault/virtualimage.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- virtualappliance CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-virtualappliance</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>virtualappliance.css</sourceFile>
-							<output>target/themes/abicloudDefault/virtualappliance.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-virtualappliance</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>virtualappliance.css</sourceFile>
+                            <output>target/themes/abicloudDefault/virtualappliance.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- user CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-user</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>user.css</sourceFile>
-							<output>target/themes/abicloudDefault/user.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-user</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>user.css</sourceFile>
+                            <output>target/themes/abicloudDefault/user.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- metering CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-metering</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>metering.css</sourceFile>
-							<output>target/themes/abicloudDefault/metering.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-metering</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>metering.css</sourceFile>
+                            <output>target/themes/abicloudDefault/metering.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- networking CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-networking</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>networking.css</sourceFile>
-							<output>target/themes/abicloudDefault/networking.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-networking</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>networking.css</sourceFile>
+                            <output>target/themes/abicloudDefault/networking.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- infrastructure CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-infrastructure</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>infrastructure.css</sourceFile>
-							<output>target/themes/abicloudDefault/infrastructure.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-infrastructure</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>infrastructure.css</sourceFile>
+                            <output>target/themes/abicloudDefault/infrastructure.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- ConfigurationComponentsManagement CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-ConfigurationComponentsManagement</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>ConfigurationComponentsManagement.css</sourceFile>
-							<output>target/themes/abicloudDefault/ConfigurationComponentsManagement.swf</output>
-					  </configuration> 
-					</execution>                     
+                    <execution>
+                        <id>compile-css-to-swf-ConfigurationComponentsManagement</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>ConfigurationComponentsManagement.css</sourceFile>
+                            <output>target/themes/abicloudDefault/ConfigurationComponentsManagement.swf</output>
+                        </configuration>
+                    </execution>
                     <!-- ConfigurationComponentsHeartBeat CSS file -->
-					<execution> 
-						<id>compile-css-to-swf-ConfigurationComponentsHeartBeat</id> 
-						<phase>compile</phase> 
-						<goals> 
-							<goal>compile-swf</goal> 
-						</goals> 
-						<configuration> 
-							<sourceFile>ConfigurationComponentsHeartBeat.css</sourceFile>
-							<output>target/themes/abicloudDefault/ConfigurationComponentsHeartBeat.swf</output>
-					  </configuration> 
-					</execution>                     
-            </executions>
-
+                    <execution>
+                        <id>compile-css-to-swf-ConfigurationComponentsHeartBeat</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile-swf</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>ConfigurationComponentsHeartBeat.css</sourceFile>
+                            <output>target/themes/abicloudDefault/ConfigurationComponentsHeartBeat.swf</output>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -321,7 +308,7 @@
                     <failIfMissing>true</failIfMissing>
                     <includes>
                         <include>**/*.as</include>
-                        <!--<include>**/*.mxml</include>-->
+                        <!--<include>**/*.mxml</include> -->
                         <include>**/*.css</include>
                     </includes>
                 </configuration>

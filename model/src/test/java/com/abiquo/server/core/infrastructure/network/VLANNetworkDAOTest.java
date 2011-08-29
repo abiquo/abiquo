@@ -88,7 +88,7 @@ public class VLANNetworkDAOTest extends DefaultDAOTestBase<VLANNetworkDAO, VLANN
         persistAll(ds(), additionalEntities, vdc1, vdc2, n1_1, n1_2, n2_1);
 
         VLANNetworkDAO dao = createDaoForRollbackTransaction();
-        List<VLANNetwork> networks = dao.findVLANNetworks(reload(dao, vdc1));
+        List<VLANNetwork> networks = dao.findVlanNetworks(reload(dao, vdc1));
         Assert.assertFalse(networks.isEmpty());
         Assert.assertEquals(networks.size(), 2);
     }
@@ -112,7 +112,7 @@ public class VLANNetworkDAOTest extends DefaultDAOTestBase<VLANNetworkDAO, VLANN
         persistAll(ds(), additionalEntities, vdc1, vdc2, n2_1);
 
         VLANNetworkDAO dao = createDaoForRollbackTransaction();
-        List<VLANNetwork> networks = dao.findVLANNetworks(reload(dao, vdc1));
+        List<VLANNetwork> networks = dao.findVlanNetworks(reload(dao, vdc1));
         Assert.assertTrue(networks.isEmpty());
     }
 }

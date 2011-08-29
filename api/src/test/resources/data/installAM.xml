@@ -1,77 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-
-	<!-- disk_format_alias id="1" name="someDiskAlias"/-->
-	<disk_format_type id="1" uri="http://diskFormat"
-		description="diskFormatDescription" /> <!--  magicnumber="79" alias="1" -->
-
-	<category idCategory="1" name="category_1" isErasable="0"
-		isDefault="0" />
-
-	<enterprise idEnterprise="1" name="enter1" 
-		ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0"
-		repositorySoft="0"
-		repositoryHard="0"
-		vlansSoft="0"
-              vlansHard="0"
-              storageSoft="0"
-              storageHard="0"
-              publicIpSoft="0"
-              publicIpHard="0"/>
-	<enterprise idEnterprise="2" name="enter2" 
-		ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0"
-		repositorySoft="0"
-		repositoryHard="0"
-			  vlanSoft="0"
-              vlanHard="0"
-              storageSoft="0"
-              storageHard="0"
-              publicIpSoft="0"
-              publicIpHard="0"/>
-	<enterprise idEnterprise="3" name="enter3"
-		ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0"
-		repositorySoft="0"
-		repositoryHard="0"
-			vlanSoft="0"
-              vlanHard="0"
-              storageSoft="0"
-              storageHard="0"
-              publicIpSoft="0"
-              publicIpHard="0"/>
-
-	<datacenter idDatacenter="1" name="dc1" situation="locationdc1"
-		version_c="1" />
-	<repository idRepository="1" idDataCenter="1"
-		name="dcrep1" URL="url_dcrep1" /><!--  version_c="1"/ -->
-
-	<remote_service idRemoteService="1" uri="http://localhost:9009/am" 
-		idDataCenter="1" status="1" remoteServiceType="APPLIANCE_MANAGER" version_c="0" />
-
-
-	<apps_library id_apps_library="1" idEnterprise="1" />
-	<apps_library id_apps_library="2" idEnterprise="2" />
-	<apps_library id_apps_library="3" idEnterprise="3" />
-
-	<ovf_package id_ovf_package="1" description="ovfPackage_1"
-		url="http://rs.bcn.abiquo.com/m0n0wall/description.ovf" idFormat="1" id_apps_library="1" idCategory="1" />
-		<!-- windows7 -->
-	<ovf_package id_ovf_package="2" description="ovfPackage_2"
-		url="url_2" idFormat="1" id_apps_library="1" idCategory="1" />
-	<ovf_package id_ovf_package="3" description="ovfPackage_3"
-		url="url_3" idFormat="1" id_apps_library="1" idCategory="1" />
-
-	<ovf_package_list id_ovf_package_list="1"
-		name="ovfPackageList_1" id_apps_library="1" />
-	<ovf_package_list id_ovf_package_list="2"
-		name="ovfPackageList_2" id_apps_library="1" />
-	<ovf_package_list id_ovf_package_list="3"
-		name="ovfPackageList_3" id_apps_library="1" />
-
-	<ovf_package_list_has_ovf_package
-		id_ovf_package_list="1" id_ovf_package="1" />
-	<ovf_package_list_has_ovf_package
-		id_ovf_package_list="1" id_ovf_package="2" />
-	<ovf_package_list_has_ovf_package
-		id_ovf_package_list="1" id_ovf_package="3" />
-
+    <!-- disk_format_alias id="1" name="someDiskAlias"/ -->
+    <disk_format_type id="1" uri="http://diskFormat" description="diskFormatDescription" /> <!-- magicnumber="79" alias="1" -->
+    <category idCategory="1" name="category_1" isErasable="0" isDefault="0" />
+    <enterprise idEnterprise="1" name="enter1" ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0" repositorySoft="0" repositoryHard="0" vlansSoft="0"
+        vlansHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <enterprise idEnterprise="2" name="enter2" ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0" repositorySoft="0" repositoryHard="0" vlanSoft="0"
+        vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <enterprise idEnterprise="3" name="enter3" ramSoft="0" cpuSoft="0" hdSoft="0" ramHard="0" cpuHard="0" hdHard="0" version_c="0" repositorySoft="0" repositoryHard="0" vlanSoft="0"
+        vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <datacenter idDatacenter="1" name="dc1" situation="locationdc1" version_c="1" />
+    <repository idRepository="1" idDataCenter="1" name="dcrep1" URL="url_dcrep1" /><!-- version_c="1"/ -->
+    <remote_service idRemoteService="1" uri="http://localhost:9009/am" idDataCenter="1" status="1" remoteServiceType="APPLIANCE_MANAGER" version_c="0" />
+    <apps_library id_apps_library="1" idEnterprise="1" />
+    <apps_library id_apps_library="2" idEnterprise="2" />
+    <apps_library id_apps_library="3" idEnterprise="3" />
+    <ovf_package id_ovf_package="1" description="ovfPackage_1" url="http://rs.bcn.abiquo.com/m0n0wall/description.ovf" idFormat="1" id_apps_library="1" idCategory="1" />
+    <!-- windows7 -->
+    <ovf_package id_ovf_package="2" description="ovfPackage_2" url="url_2" idFormat="1" id_apps_library="1" idCategory="1" />
+    <ovf_package id_ovf_package="3" description="ovfPackage_3" url="url_3" idFormat="1" id_apps_library="1" idCategory="1" />
+    <ovf_package_list id_ovf_package_list="1" name="ovfPackageList_1" id_apps_library="1" />
+    <ovf_package_list id_ovf_package_list="2" name="ovfPackageList_2" id_apps_library="1" />
+    <ovf_package_list id_ovf_package_list="3" name="ovfPackageList_3" id_apps_library="1" />
+    <ovf_package_list_has_ovf_package id_ovf_package_list="1" id_ovf_package="1" />
+    <ovf_package_list_has_ovf_package id_ovf_package_list="1" id_ovf_package="2" />
+    <ovf_package_list_has_ovf_package id_ovf_package_list="1" id_ovf_package="3" />
 </dataset>

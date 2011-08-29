@@ -18,49 +18,37 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+.ConfigurationComponentsHeartBeatManagementLabel1 {
+	font-size: "13";
+	font-weight: "bold";
+}
 
-	.ConfigurationComponentsHeartBeatManagementLabel1
-	{
-		font-size:"13";
-		font-weight:"bold";
+.ConfigurationComponentsHeartBeatManagementTextarea1 {
+	background-alpha: "0";
+	font-size: "11";
+	font-weight: "bold";
+	leading: "6";
+}
 
-	}
+.ConfigurationComponentsHeartBeatManagementLabel2 {
+	font-size: "12";
+	font-weight: "bold";
+}
 
-	.ConfigurationComponentsHeartBeatManagementTextarea1
-	{
-		background-alpha:"0";
-		font-size:"11";
-		font-weight:"bold";
-		leading:"6";
-	}
-	
-	.ConfigurationComponentsHeartBeatManagementLabel2
-	{
-		font-size:"12";
-		font-weight:"bold";
-	}
+.ConfigurationComponentsHeartBeatReminderTextarea1 {
+	background-alpha: "0";
+	font-size: "11";
+	font-weight: "bold";
+	leading: "6";
+}
 
-	.ConfigurationComponentsHeartBeatReminderTextarea1
-	{
-		background-alpha:"0";
-		font-size:"11";
-		font-weight:"bold";
-		leading:"6";
+.ConfigurationComponentsRegistrationFormFormHeading1 {
+	font-size: "14";
+}
 
-	}
-
-	.ConfigurationComponentsRegistrationFormFormHeading1
-	{
-		font-size:"14";
-
-	}
-
-
-	.ConfigurationComponentsRegistrationReminderTextarea1
-	{
-		background-alpha:"0";
-		font-size:"11";
-		font-weight:"bold";
-		leading:"6";
-
-	}
+.ConfigurationComponentsRegistrationReminderTextarea1 {
+	background-alpha: "0";
+	font-size: "11";
+	font-weight: "bold";
+	leading: "6";
+}

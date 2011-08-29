@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -38,7 +36,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -46,46 +43,46 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
-@NamedQueries( {@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
+@NamedQueries({@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)})
 public class IpPoolManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "10";
 
-    private static final String DEFAULT_RESOURCE_NAME = "MAC Address";
+    public static final String DEFAULT_RESOURCE_NAME = "MAC Address";
 
-    private static final String DEFAULT_RESOURCE_DESCRIPTION =
+    public static final String DEFAULT_RESOURCE_DESCRIPTION =
         "MAC Address asociated to private Network";
+
+    public static final String DEFAULT_RESOURCE_PUBLIC_IP_DESCRIPTION =
+        "MAC Address asociated to public Network";
 
     public static enum Type
     {
-        PRIVATE, PUBLIC; // 0 = private, 1 = public
+        PRIVATE, PUBLIC, EXTERNAL; // 0 = private, 1 = public, 2 = external
     }
 
     public static final String TABLE_NAME = "ip_pool_management";
 
-    public static final String BY_VLAN =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, " + " VLANNetwork vn "
-            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id";
+    public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id";
 
-    public static final String BY_VDC =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
-            + " AND vdc.id = :vdc_id";
+    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
+        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id";
 
-    public static final String BY_ENT =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn, " + " Enterprise ent "
-            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND ent.id = :ent_id";
+    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
+        + " Enterprise ent " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+        + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected IpPoolManagement()
+    public IpPoolManagement()
     {
         // Just for JPA support
     }
@@ -95,27 +92,13 @@ public class IpPoolManagement extends RasdManagement
     {
         super(DISCRIMINATOR);
 
-        // RasdManagement properties
-        Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(DISCRIMINATOR));
-
-        rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
-        rasd.setConnection("");
-        rasd.setAllocationUnits("0");
-        rasd.setAutomaticAllocation(0);
-        rasd.setAutomaticDeallocation(0);
-
-        setRasd(rasd);
-
-        // IpManagement properties
-        setType(type);
         setDhcp(dhcp);
         setMac(mac);
         setName(name);
         setIp(ip);
         setVlanNetwork(vlan);
         setNetworkName(networkName);
+        setAvailable(Boolean.TRUE);
     }
 
     public final static String NAME_PROPERTY = "name";
@@ -191,10 +174,15 @@ public class IpPoolManagement extends RasdManagement
         return this.mac;
     }
 
-    private void setMac(final String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
-        getRasd().setAddress(mac);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setAddress(mac);
+        }
     }
 
     public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
@@ -237,6 +225,26 @@ public class IpPoolManagement extends RasdManagement
         this.quarantine = quarantine;
     }
 
+    public final static String AVAILABLE_PROPERTY = "available";
+
+    private final static String AVAILABLE_COLUMN = "available";
+
+    private final static boolean AVAILABLE_REQUIRED = false;
+
+    @Column(name = AVAILABLE_COLUMN, nullable = false)
+    private boolean available;
+
+    @Required(value = AVAILABLE_REQUIRED)
+    public boolean getAvailable()
+    {
+        return this.available;
+    }
+
+    public void setAvailable(final boolean available)
+    {
+        this.available = available;
+    }
+
     public final static String IP_PROPERTY = "ip";
 
     private final static boolean IP_REQUIRED = false;
@@ -260,7 +268,7 @@ public class IpPoolManagement extends RasdManagement
         return this.ip;
     }
 
-    private void setIp(final String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -310,10 +318,15 @@ public class IpPoolManagement extends RasdManagement
         return this.networkName;
     }
 
-    private void setNetworkName(final String networkName)
+    public void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
-        getRasd().setParent(networkName);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setParent(networkName);
+        }
     }
 
     // ********************************** Helper methods ********************************
@@ -327,7 +340,6 @@ public class IpPoolManagement extends RasdManagement
     public void setType(final Type type)
     {
         getRasd().setResourceSubType(String.valueOf(type.ordinal()));
-        getRasd().setConfigurationName(String.valueOf(type.ordinal()));
     }
 
     public boolean isPrivateIp()
@@ -337,7 +349,12 @@ public class IpPoolManagement extends RasdManagement
 
     public boolean isPublicIp()
     {
-        return !isPrivateIp();
+        return getType() == Type.PUBLIC;
+    }
+
+    public boolean isExternalIp()
+    {
+        return getType() == Type.EXTERNAL;
     }
 
     // ********************************** Others ********************************
@@ -367,4 +384,5 @@ public class IpPoolManagement extends RasdManagement
             return null;
         }
     }
+
 }

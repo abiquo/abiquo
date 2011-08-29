@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
@@ -47,12 +48,14 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
 
     private ResourceAllocationLimitHB limits;
 
+    private VlanNetworkHB defaultVlan;
+
     public DatacenterHB getDatacenter()
     {
         return datacenter;
     }
 
-    public void setDatacenter(DatacenterHB datacenter)
+    public void setDatacenter(final DatacenterHB datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -69,7 +72,7 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
         return limits.toString();
     }
 
-    public void setLimits(ResourceAllocationLimitHB limits)
+    public void setLimits(final ResourceAllocationLimitHB limits)
     {
         this.limits = limits;
     }
@@ -79,7 +82,7 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
         return limits;
     }
 
-    public void setIdDatacenterLimit(Integer idDatacenterLimit)
+    public void setIdDatacenterLimit(final Integer idDatacenterLimit)
     {
         this.idDatacenterLimit = idDatacenterLimit;
     }
@@ -89,7 +92,7 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
         return idDatacenterLimit;
     }
 
-    public void setEnterprise(EnterpriseHB enterprise)
+    public void setEnterprise(final EnterpriseHB enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -97,6 +100,16 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
     public EnterpriseHB getEnterprise()
     {
         return enterprise;
+    }
+
+    public VlanNetworkHB getDefaultVlan()
+    {
+        return defaultVlan;
+    }
+
+    public void setDefaultVlan(final VlanNetworkHB defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
     }
 
     @Override
@@ -112,6 +125,11 @@ public class DatacenterLimitHB implements Serializable, IPojoHB<DatacenterLimit>
         if (getLimits() != null)
         {
             dcLimit.setLimits(getLimits().toPojo());
+        }
+
+        if (getDefaultVlan() != null)
+        {
+
         }
 
         return dcLimit;

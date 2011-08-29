@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <!--                                      -->
-    <!--        POM RELATIONSHIPS             -->
-    <!--                                      -->
-
-    <!--       Maven coordinates              -->
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo.abicloud</groupId>
     <artifactId>tracer</artifactId>
-
-    <!--       Inheritances                   -->
+    <!-- Inheritances -->
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
         <version>2.0-SNAPSHOT</version>
     </parent>
-
-    <!--       Dependences                    -->
+    <!-- Dependences -->
     <dependencies>
         <dependency>
             <groupId>org.apache.activemq</groupId>
@@ -44,7 +40,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.6</version>
         </dependency>
-        
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -60,10 +55,9 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <!--                                      -->
-    <!--       PROJECT INFORMATION            -->
-    <!--                                      -->
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
     <name>Tracer</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -73,10 +67,9 @@
             <url>http://www.gnu.org/license/lgpl.html</url>
         </license>
     </licenses>
-
-    <!--                                      -->
-    <!--       BUILD SETTINGS                 -->
-    <!--                                      -->
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
     <build>
         <plugins>
             <plugin>

@@ -33,6 +33,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
@@ -85,6 +87,34 @@
 
             [Bindable]
             private var _editMode:Boolean;
+            
+            //Related Virtual Datacenter
+            [Bindable]
+            protected var _virtualDatacenter:VirtualDataCenter;
+            
+            public function set virtualDatacenter(value:VirtualDataCenter):void{
+            	this._virtualDatacenter = value;
+            }
+            
+            [Bindable(event="virtualDatacenterChange")]
+            public function get virtualDatacenter():VirtualDataCenter
+            {
+                return this._virtualDatacenter;
+            }
+            
+            //Related Virtual Datacenter
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+            
+            public function set virtualAppliance(value:VirtualAppliance):void{
+                this._virtualAppliance = value;
+            }
+            
+            [Bindable(event="virtualApplianceChange")]
+            public function get virtualAppliance():VirtualAppliance
+            {
+                return this._virtualAppliance;
+            }
 
 
             public function set virtualMachine(value:VirtualMachine):void
@@ -738,7 +768,9 @@
                     <!-- Networking -->
                     <virtualmachine:VirtualMachineNICListSmall id="virtualMachineNICSmall"
                         label="@Resource(bundle='Networking', key='LABEL_NETWORK')"
-                        virtualMachine="{_virtualMachine}"/>
+                        virtualDatacenter="{this._virtualDatacenter}"
+                        virtualAppliance="{this._virtualAppliance}"
+                        virtualMachine="{this._virtualMachine}"/>
                 </mx:ViewStack>
             </mx:HBox>
 
