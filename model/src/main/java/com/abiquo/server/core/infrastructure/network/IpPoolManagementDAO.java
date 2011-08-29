@@ -144,7 +144,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
             + "vdc.datacenter.id = dc.id AND "
-            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
+            + "ip.available = 1 AND ip.quarantine = 0  AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
