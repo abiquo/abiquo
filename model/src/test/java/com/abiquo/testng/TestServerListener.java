@@ -51,7 +51,7 @@ public class TestServerListener implements ISuiteListener
     public void onStart(final ISuite suite)
     {
         LOGGER.info("Starting test server...");
-
+        long start = System.currentTimeMillis();
         int port = Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
         server = new Server(port);
 
@@ -70,13 +70,15 @@ public class TestServerListener implements ISuiteListener
         {
             throw new RuntimeException("Could not start test server", ex);
         }
+
+        LOGGER.info("Server started in {} milliseconds", System.currentTimeMillis() - start);
     }
 
     @Override
     public void onFinish(final ISuite suite)
     {
         LOGGER.info("Stopping test server...");
-
+        long start = System.currentTimeMillis();
         try
         {
             server.stop();
@@ -85,6 +87,7 @@ public class TestServerListener implements ISuiteListener
         {
             throw new RuntimeException("Could not stop test server", ex);
         }
+        LOGGER.info("Server stopped in {} milliseconds", System.currentTimeMillis() - start);
     }
 
 }

@@ -64,6 +64,16 @@ public class TestConfig
     /** Default test server port. */
     public static final String DEFAULT_SERVER_PORT = "9009";
 
+    // apacheDS properties
+    /** apache DS port. */
+    public static final String DEFAULT_LDAP_PORT = "7007";
+
+    /** ldifDirectory. */
+    public static final String DEFAULT_LDIF_DIRECTORY = "src/test/resources/ldap/users.ldif";
+
+    /** workingDirectory. */
+    public static final String DEFAULT_WORKING_DIRECTORY = "apache-ds";
+
     // Utility methods
 
     public static String getParameter(final String name, final String defaultValue)
