@@ -72,7 +72,7 @@ public class TestConfig
     public static final String DEFAULT_LDIF_DIRECTORY = "src/test/resources/ldap/users.ldif";
 
     /** workingDirectory. */
-    public static final String DEFAULT_WORKING_DIRECTORY = "apache-ds";
+    public static final String DEFAULT_WORKING_DIRECTORY = "target/apache-ds";
 
     // Utility methods
 
