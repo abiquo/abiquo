@@ -1533,6 +1533,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setNetworkName(ip.getVlanNetworkName());
         dto.setQuarantine(ip.getQuarantine());
         dto.setAvailable(ip.getAvailable());
+        dto.setConfigureGateway(ip.getConfigureGateway());
         return dto;
     }
 
@@ -1546,6 +1547,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setQuarantine(ip.getQuarantine());
         flexIp.setName(ip.getName());
         flexIp.setAvailable(ip.getAvailable());
+        flexIp.setConfigureGateway(ip.getConfigureGateway());
 
         for (RESTLink currentLink : ip.getLinks())
         {
