@@ -309,6 +309,8 @@ public class DatacenterService extends DefaultApiService
                 // deleting datacenter
                 deleteAllocationRules(datacenter);
 
+                deleteNetwork(datacenter);
+
                 List<Rack> racks = getRacks(datacenter);
                 if (racks != null)
                 {
@@ -356,6 +358,11 @@ public class DatacenterService extends DefaultApiService
 
     // overrided on premium
     protected void deleteAllocationRules(final Datacenter datacenter)
+    {
+    }
+
+    // overrided on premium
+    protected void deleteNetwork(final Datacenter datacenter)
     {
     }
 }
