@@ -413,8 +413,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -996,13 +996,13 @@ public class NetworkService extends DefaultApiService
         // Check if something has changed.
         if (!oldConfig.getUsed().equals(vmConfig.getUsed()))
         {
-            if (!vmConfig.getUsed())
-            {
-                // That means : before it was the default configuration and now it doesn't.
-                // Raise an exception: it should be at least one network configuration.
-                addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
-                flushErrors();
-            }
+            // if (!vmConfig.getUsed())
+            // {
+            // // That means : before it was the default configuration and now it doesn't.
+            // // Raise an exception: it should be at least one network configuration.
+            // addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
+            // flushErrors();
+            // }
 
             // If we have arrived here, that means the 'used' configuration has changed and
             // user wants to use a new configuration. Update the corresponding 'configureGateway' in
@@ -1014,7 +1014,8 @@ public class NetworkService extends DefaultApiService
             {
                 if (!foundIpConfigureGateway)
                 {
-                    if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+                    if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId)
+                        && vmConfig.getGateway() != null)
                     {
                         ip.setConfigureGateway(Boolean.TRUE);
                         foundIpConfigureGateway = Boolean.TRUE;
