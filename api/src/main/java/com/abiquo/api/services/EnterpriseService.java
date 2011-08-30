@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -237,7 +238,11 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
-        userService.checkEnterpriseAdminCredentials(old);
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+            && old.getId() != dto.getId())
+        {
+            throw new AccessDeniedException("");
+        }
 
         if (dto.getName().isEmpty())
         {
