@@ -72,6 +72,11 @@ public class ChefRecipe extends DefaultEntityBase
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     public final static String VIRTUALMACHINE_PROPERTY = "virtualMachine";
 
     private final static boolean VIRTUALMACHINE_REQUIRED = false;
@@ -145,7 +150,7 @@ public class ChefRecipe extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(final String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }

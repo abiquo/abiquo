@@ -158,7 +158,10 @@ public enum EventType implements Serializable
     ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
         1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
 
-    CHEF_COOKBOOK_ADDED(1510, "CHEF_COOKBOOK_ADDED", "Cookbooks added"), ;
+    CHEF_RECIPE_ADDED(1510, "CHEF_RECIPE_ADDED", "Chef recipe added"), CHEF_RECIPE_DELETED(1511,
+        "CHEF_RECIPE_DELETED", "Chef recipe deleted"),
+
+    ;
 
     private final int event;
 
@@ -210,8 +213,8 @@ public enum EventType implements Serializable
         System.out.println("|| Action performed || Description || ");
         for (EventType error : events)
         {
-            System.out.println(String.format("| %s | %s |", error.name(), error
-                .getLongDescription()));
+            System.out.println(String.format("| %s | %s |", error.name(),
+                error.getLongDescription()));
         }
     }
 }

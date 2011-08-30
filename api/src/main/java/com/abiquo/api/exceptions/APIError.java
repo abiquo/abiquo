@@ -324,7 +324,8 @@ public enum APIError
         "Could not get the list of available recipes for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
         "CHEF-1", "Chef client already exists"), CHEF_ERROR_CONNECTION("CHEF-2",
         "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
-        "The node does not exist in the Chef Server");
+        "The node does not exist in the Chef Server"), CHEF_RECIPE_DOES_NOT_EXIST("CHEF-4",
+        "The given recipe does not exist in the Chef Server"),
 
     ;
 

@@ -30,7 +30,7 @@ public enum State
         return ordinal() + 1;
     }
 
-    public static State fromId(int id)
+    public static State fromId(final int id)
     {
         return State.values()[id - 1];
     }
@@ -65,5 +65,19 @@ public enum State
                 return "Resume";
         }
         return null;
+    }
+
+    public boolean isDeployed()
+    {
+        switch (this)
+        {
+            case RUNNING:
+            case PAUSED:
+            case POWERED_OFF:
+            case REBOOTED:
+                return true;
+            default:
+                return false;
+        }
     }
 }

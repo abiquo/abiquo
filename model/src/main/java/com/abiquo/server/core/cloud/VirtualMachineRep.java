@@ -127,9 +127,19 @@ public class VirtualMachineRep extends DefaultRepBase
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
 
+    public ChefRecipe findRecipeById(final Integer id)
+    {
+        return chefDao.findById(id);
+    }
+
     public void insertRecipe(final ChefRecipe recipe)
     {
         chefDao.persist(recipe);
+    }
+
+    public void deleteRecipe(final ChefRecipe recipe)
+    {
+        chefDao.remove(recipe);
     }
 
     public List<ChefRecipe> findRecipesByVirtualMachine(final VirtualMachine virtualMachine)

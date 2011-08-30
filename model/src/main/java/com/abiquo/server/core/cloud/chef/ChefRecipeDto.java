@@ -30,19 +30,16 @@ public class ChefRecipeDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    public static final String EXTENDED_RECIPES_MIME_TYPE = "application/vnd.extended-recipes+xml";
 
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId(final Integer id)
-    {
-        this.id = id;
-    }
+    // Recipes should not return the ID, since the resource is not a regular resource in the DB. It
+    // is synchronized with the Chef Server every time it is requested
 
     private String name;
+
+    private String description;
+
+    private boolean selected;
 
     public String getName()
     {
@@ -54,8 +51,6 @@ public class ChefRecipeDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private String description;
-
     public String getDescription()
     {
         return description;
@@ -64,6 +59,16 @@ public class ChefRecipeDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = description;
+    }
+
+    public boolean isSelected()
+    {
+        return selected;
+    }
+
+    public void setSelected(final boolean selected)
+    {
+        this.selected = selected;
     }
 
 }
