@@ -255,7 +255,7 @@ public class Allocator implements IAllocator
     }
 
     @Override
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, State state)
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, final State state)
         throws AllocatorException, ResourceAllocationException
     {
         log.error("Community doesn't implement HA");
@@ -327,7 +327,8 @@ public class Allocator implements IAllocator
      *            for the datacenter repository)
      * @param resources, additional resources configuration
      */
-    protected VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
+    @Override
+    public VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
     {
         return new VirtualMachineRequirements(vmachine);
     }

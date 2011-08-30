@@ -39,6 +39,7 @@ import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
@@ -58,6 +59,8 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
+
     @Autowired
     VirtualApplianceService service;
 
@@ -75,9 +78,9 @@ public class VirtualApplianceResource
      */
     @GET
     public VirtualApplianceDto getVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
@@ -86,9 +89,9 @@ public class VirtualApplianceResource
 
     @PUT
     public VirtualApplianceDto updateVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
 
@@ -98,9 +101,9 @@ public class VirtualApplianceResource
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
@@ -123,8 +126,8 @@ public class VirtualApplianceResource
      * @return the result Dto object
      * @throws Exception
      */
-    public static VirtualApplianceDto createTransferObject(VirtualAppliance vapp,
-        IRESTBuilder builder) throws Exception
+    public static VirtualApplianceDto createTransferObject(final VirtualAppliance vapp,
+        final IRESTBuilder builder) throws Exception
     {
         VirtualApplianceDto dto =
             ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
@@ -136,8 +139,8 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private static VirtualApplianceDto addLinks(IRESTBuilder builder, VirtualApplianceDto dto,
-        Integer vdcId, Integer enterpriseId)
+    private static VirtualApplianceDto addLinks(final IRESTBuilder builder,
+        final VirtualApplianceDto dto, final Integer vdcId, final Integer enterpriseId)
     {
         dto.setLinks(builder.buildVirtualApplianceLinks(dto, vdcId, enterpriseId));
 
@@ -151,8 +154,10 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void addImage(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId, VirtualImageDto image)
+    public void addImage(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualImageDto image)
     {
 
     }
@@ -164,9 +169,23 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void deploy(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId)
+    public void deploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
     {
         service.startVirtualAppliance(vdcId, vappId);
     }
+
+    @GET
+    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliancePriceDto virtualAppliancePriceDto =
+            service.getPriceVirtualAppliance(vdcId, vappId);
+        return virtualAppliancePriceDto;
+    }
+
 }
