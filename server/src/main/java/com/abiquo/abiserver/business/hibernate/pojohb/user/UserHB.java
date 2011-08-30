@@ -23,6 +23,8 @@ package com.abiquo.abiserver.business.hibernate.pojohb.user;
 
 // Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.server.core.enterprise.User.AuthType;
@@ -59,6 +61,8 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
 
     private String availableVirtualDatacenters;
 
+    private Date creationData;
+
     private String authType;
 
     public String getAvailableVirtualDatacenters()
@@ -66,7 +70,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return availableVirtualDatacenters;
     }
 
-    public void setAvailableVirtualDatacenters(String availableVirtualDatacenters)
+    public void setAvailableVirtualDatacenters(final String availableVirtualDatacenters)
     {
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
@@ -76,7 +80,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return idUser;
     }
 
-    public void setIdUser(Integer idUser)
+    public void setIdUser(final Integer idUser)
     {
         this.idUser = idUser;
     }
@@ -86,7 +90,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return roleHB;
     }
 
-    public void setRoleHB(RoleHB roleHB)
+    public void setRoleHB(final RoleHB roleHB)
     {
         this.roleHB = roleHB;
     }
@@ -96,7 +100,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
@@ -106,7 +110,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -116,7 +120,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return surname;
     }
 
-    public void setSurname(String surname)
+    public void setSurname(final String surname)
     {
         this.surname = surname;
     }
@@ -126,7 +130,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -136,7 +140,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return email;
     }
 
-    public void setEmail(String email)
+    public void setEmail(final String email)
     {
         this.email = email;
     }
@@ -146,7 +150,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return locale;
     }
 
-    public void setLocale(String locale)
+    public void setLocale(final String locale)
     {
         this.locale = locale;
     }
@@ -156,7 +160,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -166,7 +170,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return active;
     }
 
-    public void setActive(Integer active)
+    public void setActive(final Integer active)
     {
         this.active = active;
     }
@@ -176,7 +180,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return enterpriseHB;
     }
 
-    public void setEnterpriseHB(EnterpriseHB enterpriseHB)
+    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
     {
         this.enterpriseHB = enterpriseHB;
     }
@@ -186,11 +190,22 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return authType;
     }
 
-    public void setAuthType(String authType)
+    public void setAuthType(final String authType)
     {
         this.authType = authType;
     }
 
+    public Date getCreationData()
+    {
+        return creationData;
+    }
+
+    public void setCreationData(final Date creationData)
+    {
+        this.creationData = creationData;
+    }
+
+    @Override
     public User toPojo()
     {
         User user = new User();
@@ -206,6 +221,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         user.setActive(active == 1 ? true : false);
         user.setAuthType(AuthType.valueOf(authType));
         user.setLocale(locale);
+        user.setCreationData(creationData);
         if (enterpriseHB != null)
         {
             user.setEnterprise(enterpriseHB.toPojo());

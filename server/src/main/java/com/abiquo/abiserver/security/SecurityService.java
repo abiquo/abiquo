@@ -51,6 +51,10 @@ public class SecurityService
     public static final String USERS_MANAGE_ENTERPRISE_BRANDING =
         "USERS_MANAGE_ENTERPRISE_BRANDING";
 
+    // public static final String EVENTLOG_VIEW_ENTERPRISE = "EVENTLOG_VIEW_ENTERPRISE";
+    //
+    // public static final String EVENTLOG_VIEW_ALL = "EVENTLOG_VIEW_ALL";
+
     public static boolean hasPrivilege(final String privilege, final Role role)
     {
         if (role.getPrivileges() != null)
