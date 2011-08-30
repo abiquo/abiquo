@@ -238,8 +238,9 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
+        Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
         if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
-            && old.getId() != dto.getId())
+            && !userEnt.equals(dto.getId()))
         {
             throw new AccessDeniedException("");
         }
