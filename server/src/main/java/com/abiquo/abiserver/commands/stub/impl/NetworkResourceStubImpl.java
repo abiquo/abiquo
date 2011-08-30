@@ -554,11 +554,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 }
             }
 
+            // when the virtual machine has no gateway
+            result.setSuccess(Boolean.TRUE);
+
             // Unknown exception. At least one result should be returned before.
-            result.setSuccess(Boolean.FALSE);
-            result
-                .setMessage("Unknown exception while retrieving the gateway of the virtual machine "
-                    + vmId);
+            // result.setSuccess(Boolean.FALSE);
+            // result
+            // .setMessage("Unknown exception while retrieving the gateway of the virtual machine "
+            // + vmId);
         }
         else
         {
@@ -1423,6 +1426,27 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
             // Due we receive a gateway from the Flex client and we want to send an id
             // to update the gateway, search for the VMNetworkconfigurationDto object.
+            if (gateway == null)
+            {
+                for (VMNetworkConfigurationDto dto : dtos.getCollection())
+                {
+
+                    String uriConfig =
+                        createVirtualMachineConfigurationLink(vdcId, vappId, vmId, dto.getId());
+                    dto.setUsed(Boolean.FALSE);
+                    response = put(uriConfig, dto);
+                    if (response.getStatusCode() == 200)
+                    {
+                        result.setSuccess(Boolean.TRUE);
+                    }
+                    else
+                    {
+                        populateErrors(response, result, "setGatewayForVirtualMachine");
+                    }
+                }
+                return result;
+            }
+
             for (VMNetworkConfigurationDto dto : dtos.getCollection())
             {
                 if (dto.getGateway().equalsIgnoreCase(gateway.toString()))
@@ -1445,6 +1469,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     }
                     return result;
                 }
+
             }
 
             // Unknown exception. At least one result should be returned before.
