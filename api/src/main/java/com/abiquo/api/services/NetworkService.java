@@ -719,9 +719,10 @@ public class NetworkService extends DefaultApiService
         // If the order is bigger or equal than the size, then
         // the resource does not exist. Ex: size = 2 -> nicOrder = 2 -> (ERROR! the order begins
         // with 0 and if the size is 2, the available values are 0,1.
-        if (nicOrder >= ips.size())
+        if (nicOrder >= ips.size() || linkOldOrder >= ips.size())
         {
             addNotFoundErrors(APIError.VLANS_NIC_NOT_FOUND);
+            flushErrors();
         }
 
         if (nicOrder == linkOldOrder)
