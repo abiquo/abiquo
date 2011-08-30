@@ -832,6 +832,14 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        // check the format of dns and secondary dns
+        if (!IPAddress.isValidIpAddress(newNetwork.getConfiguration().getPrimaryDNS())
+            || !IPAddress.isValidIpAddress(newNetwork.getConfiguration().getSecondaryDNS()))
+        {
+            addConflictErrors(APIError.VLANS_INVALID_IP_FORMAT);
+            flushErrors();
+        }
+
         // Check the new gateway is inside the range of IPs.
         if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
             oldNetwork.getConfiguration().getGateway()))
@@ -873,7 +881,6 @@ public class NetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
-
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
