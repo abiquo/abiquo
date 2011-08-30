@@ -153,7 +153,8 @@ public enum APIError
         "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
         "VLAN-39", "Can not delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
         "VLAN-40",
-        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"),
+        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
+        "VLAN-41", "IP format is invalid"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
@@ -418,8 +419,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
