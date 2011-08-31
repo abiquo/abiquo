@@ -130,6 +130,12 @@ public class NetworkService extends DefaultApiService
 
         IpPoolManagement ip = repo.findIp(vlan, ipId);
 
+        if (ip == null)
+        {
+            addConflictErrors(APIError.VLANS_IP_DOES_NOT_EXISTS);
+            flushErrors();
+        }
+
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
