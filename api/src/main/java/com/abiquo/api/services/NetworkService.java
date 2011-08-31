@@ -719,9 +719,10 @@ public class NetworkService extends DefaultApiService
         // If the order is bigger or equal than the size, then
         // the resource does not exist. Ex: size = 2 -> nicOrder = 2 -> (ERROR! the order begins
         // with 0 and if the size is 2, the available values are 0,1.
-        if (nicOrder >= ips.size())
+        if (nicOrder >= ips.size() || linkOldOrder >= ips.size() || linkOldOrder < 0)
         {
             addNotFoundErrors(APIError.VLANS_NIC_NOT_FOUND);
+            flushErrors();
         }
 
         if (nicOrder == linkOldOrder)
@@ -810,6 +811,7 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.INCOHERENT_IDS);
             flushErrors();
         }
+        validate(newNetwork.getConfiguration());
 
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
@@ -828,6 +830,14 @@ public class NetworkService extends DefaultApiService
             && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
+            flushErrors();
+        }
+
+        // check the format of dns and secondary dns
+        if (!IPAddress.isValidIpAddress(newNetwork.getConfiguration().getPrimaryDNS())
+            || !IPAddress.isValidIpAddress(newNetwork.getConfiguration().getSecondaryDNS()))
+        {
+            addConflictErrors(APIError.VLANS_INVALID_IP_FORMAT);
             flushErrors();
         }
 
@@ -872,7 +882,6 @@ public class NetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
-
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
