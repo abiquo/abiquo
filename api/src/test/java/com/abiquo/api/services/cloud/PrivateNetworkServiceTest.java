@@ -83,8 +83,8 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan.setEnterprise(vdc.getEnterprise());
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(),
-            vlan.getConfiguration(), vlan, vdc, dclimit);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(), vlan
+            .getConfiguration(), vlan, vdc, dclimit);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
@@ -349,7 +349,6 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
 
         // Try to delete the second one.
         service.deletePrivateNetwork(vdc.getId(), vlan2.getId());
-
         // Assert here we have delete one of them.
         assertEquals(service.getPrivateNetworks(vdc.getId()).size(), 1);
 
@@ -372,7 +371,9 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         copy.setConfiguration(new NetworkConfiguration(original.getConfiguration().getAddress(),
             original.getConfiguration().getMask(),
             IPNetworkRang.transformIntegerMaskToIPMask(original.getConfiguration().getMask())
-                .toString(), original.getConfiguration().getGateway(), "bridge"));
+                .toString(),
+            original.getConfiguration().getGateway(),
+            "bridge"));
         copy.getConfiguration().setPrimaryDNS(original.getConfiguration().getPrimaryDNS());
         copy.getConfiguration().setSecondaryDNS(original.getConfiguration().getSecondaryDNS());
         copy.getConfiguration().setSufixDNS(original.getConfiguration().getSufixDNS());
