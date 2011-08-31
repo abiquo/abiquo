@@ -162,6 +162,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
             + " OR vm.name like :filterLike " + ")";
 
+    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
+        " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
+            + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
+
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
             + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
@@ -744,6 +748,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         ipList.setTotalResults(totalResults);
 
         return ipList;
+    }
+
+    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
+    {
+        Query query = getSession().createSQLQuery(BY_DEFAULT_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        return !query.list().isEmpty();
     }
 
     @SuppressWarnings("unchecked")
