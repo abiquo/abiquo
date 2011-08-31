@@ -103,6 +103,35 @@ public class TracerLogger
     }
 
     /**
+     * Log a message to the event system.
+     * <p>
+     * Sends a normal trace or a system trace depending on the user logged. If there is no logged
+     * user, it will send a system trace.
+     * <p>
+     * This method should be only used in methods that can be invoked either by user actions and by
+     * system processes (such as one time auth protected resources).
+     * 
+     * @param severity The severity of the trace.
+     * @param component The component that generated the trace.
+     * @param event The event being traced.
+     * @param message The message to trace.
+     */
+    public void logFromContext(final SeverityType severity, final ComponentType component,
+        final EventType event, final String message)
+    {
+
+        TracerContext tracerContext = TracerContextHolder.getContext();
+        if (tracerContext.getUserId() != null)
+        {
+            log(severity, component, event, message);
+        }
+        else
+        {
+            systemLog(severity, component, event, message);
+        }
+    }
+
+    /**
      * Log a system error message to the event system.
      * <p>
      * This method should only be used to log system tasks such as infrastructure check, etc.
