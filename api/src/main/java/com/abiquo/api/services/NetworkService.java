@@ -811,6 +811,7 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.INCOHERENT_IDS);
             flushErrors();
         }
+        validate(newNetwork.getConfiguration());
 
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
