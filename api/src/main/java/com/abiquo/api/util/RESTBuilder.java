@@ -610,13 +610,6 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
 
-        // Chef recipes
-        // TODO: build appropiate links
-        // builder.buildRestLink(VirtualMachineResource.class,
-        // VirtualMachineResource.VIRTUAL_MACHINE_RECIPES_PATH, "recipes", params);
-        // builder.buildRestLink(VirtualMachineResource.class,
-        // VirtualMachineResource.VIRTUAL_MACHINE_BOOTSTRAP_PATH, "bootstrap", params);
-
         return links;
     }
 

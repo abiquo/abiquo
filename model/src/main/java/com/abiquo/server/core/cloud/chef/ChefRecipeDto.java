@@ -22,10 +22,12 @@
 package com.abiquo.server.core.cloud.chef;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "recipe")
+@XmlType(propOrder = {"name", "description", "selected"})
 public class ChefRecipeDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
