@@ -38,8 +38,8 @@ public class StonithServiceImpl implements StonithService
     private static final Logger LOGGER = LoggerFactory.getLogger(StonithServiceImpl.class);
 
     @Override
-    public boolean shootTheOtherNodeInTheHead(String host, Integer port, String user,
-        String password)
+    public boolean shootTheOtherNodeInTheHead(final String host, final Integer port,
+        final String user, final String password)
     {
         CommandLine command = buildCommand(host, port, user, password);
         command.addArgument("power").addArgument("off");
@@ -48,7 +48,8 @@ public class StonithServiceImpl implements StonithService
     }
 
     @Override
-    public boolean isStonithUp(String host, Integer port, String user, String password)
+    public boolean isStonithUp(final String host, final Integer port, final String user,
+        final String password)
     {
         CommandLine command = buildCommand(host, port, user, password);
         command.addArgument("status", true);
@@ -56,7 +57,7 @@ public class StonithServiceImpl implements StonithService
         return executeCommand(command);
     }
 
-    private boolean executeCommand(CommandLine command)
+    protected boolean executeCommand(final CommandLine command)
     {
         try
         {
@@ -64,7 +65,7 @@ public class StonithServiceImpl implements StonithService
 
             DefaultExecutor executor = new DefaultExecutor();
 
-            return (executor.execute(command) == 0);
+            return executor.execute(command) == 0;
         }
         catch (Exception e)
         {
@@ -73,7 +74,8 @@ public class StonithServiceImpl implements StonithService
         }
     }
 
-    private CommandLine buildCommand(String ip, Integer port, String user, String password)
+    protected CommandLine buildCommand(final String ip, final Integer port, final String user,
+        final String password)
     {
         CommandLine command = new CommandLine("ipmitool");
         command.addArgument("-H").addArgument(ip, true);

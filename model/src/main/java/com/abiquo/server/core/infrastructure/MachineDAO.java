@@ -41,6 +41,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Machine.State;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -73,7 +74,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     private static Criterion sameId(final Integer id)
     {
-        return Restrictions.eq(Machine.ID_PROPERTY, id);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
     private static Criterion sameName(final String name)
@@ -131,17 +132,24 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
         // Is a managed one
-        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
+        criteria.add(Restrictions
+            .disjunction()
+            .add(
+                Restrictions
+                    .conjunction()
+                    .add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED))
 
-        // Has fencing capabilities
-        criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
-        criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
-        criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
+                    // Has fencing capabilities
+                    .add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY))
+                    .add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY))
+                    .add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY))
 
-        // XenServer does not support HA
-        criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
-            HypervisorType.XENSERVER));
+                    // XenServer does not support HA
+                    .add(
+                        Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
+                            HypervisorType.XENSERVER))).add(
 
+            Restrictions.eq(Machine.RACK_PROPERTY + ".class", UcsRack.class)));
         // Order by name
         criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
 

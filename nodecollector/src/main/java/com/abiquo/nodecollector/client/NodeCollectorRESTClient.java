@@ -123,6 +123,8 @@ public class NodeCollectorRESTClient
 
     protected static final String STONITH_PATH = "stonith";
 
+    protected static final String BELONG_TO_UCS_PARAM = "stonith";
+
     protected static final String STONITH_UP_PATH = "up";
 
     protected static final String HOST_PARAM = "host";
@@ -432,7 +434,7 @@ public class NodeCollectorRESTClient
     }
 
     public boolean stonithNode(final String ip, final Integer port, final String username,
-        final String password)
+        final String password, final String bladeDn)
     {
         try
         {
@@ -447,7 +449,10 @@ public class NodeCollectorRESTClient
             {
                 resource.queryParam(PORT_PARAM, port.toString());
             }
-
+            if (bladeDn != null)
+            {
+                resource.queryParam(BELONG_TO_UCS_PARAM, bladeDn);
+            }
             ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).post(null);
 
             if (response.getStatusCode() != Status.NO_CONTENT.getStatusCode())
@@ -461,6 +466,12 @@ public class NodeCollectorRESTClient
         {
             return false;
         }
+    }
+
+    public boolean stonithNode(final String ip, final Integer port, final String username,
+        final String password)
+    {
+        return stonithNode(ip, port, username, password, null);
     }
 
     /**
