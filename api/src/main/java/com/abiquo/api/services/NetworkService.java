@@ -580,9 +580,19 @@ public class NetworkService extends DefaultApiService
             vmconfig.setUsed(ip.getConfigureGateway());
             vmconfig.setId(vlan.getConfiguration().getId());
 
+            // if its the same configuration fails in the case when you have set used true in one
+            // and in the other its false
             if (!configs.contains(vmconfig))
             {
                 configs.add(vmconfig);
+            }
+            else
+            {
+                if (vmconfig.getUsed())
+                {
+                    configs.remove(vmconfig);
+                    configs.add(vmconfig);
+                }
             }
         }
 
