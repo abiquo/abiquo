@@ -90,4 +90,11 @@ public class StonithServiceImpl implements StonithService
 
         return command;
     }
+
+    @Override
+    public boolean shootTheOtherNodeInTheHeadUcs(final String host, final Integer port,
+        final String user, final String password, final String blade)
+    {
+        return false;
+    }
 }
