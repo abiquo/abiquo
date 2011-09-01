@@ -78,8 +78,10 @@ public class PricingTierDAOTest extends DefaultDAOTestBase<PricingTierDAO, Prici
         PricingTier pt1 = eg().createUniqueInstance();
         PricingTier pt2 = eg().createUniqueInstance();
 
-        ds().persistAll(pt1.getTier(), pt1.getPricingTemplate(), pt1, pt2.getTier(),
-            pt2.getPricingTemplate(), pt2);
+        ds().persistAll(pt1.getTier().getDatacenter(), pt1.getTier(),
+            pt1.getPricingTemplate().getCurrency(), pt1.getPricingTemplate(),
+            pt2.getTier().getDatacenter(), pt1, pt2.getTier(),
+            pt2.getPricingTemplate().getCurrency(), pt2.getPricingTemplate(), pt2);
 
         PricingTierDAO dao = createDaoForRollbackTransaction();
 
@@ -96,7 +98,9 @@ public class PricingTierDAOTest extends DefaultDAOTestBase<PricingTierDAO, Prici
         PricingTier pt1 = eg().createUniqueInstance();
         PricingTier pt2 = eg().createUniqueInstance();
 
-        ds().persistAll(pt1.getTier(), pt1.getPricingTemplate(), pt1, pt2.getTier(),
+        ds().persistAll(pt1.getTier().getDatacenter(), pt1.getTier(),
+            pt1.getPricingTemplate().getCurrency(), pt1.getPricingTemplate(), pt1,
+            pt2.getTier().getDatacenter(), pt2.getTier(), pt2.getPricingTemplate().getCurrency(),
             pt2.getPricingTemplate(), pt2);
 
         PricingTierDAO dao = createDaoForRollbackTransaction();

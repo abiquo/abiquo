@@ -66,6 +66,7 @@ import com.abiquo.server.core.pricing.CostCodeCurrency;
 import com.abiquo.server.core.pricing.Currency;
 import com.abiquo.server.core.pricing.PricingCostCode;
 import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
@@ -152,7 +153,8 @@ public class TestDataAccessManager
             Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class, CostCodeCurrency.class,
-            PricingCostCode.class, PricingTemplate.class, CostCode.class, Currency.class);
+            PricingCostCode.class, PricingTier.class, PricingTemplate.class, CostCode.class,
+            Currency.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

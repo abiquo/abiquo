@@ -140,10 +140,31 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
         e2.setPricingTemplate(pt1);
         e3.setPricingTemplate(pt);
         e4.setPricingTemplate(pt);
-        Role r1 = roleGenerator.createInstance();
+        Role r1 = roleGenerator.createInstanceSysAdmin();
         User u1 = userGenerator.createInstance(e1, r1, "foo");
 
-        setup(pt.getCurrency(), pt, pt1.getCurrency(), pt1, e1, e2, e3, e4, e5, r1, u1);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(pt.getCurrency());
+        entitiesToSetup.add(pt1.getCurrency());
+        entitiesToSetup.add(pt);
+        entitiesToSetup.add(pt1);
+        entitiesToSetup.add(e1);
+        entitiesToSetup.add(e2);
+        entitiesToSetup.add(e3);
+        entitiesToSetup.add(e4);
+        entitiesToSetup.add(e5);
+
+        for (Privilege p : r1.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r1);
+        entitiesToSetup.add(u1);
+
+        setup(entitiesToSetup.toArray());
+
+        // setup(pt.getCurrency(), pt, pt1.getCurrency(), pt1, e1, e2, e3, e4, e5, r1, u1);
 
         // Enterprise associated to the pricing template
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
