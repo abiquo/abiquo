@@ -41,7 +41,7 @@ public class CurrencyGenerator extends DefaultEntityGenerator<Currency>
     public void assertAllPropertiesEqual(final Currency obj1, final Currency obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Currency.NAME_PROPERTY,
-            Currency.SYMBOL_PROPERTY, Role.BLOCKED_PROPERTY);
+            Currency.SYMBOL_PROPERTY);
     }
 
     @Override

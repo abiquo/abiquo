@@ -144,7 +144,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
             + "vdc.datacenter.id = dc.id AND "
-            + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
+            + "ip.available = 1 AND ip.quarantine = 0  AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
@@ -161,6 +161,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
             + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
             + " OR vm.name like :filterLike " + ")";
+
+    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
+        " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
+            + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
 
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
@@ -744,6 +748,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         ipList.setTotalResults(totalResults);
 
         return ipList;
+    }
+
+    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
+    {
+        Query query = getSession().createSQLQuery(BY_DEFAULT_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        return !query.list().isEmpty();
     }
 
     @SuppressWarnings("unchecked")

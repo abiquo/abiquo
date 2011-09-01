@@ -26,7 +26,6 @@ import static com.abiquo.api.resources.UserResource.createTransferObjectWithRole
 
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,6 +33,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
@@ -70,8 +70,8 @@ public class UsersResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Consumes(LINK_MEDIA_TYPE)
-    @Produces(LINK_MEDIA_TYPE)
+    // @Consumes({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
+    @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
@@ -114,7 +114,7 @@ public class UsersResource extends AbstractResource
     }
 
     @GET
-    @Consumes(FLAT_MEDIA_TYPE)
+    // @Consumes(FLAT_MEDIA_TYPE)
     @Produces(FLAT_MEDIA_TYPE)
     public UsersWithRolesDto getUsersWithRoles(
         @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,

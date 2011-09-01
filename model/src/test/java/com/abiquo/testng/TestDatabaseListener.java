@@ -56,12 +56,14 @@ public class TestDatabaseListener implements ISuiteListener
     {
         String user = getParameter(DB_USER, TestConfig.DEFAULT_DB_USER);
         String pass = getParameter(DB_PASS, TestConfig.DEFAULT_DB_PASS);
-
+        long start = System.currentTimeMillis();
         LOGGER.info("Generating test database...");
 
         db = new DB(user, pass);
         db.execute(getParameter(CREATE_SCRIPT));
         db.execute(getParameter(INSERT_SCRIPT));
+
+        LOGGER.info("Database created in {} milliseconds", System.currentTimeMillis() - start);
     }
 
     @Override
@@ -69,7 +71,11 @@ public class TestDatabaseListener implements ISuiteListener
     {
         LOGGER.info("Deleting test database...");
 
+        long start = System.currentTimeMillis();
+
         db.execute(getParameter(DROP_SCRIPT));
+
+        LOGGER.info("Database dropped in {} milliseconds", System.currentTimeMillis() - start);
     }
 
     private static class DB

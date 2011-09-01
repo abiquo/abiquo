@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -135,7 +136,9 @@ public class EnterpriseService extends DefaultApiService
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (securityService.isEnterpriseAdmin())
+        if (!securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -237,7 +240,12 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
-        userService.checkEnterpriseAdminCredentials(old);
+        Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
+        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !userEnt.equals(dto.getId()))
+        {
+            throw new AccessDeniedException("");
+        }
 
         if (dto.getName().isEmpty())
         {

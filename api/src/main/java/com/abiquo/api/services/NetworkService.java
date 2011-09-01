@@ -130,6 +130,12 @@ public class NetworkService extends DefaultApiService
 
         IpPoolManagement ip = repo.findIp(vlan, ipId);
 
+        if (ip == null)
+        {
+            addConflictErrors(APIError.VLANS_IP_DOES_NOT_EXISTS);
+            flushErrors();
+        }
+
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
@@ -279,6 +285,12 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        if (repo.isDefaultNetworkofanyVDC(vlanId))
+        {
+            addConflictErrors(APIError.VLANS_CANNOT_DELETE_DEFAULT);
+            flushErrors();
+        }
+
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
@@ -413,8 +425,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -719,9 +731,10 @@ public class NetworkService extends DefaultApiService
         // If the order is bigger or equal than the size, then
         // the resource does not exist. Ex: size = 2 -> nicOrder = 2 -> (ERROR! the order begins
         // with 0 and if the size is 2, the available values are 0,1.
-        if (nicOrder >= ips.size())
+        if (nicOrder >= ips.size() || linkOldOrder >= ips.size() || linkOldOrder < 0)
         {
             addNotFoundErrors(APIError.VLANS_NIC_NOT_FOUND);
+            flushErrors();
         }
 
         if (nicOrder == linkOldOrder)
@@ -810,6 +823,7 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.INCOHERENT_IDS);
             flushErrors();
         }
+        validate(newNetwork.getConfiguration());
 
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
@@ -828,6 +842,14 @@ public class NetworkService extends DefaultApiService
             && newNetwork.getTag() != null && !oldNetwork.getTag().equals(newNetwork.getTag()))
         {
             addConflictErrors(APIError.VLANS_EDIT_INVALID_VALUES);
+            flushErrors();
+        }
+
+        // check the format of dns and secondary dns
+        if (!IPAddress.isValidIpAddress(newNetwork.getConfiguration().getPrimaryDNS())
+            || !IPAddress.isValidIpAddress(newNetwork.getConfiguration().getSecondaryDNS()))
+        {
+            addConflictErrors(APIError.VLANS_INVALID_IP_FORMAT);
             flushErrors();
         }
 
@@ -872,7 +894,6 @@ public class NetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
-
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
@@ -996,42 +1017,55 @@ public class NetworkService extends DefaultApiService
         // Check if something has changed.
         if (!oldConfig.getUsed().equals(vmConfig.getUsed()))
         {
+            List<IpPoolManagement> ips =
+                repo.findIpsByVirtualMachine(repo.findVirtualMachineById(vmId));
+
             if (!vmConfig.getUsed())
             {
-                // That means : before it was the default configuration and now it doesn't.
-                // Raise an exception: it should be at least one network configuration.
-                addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
-                flushErrors();
+                // // That means : before it was the default configuration and now it doesn't.
+                // // Raise an exception: it should be at least one network configuration.
+                // addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
+                // flushErrors();
+
+                for (IpPoolManagement ip : ips)
+                {
+                    ip.setConfigureGateway(Boolean.FALSE);
+                    repo.updateIpManagement(ip);
+                }
             }
+            // }
 
             // If we have arrived here, that means the 'used' configuration has changed and
             // user wants to use a new configuration. Update the corresponding 'configureGateway' in
             // the IPs.
-            Boolean foundIpConfigureGateway = Boolean.FALSE;
-            List<IpPoolManagement> ips =
-                repo.findIpsByVirtualMachine(repo.findVirtualMachineById(vmId));
-            for (IpPoolManagement ip : ips)
+            else
             {
-                if (!foundIpConfigureGateway)
+                Boolean foundIpConfigureGateway = Boolean.FALSE;
+
+                for (IpPoolManagement ip : ips)
                 {
-                    if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId))
+                    if (!foundIpConfigureGateway)
                     {
-                        ip.setConfigureGateway(Boolean.TRUE);
-                        foundIpConfigureGateway = Boolean.TRUE;
+                        if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId)
+                            && vmConfig.getGateway() != null)
+                        {
+                            ip.setConfigureGateway(Boolean.TRUE);
+                            foundIpConfigureGateway = Boolean.TRUE;
+                        }
+                        else
+                        {
+                            ip.setConfigureGateway(Boolean.FALSE);
+                        }
                     }
                     else
                     {
                         ip.setConfigureGateway(Boolean.FALSE);
                     }
-                }
-                else
-                {
-                    ip.setConfigureGateway(Boolean.FALSE);
+
+                    repo.updateIpManagement(ip);
                 }
 
-                repo.updateIpManagement(ip);
             }
-
         }
 
         if (tracer != null)

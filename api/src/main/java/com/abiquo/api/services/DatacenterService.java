@@ -239,6 +239,30 @@ public class DatacenterService extends DefaultApiService
                     + datacenter.getLocation());
         }
 
+        if (responseRemoteService.getConfigErrors() != null
+            && !responseRemoteService.getConfigErrors().isEmpty())
+        {
+            // Log the event
+            tracer
+                .log(
+                    SeverityType.MAJOR,
+                    ComponentType.DATACENTER,
+                    EventType.DC_CREATE,
+                    "Datacenter '"
+                        + datacenter.getName()
+                        + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.");
+        }
+        else
+        {
+            // Log the event
+            tracer.log(
+                SeverityType.INFO,
+                ComponentType.DATACENTER,
+                EventType.DC_CREATE,
+                "Datacenter '" + datacenter.getName() + "' has been created in "
+                    + datacenter.getLocation());
+        }
+
         return responseRemoteService;
     }
 
@@ -338,6 +362,8 @@ public class DatacenterService extends DefaultApiService
                 // deleting datacenter
                 deleteAllocationRules(datacenter);
 
+                deleteNetwork(datacenter);
+
                 List<Rack> racks = getRacks(datacenter);
                 if (racks != null)
                 {
@@ -385,6 +411,11 @@ public class DatacenterService extends DefaultApiService
 
     // overrided on premium
     protected void deleteAllocationRules(final Datacenter datacenter)
+    {
+    }
+
+    // overrided on premium
+    protected void deleteNetwork(final Datacenter datacenter)
     {
     }
 }
