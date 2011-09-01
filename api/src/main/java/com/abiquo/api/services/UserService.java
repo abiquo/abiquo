@@ -378,6 +378,14 @@ public class UserService extends DefaultApiService
     {
         User user = getUser(id);
 
+        // user can not delete himself
+        User logged = getCurrentUser();
+        if (logged.getId() == user.getId())
+        {
+            addConflictErrors(APIError.USER_DELETING_HIMSELF);
+            flushErrors();
+        }
+
         checkEnterpriseAdminCredentials(user.getEnterprise());
 
         // Cloud Admins should only be editable by other Cloud Admins
