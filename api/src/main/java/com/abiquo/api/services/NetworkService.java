@@ -580,9 +580,19 @@ public class NetworkService extends DefaultApiService
             vmconfig.setUsed(ip.getConfigureGateway());
             vmconfig.setId(vlan.getConfiguration().getId());
 
+            // if its the same configuration fails in the case when you have set used true in one
+            // and in the other its false
             if (!configs.contains(vmconfig))
             {
                 configs.add(vmconfig);
+            }
+            else
+            {
+                if (vmconfig.getUsed())
+                {
+                    configs.remove(vmconfig);
+                    configs.add(vmconfig);
+                }
             }
         }
 
@@ -1017,43 +1027,55 @@ public class NetworkService extends DefaultApiService
         // Check if something has changed.
         if (!oldConfig.getUsed().equals(vmConfig.getUsed()))
         {
-            // if (!vmConfig.getUsed())
-            // {
-            // // That means : before it was the default configuration and now it doesn't.
-            // // Raise an exception: it should be at least one network configuration.
-            // addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
-            // flushErrors();
+            List<IpPoolManagement> ips =
+                repo.findIpsByVirtualMachine(repo.findVirtualMachineById(vmId));
+
+            if (!vmConfig.getUsed())
+            {
+                // // That means : before it was the default configuration and now it doesn't.
+                // // Raise an exception: it should be at least one network configuration.
+                // addConflictErrors(APIError.VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION);
+                // flushErrors();
+
+                for (IpPoolManagement ip : ips)
+                {
+                    ip.setConfigureGateway(Boolean.FALSE);
+                    repo.updateIpManagement(ip);
+                }
+            }
             // }
 
             // If we have arrived here, that means the 'used' configuration has changed and
             // user wants to use a new configuration. Update the corresponding 'configureGateway' in
             // the IPs.
-            Boolean foundIpConfigureGateway = Boolean.FALSE;
-            List<IpPoolManagement> ips =
-                repo.findIpsByVirtualMachine(repo.findVirtualMachineById(vmId));
-            for (IpPoolManagement ip : ips)
+            else
             {
-                if (!foundIpConfigureGateway)
+                Boolean foundIpConfigureGateway = Boolean.FALSE;
+
+                for (IpPoolManagement ip : ips)
                 {
-                    if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId)
-                        && vmConfig.getGateway() != null)
+                    if (!foundIpConfigureGateway)
                     {
-                        ip.setConfigureGateway(Boolean.TRUE);
-                        foundIpConfigureGateway = Boolean.TRUE;
+                        if (ip.getVlanNetwork().getConfiguration().getId().equals(vmConfigId)
+                            && vmConfig.getGateway() != null)
+                        {
+                            ip.setConfigureGateway(Boolean.TRUE);
+                            foundIpConfigureGateway = Boolean.TRUE;
+                        }
+                        else
+                        {
+                            ip.setConfigureGateway(Boolean.FALSE);
+                        }
                     }
                     else
                     {
                         ip.setConfigureGateway(Boolean.FALSE);
                     }
-                }
-                else
-                {
-                    ip.setConfigureGateway(Boolean.FALSE);
+
+                    repo.updateIpManagement(ip);
                 }
 
-                repo.updateIpManagement(ip);
             }
-
         }
 
         if (tracer != null)
