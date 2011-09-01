@@ -147,13 +147,16 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         int actualAndRequiredRam = (int) (actualAllocated.getRamInMb() + required.getRam());
         long actualAndRequiredHd = actualAllocated.getHdInMb() + required.getHd();
         long actualAndRequiredStorage = actualAllocated.getStorage() + required.getStorage();
-        int actualAndRequiredVLANs = (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
+        int actualAndRequiredVLANs =
+            (int) (actualAllocated.getVlanCount() + required.getPublicVLAN());
+        int actualAndRequiredIPs = (int) (actualAllocated.getPublicIp() + required.getPublicIP());
 
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
         limitStatus.put(LimitResource.VLAN, limits.checkVlanStatus(actualAndRequiredVLANs));
+        limitStatus.put(LimitResource.PUBLICIP, limits.checkPublicIpStatus(actualAndRequiredIPs));
 
         /**
          * TODO vlan and public ip is not checked there
@@ -166,12 +169,12 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private boolean allNoLimits(final T limit)
     {
-        return (limit.getCpuCountLimits().isNoLimit() //
+        return limit.getCpuCountLimits().isNoLimit() //
             && limit.getRamLimitsInMb().isNoLimit() //
             && limit.getHdLimitsInMb().isNoLimit() //
             && (limit.getVlansLimits() == null || limit.getVlansLimits().isNoLimit()) //
             && (limit.getStorageLimits() == null || limit.getStorageLimits().isNoLimit()) //
-        && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit()));
+            && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit());
     }
 
     /**
@@ -229,7 +232,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case NO_DETAIL:
                 if (tracer != null)
                 {
-                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
+                    tracer.systemLog(SeverityType.MAJOR, ComponentType.WORKLOAD, etype,
+                        traceMessage);
                 }
                 break;
             default:
@@ -242,8 +246,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
             case DETAIL:
                 traceMessage = except.toString();
             case NO_DETAIL:
-                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED)
-                    || entity instanceof VirtualDatacenter) && tracer != null)
+                if ((etype.equals(EventType.WORKLOAD_HARD_LIMIT_EXCEEDED) || entity instanceof VirtualDatacenter)
+                    && tracer != null)
                 {
                     tracer.log(SeverityType.MAJOR, ComponentType.WORKLOAD, etype, traceMessage);
                 }
