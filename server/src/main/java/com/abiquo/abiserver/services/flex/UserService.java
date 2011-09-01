@@ -250,21 +250,27 @@ public class UserService
         {
             BasicResult res = command.editEnterprise(userSession, enterprise);
 
-            // now edit the vlan
-            VlanNetwork defaultvlan = enterprise.getDcLimits().iterator().next().getDefaultVlan();
-
-            for (DatacenterLimit dl : enterprise.getDcLimits())
+            if (enterprise.getDcLimits().size() != 0)
             {
-                Integer datacenterId = dl.getDatacenter().getId();
-                if (defaultvlan == null)
+                // now edit the vlan
+                VlanNetwork defaultvlan =
+                    enterprise.getDcLimits().iterator().next().getDefaultVlan();
+
+                for (DatacenterLimit dl : enterprise.getDcLimits())
                 {
-                    proxyStub(userSession).setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
-                        enterprise.getId(), datacenterId);
-                }
-                else
-                {
-                    proxyStub(userSession).setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
-                        enterprise.getId(), datacenterId, defaultvlan.getNetworkId());
+                    Integer datacenterId = dl.getDatacenter().getId();
+                    if (defaultvlan == null)
+                    {
+                        proxyStub(userSession)
+                            .setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
+                                enterprise.getId(), datacenterId);
+                    }
+                    else
+                    {
+                        proxyStub(userSession)
+                            .setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
+                                enterprise.getId(), datacenterId, defaultvlan.getNetworkId());
+                    }
                 }
             }
             return res;
