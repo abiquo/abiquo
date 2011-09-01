@@ -22,8 +22,10 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -54,6 +56,9 @@ import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Privilege;
+import com.abiquo.abiserver.pojo.user.PrivilegeListResult;
+import com.abiquo.abiserver.pojo.user.Role;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.security.SecurityService;
@@ -671,88 +676,103 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
                 UsersResourceStub.class);
 
-        DataResult<User> dr = proxy.getUser(userSession.getId());
+        DataResult<User> dr = proxy.getUser(userSession.getUserIdDb());
 
         if (dr.getSuccess())
         {
 
-            // TODO check userSession match idEnterprise of vimage
-            final DAOFactory factory = HibernateDAOFactory.instance();
-            final Integer newCategoryId = vimage.getCategory().getIdCategory();
-            final Integer newRepositoryId = vimage.getRepository().getIdRepository();
+            Role r = dr.getData().getRole();
+            DataResult<PrivilegeListResult> drp = proxy.getPrivilegesByRole(r.getId());
 
-            if (vimage.getShared() == 1
-                && !SecurityService.hasPrivilege(SecurityService.APPLIB_ALLOW_MODIFY_SHARED, dr
-                    .getData().getRole()))
+            if (drp.getSuccess())
             {
-                final String cause =
-                    String
-                        .format(
-                            "Your role does not have the required privilege to modify the virtual image [%s]",
-                            vimage.getIdImage());
-                throw new AppsLibraryCommandException(cause);
-            }
+                Set<Privilege> privs = new HashSet<Privilege>();
+                privs.addAll(drp.getData().getPrivilegesList());
+                r.setPrivileges(privs);
 
-            Integer newIconId = null;
-            if (vimage.getIcon() != null)
-            {
-                newIconId = vimage.getIcon().getIdIcon();
-            }
+                // TODO check userSession match idEnterprise of vimage
+                final DAOFactory factory = HibernateDAOFactory.instance();
+                final Integer newCategoryId = vimage.getCategory().getIdCategory();
+                final Integer newRepositoryId = vimage.getRepository().getIdRepository();
 
-            try
-            {
-                factory.beginConnection();
-
-                //
-                final CategoryHB newCategory = factory.getCategoryDAO().findById(newCategoryId);
-                final DiskFormatType newDiskFormat = vimage.getType();
-                final RepositoryHB newRepository =
-                    factory.getRepositoryDAO().findById(newRepositoryId);
-
-                IconHB newIcon = null;
-                if (newIconId != null)
+                if (vimage.getShared() == 1
+                    && !SecurityService.hasPrivilege(SecurityService.APPLIB_ALLOW_MODIFY_SHARED, r))
                 {
-                    newIcon = factory.getIconDAO().findById(newIconId);
+                    final String cause =
+                        String
+                            .format(
+                                "Your role does not have the required privilege to modify the virtual image [%s]",
+                                vimage.getName());
+                    throw new AppsLibraryCommandException(cause);
                 }
 
-                final VirtualimageHB oldVimage =
-                    factory.getVirtualImageDAO().findById(vimage.getIdImage());
+                Integer newIconId = null;
+                if (vimage.getIcon() != null)
+                {
+                    newIconId = vimage.getIcon().getIdIcon();
+                }
 
-                oldVimage.setCategory(newCategory);
-                oldVimage.setIcon(newIcon);
-                oldVimage.setRepository(newRepository);
-                oldVimage.setType(newDiskFormat);
+                try
+                {
+                    factory.beginConnection();
 
-                oldVimage.setCpuRequired(vimage.getCpuRequired());
-                oldVimage.setHdRequired(vimage.getHdRequired());
-                oldVimage.setRamRequired(vimage.getRamRequired());
-                oldVimage.setDiskFileSize(vimage.getDiskFileSize());
+                    //
+                    final CategoryHB newCategory = factory.getCategoryDAO().findById(newCategoryId);
+                    final DiskFormatType newDiskFormat = vimage.getType();
+                    final RepositoryHB newRepository =
+                        factory.getRepositoryDAO().findById(newRepositoryId);
 
-                oldVimage.setOvfId(vimage.getOvfId());
-                oldVimage.setName(vimage.getName());
-                oldVimage.setDescription(vimage.getDescription());
-                oldVimage.setPathName(vimage.getPathName());
-                oldVimage.setTreaty(vimage.getTreaty());
-                oldVimage.setStateful(vimage.getStateful());
-                oldVimage.setVolumePath(vimage.getVolumePath());
-                oldVimage.setIdEnterprise(vimage.getIdEnterprise());
-                oldVimage.setShared(vimage.getShared());
-                oldVimage.setCostCode(vimage.getCostCode());
-                // oldVimage.setDeleted(deleted);
-                // XXX oldVimage.setMaster(master);
+                    IconHB newIcon = null;
+                    if (newIconId != null)
+                    {
+                        newIcon = factory.getIconDAO().findById(newIconId);
+                    }
 
-                factory.getVirtualImageDAO().makePersistent(oldVimage);
+                    final VirtualimageHB oldVimage =
+                        factory.getVirtualImageDAO().findById(vimage.getIdImage());
 
-                factory.endConnection();
+                    oldVimage.setCategory(newCategory);
+                    oldVimage.setIcon(newIcon);
+                    oldVimage.setRepository(newRepository);
+                    oldVimage.setType(newDiskFormat);
 
+                    oldVimage.setCpuRequired(vimage.getCpuRequired());
+                    oldVimage.setHdRequired(vimage.getHdRequired());
+                    oldVimage.setRamRequired(vimage.getRamRequired());
+                    oldVimage.setDiskFileSize(vimage.getDiskFileSize());
+
+                    oldVimage.setOvfId(vimage.getOvfId());
+                    oldVimage.setName(vimage.getName());
+                    oldVimage.setDescription(vimage.getDescription());
+                    oldVimage.setPathName(vimage.getPathName());
+                    oldVimage.setTreaty(vimage.getTreaty());
+                    oldVimage.setStateful(vimage.getStateful());
+                    oldVimage.setVolumePath(vimage.getVolumePath());
+                    oldVimage.setIdEnterprise(vimage.getIdEnterprise());
+                    oldVimage.setShared(vimage.getShared());
+                    oldVimage.setCostCode(vimage.getCostCode());
+                    // oldVimage.setDeleted(deleted);
+                    // XXX oldVimage.setMaster(master);
+
+                    factory.getVirtualImageDAO().makePersistent(oldVimage);
+
+                    factory.endConnection();
+
+                }
+                catch (final PersistenceException e)
+                {
+                    factory.rollbackConnection();
+
+                    final String cause =
+                        String.format("Can not edit the virtual image [%s]", vimage.getIdImage());
+                    throw new AppsLibraryCommandException(cause, e);
+                }
             }
-            catch (final PersistenceException e)
+            else
             {
-                factory.rollbackConnection();
-
                 final String cause =
                     String.format("Can not edit the virtual image [%s]", vimage.getIdImage());
-                throw new AppsLibraryCommandException(cause, e);
+                throw new AppsLibraryCommandException(cause + drp.getMessage());
             }
         }
         else
