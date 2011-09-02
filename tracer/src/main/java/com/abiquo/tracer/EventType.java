@@ -155,8 +155,13 @@ public enum EventType implements Serializable
         "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
-    ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
-        1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"), ;
+    ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
+        1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
+
+    // STORAGE DEVICE
+    STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
+        1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
+        "STORAGE DEVICE DELETED", "Storage device deleted");
 
     private final int event;
 
