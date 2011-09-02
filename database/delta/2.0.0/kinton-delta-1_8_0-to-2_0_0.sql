@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS `kinton`.`costCode`;
 DROP TABLE IF EXISTS `kinton`.`pricingCostCode`;
 DROP TABLE IF EXISTS `kinton`.`pricingTier`;
 DROP TABLE IF EXISTS `kinton`.`currency`;
+DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
 
 
 -- ---------------------------------------------- --
@@ -148,10 +149,11 @@ UNLOCK TABLES;
 -- PRICING --
 -- Dumping data for table `kinton`.`currency`
 LOCK TABLES `kinton`.`currency` WRITE;
-INSERT INTO `kinton`.`currency` values (1, "USD", "Dolar  $", 0);
-INSERT INTO `kinton`.`currency` values (2, "EUR", "Euro  €", 0);
-INSERT INTO `kinton`.`currency` values (3, "JPY", "Yen  ¥", 0);
+INSERT INTO `kinton`.`currency` values (1, "USD", "Dollar - $", 0);
+INSERT INTO `kinton`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 0);
+INSERT INTO `kinton`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0);
 UNLOCK TABLES;
+/*!40000 ALTER TABLE `currency` ENABLE KEYS */;  
 
 -- PRICING --
 -- Dumping data for table `kinton`.`roles_privileges`

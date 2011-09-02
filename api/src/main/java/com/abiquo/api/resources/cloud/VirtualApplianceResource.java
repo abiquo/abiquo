@@ -33,16 +33,15 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
+import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.VirtualMachineState;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
-import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -68,6 +67,8 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
 
     @Autowired
     VirtualApplianceService service;
@@ -239,4 +240,18 @@ public class VirtualApplianceResource
         return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.REBOOTED);
 
     }
+
+    @GET
+    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliancePriceDto virtualAppliancePriceDto =
+            service.getPriceVirtualAppliance(vdcId, vappId);
+        return virtualAppliancePriceDto;
+
+    }
+
 }

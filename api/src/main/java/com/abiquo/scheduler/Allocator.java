@@ -263,6 +263,14 @@ public class Allocator implements IAllocator
         return null;
     }
 
+    @Override
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, final State state)
+        throws AllocatorException, ResourceAllocationException
+    {
+        log.error("Community doesn't implement HA");
+        return null;
+    }
+
     // This is duet the virtual machine actually carry the virtual image requirements (should be
     // something like VirtualMachineTemplate)
     protected VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
@@ -345,7 +353,8 @@ public class Allocator implements IAllocator
      *            for the datacenter repository)
      * @param resources, additional resources configuration
      */
-    protected VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
+    @Override
+    public VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
     {
         return new VirtualMachineRequirements(vmachine);
     }

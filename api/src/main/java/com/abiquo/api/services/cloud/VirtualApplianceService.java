@@ -26,8 +26,11 @@ package com.abiquo.api.services.cloud;
 
 import static com.abiquo.model.enumerator.VirtualMachineState.NOT_DEPLOYED;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -42,7 +45,6 @@ import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -51,17 +53,21 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.scheduler.limit.VirtualMachinePrice;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
+import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -320,5 +326,84 @@ public class VirtualApplianceService extends DefaultApiService
             }
         }
         return results;
+    }
+
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(final Integer vdcId,
+        final Integer vappId)
+    {
+        BigDecimal cost = new BigDecimal(0);
+        Map<VirtualMachineCost, BigDecimal> virtualMachinesCost =
+            new HashMap<VirtualMachinePrice.VirtualMachineCost, BigDecimal>();
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.COST_CODE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, cost);
+        virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME, cost);
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, cost);
+
+        VirtualAppliancePriceDto dto =
+            new VirtualAppliancePriceDto(cost, cost, cost, cost, cost, cost);
+
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        // if enterprise tiene pt...
+        PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
+        if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
+        {
+            for (NodeVirtualImage node : virtualAppliance.getNodes())
+            {
+                VirtualMachineRequirements virtualMachineRequirements =
+                    allocatorService.getVirtualMachineRequirements(node.getVirtualMachine());
+                virtualMachinesCost =
+                    addVirtualMachineCost(virtualMachinesCost, virtualMachineRequirements,
+                        pricingTemplate);
+            }
+            dto.setComputeCost(virtualMachinesCost.get(VirtualMachineCost.COMPUTE));
+            dto.setStorageCost(virtualMachinesCost.get(VirtualMachineCost.STORAGE));
+            dto.setNetworkCost(virtualMachinesCost.get(VirtualMachineCost.NETWORK));
+            dto.setTotalCost(virtualMachinesCost.get(VirtualMachineCost.TOTAL));
+        }
+
+        return dto;
+    }
+
+    private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
+        final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final VirtualMachineRequirements virtualMachineRequirements,
+        final PricingTemplate pricingTemplate)
+    {
+        BigDecimal BYTES_TO_GB = new BigDecimal(1024l * 1024l * 1024l);
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.COMPUTE,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                pricingTemplate.getVcpu().multiply(
+                    new BigDecimal(virtualMachineRequirements.getCpu()))));
+        virtualMachinesCost.put(
+            VirtualMachineCost.COMPUTE,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                pricingTemplate.getMemoryMB().multiply(
+                    new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.STORAGE,
+            virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                pricingTemplate.getHdGB().multiply(
+                    new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                        BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.NETWORK,
+            virtualMachinesCost.get(VirtualMachineCost.NETWORK).add(
+                pricingTemplate.getPublicIp().multiply(
+                    new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.TOTAL,
+            virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
+                virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                        virtualMachinesCost.get(VirtualMachineCost.NETWORK)))));
+        return virtualMachinesCost;
+
     }
 }
