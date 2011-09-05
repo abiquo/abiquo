@@ -57,6 +57,10 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public static final String VDC_ENUMERATE = "VDC_ENUMERATE";
 
+    public static final String PRICING_VIEW = "PRICING_VIEW";
+
+    public static final String PRICING_MANAGE = "PRICING_MANAGE";
+
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -92,7 +96,9 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
         Privilege p11 = new Privilege(VDC_ENUMERATE);
         Privilege p12 = new Privilege(USERS_MANAGE_ROLES);
-        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
+        Privilege p13 = new Privilege(PRICING_VIEW);
+        Privilege p14 = new Privilege(PRICING_MANAGE);
+        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
     }
 
     public Role createInstanceSysAdmin(final String name)
