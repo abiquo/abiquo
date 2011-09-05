@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -379,9 +380,16 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.QUERY_INVALID_PARAMETER);
             flushErrors();
         }
+
+        VirtualDatacenter vdc = repo.findById(vdcId);
+
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
         List<IpPoolManagement> ips =
             repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
-        VirtualDatacenter vdc = repo.findById(vdcId);
         LOGGER
             .debug("Returning the list of IPs used by VirtualDatacenter '" + vdc.getName() + "'.");
         return ips;
@@ -421,6 +429,7 @@ public class NetworkService extends DefaultApiService
 
         for (IpPoolManagement ip : ips)
         {
+            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
             if (ip.getVlanNetwork().getEnterprise() != null)
             {
                 // needed for REST links.
