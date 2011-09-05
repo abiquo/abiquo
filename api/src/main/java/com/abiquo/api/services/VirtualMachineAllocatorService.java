@@ -34,6 +34,7 @@ import com.abiquo.scheduler.IAllocator;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.scheduler.ResourceUpgradeUseException;
 import com.abiquo.scheduler.limit.LimitExceededException;
+import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -216,6 +217,13 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
             vm.getUuid());
+    }
+
+    public VirtualMachineRequirements getVirtualMachineRequirements(
+        final VirtualMachine virtualMachine)
+    {
+        return allocator.getVirtualMachineRequirements(virtualMachine);
+
     }
 
 }

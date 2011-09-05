@@ -4094,9 +4094,10 @@ CREATE TABLE `tasks` (
 -- DROP THE TABLES RELATED TO PRICING --
 DROP TABLE IF EXISTS `kinton`.`pricing_template`;
 DROP TABLE IF EXISTS `kinton`.`costCode`;
-DROP TABLE IF EXISTS `kinton`.`pricingTemplate_costcode`;
-DROP TABLE IF EXISTS `kinton`.`pricingTemplate_tier`;
+DROP TABLE IF EXISTS `kinton`.`pricingCostCode`;
+DROP TABLE IF EXISTS `kinton`.`pricingTier`;
 DROP TABLE IF EXISTS `kinton`.`currency`;
+DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
 
 --
 -- Definition of table `kinton`.`currency`
@@ -4105,7 +4106,7 @@ DROP TABLE IF EXISTS `kinton`.`currency`;
 CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
-  `name` varchar(256) NOT NULL ,
+  `name` varchar(256) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -4117,11 +4118,11 @@ CREATE TABLE `kinton`.`currency` (
 
 /*!40000 ALTER TABLE `currency` DISABLE KEYS */;
 LOCK TABLES `currency` WRITE;
-INSERT INTO `kinton`.`currency` values (1, "USD", "Dolar  $", 0);
-INSERT INTO `kinton`.`currency` values (2, "EUR", "Euro  €", 0);
-INSERT INTO `kinton`.`currency` values (3, "JPY", "Yen  ¥", 0);
+INSERT INTO `kinton`.`currency` values (1, "USD", "Dollar - $", 0);
+INSERT INTO `kinton`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 0);
+INSERT INTO `kinton`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0);
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;  
+/*!40000 ALTER TABLE `currency` ENABLE KEYS */;  
   
 --
 -- Definition of table `kinton`.`costCode`
