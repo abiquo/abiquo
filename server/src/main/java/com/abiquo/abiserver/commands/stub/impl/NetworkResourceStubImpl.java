@@ -1573,6 +1573,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setName(ip.getName());
         flexIp.setAvailable(ip.getAvailable());
         flexIp.setConfigureGateway(ip.getConfigureGateway());
+        flexIp.setVlanNetworkName(ip.getNetworkName());
 
         for (RESTLink currentLink : ip.getLinks())
         {
