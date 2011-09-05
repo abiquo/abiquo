@@ -506,7 +506,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         Query query = getSession().createQuery(BY_VIRTUAL_MACHINE);
         query.setParameter("vm_id", virtualMachine.getId());
 
-        return query.list();
+        List<IpPoolManagement> ips = query.list();
+        return ips;
 
     }
 
