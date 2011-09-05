@@ -24,6 +24,7 @@ package com.abiquo.scheduler;
 import javax.jms.ResourceAllocationException;
 
 import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -103,4 +104,7 @@ public interface IAllocator
     void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId,
         VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
         throws AllocatorException, ResourceAllocationException;
+
+    VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine virtualMachine);
+
 }
