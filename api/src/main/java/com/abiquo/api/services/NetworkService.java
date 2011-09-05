@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -421,6 +422,7 @@ public class NetworkService extends DefaultApiService
 
         for (IpPoolManagement ip : ips)
         {
+            Hibernate.initialize(ip.getVlanNetwork().getEnterprise());
             if (ip.getVlanNetwork().getEnterprise() != null)
             {
                 // needed for REST links.
