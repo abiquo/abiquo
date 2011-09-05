@@ -214,8 +214,8 @@ public class UserService extends DefaultApiService
             SeverityType.INFO,
             ComponentType.USER,
             EventType.USER_CREATE,
-            "User " + user.getName() + "has been created [Enterprise: " + enterprise.getName()
-                + "Name: " + user.getName() + " Surname: " + user.getSurname() + "Role: "
+            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
+                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
                 + user.getRole() + "]");
 
         return user;
@@ -359,9 +359,9 @@ public class UserService extends DefaultApiService
             SeverityType.INFO,
             ComponentType.USER,
             EventType.USER_MODIFY,
-            "User " + old.getName() + "has been modified [Enterprise: "
-                + old.getEnterprise().getName() + "Name: " + old.getName() + " Surname: "
-                + old.getSurname() + "Role: " + old.getRole() + "]");
+            "User " + old.getName() + " has been modified [Enterprise: "
+                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
+                + old.getSurname() + " Role: " + old.getRole() + "]");
 
         return old;
     }
@@ -404,9 +404,9 @@ public class UserService extends DefaultApiService
             SeverityType.INFO,
             ComponentType.USER,
             EventType.USER_DELETE,
-            "User " + user.getName() + "has been deleted [Enterprise: "
-                + user.getEnterprise().getName() + "Name: " + user.getName() + " Surname: "
-                + user.getSurname() + "Role: " + user.getRole() + "]");
+            "User " + user.getName() + " has been deleted [Enterprise: "
+                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
+                + user.getSurname() + " Role: " + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
