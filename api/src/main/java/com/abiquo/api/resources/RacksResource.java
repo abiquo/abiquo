@@ -32,8 +32,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,7 @@ public class RacksResource extends AbstractResource
     protected InfrastructureService infrastructureService;
 
     @GET
+    @Produces(MediaType.APPLICATION_XML)
     public RacksDto getRacks(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
         @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
