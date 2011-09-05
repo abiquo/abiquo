@@ -335,6 +335,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setSufixDNS(configuration.getSufixDNS());
         dto.setTag(vlanTag);
 
+        if (enterprise != null)
+        {
+            // It is an External network.
+            RESTLink entLink = new RESTLink();
+            entLink.setRel("enterprise");
+            entLink.setHref(createEnterpriseLink(enterprise.getId()));
+            dto.addLink(entLink);
+        }
+
         ClientResponse response = put(uri, dto);
         if (response.getStatusCode() == 200)
         {
