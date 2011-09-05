@@ -50,7 +50,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
         USERS_MANAGE_SYSTEM_ROLES, USERS_MANAGE_LDAP_GROUP, USERS_ENUMERATE_CONNECTED, USERS_DEFINE_AS_MANAGER, SYSCONFIG_VIEW, SYSCONFIG_ALLOW_MODIFY, EVENTLOG_VIEW_ENTERPRISE, EVENTLOG_VIEW_ALL,
 
-        APPLIB_VM_COST_CODE, USERS_MANAGE_ENTERPRISE_BRANDING, SYSCONFIG_SHOW_REPORTS
+        APPLIB_VM_COST_CODE, USERS_MANAGE_ENTERPRISE_BRANDING, SYSCONFIG_SHOW_REPORTS, PRICING_VIEW, PRICING_MANAGE
     }
 
     public RoleGenerator(final SeedGenerator seed)
@@ -258,6 +258,8 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         privileges.add(prefix + Permissions.APPLIB_VM_COST_CODE);
         privileges.add(prefix + Permissions.USERS_MANAGE_ENTERPRISE_BRANDING);
         privileges.add(prefix + Permissions.SYSCONFIG_SHOW_REPORTS);
+        privileges.add(prefix + Permissions.PRICING_VIEW);
+        privileges.add(prefix + Permissions.PRICING_MANAGE);
 
         return privileges;
     }
