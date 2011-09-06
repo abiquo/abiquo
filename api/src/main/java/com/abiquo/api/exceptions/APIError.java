@@ -298,7 +298,8 @@ public enum APIError
         "SYSPROP-1", "There is already a system property with that name"),
 
     // ALLOCATOR
-    LIMIT_EXCEEDED("LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
+    LIMITS_EXCEEDED("LIMIT-0", "The required resources exceed the allowed limits"), LIMIT_EXCEEDED(
+        "LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
         "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
@@ -421,8 +422,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 
