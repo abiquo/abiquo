@@ -53,6 +53,10 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         APPLIB_VM_COST_CODE, USERS_MANAGE_ENTERPRISE_BRANDING, SYSCONFIG_SHOW_REPORTS, PRICING_VIEW, PRICING_MANAGE
     }
 
+    public static final String PRICING_VIEW = "PRICING_VIEW";
+
+    public static final String PRICING_MANAGE = "PRICING_MANAGE";
+
     public RoleGenerator(final SeedGenerator seed)
     {
         super(seed);

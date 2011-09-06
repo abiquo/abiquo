@@ -164,8 +164,6 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
 
-        // setup(pt.getCurrency(), pt, pt1.getCurrency(), pt1, e1, e2, e3, e4, e5, r1, u1);
-
         // Enterprise associated to the pricing template
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put("idPricingTemplate", new String[] {Integer.toString(pt.getId())});
