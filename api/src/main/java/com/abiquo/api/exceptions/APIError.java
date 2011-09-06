@@ -159,7 +159,8 @@ public enum APIError
         "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
         "VLAN-41", "IP format is invalid"), VLANS_IP_DOES_NOT_EXISTS("VLAN-42",
         "The IP does not exists"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
-        "This is the default VLAN for the Virtual Datacenter and cannot be deleted"),
+        "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
+        "VLAN-42", "The external VLAN belongs to another enterprise"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
