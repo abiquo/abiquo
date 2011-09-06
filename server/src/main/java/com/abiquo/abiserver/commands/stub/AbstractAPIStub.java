@@ -361,7 +361,6 @@ public class AbstractAPIStub
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
             }
-
         }
     }
 
