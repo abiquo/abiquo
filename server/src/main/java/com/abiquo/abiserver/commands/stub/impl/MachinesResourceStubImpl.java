@@ -297,6 +297,22 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         return null;
     }
 
+    @Override
+    public DataResult<PhysicalMachineCreation> getMachineInfo(final Integer datacenterId,
+        final String ip, final String user, final String password, final HypervisorType hypervisor,
+        final Integer port)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<Integer> getHypervisorType(final Integer datacenterId, final String ip)
+    {
+        // PREMIUM
+        return null;
+    }
+
     private String fromErrorsToMessage(final ErrorsDto errors)
     {
         String message = "";

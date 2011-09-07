@@ -667,6 +667,38 @@ public class AbstractAPIStub
         return resolveURI(apiUri, uri, params);
     }
 
+    protected String createDatacenterLinkgetMachineInfo(final Integer datacenterId,
+        final String ip, final String user, final String password, final String hypervisor,
+        final Integer port)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("ip", ip);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/";
+        uri +=
+            "action/discover?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createDatacenterLinkgetHypervisor(final Integer datacenterId, final String ip)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("ip", ip);
+
+        String uri = "admin/datacenters/{datacenter}/action/hypervisor?ip={ip}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
     protected String createMachinesLinkMultiplePost(final Integer datacenterId,
         final Integer rackId, final String ipFrom, final String ipTo, final String hypervisor,
         final String user, final String password, final Integer port, final String vSwitch)

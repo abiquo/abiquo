@@ -480,4 +480,28 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         }
         return null;
     }
+
+    static public Integer transportStateToInteger(final State state)
+    {
+        switch (state)
+        {
+            case MANAGED:
+                return STATE_MANAGED;
+            case NOT_MANAGED:
+                return STATE_NOT_MANAGED;
+            case DISABLED_FOR_HA:
+                return STATE_DISABLED_FOR_HA;
+            case HA_IN_PROGRESS:
+                return STATE_HA_IN_PROGRESS;
+            case HALTED:
+                return STATE_HALTED;
+            case PROVISIONED:
+                return STATE_PROVISIONED;
+            case STOPPED:
+                return STATE_STOPPED;
+            case UNLICENSED:
+                return STATE_UNLICENSED;
+        }
+        return null;
+    }
 }

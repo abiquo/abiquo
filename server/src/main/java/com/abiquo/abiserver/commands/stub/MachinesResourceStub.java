@@ -79,4 +79,9 @@ public interface MachinesResourceStub
 
     public DataResult<MachineDto> editPhysicalMachine(
         final PhysicalMachineCreation createPhysicalMachine);
+
+    public DataResult<PhysicalMachineCreation> getMachineInfo(Integer datacenterId, String ip,
+        String user, String password, HypervisorType hypervisor, Integer port);
+
+    public DataResult<Integer> getHypervisorType(final Integer datacenterId, final String ip);
 }

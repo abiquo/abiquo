@@ -92,7 +92,7 @@ public class MachinesResource extends AbstractResource
     @POST
     @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
     @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
-    public MachineDto postMachines(
+    public MachineDto postMachine(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachineDto machine,
         @Context final IRESTBuilder restBuilder) throws Exception

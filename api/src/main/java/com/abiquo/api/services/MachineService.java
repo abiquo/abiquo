@@ -45,6 +45,7 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -248,6 +249,14 @@ public class MachineService extends DefaultApiService
         }
 
         deleteMachineLoadRulesFromMachine(machine);
+
+        if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+        {
+            for (Datastore d : machine.getDatastores())
+            {
+                repo.deleteDatastore(d);
+            }
+        }
 
         repo.deleteMachine(machine);
     }

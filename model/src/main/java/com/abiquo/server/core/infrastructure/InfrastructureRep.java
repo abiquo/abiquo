@@ -469,6 +469,15 @@ public class InfrastructureRep extends DefaultRepBase
         datastoreDao.flush();
     }
 
+    public void deleteDatastore(final Datastore datastore)
+    {
+        assert datastore != null;
+        assert this.datastoreDao.isManaged(datastore);
+
+        this.datastoreDao.remove(datastore);
+        this.datastoreDao.flush();
+    }
+
     public boolean existAnyDatastoreWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);

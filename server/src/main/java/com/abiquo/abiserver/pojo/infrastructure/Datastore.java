@@ -263,4 +263,20 @@ public class Datastore implements IPojo<DatastoreHB>
         return dto;
     }
 
+    public static Datastore fromDto(final DatastoreDto dto)
+    {
+        Datastore d = new Datastore();
+
+        d.setDatastoreUUID(dto.getDatastoreUUID());
+        d.setDirectory(dto.getDirectory());
+        d.setEnabled(dto.isEnabled());
+        d.setId(dto.getId());
+        d.setName(dto.getName());
+        d.setUUID(dto.getRootPath());
+        d.setSize(dto.getSize());
+        d.setUsedSize(dto.getUsedSize());
+
+        return d;
+    }
+
 }
