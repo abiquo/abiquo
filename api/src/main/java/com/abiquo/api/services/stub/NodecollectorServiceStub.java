@@ -19,33 +19,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * Abiquo premium edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.api.services.stub;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -387,11 +367,14 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         int ram = (int) (host.getRam() / MEGABYTE);
         int cpus = (int) host.getCpu();
-
+        if (!StringUtils.hasText(host.getDescription()))
+        {
+            host.setDescription(formatDn(host.getName()));
+        }
         Machine machine =
             new Machine(datacenter,
                 host.getName(),
-                "",
+                host.getDescription(),
                 ram,
                 ram,
                 0,
@@ -437,9 +420,37 @@ public class NodecollectorServiceStub extends DefaultApiService
         return machine;
     }
 
+    private String formatDn(final String name)
+    {
+        if (!name.contains("/"))
+        {
+            return name;
+        }
+        String[] parts = name.split("/");
+        if (parts.length != 3)
+        {
+            // weird dn
+            return name;
+        }
+        String[] ch = parts[1].split("-");
+        if (ch.length != 2)
+        {
+            return name;
+        }
+        String[] bl = parts[2].split("-");
+        if (bl.length != 2)
+        {
+            return name;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(ch[0]).append(" ").append(ch[1]).append(" ").append("Slot").append(" ")
+            .append(bl[1]);
+        return WordUtils.capitalize(sb.toString());
+    }
+
     /**
      * Transform the NodeCollector's enum state {@link HostStatusEnumType} to Server enum state
-     * {@link State}
+     * {@link MachineState}
      * 
      * @param status status of the nodecollector's retrieval.
      * @return
