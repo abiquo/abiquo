@@ -55,7 +55,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
 
         private String entityName;
 
-        private LimitResource(String entityname)
+        private LimitResource(final String entityname)
         {
             this.entityName = entityname;
         }
@@ -107,13 +107,14 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      * @param required, new target resource requirements.
      * @param force, indicating if the soft limit reached should be reported as exception or only a
      *            <strong>event trace<strong> is created and the machine selection continues.
+     * @param editLimits, inidicates if we are editing limits to change tracer message.
      * @throws LimitExceededException, {@link HardLimitExceededException} it the resource allocation
      *             hard limit is exceeded. {@link SoftLimitExceededException}, on force = false and
      *             the soft limit is exceeded.
      */
     public void checkLimits(final CHECK_ENTITY entity, final LimitResource resourceType,
         final long required, final boolean force, final UserSession userSession,
-        final VirtualDataCenterHB virtualDatacenter)
+        final VirtualDataCenterHB virtualDatacenter, final boolean editLimits)
     {
 
         ResourceAllocationLimitHB limits = getLimit(entity);
@@ -147,7 +148,27 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         ResourceLimitRange status = limitStatus(actual, required, limit);
 
         checkResourceLimits(force, status, resourceType, entity, required, actual, limit,
-            userSession, virtualDatacenter);
+            userSession, virtualDatacenter, editLimits);
+    }
+
+    /**
+     * Check the resource allocation limits on the current entity when adding new resource
+     * requirements.
+     * 
+     * @param entity, the entity to obtain its resource allocation limits.
+     * @param required, new target resource requirements.
+     * @param force, indicating if the soft limit reached should be reported as exception or only a
+     *            <strong>event trace<strong> is created and the machine selection continues.
+     * @throws LimitExceededException, {@link HardLimitExceededException} it the resource allocation
+     *             hard limit is exceeded. {@link SoftLimitExceededException}, on force = false and
+     *             the soft limit is exceeded.
+     */
+    public void checkLimits(final CHECK_ENTITY entity, final LimitResource resourceType,
+        final long required, final boolean force, final UserSession userSession,
+        final VirtualDataCenterHB virtualDatacenter)
+    {
+
+        checkLimits(entity, resourceType, required, force, userSession, virtualDatacenter, false);
     }
 
     /**
@@ -155,7 +176,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
      */
     private boolean noLimits(final LimitHB limit)
     {
-        return (limit == null || limit.getSoft() == 0 && limit.getHard() == 0);
+        return limit == null || limit.getSoft() == 0 && limit.getHard() == 0;
     }
 
     /**
@@ -204,8 +225,8 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
     private void checkResourceLimits(final boolean force, final ResourceLimitRange status,
         final LimitResource resourceType, final CHECK_ENTITY entity, final long requirements,
         final long actual, final LimitHB limit, final UserSession userSession,
-        final VirtualDataCenterHB virtualDatacenter) throws SoftLimitExceededException,
-        HardLimitExceededException
+        final VirtualDataCenterHB virtualDatacenter, final boolean editLimits)
+        throws SoftLimitExceededException, HardLimitExceededException
     {
 
         switch (status)
@@ -215,14 +236,16 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
                     requirements,
                     actual,
                     limit,
-                    resourceType), userSession, virtualDatacenter);
+                    resourceType,
+                    editLimits), userSession, virtualDatacenter);
                 break;
             case SOFT:
                 traceLimit(false, force, entity, new SoftLimitExceededException(entity,
                     requirements,
                     actual,
                     limit,
-                    resourceType), userSession, virtualDatacenter);
+                    resourceType,
+                    editLimits), userSession, virtualDatacenter);
                 break;
             default: // OK
                 break;
@@ -242,7 +265,7 @@ public abstract class EntityLimitChecker<CHECK_ENTITY extends Object>
         DAOFactory daoF = HibernateDAOFactory.instance();
         DatacenterHB dcHB = null;
         DataCenter dc = null;
-        String vdcName = (virtualDatacenter != null) ? virtualDatacenter.getName() : null;
+        String vdcName = virtualDatacenter != null ? virtualDatacenter.getName() : null;
         try
         {
             daoF.beginConnection();
