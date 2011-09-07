@@ -92,7 +92,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String HYPERVISOR_ID_COLUMN = "idHypervisor";
 
-    @JoinColumn(name = HYPERVISOR_ID_COLUMN)
+    @JoinColumn(name = HYPERVISOR_ID_COLUMN, nullable = !HYPERVISOR_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_hypervisor")
     private Hypervisor hypervisor;
@@ -112,11 +112,11 @@ public class VirtualMachine extends DefaultEntityBase
 
     public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = true;
+    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
 
     private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
+    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN, nullable = !VIRTUAL_IMAGE_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     // , cascade = CascadeType.ALL)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualimage")
@@ -140,7 +140,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String DATASTORE_ID_COLUMN = "idDatastore";
 
-    @JoinColumn(name = DATASTORE_ID_COLUMN)
+    @JoinColumn(name = DATASTORE_ID_COLUMN, nullable = !DATASTORE_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_datastore")
     private Datastore datastore;
@@ -160,7 +160,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
     /* package */final static int NAME_LENGTH_MIN = 0;
 
@@ -406,11 +406,11 @@ public class VirtualMachine extends DefaultEntityBase
 
     public final static String ENTERPRISE_PROPERTY = "enterprise";
 
-    private final static boolean ENTERPRISE_REQUIRED = true;
+    private final static boolean ENTERPRISE_REQUIRED = false;
 
     private final static String ENTERPRISE_ID_COLUMN = "idEnterprise";
 
-    @JoinColumn(name = ENTERPRISE_ID_COLUMN)
+    @JoinColumn(name = ENTERPRISE_ID_COLUMN, nullable = !ENTERPRISE_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_enterprise")
     private Enterprise enterprise;
@@ -428,11 +428,11 @@ public class VirtualMachine extends DefaultEntityBase
 
     public final static String USER_PROPERTY = "user";
 
-    private final static boolean USER_REQUIRED = true;
+    private final static boolean USER_REQUIRED = false;
 
     private final static String USER_ID_COLUMN = "idUser";
 
-    @JoinColumn(name = USER_ID_COLUMN)
+    @JoinColumn(name = USER_ID_COLUMN, nullable = !USER_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_user")
     private User user;

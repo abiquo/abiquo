@@ -19,25 +19,30 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.commands.stub;
+package com.abiquo.server.core.infrastructure;
 
-import java.util.ArrayList;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
-import com.abiquo.abiserver.pojo.result.BasicResult;
-import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.enumerator.MachineState;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-public interface DatacentersResourceStub
+@XmlRootElement(name = "MachineState")
+public class MachineStateDto extends SingleResourceTransportDto
 {
-    public DataResult<DataCenter> createDatacenter(DataCenter datacenter);
+    private static final long serialVersionUID = -1283420076908929678L;
 
-    public DataResult<ArrayList<DataCenter>> getDatacenters();
+    private MachineState state;
 
-    public DataResult<DataCenter> modifyDatacenter(DataCenter datacenter);
+    @XmlElement(name = "state")
+    public MachineState getState()
+    {
+        return state;
+    }
 
-    public DataResult<DataCenter> deleteDatacenter(DataCenter datacenter);
+    public void setState(final MachineState state)
+    {
+        this.state = state;
+    }
 
-    public DataResult<DataCenter> getDatacenter(Integer datacenterId);
-
-    public BasicResult updateUsedResources(Integer datacenterId);
 }

@@ -40,13 +40,14 @@ import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -232,6 +233,7 @@ public class MachineService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
+        throws Exception
     {
         Machine old = getMachine(machineId);
         if (!old.getBelongsToManagedRack())
@@ -335,7 +337,22 @@ public class MachineService extends DefaultApiService
             virtualMachineService.updateVirtualMachine(vm);
         }
 
+        deleteMachineLoadRulesFromMachine(machine);
+
+        if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+        {
+            for (Datastore d : machine.getDatastores())
+            {
+                repo.deleteDatastore(d);
+            }
+        }
+
         repo.deleteMachine(machine);
+    }
+
+    protected void deleteMachineLoadRulesFromMachine(final Machine machine)
+    {
+        // PREMIUM
     }
 
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId,

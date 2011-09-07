@@ -63,6 +63,8 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 @Controller
 public class MachineResource extends AbstractResource
 {
+    public static final String SYNC = "sync";
+
     public static final String MACHINE = "machine";
 
     public static final String MACHINE_PARAM = "{" + MACHINE + "}";
@@ -144,7 +146,8 @@ public class MachineResource extends AbstractResource
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
         @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @PathParam(MachineResource.SYNC) final Boolean sync, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
@@ -200,7 +203,8 @@ public class MachineResource extends AbstractResource
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
-        vmService.deleteNotManagedVirtualMachines(hypervisor);
+        vmService.deleteNotManagedVirtualMachines(hypervisor, true);
+        infraService.updateUsedResourcesByMachine(machineId);
     }
 
     // protected methods

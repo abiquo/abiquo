@@ -80,6 +80,11 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     // ******************************* Properties *******************************
     public final static String LOCATION_PROPERTY = "location";
 

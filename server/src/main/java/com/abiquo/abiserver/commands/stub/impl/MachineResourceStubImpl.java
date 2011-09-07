@@ -34,7 +34,6 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
-
     @Override
     public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
@@ -91,6 +90,13 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      */
     @Override
     public BasicResult powerOn(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;

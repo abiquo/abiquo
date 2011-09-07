@@ -63,4 +63,7 @@ public interface MachineResourceStub
      *         error the appropiate object.
      */
     public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine);
+
+    public BasicResult deletePhysicalMachine(PhysicalMachine machine);
+
 }

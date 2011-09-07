@@ -30,6 +30,7 @@ import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 
 public class VirtualMachine extends InfrastructureElement implements IPojo<VirtualmachineHB>
 {
@@ -224,7 +225,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -265,7 +266,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
             virtualMachineHB.setState(StateEnum.valueOf(state.getDescription()));
         }
 
-        virtualMachineHB.setImage((virtualImage == null) ? null : virtualImage.toPojoHB());
+        virtualMachineHB.setImage(virtualImage == null ? null : virtualImage.toPojoHB());
 
         virtualMachineHB.setUuid(UUID);
         virtualMachineHB.setName(getName());
@@ -276,10 +277,10 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         virtualMachineHB.setVdrpIp(vdrpIP);
         virtualMachineHB.setVdrpPort(vdrpPort);
         virtualMachineHB.setHighDisponibility(highDisponibility ? 1 : 0);
-        virtualMachineHB.setUserHB((user == null) ? null : user.toPojoHB());
-        virtualMachineHB.setEnterpriseHB((enterprise == null) ? null : enterprise.toPojoHB());
+        virtualMachineHB.setUserHB(user == null ? null : user.toPojoHB());
+        virtualMachineHB.setEnterpriseHB(enterprise == null ? null : enterprise.toPojoHB());
         virtualMachineHB.setIdType(this.idType);
-        virtualMachineHB.setDatastore((datastore == null) ? null : datastore.toPojoHB());
+        virtualMachineHB.setDatastore(datastore == null ? null : datastore.toPojoHB());
         virtualMachineHB.setPassword(password);
 
         return virtualMachineHB;
@@ -309,5 +310,19 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
     public Datastore getDatastore()
     {
         return datastore;
+    }
+
+    public static VirtualMachine create(final VirtualMachineDto dto)
+    {
+        VirtualMachine vm = new VirtualMachine();
+
+        vm.setCpu(dto.getCpu());
+        vm.setDescription(dto.getDescription());
+        vm.setHd(dto.getHd());
+        vm.setHighDisponibility(dto.getHighDisponibility() == com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
+        vm.setId(dto.getId());
+        vm.setState(new State(dto.getIdState(), dto.getState().toString()));
+
+        return vm;
     }
 }

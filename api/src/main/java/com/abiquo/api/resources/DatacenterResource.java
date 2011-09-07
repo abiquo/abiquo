@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -50,6 +51,8 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
@@ -64,7 +67,13 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES = "enterprises";
+
     public static final String ENTERPRISES_PATH = "action/enterprises";
+
+    public static final String UPDATE_RESOURCES = "updateUsedResources";
+
+    public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
 
     public static final String NETWORK = "network";
 
@@ -73,6 +82,9 @@ public class DatacenterResource extends AbstractResource
 
     @Autowired
     NetworkService netService;
+
+    @Autowired
+    InfrastructureService infraService;
 
     @Context
     UriInfo uriInfo;
@@ -149,6 +161,23 @@ public class DatacenterResource extends AbstractResource
     public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
     {
         service.removeDatacenter(datacenterId);
+    }
+
+    @PUT
+    @Path(UPDATE_RESOURCES_PATH)
+    public void updateUsedResources(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Rack> racks = service.getRacks(datacenter);
+        for (Rack rack : racks)
+        {
+            List<Machine> machines = infraService.getMachines(rack);
+            for (Machine machine : machines)
+            {
+                infraService.updateUsedResourcesByMachine(machine);
+            }
+        }
+
     }
 
     public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)

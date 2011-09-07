@@ -22,8 +22,15 @@
 package com.abiquo.abiserver.pojo.infrastructure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.infrastructure.Resource;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.infrastructure.DatastoreDto;
+import com.abiquo.server.core.infrastructure.DatastoresDto;
+import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.nodecollector.ResourceEnumType;
 
 /**
  * Auxiliary class This class is used to create a new Physical Machine, along with its Hypervisors
@@ -44,7 +51,7 @@ public class PhysicalMachineCreation
         return physicalMachine;
     }
 
-    public void setPhysicalMachine(PhysicalMachine physicalMachine)
+    public void setPhysicalMachine(final PhysicalMachine physicalMachine)
     {
         this.physicalMachine = physicalMachine;
     }
@@ -54,12 +61,12 @@ public class PhysicalMachineCreation
         return hypervisors;
     }
 
-    public void setHypervisors(ArrayList<HyperVisor> hypervisors)
+    public void setHypervisors(final ArrayList<HyperVisor> hypervisors)
     {
         this.hypervisors = hypervisors;
     }
 
-    public void setResources(ArrayList<Resource> resources)
+    public void setResources(final ArrayList<Resource> resources)
     {
         this.resources = resources;
     }
@@ -69,4 +76,125 @@ public class PhysicalMachineCreation
         return resources;
     }
 
+    public MachineDto toMachineDto()
+    {
+        MachineDto dto = new MachineDto();
+
+        PhysicalMachine pm = this.getPhysicalMachine();
+        HyperVisor h = null;
+
+        if (this.getHypervisors() != null && !this.getHypervisors().isEmpty())
+        {
+            h = this.getHypervisors().get(0);
+        }
+
+        dto.setId(pm.getId());
+        dto.setDescription(pm.getDescription());
+        dto.setIpmiIp(pm.getIpmiIp());
+        dto.setIpmiPassword(pm.getIpmiPassword());
+        dto.setIpmiPort(pm.getIpmiPort());
+        dto.setIpmiUser(pm.getIpmiUser());
+        dto.setName(pm.getName());
+        dto.setRealCpuCores(pm.getRealCpu());
+        dto.setRealHardDiskInMb(pm.getRealStorage());
+        dto.setRealRamInMb(pm.getRealRam());
+        dto.setState(PhysicalmachineHB.transportIntegerToState(pm.getIdState()));
+
+        if (h != null)
+        {
+            dto.setIp(h.getIp());
+            dto.setIpService(h.getIpService());
+            dto.setPassword(h.getPassword());
+            dto.setPort(h.getPort());
+            dto.setType(HypervisorType.fromValue(h.getType().getName()));
+            dto.setUser(h.getUser());
+        }
+
+        dto.setVirtualCpuCores(pm.getCpu());
+        dto.setVirtualCpusPerCore(pm.getCpuRatio());
+        dto.setVirtualCpusUsed(pm.getCpuUsed());
+
+        dto.setVirtualHardDiskInMb(pm.getHd());
+        dto.setVirtualHardDiskUsedInMb(pm.getHdUsed());
+
+        dto.setVirtualRamInMb(pm.getRam());
+        dto.setVirtualRamUsedInMb(pm.getRamUsed());
+
+        dto.setVirtualSwitch(pm.getVswitchName());
+
+        if (pm.getDatastores() != null && !pm.getDatastores().isEmpty())
+        {
+            DatastoresDto dss = new DatastoresDto();
+            for (Datastore d : pm.getDatastores())
+            {
+                dss.add(d.toDto());
+            }
+            dto.setDatastores(dss);
+        }
+
+        return dto;
+    }
+
+    public static PhysicalMachineCreation create(final MachineDto dto)
+    {
+        PhysicalMachineCreation machineCreation = new PhysicalMachineCreation();
+        PhysicalMachine machine = new PhysicalMachine();
+
+        machine.setId(dto.getId());
+        machine.setDescription(dto.getDescription());
+        machine.setIpmiIp(dto.getIpmiIp());
+        machine.setIpmiPassword(dto.getIpmiPassword());
+        machine.setIpmiPort(dto.getIpmiPort());
+        machine.setIpmiUser(dto.getIpmiUser());
+        machine.setName(dto.getName());
+        machine.setRealCpu(dto.getRealCpuCores());
+        machine.setRealStorage(dto.getRealHardDiskInMb());
+        machine.setRealRam(dto.getRealRamInMb());
+        machine.setVswitchName(dto.getVirtualSwitch());
+        machine.setIdState(PhysicalmachineHB.transportStateToInteger(dto.getState()));
+        machine.setCpu(dto.getVirtualCpuCores());
+        machine.setCpuRatio(dto.getVirtualCpusPerCore());
+        machine.setCpuUsed(dto.getVirtualCpusUsed());
+        machine.setHd(dto.getVirtualHardDiskInMb());
+        machine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
+        machine.setRam(dto.getVirtualRamInMb());
+        machine.setRamUsed(dto.getVirtualRamUsedInMb());
+
+        HyperVisor hypervisor = new HyperVisor();
+        hypervisor.setIp(dto.getIp());
+        hypervisor.setIpService(dto.getIpService());
+        hypervisor.setPassword(dto.getPassword());
+        hypervisor.setPort(dto.getPort() == null ? 0 : dto.getPort());
+        hypervisor.setType(new HyperVisorType(dto.getType()));
+        hypervisor.setUser(dto.getUser());
+
+        if (dto.getDatastores() != null && !dto.getDatastores().isEmpty())
+        {
+            machine.setDatastores(new HashSet<Datastore>());
+            for (DatastoreDto d : dto.getDatastores().getCollection())
+            {
+                machine.getDatastores().add(Datastore.fromDto(d));
+            }
+        }
+
+        if (dto.getVirtualSwitch() != null && dto.getVirtualSwitch().contains("/"))
+        {
+            machineCreation.setResources(new ArrayList<Resource>());
+            String[] vss = dto.getVirtualSwitch().split("/");
+            for (String s : vss)
+            {
+                Resource resource = new Resource();
+                resource.setResourcetype(ResourceEnumType.VSWITCH.value());
+                resource.setElementName(s);
+                machineCreation.getResources().add(resource);
+            }
+            dto.setVirtualSwitch(null);
+        }
+
+        machineCreation.setPhysicalMachine(machine);
+        machineCreation.setHypervisors(new ArrayList<HyperVisor>());
+        machineCreation.getHypervisors().add(hypervisor);
+
+        return machineCreation;
+    }
 }

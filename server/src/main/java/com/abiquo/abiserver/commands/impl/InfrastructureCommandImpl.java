@@ -117,6 +117,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     protected static ResourceManager resourceManager =
         new ResourceManager(InfrastructureCommandImpl.class);
 
+    public static ResourceManager getResourceManager()
+    {
+        return resourceManager;
+    }
+
     private IInfrastructureWS infrastructureWS;
 
     // TODO autowire

@@ -390,6 +390,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
 
+    public Machine findMachineByIp(final Integer datacenterId, final String ip)
+    {
+        return this.machineDao.findByIp(datacenterId, ip);
+    }
+
     public void insertMachine(final Machine machine)
     {
         assert machine != null;
@@ -486,6 +491,15 @@ public class InfrastructureRep extends DefaultRepBase
         assert !existAnyOtherDatastoreWithDirectory(datastore, datastore.getDirectory()) : "ASSERT - datastore duplicated directory";
 
         datastoreDao.flush();
+    }
+
+    public void deleteDatastore(final Datastore datastore)
+    {
+        assert datastore != null;
+        assert this.datastoreDao.isManaged(datastore);
+
+        this.datastoreDao.remove(datastore);
+        this.datastoreDao.flush();
     }
 
     public boolean existAnyDatastoreWithName(final String name)

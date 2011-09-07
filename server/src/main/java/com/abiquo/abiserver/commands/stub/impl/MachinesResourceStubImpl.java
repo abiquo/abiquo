@@ -30,12 +30,20 @@ import org.apache.wink.client.ClientResponse;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachinesResourceStub;
+import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
+import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
+import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
@@ -43,6 +51,8 @@ import com.abiquo.server.core.infrastructure.RackDto;
 
 public class MachinesResourceStubImpl extends AbstractAPIStub implements MachinesResourceStub
 {
+    public static final String MULTIPLE_MACHINES_MIME_TYPE = "application/machinesdto+xml";
+
     /**
      * @see com.abiquo.abiserver.commands.stub.MachinesResourceStub#getMachines(com.abiquo.server.core.infrastructure.UcsRack)
      */
@@ -137,4 +147,206 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
 
         return DataCenter.create(dto);
     }
+
+    @Override
+    public DataResult<MachineDto> createPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine)
+    {
+        Rack rack = (Rack) createPhysicalMachine.getPhysicalMachine().getAssignedTo();
+        String uri = createMachinesLink(rack.getDataCenter().getId(), rack.getId());
+
+        DataResult<MachineDto> result = new DataResult<MachineDto>();
+
+        MachineDto dto = createPhysicalMachine.toMachineDto();
+
+        ClientResponse response = post(uri, dto);
+        if (response.getStatusCode() == 201)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "createPhysicalMachine");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public DataResult<MachineDto> editPhysicalMachine(
+        final PhysicalMachineCreation createPhysicalMachine)
+    {
+        Rack rack = (Rack) createPhysicalMachine.getPhysicalMachine().getAssignedTo();
+        String uri =
+            createMachineLink(rack.getDataCenter().getId(), rack.getId(), createPhysicalMachine
+                .getPhysicalMachine().getId());
+
+        DataResult<MachineDto> result = new DataResult<MachineDto>();
+
+        MachineDto dto = createPhysicalMachine.toMachineDto();
+
+        ClientResponse response = put(uri, dto);
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "editPhysicalMachine");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public DataResult<List<PhysicalMachine>> createMultiplePhysicalMachine(
+        final Integer datacenterId, final Integer rackId, final IPAddress ipFrom,
+        final IPAddress ipTo, final Integer hypervisorType, final String user,
+        final String password, final Integer port, final String vSwitch)
+    {
+        DataResult<List<PhysicalMachine>> result = new DataResult<List<PhysicalMachine>>();
+
+        // getting rack
+        DataResult<Rack> rackResult = new DataResult<Rack>();
+        ClientResponse rackResponse = get(createRackLink(datacenterId, rackId));
+
+        if (rackResponse.getStatusCode() == 200)
+        {
+            RackDto rDto = rackResponse.getEntity(RackDto.class);
+            rackResult.setSuccess(true);
+            Map<String, DatacenterDto> catchedDatacenters = new HashMap<String, DatacenterDto>();
+            Rack rack =
+                Rack.create(rDto,
+                    getDatacenterFromLink(rDto.searchLink("datacenter"), catchedDatacenters));
+
+            rackResult.setData(rack);
+
+            // creating machines
+            String uri =
+                createMachinesLinkMultiplePost(datacenterId, rackId, ipFrom.toString(),
+                    ipTo.toString(), HypervisorType.fromId(hypervisorType).getValue(), user,
+                    password, port, vSwitch);
+
+            ClientResponse response =
+                post(uri, null, MachinesResourceStubImpl.MULTIPLE_MACHINES_MIME_TYPE);
+
+            if (response.getStatusCode() == 201)
+            {
+                List<PhysicalMachine> list = new ArrayList<PhysicalMachine>();
+                MachinesDto pms = response.getEntity(MachinesDto.class);
+                for (MachineDto d : pms.getCollection())
+                {
+                    PhysicalMachine pm = PhysicalMachine.create(d, rack.getDataCenter(), rack);
+                    pm.completeInfo(d);
+                    list.add(pm);
+                }
+                result.setSuccess(true);
+                result.setData(list);
+
+                if (pms.getErrors() == null || pms.getErrors().isEmpty())
+                {
+                    result.setSuccess(true);
+                }
+                else
+                {
+                    result.setMessage(fromErrorsToMessage(pms.getErrors()));
+                    result.setSuccess(false);
+                }
+
+            }
+            else
+            {
+                populateErrors(response, result, "createMultiplePhysicalMachine");
+            }
+        }
+        else
+        {
+            populateErrors(rackResponse, rackResult, "createMultiplePhysicalMachine");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public BasicResult isStonithUp(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String user, final String password,
+        final Integer port)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(final Integer dcId,
+        final Integer rackId, final Integer pmId)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<MachineState> checkPhysicalMachineState(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final String ip,
+        final HypervisorType hypervisor, final String user, final String password,
+        final Integer port)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<PhysicalMachineCreation> getMachineInfo(final Integer datacenterId,
+        final String ip, final String user, final String password, final HypervisorType hypervisor,
+        final Integer port)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public DataResult<Integer> getHypervisorType(final Integer datacenterId, final String ip)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    private String fromErrorsToMessage(final ErrorsDto errors)
+    {
+        String message = "";
+
+        if (errors != null && !errors.isEmpty())
+        {
+            for (ErrorDto dto : errors.getCollection())
+            {
+                message += dto.getCode() + ": " + dto.getMessage() + "\n";
+            }
+        }
+
+        return message;
+    }
+
+    @Override
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine)
+    {
+        String uri = createMachineLink(machine);
+
+        BasicResult result = new BasicResult();
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusCode() == 204)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deletePhysicalMachine");
+        }
+
+        return result;
+    }
+
 }

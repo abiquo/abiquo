@@ -27,7 +27,12 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
@@ -46,13 +51,19 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.services.stub.NodecollectorServiceStub;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
@@ -62,6 +73,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -94,6 +106,9 @@ public class InfrastructureService extends DefaultApiService
 
     @Autowired
     MachineService machineService;
+
+    @Autowired
+    protected NodecollectorServiceStub nodecollectorServiceStub;
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
@@ -175,9 +190,64 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
+    public Map<String, Object> addMachines(final Integer datacenterId, final Integer rackId,
+        final String ipFrom, final String ipTo, final String hypervisor, final String user,
+        final String password, final Integer port, final String vSwitch)
+    {
+        List<Machine> createdMachines = new ArrayList<Machine>();
+
+        // Create the IPAddress objects again to check the IP correct format
+        IPAddress ipFromOK = IPAddress.newIPAddress(ipFrom.toString());
+        IPAddress ipToOK = IPAddress.newIPAddress(ipTo.toString());
+
+        if (ipFromOK.isBiggerThan(ipToOK))
+        {
+            addConflictErrors(new CommonError(APIError.MACHINE_INVALID_IP_RANGE.getCode(),
+                "IP From can not be bigger than IP To!"));
+        }
+
+        // prepare NODE COLLECTOR
+        Datacenter datacenter = getDatacenter(datacenterId);
+        RemoteService nodecollector =
+            getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
+
+        // getting machines
+        HypervisorType hyType = HypervisorType.fromValue(hypervisor);
+        List<Machine> discoveredMachines =
+            nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
+                user, password, port);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        Set<CommonError> errors = new HashSet<CommonError>();
+        // saving machines
+        for (Machine machine : discoveredMachines)
+        {
+            try
+            {
+                enableMaxFreeSpaceDatastore(machine);
+                machine.setVirtualSwitch(vSwitch);
+                Machine m = addMachine(machine, datacenterId, rackId);
+                createdMachines.add(m);
+            }
+            catch (APIException ex)
+            {
+                errors.addAll(addIpInErrors(ex.getErrors(), machine.getHypervisor().getIp()));
+            }
+        }
+
+        map.put("machines", createdMachines);
+        if (!errors.isEmpty())
+        {
+            map.put("errors", errors);
+        }
+        return map;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Machine addMachine(final Machine machine, final Integer datacenterId,
         final Integer rackId)
     {
+        machine.setId(null);
 
         // Gets the rack. It throws the NotFoundException if needed.
         Rack rack = getRack(datacenterId, rackId);
@@ -189,6 +259,8 @@ public class InfrastructureService extends DefaultApiService
             addConflictErrors(APIError.MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK);
             flushErrors();
         }
+
+        checkAvailableCores(machine);
 
         Long realHardDiskInBytes = 0l;
         Long virtualHardDiskInBytes = 0l;
@@ -214,6 +286,7 @@ public class InfrastructureService extends DefaultApiService
         }
 
         // Insert the machine into database
+        machine.setVirtualCpusPerCore(1);
         machine.setRealHardDiskInBytes(realHardDiskInBytes);
         machine.setVirtualHardDiskInBytes(virtualHardDiskInBytes);
         machine.setVirtualHardDiskUsedInBytes(virtualHardDiskUsedInBytes);
@@ -242,6 +315,7 @@ public class InfrastructureService extends DefaultApiService
         flushErrors();
 
         repo.insertMachine(machine);
+        repo.insertHypervisor(machine.getHypervisor());
 
         // Get the remote service to monitor the machine
         RemoteService vsmRS =
@@ -249,6 +323,9 @@ public class InfrastructureService extends DefaultApiService
         vsmServiceStub.monitor(vsmRS.getUri(), machine.getHypervisor().getIp(), machine
             .getHypervisor().getPort(), machine.getHypervisor().getType().name(), machine
             .getHypervisor().getUser(), machine.getHypervisor().getPassword());
+
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
+            + machine.getName() + "' has been created succesfully");
 
         return machine;
     }
@@ -384,12 +461,6 @@ public class InfrastructureService extends DefaultApiService
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE,
             "Rack " + rack.getName() + " deleted");
     }
-
-    // public void removeRack(final Integer datacenterId, final Integer rackId)
-    // {
-    // Rack rack = getRack(datacenterId, rackId);
-    // repo.deleteRack(rack);
-    // }
 
     public List<Machine> getMachines(final Rack rack)
     {
@@ -718,9 +789,102 @@ public class InfrastructureService extends DefaultApiService
         flushErrors();
     }
 
+    public Collection<VirtualMachine> getVirtualMachinesByMachine(final Integer machineId)
+    {
+        Machine machine = machineService.getMachine(machineId);
+        return virtualMachineService.findByHypervisor(machine.getHypervisor());
+    }
+
+    public void updateUsedResourcesByMachine(final Integer machineId)
+    {
+        Machine machine = machineService.getMachine(machineId);
+        updateUsedResourcesByMachine(machine);
+    }
+
+    public void updateUsedResourcesByMachine(final Machine machine)
+    {
+        Collection<VirtualMachine> vms = getVirtualMachinesByMachine(machine.getId());
+
+        Integer ramUsed = 0;
+        Integer cpuUsed = 0;
+        long hdUsed = 0;
+
+        for (VirtualMachine vm : vms)
+        {
+            if (vm.getState() != null && !vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
+            {
+                ramUsed += vm.getRam();
+                cpuUsed += vm.getCpu();
+                hdUsed += vm.getHdInBytes();
+            }
+        }
+
+        machine.setVirtualRamUsedInMb(ramUsed);
+        machine.setVirtualCpusUsed(cpuUsed);
+        machine.setVirtualHardDiskUsedInBytes(hdUsed);
+
+        repo.updateMachine(machine);
+    }
+
     public boolean hasVlanConfig(final Rack rack)
     {
         return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
             && rack.getVlanPerVdcExpected() != null;
+    }
+
+    public void checkAvailableCores(final Machine machine)
+    {
+        // PREMIUM
+    }
+
+    // ----------------- //
+    // ---- PRIVATE ---- //
+    // ----------------- //
+
+    private void enableMaxFreeSpaceDatastore(final Machine machine)
+    {
+        if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+        {
+            Datastore datastoreToEnable = null;
+            long freeSpace = 0;
+            for (Datastore d : machine.getDatastores())
+            {
+                if (freeSpace < d.getSize() - d.getUsedSize())
+                {
+                    freeSpace = d.getSize() - d.getUsedSize();
+                    datastoreToEnable = d;
+                }
+            }
+
+            if (datastoreToEnable != null)
+            {
+                datastoreToEnable.setEnabled(true);
+            }
+            else
+            {
+                // if any datastore has free space, select the first
+                machine.getDatastores().get(0).setEnabled(true);
+            }
+        }
+
+    }
+
+    private Set<CommonError> addIpInErrors(final Set<CommonError> errors, final String ip)
+    {
+        Set<CommonError> newErrors = new HashSet<CommonError>();
+
+        if (errors != null && !errors.isEmpty())
+        {
+            for (CommonError commonError : errors)
+            {
+                CommonError newError =
+                    new CommonError(commonError.getCode(), "[" + ip + "] "
+                        + commonError.getMessage());
+                newErrors.add(newError);
+            }
+        }
+
+        return newErrors;
+
     }
 }

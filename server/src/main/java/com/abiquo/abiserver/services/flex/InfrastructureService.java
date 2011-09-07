@@ -396,21 +396,8 @@ public class InfrastructureService
         final PhysicalMachineCreation physicalMachineCreation)
     {
 
-        InfrastructureCommand command = proxyCommand(session);
+        return proxyMachinesStub(session).createPhysicalMachine(physicalMachineCreation);
 
-        DataResult<PhysicalMachineCreation> result = new DataResult<PhysicalMachineCreation>();
-
-        try
-        {
-            result = command.createPhysicalMachine(session, physicalMachineCreation);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
     }
 
     /**
@@ -423,15 +410,7 @@ public class InfrastructureService
     public BasicResult deletePhysicalMachine(final UserSession session,
         final PhysicalMachine physicalMachine)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        try
-        {
-            return command.deletePhysicalMachine(session, physicalMachine);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxyMachinesStub(session).deletePhysicalMachine(physicalMachine);
     }
 
     /**
@@ -448,22 +427,7 @@ public class InfrastructureService
     public BasicResult editPhysicalMachine(final UserSession session,
         final PhysicalMachineCreation physicalMachineCreation)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-
-        DataResult<ArrayList<HyperVisor>> result = new DataResult<ArrayList<HyperVisor>>();
-
-        try
-        {
-            result = command.editPhysicalMachine(session, physicalMachineCreation);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
+        return proxyMachinesStub(session).editPhysicalMachine(physicalMachineCreation);
     }
 
     /* ______________________________ VIRTUAL MACHINES _______________________________ */
@@ -524,6 +488,7 @@ public class InfrastructureService
      * @param virtualMachine
      * @return
      */
+    @Deprecated
     public BasicResult moveVirtualMachine(final UserSession session,
         final VirtualMachine virtualMachine)
     {
@@ -559,10 +524,7 @@ public class InfrastructureService
     public BasicResult updateUsedResourcesByDatacenter(final UserSession session,
         final DataCenter dataCenter)
     {
-
-        InfrastructureCommand command = proxyCommand(session);
-        return command.updateUsedResourcesByDatacenter(dataCenter.toPojoHB());
-
+        return proxyDatacentersStub(session).updateUsedResources(dataCenter.getId());
     }
 
     /**
