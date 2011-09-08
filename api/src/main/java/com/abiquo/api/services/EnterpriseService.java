@@ -129,7 +129,9 @@ public class EnterpriseService extends DefaultApiService
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (securityService.isEnterpriseAdmin())
+        if (!securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -259,8 +261,8 @@ public class EnterpriseService extends DefaultApiService
             for (Machine m : reservedMachines)
             {
                 releaseMachine(m.getId(), id);
-	    }
-	}
+            }
+        }
 
         if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
         {
