@@ -161,16 +161,13 @@ public class MachineService extends DefaultApiService
         old.setState(machineDto.getState());
 
         old.setVirtualRamInMb(machineDto.getVirtualRamInMb());
-        old.setRealRamInMb(machineDto.getRealRamInMb());
         old.setVirtualRamUsedInMb(machineDto.getVirtualRamUsedInMb());
 
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
-        old.setRealCpuCores(machineDto.getRealCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
         old.setVirtualHardDiskInBytes(machineDto.getVirtualHardDiskInMb());
-        old.setRealHardDiskInBytes(machineDto.getRealHardDiskInMb());
         old.setVirtualHardDiskUsedInBytes(machineDto.getVirtualHardDiskUsedInMb());
 
         isValidMachine(old);

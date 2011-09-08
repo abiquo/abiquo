@@ -12,6 +12,7 @@
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
+ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --

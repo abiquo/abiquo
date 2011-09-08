@@ -62,8 +62,8 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
     }
 
     @Override
-    public DatastoreHB createDatastore(UserSession userSession, DatastoreHB newDatastore,
-        Integer physicalMachineId) throws DatastoreCommandException
+    public DatastoreHB createDatastore(final UserSession userSession, DatastoreHB newDatastore,
+        final Integer physicalMachineId) throws DatastoreCommandException
     {
         try
         {
@@ -73,12 +73,12 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
 
             // Create the Datastore
             newDatastore =
-                (DatastoreHB) HibernateDAOFactory.getSessionFactory().getCurrentSession().merge(
-                    newDatastore);
+                (DatastoreHB) HibernateDAOFactory.getSessionFactory().getCurrentSession()
+                    .merge(newDatastore);
 
             // Persist the relation between the datastore and the physicalmachine.
             PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
-            
+
             PhysicalmachineHB pmHB = pmDAO.findById(physicalMachineId);
             pmHB.getDatastoresHB().add(newDatastore);
 
@@ -97,7 +97,7 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
     }
 
     @Override
-    public DatastoreHB editDatastore(UserSession userSession, DatastoreHB datastore)
+    public DatastoreHB editDatastore(final UserSession userSession, final DatastoreHB datastore)
         throws DatastoreCommandException
     {
         DatastoreHB dataHB;
@@ -119,7 +119,8 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
                 throw new DatastoreCommandException("Datastore to edit doesn't exist in Database");
             }
 
-            // The changes in the datastore deploy directory are not allowed if there is any virtual machine deployed
+            // The changes in the datastore deploy directory are not allowed if there is any virtual
+            // machine deployed
             if (vmDAO.findByDatastore(datastoreId).size() > 0)
             {
                 if (!datastore.getDirectory().equals(dataHB.getDirectory())
@@ -134,14 +135,16 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
 
             // Currently we only use one pm per datastore...
             PhysicalmachineHB pmHB = pmDAO.getPhysicalMachineListByDatastore(datastoreId).get(0);
-            pmHB.setRealStorage(pmHB.getRealStorage() - dataHB.getSize() + datastore.getSize());
+            pmHB.setHd(pmHB.getHd() - dataHB.getSize() + datastore.getSize());
             pmDAO.makePersistent(pmHB);
 
             if (!datastore.getDirectory().equals(dataHB.getDirectory()))
             {
                 // ESXi and XenServer manage the directory on their own way. So, we can not edit it
-                if (pmHB.getHypervisor().getType().getValue().equalsIgnoreCase(HypervisorType.VMX_04.getValue())
-                    || pmHB.getHypervisor().getType().getValue().equalsIgnoreCase(HypervisorType.XENSERVER.getValue()))
+                if (pmHB.getHypervisor().getType().getValue()
+                    .equalsIgnoreCase(HypervisorType.VMX_04.getValue())
+                    || pmHB.getHypervisor().getType().getValue()
+                        .equalsIgnoreCase(HypervisorType.XENSERVER.getValue()))
                 {
                     throw new DatastoreCommandException("Can not edit the directory for this Hypervisor");
                 }

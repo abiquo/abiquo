@@ -37,9 +37,9 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
@@ -92,7 +92,7 @@ public class PopulateInfrastructure extends PopulateConstants
      * <li>d1.r1.m1:HTYPE [ :cpu,used:ram,used:hd,used ]
      * </ul>
      */
-    public void populateInfrastructure(String declar)
+    public void populateInfrastructure(final String declar)
     {
         //
         String datacenterName;
@@ -138,7 +138,7 @@ public class PopulateInfrastructure extends PopulateConstants
         }
     }
 
-    public Datacenter createDatacenter(String dcStr)
+    public Datacenter createDatacenter(final String dcStr)
     {
         Datacenter dc = dcRep.findByName(dcStr);
 
@@ -160,7 +160,7 @@ public class PopulateInfrastructure extends PopulateConstants
         }
     }
 
-    private void allowAllEnterpriseByDefault(Datacenter dc)
+    private void allowAllEnterpriseByDefault(final Datacenter dc)
     {
         for (Enterprise enterprise : enterpriseRep.findAll())
         {
@@ -175,7 +175,7 @@ public class PopulateInfrastructure extends PopulateConstants
      * @param rackStr, r1:2,1002,2,10,[3;4] -- minVlan, maxVlna, vlanxvdcexpected, NRSQ,
      *            vlansIdAvoided
      */
-    public Rack createRack(String dcStr, String rackStr)
+    public Rack createRack(final String dcStr, final String rackStr)
     {
         String[] frags = rackStr.split(DELIMITER_DEFINITION);
 
@@ -230,7 +230,7 @@ public class PopulateInfrastructure extends PopulateConstants
     /**
      * @param mStr, m1:HTYPE [ :cpu,used:ram,used:hd,used ]
      */
-    public Machine createMachine(String dcStr, String rackStr, String machineDef)
+    public Machine createMachine(final String dcStr, final String rackStr, final String machineDef)
     {
         String mFrg[] = machineDef.split(DELIMITER_DEFINITION);
 
@@ -274,20 +274,17 @@ public class PopulateInfrastructure extends PopulateConstants
             Datastore ds = datastoreGen.createInstance(machine);
             ds.setEnabled(true);
             ds.setUsedSize(0);
-            ds.setSize(hd * GB_TO_MB * (1014 * 1024)); // TODO Datastore size is bytes
+            ds.setSize(hd * GB_TO_MB * 1014 * 1024); // TODO Datastore size is bytes
 
             dcRep.insertDatastore(ds);
 
-            machine.setRealCpuCores((int) cpu);
             machine.setVirtualCpuCores((int) cpu);
             machine.setVirtualCpusUsed(0);
 
-            machine.setRealRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamUsedInMb(0);
 
-            machine.setRealHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
-            machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * (1014 * 1024));
+            machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * 1014 * 1024);
             machine.setVirtualHardDiskUsedInBytes(0L);
 
             dcRep.updateMachine(machine);

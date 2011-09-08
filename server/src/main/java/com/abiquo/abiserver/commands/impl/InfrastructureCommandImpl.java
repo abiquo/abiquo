@@ -740,8 +740,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setCpu(pm.getCpu());
             physicalMachineHb.setRam(pm.getRam());
             physicalMachineHb.setHd(pm.getHd());
-            physicalMachineHb.setRealCpu(pm.getRealCpu());
-            physicalMachineHb.setRealRam(pm.getRealRam());
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());

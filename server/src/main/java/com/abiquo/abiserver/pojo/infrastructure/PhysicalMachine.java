@@ -49,12 +49,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
 
     private long hd;
 
-    private int realRam;
-
-    private int realCpu;
-
-    private long realStorage;
-
     private int cpuRatio = AbiConfigManager.getInstance().getAbiConfig().getVirtualCpuPerCore();
 
     private int ramUsed;
@@ -159,42 +153,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
     public void setHd(final long hd)
     {
         this.hd = hd;
-    }
-
-    public int getRealRam()
-    {
-        return realRam;
-    }
-
-    public void setRealRam(final int realRam)
-    {
-        this.realRam = realRam;
-    }
-
-    public int getRealCpu()
-    {
-        return realCpu;
-    }
-
-    public void setRealCpu(final int realCpu)
-    {
-        this.realCpu = realCpu;
-    }
-
-    /**
-     * @param realStorage the realStorage to set
-     */
-    public void setRealStorage(final long realStorage)
-    {
-        this.realStorage = realStorage;
-    }
-
-    /**
-     * @return the realStorage
-     */
-    public long getRealStorage()
-    {
-        return realStorage;
     }
 
     // used
@@ -389,9 +347,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         // 2181)
         physicalMachineHB.setDescription(getDescription());
         physicalMachineHB.setCpu(getCpu());
-        physicalMachineHB.setRealCpu(realCpu);
-        physicalMachineHB.setRealRam(realRam);
-        physicalMachineHB.setRealStorage(realStorage);
         physicalMachineHB.setCpuUsed(getCpuUsed());
         physicalMachineHB.setRam(getRam());
         physicalMachineHB.setRamUsed(getRamUsed());
@@ -449,9 +404,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());
         physicalMachine.setHd(dto.getVirtualHardDiskInMb());
-        physicalMachine.setRealCpu(dto.getRealCpuCores());
-        physicalMachine.setRealRam(dto.getRealRamInMb());
-        physicalMachine.setRealStorage(dto.getRealHardDiskInMb());
         physicalMachine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
         physicalMachine.setId(dto.getId());
         physicalMachine.setName(dto.getName());
@@ -481,9 +433,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());
         physicalMachine.setHd(dto.getVirtualHardDiskInMb());
-        physicalMachine.setRealCpu(dto.getRealCpuCores());
-        physicalMachine.setRealRam(dto.getRealRamInMb());
-        physicalMachine.setRealStorage(dto.getRealHardDiskInMb());
         physicalMachine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
         physicalMachine.setId(dto.getId());
         physicalMachine.setName(dto.getName());

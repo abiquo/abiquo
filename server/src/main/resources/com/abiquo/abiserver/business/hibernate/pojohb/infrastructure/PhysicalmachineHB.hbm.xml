@@ -28,15 +28,6 @@
         <property name="hd" type="java.lang.Long">
             <column name="hd" not-null="true" />
         </property>
-        <property name="realRam" type="int">
-            <column name="realram" not-null="true" />
-        </property>
-        <property name="realCpu" type="int">
-            <column name="realcpu" not-null="true" />
-        </property>
-        <property name="realStorage" type="java.lang.Long">
-            <column name="realStorage" not-null="true" />
-        </property>
         <property name="cpuRatio" type="int">
             <column name="cpuRatio" not-null="true" />
         </property>

@@ -60,12 +60,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
 
     private long hd;
 
-    private int realRam;
-
-    private int realCpu;
-
-    private long realStorage;
-
     private String vswitchName;
 
     private String initiatorIQN;
@@ -213,42 +207,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     public void setHd(final long hd)
     {
         this.hd = hd;
-    }
-
-    public int getRealRam()
-    {
-        return realRam;
-    }
-
-    public void setRealRam(final int realRam)
-    {
-        this.realRam = realRam;
-    }
-
-    public int getRealCpu()
-    {
-        return realCpu;
-    }
-
-    public void setRealCpu(final int realCpu)
-    {
-        this.realCpu = realCpu;
-    }
-
-    /**
-     * @return the realStorage
-     */
-    public long getRealStorage()
-    {
-        return realStorage;
-    }
-
-    /**
-     * @param realStorage the realStorage to set
-     */
-    public void setRealStorage(final long realStorage)
-    {
-        this.realStorage = realStorage;
     }
 
     // used
@@ -417,9 +375,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         physicalMachine.setCpuUsed(cpuUsed);
         physicalMachine.setDescription(description);
         physicalMachine.setHd(hd);
-        physicalMachine.setRealCpu(realCpu);
-        physicalMachine.setRealRam(realRam);
-        physicalMachine.setRealStorage(realStorage);
         physicalMachine.setHdUsed(hdUsed);
         physicalMachine.setId(getIdPhysicalMachine());
         physicalMachine.setName(name);

@@ -371,12 +371,9 @@ public class NodecollectorServiceStub extends DefaultApiService
                 host.getName(),
                 "",
                 ram,
-                ram,
                 0,
                 0L,
                 0L,
-                0L,
-                cpus,
                 cpus,
                 0,
                 0,
@@ -409,7 +406,6 @@ public class NodecollectorServiceStub extends DefaultApiService
         }
 
         switches = switches.substring(0, switches.lastIndexOf('/'));
-        machine.setRealHardDiskInBytes(totalStorage);
         machine.setVirtualHardDiskInBytes(totalStorage);
         machine.setVirtualSwitch(switches);
         return machine;

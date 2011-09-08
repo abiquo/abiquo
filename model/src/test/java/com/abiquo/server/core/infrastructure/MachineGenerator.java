@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.testng.Assert;
 
-import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Machine.State;
@@ -36,9 +35,8 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
     private DatacenterGenerator datacenterGenerator;
 
     private RackGenerator rackGenerator;
-    
 
-    public MachineGenerator(SeedGenerator seed)
+    public MachineGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.datacenterGenerator = new DatacenterGenerator(seed);
@@ -46,7 +44,7 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
     }
 
     @Override
-    public void assertAllPropertiesEqual(Machine arg0, Machine arg1)
+    public void assertAllPropertiesEqual(final Machine arg0, final Machine arg1)
     {
         Assert.assertEquals(arg0.getName(), arg1.getName());
     }
@@ -66,7 +64,7 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         return createMachine(datacenter, rack);
     }
 
-    public Machine createReservedMachine(Enterprise enterprise)
+    public Machine createReservedMachine(final Enterprise enterprise)
     {
         Machine machine = createMachineIntoRack();
         machine.setEnterprise(enterprise);
@@ -74,7 +72,8 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Machine entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Machine entity,
+        final List<Object> entitiesToPersist)
     {
         if (entity.getRack() != null)
         {
@@ -91,36 +90,33 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
-    public Machine createMachine(Datacenter datacenter)
+    public Machine createMachine(final Datacenter datacenter)
     {
         int seed = nextSeed();
 
         final String name = newString(seed, Machine.NAME_LENGTH_MIN, Machine.NAME_LENGTH_MAX);
         Machine machine = createMachine(datacenter, name);
-                
+
         return machine;
     }
 
-    public Machine createMachine(Datacenter datacenter, Rack rack)
+    public Machine createMachine(final Datacenter datacenter, final Rack rack)
     {
         Machine machine = createMachine(datacenter);
-        machine.setRack(rack);       
+        machine.setRack(rack);
 
         return machine;
     }
 
-    public Machine createMachine(Datacenter datacenter, String name)
+    public Machine createMachine(final Datacenter datacenter, final String name)
     {
         int seed = nextSeed();
 
         int virtualRamInMb = seed * 10 + 1;
-        int realRamInMb = seed * 20 + 1;
         int virtualRamUsedInMb = seed * 30 + 1;
         long virtualHardDiskInMb = seed * 1000 + 1;
-        long realHardDiskInMb = seed * 2000 + 1;
         long virtualHardDiskUsed = seed * 3000 + 1;
         int realCpuThreads = seed + 1;
-        int realCpuCores = seed + 1;
         int virtualCpusPerThread = 1;
         int currentCpusInUse = seed + 3 + 1;
         State state = newEnum(State.class, seed);
@@ -130,11 +126,10 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         String virtualSwitch = newString(seed, 1, 255);
 
         Machine machine =
-            datacenter.createMachine(name, description, virtualRamInMb, realRamInMb,
-                virtualRamUsedInMb, virtualHardDiskInMb, realHardDiskInMb, virtualHardDiskUsed,
-                realCpuThreads, realCpuCores, currentCpusInUse, virtualCpusPerThread, state,
-                virtualSwitch);
-        
+            datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
+                virtualHardDiskInMb, virtualHardDiskUsed, realCpuThreads, currentCpusInUse,
+                virtualCpusPerThread, state, virtualSwitch);
+
         return machine;
     }
 

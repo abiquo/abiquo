@@ -235,9 +235,6 @@ public class MachineResource extends AbstractResource
         dto.setDescription(machine.getDescription());
         dto.setId(machine.getId());
         dto.setName(machine.getName());
-        dto.setRealCpuCores(machine.getRealCpuCores());
-        dto.setRealHardDiskInMb(machine.getRealHardDiskInBytes());
-        dto.setRealRamInMb(machine.getRealRamInMb());
         dto.setState(machine.getState());
         dto.setVirtualCpuCores(machine.getVirtualCpuCores());
         dto.setVirtualCpusPerCore(machine.getVirtualCpusPerCore());
