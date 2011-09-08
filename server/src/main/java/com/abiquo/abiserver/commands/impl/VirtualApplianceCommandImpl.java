@@ -57,7 +57,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
@@ -408,31 +407,31 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter, final String networkName,
         final NetworkConfigurationHB configuration)
     {
-        // Check the private VLAN limits.
-        VirtualDataCenterHB vdc = virtualDataCenter.toPojoHB();
-        EnterpriseHB enter = vdc.getEnterpriseHB();
+        // Check the private VLAN limits in API!
+        // VirtualDataCenterHB vdc = virtualDataCenter.toPojoHB();
+        // EnterpriseHB enter = vdc.getEnterpriseHB();
 
-        DAOFactory daoF = HibernateDAOFactory.instance();
-
-        try
-        {
-            daoF.beginConnection();
-
-            instantiateNetworkCommand().checkPrivateVlan(vdc, vdc.getIdDataCenter(), enter,
-                userSession);
-        }
-        catch (Exception e)
-        {
-            DataResult<VirtualDataCenter> result = new DataResult<VirtualDataCenter>();
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-
-            return result;
-        }
-        finally
-        {
-            daoF.endConnection();
-        }
+        // DAOFactory daoF = HibernateDAOFactory.instance();
+        //
+        // try
+        // {
+        // daoF.beginConnection();
+        //
+        // instantiateNetworkCommand().checkPrivateVlan(vdc, vdc.getIdDataCenter(), enter,
+        // userSession);
+        // }
+        // catch (Exception e)
+        // {
+        // DataResult<VirtualDataCenter> result = new DataResult<VirtualDataCenter>();
+        // result.setSuccess(false);
+        // result.setMessage(e.getMessage());
+        //
+        // return result;
+        // }
+        // finally
+        // {
+        // daoF.endConnection();
+        // }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
@@ -1363,27 +1362,28 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter)
     {
 
-        Session session = HibernateUtil.getSession();
-        Transaction tx = session.beginTransaction();
-
-        try
-        {
-            VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
-            checkLimits(vdcHb, userSession);
-        }
-        catch (HardLimitExceededException e)
-        {
-            BasicResult basicResult = new BasicResult();
-            basicResult.setSuccess(false);
-            basicResult.setMessage(resourceManager
-                .getMessage("editVirtualDataCenter.limitExceeded"));
-
-            return basicResult;
-        }
-        finally
-        {
-            tx.commit();
-        }
+        // Checked en api
+        // Session session = HibernateUtil.getSession();
+        // Transaction tx = session.beginTransaction();
+        //
+        // try
+        // {
+        // VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
+        // checkLimits(vdcHb, userSession);
+        // }
+        // catch (HardLimitExceededException e)
+        // {
+        // BasicResult basicResult = new BasicResult();
+        // basicResult.setSuccess(false);
+        // basicResult.setMessage(resourceManager
+        // .getMessage("editVirtualDataCenter.limitExceeded"));
+        //
+        // return basicResult;
+        // }
+        // finally
+        // {
+        // tx.commit();
+        // }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
