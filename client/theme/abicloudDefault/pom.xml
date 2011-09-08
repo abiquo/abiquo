@@ -30,7 +30,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>client</artifactId>
-        <version>1.8.0-HF2</version>        
+        <version>1.8.0-HF3</version>        
     </parent>
 
    <!--       Project properties             -->
