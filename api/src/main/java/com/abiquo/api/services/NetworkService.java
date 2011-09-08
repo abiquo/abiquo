@@ -814,6 +814,11 @@ public class NetworkService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
 
+        if (vlan == null)
+        {
+            addNotFoundErrors(APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK);
+        }
+
         vdc.setDefaultVlan(vlan);
         repo.update(vdc);
 
