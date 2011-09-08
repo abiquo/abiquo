@@ -184,7 +184,8 @@ public enum APIError
         "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
-        "In Ldap mode can not modify user's enterprise"),
+        "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
+        "The user cannot delete his own user account"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -228,7 +229,8 @@ public enum APIError
         "SP-2", "The id of the Storage Pool and the id of the submitted object must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
-        "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
+        "SP-5",
+        "Storage plugin not found. Storage plugin is required, please consult the Administrator Guide"), STORAGE_POOL_SYNC(
         "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
         "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
