@@ -1,6 +1,7 @@
 package com.abiquo.api.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,7 @@ public class EventService extends DefaultApiService
         event = null;
         if (event == null)
         {
-            // TODO : change API error to NON_EXISTENT_EVENT
-            addNotFoundErrors(APIError.NON_EXISTENT_VOLUME);
+            addNotFoundErrors(APIError.NON_EXISTENT_EVENT);
             flushErrors();
         }
 
@@ -42,11 +42,15 @@ public class EventService extends DefaultApiService
     {
         List<EventDto> listOfEvents = new ArrayList<EventDto>();
 
-        // List<String> listOfUsers =
-        // userService.getUsersByEnterprise(enterpriseId, filterOptions.getFilter(), filterOptions
-        // .getOrderBy(), filterOptions.getAsc());
-
         User currentUser = userService.getCurrentUser();
+
+        Collection<User> listOfUsers =
+            userService.getUsersByEnterprise(currentUser.getEnterprise().getId().toString(),
+                filterOptions.getFilter(), filterOptions.getOrderBy(), filterOptions.getAsc());
+
+        System.out.println(currentUser.getName());
+
+        String listEvents = userService.getEvents();
 
         return listOfEvents;
     }

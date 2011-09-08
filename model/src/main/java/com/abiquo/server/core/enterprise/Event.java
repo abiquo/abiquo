@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
@@ -27,10 +29,16 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = Event.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = Event.TABLE_NAME)
+@NamedQueries( {@NamedQuery(name = Event.EVENT_BY_FILTER, query = Event.BY_FILTER)})
 public class Event extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "metering";
+
+    public static final String EVENT_BY_FILTER = "BY_FILTER";
+
+    public static final String BY_FILTER =
+        "SELECT event FROM Event event WHERE event.timestamp BETWEEN :timestampInit AND :timestampEnd"
+            + " AND event.enterprise.name LIKE :enterprise ORDER BY timestamp DESC";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -39,7 +47,22 @@ public class Event extends DefaultEntityBase
         // Just for JPA support
     }
 
-    private final static String ID_COLUMN = "eventId";
+    public Event(final String actionPerformed, final String component, final String performedBy,
+        final String severity, final int storageSystem, final String stacktrace, final int subnet,
+        final int timestamp)
+    {
+        super();
+        this.actionPerformed = actionPerformed;
+        this.component = component;
+        this.performedBy = performedBy;
+        this.severity = severity;
+        this.storageSystem = storageSystem;
+        this.stracktrace = stacktrace;
+        this.subnet = subnet;
+        this.timestamp = timestamp;
+    }
+
+    private final static String ID_COLUMN = "idMeter";
 
     @Id
     @GeneratedValue
@@ -83,9 +106,9 @@ public class Event extends DefaultEntityBase
 
     private final static boolean ACTION_PERFORMED_REQUIRED = true;
 
-    private final static int ACTION_PERFORMED_LENGTH_MIN = 0;
+    /* package */final static int ACTION_PERFORMED_LENGTH_MIN = 0;
 
-    private final static int ACTION_PERFORMED_LENGTH_MAX = 255;
+    /* package */final static int ACTION_PERFORMED_LENGTH_MAX = 255;
 
     private final static boolean ACTION_PERFORMED_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 

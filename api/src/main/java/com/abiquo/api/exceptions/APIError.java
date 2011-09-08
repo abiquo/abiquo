@@ -320,7 +320,9 @@ public enum APIError
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
-        "RULE-6", "The load balance type indicated is null or invalid")
+        "RULE-6", "The load balance type indicated is null or invalid"),
+
+    NON_EXISTENT_EVENT("EVENT-1", "The event does not exist")
 
     ;
 
@@ -373,8 +375,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
