@@ -49,8 +49,8 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
-import com.abiquo.server.core.scheduler.MachineLoadRule;
 import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
+import com.abiquo.server.core.scheduler.MachineLoadRule;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -211,8 +211,9 @@ public class VirtualimageAllocationService
      *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
-        Integer rackId) throws ResourceAllocationException
+        final Integer idVirtualAppliance, final String datastoreUuid,
+        final Integer originalHypervisorId, final Integer rackId)
+        throws ResourceAllocationException
     {
 
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
@@ -278,12 +279,12 @@ public class VirtualimageAllocationService
 
         final Long numberOfDeployedVLAN =
             datacenterRepo.getNumberOfDeployedVlanNetworksByRack(idRack);
-        final Integer vlanPerSwitch = (rack.getVlanIdMax() - rack.getVlanIdMin()) + 1;
+        final Integer vlanPerSwitch = rack.getVlanIdMax() - rack.getVlanIdMin() + 1;
 
         log.debug("The number of deployed VLAN for the rack: {}, is: {}", idRack,
             numberOfDeployedVLAN);
 
-        final int second_operator = Math.round((vlanPerSwitch * rack.getNrsq()) / 100);
+        final int second_operator = Math.round(vlanPerSwitch * rack.getNrsq() / 100);
         final int vlan_soft_limit = vlanPerSwitch - second_operator;
 
         if (numberOfDeployedVLAN.intValue() >= vlan_soft_limit)
@@ -371,7 +372,7 @@ public class VirtualimageAllocationService
             ruleFinder.initializeMachineLoadRuleCache(firstPassCandidates);
 
         physicalMachineFit =
-            (fitPolicy == FitPolicy.PROGRESSIVE) ? new AllocationFitMax() : new AllocationFitMin();
+            fitPolicy == FitPolicy.PROGRESSIVE ? new AllocationFitMax() : new AllocationFitMin();
 
         Machine bestTarget = null;
         long bestFitTarget = NO_FIT;
@@ -506,6 +507,35 @@ public class VirtualimageAllocationService
         }
 
         return pass;
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOffMachines(rackId);
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOnMachines(rackId);
+    }
+
+    public Machine getRandomMachineToStartFromRack(final Integer rackId)
+    {
+        return datacenterRepo.getRandomMachineToStartFromRack(rackId);
     }
 
 }

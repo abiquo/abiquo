@@ -50,7 +50,7 @@ public class UcsRack extends Rack
     /* package */UcsRack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
         final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer nrsq,
         final String ip, final Integer port, final String user, final String password,
-        final String defaultTemplate)
+        final String defaultTemplate, final Integer maxMachinesOn)
     {
         setDatacenter(datacenter);
         setName(name);
@@ -62,6 +62,7 @@ public class UcsRack extends Rack
         setPort(port);
         setUser(user);
         setPassword(password);
+        setMaxMachinesOn(maxMachinesOn);
     }
 
     public final static String PORT_PROPERTY = "port";
@@ -201,5 +202,30 @@ public class UcsRack extends Rack
     public void setDefaultTemplate(final String defaultTemplate)
     {
         this.defaultTemplate = defaultTemplate;
+    }
+
+    public final static String MAX_MACHINES_ON_PROPERTY = "maxMachinesOn";
+
+    private final static boolean MAX_MACHINES_ON_REQUIRED = false;
+
+    private final static String MAX_MACHINES_ON_COLUMN = "maxMachinesOn";
+
+    private final static int MAX_MACHINES_ON_MIN = 0;
+
+    private final static int MAX_MACHINES_ON_MAX = Integer.MAX_VALUE;
+
+    @Column(name = MAX_MACHINES_ON_COLUMN, nullable = !MAX_MACHINES_ON_REQUIRED)
+    @Range(min = MAX_MACHINES_ON_MIN, max = MAX_MACHINES_ON_MAX)
+    @Required(value = MAX_MACHINES_ON_REQUIRED)
+    private Integer maxMachinesOn;
+
+    public Integer getMaxMachinesOn()
+    {
+        return this.maxMachinesOn;
+    }
+
+    public void setMaxMachinesOn(final Integer maxMachinesOn)
+    {
+        this.maxMachinesOn = maxMachinesOn;
     }
 }

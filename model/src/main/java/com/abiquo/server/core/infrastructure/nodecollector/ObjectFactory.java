@@ -80,6 +80,9 @@ public class ObjectFactory
     private final static QName _Fsms_QNAME =
         new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsms");
 
+    private final static QName _LogicServerPolicy_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "LogicServerPolicy");
+
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes
      * for package: com.abiquo.server.core.infrastructure.nodecollector
@@ -160,7 +163,6 @@ public class ObjectFactory
         return new OrganizationsDto();
     }
 
-
     /**
      * Create an instance of {@link FsmDto }
      */
@@ -176,7 +178,7 @@ public class ObjectFactory
     {
         return new FsmsDto();
     }
-    
+
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link HypervisorEnumTypeDto }{@code >}
      */
@@ -279,17 +281,14 @@ public class ObjectFactory
             null,
             value);
     }
-    
+
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link FsmDto }{@code >}
      */
     @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsm")
     public JAXBElement<FsmDto> createFsm(final FsmDto value)
     {
-        return new JAXBElement<FsmDto>(_Fsm_QNAME,
-            FsmDto.class,
-            null,
-            value);
+        return new JAXBElement<FsmDto>(_Fsm_QNAME, FsmDto.class, null, value);
     }
 
     /**
@@ -298,8 +297,17 @@ public class ObjectFactory
     @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsms")
     public JAXBElement<FsmsDto> createFsms(final FsmsDto value)
     {
-        return new JAXBElement<FsmsDto>(_Fsms_QNAME,
-            FsmsDto.class,
+        return new JAXBElement<FsmsDto>(_Fsms_QNAME, FsmsDto.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link LogicServerPolicyDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsm")
+    public JAXBElement<LogicServerPolicyDto> createFsm(final LogicServerPolicyDto value)
+    {
+        return new JAXBElement<LogicServerPolicyDto>(_LogicServerPolicy_QNAME,
+            LogicServerPolicyDto.class,
             null,
             value);
     }

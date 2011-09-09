@@ -28,7 +28,6 @@
 
 package com.abiquo.server.core.infrastructure.nodecollector;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="associated" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="associatedTo" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="policies"type="{http://abiquo.com/server/core/infrastructure/nodecollector/ucs}LogicServerPolicyDto" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -63,7 +63,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LogicServerDto", propOrder = {"name", "type", "associated", "associatedTo",
-"description", "policies"})
+"description", "content"})
 public class LogicServerDto
 {
 
@@ -83,9 +83,9 @@ public class LogicServerDto
     @XmlElement(required = false)
     protected String description;
 
-    @XmlElementRef(name = "policies", type = JAXBElement.class)
+    @XmlElementRef(name = "policies")
     @XmlMixed
-    protected List<Serializable> policies;
+    protected List<LogicServerPolicyDto> content;
 
     /**
      * Gets the value of the name property.
@@ -163,13 +163,13 @@ public class LogicServerDto
      * Objects of the following type(s) are allowed in the list {@link JAXBElement }{@code <}
      * {@link ConfigSet }{@code >} {@link String }
      */
-    public List<Serializable> policies()
+    public List<LogicServerPolicyDto> getContent()
     {
-        if (policies == null)
+        if (content == null)
         {
-            policies = new ArrayList<Serializable>();
+            content = new ArrayList<LogicServerPolicyDto>();
         }
-        return this.policies;
+        return this.content;
     }
 
     /**

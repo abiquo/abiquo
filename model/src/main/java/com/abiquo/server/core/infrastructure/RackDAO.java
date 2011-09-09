@@ -35,6 +35,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaRackDAO")
 /* package */class RackDAO extends DefaultDAOBase<Integer, Rack>
@@ -45,26 +46,26 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         super(Rack.class);
     }
 
-    public RackDAO(EntityManager entityManager)
+    public RackDAO(final EntityManager entityManager)
     {
         super(Rack.class, entityManager);
     }
-    
-    private static Criterion sameDatacenter(Datacenter datacenter)
+
+    private static Criterion sameDatacenter(final Datacenter datacenter)
     {
         assert datacenter != null;
 
         return Restrictions.eq(Rack.DATACENTER_PROPERTY, datacenter);
     }
 
-    private static Criterion equalName(String name)
+    private static Criterion equalName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Rack.NAME_PROPERTY, name);
     }
 
-    public List<Rack> findRacks(Datacenter datacenter)
+    public List<Rack> findRacks(final Datacenter datacenter)
     {
         assert datacenter != null;
         assert isManaged2(datacenter);
@@ -75,7 +76,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return result;
     }
 
-    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    public List<Rack> findRacksWithHAEnabled(final Datacenter datacenter)
     {
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.add(Restrictions.eq(Rack.HAENABLED_PROPERTY, true));
@@ -86,7 +87,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return result;
     }
 
-    public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
+    public boolean existsAnyWithDatacenterAndName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert !StringUtils.isEmpty(name);
@@ -94,7 +95,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return existsAnyByCriterions(sameDatacenter(datacenter), equalName(name));
     }
 
-    public boolean existsAnyOtherWithDatacenterAndName(Rack rack, String name)
+    public boolean existsAnyOtherWithDatacenterAndName(final Rack rack, final String name)
     {
         assert rack != null;
         assert !StringUtils.isEmpty(name);
@@ -127,7 +128,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
      * Obtains the racks (prefiltered by target datacenter and virtualdatacenter) with minimal VLANS
      * // and with vms deployed
      */
-    public List<Integer> getRackIdByMinVLANCount(int idDatacenter)
+    public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
     {
         SQLQuery query = getSession().createSQLQuery(SQL_RACK_IDS_BY_MIN_VLAN_COUNT);
         query.setInteger("idDatacenter", idDatacenter);
@@ -140,7 +141,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
             "FROM NetworkAssignment vn WHERE " + //
             "vn.rack.id = :idRack";
 
-    public Long getNumberOfDeployedVlanNetworks(Integer rackId)
+    public Long getNumberOfDeployedVlanNetworks(final Integer rackId)
     {
         Query query = getSession().createQuery(COUNT_DEPLOYED_VLA);
         query.setInteger("idRack", rackId);
@@ -152,14 +153,15 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
     /**
      * Return the Rack by datacenter id and rack id.
+     * 
      * @param datacenterId
      * @param rackId
      * @return
      */
-    public Rack findByIds(Integer datacenterId, Integer rackId)
+    public Rack findByIds(final Integer datacenterId, final Integer rackId)
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq(Rack.ID_PROPERTY, rackId));
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, rackId));
     }
 
     private final static String HQL_NOT_MANAGED_RACKS_BY_DATACENTER = //
@@ -173,10 +175,60 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
      * @param datacenter
      * @return List<Rack>
      */
-    public List<Rack> findAllNotManagedRacksByDatacenter(Integer datacenterId)
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
     {
         Query q = getSession().createQuery(HQL_NOT_MANAGED_RACKS_BY_DATACENTER);
         q.setInteger("idDatacenter", datacenterId);
         return q.list();
+    }
+
+    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and not exists "
+        + "(final select vm.hypervisor from VirtualMachine vm where vm.hypervisor != h.id) "
+        + "and h.machine.state = " + Machine.State.HALTED_FOR_SAVE.name();
+
+    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and not exists "
+        + "(final select vm.hypervisor from VirtualMachine vm where vm.hypervisor != h.id) "
+        + "and h.machine.state = " + Machine.State.MANAGED.name();
+
+    /**
+     * Return all machines in a rack that are empty of VM and powered off.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    public Machine getRandomMachineToStartFromRack(final Integer rackId)
+    {
+
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        List<Machine> machines = q.list();
+        if (machines.isEmpty())
+        {
+            return null;
+        }
+        return machines.get(0);
     }
 }
