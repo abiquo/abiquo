@@ -74,6 +74,11 @@ public class Hypervisor extends DefaultEntityBase
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     // ************************** Validation support ****************************
     // ******************************* Properties *******************************
 

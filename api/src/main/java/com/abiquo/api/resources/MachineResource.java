@@ -320,6 +320,7 @@ public class MachineResource extends AbstractResource
         String user = dto.getUser();
         String password = dto.getPassword();
         Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
+        hypervisor.setId(null);
         machine.setHypervisor(hypervisor);
 
         // Set the datastores
