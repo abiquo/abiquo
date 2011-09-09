@@ -111,7 +111,8 @@ public enum APIError
         "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME_VDC(
         "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
-        "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
+        "VLAN-3",
+        "For performance reasons, Abiquo does not allow the creation of networks with more than 1024 IP addresses (subnet 22 or lower)."), VLANS_TOO_BIG_NETWORK_II(
         "VLAN-4", "This network allows a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
         "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
         "VLAN-6", "The network does not match the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
@@ -127,9 +128,9 @@ public enum APIError
         "VLAN-15", "Can not create two VLANs with the same name in a Datacenter"), VLANS_TAG_INVALID(
         "VLAN-16", "VLAN tag out of limits"), VLANS_NON_EXISTENT_PUBLIC_IP("VLAN-17",
         "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
-        "Only 'quarantine' and 'available' attributes can be modified when editting an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
+        "Only 'quarantine' and 'available' attributes can be modified when editing an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
         "VLAN-19",
-        "Attributes 'address' and 'mask' can not be changed by the Edit process of private VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "Attributes 'address' and 'mask' can not be changed by the Edit process of public VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
         "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
         "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
         "This IP address is currently used by a Virtual Machine. Can not be released"), VLANS_PRIVATE_IP_INVALID_LINK(
