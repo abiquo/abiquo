@@ -313,7 +313,10 @@ public class InfrastructureService extends DefaultApiService
         flushErrors();
 
         repo.insertMachine(machine);
-        repo.insertHypervisor(machine.getHypervisor());
+        if (machine.getHypervisor().getId() == null || machine.getHypervisor().getId().equals(0))
+        {
+            repo.insertHypervisor(machine.getHypervisor());
+        }
 
         // Get the remote service to monitor the machine
         RemoteService vsmRS =
@@ -781,6 +784,7 @@ public class InfrastructureService extends DefaultApiService
         return virtualMachineService.findByHypervisor(machine.getHypervisor());
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateUsedResourcesByMachine(final Integer machineId)
     {
         Machine machine = machineService.getMachine(machineId);

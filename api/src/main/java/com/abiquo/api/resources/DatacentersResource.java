@@ -35,6 +35,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class DatacentersResource extends AbstractResource
     private EnterpriseService entService;
 
     @GET
-    @Produces(LINK_MEDIA_TYPE)
+    @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
         @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {

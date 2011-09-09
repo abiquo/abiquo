@@ -49,7 +49,6 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.UcsRack;
-import com.abiquo.server.core.util.network.IPAddress;
 
 public class MachinesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -66,10 +65,13 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
         machine = hypervisor.getMachine();
 
-        RemoteService rs =
+        RemoteService vsm =
             machine.getDatacenter().createRemoteService(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 "http://localhost:8080/fooo", 1);
-        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, rs);
+        RemoteService nc =
+            machine.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
+        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, vsm, nc);
 
         machinesURI =
             resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
@@ -226,51 +228,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Create multiple physical machines in the same time.
-     * 
-     * @throws Exception
-     */
-    @Test
-    void createMultipleMachines() throws Exception
-    {
-        MachineDto m = getValidMachine();
-        DatastoreDto dto = new DatastoreDto();
-        dto.setName("datastoreName");
-        dto.setRootPath("/");
-        dto.setDirectory("var/lib/virt");
-        dto.setEnabled(Boolean.TRUE);
-        m.getDatastores().getCollection().add(dto);
-
-        MachineDto m2 = getValidMachine();
-        IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
-        m2.setName(m2.getName() + "-two");
-        m2.setIp(nextIP.toString());
-        m2.setIpService(nextIP.toString());
-        DatastoreDto dto2 = new DatastoreDto();
-        dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/another-root");
-        dto2.setDirectory("var/lib/virt2");
-        dto2.setEnabled(Boolean.TRUE);
-        m2.getDatastores().add(dto2);
-
-        MachinesDto machinesDto = new MachinesDto();
-        machinesDto.add(m);
-        machinesDto.add(m2);
-
-        Resource resource = client.resource(machinesURI);
-        ClientResponse response =
-            resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)
-                .accept(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE).post(machinesDto);
-
-        // Assert both are created
-        assertEquals(response.getStatusCode(), 201);
-        MachinesDto machines = response.getEntity(MachinesDto.class);
-        assertNotNull(machines);
-        assertEquals(machines.getCollection().size(), 2);
-
-    }
-
-    /**
      * Checks you can not create a machine with a Trailing Slashh "/" value in the vswitch
      * 
      * @throws Exception
@@ -311,7 +268,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setVirtualRamUsedInMb(4);
 
         m.setVirtualCpuCores(18);
-        m.setVirtualCpusPerCore(2);
+        m.setVirtualCpusPerCore(1);
         m.setVirtualCpusUsed(0);
 
         m.setVirtualHardDiskInMb(100L);
