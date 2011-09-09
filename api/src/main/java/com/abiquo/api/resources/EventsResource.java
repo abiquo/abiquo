@@ -19,7 +19,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.EventService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.enterprise.EventDto;
+import com.abiquo.server.core.enterprise.Event;
 import com.abiquo.server.core.enterprise.EventsDto;
 import com.abiquo.server.core.util.FilterOptions;
 
@@ -51,14 +51,15 @@ public class EventsResource extends AbstractResource
         FilterOptions filterOptions =
             new FilterOptions(startwith, limit, filter, orderBy, desc_or_asc);
 
-        List<EventDto> events = eventService.getEvents(filterOptions);
+        List<Event> events = eventService.getEvents(filterOptions);
 
         EventsDto transferEvents = new EventsDto();
         if (events != null)
         {
-            for (EventDto currentEventDto : events)
+            for (Event currentEvent : events)
             {
-                transferEvents.getCollection().add(currentEventDto);
+                transferEvents.getCollection().add(
+                    EventResource.createTransferObject(currentEvent, restBuilder));
             }
         }
 

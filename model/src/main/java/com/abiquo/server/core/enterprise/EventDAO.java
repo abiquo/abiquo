@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
-import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -30,27 +30,27 @@ public class EventDAO extends DefaultDAOBase<Integer, Event>
     {
         // TODO : Redo method MeterDAOHibernate.findAllByFilter()
 
-        Query query = getSession().getNamedQuery(Event.EVENT_BY_FILTER);
+        Query query = getEntityManager().createNamedQuery(Event.EVENT_BY_FILTER);
 
         // Create Dates
         String fromDateInit = new Timestamp(0).toString();
         String toDateEnd = new Timestamp(new Date().getTime()).toString();
 
-        query.setString("timestampInit", fromDateInit);
-        query.setString("timestampEnd", toDateEnd);
-        query.setString("enterprise", replaceApostrophe("Abiquo"));
+        query.setParameter("timestampInit", fromDateInit);
+        query.setParameter("timestampEnd", toDateEnd);
+        query.setParameter("enterprise", replaceApostrophe("Abiquo"));
 
-        Integer size = query.list().size();
+        Integer size = query.getResultList().size();
 
         query.setFirstResult(filterOptions.getStartwith());
         query.setMaxResults(filterOptions.getLimit());
 
-        PagedList<Event> eventsList = new PagedList<Event>(query.list());
+        PagedList<Event> eventsList = new PagedList<Event>(query.getResultList());
         eventsList.setTotalResults(size);
         eventsList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
         eventsList.setCurrentElement(filterOptions.getStartwith());
 
-        return null;
+        return eventsList;
     }
 
     private final String replaceApostrophe(final String name)

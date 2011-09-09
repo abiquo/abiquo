@@ -36,6 +36,7 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.EventService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.enterprise.Event;
 import com.abiquo.server.core.enterprise.EventDto;
 
 /**
@@ -60,8 +61,25 @@ public class EventResource extends AbstractResource
     public EventDto getEvent(@PathParam(EVENT) final Integer eventId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        EventDto event = eventService.getEvent(eventId);
+        Event event = eventService.getEvent(eventId);
 
-        return event;
+        return createTransferObject(event, restBuilder);
+    }
+
+    public static EventDto createTransferObject(final Event event, final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        EventDto dto = new EventDto();
+        dto.setId(event.getId());
+        dto.setActionPerformed(event.getActionPerformed());
+        dto.setDatacenter(event.getDatacenter().getId());
+        dto.setEnterprise(event.getEnterprise().getId());
+
+        // TODO : add all the dto.* here
+
+        // dto.setLinks(restBuilder.buildVolumeCloudLinks(event));
+        // dto.addLinks(restBuilder.buildRasdLinks(event));
+
+        return dto;
     }
 }

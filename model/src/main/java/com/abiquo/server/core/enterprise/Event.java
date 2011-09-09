@@ -34,11 +34,11 @@ public class Event extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "metering";
 
-    public static final String EVENT_BY_FILTER = "BY_FILTER";
+    public static final String EVENT_BY_FILTER = "EVENT_BY_FILTER";
 
     public static final String BY_FILTER =
         "SELECT event FROM Event event WHERE event.timestamp BETWEEN :timestampInit AND :timestampEnd"
-            + " AND event.enterprise.name LIKE :enterprise ORDER BY timestamp DESC";
+            + " AND event.enterprise.name LIKE :enterprise ORDER BY event.timestamp DESC";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code

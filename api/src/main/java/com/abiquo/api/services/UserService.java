@@ -557,10 +557,4 @@ public class UserService extends DefaultApiService
             return true;
         }
     }
-
-    public String getEvents()
-    {
-        // TODO:
-        return null;
-    }
 }
