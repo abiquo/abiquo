@@ -39,11 +39,11 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private String name, description;
 
-    private Integer realRamInMb, virtualRamInMb, virtualRamUsedInMb;
+    private Integer virtualRamInMb, virtualRamUsedInMb;
 
-    private Integer realCpuCores, virtualCpuCores, virtualCpusUsed, virtualCpusPerCore;
+    private Integer virtualCpuCores, virtualCpusUsed, virtualCpusPerCore;
 
-    private Long realHardDiskInMb, virtualHardDiskInMb, virtualHardDiskUsedInMb;
+    private Long virtualHardDiskInMb, virtualHardDiskUsedInMb;
 
     private MachineState state;
 
@@ -70,7 +70,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     private String ipmiUser;
 
     private String ipmiPassword;
-
 
     /**
      * @return the port
@@ -208,17 +207,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
         this.description = description;
     }
 
-    @XmlElement(name = "realRam")
-    public Integer getRealRamInMb()
-    {
-        return getDefaultMb(realRamInMb).intValue();
-    }
-
-    public void setRealRamInMb(final Integer realRamInMb)
-    {
-        this.realRamInMb = realRamInMb;
-    }
-
     @XmlElement(name = "ram")
     public Integer getVirtualRamInMb()
     {
@@ -239,17 +227,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public void setVirtualRamUsedInMb(final Integer virtualRamUsedInMb)
     {
         this.virtualRamUsedInMb = virtualRamUsedInMb;
-    }
-
-    @XmlElement(name = "realCpu")
-    public Integer getRealCpuCores()
-    {
-        return (Integer) getDefaultMb(realCpuCores);
-    }
-
-    public void setRealCpuCores(final Integer realCpuCores)
-    {
-        this.realCpuCores = realCpuCores;
     }
 
     @XmlElement(name = "cpu")
@@ -283,17 +260,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public void setVirtualCpusPerCore(final Integer virtualCpusPerCore)
     {
         this.virtualCpusPerCore = virtualCpusPerCore;
-    }
-
-    @XmlElement(name = "realHd")
-    public Long getRealHardDiskInMb()
-    {
-        return getDefaultMb(realHardDiskInMb).longValue();
-    }
-
-    public void setRealHardDiskInMb(final Long realHardDiskInMb)
-    {
-        this.realHardDiskInMb = realHardDiskInMb;
     }
 
     @XmlElement(name = "hd")

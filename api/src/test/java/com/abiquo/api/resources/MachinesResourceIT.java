@@ -138,7 +138,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getName(), entityPost.getName());
         assertEquals(m.getDescription(), entityPost.getDescription());
         assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
         assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
         assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
         assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
@@ -147,8 +146,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getIpService(), entityPost.getIpService());
         assertEquals(m.getUser(), entityPost.getUser());
         assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
 
@@ -313,16 +310,13 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setName("machine_test");
         m.setDescription("machine_test_description");
 
-        m.setRealRamInMb(200);
         m.setVirtualRamInMb(2);
         m.setVirtualRamUsedInMb(4);
 
-        m.setRealCpuCores(200);
         m.setVirtualCpuCores(18);
         m.setVirtualCpusPerCore(2);
         m.setVirtualCpusUsed(0);
 
-        m.setRealHardDiskInMb(200L);
         m.setVirtualHardDiskInMb(100L);
         m.setVirtualHardDiskUsedInMb(10L);
 

@@ -221,80 +221,80 @@ public class Machine extends DefaultEntityBase
         this.virtualHardDiskInBytes = virtualHardDiskInBytes;
     }
 
-    public final static String REAL_RAM_IN_MB_PROPERTY = "realRamInMb";
+    // public final static String REAL_RAM_IN_MB_PROPERTY = "realRamInMb";
+    //
+    // /* package */final static String REAL_RAM_IN_MB_COLUMN = "realram";
+    //
+    // /* package */final static int REAL_RAM_IN_MB_MIN = 0;
+    //
+    // /* package */final static int REAL_RAM_IN_MB_MAX = Integer.MAX_VALUE;
+    //
+    // /* package */final static boolean REAL_RAM_IN_MB_REQUIRED = true;
+    //
+    // @Column(name = REAL_RAM_IN_MB_COLUMN, nullable = false)
+    // @Range(min = REAL_RAM_IN_MB_MIN, max = REAL_RAM_IN_MB_MAX)
+    // private Integer realRamInMb;
+    //
+    // @Required(value = REAL_RAM_IN_MB_REQUIRED)
+    // public Integer getRealRamInMb()
+    // {
+    // return this.realRamInMb;
+    // }
+    //
+    // public void setRealRamInMb(final Integer realRamInMb)
+    // {
+    // this.realRamInMb = realRamInMb;
+    // }
 
-    /* package */final static String REAL_RAM_IN_MB_COLUMN = "realram";
+    // public final static String REAL_CPU_CORES_PROPERTY = "realCpuCores";
+    //
+    // /* package */final static String REAL_CPU_CORES_COLUMN = "realCpu";
+    //
+    // /* package */final static int REAL_CPU_CORES_MIN = 0;
+    //
+    // /* package */final static int REAL_CPU_CORES_MAX = Integer.MAX_VALUE;
+    //
+    // /* package */final static boolean REAL_CPU_CORES_REQUIRED = true;
+    //
+    // @Column(name = REAL_CPU_CORES_COLUMN, nullable = false)
+    // @Range(min = REAL_CPU_CORES_MIN, max = REAL_CPU_CORES_MAX)
+    // private Integer realCpuCores;
+    //
+    // @Required(value = REAL_CPU_CORES_REQUIRED)
+    // public Integer getRealCpuCores()
+    // {
+    // return this.realCpuCores;
+    // }
+    //
+    // public void setRealCpuCores(final Integer realCpuCores)
+    // {
+    // this.realCpuCores = realCpuCores;
+    // }
 
-    /* package */final static int REAL_RAM_IN_MB_MIN = 0;
-
-    /* package */final static int REAL_RAM_IN_MB_MAX = Integer.MAX_VALUE;
-
-    /* package */final static boolean REAL_RAM_IN_MB_REQUIRED = true;
-
-    @Column(name = REAL_RAM_IN_MB_COLUMN, nullable = false)
-    @Range(min = REAL_RAM_IN_MB_MIN, max = REAL_RAM_IN_MB_MAX)
-    private Integer realRamInMb;
-
-    @Required(value = REAL_RAM_IN_MB_REQUIRED)
-    public Integer getRealRamInMb()
-    {
-        return this.realRamInMb;
-    }
-
-    public void setRealRamInMb(final Integer realRamInMb)
-    {
-        this.realRamInMb = realRamInMb;
-    }
-
-    public final static String REAL_CPU_CORES_PROPERTY = "realCpuCores";
-
-    /* package */final static String REAL_CPU_CORES_COLUMN = "realCpu";
-
-    /* package */final static int REAL_CPU_CORES_MIN = 0;
-
-    /* package */final static int REAL_CPU_CORES_MAX = Integer.MAX_VALUE;
-
-    /* package */final static boolean REAL_CPU_CORES_REQUIRED = true;
-
-    @Column(name = REAL_CPU_CORES_COLUMN, nullable = false)
-    @Range(min = REAL_CPU_CORES_MIN, max = REAL_CPU_CORES_MAX)
-    private Integer realCpuCores;
-
-    @Required(value = REAL_CPU_CORES_REQUIRED)
-    public Integer getRealCpuCores()
-    {
-        return this.realCpuCores;
-    }
-
-    public void setRealCpuCores(final Integer realCpuCores)
-    {
-        this.realCpuCores = realCpuCores;
-    }
-
-    public final static String REAL_HARD_DISK_IN_BYTES_PROPERTY = "realHardDiskInBytes";
-
-    /* package */final static String REAL_HARD_DISK_IN_BYTES_COLUMN = "realStorage";
-
-    /* package */final static long REAL_HARD_DISK_IN_BYTES_MIN = 0;
-
-    /* package */final static long REAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
-
-    /* package */final static boolean REAL_HARD_DISK_IN_BYTES_REQUIRED = true;
-
-    @Column(name = REAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
-    @Range(min = REAL_HARD_DISK_IN_BYTES_MIN, max = REAL_HARD_DISK_IN_BYTES_MAX)
-    private Long realHardDiskInBytes;
-
-    @Required(value = REAL_HARD_DISK_IN_BYTES_REQUIRED)
-    public Long getRealHardDiskInBytes()
-    {
-        return this.realHardDiskInBytes;
-    }
-
-    public void setRealHardDiskInBytes(final Long realHardDiskInBytes)
-    {
-        this.realHardDiskInBytes = realHardDiskInBytes;
-    }
+    // public final static String REAL_HARD_DISK_IN_BYTES_PROPERTY = "realHardDiskInBytes";
+    //
+    // /* package */final static String REAL_HARD_DISK_IN_BYTES_COLUMN = "realStorage";
+    //
+    // /* package */final static long REAL_HARD_DISK_IN_BYTES_MIN = 0;
+    //
+    // /* package */final static long REAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
+    //
+    // /* package */final static boolean REAL_HARD_DISK_IN_BYTES_REQUIRED = true;
+    //
+    // @Column(name = REAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
+    // @Range(min = REAL_HARD_DISK_IN_BYTES_MIN, max = REAL_HARD_DISK_IN_BYTES_MAX)
+    // private Long realHardDiskInBytes;
+    //
+    // @Required(value = REAL_HARD_DISK_IN_BYTES_REQUIRED)
+    // public Long getRealHardDiskInBytes()
+    // {
+    // return this.realHardDiskInBytes;
+    // }
+    //
+    // public void setRealHardDiskInBytes(final Long realHardDiskInBytes)
+    // {
+    // this.realHardDiskInBytes = realHardDiskInBytes;
+    // }
 
     public final static String VIRTUAL_RAM_USED_IN_MB_PROPERTY = "virtualRamUsedInMb";
 
@@ -720,25 +720,20 @@ public class Machine extends DefaultEntityBase
     // *************************** Mandatory constructors
     // ***********************
     public Machine(final Datacenter datacenter, final String name, final String description,
-        final int virtualRamInMb, final int realRamInMb, final int virtualRamUsedInMb,
-        final long virtualHardDiskInMb, final long realHardDiskInMb,
-        final long virtualHardDiskUsed, final int realCpuCores, final int virtualCpuCores,
-        final int virtualCpusUsed, final int virtualCpusPerCore, final MachineState state,
-        final String virtualSwitch)
+        final int virtualRamInMb, final int virtualRamUsedInMb, final long virtualHardDiskInMb,
+        final long virtualHardDiskUsed, final int virtualCpuCores, final int virtualCpusUsed,
+        final int virtualCpusPerCore, final MachineState state, final String virtualSwitch)
     {
         setDatacenter(datacenter);
         setName(name);
         setDescription(description);
 
         setVirtualRamInMb(virtualRamInMb);
-        setRealRamInMb(realRamInMb);
         setVirtualRamUsedInMb(virtualRamUsedInMb);
 
         setVirtualHardDiskInBytes(virtualHardDiskInMb);
-        setRealHardDiskInBytes(realHardDiskInMb);
         setVirtualHardDiskUsedInBytes(virtualHardDiskUsed);
 
-        setRealCpuCores(realCpuCores);
         setVirtualCpuCores(virtualCpuCores);
         setVirtualCpusUsed(virtualCpusUsed);
         setVirtualCpusPerCore(virtualCpusPerCore);

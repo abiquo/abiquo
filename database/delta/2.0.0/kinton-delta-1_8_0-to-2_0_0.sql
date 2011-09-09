@@ -127,6 +127,7 @@ ALTER TABLE `kinton`.`ip_pool_management` ADD COLUMN `available` boolean NOT NUL
 ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
 ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricing_template` (`idPricingTemplate`);
 
+ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --

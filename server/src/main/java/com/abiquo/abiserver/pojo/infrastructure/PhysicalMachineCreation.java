@@ -95,9 +95,6 @@ public class PhysicalMachineCreation
         dto.setIpmiPort(pm.getIpmiPort());
         dto.setIpmiUser(pm.getIpmiUser());
         dto.setName(pm.getName());
-        dto.setRealCpuCores(pm.getRealCpu());
-        dto.setRealHardDiskInMb(pm.getRealStorage());
-        dto.setRealRamInMb(pm.getRealRam());
         dto.setState(PhysicalmachineHB.transportIntegerToState(pm.getIdState()));
 
         if (h != null)
@@ -147,9 +144,6 @@ public class PhysicalMachineCreation
         machine.setIpmiPort(dto.getIpmiPort());
         machine.setIpmiUser(dto.getIpmiUser());
         machine.setName(dto.getName());
-        machine.setRealCpu(dto.getRealCpuCores());
-        machine.setRealStorage(dto.getRealHardDiskInMb());
-        machine.setRealRam(dto.getRealRamInMb());
         machine.setVswitchName(dto.getVirtualSwitch());
         machine.setIdState(PhysicalmachineHB.transportStateToInteger(dto.getState()));
         machine.setCpu(dto.getVirtualCpuCores());

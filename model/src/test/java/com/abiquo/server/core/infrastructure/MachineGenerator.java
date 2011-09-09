@@ -113,13 +113,10 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         int seed = nextSeed();
 
         int virtualRamInMb = seed * 10 + 1;
-        int realRamInMb = seed * 20 + 1;
         int virtualRamUsedInMb = seed * 30 + 1;
         long virtualHardDiskInMb = seed * 1000 + 1;
-        long realHardDiskInMb = seed * 2000 + 1;
         long virtualHardDiskUsed = seed * 3000 + 1;
         int realCpuThreads = seed + 1;
-        int realCpuCores = seed + 1;
         int virtualCpusPerThread = 1;
         int currentCpusInUse = seed + 3 + 1;
         MachineState state = newEnum(MachineState.class, seed);
@@ -129,10 +126,9 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         String virtualSwitch = newString(seed, 1, 255);
 
         Machine machine =
-            datacenter.createMachine(name, description, virtualRamInMb, realRamInMb,
-                virtualRamUsedInMb, virtualHardDiskInMb, realHardDiskInMb, virtualHardDiskUsed,
-                realCpuThreads, realCpuCores, currentCpusInUse, virtualCpusPerThread, state,
-                virtualSwitch);
+            datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
+                virtualHardDiskInMb, virtualHardDiskUsed, realCpuThreads, currentCpusInUse,
+                virtualCpusPerThread, state, virtualSwitch);
 
         return machine;
     }

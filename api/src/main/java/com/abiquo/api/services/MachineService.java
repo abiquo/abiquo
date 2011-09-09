@@ -163,14 +163,12 @@ public class MachineService extends DefaultApiService
         Machine machine =
             datacenter.createMachine(machineDto.getName(), machineDto.getDescription(),
 
-            machineDto.getVirtualRamInMb(), machineDto.getRealRamInMb(),
-                machineDto.getVirtualRamUsedInMb(),
+            machineDto.getVirtualRamInMb(), machineDto.getVirtualRamUsedInMb(),
 
-                machineDto.getVirtualHardDiskInMb(), machineDto.getRealHardDiskInMb(),
-                machineDto.getVirtualHardDiskUsedInMb(),
+            machineDto.getVirtualHardDiskInMb(), machineDto.getVirtualHardDiskUsedInMb(),
 
-                machineDto.getRealCpuCores(), machineDto.getVirtualCpuCores(),
-                machineDto.getVirtualCpusUsed(), machineDto.getVirtualCpusPerCore(),
+            machineDto.getVirtualCpuCores(), machineDto.getVirtualCpusUsed(),
+                machineDto.getVirtualCpusPerCore(),
 
                 machineDto.getState(), machineDto.getVirtualSwitch());
 
@@ -250,16 +248,13 @@ public class MachineService extends DefaultApiService
         old.setState(machineDto.getState());
 
         old.setVirtualRamInMb(machineDto.getVirtualRamInMb());
-        old.setRealRamInMb(machineDto.getRealRamInMb());
         old.setVirtualRamUsedInMb(machineDto.getVirtualRamUsedInMb());
 
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
-        old.setRealCpuCores(machineDto.getRealCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
 
         old.setVirtualHardDiskInBytes(machineDto.getVirtualHardDiskInMb());
-        old.setRealHardDiskInBytes(machineDto.getRealHardDiskInMb());
         old.setVirtualHardDiskUsedInBytes(machineDto.getVirtualHardDiskUsedInMb());
 
         isValidMachine(old);

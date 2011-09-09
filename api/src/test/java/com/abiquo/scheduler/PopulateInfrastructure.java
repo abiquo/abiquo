@@ -105,16 +105,16 @@ public class PopulateInfrastructure extends PopulateConstants
         {
             case 1: // create datacenter
                 datacenterName = fragments[0];
-                assertTrue("Expected datacenter declaration " + declar, datacenterName
-                    .startsWith(DEC_DATACENTER));
+                assertTrue("Expected datacenter declaration " + declar,
+                    datacenterName.startsWith(DEC_DATACENTER));
 
                 createDatacenter(datacenterName);
                 break;
             case 2: // create rack
                 datacenterName = fragments[0];
                 rackName = fragments[1];
-                assertTrue("Expected rack declaration " + declar, datacenterName
-                    .startsWith(DEC_DATACENTER));
+                assertTrue("Expected rack declaration " + declar,
+                    datacenterName.startsWith(DEC_DATACENTER));
                 assertTrue("Expected rack declaration " + declar, rackName.startsWith(DEC_RACK));
 
                 createRack(datacenterName, rackName);
@@ -124,11 +124,11 @@ public class PopulateInfrastructure extends PopulateConstants
                 datacenterName = fragments[0];
                 rackName = fragments[1];
                 machineDeclaration = fragments[2];
-                assertTrue("Expected machine declaration " + declar, datacenterName
-                    .startsWith(DEC_DATACENTER));
+                assertTrue("Expected machine declaration " + declar,
+                    datacenterName.startsWith(DEC_DATACENTER));
                 assertTrue("Expected machine declaration " + declar, rackName.startsWith(DEC_RACK));
-                assertTrue("Expected machine declaration " + declar, machineDeclaration
-                    .startsWith(DEC_MACHINE));
+                assertTrue("Expected machine declaration " + declar,
+                    machineDeclaration.startsWith(DEC_MACHINE));
 
                 createMachine(datacenterName, rackName, machineDeclaration);
                 break;
@@ -278,15 +278,12 @@ public class PopulateInfrastructure extends PopulateConstants
 
             dcRep.insertDatastore(ds);
 
-            machine.setRealCpuCores((int) cpu);
             machine.setVirtualCpuCores((int) cpu);
             machine.setVirtualCpusUsed(0);
 
-            machine.setRealRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamInMb((int) (ram * GB_TO_MB));
             machine.setVirtualRamUsedInMb(0);
 
-            machine.setRealHardDiskInBytes(hd * GB_TO_MB * 1014 * 1024);
             machine.setVirtualHardDiskInBytes(hd * GB_TO_MB * 1014 * 1024);
             machine.setVirtualHardDiskUsedInBytes(0L);
 
