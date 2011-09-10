@@ -22,7 +22,7 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.api.resources.UserResource.createTransferObject;
-import static com.abiquo.api.resources.UserResource.createTransferObjectWithRole;
+import static com.abiquo.api.resources.UserResource.createUsersTransferObjectWithRole;
 
 import java.util.Collection;
 
@@ -143,8 +143,9 @@ public class UsersResource extends AbstractResource
         {
             for (User u : all)
             {
-                UserWithRoleDto uDto = createTransferObjectWithRole(u, restBuilder);
-                uDto.setRole(RoleResource.createTransferObject(u.getRole(), restBuilder));
+                UserWithRoleDto uDto = createUsersTransferObjectWithRole(u, restBuilder);
+                uDto.setRole(RoleResource.createTransferWithPrivilegesObject(u.getRole(),
+                    restBuilder));
                 users.add(uDto);
             }
 

@@ -23,21 +23,35 @@ package com.abiquo.server.core.enterprise;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "userWithRole")
-public class UserWithRoleDto extends UserDto
+@XmlRootElement(name = "roleWithPrivileges")
+public class RoleWithPrivilegesDto extends RoleDto
 {
-    private RoleWithPrivilegesDto role;
+    public RoleWithPrivilegesDto()
+    {
+    }
+
+    public RoleWithPrivilegesDto(final RoleDto dto)
+    {
+        super();
+        this.setBlocked(dto.isBlocked());
+        this.setId(dto.getId());
+        this.setIdEnterprise(dto.getIdEnterprise());
+        this.setName(dto.getName());
+        this.setLinks(dto.getLinks());
+    }
+
+    private PrivilegesDto privileges;
 
     private EnterpriseDto enterprise;
 
-    public RoleWithPrivilegesDto getRole()
+    public PrivilegesDto getPrivileges()
     {
-        return role;
+        return privileges;
     }
 
-    public void setRole(final RoleWithPrivilegesDto role)
+    public void setPrivileges(final PrivilegesDto privileges)
     {
-        this.role = role;
+        this.privileges = privileges;
     }
 
     public EnterpriseDto getEnterprise()
@@ -48,6 +62,17 @@ public class UserWithRoleDto extends UserDto
     public void setEnterprise(final EnterpriseDto enterprise)
     {
         this.enterprise = enterprise;
+    }
+
+    public RoleDto toRoleDto()
+    {
+        RoleDto dto = new RoleDto();
+        dto.setId(this.getId());
+        dto.setName(this.getName());
+        dto.setBlocked(this.isBlocked());
+        dto.setIdEnterprise(this.getIdEnterprise());
+        dto.setLinks(this.getLinks());
+        return dto;
     }
 
 }

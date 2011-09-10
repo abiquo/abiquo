@@ -45,6 +45,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UserWithRoleDto;
@@ -158,10 +159,10 @@ public class UserResource extends AbstractResource
         return user;
     }
 
-    public static UserWithRoleDto createTransferObjectWithRole(final User user,
+    public static UserWithRoleDto createUsersTransferObjectWithRole(final User user,
         final IRESTBuilder restBuilder) throws Exception
     {
-        UserWithRoleDto u = createTransferObjectWithRole(user);
+        UserWithRoleDto u = createUserTransferObjectWithRole(user, restBuilder);
 
         u = addLinks(restBuilder, u, user.getEnterprise().getId(), user.getRole().getId());
 
@@ -197,7 +198,8 @@ public class UserResource extends AbstractResource
         return u;
     }
 
-    public static UserWithRoleDto createTransferObjectWithRole(final User user)
+    public static UserWithRoleDto createUserTransferObjectWithRole(final User user,
+        final IRESTBuilder restBuilder) throws Exception
     {
         UserWithRoleDto u = new UserWithRoleDto();
 
@@ -212,6 +214,10 @@ public class UserResource extends AbstractResource
         u.setDescription(user.getDescription());
         u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
         u.setAuthType(user.getAuthType().name());
+
+        EnterpriseDto e =
+            EnterpriseResource.createTransferObject(user.getEnterprise(), restBuilder);
+        u.setEnterprise(e);
 
         return u;
     }

@@ -53,6 +53,7 @@ import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.RoleDto;
+import com.abiquo.server.core.enterprise.RoleWithPrivilegesDto;
 import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.UserWithRoleDto;
@@ -294,55 +295,67 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
             UsersWithRolesDto usersDto = response.getEntity(UsersWithRolesDto.class);
             Collection<User> users = new ArrayList<User>();
             Collection<User> normalUsers = new ArrayList<User>();
-            Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
-            Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
-            Map<String, Set<Privilege>> catchedPrivileges = new HashMap<String, Set<Privilege>>();
+            // Map<String, EnterpriseDto> catchedEnterprises = new HashMap<String, EnterpriseDto>();
+            // Map<String, RoleDto> catchedRoles = new HashMap<String, RoleDto>();
+            // Map<String, Set<Privilege>> catchedPrivileges = new HashMap<String,
+            // Set<Privilege>>();
 
             for (int i = 0; i < usersDto.getCollection().size(); i++)
             {
                 UserWithRoleDto dto = usersDto.getCollection().get(i);
-                RoleDto role = dto.getRole();
+                RoleWithPrivilegesDto role = dto.getRole();
                 // RoleDto role = getRole(dto.searchLink("role").getHref(), catchedRoles);
-                EnterpriseDto enterprise =
-                    getEnterprise(dto.searchLink("enterprise").getHref(), catchedEnterprises);
+                // EnterpriseDto enterprise =
+                // getEnterprise(dto.searchLink("enterprise").getHref(), catchedEnterprises);
+                EnterpriseDto enterprise = dto.getEnterprise();
 
-                RESTLink enterpriseLink = role.searchLink("enterprise");
-                EnterpriseDto enterpriseRole = null;
+                // RESTLink enterpriseLink = role.searchLink("enterprise");
+                EnterpriseDto enterpriseRole = role.getEnterprise();
                 Enterprise entRole = null;
-                if (enterpriseLink != null)
+                if (enterpriseRole != null)
                 {
-                    enterpriseRole = getEnterprise(enterpriseLink.getHref(), catchedEnterprises);
                     entRole = Enterprise.create(enterpriseRole);
                 }
 
-                DataResult<Boolean> result = checkRoleAccess(role.getId());
+                // if (enterpriseLink != null)
+                // {
+                // enterpriseRole = getEnterprise(enterpriseLink.getHref(), catchedEnterprises);
+                // entRole = Enterprise.create(enterpriseRole);
+                // }
 
-                if (result.getSuccess() && result.getData())
+                // DataResult<Boolean> result = checkRoleAccess(role.getId());
+
+                // if (result.getSuccess() && result.getData())
+                // {
+                // RESTLink privilegesLink = role.searchLink("action", "privileges");
+                Set<Privilege> privileges = new HashSet<Privilege>();
+                // if (privilegesLink != null)
+                // {
+                // privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
+                // }
+
+                for (PrivilegeDto p : role.getPrivileges().getCollection())
                 {
-                    RESTLink privilegesLink = role.searchLink("action", "privileges");
-                    Set<Privilege> privileges = new HashSet<Privilege>();
-                    if (privilegesLink != null)
-                    {
-                        privileges = getPrivileges(privilegesLink.getHref(), catchedPrivileges);
-                    }
+                    privileges.add(Privilege.create(p));
+                }
 
-                    if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
-                        && orderBy.equalsIgnoreCase("role"))
-                    {
-                        normalUsers.add(User.create(dto, Enterprise.create(enterprise),
-                            Role.create(role, entRole, privileges)));
-                    }
-                    else
-                    {
-                        users.add(User.create(dto, Enterprise.create(enterprise),
-                            Role.create(role, entRole, privileges)));
-                    }
+                if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
+                    && orderBy.equalsIgnoreCase("role"))
+                {
+                    normalUsers.add(User.create(dto, Enterprise.create(enterprise),
+                        Role.create(role, entRole, privileges)));
                 }
                 else
                 {
                     users.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role, entRole, new HashSet<Privilege>())));
+                        Role.create(role, entRole, privileges)));
                 }
+                // }
+                // else
+                // {
+                // users.add(User.create(dto, Enterprise.create(enterprise),
+                // Role.create(role, entRole, new HashSet<Privilege>())));
+                // }
             }
             Collection<User> usersWithoutVDC = new ArrayList<User>();
             Integer total =
