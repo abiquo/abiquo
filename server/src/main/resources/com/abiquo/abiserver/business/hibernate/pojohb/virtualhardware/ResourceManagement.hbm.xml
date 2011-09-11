@@ -18,16 +18,16 @@
 		</many-to-one>
 		<many-to-one
 			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB"
-			fetch="select" name="virtualDataCenter" lazy="false">
+			fetch="select" name="virtualDataCenter">
 			<column name="idVirtualDataCenter" not-null="false" />
 		</many-to-one>
 		<many-to-one
 			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB"
-			fetch="select" name="virtualMachine" lazy="false">
+			fetch="select" name="virtualMachine">
 			<column name="idVM" not-null="false" />
 		</many-to-one>
 		<many-to-one entity-name="VirtualappHB" fetch="select"
-			name="virtualApp" not-null="true" lazy="false">
+			name="virtualApp" not-null="true">
 			<column name="idVirtualApp" not-null="false" />
 		</many-to-one>
 

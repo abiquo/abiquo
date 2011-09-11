@@ -30,6 +30,8 @@ import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceManagement;
 
 /**
@@ -110,6 +112,27 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualDataCenterHB getVirtualDataCenter()
     {
+        if (virtualDataCenter != null && virtualDataCenter.getIdVirtualDataCenter() != null
+            && virtualDataCenter.getName() == null)
+        {
+            DAOFactory factory = HibernateDAOFactory.instance();
+            boolean participate = factory.isTransactionActive();
+
+            if (!participate)
+            {
+                factory.beginConnection();
+            }
+
+            virtualDataCenter =
+                factory.getVirtualDataCenterDAO().findById(
+                    virtualDataCenter.getIdVirtualDataCenter());
+
+            if (!participate)
+            {
+                factory.endConnection();
+            }
+        }
+
         return virtualDataCenter;
     }
 
@@ -126,6 +149,25 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualmachineHB getVirtualMachine()
     {
+        if (virtualMachine != null && virtualMachine.getIdVm() != null
+            && virtualMachine.getName() == null)
+        {
+            DAOFactory factory = HibernateDAOFactory.instance();
+            boolean participate = factory.isTransactionActive();
+
+            if (!participate)
+            {
+                factory.beginConnection();
+            }
+
+            virtualMachine = factory.getVirtualMachineDAO().findById(virtualMachine.getIdVm());
+
+            if (!participate)
+            {
+                factory.endConnection();
+            }
+        }
+
         return virtualMachine;
     }
 
@@ -142,6 +184,24 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public ResourceAllocationSettingData getRasd()
     {
+        if (rasd != null && rasd.getInstanceID() != null && rasd.getElementName() == null)
+        {
+            DAOFactory factory = HibernateDAOFactory.instance();
+            boolean participate = factory.isTransactionActive();
+
+            if (!participate)
+            {
+                factory.beginConnection();
+            }
+
+            rasd = factory.getResourceAllocationSettingDataDAO().findById(rasd.getInstanceID());
+
+            if (!participate)
+            {
+                factory.endConnection();
+            }
+        }
+
         return rasd;
     }
 
@@ -158,6 +218,25 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualappHB getVirtualApp()
     {
+        if (virtualApp != null && virtualApp.getIdVirtualApp() != null
+            && virtualApp.getName() == null)
+        {
+            DAOFactory factory = HibernateDAOFactory.instance();
+            boolean participate = factory.isTransactionActive();
+
+            if (!participate)
+            {
+                factory.beginConnection();
+            }
+
+            virtualApp = factory.getVirtualApplianceDAO().findById(virtualApp.getIdVirtualApp());
+
+            if (!participate)
+            {
+                factory.endConnection();
+            }
+        }
+
         return virtualApp;
     }
 
