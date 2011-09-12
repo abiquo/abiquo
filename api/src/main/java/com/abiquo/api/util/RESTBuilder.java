@@ -156,14 +156,15 @@ public class RESTBuilder implements IRESTBuilder
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenter.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(DatacenterResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(DatacenterResource.class, REL_EDIT, datacenter.getName(),
+            params));
         links.add(builder.buildRestLink(RacksResource.class, RacksResource.RACKS_PATH, params));
         links.add(builder.buildRestLink(RemoteServicesResource.class,
             RemoteServicesResource.REMOTE_SERVICES_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
 

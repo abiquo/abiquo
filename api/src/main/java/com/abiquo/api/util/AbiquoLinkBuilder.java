@@ -49,6 +49,16 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
     }
 
     public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
+        final String rel, final String title, final Map<String, String> params)
+    {
+        RESTLink link = buildRestLink(resource, subResource, rel, params);
+        link.setTitle(title);
+
+        return link;
+
+    }
+
+    public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
         final String rel, final Map<String, String> params)
     {
         List<SyndLink> links =
@@ -56,6 +66,8 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         return new RESTLink(links.get(0));
     }
 
+    // TODO this method should desapear since action links are not defined this way anymore. Check:
+    // http://wiki.abiquo.com/display/Abiquo/API+links+and+MIME+types
     public RESTLink buildActionLink(final Class< ? > resource, final String subResource,
         final String title, final Map<String, String> params)
     {

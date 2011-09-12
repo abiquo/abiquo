@@ -75,6 +75,8 @@ public class DatacenterResource extends AbstractResource
 
     public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
 
+    public static final String ENTERPRISES_REL = "enterprises";
+
     public static final String NETWORK = "network";
 
     @Autowired
