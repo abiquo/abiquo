@@ -60,7 +60,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
             + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
             + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
-            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
+            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
@@ -887,6 +887,12 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             case VIRTUALAPPLIANCE:
             {
                 queryString.append("vapp.name ");
+                break;
+            }
+
+            case ENTERPRISENAME:
+            {
+                queryString.append("ent.name ");
                 break;
             }
             case LEASE:
