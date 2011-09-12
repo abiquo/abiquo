@@ -22,7 +22,7 @@
         	<column name="isReservationRestricted" />
         </property>
 		
-		<set name="dcLimits" cascade="all-delete-orphan">
+		<set name="dcLimits" cascade="all-delete-orphan" lazy="false">
 			<key>
 				<column name="idEnterprise" not-null="true" />
 			</key>
@@ -84,7 +84,7 @@
 			</component>
 		</component>
 
-		<set name="reservedMachines" table="physicalmachine" 
+		<set name="reservedMachines" table="physicalmachine" lazy="false"
 			cascade="all">
 			<key>
 				<column name="idEnterprise" not-null="true" />

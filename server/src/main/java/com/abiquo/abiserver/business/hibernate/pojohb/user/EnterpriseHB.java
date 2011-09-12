@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.LazyUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
@@ -127,7 +126,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     public Collection<PhysicalmachineHB> getReservedMachines()
     {
-        return LazyUtils.lazyGet(reservedMachines);
+        return reservedMachines;
     }
 
     public void setDcLimits(final Set<DatacenterLimitHB> dcLimits)
@@ -137,7 +136,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     public Set<DatacenterLimitHB> getDcLimits()
     {
-        return LazyUtils.lazyGet(dcLimits);
+        return dcLimits;
     }
 
     /**
