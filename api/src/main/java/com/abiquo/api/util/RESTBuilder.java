@@ -252,7 +252,8 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_ON,
                 MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
-            links.add(builder.buildActionLink(MachineResource.class,
+            
+	    links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_OFF,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
             links.add(builder.buildActionLink(MachineResource.class,
