@@ -587,7 +587,10 @@
     <!-- VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE ________________________________________________________________________ -->
     <EventHandlers type="{VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE}">
         <!-- Make call to the server here -->
-
+		
+		 <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+		
         <RemoteObjectInvoker instance="{services.nonBlockingService}"
             method="checkVirtualDatacentersAndAppliancesByEnterprise"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise]}">
@@ -596,12 +599,16 @@
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
                     method="handleCheckVirtualDatacentersAndAppliancesByEnterprise"
                     arguments="{[resultObject]}"/>
+                 <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
             </resultHandlers>
 
             <faultHandlers>
                 <MethodInvoker generator="{FaultHandler}"
                     method="handleFaultInBackground"
                     arguments="{[fault]}"/>
+                 <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
             </faultHandlers>
 
         </RemoteObjectInvoker>
