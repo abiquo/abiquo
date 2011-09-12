@@ -32,7 +32,7 @@ package net.undf.abicloud.vo.networking
         
         public static const EXTERNAL:String = "EXTERNAL";
         
-        public static const INTPUBLICERNAL:String = "PUBLIC";
+        public static const PUBLIC:String = "PUBLIC";
         
         
         public var vlanNetworkId:int;

@@ -44,10 +44,12 @@ package net.undf.abicloud.business.managers
          */
         public function addVLANToNetwork(network:Network, vlanNetwork:VlanNetwork):void
         {
-            network.networks.addItem(vlanNetwork);
-            if (vlanNetwork.defaultNetwork)
-            {
-                setDefaultVLANNetwork(network, vlanNetwork);
+            if(network){
+	            network.networks.addItem(vlanNetwork);
+	            if (vlanNetwork.defaultNetwork)
+	            {
+	                setDefaultVLANNetwork(network, vlanNetwork);
+	            }
             }
 
             //Announcing that the VLAN has been created
@@ -103,16 +105,18 @@ package net.undf.abicloud.business.managers
          */
         public function removeVLANFromNetwork(network:Network, vlanNetwork:VlanNetwork):void
         {
-            var position:int = network.networks.getItemIndex(vlanNetwork);
-            if (position > -1)
-            {
-                network.networks.removeItemAt(position);
-
-                //Announce that a VlanNetwork has been deleted
-                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.VLAN_DELETED);
-                event.vlanNetwork = vlanNetwork;
-                dispatchEvent(event);
+            if(network){
+	            var position:int = network.networks.getItemIndex(vlanNetwork);
+	            if (position > -1)
+	            {
+	                network.networks.removeItemAt(position);
+	
+	            }
             }
+	        //Announce that a VlanNetwork has been deleted
+	        var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.VLAN_DELETED);
+	        event.vlanNetwork = vlanNetwork;
+	        dispatchEvent(event);
         }
     }
 }
