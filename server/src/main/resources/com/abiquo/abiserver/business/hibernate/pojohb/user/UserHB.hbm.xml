@@ -7,10 +7,10 @@
       <column name="idUser"/>
       <generator class="identity"/>
     </id>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" fetch="select" lazy="false" name="roleHB">
+    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" fetch="select" name="roleHB">
       <column name="idRole"/>
     </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
+    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" name="enterpriseHB">
       <column name="idEnterprise"/>
     </many-to-one>
     <property name="name" type="string">
