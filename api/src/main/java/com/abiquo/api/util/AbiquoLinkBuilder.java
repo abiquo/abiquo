@@ -51,7 +51,7 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
     public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
         final String rel, final String title, final Map<String, String> params)
     {
-        RESTLink link = buildRestLink(resource, subResource, rel, title, params);
+        RESTLink link = buildRestLink(resource, subResource, rel, params);
         link.setTitle(title);
 
         return link;
