@@ -28,11 +28,9 @@ import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,7 +39,6 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
@@ -144,6 +141,13 @@ public class VirtualApplianceService extends DefaultApiService
      */
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
+
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
         if (vappId == 0)
         {
             addValidationErrors(APIError.INVALID_ID);
