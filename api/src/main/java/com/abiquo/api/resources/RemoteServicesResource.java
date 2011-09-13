@@ -46,7 +46,7 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 @Controller
 public class RemoteServicesResource extends AbstractResource
 {
-    public final static String REMOTE_SERVICES_PATH = "remoteServices";
+    public final static String REMOTE_SERVICES_PATH = "remoteservices";
 
     // @Autowired
     @Resource(name = "infrastructureService")
@@ -54,8 +54,8 @@ public class RemoteServicesResource extends AbstractResource
 
     @GET
     public RemoteServicesDto getRemoteServices(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<RemoteService> all = service.getRemoteServicesByDatacenter(datacenterId);
         RemoteServicesDto remoteServices = new RemoteServicesDto();
@@ -73,8 +73,9 @@ public class RemoteServicesResource extends AbstractResource
 
     @POST
     public RemoteServiceDto postRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        RemoteServiceDto remoteService, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         RemoteServiceDto persistentService = service.addRemoteService(remoteService, datacenterId);
 
