@@ -878,7 +878,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (vapp == null)
         {
             transaction.rollback();
-            
+
             dataResult.setSuccess(false);
             dataResult.setMessage(resourceManager
                 .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
@@ -886,7 +886,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             return dataResult;
         }
         transaction.commit();
-        
 
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
@@ -1612,6 +1611,25 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final UserSession userSession, final Enterprise enterprise)
     {
         return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
+    }
+
+    @Override
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
+        final UserSession userSession, final Enterprise enterprise)
+    {
+        VirtualDatacenterResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
+                VirtualDatacenterResourceStub.class);
+
+        DataResult<Collection<VirtualDataCenter>> dataResult =
+            proxy.getVirtualDatacentersByEnterprise(enterprise);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
     }
 
     /*

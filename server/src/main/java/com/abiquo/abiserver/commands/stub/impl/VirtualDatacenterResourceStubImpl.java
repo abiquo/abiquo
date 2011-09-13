@@ -21,9 +21,12 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import static java.lang.String.valueOf;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
 
@@ -91,8 +94,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
-                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
+                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -254,12 +257,51 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                         "{datacenter}", "datacenter");
 
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise, network
-                    .toPojo()));
+                datacenters.add(VirtualDataCenter.create(vdc, datacenterId, enterprise,
+                    network.toPojo()));
             }
             result.setData(datacenters);
 
             factory.endConnection();
+        }
+        else
+        {
+            populateErrors(response, result, "getVirtualDatacenters");
+        }
+
+        return result;
+    }
+
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
+        final Enterprise enterprise)
+    {
+        DataResult<Collection<VirtualDataCenter>> result =
+            new DataResult<Collection<VirtualDataCenter>>();
+
+        // Build request URI
+        String uri =
+            URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", Collections.emptyMap(),
+                Collections.singletonMap("enterprise", new String[] {valueOf(enterprise.getId())}));
+
+        // Request virtual datacenters
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
+            Collection<VirtualDataCenter> collection = new LinkedHashSet<VirtualDataCenter>();
+
+            for (VirtualDatacenterDto vdc : dto.getCollection())
+            {
+                VirtualDataCenter pojo = new VirtualDataCenter();
+                pojo.setId(vdc.getId());
+                pojo.setName(vdc.getName());
+
+                collection.add(pojo);
+            }
+
+            result.setSuccess(true);
+            result.setData(collection);
         }
         else
         {
