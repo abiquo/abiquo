@@ -155,6 +155,46 @@
     	WHERE vapp.idVirtualApp = :idVirtualApp
     </query>
     
+    <query name="VIRTUAL_APPLIANCE_BY_ENTERPRISE_AND_DC_TINY">
+        select va.id, va.name, va.highDisponibility, va.state, va.subState, va.error, va.public_, va.nodeConnections,
+            vdc.idVirtualDataCenter, vdc.name, vdc.idDataCenter, vdc.hypervisorType
+        from VirtualappHB va 
+        inner join va.virtualDataCenterHB as vdc
+        where va.enterpriseHB.idEnterprise = :enterpriseId
+            and vdc.idDataCenter = :datacenterId
+        order by va.name asc
+    </query>
+    
+    <query name="VIRTUAL_APPLIANCE_BY_ENTERPRISE_AND_DC_TINY_WITH_RESTRICTIONS">
+        select va.id, va.name, va.highDisponibility, va.state, va.subState, va.error, va.public_, va.nodeConnections,
+            vdc.idVirtualDataCenter, vdc.name, vdc.idDataCenter, vdc.hypervisorType
+        from VirtualappHB va 
+        inner join va.virtualDataCenterHB as vdc
+        where va.enterpriseHB.idEnterprise = :enterpriseId
+            and vdc.idDataCenter = :datacenterId
+            and vdc.idVirtualDataCenter in (:vdcs)
+        order by va.name asc
+    </query>
+    
+    <query name="VIRTUAL_APPLIANCE_BY_ENTERPRISE_TINY">
+        select va.id, va.name, va.highDisponibility, va.state, va.subState, va.error, va.public_, va.nodeConnections,
+            vdc.idVirtualDataCenter, vdc.name, vdc.idDataCenter, vdc.hypervisorType
+        from VirtualappHB va 
+        inner join va.virtualDataCenterHB as vdc
+        where va.enterpriseHB.idEnterprise = :enterpriseId
+        order by va.name asc
+    </query>
+    
+    <query name="VIRTUAL_APPLIANCE_BY_ENTERPRISE_TINY_WITH_RESTRICTIONS">
+        select va.id, va.name, va.highDisponibility, va.state, va.subState, va.error, va.public_, va.nodeConnections,
+            vdc.idVirtualDataCenter, vdc.name, vdc.idDataCenter, vdc.hypervisorType
+        from VirtualappHB va 
+        inner join va.virtualDataCenterHB as vdc
+        where va.enterpriseHB.idEnterprise = :enterpriseId
+            and vdc.idVirtualDataCenter in (:vdcs)
+        order by va.name asc
+    </query>
+    
     <!-- 
     <query name="VIRTUAL_DATACENTER_ID_BY_VIRTUAL_APP_ID">
     	Select vdc.idVirtualDataCenter
