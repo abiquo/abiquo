@@ -846,7 +846,7 @@
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
                     method="handleSetExternalVlanAsDefaultInVirtualDatacenter"
-                    arguments="{[resultObject]}"/>
+                    arguments="{[resultObject, event.virtualDatacenter, event.vlanNetwork]}"/>
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>
