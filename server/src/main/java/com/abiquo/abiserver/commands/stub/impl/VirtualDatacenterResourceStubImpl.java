@@ -23,12 +23,16 @@ package com.abiquo.abiserver.commands.stub.impl;
 
 import static java.lang.String.valueOf;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
+
+import antlr.collections.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
@@ -41,6 +45,8 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.abiserver.pojo.virtualhardware.Limit;
+import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
@@ -293,9 +299,18 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
             for (VirtualDatacenterDto vdc : dto.getCollection())
             {
+                // TODO set all limits
+                ResourceAllocationLimit limits = new ResourceAllocationLimit();
+
+                Limit publicIpLimit = new Limit();
+                publicIpLimit.setHard(vdc.getPublicIpsHard());
+                publicIpLimit.setSoft(vdc.getPublicIpsSoft());
+                limits.setPublicIP(publicIpLimit);
+
                 VirtualDataCenter pojo = new VirtualDataCenter();
                 pojo.setId(vdc.getId());
                 pojo.setName(vdc.getName());
+                pojo.setLimits(limits);
 
                 collection.add(pojo);
             }
