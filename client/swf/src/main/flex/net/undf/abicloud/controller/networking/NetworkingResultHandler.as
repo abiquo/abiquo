@@ -36,6 +36,7 @@ package net.undf.abicloud.controller.networking
     import net.undf.abicloud.vo.result.BasicResult;
     import net.undf.abicloud.vo.result.DataResult;
     import net.undf.abicloud.vo.result.ListResponse;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
     public class NetworkingResultHandler extends ResultHandler
     {
@@ -295,10 +296,12 @@ package net.undf.abicloud.controller.networking
             }
         }
         
-        public function handleSetExternalVlanAsDefaultInVirtualDatacenter(result:BasicResult):void
+        public function handleSetExternalVlanAsDefaultInVirtualDatacenter(result:BasicResult, virtualDatacenter:VirtualDataCenter, defaultNetwork:VlanNetwork):void
         {
             if (result.success)
             {
+                //Update the default vlannetwork
+                virtualDatacenter.defaultVlan = defaultNetwork;
                 //dispatch an event to close the edit vlan form
                 AbiCloudModel.getInstance().networkingManager.dispatchEvent(new Event("vlanUpdated"));
             }
