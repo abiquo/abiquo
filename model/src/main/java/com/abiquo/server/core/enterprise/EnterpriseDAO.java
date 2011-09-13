@@ -197,6 +197,22 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
     }
 
+    private Criterion withPricingTemplate()
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.isNotNull(Enterprise.PRICING_PROPERTY));
+
+        return filterDisjunction;
+    }
+
+    private Criterion withoutPricingTemplate()
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+        filterDisjunction.add(Restrictions.isNull(Enterprise.PRICING_PROPERTY));
+
+        return filterDisjunction;
+    }
+
     private Criterion filterBy(final String filter)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
@@ -351,15 +367,25 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     {
         Criteria criteria = createCriteria();
 
-        if (included)
+        if (included && pricingTemplate != null)
         {
 
             criteria.add(samePricingTemplate(pricingTemplate));
 
         }
-        else
+        else if (included && pricingTemplate == null)
+        {
+
+            criteria.add(withPricingTemplate());
+
+        }
+        else if (!included && pricingTemplate != null)
         {
             criteria.add(differentPricingTemplateOrNull(pricingTemplate));
+        }
+        else if (!included && pricingTemplate == null)
+        {
+            criteria.add(withoutPricingTemplate());
         }
 
         if (!StringUtils.isEmpty(filter))
