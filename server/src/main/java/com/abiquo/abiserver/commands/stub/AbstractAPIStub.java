@@ -838,4 +838,15 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers/{tier}", params);
     }
 
+    protected String createVirtualAppliancePriceLink(final int virtualDatacenterId,
+        final int virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("{virtualDatacenter}", String.valueOf(virtualDatacenterId));
+        params.put("{vapp}", String.valueOf(virtualApplianceId));
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}/action/price", params);
+    }
+
 }
