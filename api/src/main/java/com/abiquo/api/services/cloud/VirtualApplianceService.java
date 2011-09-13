@@ -55,8 +55,8 @@ import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
-import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
 import com.abiquo.scheduler.limit.VirtualMachineRequirements;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -151,6 +151,13 @@ public class VirtualApplianceService extends DefaultApiService
      */
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
+
+        VirtualDatacenter vdc = repo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
         if (vappId == 0)
         {
             addValidationErrors(APIError.INVALID_ID);
@@ -375,36 +382,32 @@ public class VirtualApplianceService extends DefaultApiService
     {
         BigDecimal BYTES_TO_GB = new BigDecimal(1024l * 1024l * 1024l);
 
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
-            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE)
+            .add(
                 pricingTemplate.getVcpu().multiply(
                     new BigDecimal(virtualMachineRequirements.getCpu()))));
-        virtualMachinesCost.put(
-            VirtualMachineCost.COMPUTE,
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, virtualMachinesCost.get(
+            VirtualMachineCost.COMPUTE).add(
+            pricingTemplate.getMemoryMB().multiply(
+                new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, virtualMachinesCost.get(
+            VirtualMachineCost.STORAGE).add(
+            pricingTemplate.getHdGB().multiply(
+                new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                    BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, virtualMachinesCost.get(
+            VirtualMachineCost.NETWORK).add(
+            pricingTemplate.getPublicIp().multiply(
+                new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, virtualMachinesCost.get(
+            VirtualMachineCost.TOTAL).add(
             virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                pricingTemplate.getMemoryMB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getRam()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.STORAGE,
-            virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                pricingTemplate.getHdGB().multiply(
-                    new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
-                        BigDecimal.ROUND_HALF_EVEN))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.NETWORK,
-            virtualMachinesCost.get(VirtualMachineCost.NETWORK).add(
-                pricingTemplate.getPublicIp().multiply(
-                    new BigDecimal(virtualMachineRequirements.getPublicIP()))));
-
-        virtualMachinesCost.put(
-            VirtualMachineCost.TOTAL,
-            virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
-                virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                    virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                        virtualMachinesCost.get(VirtualMachineCost.NETWORK)))));
+                virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.NETWORK)))));
         return virtualMachinesCost;
 
     }
