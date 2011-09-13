@@ -288,6 +288,26 @@
         <security:intercept-url pattern="/config/properties/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/properties/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/properties/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <!--============================================= -->
+        <!--============= APPROVAL PROCESS ============== -->
+        <!--============================================= -->
+        <!-- APPROVAL REQUESTS -->
+        <security:intercept-url pattern="/approvals" method="GET" access="ROLE_AUTHENTICATED,ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/*" method="POST" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/*" method="DELETE" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/*" method="PUT" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/approved" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/approved" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/approved/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/approved/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/denied" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/denied" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/denied/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/denied/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- MANAGERS -->
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->
