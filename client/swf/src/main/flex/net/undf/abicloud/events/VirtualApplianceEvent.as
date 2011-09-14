@@ -104,6 +104,8 @@ package net.undf.abicloud.events
 	public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
 	
 	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCE_LOGS:String = "getVirtualApplianceLogsVirtualEvent";
 
         /* ------------- Public atributes ------------- */
         public var virtualAppliance:VirtualAppliance;
@@ -123,6 +125,8 @@ package net.undf.abicloud.events
         public var networkConfiguration:NetworkConfiguration;
 
         public var datacenter:DataCenter;
+        
+        public var callback:Function;
 
 
         /* ------------- Constructor ------------- */

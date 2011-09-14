@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.events.InfrastructureEvent;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -60,6 +61,9 @@
             //The VirtualAppliance that will be rendered
             [Bindable]
             private var _virtualAppliance:VirtualAppliance;
+            
+            [Bindable]
+            private var _logs:ArrayCollection;
 
 
             private function onCreationComplete():void{
@@ -72,6 +76,28 @@
             public function set virtualAppliance(value:VirtualAppliance):void
             {
                 this._virtualAppliance = value;
+                if(this._virtualAppliance){
+	                getVirtualApplianceLogs();
+                }
+            }
+            
+            /**
+             * Get the Virtual Appliances Logs
+             */
+            public function getVirtualApplianceLogs():void
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.GET_VIRTUAL_APPLIANCE_LOGS);
+                event.virtualAppliance = this._virtualAppliance;
+                event.callback = onLogsRetrieved;
+                dispatchEvent(event); 
+            }
+            
+            /**
+             * Retrieve the list of Virtual Appliance
+             */
+            public function onLogsRetrieved(value:ArrayCollection):void
+            {
+                this._logs = value; 
             }
 
             /**
@@ -372,7 +398,7 @@
                 width="50%"
                 rowHeight="80"
                 rowCount="1"
-                dataProvider="{this._virtualAppliance.logs}" selectable="true">
+                dataProvider="{this._logs}" selectable="true">
 
                 <mx:columns>
 
