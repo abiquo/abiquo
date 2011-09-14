@@ -39,11 +39,12 @@ public class CurrencyDto extends SingleResourceTransportDto
         // TODO Auto-generated constructor stub
     }
 
-    public CurrencyDto(final String name, final String symbol)
+    public CurrencyDto(final String name, final String symbol, final int digits)
     {
         super();
         this.name = name;
         this.symbol = symbol;
+        this.digits = digits;
     }
 
     private Integer id;
@@ -80,6 +81,18 @@ public class CurrencyDto extends SingleResourceTransportDto
     public void setSymbol(final String symbol)
     {
         this.symbol = symbol;
+    }
+
+    private int digits;
+
+    public int getDigits()
+    {
+        return digits;
+    }
+
+    public void setDigits(final int digits)
+    {
+        this.digits = digits;
     }
 
 }

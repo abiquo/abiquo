@@ -22,6 +22,7 @@ CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `symbol` varchar(256) NOT NULL ,
   `name` varchar(256) NOT NULL ,
+   `digits` int(10)  NOT NULL default 2,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -38,7 +39,7 @@ CREATE TABLE `kinton`.`costCode` (
 
 -- PRICING --
 -- Definition of table `kinton`.`pricing`
-CREATE TABLE `kinton`.`pricing_template` (
+CREATE TABLE `kinton`.`pricingTemplate` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
   `name` varchar(256) NOT NULL ,
@@ -46,20 +47,21 @@ CREATE TABLE `kinton`.`pricing_template` (
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `standingChargePeriod` DECIMAL(20) NOT NULL default 0,
-  `minimumChargePeriod` DECIMAL(20) NOT NULL default 0,
-  `vcpu` DECIMAL(20) NOT NULL default 0,
-  `memoryMB` DECIMAL(20) NOT NULL default 0,
-  `hdGB` DECIMAL(20) NOT NULL default 0,
-  `vlan` DECIMAL(20) NOT NULL default 0,
-  `publicIp` DECIMAL(20) NOT NULL default 0,
-   `defaultTemplate` boolean NOT NULL default 0,
-   `last_update` timestamp NOT NULL,
+  `standingChargePeriod` DECIMAL(20,10) NOT NULL default 0,
+  `minimumChargePeriod` DECIMAL(20,10) NOT NULL default 0,
+  `vcpu` DECIMAL(20,10) NOT NULL default 0,
+  `memoryMB` DECIMAL(20,10) NOT NULL default 0,
+  `hdGB` DECIMAL(20,10) NOT NULL default 0,
+  `vlan` DECIMAL(20,10) NOT NULL default 0,
+  `publicIp` DECIMAL(20,10) NOT NULL default 0,
+  `defaultTemplate` boolean NOT NULL default 0,
+  `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`) ,
   KEY `Pricing_FK2_Currency` (`idCurrency`),
   CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  
 
 -- PRICING --
 -- Definition of table `kinton`.`pricingCostCode`
@@ -67,7 +69,7 @@ CREATE TABLE `kinton`.`pricingCostCode` (
 `idPricingCostCode` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idCostCode` int(10) UNSIGNED NOT NULL,
-  `price` DECIMAL(20) NOT NULL default 0,
+  `price` DECIMAL(20,10) NOT NULL default 0,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingCostCode`)  
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
@@ -79,8 +81,8 @@ CREATE TABLE  `kinton`.`costCodeCurrency` (
   `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idCostCode` int(10) unsigned,
   `idCurrency` int(10) unsigned,
-  `price` DECIMAL(20) NOT NULL default 0,
-  `version_c` integer NOT NULL DEFAULT 1,
+  `price` DECIMAL(20,10) NOT NULL default 0,
+  `version_c` integer NOT NULL DEFAULT 0,
   PRIMARY KEY (`idCostCodeCurrency`)
   -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
   -- CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `currency` (`idCurrency`)
@@ -91,7 +93,7 @@ CREATE TABLE  `kinton`.`costCodeCurrency` (
 CREATE TABLE `kinton`.`pricingTier` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
-  `price` int(10) UNSIGNED NOT NULL ,
+  `price` DECIMAL(20,10) UNSIGNED NOT NULL default 0,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`, `idTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
@@ -124,9 +126,9 @@ UNLOCK TABLES;
 -- PRICING --
 -- Dumping data for table `kinton`.`currency`
 LOCK TABLES `kinton`.`currency` WRITE;
-INSERT INTO `kinton`.`currency` values (1, "USD", "Dollar - $", 0);
-INSERT INTO `kinton`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 0);
-INSERT INTO `kinton`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0);
+INSERT INTO `kinton`.`currency` values (1, "USD", "Dollar - $", 2, 0);
+INSERT INTO `kinton`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 2,  0);
+INSERT INTO `kinton`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0, 0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `currency` ENABLE KEYS */;  
 

@@ -24,7 +24,6 @@ package com.abiquo.server.core.pricing;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.enterprise.Role;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -50,7 +49,7 @@ public class CurrencyGenerator extends DefaultEntityGenerator<Currency>
         String name = newString(nextSeed(), 0, 255);
         String symbol = newString(nextSeed(), 0, 5);
 
-        Currency currency = new Currency(name, symbol);
+        Currency currency = new Currency(name, symbol, 2);
 
         return currency;
     }

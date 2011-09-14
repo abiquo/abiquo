@@ -53,10 +53,11 @@ public class Currency extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public Currency(final String name, final String symbol)
+    public Currency(final String name, final String symbol, final int digits)
     {
         this.setName(name);
         this.setSymbol(symbol);
+        this.setDigits(digits);
     }
 
     private final static String ID_COLUMN = "idCurrency";
@@ -128,6 +129,27 @@ public class Currency extends DefaultEntityBase
         this.symbol = symbol;
     }
 
+    public final static String DIGITS_PROPERTY = "digits";
+
+    private final static boolean DIGITS_REQUIRED = true;
+
+    private final static String DIGITS_COLUMN = "digits";
+
+    @Column(name = DIGITS_COLUMN, nullable = !DIGITS_REQUIRED)
+    private int digits;
+
+    @Required(value = DIGITS_REQUIRED)
+    public int getDigits()
+    {
+        return digits;
+    }
+
+    public void setDigits(final int digits)
+    {
+        this.digits = digits;
+    }
+
     @OneToMany(targetEntity = CostCodeCurrency.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "currency")
     private List<CostCodeCurrency> currencyCostCode = new ArrayList<CostCodeCurrency>();
+
 }
