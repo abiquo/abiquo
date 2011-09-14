@@ -4145,13 +4145,13 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
   `showMinimumCharge` boolean NOT NULL default 0,
-  `standingChargePeriod` DECIMAL(20,10) NOT NULL default 0,
-  `minimumChargePeriod` DECIMAL(20,10) NOT NULL default 0,
-  `vcpu` DECIMAL(20,10) NOT NULL default 0,
-  `memoryMB` DECIMAL(20,10) NOT NULL default 0,
-  `hdGB` DECIMAL(20,10) NOT NULL default 0,
-  `vlan` DECIMAL(20,10) NOT NULL default 0,
-  `publicIp` DECIMAL(20,10) NOT NULL default 0,
+  `standingChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `minimumChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `vcpu` DECIMAL(20,5) NOT NULL default 0,
+  `memoryMB` DECIMAL(20,5) NOT NULL default 0,
+  `hdGB` DECIMAL(20,5) NOT NULL default 0,
+  `vlan` DECIMAL(20,5) NOT NULL default 0,
+  `publicIp` DECIMAL(20,5) NOT NULL default 0,
   `defaultTemplate` boolean NOT NULL default 0,
   `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
@@ -4170,7 +4170,7 @@ CREATE TABLE `kinton`.`pricingCostCode` (
 `idPricingCostCode` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idCostCode` int(10) UNSIGNED NOT NULL,
-  `price` DECIMAL(20,10) NOT NULL default 0,
+  `price` DECIMAL(20,5) NOT NULL default 0,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingCostCode`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
@@ -4185,7 +4185,7 @@ CREATE TABLE  `kinton`.`costCodeCurrency` (
   `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idCostCode` int(10) unsigned,
   `idCurrency` int(10) unsigned,
-  `price` DECIMAL(20,10) NOT NULL default 0,
+  `price` DECIMAL(20,5) NOT NULL default 0,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY (`idCostCodeCurrency`)
   -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
@@ -4202,7 +4202,7 @@ CREATE TABLE `kinton`.`pricingTier` (
   `idPricingTier` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `idPricingTemplate` int(10) UNSIGNED NOT NULL,
   `idTier` int(10) UNSIGNED NOT NULL,
-  `price`  DECIMAL(20,10) NOT NULL default 0,
+  `price`  DECIMAL(20,5) NOT NULL default 0,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTier`) 
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
