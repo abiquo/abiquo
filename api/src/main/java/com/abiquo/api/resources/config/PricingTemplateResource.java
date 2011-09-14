@@ -33,7 +33,7 @@ import com.abiquo.api.resources.AbstractResource;
 @Controller
 public class PricingTemplateResource extends AbstractResource
 {
-    public static final String PRICING_TEMPLATE = "template";
+    public static final String PRICING_TEMPLATE = "pricingtemplate";
 
     public static final String PRICING_TEMPLATE_PARAM = "{" + PRICING_TEMPLATE + "}";
 

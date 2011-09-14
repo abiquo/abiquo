@@ -81,7 +81,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
-    private String costCode;
+    private int costCode;
 
     public VirtualimageHB()
     {
@@ -111,7 +111,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         final String pathName, final Long hdRequired, final Integer ramRequired,
         final Integer cpuRequired, final int treaty, final int deleted,
         final VirtualimageHB master, final int idEnterprise, final String ovfId,
-        final Long diskFileSize, final String costCode)
+        final Long diskFileSize, final int costCode)
     {
         this.repository = repository;
         this.icon = icon;
@@ -288,7 +288,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return diskFileSize;
     }
 
-    public void setDiskFileSize(Long diskFileSize)
+    public void setDiskFileSize(final Long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -298,17 +298,17 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return shared;
     }
 
-    public void setShared(int shared)
+    public void setShared(final int shared)
     {
         this.shared = shared;
     }
 
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }
@@ -444,7 +444,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return volumePath;
     }
 
-    public void setVolumePath(String volumePath)
+    public void setVolumePath(final String volumePath)
     {
         this.volumePath = volumePath;
     }
@@ -454,7 +454,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return type;
     }
 
-    public void setType(DiskFormatType type)
+    public void setType(final DiskFormatType type)
     {
         this.type = type;
     }

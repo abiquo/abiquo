@@ -54,8 +54,8 @@
         <property name="diskFileSize" type="java.lang.Long">
             <column name="diskFileSize" not-null="true" />
         </property>
-        <property name="costCode" type="string">
-            <column length="50" name="cost_code" not-null="false" />
+        <property name="costCode" type="int">
+            <column name="cost_code" not-null="false" />
         </property>
         <property name="type" type="DiskFormatType" not-null="true" />
         <!-- RELATIONS -->

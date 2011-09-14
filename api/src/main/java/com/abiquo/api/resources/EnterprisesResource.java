@@ -73,7 +73,7 @@ public class EnterprisesResource extends AbstractResource
             numResults = DEFAULT_PAGE_LENGTH;
         }
 
-        int idPricingTempl = 0;
+        int idPricingTempl = -1;
         if (idPricTempl != null)
         {
             idPricingTempl = Integer.valueOf(idPricTempl);
