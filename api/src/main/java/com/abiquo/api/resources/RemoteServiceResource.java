@@ -24,7 +24,6 @@ package com.abiquo.api.resources;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
 
-import javax.annotation.Resource;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -65,13 +64,13 @@ public class RemoteServiceResource extends AbstractResource
 
     @GET
     public RemoteServiceDto getRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) String serviceType, @Context IRESTBuilder restBuilder)
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         return createTransferObject(remoteService, restBuilder);
@@ -80,8 +79,8 @@ public class RemoteServiceResource extends AbstractResource
     @GET
     @Path(CHECK_RESOURCE)
     public RemoteServiceDto pingRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) String serviceType, @Context IRESTBuilder restBuilder)
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         RemoteServiceDto rs = getRemoteService(datacenterId, serviceType, restBuilder);
@@ -94,13 +93,13 @@ public class RemoteServiceResource extends AbstractResource
 
     @PUT
     public RemoteServiceDto modifyRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) String serviceType, RemoteServiceDto remoteService,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(REMOTE_SERVICE) final String serviceType, final RemoteServiceDto remoteService,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService old = service.getRemoteService(datacenterId, type);
 
         RemoteServiceDto r = service.modifyRemoteService(old.getId(), remoteService);
@@ -111,12 +110,13 @@ public class RemoteServiceResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteRemoteService(@PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(REMOTE_SERVICE) String serviceType)
+    public void deleteRemoteService(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(REMOTE_SERVICE) final String serviceType)
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         service.removeRemoteService(remoteService.getId());
@@ -126,15 +126,15 @@ public class RemoteServiceResource extends AbstractResource
      * Utility methods TODO: We are duplicating these everywhere, refactor!!
      */
 
-    public static RemoteServiceDto addLinks(IRESTBuilder restBuilder,
-        RemoteServiceDto remoteService, Integer datacenterId)
+    public static RemoteServiceDto addLinks(final IRESTBuilder restBuilder,
+        final RemoteServiceDto remoteService, final Integer datacenterId)
     {
         remoteService.setLinks(restBuilder.buildRemoteServiceLinks(datacenterId, remoteService));
         return remoteService;
     }
 
-    public static RemoteServiceDto createTransferObject(RemoteService remoteService,
-        IRESTBuilder restBuilder) throws Exception
+    public static RemoteServiceDto createTransferObject(final RemoteService remoteService,
+        final IRESTBuilder restBuilder) throws Exception
     {
         RemoteServiceDto dto = createTransferObject(remoteService);
 
@@ -142,7 +142,7 @@ public class RemoteServiceResource extends AbstractResource
         return dto;
     }
 
-    public static RemoteServiceDto createTransferObject(RemoteService remoteService)
+    public static RemoteServiceDto createTransferObject(final RemoteService remoteService)
     {
         RemoteServiceDto dto = new RemoteServiceDto();
         dto.setId(remoteService.getId());
