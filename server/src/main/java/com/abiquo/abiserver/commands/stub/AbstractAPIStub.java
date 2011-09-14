@@ -887,7 +887,7 @@ public class AbstractAPIStub
 
         String uri = "admin/datacenters/{datacenter}/";
         uri +=
-            "action/discover?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
+            "action/discoversingle?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
 
         return resolveURI(apiUri, uri, params);
     }
@@ -1264,8 +1264,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
-            Collections.singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
+            .singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1329,16 +1329,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
-            Collections.singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
+            .singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
-                Collections.singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
+                .singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
