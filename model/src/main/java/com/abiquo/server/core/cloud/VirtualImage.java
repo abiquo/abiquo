@@ -162,7 +162,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
-    private void setStateful(final Integer stateful)
+    public void setStateful(final Integer stateful)
     {
         this.stateful = stateful;
     }
