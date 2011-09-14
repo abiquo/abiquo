@@ -398,7 +398,7 @@ public class InfrastructureService extends DefaultApiService
 
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(remoteServiceMapping.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(remoteServiceMapping.toUpperCase());
 
         return isAssignedTo(datacenterId, type);
     }
