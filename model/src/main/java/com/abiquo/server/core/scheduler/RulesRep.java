@@ -188,6 +188,9 @@ public class RulesRep extends DefaultRepBase
         if (fitPolicyRule != null)
         {
             fitPolicyRuleDao.remove(fitPolicyRule);
+
+            fitPolicyRuleDao.flush();
+
         }
 
     }
