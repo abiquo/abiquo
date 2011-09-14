@@ -814,4 +814,35 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- VirtualApplianceEvent.GET_VIRTUAL_APPLIANCE_LOGS ________________________________________________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.GET_VIRTUAL_APPLIANCE_LOGS}">
+        <!-- Make call to the server here -->
+        
+         <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+        
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="getVirtualApplianceLogs"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualAppliance]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{VirtualApplianceResultHandler}"
+                    method="handleGetVirtualApplianceLogs"
+                    arguments="{[resultObject, event.callback]}"/>
+                 <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+                 <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
 </EventMap>
