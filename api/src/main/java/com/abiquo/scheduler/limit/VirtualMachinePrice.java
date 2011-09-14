@@ -32,7 +32,7 @@ public class VirtualMachinePrice
 {
     public enum VirtualMachineCost
     {
-        COST_CODE, COMPUTE, NETWORK, STORAGE, ADDITIONAL_VOLUME, TOTAL;
+        COST_CODE, COMPUTE, NETWORK, STORAGE, ADDITIONAL_VOLUME, STANDING_CHARGE, TOTAL;
     }
 
     /** Value for the image being deployed */

@@ -384,73 +384,7 @@ public class PricingTemplate extends DefaultEntityBase
     @OneToMany(targetEntity = PricingCostCode.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
     private List<PricingCostCode> costCodeByPricing = new ArrayList<PricingCostCode>();
 
-    //
-    // public final static String ASSOCIATION_TABLE = "pricingCostCode";
-    //
-    // @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade =
-    // CascadeType.DETACH)
-    // @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = ID_COLUMN),
-    // inverseJoinColumns = @JoinColumn(name = CostCode.ID_COLUMN))
-    // private List<CostCode> costCodes = new ArrayList<CostCode>();
-    //
-    // public List<CostCode> getCostCodes()
-    // {
-    // return costCodes;
-    // }
-    //
-    // public void setCostCodes(final List<CostCode> costCodes)
-    // {
-    // this.costCodes = costCodes;
-    // }
-
     @OneToMany(targetEntity = PricingTier.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "pricingTemplate")
     private List<PricingTier> pricingTier = new ArrayList<PricingTier>();
-
-    // public final static String ASSOCIATION_TABLE_TIER = "pricingTemplate_tier";
-    //
-    // @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade =
-    // CascadeType.DETACH)
-    // @JoinTable(name = ASSOCIATION_TABLE_TIER, joinColumns = @JoinColumn(name = ID_COLUMN),
-    // inverseJoinColumns = @JoinColumn(name = "idTier"))
-    // private List<Tier> tiers = new ArrayList<Tier>();
-    //
-    // public List<Tier> getTiers()
-    // {
-    // return tiers;
-    // }
-    //
-    // public void setTiers(final List<Tier> tiers)
-    // {
-    // this.tiers = tiers;
-    // }
-
-    // ************************* Helper methods ****************************
-
-    // public void addCostCode(final CostCode costCode)
-    // {
-    // if (costCodes == null)
-    // {
-    // costCodes = new ArrayList<CostCode>();
-    // }
-    // costCodes.add(costCode);
-    // }
-
-    // public void addTier(final Tier tier)
-    // {
-    // if (tiers == null)
-    // {
-    // tiers = new ArrayList<Tier>();
-    // }
-    // tiers.add(tier);
-    // }
-
-    // public void addTier(final Tier tier)
-    // {
-    // if (tiers == null)
-    // {
-    // tiers = new ArrayList<Tier>();
-    // }
-    // tiers.add(tier);
-    // }
 
 }

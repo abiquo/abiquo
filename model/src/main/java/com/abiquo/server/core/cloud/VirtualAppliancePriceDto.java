@@ -68,8 +68,35 @@ public class VirtualAppliancePriceDto extends SingleResourceTransportDto
     /** Value for the volume */
     private BigDecimal additionalVolumCost;
 
+    /** Value for deploy */
+    private BigDecimal standingCharge;
+
     /** Value total */
     private BigDecimal totalCost;
+
+    private Integer minimumCharge;
+
+    private BigDecimal minimumChargePeriod;
+
+    public BigDecimal getMinimumChargePeriod()
+    {
+        return minimumChargePeriod;
+    }
+
+    public void setMinimumChargePeriod(final BigDecimal minimumChargePeriod)
+    {
+        this.minimumChargePeriod = minimumChargePeriod;
+    }
+
+    public Integer getMinimumCharge()
+    {
+        return minimumCharge;
+    }
+
+    public void setMinimumCharge(final Integer minimumCharge)
+    {
+        this.minimumCharge = minimumCharge;
+    }
 
     public BigDecimal getCostCodeCost()
     {
@@ -119,6 +146,16 @@ public class VirtualAppliancePriceDto extends SingleResourceTransportDto
     public void setAdditionalVolumCost(final BigDecimal additionalVolumCost)
     {
         this.additionalVolumCost = additionalVolumCost;
+    }
+
+    public BigDecimal getStandingCharge()
+    {
+        return standingCharge;
+    }
+
+    public void setStandingCharge(final BigDecimal standingCharge)
+    {
+        this.standingCharge = standingCharge;
     }
 
     public BigDecimal getTotalCost()

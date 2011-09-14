@@ -162,7 +162,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         dto.setIsReservationRestricted(enterprise.getIsReservationRestricted());
         if (enterprise.getIdPricingTemplate() != null)
         {
-            dto.addLink(new RESTLink("template", createPricingTemplateLink(enterprise
+            dto.addLink(new RESTLink("pricingtemplate", createPricingTemplateLink(enterprise
                 .getIdPricingTemplate())));
         }
 
@@ -478,7 +478,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         EnterpriseDto dto = fromEnterpriseToDtoWithoutPricing(enterprise);
         if (idPricingTemplate != null)
         {
-            dto.addLink(new RESTLink("template", createPricingTemplateLink(idPricingTemplate)));
+            dto.addLink(new RESTLink("pricingtemplate",
+                createPricingTemplateLink(idPricingTemplate)));
         }
 
         result = new DataResult<Enterprise>();
