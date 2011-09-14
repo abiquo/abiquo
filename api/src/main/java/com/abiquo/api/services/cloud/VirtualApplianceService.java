@@ -374,6 +374,8 @@ public class VirtualApplianceService extends DefaultApiService
         PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
         if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
         {
+            int significantDigits = pricingTemplate.getCurrency().getDigits();
+
             for (NodeVirtualImage node : virtualAppliance.getNodes())
             {
                 VirtualMachineRequirements virtualMachineRequirements =
@@ -383,24 +385,37 @@ public class VirtualApplianceService extends DefaultApiService
                     addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
                         virtualMachineRequirements, pricingTemplate);
             }
-            dto.setAdditionalVolumCost(virtualMachinesCost
-                .get(VirtualMachineCost.ADDITIONAL_VOLUME));
-            dto.setCostCodeCost(virtualMachinesCost.get(VirtualMachineCost.COST_CODE));
-            dto.setComputeCost(virtualMachinesCost.get(VirtualMachineCost.COMPUTE));
-            dto.setStorageCost(virtualMachinesCost.get(VirtualMachineCost.STORAGE));
-            dto.setNetworkCost(virtualMachinesCost.get(VirtualMachineCost.NETWORK));
-            dto.setStandingCharge(pricingTemplate.getStandingChargePeriod());
+            dto.setAdditionalVolumCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+            dto.setCostCodeCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
+            dto.setComputeCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
+            dto.setStorageCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
+            dto.setNetworkCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
+            dto.setStandingCharge(rounded(significantDigits,
+                pricingTemplate.getStandingChargePeriod()));
             if (pricingTemplate.isShowMinimumCharge())
             {
                 dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
-                dto.setMinimumChargePeriod(pricingTemplate.getMinimumChargePeriod());
+                dto.setMinimumChargePeriod(rounded(significantDigits,
+                    pricingTemplate.getMinimumChargePeriod()));
             }
 
-            dto.setTotalCost(virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
-                pricingTemplate.getStandingChargePeriod()));
+            dto.setTotalCost(rounded(
+                significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
+                    pricingTemplate.getStandingChargePeriod())));
         }
 
         return dto;
+    }
+
+    private BigDecimal rounded(final int significantDigits, final BigDecimal aNumber)
+    {
+        return aNumber.setScale(significantDigits, BigDecimal.ROUND_HALF_EVEN);
     }
 
     private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
