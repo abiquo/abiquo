@@ -701,8 +701,8 @@ public class AbstractAPIStub
 
     protected String createPricingTemplateLink(final int templateId)
     {
-        return URIResolver.resolveURI(apiUri, "config/pricingTemplates/{template}",
-            Collections.singletonMap("template", valueOf(templateId)));
+        return URIResolver.resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}",
+            Collections.singletonMap("pricingtemplate", valueOf(templateId)));
     }
 
     protected String createPricingTemplatesLink()
@@ -713,7 +713,7 @@ public class AbstractAPIStub
     protected String createPricingTemplatesLink(Integer offset, final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/pricingTemplates", Collections.emptyMap());
+            URIResolver.resolveURI(apiUri, "config/pricingtemplates", Collections.emptyMap());
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
 
@@ -735,7 +735,7 @@ public class AbstractAPIStub
 
     protected String createCostCodesLink(Integer offset, final Integer numResults)
     {
-        String uri = URIResolver.resolveURI(apiUri, "config/costCodes", Collections.emptyMap());
+        String uri = URIResolver.resolveURI(apiUri, "config/costcodes", Collections.emptyMap());
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
 
@@ -755,12 +755,12 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("costcode", costCodeId.toString());
 
-        return resolveURI(apiUri, "config/costCodes/{costcode}/currencies", params);
+        return resolveURI(apiUri, "config/costcodes/{costcode}/currencies", params);
     }
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}",
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
             Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
@@ -768,7 +768,7 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costCodes/{costcode}/currencies",
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
                 Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
@@ -808,34 +808,35 @@ public class AbstractAPIStub
     protected String createPricingCostCodesLink(final Integer pricingId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("template", pricingId.toString());
+        params.put("pricingtemplate", pricingId.toString());
 
-        return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes", params);
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes", params);
     }
 
     protected String createPricingCostCodeLink(final Integer pricingId,
         final Integer pricingCostCodeId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("template", pricingId.toString());
+        params.put("pricingtemplate", pricingId.toString());
         params.put("costcode", pricingCostCodeId.toString());
-        return resolveURI(apiUri, "config/pricingTemplates/{template}/costcodes/{costcode}", params);
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes/{costcode}",
+            params);
     }
 
     protected String createPricingTiersLink(final Integer pricingId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("template", pricingId.toString());
+        params.put("pricingtemplate", pricingId.toString());
 
-        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers", params);
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers", params);
     }
 
     protected String createPricingTierLink(final Integer pricingId, final Integer pricingTierId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("template", pricingId.toString());
+        params.put("pricingtemplate", pricingId.toString());
         params.put("tier", pricingTierId.toString());
-        return resolveURI(apiUri, "config/pricingTemplates/{template}/tiers/{tier}", params);
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers/{tier}", params);
     }
 
     protected String createVirtualAppliancePriceLink(final int virtualDatacenterId,

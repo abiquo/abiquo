@@ -34,6 +34,6 @@ import com.abiquo.api.resources.AbstractResource;
 public class PricingTemplatesResource extends AbstractResource
 {
 
-    public static final String PRICING_TEMPLATES_PATH = "config/pricingTemplates";
+    public static final String PRICING_TEMPLATES_PATH = "config/pricingtemplates";
 
 }

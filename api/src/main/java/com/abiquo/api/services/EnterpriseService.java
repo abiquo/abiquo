@@ -184,7 +184,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink("template") != null)
+        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
         {
             int idPricing = getPricingTemplateId(dto);
             if (idPricing == 0)
@@ -269,7 +269,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink("template") != null)
+        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
         {
             int idPricing = getPricingTemplateId(dto);
             if (idPricing == 0)
