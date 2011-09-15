@@ -242,7 +242,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-        links.add(builder.buildActionLink(MachineResource.class,
+
+        links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
@@ -255,6 +256,7 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_OFF,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
+
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_LED_ON, MachineResource.MACHINE_ACTION_LED_ON_REL,
                 params));
@@ -867,7 +869,10 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+<<<<<<< HEAD
     @Override
+=======
+>>>>>>> ABICLOUDPREMIUM-2325machinelinks
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
@@ -881,6 +886,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+<<<<<<< HEAD
     @Override
     public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
         final FitPolicyRule fpr)
@@ -941,6 +947,10 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildPricingCostCodeLinks(final CostCode costCode,
         final PricingTemplate pricingTemplate, final PricingCostCodeDto dto)
+=======
+    public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
+        final FitPolicyRule fpr)
+>>>>>>> ABICLOUDPREMIUM-2325machinelinks
     {
         // TODO Auto-generated method stub
         return null;
