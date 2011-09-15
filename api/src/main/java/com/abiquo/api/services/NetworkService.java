@@ -456,7 +456,7 @@ public class NetworkService extends DefaultApiService
      */
     public List<IpPoolManagement> getListIpPoolManagementByVlan(final Integer vdcId,
         final Integer vlanId, final Integer startwith, final String orderBy, final String filter,
-        final Integer limit, final Boolean descOrAsc)
+        final Integer limit, final Boolean descOrAsc, final Boolean freeIps)
     {
         // Check if the orderBy element is actually one of the available ones
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
@@ -469,7 +469,7 @@ public class NetworkService extends DefaultApiService
         }
 
         return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter,
-            orderByEnum, descOrAsc);
+            orderByEnum, descOrAsc, freeIps);
     }
 
     /**
