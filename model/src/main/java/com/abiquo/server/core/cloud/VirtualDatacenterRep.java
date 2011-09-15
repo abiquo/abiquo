@@ -303,10 +303,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsByPrivateVLANFiltered(final Integer vdcId,
         final Integer vlanId, final Integer firstElem, final Integer numElem, final String has,
-        final IpPoolManagement.OrderByEnum orderBy, final Boolean asc)
+        final IpPoolManagement.OrderByEnum orderBy, final Boolean asc, final Boolean freeIps)
     {
         return ipManagementDAO.findIpsByPrivateVLANFiltered(vdcId, vlanId, firstElem, numElem, has,
-            orderBy, asc);
+            orderBy, asc, freeIps);
     }
 
     /**
@@ -341,6 +341,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
     {
         return ipManagementDAO.findIpsByVlan(vlan);
+    }
+
+    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
+    {
+        return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
     public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
