@@ -869,10 +869,8 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-<<<<<<< HEAD
+
     @Override
-=======
->>>>>>> ABICLOUDPREMIUM-2325machinelinks
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
@@ -886,7 +884,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-<<<<<<< HEAD
     @Override
     public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
         final FitPolicyRule fpr)
@@ -947,10 +944,6 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildPricingCostCodeLinks(final CostCode costCode,
         final PricingTemplate pricingTemplate, final PricingCostCodeDto dto)
-=======
-    public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
-        final FitPolicyRule fpr)
->>>>>>> ABICLOUDPREMIUM-2325machinelinks
     {
         // TODO Auto-generated method stub
         return null;
