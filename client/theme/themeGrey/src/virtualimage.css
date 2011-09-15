@@ -134,6 +134,12 @@
 		source:Embed("/assets/virtualimage/publicVirtualImage.png");
 
 	}
+	
+	.VirtualImageMiniatureBaseChefImage
+    {
+        source:Embed("/assets/virtualimage/chefEnabled.png");
+
+    }
 
 
 

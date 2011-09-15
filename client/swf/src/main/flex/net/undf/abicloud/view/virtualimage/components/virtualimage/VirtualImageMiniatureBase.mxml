@@ -404,6 +404,12 @@
             creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBasePublicImage', publicImage)"            
             toolTip="@Resource(bundle='VirtualImage', key='LABEL_SHARED_IMAGE')"
             visible="{this._virtualImage.shared == 1}"/>
+        
+        <utils:SmoothImage id="chefImage"
+            right="5" bottom="5"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseChefImage', chefImage)"            
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+            visible="{this._virtualImage.chefEnabled}"/>
     </mx:Canvas>
 
     <mx:HRule 

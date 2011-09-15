@@ -122,6 +122,12 @@
 		source:Embed("/assets/virtualimage/labelMaster.png");
 		
 	}
+	
+	.VirtualImageMiniatureBaseChefImage
+    {
+        source:Embed("/assets/virtualimage/chefEnabled.png");
+
+    }
 
 	.VirtualImageMiniatureBaseSlaveImage
 	{

@@ -61,6 +61,8 @@ package net.undf.abicloud.vo.user
         public var chefURL:String;
         
         public var chefValidatorCertificate:String;
+        
+        public var chefValidator:String;
 
         public function Enterprise()
         {

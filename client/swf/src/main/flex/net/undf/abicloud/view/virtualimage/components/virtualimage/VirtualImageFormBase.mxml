@@ -226,6 +226,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
+                    chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
                     costInput.text = this._virtualImage.costCode;
                 }
                 else
@@ -283,6 +284,9 @@
                         updatedValues.shared = 1;
                     else
                         updatedValues.shared = 0; 
+                        
+                    //Chef integration
+                    updatedValues.chefEnabled = chefEnabledCombobox.selected;
                         
                     updatedValues.costCode = costInput.text;                   
 
@@ -805,6 +809,14 @@
                 visible="{this._virtualImage != null}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                id="chefEnabledFormItem"
+                label="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+                includeInLayout="{this._virtualImage != null}">
+                <mx:CheckBox id="chefEnabledCombobox"
+                    change="validateForm()"/>
             </mx:FormItem>
             
             <mx:FormItem 

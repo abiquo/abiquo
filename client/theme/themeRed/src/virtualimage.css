@@ -135,7 +135,11 @@
 
 	}
 
+    .VirtualImageMiniatureBaseChefImage
+    {
+        source:Embed("/assets/virtualimage/chefEnabled.png");
 
+    }
 
 	.VirtualImageMiniatureBaseVRule
 	{
