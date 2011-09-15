@@ -221,6 +221,17 @@
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
                                             Alert.OK);
                 }
+                else if (_selectedVLAN.networkType == VlanNetwork.EXTERNAL)
+                {
+                    //The external VLAN cannot be deleted
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNABLE_DELETE_EXTERNAL_VLAN_TEXT"),
+                                            Alert.OK);
+                }
                 else
                 {
                     //Asking user to confirm VLAN deletion
