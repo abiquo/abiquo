@@ -1,32 +1,45 @@
 package com.abiquo.server.core.enterprise;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "approval")
+@XmlRootElement(name = "")
 public class ApprovalDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = 9064569677642171693L;
+    private static final long serialVersionUID = 6985079950355525566L;
 
     private Integer id;
 
-    private String token;
-
-    private ApprovalType approvalType;
-
-    private ApprovalState approvalState;
-
-    private String reason;
+    public Integer getId()
+    {
+        return id;
+    }
 
     public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    public Integer getId()
+    private Date timeRequested;
+
+    public Date getTimeRequested()
     {
-        return id;
+        return timeRequested;
+    }
+
+    public void setTimeRequested(final Date timeRequested)
+    {
+        this.timeRequested = timeRequested;
+    }
+
+    private String token;
+
+    public String getToken()
+    {
+        return token;
     }
 
     public void setToken(final String token)
@@ -34,29 +47,23 @@ public class ApprovalDto extends SingleResourceTransportDto
         this.token = token;
     }
 
-    public String getToken()
+    private Date timeResponse;
+
+    public Date getTimeResponse()
     {
-        return token;
+        return timeResponse;
     }
 
-    public void setApprovalType(final ApprovalType approvalType)
+    public void setTimeResponse(final Date timeResponse)
     {
-        this.approvalType = approvalType;
+        this.timeResponse = timeResponse;
     }
 
-    public ApprovalType getApprovalType()
-    {
-        return approvalType;
-    }
+    private String reason;
 
-    public void setApprovalState(final ApprovalState approvalState)
+    public String getReason()
     {
-        this.approvalState = approvalState;
-    }
-
-    public ApprovalState getApprovalState()
-    {
-        return approvalState;
+        return reason;
     }
 
     public void setReason(final String reason)
@@ -64,8 +71,28 @@ public class ApprovalDto extends SingleResourceTransportDto
         this.reason = reason;
     }
 
-    public String getReason()
+    private ApprovalState status;
+
+    public ApprovalState getStatus()
     {
-        return reason;
+        return status;
     }
+
+    public void setStatus(final ApprovalState status)
+    {
+        this.status = status;
+    }
+
+    private ApprovalType approvalType;
+
+    public ApprovalType getApprovalType()
+    {
+        return approvalType;
+    }
+
+    public void setApprovalType(final ApprovalType approvalType)
+    {
+        this.approvalType = approvalType;
+    }
+
 }
