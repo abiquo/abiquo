@@ -23,6 +23,9 @@
         <property name="chefURL" type="string">
             <column name="chef_url" length="255" not-null="false" />
         </property>
+        <property name="chefValidator" type="string">
+            <column name="chef_validator" length="50" not-null="false" />
+        </property>
         <property name="chefClientCertificate" type="string">
             <column name="chef_client_certificate" sql-type="TEXT" not-null="false"/>
         </property>

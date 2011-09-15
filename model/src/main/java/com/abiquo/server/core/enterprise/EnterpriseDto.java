@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceWithLimitsDto;
 @XmlRootElement(name = "enterprise")
 public class EnterpriseDto extends SingleResourceWithLimitsDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     private String name;
@@ -35,8 +37,10 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     private long repositorySoft;
 
     private long repositoryHard;
-    
+
     private String chefURL;
+
+    private String chefValidator;
 
     private String chefClientCertificate;
 
@@ -95,9 +99,19 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return chefURL;
     }
 
-    public void setChefURL(String chefURL)
+    public void setChefURL(final String chefURL)
     {
         this.chefURL = chefURL;
+    }
+
+    public String getChefValidator()
+    {
+        return chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
     }
 
     public String getChefClientCertificate()
@@ -105,7 +119,7 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return chefClientCertificate;
     }
 
-    public void setChefClientCertificate(String chefClientCertificate)
+    public void setChefClientCertificate(final String chefClientCertificate)
     {
         this.chefClientCertificate = chefClientCertificate;
     }
@@ -115,17 +129,17 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
         return chefValidatorCertificate;
     }
 
-    public void setChefValidatorCertificate(String chefValidatorCertificate)
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
     {
         this.chefValidatorCertificate = chefValidatorCertificate;
     }
-    
+
     public boolean getIsReservationRestricted()
     {
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(boolean isReservationRestricted)
+    public void setIsReservationRestricted(final boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }

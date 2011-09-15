@@ -81,10 +81,14 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
     public Enterprise addChefConfig(final Enterprise enterprise)
     {
         String chefServerURL = "https://api.opscode.com/organizations/ent" + nextSeed();
+        String validatorName =
+            newString(nextSeed(), Enterprise.CHEF_VALIDATOR_LENGTH_MIN,
+                Enterprise.CHEF_VALIDATOR_LENGTH_MAX);
         String clientCert = newString(nextSeed(), 0, 100);
         String validationCert = newString(nextSeed(), 0, 100);
 
         enterprise.setChefURL(chefServerURL);
+        enterprise.setChefValidator(validatorName);
         enterprise.setChefValidatorCertificate(validationCert);
         enterprise.setChefClientCertificate(clientCert);
 
