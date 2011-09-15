@@ -58,6 +58,8 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
     private String chefURL;
 
+    private String chefValidator;
+
     private String chefClientCertificate;
 
     private String chefValidatorCertificate;
@@ -139,6 +141,16 @@ public class Enterprise implements IPojo<EnterpriseHB>
     public void setChefURL(final String chefURL)
     {
         this.chefURL = chefURL;
+    }
+
+    public String getChefValidator()
+    {
+        return chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
     }
 
     public String getChefClientCertificate()
@@ -245,6 +257,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
         enterpriseHB.setReservedMachines(reservedMachinesHB);
         enterpriseHB.setChefURL(getChefURL());
+        enterpriseHB.setChefValidator(getChefValidator());
         enterpriseHB.setChefClientCertificate(getChefClientCertificate());
         enterpriseHB.setChefValidatorCertificate(getChefValidatorCertificate());
 
@@ -269,8 +282,9 @@ public class Enterprise implements IPojo<EnterpriseHB>
 
         enterprise.setLimits(ral);
 
-        enterprise.setChefClientCertificate(dto.getChefClientCertificate());
         enterprise.setChefURL(dto.getChefURL());
+        enterprise.setChefValidator(dto.getChefValidator());
+        enterprise.setChefClientCertificate(dto.getChefClientCertificate());
         enterprise.setChefValidatorCertificate(dto.getChefValidatorCertificate());
 
         return enterprise;

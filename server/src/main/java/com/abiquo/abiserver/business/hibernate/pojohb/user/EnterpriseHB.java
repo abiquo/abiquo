@@ -54,9 +54,12 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
     private String chefURL;
 
+    private String chefValidator;
+
     private String chefClientCertificate;
 
     private String chefValidatorCertificate;
+
     /** kind of reservation */
     private Boolean isReservationRestricted;
 
@@ -108,6 +111,16 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         this.chefURL = chefURL;
     }
 
+    public String getChefValidator()
+    {
+        return chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
+    }
+
     public String getChefClientCertificate()
     {
         return chefClientCertificate;
@@ -127,13 +140,13 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
     {
         this.chefValidatorCertificate = chefValidatorCertificate;
     }
-    
+
     public Boolean getIsReservationRestricted()
     {
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    public void setIsReservationRestricted(final Boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -154,7 +167,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         this.limits = limits;
     }
 
-    public void setReservedMachines(Collection<PhysicalmachineHB> reservedMachines)
+    public void setReservedMachines(final Collection<PhysicalmachineHB> reservedMachines)
     {
         this.reservedMachines = reservedMachines;
     }
@@ -164,7 +177,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         return reservedMachines;
     }
 
-    public void setDcLimits(Set<DatacenterLimitHB> dcLimits)
+    public void setDcLimits(final Set<DatacenterLimitHB> dcLimits)
     {
         this.dcLimits = dcLimits;
     }
@@ -205,6 +218,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
 
         enterprise.setReservedMachines(rMachines);
         enterprise.setChefURL(getChefURL());
+        enterprise.setChefValidator(getChefValidator());
         enterprise.setChefClientCertificate(getChefClientCertificate());
         enterprise.setChefValidatorCertificate(getChefValidatorCertificate());
 

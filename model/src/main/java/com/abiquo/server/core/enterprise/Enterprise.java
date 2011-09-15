@@ -217,6 +217,34 @@ public class Enterprise extends DefaultEntityWithLimits
         this.chefURL = chefURL;
     }
 
+    public final static String CHEF_VALIDATOR_PROPERTY = "chefValidator";
+
+    private final static boolean CHEF_VALIDATOR_REQUIRED = false;
+
+    /* package */final static int CHEF_VALIDATOR_LENGTH_MIN = 1;
+
+    /* package */final static int CHEF_VALIDATOR_LENGTH_MAX = 50;
+
+    private final static boolean CHEF_VALIDATOR_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_VALIDATOR_COLUMN = "chef_validator";
+
+    @Column(name = CHEF_VALIDATOR_COLUMN, nullable = !CHEF_VALIDATOR_REQUIRED, length = CHEF_VALIDATOR_LENGTH_MAX)
+    private String chefValidator;
+
+    @Required(value = CHEF_VALIDATOR_REQUIRED)
+    @Length(min = CHEF_VALIDATOR_LENGTH_MIN, max = CHEF_VALIDATOR_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_VALIDATOR_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefValidator()
+    {
+        return this.chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
+    }
+
     public final static String CHEF_CLIENT_CERT_PROPERTY = "chefClientCertificate";
 
     private final static boolean CHEF_CLIENT_CERT_REQUIRED = false;
