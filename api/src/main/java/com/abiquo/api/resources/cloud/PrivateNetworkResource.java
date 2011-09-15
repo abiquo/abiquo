@@ -122,6 +122,7 @@ public class PrivateNetworkResource extends AbstractResource
         dto.setPrimaryDNS(network.getConfiguration().getPrimaryDNS());
         dto.setSecondaryDNS(network.getConfiguration().getSecondaryDNS());
         dto.setSufixDNS(network.getConfiguration().getSufixDNS());
+        dto.setType(network.getType());
 
         dto = addLinks(restBuilder, dto, virtualDatacenterId);
 

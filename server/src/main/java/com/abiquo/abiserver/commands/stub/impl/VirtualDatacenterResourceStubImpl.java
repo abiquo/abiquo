@@ -90,8 +90,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
-                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
+                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -124,7 +124,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 VirtualDataCenter.create(responseDto, vdc.getIdDataCenter(), vdc.getEnterprise(),
                     network.toPojo());
             responseVdc.setLimits(vdc.getLimits());
-
+            responseVdc.setDefaultVlan(vdc.getDefaultVlan());
             dataResult.setData(responseVdc);
             dataResult.setMessage(resourceManager.getMessage("createVirtualDataCenter.success"));
 

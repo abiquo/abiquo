@@ -60,6 +60,8 @@ package net.undf.abicloud.events
         public static const GET_PRIVATE_IPs_BY_VLAN:String = "getPrivateIPsByVLANNetworkingEvent";
         
         public static const GET_EXTERNAL_IPs_BY_VLAN:String = "getExternalIPsByVLANNetworkingEvent";
+        
+        public static const GET_FREE_IPs_BY_EXTERNAL_VLAN:String = "getFreeIPsByExternalVLANNetworkingEvent";
 
         public static const GET_NICs_BY_VIRTUAL_MACHINE:String = "getNICsByVirtualMachineNetworkingEvent";
 

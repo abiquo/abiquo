@@ -354,6 +354,43 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN ______________________________ -->
+    <EventHandlers type="{NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.networkingService}"
+            method="getFreeIpsByExternalVlan"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session,
+            event.virtualDatacenter, 
+            event.vlanNetwork.vlanNetworkId, 
+            event.available]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{NetworkingResultHandler}"
+                    method="handleGetPrivateIPs"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
 
     <!-- NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE _______________ -->
     <EventHandlers type="{NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE}">

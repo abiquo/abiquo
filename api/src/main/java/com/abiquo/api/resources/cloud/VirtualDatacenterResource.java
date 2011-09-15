@@ -244,6 +244,9 @@ public class VirtualDatacenterResource extends AbstractResource
         final IRESTBuilder builder) throws Exception
     {
         VirtualDatacenterDto response = createTransferObject(vdc);
+        VLANNetworkDto vlan =
+            PrivateNetworkResource.createTransferObject(vdc.getDefaultVlan(), vdc.getId(), builder);
+        response.setVlan(vlan);
         response.setLinks(builder.buildVirtualDatacenterLinks(vdc, vdc.getDatacenter().getId(), vdc
             .getEnterprise().getId()));
 
@@ -266,5 +269,4 @@ public class VirtualDatacenterResource extends AbstractResource
         response.setPublicIPLimits(vdc.getPublicIpsSoft(), vdc.getPublicIpsHard());
         return response;
     }
-
 }

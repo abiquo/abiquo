@@ -92,7 +92,7 @@ public interface NetworkResourceStub
 
     public BasicResult getListNetworkPoolByPrivateVLAN(Integer vdcId, Integer vlanId,
         Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
-        Boolean onlyAvailable);
+        Boolean onlyAvailable, Boolean freeIps);
 
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
         Integer numElem, String filterLike, String orderBy, Boolean asc)
@@ -115,7 +115,7 @@ public interface NetworkResourceStub
         throws NetworkCommandException;
 
     public BasicResult getNetworkPoolInfoByExternalVlan(VirtualDataCenter vdc, Integer vlanId,
-        Boolean available);
+        Boolean available, Boolean freeIps);
 
     public BasicResult getNICsByVirtualMachine(Integer virtualDatacenterId, Integer vappId,
         Integer virtualMachineId);
