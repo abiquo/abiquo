@@ -47,7 +47,7 @@ import com.abiquo.tracer.client.TracerFactory;
  * 
  * @author ibarrera
  */
-@Task(interval = 4, timeUnit = TimeUnit.MINUTES)
+@Task(interval = 15, timeUnit = TimeUnit.MINUTES)
 public class RemoteServicesCheck
 {
     /**
