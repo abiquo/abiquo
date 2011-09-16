@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.pricing;
 
+import static org.testng.Assert.assertEquals;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -28,7 +30,6 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.TierGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingTierGenerator extends DefaultEntityGenerator<PricingTier>
 {
@@ -51,7 +52,9 @@ public class PricingTierGenerator extends DefaultEntityGenerator<PricingTier>
     @Override
     public void assertAllPropertiesEqual(final PricingTier obj1, final PricingTier obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, PricingTier.PRICE_PROPERTY);
+        assertEquals(obj1.getPrice().setScale(2), obj2.getPrice().setScale(2));
+        assertEquals(obj1.getPricingTemplate().getId(), obj2.getPricingTemplate().getId());
+        assertEquals(obj1.getTier().getId(), obj2.getTier().getId());
     }
 
     @Override
