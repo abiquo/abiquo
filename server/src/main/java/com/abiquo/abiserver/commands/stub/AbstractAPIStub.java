@@ -159,8 +159,8 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
-            .accept(mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
+            mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -204,8 +204,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
-            .contentType(mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
+            mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -358,8 +358,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
-            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
+            .singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -392,8 +392,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
-            Collections.singletonMap("role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
+            "role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -420,8 +420,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
-            Collections.singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
+            .singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -453,8 +453,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
-            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
+            .singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -466,8 +466,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
-                Collections.singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
+                .singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -696,5 +696,12 @@ public class AbstractAPIStub
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
+    }
+
+    protected String createApprovalsLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "approvals", params);
     }
 }
