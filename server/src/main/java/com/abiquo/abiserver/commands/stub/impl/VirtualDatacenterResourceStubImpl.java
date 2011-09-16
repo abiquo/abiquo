@@ -23,16 +23,11 @@ package com.abiquo.abiserver.commands.stub.impl;
 
 import static java.lang.String.valueOf;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
-
-import antlr.collections.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
@@ -251,7 +246,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         {
             result.setSuccess(true);
             DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
+            factory.beginConnection(true);
 
             VirtualDatacentersDto dto = response.getEntity(VirtualDatacentersDto.class);
             Collection<VirtualDataCenter> datacenters = new LinkedHashSet<VirtualDataCenter>();
@@ -278,6 +273,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         return result;
     }
 
+    @Override
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
         final Enterprise enterprise)
     {

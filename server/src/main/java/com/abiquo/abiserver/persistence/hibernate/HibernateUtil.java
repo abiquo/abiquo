@@ -24,15 +24,13 @@ package com.abiquo.abiserver.persistence.hibernate;
 import java.io.File;
 import java.net.URL;
 
+import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.classic.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.abiquo.abiserver.config.AbiConfig;
-import com.abiquo.abiserver.config.AbiConfigManager;
 
 /**
  * TODO documentation
@@ -56,8 +54,7 @@ public class HibernateUtil
             Configuration conf = new Configuration();
             conf.configure(hibernateConfRootDir + "hibernate.cfg.xml");
 
-            hibernateConfRootDir += "ext/";            
-
+            hibernateConfRootDir += "ext/";
             URL url = HibernateUtil.class.getClassLoader().getResource(hibernateConfRootDir);
 
             if (url != null)
@@ -75,7 +72,6 @@ public class HibernateUtil
             }
 
             sessionFactory = conf.buildSessionFactory();
-
             logger.info("SessionFactory created!");
 
         }
@@ -86,13 +82,11 @@ public class HibernateUtil
             throw new ExceptionInInitializerError(ex);
         }
     }
-    
-    
+
     public static SessionFactory getSessionFactory()
     {
         return sessionFactory;
     }
-    
 
     public static void beginTransaction()
     {
@@ -102,8 +96,7 @@ public class HibernateUtil
     // public static SessionFactory getSessionFactory()
     // {
     // return sessionFactory;
-    //        
-    //        
+    //
     // }
 
     public static void commitTransaction()
@@ -131,6 +124,19 @@ public class HibernateUtil
 
     public static Session getSession()
     {
+        return getSession(false);
+    }
+
+    public static Session getSession(final boolean ro)
+    {
+        if (ro)
+        {
+            sessionFactory.getCurrentSession().setFlushMode(FlushMode.MANUAL);
+        }
+        else
+        {
+            sessionFactory.getCurrentSession().setFlushMode(FlushMode.AUTO);
+        }
         return sessionFactory.getCurrentSession();
     }
     //

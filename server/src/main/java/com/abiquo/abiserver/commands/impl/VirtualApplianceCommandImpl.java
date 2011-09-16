@@ -172,7 +172,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         try
         {
-            session = HibernateUtil.getSession();
+            session = HibernateUtil.getSession(true);
             transaction = session.beginTransaction();
 
             // Getting the given VirtualAppliance from the DataBase
@@ -1740,7 +1740,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 new DataResult<Collection<VirtualAppliance>>();
 
             DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
+            factory.beginConnection(true);
 
             VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
             UserDAO userDAO = factory.getUserDAO();

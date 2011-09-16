@@ -47,7 +47,7 @@ import com.abiquo.tracer.client.TracerFactory;
  * 
  * @author ibarrera
  */
-@Task(interval = 15, timeUnit = TimeUnit.MINUTES)
+@Task(interval = 4, timeUnit = TimeUnit.MINUTES)
 public class RemoteServicesCheck
 {
     /**
@@ -102,15 +102,16 @@ public class RemoteServicesCheck
                 {
                     if (remoteService.getRemoteServiceType().canBeChecked())
                     {
-                        rsCommand.checkRemoteService(systemSession, remoteService
-                            .getIdRemoteService());
+                        rsCommand.checkRemoteService(systemSession,
+                            remoteService.getIdRemoteService());
                     }
                 }
                 catch (InfrastructureCommandException ex)
                 {
-                    LOGGER.error("An error occured while checking remote service: "
-                        + remoteService.getRemoteServiceType() + " for datacenter "
-                        + remoteService.getIdDataCenter(), ex);
+                    LOGGER.error(
+                        "An error occured while checking remote service: "
+                            + remoteService.getRemoteServiceType() + " for datacenter "
+                            + remoteService.getIdDataCenter(), ex);
 
                     TracerFactory.getTracer().log(
                         SeverityType.CRITICAL,
