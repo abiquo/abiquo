@@ -32,6 +32,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
+import com.abiquo.server.core.enterprise.ApprovalManagerDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -66,7 +67,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildRackLinks(final Integer datacenterId, final RackDto rack);
 
-    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId, Boolean managedRack, MachineDto machine);
+    public List<RESTLink> buildMachineLinks(Integer datacenterId, Integer rackId,
+        Boolean managedRack, MachineDto machine);
 
     public List<RESTLink> buildRemoteServiceLinks(Integer datacenterId,
         RemoteServiceDto remoteService);
@@ -139,7 +141,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId);
-    
+
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         EnterpriseExclusionRule enterpriseExclusion);
@@ -148,4 +150,7 @@ public interface IRESTBuilder
         final MachineLoadRule mlr);
 
     public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr);
+
+    public List<RESTLink> buildApprovalManagerLinks(Integer idEnterprise, Integer idUser,
+        ApprovalManagerDto dto);
 }

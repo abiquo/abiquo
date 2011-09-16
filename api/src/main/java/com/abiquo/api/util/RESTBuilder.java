@@ -68,6 +68,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
+import com.abiquo.server.core.enterprise.ApprovalManagerDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -95,7 +96,8 @@ import com.abiquo.server.core.scheduler.MachineLoadRuleDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Component
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)  // This bean must not be singleton
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
+// This bean must not be singleton
 public class RESTBuilder implements IRESTBuilder
 {
     public static final String REL_EDIT = "edit";
@@ -123,7 +125,8 @@ public class RESTBuilder implements IRESTBuilder
         return buildDatacenterLink(datacenterId, builder);
     }
 
-    protected RESTLink buildDatacenterLink(final Integer datacenterId, final AbiquoLinkBuilder builder)
+    protected RESTLink buildDatacenterLink(final Integer datacenterId,
+        final AbiquoLinkBuilder builder)
     {
         Map<String, String> params =
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString());
@@ -198,15 +201,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
-        
+
         if (managedRack)
         {
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_ON, MachineResource.MACHINE_ACTION_POWER_ON_REL,
-                params));
+                MachineResource.MACHINE_ACTION_POWER_ON,
+                MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_OFF, MachineResource.MACHINE_ACTION_POWER_OFF_REL,
-                params));
+                MachineResource.MACHINE_ACTION_POWER_OFF,
+                MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
         }
 
         return links;
@@ -600,17 +603,13 @@ public class RESTBuilder implements IRESTBuilder
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON,
-            "power on", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON, "power on", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF,
-            "power off", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF, "power off", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME,
-            "resume", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME, "resume", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE,
-            "pause", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
 
         return links;
     }
@@ -653,9 +652,9 @@ public class RESTBuilder implements IRESTBuilder
             // Previous using the page size avoiding to be less than 0.
             Integer previous = list.getCurrentElement() - list.getPageSize();
             previous =
-                (previous > list.getTotalResults()) ? (list.getTotalResults() - 2 * list
-                    .getPageSize()) : previous;
-            previous = (previous < 0) ? 0 : previous;
+                previous > list.getTotalResults() ? list.getTotalResults() - 2 * list.getPageSize()
+                    : previous;
+            previous = previous < 0 ? 0 : previous;
 
             links.add(new RESTLink(PREV, absolutePath + "?" + AbstractResource.START_WITH + "="
                 + previous));
@@ -725,7 +724,8 @@ public class RESTBuilder implements IRESTBuilder
         return buildEnterpriseLink(enterpriseId, builder);
     }
 
-    protected RESTLink buildEnterpriseLink(final Integer enterpriseId, final AbiquoLinkBuilder builder)
+    protected RESTLink buildEnterpriseLink(final Integer enterpriseId,
+        final AbiquoLinkBuilder builder)
     {
         Map<String, String> params =
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
@@ -786,22 +786,24 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
-        EnterpriseExclusionRuleDto enterpriseExclusionDto,
-        EnterpriseExclusionRule enterpriseExclusion)
+        final EnterpriseExclusionRuleDto enterpriseExclusionDto,
+        final EnterpriseExclusionRule enterpriseExclusion)
     {
         // TODO Auto-generated method stub
-	return null;
+        return null;
     }
-
 
     @Override
     public List<RESTLink> buildVolumeCloudLinks(final VolumeManagement volume)
     {
         return null;
     }
-    
-    public List<RESTLink> buildMachineLoadRuleLinks(MachineLoadRuleDto mlrDto, MachineLoadRule mlr)
+
+    @Override
+    public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
+        final MachineLoadRule mlr)
     {
         // TODO Auto-generated method stub
         return null;
@@ -813,7 +815,17 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    public List<RESTLink> buildFitPolicyRuleLinks(FitPolicyRuleDto fprDto, FitPolicyRule fpr)
+    @Override
+    public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
+        final FitPolicyRule fpr)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildApprovalManagerLinks(final Integer idEnterprise,
+        final Integer idUser, final ApprovalManagerDto dto)
     {
         // TODO Auto-generated method stub
         return null;

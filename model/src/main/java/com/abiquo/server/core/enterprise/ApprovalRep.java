@@ -15,6 +15,9 @@ public class ApprovalRep extends DefaultRepBase
     @Autowired
     private ApprovalDAO approvalDAO;
 
+    @Autowired
+    private ApprovalManagerDAO approvalManagerDAO;
+
     public ApprovalRep()
     {
 
@@ -44,5 +47,18 @@ public class ApprovalRep extends DefaultRepBase
     {
         List<Approval> list = approvalDAO.findAll();
         return list;
+    }
+
+    public List<ApprovalManager> findAllApprovalManager()
+    {
+        List<ApprovalManager> appmList = approvalManagerDAO.findAll();
+        return appmList;
+    }
+
+    public void insertApprovalManager(final ApprovalManager appm)
+    {
+        approvalManagerDAO.persist(appm);
+        approvalManagerDAO.flush();
+
     }
 }
