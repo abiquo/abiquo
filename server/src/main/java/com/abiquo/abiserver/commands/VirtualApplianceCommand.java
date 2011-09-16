@@ -373,4 +373,7 @@ public interface VirtualApplianceCommand
      */
     public abstract IVirtualApplianceWS getVirtualApplianceWs();
 
+    public abstract DataResult<Collection<Log>> getVirtualApplianceLogs(UserSession userSession,
+        VirtualAppliance virtualAppliance);
+
 }
