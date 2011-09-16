@@ -21,13 +21,14 @@
 
 package com.abiquo.server.core.pricing;
 
+import static org.testng.Assert.assertEquals;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 import com.abiquo.model.enumerator.PricingPeriod;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
 
 public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemplate>
 {
@@ -44,14 +45,26 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
     @Override
     public void assertAllPropertiesEqual(final PricingTemplate obj1, final PricingTemplate obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, PricingTemplate.NAME_PROPERTY,
-            PricingTemplate.HD_GB_PROPERTY, PricingTemplate.STANDING_CHARGE_PERIOD_PROPERTY,
-            PricingTemplate.VLAN_PROPERTY, PricingTemplate.SHOW_MINIMUM_CHARGE_PROPERTY,
-            PricingTemplate.CHARGING_PERIOD_PROPERTY,
-            PricingTemplate.MINIMUM_CHARGE_PERIOD_PROPERTY,
-            PricingTemplate.SHOW_CHANGES_BEFORE_PROPERTY, PricingTemplate.MINIMUM_CHARGE_PROPERTY,
-            PricingTemplate.PUBLIC_IP_PROPERTY, PricingTemplate.V_CPU_PROPERTY,
-            PricingTemplate.MEMORY_MB_PROPERTY);
+
+        // AssertEx.assertPropertiesEqualSilent(obj1, obj2, PricingTemplate.NAME_PROPERTY,
+        // PricingTemplate.HD_GB_PROPERTY, PricingTemplate.STANDING_CHARGE_PERIOD_PROPERTY,
+        // PricingTemplate.VLAN_PROPERTY, PricingTemplate.SHOW_MINIMUM_CHARGE_PROPERTY,
+        // PricingTemplate.CHARGING_PERIOD_PROPERTY,
+        // PricingTemplate.MINIMUM_CHARGE_PERIOD_PROPERTY,
+        // PricingTemplate.SHOW_CHANGES_BEFORE_PROPERTY, PricingTemplate.MINIMUM_CHARGE_PROPERTY,
+        // PricingTemplate.PUBLIC_IP_PROPERTY, PricingTemplate.V_CPU_PROPERTY,
+        // PricingTemplate.MEMORY_MB_PROPERTY);
+
+        assertEquals(obj1.getId(), obj2.getId());
+        assertEquals(obj1.getName(), obj2.getName());
+        assertEquals(obj1.getHdGB().setScale(2), obj2.getHdGB().setScale(2));
+        assertEquals(obj1.getVlan().setScale(2), obj2.getVlan().setScale(2));
+        assertEquals(obj1.getChargingPeriod().id(), obj2.getChargingPeriod().id());
+        assertEquals(obj1.getMinimumChargePeriod().setScale(2), obj2.getMinimumChargePeriod()
+            .setScale(2));
+        assertEquals(obj1.getPublicIp().setScale(2), obj2.getPublicIp().setScale(2));
+        assertEquals(obj1.getMemoryMB().setScale(2), obj2.getMemoryMB().setScale(2));
+        assertEquals(obj1.getCurrency().getId(), obj2.getCurrency().getId());
     }
 
     @Override

@@ -88,7 +88,7 @@
     <mx:ViewStack id="networkManagementVS"
         width="100%" height="100%">
         <privatenetwork:PrivateNetworkManagement id="privateNetworkManagement"
-            label="@Resource(bundle='Networking', key='LABEL_PRIVATE')"
+            label="@Resource(bundle='Networking', key='LABEL_PRIVATE_EXTERNAL')"
             show="onShowPrivateNetworkManagement()"
             selectedVLANChange="onSelectedPrivateVLANChange()"/>
     </mx:ViewStack>

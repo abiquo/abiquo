@@ -21,12 +21,13 @@
 
 package com.abiquo.server.core.pricing;
 
+import static org.testng.Assert.assertEquals;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
 
 public class CostCodeCurrencyGenerator extends DefaultEntityGenerator<CostCodeCurrency>
 {
@@ -46,7 +47,10 @@ public class CostCodeCurrencyGenerator extends DefaultEntityGenerator<CostCodeCu
     @Override
     public void assertAllPropertiesEqual(final CostCodeCurrency obj1, final CostCodeCurrency obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, CostCodeCurrency.PRICE_PROPERTY);
+        assertEquals(obj1.getId(), obj2.getId());
+        assertEquals(obj1.getPrice().setScale(2), obj2.getPrice().setScale(2));
+        assertEquals(obj1.getCostCode().getId(), obj2.getCostCode().getId());
+        assertEquals(obj1.getCurrency().getId(), obj2.getCurrency().getId());
     }
 
     @Override
