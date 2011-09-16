@@ -97,6 +97,7 @@
              */
             public function onLogsRetrieved(value:ArrayCollection):void
             {
+                this._virtualAppliance.logs = value;
                 this._logs = value; 
             }
 
