@@ -20,7 +20,6 @@
  */
 package com.abiquo.api.resources.appslibrary;
 
-import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -52,7 +51,7 @@ public class AMResource extends StaticRemoteServiceResource
     public static final String AM_SERVICE_TYPE = "appliance_manager";
 
     /** The path to manage the actions of this remote service. */
-    public static final String AM_SERVICE_PATH = AM_SERVICE_TYPE;
+    public static final String AM_SERVICE_PATH = "appliancemanager";
 
     // /** The path to the brief action. */
     // public static final String DOWNLOAD_DISK_FILE = "actions/downloadDiskFile";
@@ -75,8 +74,8 @@ public class AMResource extends StaticRemoteServiceResource
     /* REST Methods */
     @GET
     public AMConfigurationDto getAMConfiguration(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AM_SERVICE_TYPE) String serviceType) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(AM_SERVICE_PATH) final String serviceType) throws Exception
     {
 
         validatePathParameters(datacenterId, serviceType);
@@ -93,8 +92,8 @@ public class AMResource extends StaticRemoteServiceResource
     /**
      * 
      */
-    protected static RemoteService getValidAMRemoteService(InfrastructureService r,
-        String serviceType, Integer datacenterId)
+    protected static RemoteService getValidAMRemoteService(final InfrastructureService r,
+        final String serviceType, final Integer datacenterId)
     {
         if (!isApplianceManagerType(serviceType))
         {
@@ -111,20 +110,20 @@ public class AMResource extends StaticRemoteServiceResource
         return r.getRemoteService(datacenterId, type);
     }
 
-    private static boolean isApplianceManagerType(String serviceType)
+    private static boolean isApplianceManagerType(final String serviceType)
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType.toUpperCase());
         boolean result = false;
 
         if (type != null)
         {
-            result = (type == RemoteServiceType.APPLIANCE_MANAGER);
+            result = type == RemoteServiceType.APPLIANCE_MANAGER;
         }
 
         return result;
     }
 
-    private void validatePathParameters(Integer datacenterId, String serviceType)
+    private void validatePathParameters(final Integer datacenterId, final String serviceType)
         throws NotFoundException
     {
         RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
