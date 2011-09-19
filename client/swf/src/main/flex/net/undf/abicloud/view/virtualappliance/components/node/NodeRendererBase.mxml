@@ -40,6 +40,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.states.State;
@@ -391,7 +392,9 @@
              **/
             private function onRollOver():void
             {
-                buttonsContainer.visible = true;
+                if(NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
+	                buttonsContainer.visible = true;
+                }
             }
 
             /**
