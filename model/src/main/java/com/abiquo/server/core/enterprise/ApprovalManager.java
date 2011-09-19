@@ -25,9 +25,14 @@ public class ApprovalManager extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected ApprovalManager()
+    public ApprovalManager()
     {
         // Just for JPA support
+    }
+
+    public ApprovalManager(final String approvalMail)
+    {
+        setApprovalMail(approvalMail);
     }
 
     private final static String ID_COLUMN = "idApprovalManager";

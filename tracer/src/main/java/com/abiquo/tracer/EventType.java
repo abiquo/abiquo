@@ -161,7 +161,15 @@ public enum EventType implements Serializable
     // STORAGE DEVICE
     STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
-        "STORAGE DEVICE DELETED", "Storage device deleted");
+        "STORAGE DEVICE DELETED", "Storage device deleted"),
+
+    // APPROVAL
+    APROVAL(1700, "APPROVAL CREATED", "Approval created"), APPROVAL_MODIFIED(1701,
+        "APPROVAL MODIFIED", "Approval modified"), APPROVAL_DELETED(1702, "APPROVAL DELETED",
+        "Approval deleted"), APPROVAL_MANAGER(1703, "APPROVAL MANAGER CREATED",
+        "Approval manager created"), APPROVAL_MANAGER_MODIFIED(1704, "APPROVAL MANAGER MODIFIED",
+        "approval manager modified"), APPROVAL_MANAGER_DELETED(1705, "APPROVAL MANAGER DELETED",
+        "Approval manager deleted");
 
     private final int event;
 

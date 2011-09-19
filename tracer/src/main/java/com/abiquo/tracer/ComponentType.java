@@ -74,7 +74,10 @@ public enum ComponentType implements Serializable
     HIGH_AVAILABILITY(2621444, "High availability engine"),
 
     // STORAGE DEVICES
-    STORAGE_DEVICE(5242888, "Storage device");
+    STORAGE_DEVICE(5242888, "Storage device"),
+
+    // APPROVAL
+    APPROVAL(8388608, "Approval");
 
     private final int component;
 

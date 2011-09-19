@@ -61,4 +61,23 @@ public class ApprovalRep extends DefaultRepBase
         approvalManagerDAO.flush();
 
     }
+
+    public ApprovalManager findApprovalManagerById(final Integer approvalManagerId)
+    {
+        assert approvalManagerId != null;
+        return approvalManagerDAO.findById(approvalManagerId);
+    }
+
+    public void deleteApprovalManager(final ApprovalManager appm)
+    {
+        approvalManagerDAO.remove(appm);
+        approvalManagerDAO.flush();
+
+    }
+
+    public void updateApprovalManager(final ApprovalManager aprovalmanager)
+    {
+        assert aprovalmanager != null;
+        approvalManagerDAO.flush();
+    }
 }
