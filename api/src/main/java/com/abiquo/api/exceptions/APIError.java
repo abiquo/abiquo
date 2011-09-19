@@ -185,7 +185,8 @@ public enum APIError
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
         "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
-        "The user cannot delete his own user account"),
+        "The user cannot delete his own user account"), USER_MISSING_LINK("USER 10",
+        "Missing link to the user"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -320,7 +321,10 @@ public enum APIError
         "The requested load level rule does not exist"), ONE_FPR_REQUIRED("RULE-4",
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
-        "RULE-6", "The load balance type indicated is null or invalid")
+        "RULE-6", "The load balance type indicated is null or invalid"),
+
+    // APPROVAL
+    NON_EXISTENT_APPM("APPROVAL-1", "The requested approval manager does not exist")
 
     ;
 

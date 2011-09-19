@@ -307,7 +307,18 @@
         <security:intercept-url pattern="/approvals/denied" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/approvals/denied/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
         <security:intercept-url pattern="/approvals/denied/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        
         <!-- MANAGERS -->
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="GET" access="ROLE_AUTHENTICATED,ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="POST" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="PUT" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="DELETE" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="OPTIONS" access="ROLE_APPROVAL_MANAGE" />
+        
+        
+
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->
