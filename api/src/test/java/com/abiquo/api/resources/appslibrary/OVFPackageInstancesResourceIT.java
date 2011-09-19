@@ -48,7 +48,7 @@ public class OVFPackageInstancesResourceIT extends AbstractResourceIT
     }
 
     private String ovfPackageInstancesURI =
-        resolveOVFPackageInstancesURI(1, AMResource.AM_SERVICE_TYPE, 1);
+        resolveOVFPackageInstancesURI(1, AMResource.AM_SERVICE_PATH, 1);
 
     @Test(enabled = false)
     public void getOVFPackageInstances() throws Exception
