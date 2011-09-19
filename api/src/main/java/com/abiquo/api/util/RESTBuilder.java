@@ -289,7 +289,7 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(RemoteServiceResource.REMOTE_SERVICE, remoteService.getType().toString()
-            .toLowerCase());
+            .toLowerCase().replace("_",""));
 
         links.add(builder.buildRestLink(RemoteServiceResource.class, REL_EDIT, params));
         return links;
