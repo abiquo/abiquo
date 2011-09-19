@@ -127,6 +127,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         String uri = createEnterpriseLink(enterprise.getId());
 
         EnterpriseDto dto = fromEnterpriseToDto(enterprise);
+        dto.setId(enterprise.getId());
 
         result = new DataResult<Enterprise>();
 
