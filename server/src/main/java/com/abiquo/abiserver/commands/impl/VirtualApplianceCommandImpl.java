@@ -3415,10 +3415,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             session.delete(rasd);
             netMan.setRasd(null);
             netMan.setVirtualMachine(null);
-            netMan.setMac(null);
             netMan.setVirtualApp(null);
             netMan.setConfigureGateway(Boolean.FALSE);
 
+            if (rasd.getResourceSubType() != null
+                && rasd.getResourceSubType().equalsIgnoreCase("2"))
+            {
+                netMan.setMac(null);
+                netMan.setVirtualDataCenter(null);
+                netMan.setName(null);
+            }
             session.saveOrUpdate(netMan);
         }
     }
