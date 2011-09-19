@@ -31,7 +31,7 @@ public class OVFPackageList extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected OVFPackageList()
+    public OVFPackageList()
     {
         // Just for JPA support
     }
@@ -46,6 +46,11 @@ public class OVFPackageList extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     public final static String APPS_LIBRARY_PROPERTY = "appsLibrary";
@@ -93,7 +98,7 @@ public class OVFPackageList extends DefaultEntityBase
         return this.name;
     }
 
-    private void setName(final String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -121,7 +126,7 @@ public class OVFPackageList extends DefaultEntityBase
         return this.url;
     }
 
-    private void setUrl(final String url)
+    public void setUrl(final String url)
     {
         this.url = url;
     }

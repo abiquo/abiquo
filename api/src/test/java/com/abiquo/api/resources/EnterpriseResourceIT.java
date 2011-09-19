@@ -436,6 +436,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(vdc);

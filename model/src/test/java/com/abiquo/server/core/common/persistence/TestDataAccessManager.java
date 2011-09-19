@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -139,9 +140,9 @@ public class TestDataAccessManager
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
             VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
-            OVFPackageList.class, OVFPackage.class, AppsLibrary.class, VolumeManagement.class,
-            VirtualImageConversion.class, VirtualImage.class, Category.class,
-            IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
+            OVFPackageList.class, OVFPackage.class, AppsLibrary.class, Icon.class,
+            VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
+            Category.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
             Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,

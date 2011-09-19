@@ -1,5 +1,7 @@
 package com.abiquo.server.core.appslibrary;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -7,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -43,6 +47,11 @@ public class OVFPackage extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     public final static String APPS_LIBRARY_PROPERTY = "appsLibrary";
@@ -90,7 +99,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.productVersion;
     }
 
-    private void setProductVersion(final String productVersion)
+    public void setProductVersion(final String productVersion)
     {
         this.productVersion = productVersion;
     }
@@ -168,7 +177,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.productVendor;
     }
 
-    private void setProductVendor(final String productVendor)
+    public void setProductVendor(final String productVendor)
     {
         this.productVendor = productVendor;
     }
@@ -196,7 +205,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.productUrl;
     }
 
-    private void setProductUrl(final String productUrl)
+    public void setProductUrl(final String productUrl)
     {
         this.productUrl = productUrl;
     }
@@ -267,7 +276,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.type;
     }
 
-    private void setType(final DiskFormatType type)
+    public void setType(final DiskFormatType type)
     {
         this.type = type;
     }
@@ -295,7 +304,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.productName;
     }
 
-    private void setProductName(final String productName)
+    public void setProductName(final String productName)
     {
         this.productName = productName;
     }
@@ -319,7 +328,7 @@ public class OVFPackage extends DefaultEntityBase
         return this.diskSizeMb;
     }
 
-    private void setDiskSizeMb(final long diskSizeMb)
+    public void setDiskSizeMb(final long diskSizeMb)
     {
         this.diskSizeMb = diskSizeMb;
     }
@@ -350,6 +359,31 @@ public class OVFPackage extends DefaultEntityBase
     public void setDescription(final String description)
     {
         this.description = description;
+    }
+
+    /**
+     * OVF Package List Association
+     */
+    public static final String OVF_PACKAGE_LIST_TABLE = "ovf_package_list_has_ovf_package";
+
+    public static final String OVF_PACKAGE_LIST_PROPERTY = "ovf_packages_list";
+
+    static final String OVF_PACKAGE_LIST_ID_COLUMN = "id_ovf_package_list";
+
+    static final String OVF_PACKAGES_ID_COLUMN = "id_ovf_package";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = OVF_PACKAGE_LIST_TABLE, joinColumns = {@JoinColumn(name = OVF_PACKAGE_LIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = OVF_PACKAGES_ID_COLUMN)})
+    private List<OVFPackageList> ovfPackageLists;
+
+    public List<OVFPackageList> getOvfPackageLists()
+    {
+        return ovfPackageLists;
+    }
+
+    public void setOvfPackageLists(final List<OVFPackageList> ovfPackageLists)
+    {
+        this.ovfPackageLists = ovfPackageLists;
     }
 
     public OVFPackage(final String name, final String productName, final String productUrl,

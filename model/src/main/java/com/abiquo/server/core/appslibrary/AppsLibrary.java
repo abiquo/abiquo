@@ -28,7 +28,7 @@ public class AppsLibrary extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected AppsLibrary()
+    public AppsLibrary()
     {
         // Just for JPA support
     }

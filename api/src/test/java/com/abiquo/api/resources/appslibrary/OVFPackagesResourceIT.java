@@ -74,7 +74,7 @@ public class OVFPackagesResourceIT extends AbstractResourceIT
         OVFPackageDto p = new OVFPackageDto();
         p.setDescription("test_created_desc");
         p.setDiskFormatTypeUri("http://diskFormat"); // TODO: test this is a necessary field
-        p.setCategoryName("category_1"); // TODO: test this is a necessary field
+        p.setName("category_1"); // TODO: test this is a necessary field
 
         ClientResponse response =
             resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
@@ -86,7 +86,7 @@ public class OVFPackagesResourceIT extends AbstractResourceIT
         assertNotNull(entityPost);
         assertEquals(p.getDescription(), entityPost.getDescription());
         assertEquals(p.getDiskFormatTypeUri(), entityPost.getDiskFormatTypeUri());
-        assertEquals(p.getCategoryName(), entityPost.getCategoryName());
+        assertEquals(p.getName(), entityPost.getName());
     }
 
 }

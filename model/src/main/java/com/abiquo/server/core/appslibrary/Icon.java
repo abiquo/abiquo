@@ -21,9 +21,14 @@ public class Icon extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected Icon()
+    public Icon()
     {
         // Just for JPA support
+    }
+
+    public Icon(final String iconPath)
+    {
+        setPath(iconPath);
     }
 
     private final static String ID_COLUMN = "idIcon";

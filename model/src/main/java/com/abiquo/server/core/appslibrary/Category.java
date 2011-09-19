@@ -22,7 +22,7 @@ public class Category extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected Category()
+    public Category()
     {
         // Just for JPA support
     }

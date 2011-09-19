@@ -96,7 +96,7 @@ public class OVFPackageListsResourceIT extends AbstractResourceIT
         OVFPackageDto p = new OVFPackageDto();
         p.setDescription("test_created_desc");
         p.setDiskFormatTypeUri("http://diskFormat"); // TODO: test this is a necessary field
-        p.setCategoryName("category_1"); // TODO: test this is a necessary field
+        p.setName("category_1"); // TODO: test this is a necessary field
         packages.add(p);
         packageList.setOvfPackages(packages);
 

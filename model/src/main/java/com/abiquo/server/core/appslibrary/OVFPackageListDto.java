@@ -1,5 +1,7 @@
 package com.abiquo.server.core.appslibrary;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -41,6 +43,18 @@ public class OVFPackageListDto extends SingleResourceTransportDto
     public void setUrl(final String url)
     {
         this.url = url;
+    }
+
+    private List<OVFPackageDto> ovfPackages;
+
+    public List<OVFPackageDto> getOvfPackages()
+    {
+        return ovfPackages;
+    }
+
+    public void setOvfPackages(final List<OVFPackageDto> ovfPackages)
+    {
+        this.ovfPackages = ovfPackages;
     }
 
 }

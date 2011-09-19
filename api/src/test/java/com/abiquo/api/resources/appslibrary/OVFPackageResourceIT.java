@@ -66,7 +66,7 @@ public class OVFPackageResourceIT extends AbstractResourceIT
         assertNotNull(ovfPackageDto);
         assertEquals(ovfPackageDto.getDescription(), "ovfPackage_1");
         assertEquals(ovfPackageDto.getDiskFormatTypeUri(), "http://diskFormat");
-        assertEquals(ovfPackageDto.getCategoryName(), "category_1");
+        assertEquals(ovfPackageDto.getName(), "category_1");
     }
 
     private OVFPackageDto getValidOVFPackage()
