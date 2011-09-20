@@ -114,19 +114,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         if (dataResult.getSuccess())
         {
-            traceLog(
-                SeverityType.INFO,
-                ComponentType.USER,
-                EventType.USER_CREATE,
-                userSession,
-                null,
-                null,
-                "User '" + user.getUser() + "' has been created [Enterprise: "
-                    + user.getEnterprise().getName() + ", Name: " + user.getName() + ", Surname: "
-                    + user.getSurname() + ", Role: " + user.getRole().getName() + ", User: "
-                    + user.getUser() + ", Email: " + user.getEmail() + ", Description: "
-                    + user.getDescription() + "]", null, null, null, user.getUser(), user
-                    .getEnterprise().getName());
+            dataResult.setMessage(resourceManager.getMessage("createUser.success"));
         }
 
         return dataResult;
@@ -154,13 +142,6 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
             {
                 basicResult.setMessage(resourceManager.getMessage("editUser.success"));
 
-                traceLog(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, userSession,
-                    null, null, "User '" + user.getUser() + "' has been modified [Enterprise: "
-                        + user.getEnterprise().getName() + ", Name: " + user.getName()
-                        + ", Surname: " + user.getSurname() + ", Role: " + user.getRole().getName()
-                        + ", User: " + user.getUser() + ", Email: " + user.getEmail()
-                        + ", Description: " + user.getDescription() + "]", null, null, null,
-                    user.getUser(), user.getEnterprise().getName());
             }
             else
             {
@@ -190,6 +171,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         if (basicResult.getSuccess())
         {
             basicResult.setMessage(resourceManager.getMessage("deleteUser.success"));
+
         }
         else
         {
