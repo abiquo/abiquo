@@ -62,18 +62,20 @@ public class BootstrapDto implements Serializable
     }
 
     @XmlRootElement(name = "chef")
-    @XmlType(propOrder = {"chefServerURL", "validationCertificate", "recipes"})
+    @XmlType(propOrder = {"chefServerURL", "validatorName", "validationCertificate", "recipes"})
     public static class ChefBootstrap implements Serializable
     {
         private static final long serialVersionUID = 1L;
 
         private String chefServerURL;
 
+        private String validatorName;
+
         private String validationCertificate;
 
         private RecipeListDto recipes = new RecipeListDto();
 
-        @XmlElement(name = "chefserver")
+        @XmlElement(name = "chef-server-url")
         public String getChefServerURL()
         {
             return chefServerURL;
@@ -82,6 +84,17 @@ public class BootstrapDto implements Serializable
         public void setChefServerURL(final String chefServerURL)
         {
             this.chefServerURL = chefServerURL;
+        }
+
+        @XmlElement(name = "validation-client-name")
+        public String getValidatorName()
+        {
+            return validatorName;
+        }
+
+        public void setValidatorName(final String validatorName)
+        {
+            this.validatorName = validatorName;
         }
 
         @XmlElement(name = "validation-cert")
