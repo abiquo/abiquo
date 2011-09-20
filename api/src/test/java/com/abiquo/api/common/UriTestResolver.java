@@ -111,7 +111,7 @@ public class UriTestResolver
 
     public static String resolveEnterpriseActionGetVirtualMachinesURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId)
+        return resolveEnterpriseURI(entId) + "/"
             + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
