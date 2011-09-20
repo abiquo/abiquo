@@ -21,22 +21,19 @@
 
 package com.abiquo.server.core.infrastructure;
 
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "policy")
 public class LogicServerPolicyDto
 {
 
-    @XmlElement(required = true)
     protected String dn;
 
     // It can be template (update or initial) or instance
-    @XmlElement(required = true)
     protected String name;
 
-    @XmlElement(required = true)
     protected String priority;
 
-    @XmlElement(required = false)
     protected String description;
 
     public String getDn()

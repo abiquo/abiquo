@@ -49,6 +49,8 @@ import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.UcsRack;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
@@ -250,12 +252,16 @@ public class Allocator implements IAllocator
 
         log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
             targetMachine.getName(), vmachine.getName());
+        if (fitPolicy.equals(FitPolicy.PROGRESSIVE))
+        {
+            adjustPoweredMachinesInRack(targetMachine.getRack());
+        }
 
         return vmachine;
     }
 
     @Override
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, State state)
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, final State state)
         throws AllocatorException, ResourceAllocationException
     {
         log.error("Community doesn't implement HA");
@@ -341,6 +347,55 @@ public class Allocator implements IAllocator
         final Integer idDatacenter, final Integer idEnterprise)
     {
         return machineChecker.check(machine);
+    }
+
+    /**
+     * We check how many empty machines are in a rack. Then we power on or off to fit the
+     * configuration. In 2.0 only in {@link UcsRack}.
+     * 
+     * @param targetMachine machine we are deploy void
+     */
+    protected void adjustPoweredMachinesInRack(final Rack rack)
+    {
+        // Only UcsRack
+        if (!(rack instanceof UcsRack))
+        {
+            log.debug("We can only adjust max machines on in UCS");
+            return;
+        }
+        Integer max = ((UcsRack) rack).getMaxMachinesOn();
+        if (max == null || max == 0)
+        {
+            log.debug("Max machines on feature is disable for rack: " + rack.getId());
+            return;
+        }
+
+        Integer emptyMachinesOn = this.allocationService.getEmptyOnMachines(rack.getId());
+        if (max < emptyMachinesOn)
+        {
+            log.debug("No enough machines rack: " + rack.getId() + " should be " + max
+                + " but there are " + emptyMachinesOn);
+            Integer offMachines = this.allocationService.getEmptyOffMachines(rack.getId());
+            if (offMachines != 0)
+            {
+                Machine machine =
+                    this.allocationService.getRandomMachineToStartFromRack(rack.getId());
+                shutDownMachine(machine);
+            }
+            log.debug("No off machines empty machines for rack: " + rack.getId());
+        }
+        else if (max > emptyMachinesOn)
+        {
+            log.debug("Too many machines rack: " + rack.getId() + " should be " + max
+                + " but there are " + emptyMachinesOn);
+        }
+
+    }
+
+    protected void shutDownMachine(final Machine machine)
+    {
+        // PREMIUM
+
     }
 
     /*

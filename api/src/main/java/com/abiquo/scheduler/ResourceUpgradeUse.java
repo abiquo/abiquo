@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -51,6 +52,7 @@ import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.UcsRack;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -59,6 +61,9 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 
 /**
  * Updates the following resource.
@@ -99,6 +104,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Autowired
     HypervisorDAO hypervisorDao;
 
+    @Autowired
+    VirtualimageAllocationService allocationService;
+
+    @Autowired
+    FitPolicyRuleDAO fitPolicyDao;
+
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
     /**
@@ -114,8 +125,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
-        Integer sourceHypervisorId)
+    public void updateUseHa(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final Integer sourceHypervisorId)
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
                                                              // hypervisor
@@ -124,7 +135,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
-    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
+    private void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final boolean isHA)
     {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
@@ -197,6 +209,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             throw new ResourceUpgradeUseException("Can not update resource utilization"
                 + e.getMessage());
+        }
+
+        if (getAllocationFitPolicyOnDatacenter(
+            virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
+            FitPolicyRule.FitPolicy.PROGRESSIVE))
+        {
+            adjustPoweredMachinesInRack(virtualMachine.getHypervisor().getMachine().getRack());
         }
     }
 
@@ -339,12 +358,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         final int newCpu =
-            (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu());
+            isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
+                .getVirtualCpusUsed() + used.getCpu();
 
         final int newRam =
-            (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam());
+            isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
+                .getVirtualRamUsedInMb() + used.getRam();
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -367,6 +386,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datacenterRepo.updateMachine(machine);
     }
 
+    @Override
     public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
     {
         machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);
@@ -404,7 +424,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datastoreDao.flush();
     }
 
-    private void updateDatastore(Datastore datastore, Long requestSize, boolean isRollback)
+    private void updateDatastore(final Datastore datastore, final Long requestSize,
+        final boolean isRollback)
     {
         final Long actualSize = datastore.getUsedSize();
 
@@ -552,7 +573,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return vlans_avoided_collection;
     }
 
-    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(List<VLANNetwork> vlanNetworkList)
+    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(
+        final List<VLANNetwork> vlanNetworkList)
     {
         List<Integer> publicIdsList = new ArrayList<Integer>();
         for (VLANNetwork vlanNetwork : vlanNetworkList)
@@ -561,5 +583,62 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
 
         return publicIdsList;
+    }
+
+    /**
+     * We check how many empty machines are in a rack. Then we power on or off to fit the
+     * configuration. In 2.0 only in {@link UcsRack}.
+     * 
+     * @param targetMachine machine we are deploy void
+     */
+    protected void adjustPoweredMachinesInRack(final Rack rack)
+    {
+        // Only UcsRack
+        if (!(rack instanceof UcsRack))
+        {
+            log.debug("We can only adjust max machines on in UCS");
+            return;
+        }
+        Integer max = ((UcsRack) rack).getMaxMachinesOn();
+        if (max == null || max == 0)
+        {
+            log.debug("Max machines on feature is disable for rack: " + rack.getId());
+            return;
+        }
+
+        Integer emptyMachinesOn = this.allocationService.getEmptyOnMachines(rack.getId());
+        if (max < emptyMachinesOn)
+        {
+            log.debug("No enough machines rack: " + rack.getId() + " should be " + max
+                + " but there are " + emptyMachinesOn);
+            Integer offMachines = this.allocationService.getEmptyOffMachines(rack.getId());
+            if (offMachines != 0)
+            {
+                Machine machine =
+                    this.allocationService.getRandomMachineToStartFromRack(rack.getId());
+            }
+            log.debug("No off machines empty machines for rack: " + rack.getId());
+        }
+        else if (max > emptyMachinesOn)
+        {
+            log.debug("Too many machines rack: " + rack.getId() + " should be " + max
+                + " but there are " + emptyMachinesOn);
+        }
+
+    }
+
+    protected void shutDownMachine(final Machine machine)
+    {
+        // PREMIUM
+    }
+
+    /**
+     * By datacenter
+     */
+    protected FitPolicy getAllocationFitPolicyOnDatacenter(final Integer idDatacenter)
+    {
+        FitPolicyRule fit = fitPolicyDao.getFitPolicyForDatacenter(idDatacenter);
+
+        return fit != null ? fit.getFitPolicy() : fitPolicyDao.getGlobalFitPolicy().getFitPolicy();
     }
 }

@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -166,9 +168,10 @@ public class LogicServerDto
      * getCollection().add(newItem);
      * </pre>
      * <p>
-     * Objects of the following type(s) are allowed in the list {@link LogicServerDto }
+     * Objects of the following type(s) are allowed in the list {@link LogicServerPolicyDto }
      */
-    @XmlElement(name = "logicServer")
+    @XmlElements({@XmlElement(name = "policy", type = LogicServerPolicyDto.class)})
+    @XmlElementWrapper(name = "policies")
     public List<LogicServerPolicyDto> getCollection()
     {
         if (policies == null)

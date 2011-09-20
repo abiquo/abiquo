@@ -587,6 +587,7 @@ CREATE TABLE  `kinton`.`ucs_rack` (
   `user_rack` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `defaultTemplate` varchar(200),
+  `maxMachinesOn` int(4) DEFAULT 0,
   KEY `id_rack_FK` (`idRack`),
   CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

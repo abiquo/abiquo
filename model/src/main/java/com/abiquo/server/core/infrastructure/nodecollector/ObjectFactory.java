@@ -303,8 +303,9 @@ public class ObjectFactory
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link LogicServerPolicyDto }{@code >}
      */
-    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "Fsm")
-    public JAXBElement<LogicServerPolicyDto> createFsm(final LogicServerPolicyDto value)
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "LogicServerPolicy")
+    public JAXBElement<LogicServerPolicyDto> createLogicServerPolicy(
+        final LogicServerPolicyDto value)
     {
         return new JAXBElement<LogicServerPolicyDto>(_LogicServerPolicy_QNAME,
             LogicServerPolicyDto.class,
