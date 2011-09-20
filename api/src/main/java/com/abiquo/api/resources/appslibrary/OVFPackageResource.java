@@ -32,8 +32,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +65,12 @@ public class OVFPackageResource extends AbstractResource
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
-    public static final String INSTALL_ACTION = "actions/install";
+    public static final String INSTALL_ACTION = "action/install";
 
-    public static final String INSTALL_TARGET_QUERY_PARAM = "idDatacenter";
+    public static final String INSTALL_TARGET_QUERY_PARAM = "iddatacenter";
 
     /** Used to know where the AM is located on the current datacenter. */
-    //@Autowired
+    // @Autowired
     @Resource(name = "infrastructureService")
     InfrastructureService remoteServices;
 
@@ -87,8 +87,8 @@ public class OVFPackageResource extends AbstractResource
     AppsLibraryTransformer transformer;
 
     @GET
-    public OVFPackageDto getOVFPackage(@PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageDto getOVFPackage(@PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackage ovfPackage = service.getOVFPackage(ovfPackageId);
         if (ovfPackage == null)
@@ -100,10 +100,10 @@ public class OVFPackageResource extends AbstractResource
     }
 
     @PUT
-    public OVFPackageDto modifyOVFPackage(OVFPackageDto ovfPackage,
-        @PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageDto modifyOVFPackage(final OVFPackageDto ovfPackage,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackage d = transformer.createPersistenceObject(ovfPackage);
 
@@ -113,18 +113,18 @@ public class OVFPackageResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteOVFPackage(@PathParam(OVF_PACKAGE) Integer ovfPackageId)
+    public void deleteOVFPackage(@PathParam(OVF_PACKAGE) final Integer ovfPackageId)
     {
         service.removeOVFPackage(ovfPackageId);
     }
 
     @POST
     @Path(OVFPackageResource.INSTALL_ACTION)
-    public Response installOVFPackageOnDatacenter(@Context UriInfo uriInfo,
-        @Context IRESTBuilder restBuilder,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @QueryParam(INSTALL_TARGET_QUERY_PARAM) String idDatacenter) throws Exception
+    public Response installOVFPackageOnDatacenter(@Context final UriInfo uriInfo,
+        @Context final IRESTBuilder restBuilder,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @QueryParam(INSTALL_TARGET_QUERY_PARAM) final String idDatacenter) throws Exception
     {
         Response response;
 
