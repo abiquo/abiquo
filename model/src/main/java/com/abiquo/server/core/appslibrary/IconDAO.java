@@ -19,4 +19,9 @@ public class IconDAO extends DefaultDAOBase<Integer, Icon>
         super(Icon.class, entityManager);
     }
 
+    public Icon findByPath(final String path)
+    {
+        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
+    }
+
 }

@@ -32,24 +32,19 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.OVFPackageService;
-import com.abiquo.api.services.stub.ApplianceManagerStub;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -70,13 +65,9 @@ public class OVFPackageResource extends AbstractResource
     public static final String INSTALL_TARGET_QUERY_PARAM = "idDatacenter";
 
     /** Used to know where the AM is located on the current datacenter. */
-    //@Autowired
+    // @Autowired
     @Resource(name = "infrastructureService")
     InfrastructureService remoteServices;
-
-    /** Used to consume the remote service Appliance Manager. */
-    @Autowired
-    ApplianceManagerStub amStub;
 
     /** Internal logic. */
     @Autowired
@@ -87,23 +78,18 @@ public class OVFPackageResource extends AbstractResource
     AppsLibraryTransformer transformer;
 
     @GET
-    public OVFPackageDto getOVFPackage(@PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageDto getOVFPackage(@PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        OVFPackage ovfPackage = service.getOVFPackage(ovfPackageId);
-        if (ovfPackage == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_OVF_PACKAGE);
-        }
-
-        return transformer.createTransferObject(ovfPackage, restBuilder);
+        OVFPackage ovfpackage = service.getOVFPackage(ovfPackageId, restBuilder);
+        return transformer.createTransferObject(ovfpackage, restBuilder);
     }
 
     @PUT
-    public OVFPackageDto modifyOVFPackage(OVFPackageDto ovfPackage,
-        @PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageDto modifyOVFPackage(final OVFPackageDto ovfPackage,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackage d = transformer.createPersistenceObject(ovfPackage);
 
@@ -113,53 +99,24 @@ public class OVFPackageResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteOVFPackage(@PathParam(OVF_PACKAGE) Integer ovfPackageId)
+    public void deleteOVFPackage(@PathParam(OVF_PACKAGE) final Integer ovfPackageId)
     {
         service.removeOVFPackage(ovfPackageId);
     }
 
     @POST
     @Path(OVFPackageResource.INSTALL_ACTION)
-    public Response installOVFPackageOnDatacenter(@Context UriInfo uriInfo,
-        @Context IRESTBuilder restBuilder,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @PathParam(OVF_PACKAGE) Integer ovfPackageId,
-        @QueryParam(INSTALL_TARGET_QUERY_PARAM) String idDatacenter) throws Exception
+    public Response installOVFPackageOnDatacenter(@Context final UriInfo uriInfo,
+        @Context final IRESTBuilder restBuilder,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @QueryParam(INSTALL_TARGET_QUERY_PARAM) final String idDatacenter) throws Exception
     {
-        Response response;
-
         final String amUri = getApplianceManagerAddressOnDatacenter(Integer.valueOf(idDatacenter));
-        final String ovfLocation = service.getOVFPackage(ovfPackageId).getUrl();
+        final String ovfLocation = service.getOVFPackage(ovfPackageId, restBuilder).getUrl();
 
-        OVFPackageInstanceStatusDto stat =
-            amStub.installOVFPackage(amUri, String.valueOf(idEnterprise), ovfLocation);
-
-        OVFPackageInstanceStatusType status = stat.getOvfPackageStatus();
-        switch (status)
-        {
-            case NOT_DOWNLOAD:
-                response = Response.status(Status.NOT_FOUND).build();
-                break;
-            case DOWNLOAD:
-                response = Response.status(Status.CREATED).build();
-                break;
-            case DOWNLOADING:
-                final String progress = String.valueOf(stat.getProgress());
-                response = Response.status(Status.ACCEPTED).entity(progress).build();
-                break;
-            case ERROR:
-                final String error = stat.getErrorCause();
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(error).build();
-                break;
-
-            default:
-                final String cause =
-                    String.format("Can not determine the OVFPackage status [%s]", status.name());
-                response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(cause).build();
-                break;
-        }
-
-        return response;
+        return service.installOVFPackageOnDatacenter(amUri, String.valueOf(idEnterprise),
+            ovfLocation);
     }
 
     private String getApplianceManagerAddressOnDatacenter(final Integer idDatacenter)
