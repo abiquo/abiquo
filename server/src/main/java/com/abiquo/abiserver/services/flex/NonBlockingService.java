@@ -341,4 +341,14 @@ public class NonBlockingService
         return command
             .bundleVirtualAppliance(session, virtualAppliance, new ArrayList<Node>(nodes));
     }
+
+    public BasicResult getVirtualApplianceLogs(final UserSession userSession,
+        final VirtualAppliance virtualAppliance)
+    {
+        VirtualApplianceCommand command =
+            BusinessDelegateProxy.getInstance(userSession, virtualAppCommand,
+                VirtualApplianceCommand.class);
+
+        return command.getVirtualApplianceLogs(userSession, virtualAppliance);
+    }
 }

@@ -23,9 +23,11 @@ package com.abiquo.api.resources;
 
 import static com.abiquo.api.resources.UserResource.createTransferObject;
 import static com.abiquo.api.resources.UserResource.createTransferObjectWithRole;
+import static com.abiquo.api.resources.UserResource.createUsersTransferObjectWithRole;
 
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -70,8 +72,8 @@ public class UsersResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    // @Consumes({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
-    @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
+    @Consumes(LINK_MEDIA_TYPE)
+    @Produces(LINK_MEDIA_TYPE)
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
@@ -114,7 +116,7 @@ public class UsersResource extends AbstractResource
     }
 
     @GET
-    // @Consumes(FLAT_MEDIA_TYPE)
+    @Consumes(FLAT_MEDIA_TYPE)
     @Produces(FLAT_MEDIA_TYPE)
     public UsersWithRolesDto getUsersWithRoles(
         @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
@@ -143,8 +145,9 @@ public class UsersResource extends AbstractResource
         {
             for (User u : all)
             {
-                UserWithRoleDto uDto = createTransferObjectWithRole(u, restBuilder);
-                uDto.setRole(RoleResource.createTransferObject(u.getRole(), restBuilder));
+                UserWithRoleDto uDto = createUsersTransferObjectWithRole(u, restBuilder);
+                uDto.setRole(RoleResource.createTransferWithPrivilegesObject(u.getRole(),
+                    restBuilder));
                 users.add(uDto);
             }
 
