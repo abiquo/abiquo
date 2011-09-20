@@ -1,78 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
-<hibernate-mapping> 
-  <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" table="virtualmachine">
-    <id name="idVm" type="java.lang.Integer">
-      <column name="idVM"/>
-      <generator class="identity"/>
-    </id>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB" lazy="false" name="hypervisor">
-      <column name="idHypervisor" not-null="false"/>
-    </many-to-one>    
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB" lazy="false" name="image">
-      <column name="idImage"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB" name="conversion">
-      <column name="idConversion"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB" lazy="false" name="datastore">
-      <column name="idDatastore"/>
-    </many-to-one>
-    <property name="state" type="State" not-null="true"/>
-    
-    <property name="uuid" type="string" column="UUID"/>
-    
-    <property name="name" type="string"/>
-    
-    <property name="description" type="string">
-      <column length="255" name="description"/>
-    </property>
-    <property name="ram" type="java.lang.Integer">
-      <column name="ram"/>
-    </property>
-    <property name="cpu" type="java.lang.Integer">
-      <column name="cpu"/>
-    </property>
-    <property name="hd" type="java.lang.Long">
-      <column name="hd"/>
-    </property>
-    <property name="vdrpPort" type="java.lang.Integer">
-      <column name="vdrpPort"/>
-    </property>
-    <property name="vdrpIp" type="string">
-      <column length="39" name="vdrpIP"/>
-    </property>
-    <property name="highDisponibility" type="int">
-      <column name="high_disponibility" not-null="true"/>
-    </property>
-    <property name="idType" type="int">
-      <column name="idType" not-null="true"/>
-    </property>
-    <property name="password" type="string">
-      <column length="15" name="password" />
-    </property>
-    
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" fetch="select" lazy="false" name="userHB">
-      <column name="idUser"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
-      <column name="idEnterprise"/>
-    </many-to-one>
-    <set inverse="true" name="resman" lazy="false">
-      <key>
-        <column name="idVM" not-null="true"/>
-      </key>
-      <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB" />
-    </set>
-  </class>
-        <query name="VIRTUALMACHINE.VIRTUAL_MACHINE_SEARCH_VAPP">
-		SELECT va FROM 
-	    VirtualappExtendedHB as va
-	    inner join va.nodesHB as n,  	    
-	    com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi
-	    inner join nvi.virtualMachineHB as vm
-	    WHERE 	    
-	    n.type = :type AND nvi.idNode=n.idNode AND vm.idVm = :idVm
-        </query>
+<hibernate-mapping>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" table="virtualmachine">
+        <id name="idVm" type="java.lang.Integer">
+            <column name="idVM" />
+            <generator class="identity" />
+        </id>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB" lazy="false" name="hypervisor">
+            <column name="idHypervisor" not-null="false" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB" lazy="false" name="image">
+            <column name="idImage" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB" name="conversion">
+            <column name="idConversion" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB" lazy="false" name="datastore">
+            <column name="idDatastore" />
+        </many-to-one>
+        <property name="state" type="State" not-null="true" />
+        <property name="uuid" type="string" column="UUID" />
+        <property name="name" type="string" />
+        <property name="description" type="string">
+            <column length="255" name="description" />
+        </property>
+        <property name="ram" type="java.lang.Integer">
+            <column name="ram" />
+        </property>
+        <property name="cpu" type="java.lang.Integer">
+            <column name="cpu" />
+        </property>
+        <property name="hd" type="java.lang.Long">
+            <column name="hd" />
+        </property>
+        <property name="vdrpPort" type="java.lang.Integer">
+            <column name="vdrpPort" />
+        </property>
+        <property name="vdrpIp" type="string">
+            <column length="39" name="vdrpIP" />
+        </property>
+        <property name="highDisponibility" type="int">
+            <column name="high_disponibility" not-null="true" />
+        </property>
+        <property name="idType" type="int">
+            <column name="idType" not-null="true" />
+        </property>
+        <property name="password" type="string">
+            <column length="15" name="password" />
+        </property>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" fetch="select" lazy="false" name="userHB">
+            <column name="idUser" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
+            <column name="idEnterprise" />
+        </many-to-one>
+        <set inverse="true" name="resman" lazy="false">
+            <key>
+                <column name="idVM" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB" />
+        </set>
+    </class>
+    <query name="VIRTUALMACHINE.VIRTUAL_MACHINE_SEARCH_VAPP"> SELECT va FROM VirtualappExtendedHB as va inner join va.nodesHB as n, com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi inner join
+        nvi.virtualMachineHB as vm WHERE n.type = :type AND nvi.idNode=n.idNode AND vm.idVm = :idVm
+    </query>
 </hibernate-mapping>

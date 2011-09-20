@@ -1,102 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping package="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage" catalog="kinton">
-
-	<class name="VirtualimageHB" table="virtualimage">
-	
-		<!-- ID -->
-		<id name="idImage" type="java.lang.Integer">
-			<column name="idImage" />
-			<generator class="identity" />
-		</id>
-		
-		<!-- ATTRIBUTES -->
-		
-		<property name="name" type="string">
-			<column length="255" name="name" not-null="true" />
-		</property>
-		<property name="description" type="string">
-			<column length="255" name="description" />
-		</property>
-		<property name="pathName" type="string">
-			<column length="255" name="pathName" not-null="true" />
-			
-		</property>
-		<property name="hdRequired" type="java.lang.Long">
-			<column name="hd_required" />
-		</property>
-		<property name="ramRequired" type="java.lang.Integer">
-			<column name="ram_required" />
-		</property>
-		<property name="cpuRequired" type="java.lang.Integer">
-			<column name="cpu_required" />
-		</property>
-		<property name="treaty" type="int">
-			<column name="treaty" not-null="true">
-				<comment>0-No 1-Yes</comment>
-			</column>
-		</property>
-		<property name="deleted" type="int">
-			<column name="deleted" not-null="true">
-				<comment>0-No 1-Yes</comment>
-			</column>
-		</property>		
-		<property name="shared" type="int">
-			<column name="shared" not-null="true">
-				<comment>0-No 1-Yes</comment>
-			</column>
-		</property>		
-		<property name="idEnterprise" type="java.lang.Integer">
-			<column name="idEnterprise" not-null="false" />
-		</property>
-		<property name="ovfId" type="string">
-			<column length="255" name="ovfid" not-null="false" />
-		</property>
-		<property name="stateful" type="int">
-			<column length="1" name="stateful" not-null="true" />
-		</property>
-
-		<property name="diskFileSize" type="java.lang.Long">
-			<column name="diskFileSize" not-null="true" />
-		</property>
-		
-		<property name="costCode" type="string">
-			<column length="50" name="cost_code" not-null="false" />
-		</property>
-
-		<property name="type" type="DiskFormatType" not-null="true"/>
-		
-		<!-- RELATIONS -->
-		
-		<many-to-one class="RepositoryHB" name="repository" fetch="select" lazy="false">
-			<column name="idRepository" not-null="false" />
-		</many-to-one>
-		
-		<many-to-one class="IconHB" name="icon" lazy="false" fetch="select">
-			<column name="idIcon" />
-		</many-to-one>
-		
-		<many-to-one class="CategoryHB" name="category" fetch="select" lazy="false">
-			<column name="idCategory" not-null="true" />
-		</many-to-one>
-
-		<many-to-one class="VirtualimageHB" name="master" lazy="false">
-			<column name="idMaster" />
-		</many-to-one>
-
-	</class>
-
-	<!-- Get Virtual Images by path -->
-	<query name="GET_IMAGES_FROM_PATH">
+    <class name="VirtualimageHB" table="virtualimage">
+        <!-- ID -->
+        <id name="idImage" type="java.lang.Integer">
+            <column name="idImage" />
+            <generator class="identity" />
+        </id>
+        <!-- ATTRIBUTES -->
+        <property name="name" type="string">
+            <column length="255" name="name" not-null="true" />
+        </property>
+        <property name="description" type="string">
+            <column length="255" name="description" />
+        </property>
+        <property name="pathName" type="string">
+            <column length="255" name="pathName" not-null="true" />
+        </property>
+        <property name="hdRequired" type="java.lang.Long">
+            <column name="hd_required" />
+        </property>
+        <property name="ramRequired" type="java.lang.Integer">
+            <column name="ram_required" />
+        </property>
+        <property name="cpuRequired" type="java.lang.Integer">
+            <column name="cpu_required" />
+        </property>
+        <property name="treaty" type="int">
+            <column name="treaty" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="deleted" type="int">
+            <column name="deleted" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="shared" type="int">
+            <column name="shared" not-null="true">
+                <comment>0-No 1-Yes</comment>
+            </column>
+        </property>
+        <property name="idEnterprise" type="java.lang.Integer">
+            <column name="idEnterprise" not-null="false" />
+        </property>
+        <property name="ovfId" type="string">
+            <column length="255" name="ovfid" not-null="false" />
+        </property>
+        <property name="stateful" type="int">
+            <column length="1" name="stateful" not-null="true" />
+        </property>
+        <property name="diskFileSize" type="java.lang.Long">
+            <column name="diskFileSize" not-null="true" />
+        </property>
+        <property name="costCode" type="string">
+            <column length="50" name="cost_code" not-null="false" />
+        </property>
+        <property name="type" type="DiskFormatType" not-null="true" />
+        <!-- RELATIONS -->
+        <many-to-one class="RepositoryHB" name="repository" fetch="select" lazy="false">
+            <column name="idRepository" not-null="false" />
+        </many-to-one>
+        <many-to-one class="IconHB" name="icon" lazy="false" fetch="select">
+            <column name="idIcon" />
+        </many-to-one>
+        <many-to-one class="CategoryHB" name="category" fetch="select" lazy="false">
+            <column name="idCategory" not-null="true" />
+        </many-to-one>
+        <many-to-one class="VirtualimageHB" name="master" lazy="false">
+            <column name="idMaster" />
+        </many-to-one>
+    </class>
+    <!-- Get Virtual Images by path -->
+    <query name="GET_IMAGES_FROM_PATH">
 	<![CDATA[
 		FROM VirtualimageHB
 		WHERE pathName in (:pathName)
 	]]>
-	</query>
-	
-	<!-- Get virtual images by user -->
-	<query name="GET_VIRTUAL_IMAGES_BY_USER">
+    </query>
+    <!-- Get virtual images by user -->
+    <query name="GET_VIRTUAL_IMAGES_BY_USER">
 	<![CDATA[
 	    SELECT i
 	    FROM VirtualimageHB i, UserHB u
@@ -104,10 +88,9 @@
             AND (i.idEnterprise = u.enterpriseHB.id OR i.idEnterprise is null OR i.shared = 1)            
             AND u.user = :username
 	]]>
-	</query>
-	
-	<!-- Get virtual images by user and repository -->
-	<query name="GET_VIRTUAL_IMAGES_BY_ENTER_AND_REPOSITORY_AND_CATEGORY">
+    </query>
+    <!-- Get virtual images by user and repository -->
+    <query name="GET_VIRTUAL_IMAGES_BY_ENTER_AND_REPOSITORY_AND_CATEGORY">
 	<![CDATA[
 		FROM VirtualimageHB
 		WHERE repository is not null AND repository.idRepository = :idRepository
@@ -115,41 +98,33 @@
 			AND category.idCategory = :idCategory
 			AND stateful = 0
 	]]>
-	</query>
-	
-	<query name="GET_VIRTUAL_IMAGES_BY_ENTER_AND_REPOSITORY">
+    </query>
+    <query name="GET_VIRTUAL_IMAGES_BY_ENTER_AND_REPOSITORY">
 	<![CDATA[
 		FROM VirtualimageHB
 		WHERE repository is not null AND repository.idRepository = :idRepository
 			AND (idEnterprise = :idEnterprise OR idEnterprise is null OR shared = 1)
 			AND stateful = 0
 	]]>
-	</query>
-
-
-	<query name="GET_VIRTUAL_IMAGES_BY_REPOSITORY">
+    </query>
+    <query name="GET_VIRTUAL_IMAGES_BY_REPOSITORY">
 	<![CDATA[
 		FROM VirtualimageHB
 		WHERE repository is not null AND repository.idRepository = :idRepository
 			AND stateful = 0
 	]]>
-	</query>	
-
-	
-	<!-- Get virtual images by user and repository -->
-	<query name="GET_VIRTUAL_IMAGES_BY_USER_AND_REPOSITORY_AND_CATEGORY">
+    </query>
+    <!-- Get virtual images by user and repository -->
+    <query name="GET_VIRTUAL_IMAGES_BY_USER_AND_REPOSITORY_AND_CATEGORY">
 	<![CDATA[
 		FROM VirtualimageHB
 		WHERE repository is not null AND repository.idRepository = :idRepository
 			AND (idEnterprise = :idEnterprise OR idEnterprise is null OR shared = 1)
 			AND category.idCategory = :idCategory
 	]]>
-	</query>
-	
-	
-	
-	<!-- Get virtual images by user and stateful type -->
-	<query name="GET_VIRTUAL_IMAGES_BY_USER_AND_STATEFUL">
+    </query>
+    <!-- Get virtual images by user and stateful type -->
+    <query name="GET_VIRTUAL_IMAGES_BY_USER_AND_STATEFUL">
 	<![CDATA[
 	    SELECT i
 		FROM VirtualimageHB i, UserHB u
@@ -158,7 +133,5 @@
 			AND i.stateful = :stateful
 			AND u.user = :username
 	]]>
-	</query>
-
+    </query>
 </hibernate-mapping>
-
