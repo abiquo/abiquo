@@ -67,7 +67,7 @@
                 privateNICSelector.addEventListener("close", onClose);
 
                 toggledContainer.addContent(privateNICSelector, ResourceManager.getInstance().getString("Networking",
-                                                                                                        "LABEL_PRIVATE"));
+                                                                                                        "LABEL_PRIVATE_EXTERNAL"));
             }
             
             public function onAssignNicToVirtualMachine(evt:Event):void{
