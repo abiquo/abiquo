@@ -369,19 +369,18 @@ public class RESTBuilder implements IRESTBuilder
             OVFPackagesResource.OVF_PACKAGES_PATH, params));
 
         // action get virtual machines by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         // action get ips by enterprise
-        links
-            .add(builder.buildActionLink(EnterpriseResource.class,
-                EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
-                params));
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH, IpAddressesResource.IP_ADDRESSES,
+            params));
 
         // action get virtual datacenters by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH,
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;

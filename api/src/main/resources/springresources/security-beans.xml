@@ -101,7 +101,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/install" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/action/install" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <!-- OVF PACKAGE LIST -->
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="GET" access="ROLE_APPLIB_VIEW " />
@@ -194,9 +194,9 @@
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/addInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/removeInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/actions/volumes" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/action/addInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/action/removeInitiator" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/devices/*/pools/*/action/volumes" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         <!-- REMOTE SERVICES -->
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices" method="POST" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
