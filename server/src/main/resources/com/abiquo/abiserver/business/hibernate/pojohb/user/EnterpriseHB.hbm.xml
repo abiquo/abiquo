@@ -2,176 +2,83 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
-		table="enterprise">
-
-		<!-- ID -->
-		<id name="idEnterprise" type="java.lang.Integer">
-			<column name="idEnterprise" />
-			<generator class="identity" />
-		</id>
-
-		<!-- Properties -->
-
-		<property name="name" type="string">
-			<column length="40" name="name" not-null="true" />
-		</property>
-		
-		<property name="isReservationRestricted" type="boolean">
-        	<column name="isReservationRestricted" />
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" table="enterprise">
+        <!-- ID -->
+        <id name="idEnterprise" type="java.lang.Integer">
+            <column name="idEnterprise" />
+            <generator class="identity" />
+        </id>
+        <!-- Properties -->
+        <property name="name" type="string">
+            <column length="40" name="name" not-null="true" />
         </property>
-		
-		<set name="dcLimits" cascade="all-delete-orphan" lazy="false">
-			<key>
-				<column name="idEnterprise" not-null="true" />
-			</key>
-			<one-to-many
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
-		</set>
-		<!-- Limits -->
-
-		<component name="limits"
-			class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
-			<component name="cpu"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="cpuHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="cpuSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="ram"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="ramHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="ramSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="hd"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="hdHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="hdSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="storage"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="storageHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="storageSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="repository"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="repositoryHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="repositorySoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="vlan"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="vlanHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="vlanSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-			<component name="publicIP"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-				<property name="hard" column="publicIPHard" type="java.lang.Long"
-					not-null="true" />
-				<property name="soft" column="publicIPSoft" type="java.lang.Long"
-					not-null="true" />
-			</component>
-		</component>
-
-		<set name="reservedMachines" table="physicalmachine" lazy="false"
-			cascade="all">
-			<key>
-				<column name="idEnterprise" not-null="true" />
-			</key>
-			<one-to-many
-				class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
-		</set>
-	</class>
-
-
-	<!-- NAMED QUERIES -->
-
-	
-	<!--
-		SQL query to obtain the total allocations of a resource. only sum
-		virtualMachiens on state different to NOT_DEPLOYED.
-	-->
-	<query name="SUM_USED_CPU_RESOURCES">
-		SELECT SUM(vm.cpu) FROM
-		NodeVirtualImageHB as nvi,
-		NodeHB as n,
-		VirtualappHB as va,
-		VirtualmachineHB as vm
-
-		WHERE
-		va.enterpriseHB.idEnterprise=:idEnterprise
-		AND n.idVirtualApp=va.idVirtualApp
-		AND nvi.idNode=n.idNode
-		AND nvi.virtualMachineHB.idVm=vm.idVm
-		AND vm.state!=:state         
+        <property name="isReservationRestricted" type="boolean">
+            <column name="isReservationRestricted" />
+        </property>
+        <set name="dcLimits" cascade="all-delete-orphan" lazy="false">
+            <key>
+                <column name="idEnterprise" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" />
+        </set>
+        <!-- Limits -->
+        <component name="limits" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
+            <component name="cpu" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="cpuHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="cpuSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="ram" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="ramHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="ramSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="hd" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="hdHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="hdSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="storage" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="storageHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="storageSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="repository" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="repositoryHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="repositorySoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="vlan" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="vlanHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="vlanSoft" type="java.lang.Long" not-null="true" />
+            </component>
+            <component name="publicIP" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="publicIPHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="publicIPSoft" type="java.lang.Long" not-null="true" />
+            </component>
+        </component>
+        <set name="reservedMachines" table="physicalmachine" lazy="false" cascade="all">
+            <key>
+                <column name="idEnterprise" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" />
+        </set>
+    </class>
+    <!-- NAMED QUERIES -->
+    <!--
+        SQL query to obtain the total allocations of a resource. only sum
+        virtualMachiens on state different to NOT_DEPLOYED.
+    -->
+    <query name="SUM_USED_CPU_RESOURCES"> SELECT SUM(vm.cpu) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
+        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state
     </query>
-
-	<query name="SUM_USED_RAM_RESOURCES">
-		SELECT SUM(vm.ram) FROM
-		NodeVirtualImageHB as nvi,
-		NodeHB as n,
-		VirtualappHB as va,
-		VirtualmachineHB as vm
-
-		WHERE
-		va.enterpriseHB.idEnterprise=:idEnterprise
-		AND n.idVirtualApp=va.idVirtualApp
-		AND nvi.idNode=n.idNode
-		AND nvi.virtualMachineHB.idVm=vm.idVm
-		AND vm.state!=:state    
+    <query name="SUM_USED_RAM_RESOURCES"> SELECT SUM(vm.ram) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
+        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state
     </query>
-
-	<query name="SUM_USED_HD_RESOURCES">
-		SELECT SUM(vm.hd) FROM
-		NodeVirtualImageHB as nvi,
-		NodeHB as n,
-		VirtualappHB as va,
-		VirtualmachineHB as vm
-
-		WHERE
-		va.enterpriseHB.idEnterprise=:idEnterprise
-		AND n.idVirtualApp=va.idVirtualApp
-		AND nvi.idNode=n.idNode
-		AND nvi.virtualMachineHB.idVm=vm.idVm
-		AND vm.state!=:state               
+    <query name="SUM_USED_HD_RESOURCES"> SELECT SUM(vm.hd) FROM NodeVirtualImageHB as nvi, NodeHB as n, VirtualappHB as va, VirtualmachineHB as vm WHERE va.enterpriseHB.idEnterprise=:idEnterprise AND
+        n.idVirtualApp=va.idVirtualApp AND nvi.idNode=n.idNode AND nvi.virtualMachineHB.idVm=vm.idVm AND vm.state!=:state
     </query>
-
-	<query name="GET_ALL_ENTERPRISE_IDS">
-		SELECT enter.idEnterprise FROM
-		EnterpriseHB as enter
-	</query>
-
-	<query name="GET_BY_VIRTAL_APP">
-		SELECT enter
-		FROM EnterpriseHB as enter,
-		VirtualappHB as vapp
-		WHERE vapp.enterpriseHB.idEnterprise = enter.idEnterprise
-		AND
-		vapp.idVirtualApp = :idVirtualApp
-	</query>
-	
-	<query name="GET_DATACENTER_LIMITS">
-		SELECT dclimit
-		FROM DatacenterLimitHB as dclimit
-		WHERE dclimit.enterprise.idEnterprise = :idEnterprise
-		AND dclimit.datacenter.idDataCenter = :idDatacenter	
-	</query>
-	
-	<query name="ENTERPRISE.GET_ENTERPRISE_RESERVED_BY_VLAN_ID">
-		SELECT vlan.enterpriseHB
-		FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB as vlan
-		WHERE vlan.vlanNetworkId = :vlan_id	
-	</query>
-
+    <query name="GET_ALL_ENTERPRISE_IDS"> SELECT enter.idEnterprise FROM EnterpriseHB as enter
+    </query>
+    <query name="GET_BY_VIRTAL_APP"> SELECT enter FROM EnterpriseHB as enter, VirtualappHB as vapp WHERE vapp.enterpriseHB.idEnterprise = enter.idEnterprise AND vapp.idVirtualApp = :idVirtualApp
+    </query>
+    <query name="GET_DATACENTER_LIMITS"> SELECT dclimit FROM DatacenterLimitHB as dclimit WHERE dclimit.enterprise.idEnterprise = :idEnterprise AND dclimit.datacenter.idDataCenter = :idDatacenter
+    </query>
+    <query name="ENTERPRISE.GET_ENTERPRISE_RESERVED_BY_VLAN_ID"> SELECT vlan.enterpriseHB FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB as vlan WHERE vlan.vlanNetworkId = :vlan_id
+    </query>
 </hibernate-mapping>
