@@ -32,6 +32,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
@@ -52,6 +53,7 @@ import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.User.AuthType;
@@ -159,8 +161,22 @@ public class UserService extends DefaultApiService
             order = User.NAME_PROPERTY;
         }
 
-        return repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page,
-            numResults);
+        Collection<User> users =
+            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+
+        // Refresh all entities to avioid lazys
+        for (User u : users)
+        {
+            Hibernate.initialize(u.getEnterprise());
+            Hibernate.initialize(u.getRole());
+
+            for (Privilege p : u.getRole().getPrivileges())
+            {
+                Hibernate.initialize(p);
+            }
+        }
+
+        return users;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

@@ -100,7 +100,7 @@ public class MeterCommandImpl extends BasicCommand implements MeterCommand
                 }
             }
 
-            factory.beginConnection();
+            factory.beginConnection(true);
 
             // UserHB user = userDAO.getUserByUserName(userSession.getUser());
             UserHB user =

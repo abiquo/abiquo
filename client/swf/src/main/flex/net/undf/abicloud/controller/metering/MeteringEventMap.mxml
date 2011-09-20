@@ -111,7 +111,7 @@
     <EventHandlers type="{MeteringEvent.GET_EVENTS_FILTERED}">
 
         <!-- Blocking screen -->
-        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+        <!--<InlineInvoker method="ScreenBlocker.blockScreen"/>-->
 
         <!-- Make call to the server here -->
 
