@@ -331,7 +331,8 @@
             arguments="{[AbiCloudModel.getInstance().loginManager.session,
             event.virtualDatacenter, 
             event.vlanNetwork.vlanNetworkId, 
-            event.available]}">
+            event.available,
+            event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -368,7 +369,8 @@
             arguments="{[AbiCloudModel.getInstance().loginManager.session,
             event.virtualDatacenter, 
             event.vlanNetwork.vlanNetworkId, 
-            event.available]}">
+            event.available,
+            event.listRequest]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

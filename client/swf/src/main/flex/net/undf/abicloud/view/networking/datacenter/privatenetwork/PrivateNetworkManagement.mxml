@@ -96,9 +96,9 @@
                 else if (networkTree.selectedItem is VlanNetwork)
                 {
 
-                	var virtualDatacenter:VirtualDataCenter = returnParentVirtualDatacenter(networkTree.networkTree.dataProvider as ArrayCollection,networkTree.selectedItem as VlanNetwork);
+                	var virtualDatacenter:VirtualDataCenter = VlanNetwork(networkTree.selectedItem).virtualDatacenter;
                 	
-                    privateIPList.init(null, null, networkTree.selectedItem as VlanNetwork);
+                    privateIPList.init(null, virtualDatacenter, networkTree.selectedItem as VlanNetwork);
                     vlanRenderer.vlanNetwork = networkTree.selectedItem as VlanNetwork;
                     showMoreInfoContainer();
                 }
