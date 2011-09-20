@@ -84,4 +84,23 @@ public interface Crudable<T, ID extends Serializable>
      */
     void makeTransient(String entityName, T entity) throws PersistenceException;
 
+    /**
+     * Merges an entity.
+     * 
+     * @param entity entity to merge.
+     * @return the updated entity.
+     * @throws PersistenceException If an error.
+     */
+    T merge(T entity) throws PersistenceException;
+
+    /**
+     * Merges an entity.
+     * 
+     * @param entity entity to merge.
+     * @param entity The entity to store.
+     * @return the updated entity.
+     * @throws PersistenceException If an error.
+     */
+    T merge(String entityName, T entity) throws PersistenceException;
+
 }

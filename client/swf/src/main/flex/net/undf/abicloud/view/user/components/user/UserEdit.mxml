@@ -139,6 +139,7 @@
                     labelOldPasswordInvalid.visible = false;
                     currentPassword.enabled = false;
                     requestPrivilege(this._userToEdit.role);
+                    checkRoleAccess(this._userToEdit.role);
                 }
 
                 nameInput.setFocus();
@@ -485,6 +486,17 @@
             			createVirtualDataCenterList();
             		}            		
             	}
+            }
+            
+            private function checkRoleAccess(role:Role):void{
+                var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_ACCESS);
+                event.role = role;
+                event.callback = setRestrictedRoleAccess;
+                dispatchEvent(event);
+            }
+            
+            private function setRestrictedRoleAccess(value:Boolean):void{
+                roleInput.enabled = value;
             }
         ]]>
     </mx:Script>

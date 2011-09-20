@@ -128,9 +128,21 @@ public class HibernateUtil
         }
 
     }
-
     public static Session getSession()
     {
+        return getSession(false);
+    }
+
+    public static Session getSession(final boolean ro)
+    {
+        if (ro)
+        {
+            sessionFactory.getCurrentSession().setFlushMode(FlushMode.MANUAL);
+        }
+        else
+        {
+            sessionFactory.getCurrentSession().setFlushMode(FlushMode.AUTO);
+        }
         return sessionFactory.getCurrentSession();
     }
     //
