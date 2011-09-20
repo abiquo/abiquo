@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Abiquo community edition
  * cloud management application for hybrid clouds
