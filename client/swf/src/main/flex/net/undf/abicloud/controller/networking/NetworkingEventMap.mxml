@@ -163,7 +163,13 @@
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
                     method="handleEditVLAN"
-                    arguments="{[resultObject, event.network, event.vlanNetwork, event.networkName, event.networkConfiguration, event.defaultNetwork]}"/>
+                    arguments="{[resultObject, 
+                    event.network, 
+                    event.vlanNetwork, 
+                    event.networkName, 
+                    event.networkConfiguration, 
+                    event.defaultNetwork, 
+                    event.virtualDatacenter]}"/>
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>

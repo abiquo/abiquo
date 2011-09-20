@@ -22,11 +22,12 @@
 package net.undf.abicloud.business.managers
 {
     import flash.events.EventDispatcher;
-
+    
     import net.undf.abicloud.events.NetworkingEvent;
     import net.undf.abicloud.vo.networking.Network;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
     import net.undf.abicloud.vo.networking.VlanNetwork;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
     [Bindable]
     public class NetworkingManager extends EventDispatcher
@@ -70,7 +71,7 @@ package net.undf.abicloud.business.managers
         public function updateVLANNetwork(network:Network, vlanNetwork:VlanNetwork,
                                           networkName:String,                                          
                                           networkConfiguration:NetworkConfiguration,
-                                          defaultNetwork:Boolean):void
+                                          defaultNetwork:Boolean, virtualDatacenter:VirtualDataCenter):void
         {
             //Updating values
             vlanNetwork.networkName = networkName;
@@ -78,6 +79,7 @@ package net.undf.abicloud.business.managers
             if (defaultNetwork)
             {
                 setDefaultVLANNetwork(network, vlanNetwork);
+                virtualDatacenter.defaultVlan = vlanNetwork;
             }
         }
 
