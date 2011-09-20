@@ -113,6 +113,7 @@ public class AMResource extends StaticRemoteServiceResource
     private static boolean isApplianceManagerType(final String serviceType)
     {
         RemoteServiceType type = RemoteServiceType.valueFromName(serviceType.toUpperCase());
+
         boolean result = false;
 
         if (type != null)
@@ -126,7 +127,8 @@ public class AMResource extends StaticRemoteServiceResource
     private void validatePathParameters(final Integer datacenterId, final String serviceType)
         throws NotFoundException
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        // TODO I'm here!
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType.toUpperCase());
 
         if (type == null)
         {
@@ -148,5 +150,11 @@ public class AMResource extends StaticRemoteServiceResource
     protected String getRemoteServiceType()
     {
         return AM_SERVICE_TYPE;
+    }
+
+    @Override
+    protected String getRemoteServicePath()
+    {
+        return AM_SERVICE_PATH;
     }
 }
