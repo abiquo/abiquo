@@ -105,13 +105,14 @@ public class UriTestResolver
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId) + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH;
     }
 
     public static String resolveEnterpriseActionGetVirtualMachinesURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId)
-            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
     public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
@@ -732,6 +733,5 @@ public class UriTestResolver
     {
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
     }
-
 
 }
