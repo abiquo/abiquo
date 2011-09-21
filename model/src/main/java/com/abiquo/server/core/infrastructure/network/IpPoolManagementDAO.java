@@ -534,6 +534,11 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();
 
+        if (firstElem == null)
+        {
+            firstElem = 0;
+        }
+
         if (firstElem >= totalResults)
         {
             firstElem = totalResults - numElem;
