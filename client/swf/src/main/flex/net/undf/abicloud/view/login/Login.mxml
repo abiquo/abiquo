@@ -71,7 +71,8 @@
             [Bindable]
             private var languageDP:Array = [ { label: "English", data: "en_US" },
                                              { label: "Español", data: "es_ES" },
-                                             { label: "Japanese", data: "ja_JP" }
+                                             { label: "Japanese", data: "ja_JP" },
+                                             { label: "Chinese", data: "zh_ZH" }
                                               ];
 
             [Bindable]
