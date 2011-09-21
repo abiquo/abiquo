@@ -261,9 +261,6 @@ public class InfrastructureService extends DefaultApiService
 
         checkAvailableCores(machine);
 
-        Long realHardDiskInBytes = 0l;
-        Long virtualHardDiskInBytes = 0l;
-        Long virtualHardDiskUsedInBytes = 0l;
         Boolean anyEnabled = Boolean.FALSE;
         for (Datastore datastore : machine.getDatastores())
         {
@@ -271,8 +268,6 @@ public class InfrastructureService extends DefaultApiService
             {
                 anyEnabled = Boolean.TRUE;
             }
-            realHardDiskInBytes = virtualHardDiskInBytes = datastore.getSize();
-            virtualHardDiskUsedInBytes = datastore.getUsedSize();
 
             validate(datastore);
             repo.insertDatastore(datastore);
@@ -286,8 +281,6 @@ public class InfrastructureService extends DefaultApiService
 
         // Insert the machine into database
         machine.setVirtualCpusPerCore(1);
-        machine.setVirtualHardDiskInBytes(virtualHardDiskInBytes);
-        machine.setVirtualHardDiskUsedInBytes(virtualHardDiskUsedInBytes);
         machine.setDatacenter(datacenter);
         machine.setRack(rack);
 
@@ -812,7 +805,6 @@ public class InfrastructureService extends DefaultApiService
 
         machine.setVirtualRamUsedInMb(ramUsed);
         machine.setVirtualCpusUsed(cpuUsed);
-        machine.setVirtualHardDiskUsedInBytes(hdUsed);
 
         repo.updateMachine(machine);
     }

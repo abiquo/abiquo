@@ -123,13 +123,13 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final String update =
             "update physicalmachine p, "
-                + "(SELECT hy.idPhysicalMachine, IFNULL(SUM(vm.ram),0) ram, IFNULL(SUM(vm.cpu),0) cpu, IFNULL(SUM(vm.hd),0) hd "
+                + "(SELECT hy.idPhysicalMachine, IFNULL(SUM(vm.ram),0) ram, IFNULL(SUM(vm.cpu),0) cpu"
                 + "FROM virtualmachine vm right join hypervisor hy on vm.idHypervisor = hy.id, "
                 + "physicalmachine pm, rack r "
                 + "WHERE (vm.state is null or vm.state != 'NOT_DEPLOYED') AND pm.idPhysicalMachine = hy.idPhysicalMachine "
                 + "AND pm.idRack = r.idRack AND r.idDatacenter = :idDatacenter "
                 + "group by hy.idPhysicalMachine) x "
-                + "set p.ramused = x.ram, p.cpuused = x.cpu, p.hdused = x.hd where p.idPhysicalMachine = x.idPhysicalMachine ";
+                + "set p.ramused = x.ram, p.cpuused = x.cpu where p.idPhysicalMachine = x.idPhysicalMachine ";
         final Query pmQuery = session.createSQLQuery(update);
         pmQuery.setInteger("idDatacenter", idDatacenter);
         pmQuery.executeUpdate();
@@ -228,7 +228,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final Query query = session.getNamedQuery(GET_RACKS_BY_DATACENTER);
         query.setInteger("idDatacenter", datacenterId);
-        query.setString("filterLike", (filters == null || filters.isEmpty()) ? "%" : "%" + filters
+        query.setString("filterLike", filters == null || filters.isEmpty() ? "%" : "%" + filters
             + "%");
 
         return (ArrayList<RackHB>) query.list();

@@ -183,17 +183,14 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     }
 
     public Machine createMachine(final String name, final String description, final int ramInMb,
-        final int currentRamInUseInMb, final long hardDiskInMb, final long currentHardDiskInUse,
-        final int realCpuThreads, final int virtualCpusPerThread, final int currentCpusInUse,
-        final State state, final String virtualSwitch)
+        final int currentRamInUseInMb, final int realCpuThreads, final int virtualCpusPerThread,
+        final int currentCpusInUse, final State state, final String virtualSwitch)
     {
         return new Machine(this,
             name,
             description,
             ramInMb,
             currentRamInUseInMb,
-            hardDiskInMb,
-            currentHardDiskInUse,
             realCpuThreads,
             virtualCpusPerThread,
             currentCpusInUse,

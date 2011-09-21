@@ -111,9 +111,6 @@ public class PhysicalMachineCreation
         dto.setVirtualCpusPerCore(pm.getCpuRatio());
         dto.setVirtualCpusUsed(pm.getCpuUsed());
 
-        dto.setVirtualHardDiskInMb(pm.getHd());
-        dto.setVirtualHardDiskUsedInMb(pm.getHdUsed());
-
         dto.setVirtualRamInMb(pm.getRam());
         dto.setVirtualRamUsedInMb(pm.getRamUsed());
 
@@ -149,8 +146,6 @@ public class PhysicalMachineCreation
         machine.setCpu(dto.getVirtualCpuCores());
         machine.setCpuRatio(dto.getVirtualCpusPerCore());
         machine.setCpuUsed(dto.getVirtualCpusUsed());
-        machine.setHd(dto.getVirtualHardDiskInMb());
-        machine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
         machine.setRam(dto.getVirtualRamInMb());
         machine.setRamUsed(dto.getVirtualRamUsedInMb());
 

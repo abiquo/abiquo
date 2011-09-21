@@ -114,8 +114,6 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
 
         int virtualRamInMb = seed * 10 + 1;
         int virtualRamUsedInMb = seed * 30 + 1;
-        long virtualHardDiskInMb = seed * 1000 + 1;
-        long virtualHardDiskUsed = seed * 3000 + 1;
         int realCpuThreads = seed + 1;
         int virtualCpusPerThread = 1;
         int currentCpusInUse = seed + 3 + 1;
@@ -127,8 +125,7 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
 
         Machine machine =
             datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
-                virtualHardDiskInMb, virtualHardDiskUsed, realCpuThreads, currentCpusInUse,
-                virtualCpusPerThread, state, virtualSwitch);
+                realCpuThreads, currentCpusInUse, virtualCpusPerThread, state, virtualSwitch);
 
         return machine;
     }

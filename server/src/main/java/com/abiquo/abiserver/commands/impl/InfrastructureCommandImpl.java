@@ -739,7 +739,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setDescription(pm.getDescription());
             physicalMachineHb.setCpu(pm.getCpu());
             physicalMachineHb.setRam(pm.getRam());
-            physicalMachineHb.setHd(pm.getHd());
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
@@ -776,7 +775,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachineAux.getDataCenter(), null, "Physical machine '"
                     + physicalMachineAux.getName() + "' has been modified [Name: "
                     + physicalMachineHb.getName() + ", " + +physicalMachineHb.getCpu() + "CPUs, "
-                    + physicalMachineHb.getRam() + " RAM, " + physicalMachineHb.getHd() + " HD, "
+                    + physicalMachineHb.getRam() + " RAM, "
                     + physicalMachineHb.getHypervisor().getType().getValue() + " hypervisor]",
                 null, (Rack) physicalMachineAux.getAssignedTo(), physicalMachineAux, null, null);
         }

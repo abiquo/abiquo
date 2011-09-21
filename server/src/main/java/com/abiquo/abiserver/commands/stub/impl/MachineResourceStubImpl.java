@@ -61,8 +61,6 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         dto.setVirtualCpuCores(machine.getCpu());
         dto.setVirtualCpusUsed(machine.getCpuUsed());
         dto.setVirtualCpusPerCore(machine.getCpuRatio());
-        dto.setVirtualHardDiskInMb(machine.getHd());
-        dto.setVirtualHardDiskUsedInMb(machine.getHdUsed());
         dto.setVirtualRamInMb(machine.getRam());
         dto.setVirtualRamUsedInMb(machine.getRamUsed());
 
