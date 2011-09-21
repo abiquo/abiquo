@@ -57,7 +57,7 @@ END
 CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT)
 BEGIN
     SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
-    FROM datastore d LEFT OUTER JOIN datastore_assigment da ON d.idDatastore = da.idDatastore 
+    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
     LEFT OUTER JOIN phyisicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
     WHERE pm.idDataCenter = idDC AND d.enabled = 1;
 END
@@ -67,7 +67,7 @@ END
 CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT)
 BEGIN
     SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
-    FROM datastore d LEFT OUTER JOIN datastore_assigment da ON d.idDatastore = da.idDatastore
+    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
     LEFT OUTER JOIN phyisicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
     WHERE pm.idDataCenter = idDC AND d.enabled = 1;
 END
