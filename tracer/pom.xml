@@ -14,7 +14,7 @@
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
-        <version>1.8.0-HF4-SNAPSHOT</version>
+        <version>1.8.0-HF4</version>
     </parent>
 
     <!--       Dependences                    -->
