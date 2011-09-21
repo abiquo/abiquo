@@ -23,8 +23,10 @@ package com.abiquo.server.core.scheduler;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
 @XmlRootElement(name = "rules")
-public class RulesDto
+public class RulesDto extends SingleResourceTransportDto
 {
 
     private FitPolicyRulesDto fitPolicyRules;
@@ -38,7 +40,7 @@ public class RulesDto
         return fitPolicyRules;
     }
 
-    public void setFitPolicyRules(FitPolicyRulesDto fitPolicyRules)
+    public void setFitPolicyRules(final FitPolicyRulesDto fitPolicyRules)
     {
         this.fitPolicyRules = fitPolicyRules;
     }
@@ -48,7 +50,7 @@ public class RulesDto
         return machineLoadRules;
     }
 
-    public void setMachineLoadRules(MachineLoadRulesDto machineLoadRules)
+    public void setMachineLoadRules(final MachineLoadRulesDto machineLoadRules)
     {
         this.machineLoadRules = machineLoadRules;
     }
@@ -58,7 +60,8 @@ public class RulesDto
         return enterpriseExclusionRules;
     }
 
-    public void setEnterpriseExclusionRules(EnterpriseExclusionsRulesDto enterpriseExclusionRules)
+    public void setEnterpriseExclusionRules(
+        final EnterpriseExclusionsRulesDto enterpriseExclusionRules)
     {
         this.enterpriseExclusionRules = enterpriseExclusionRules;
     }
