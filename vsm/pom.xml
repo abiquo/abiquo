@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8.0-HF4</version>
+        <version>1.8.0-HF5-SNAPSHOT</version>
     </parent>
 
     <dependencies>
