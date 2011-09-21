@@ -259,27 +259,23 @@
 					}
 				}
 				
-				/* if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ALL) 
-				 || SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ENTERPRISE))
-				{ */
-					//Making available this resource
-					menuOption = new HeaderButton(5);
-					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
-					menuOption.height = 61;
-					menuOption.label = ResourceManager.getInstance().getString("Main",
-						"HEADER_MENU_METERING");
-					menuOption.styleName = "MainHeaderMeteringButton";
-					menuOptions.addItem(menuOption);
-					
-					
-					//Adding another separator
-					var headerSpacer2:Image = new Image();
-					headerSpacer2.width = 2;
-					headerSpacer2.height = 19;
-					headerSpacer2.source = o.source;
-					
-					menuOptions.addItem(headerSpacer2);					
-				/* } */
+				//Making available this resource
+				menuOption = new HeaderButton(5);
+				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
+				menuOption.height = 61;
+				menuOption.label = ResourceManager.getInstance().getString("Main",
+					"HEADER_MENU_METERING");
+				menuOption.styleName = "MainHeaderMeteringButton";
+				menuOptions.addItem(menuOption);
+				
+				
+				//Adding another separator
+				var headerSpacer2:Image = new Image();
+				headerSpacer2.width = 2;
+				headerSpacer2.height = 19;
+				headerSpacer2.source = o.source;
+				
+				menuOptions.addItem(headerSpacer2);					
 				
 				
 				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.SYSCONFIG_VIEW))
