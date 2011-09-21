@@ -21,6 +21,7 @@
 
 package com.abiquo.abiserver.persistence.dao.virtualappliance.hibernate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.hibernate.Session;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeTypeEnum;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -40,6 +42,7 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import com.abiquo.model.enumerator.HypervisorType;
 
 /**
  * Class that implements the extra DAO functions for the
@@ -270,54 +273,70 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
     public Collection<VirtualappHB> getVirtualAppliancesByEnterprise(final UserHB user,
         final Integer enterpriseId)
     {
-        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+        boolean isRestricted = !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
 
-        String query = "from VirtualappHB app where app.enterpriseHB.idEnterprise = :enterpriseId";
-
-        if (!StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
+        String queryName =
+            isRestricted ? "VIRTUAL_APPLIANCE_BY_ENTERPRISE_TINY_WITH_RESTRICTIONS"
+                : "VIRTUAL_APPLIANCE_BY_ENTERPRISE_TINY";
+        Query q = getSession().getNamedQuery(queryName);
+        q.setParameter("enterpriseId", enterpriseId);
+        if (isRestricted)
         {
-            query += " and app.virtualDataCenterHB.idVirtualDataCenter in(:vdcs)";
-        }
-        query += " order by app.name asc";
-
-        Query namedQuery = session.createQuery(query).setParameter("enterpriseId", enterpriseId);
-
-        if (!StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
-        {
-            Collection<Integer> vdcs = getAvailableVdcs(user);
-
-            namedQuery.setParameterList("vdcs", vdcs);
+            q.setParameterList("vdcs", getAvailableVdcs(user));
         }
 
-        return namedQuery.list();
+        List<Object[]> results = q.list();
+        return readVirtualApps(results);
     }
 
     @Override
     public Collection<VirtualappHB> getVirtualAppliancesByEnterpriseAndDatacenter(
-        final UserHB user, final Integer enterpriseId, final Integer datacenteId)
+        final UserHB user, final Integer enterpriseId, final Integer datacenterId)
     {
-        String query =
-            "from VirtualappHB app where app.enterpriseHB.idEnterprise = :enterpriseId"
-                + " and app.virtualDataCenterHB.idDataCenter = :datacenterId";
-        if (!StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
+        boolean isRestricted = !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
+
+        String queryName =
+            isRestricted ? "VIRTUAL_APPLIANCE_BY_ENTERPRISE_AND_DC_TINY_WITH_RESTRICTIONS"
+                : "VIRTUAL_APPLIANCE_BY_ENTERPRISE_AND_DC_TINY";
+        Query q = getSession().getNamedQuery(queryName);
+        q.setParameter("enterpriseId", enterpriseId);
+        q.setParameter("datacenterId", datacenterId);
+        if (isRestricted)
         {
-            query += " and app.virtualDataCenterHB.idVirtualDataCenter in(:vdcs)";
-        }
-        query += " order by app.name asc";
-
-        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query namedQuery =
-            session.createQuery(query).setParameter("enterpriseId", enterpriseId)
-                .setParameter("datacenterId", datacenteId);
-
-        if (!StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
-        {
-            Collection<Integer> vdcs = getAvailableVdcs(user);
-
-            namedQuery.setParameterList("vdcs", vdcs);
+            q.setParameterList("vdcs", getAvailableVdcs(user));
         }
 
-        return namedQuery.list();
+        List<Object[]> results = q.list();
+        return readVirtualApps(results);
+    }
+
+    private Collection<VirtualappHB> readVirtualApps(List<Object[]> results)
+    {
+        List<VirtualappHB> vapps = new ArrayList<VirtualappHB>();
+        for (Object[] row : results)
+        {
+            VirtualappHB vapp = new VirtualappHB();
+            vapp.setIdVirtualApp((Integer) row[0]);
+            vapp.setName((String) row[1]);
+            vapp.setHighDisponibility((Integer) row[2]);
+            vapp.setState((StateEnum) row[3]);
+            vapp.setSubState((StateEnum) row[4]);
+            vapp.setError((Integer) row[5]);
+            vapp.setPublic_((Integer) row[6]);
+            vapp.setNodeConnections((String) row[7]);
+
+            VirtualDataCenterHB vdc = new VirtualDataCenterHB();
+            vdc.setIdVirtualDataCenter((Integer) row[8]);
+            vdc.setName((String) row[9]);
+            vdc.setIdDataCenter((Integer) row[10]);
+            vdc.setHypervisorType((HypervisorType) row[11]);
+
+            vapp.setVirtualDataCenterHB(vdc);
+
+            vapps.add(vapp);
+        }
+
+        return vapps;
     }
 
     private Collection<Integer> getAvailableVdcs(final UserHB user)

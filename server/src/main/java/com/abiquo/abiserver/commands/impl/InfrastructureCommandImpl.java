@@ -1810,7 +1810,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB)
      */
     @Override
-    public BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter)
+    public BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -1821,7 +1821,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             factory.beginConnection();
             DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
 
-            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
+            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter);
             basicResult.setSuccess(true);
             basicResult.setMessage(InfrastructureCommandImpl.resourceManager
                 .getMessage("updateUsedResourcesByDatacenter.success"));
@@ -1987,7 +1987,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         DatacenterHB dataCenter = pm.getDataCenter();
         factory.endConnection();
 
-        return updateUsedResourcesByDatacenter(dataCenter);
+        return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
     public static void ignoreVSMEventsIfNecessary(final VirtualmachineHB vmHB,

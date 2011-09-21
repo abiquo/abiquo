@@ -12,13 +12,13 @@
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData" fetch="select" name="rasd" cascade="all">
             <column length="5" name="idResource" not-null="false" />
         </many-to-one>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB" fetch="select" name="virtualDataCenter" lazy="false">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB" fetch="select" name="virtualDataCenter">
             <column name="idVirtualDataCenter" not-null="false" />
         </many-to-one>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" fetch="select" name="virtualMachine" lazy="false">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" fetch="select" name="virtualMachine">
             <column name="idVM" not-null="false" />
         </many-to-one>
-        <many-to-one entity-name="VirtualappHB" fetch="select" name="virtualApp" not-null="true" lazy="false">
+        <many-to-one entity-name="VirtualappHB" fetch="select" name="virtualApp" not-null="true">
             <column name="idVirtualApp" not-null="false" />
         </many-to-one>
         <joined-subclass name="com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB" table="ip_pool_management">
@@ -50,22 +50,31 @@
         </joined-subclass>
     </class>
     <query name="IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER"> Select distinct(ent) from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip inner join ip.virtualDataCenter vdc inner join vdc.enterpriseHB ent
-        where vdc.idDataCenter = :datacenterId and ent.name like :filterLike</query>
-    <query name="IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB where mac = :mac</query>
+        where vdc.idDataCenter = :datacenterId and ent.name like :filterLike
+    </query>
+    <query name="IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB where mac = :mac
+    </query>
     <query name="IP_POOL_GET_NETWORK_POOL_BY_VLAN"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration conf,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB dhcp inner join dhcp.ipPoolManagement ip left join ip.virtualMachine vm left join ip.virtualApp vapp left join
         ip.virtualDataCenter vdc left join vdc.enterpriseHB ent where vlan.vlanNetworkId = :vlanId and conf.dhcpService.dhcpServiceId = dhcp.dhcpServiceId and ( ip.ip like :filterLike or ip.mac like
-        :filterLike or ip.vlanNetworkName like :filterLike or vapp.name like :filterLike or vm.name like :filterLike or ent.name like :filterLike )</query>
+        :filterLike or ip.vlanNetworkName like :filterLike or vapp.name like :filterLike or vm.name like :filterLike or ent.name like :filterLike )
+    </query>
     <query name="IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration conf,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB dhcp inner join dhcp.ipPoolManagement ip where vlan.vlanNetworkId = :vlanId and conf.dhcpService.dhcpServiceId =
-        dhcp.dhcpServiceId and ip.virtualMachine is null and ( ip.ip like :filterLike or ip.mac like :filterLike or ip.vlanNetworkName like :filterLike )</query>
-    <query name="IP_POOL_GET_PRIVATE_NICS_BY_VIRTUALMACHINE"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where ip.virtualMachine.idVm = :vmId and ip.rasd.resourceSubType = '0'</query>
+        dhcp.dhcpServiceId and ip.virtualMachine is null and ( ip.ip like :filterLike or ip.mac like :filterLike or ip.vlanNetworkName like :filterLike )
+    </query>
+    <query name="IP_POOL_GET_PRIVATE_NICS_BY_VIRTUALMACHINE"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where ip.virtualMachine.idVm = :vmId and ip.rasd.resourceSubType = '0'
+    </query>
     <query name="IP_POOL_GET_PRIVATE_IP_BY_VLAN"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration conf,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB dhcp inner join dhcp.ipPoolManagement ip where vlan.vlanNetworkId = :vlanId and conf.dhcpService.dhcpServiceId =
-        dhcp.dhcpServiceId and ip.ip = :ip</query>
+        dhcp.dhcpServiceId and ip.ip = :ip
+    </query>
     <query name="IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT"> Select vlan from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration.dhcpService dhcp,
-        com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where dhcp.dhcpServiceId = ip.dhcpServiceId and ip.idManagement = :id_pool</query>
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where dhcp.dhcpServiceId = ip.dhcpServiceId and ip.idManagement = :id_pool
+    </query>
     <query name="IP_POOL.GET_BY_VLAN"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm != :idVm AND ippool.vlanNetworkId =
-        :vlanNetworkId</query>
-    <query name="IP_POOL.GET_BY_VIRTUAL_MACHIE"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm = :idVm</query>
+        :vlanNetworkId
+    </query>
+    <query name="IP_POOL.GET_BY_VIRTUAL_MACHIE"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm = :idVm
+    </query>
 </hibernate-mapping>

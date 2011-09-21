@@ -217,7 +217,6 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final Query query = session.getNamedQuery(GET_ALLOWED_DATACENTERS);
         query.setInteger("idEnterprise", idEnterprise);
-
         return query.list();
     }
 
@@ -228,7 +227,7 @@ public class DataCenterDAOHibernate extends HibernateDAO<DatacenterHB, Integer> 
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final Query query = session.getNamedQuery(GET_RACKS_BY_DATACENTER);
         query.setInteger("idDatacenter", datacenterId);
-        query.setString("filterLike", (filters == null || filters.isEmpty()) ? "%" : "%" + filters
+        query.setString("filterLike", filters == null || filters.isEmpty() ? "%" : "%" + filters
             + "%");
 
         return (ArrayList<RackHB>) query.list();

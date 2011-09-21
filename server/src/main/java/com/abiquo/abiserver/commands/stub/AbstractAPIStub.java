@@ -103,6 +103,25 @@ public class AbstractAPIStub
         this.currentSession = currentSession;
     }
 
+    private UserHB getCurrentUserCredentials()
+    {
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection();
+
+        Object[] credentials =
+            factory.getUserDAO().getCurrentUserCredentials(currentSession.getUser(),
+                currentSession.getAuthType());
+
+        UserHB user = new UserHB();
+        user.setUser((String) credentials[0]);
+        user.setPassword((String) credentials[1]);
+        user.setAuthType(currentSession.getAuthType());
+
+        factory.endConnection();
+
+        return user;
+    }
+
     protected ClientResponse get(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).get();
@@ -118,14 +137,14 @@ public class AbstractAPIStub
      */
     protected ClientResponse get(final String uri, final MediaType mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
     protected ClientResponse getWithMediaType(final String uri, final String accept,
         final String contentType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
             .get();
     }
@@ -161,33 +180,33 @@ public class AbstractAPIStub
 
     protected ClientResponse get(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).get();
     }
 
     protected ClientResponse get(final String uri, final String mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
     protected ClientResponse post(final String uri, final Object dto)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        UserHB user = getCurrentUserCredentials();
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
+            .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML);
     }
@@ -201,7 +220,7 @@ public class AbstractAPIStub
 
     protected ClientResponse put(final String uri, final Object dto)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
@@ -214,14 +233,14 @@ public class AbstractAPIStub
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
             .put(dto);
     }
 
     protected ClientResponse delete(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).delete();
     }
 
@@ -232,9 +251,9 @@ public class AbstractAPIStub
 
     protected ClientResponse delete(final String uri, final String mediaType)
     {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        UserHB user = getCurrentUserCredentials();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
