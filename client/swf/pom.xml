@@ -149,6 +149,7 @@
                         <locale>en_US</locale>
                         <locale>es_ES</locale>
                         <locale>ja_JP</locale>
+                        <locale>zh_ZH</locale>
                     </compiledLocales>
                     <skipTests>true</skipTests>
                     <generateHtmlWrapper>true</generateHtmlWrapper>
