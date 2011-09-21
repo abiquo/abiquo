@@ -920,7 +920,7 @@ CREATE TABLE  `kinton`.`user` (
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
   `authType` varchar(20) NOT NULL,
-  `creationData` timestamp NOT NULL,
+  `creationDate` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idUser`),
   KEY `User_FK1` (`idRole`),

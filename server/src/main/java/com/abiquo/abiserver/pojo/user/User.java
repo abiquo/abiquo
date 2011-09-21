@@ -64,7 +64,7 @@ public class User implements IPojo<UserHB>
 
     private Integer[] availableVirtualDatacenters;
 
-    private Date creationData;
+    private Date creationDate;
 
     private AuthType authType;
 
@@ -198,14 +198,14 @@ public class User implements IPojo<UserHB>
         this.enterprise = enterprise;
     }
 
-    public Date getCreationData()
+    public Date getCreationDate()
     {
-        return creationData;
+        return creationDate;
     }
 
-    public void setCreationData(final Date creationData)
+    public void setCreationDate(final Date creationDate)
     {
-        this.creationData = creationData;
+        this.creationDate = creationDate;
     }
 
     /**
@@ -231,7 +231,7 @@ public class User implements IPojo<UserHB>
         userHB.setPassword(pass);
         userHB.setActive(active ? 1 : 0);
         userHB.setAuthType(authType.name());
-        userHB.setCreationData(creationData);
+        userHB.setCreationDate(creationDate);
         if (enterprise != null)
         {
             userHB.setEnterpriseHB(enterprise.toPojoHB());
@@ -282,7 +282,7 @@ public class User implements IPojo<UserHB>
             user.setAvailableVirtualDatacenters(new Integer[] {});
         }
 
-        user.setCreationData(Calendar.getInstance().getTime());
+        user.setCreationDate(Calendar.getInstance().getTime());
 
         return user;
     }

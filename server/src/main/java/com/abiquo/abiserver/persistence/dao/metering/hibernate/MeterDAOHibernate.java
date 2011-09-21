@@ -89,7 +89,8 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
 
         stringQuery.append("where timestamp between '").append(fromdateFilter).append("' and '")
-            .append(todateFilter).append("'");
+            .append(todateFilter).append("' and timestamp > '")
+            .append(user.getCreationDate().toString()).append("'");
 
         // create all the filters from the HashMap information. Due all of them are included in the
         // query, we need to
@@ -170,13 +171,13 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         // if (role != Role.SYS_ADMIN)
         if (!SecurityService.isCloudAdmin(user.getRoleHB().toPojo()))
         {
-            // if (!SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ENTERPRISE, user
-            // .getRoleHB().toPojo())
-            // && !SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ALL, user
-            // .getRoleHB().toPojo()))
-            // {
-            // stringQuery.append(" and idUser = " + user.getIdUser());
-            // }
+            if (!SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ENTERPRISE, user
+                .getRoleHB().toPojo())
+                && !SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ALL, user
+                    .getRoleHB().toPojo()))
+            {
+                stringQuery.append(" and idUser = " + user.getIdUser());
+            }
 
             if (performedbyList != null && !performedbyList.isEmpty())
             {

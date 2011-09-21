@@ -61,7 +61,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
 
     private String availableVirtualDatacenters;
 
-    private Date creationData;
+    private Date creationDate;
 
     private String authType;
 
@@ -195,14 +195,14 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         this.authType = authType;
     }
 
-    public Date getCreationData()
+    public Date getCreationDate()
     {
-        return creationData;
+        return creationDate;
     }
 
-    public void setCreationData(final Date creationData)
+    public void setCreationDate(final Date creationDate)
     {
-        this.creationData = creationData;
+        this.creationDate = creationDate;
     }
 
     @Override
@@ -221,7 +221,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         user.setActive(active == 1 ? true : false);
         user.setAuthType(AuthType.valueOf(authType));
         user.setLocale(locale);
-        user.setCreationData(creationData);
+        user.setCreationDate(creationDate);
         if (enterpriseHB != null)
         {
             user.setEnterprise(enterpriseHB.toPojo());

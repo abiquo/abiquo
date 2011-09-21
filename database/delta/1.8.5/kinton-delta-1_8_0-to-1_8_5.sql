@@ -11,7 +11,7 @@
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
-alter table `kinton`.`user` add creationDate timestamp NOT NULL;
+alter table `kinton`.`user` add creationDate timestamp DEFAULT '1986-02-26 00:00:00' NOT NULL;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
