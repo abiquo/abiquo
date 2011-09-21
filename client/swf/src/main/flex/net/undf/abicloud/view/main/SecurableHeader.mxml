@@ -259,9 +259,9 @@
 					}
 				}
 				
-				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ALL) 
+				/* if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ALL) 
 				 || SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.EVENTLOG_VIEW_ENTERPRISE))
-				{
+				{ */
 					//Making available this resource
 					menuOption = new HeaderButton(5);
 					menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
@@ -279,7 +279,7 @@
 					headerSpacer2.source = o.source;
 					
 					menuOptions.addItem(headerSpacer2);					
-				}
+				/* } */
 				
 				
 				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.SYSCONFIG_VIEW))
