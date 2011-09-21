@@ -502,11 +502,9 @@ CREATE TABLE  `kinton`.`physicalmachine` (
   `description` varchar(100) default NULL,
   `ram` int(7) NOT NULL,
   `cpu` int(11) NOT NULL,
-  `hd` bigint(20) unsigned NOT NULL,
   `cpuRatio` int(7) NOT NULL,
   `ramUsed` int(7) NOT NULL,
   `cpuUsed` int(11) NOT NULL,
-  `hdUsed` bigint(20) NOT NULL,
   `idState` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - STOPPED
 1 - NOT PROVISIONED
 2 - NOT MANAGED
@@ -2195,21 +2193,21 @@ CREATE TRIGGER `kinton`.`enterprise_deleted` AFTER DELETE ON `kinton`.`enterpris
 |
 CREATE TRIGGER `kinton`.`create_physicalmachine_update_stats` AFTER INSERT ON `kinton`.`physicalmachine`
   FOR EACH ROW BEGIN
+    DECLARE datastoreUsedSize BIGINT(20);
+    DECLARE datastoreSize BIGINT(20);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF NEW.idState = 3 THEN
-      UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1 WHERE idDataCenter = NEW.idDataCenter;
-      UPDATE IGNORE cloud_usage_stats
-        SET vCpuUsed=vCpuUsed+NEW.cpuUsed,
-          vMemoryUsed=vMemoryUsed+NEW.ramUsed,
-          vStorageUsed=vStorageUsed+NEW.hdUsed
+      CALL get_datastore_used_size(NEW.idPhysicalMachine,datastoreUsedSize);
+      UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1,
+             vStorageUsed = vStorageUsed + datastoreUsedSize,
+             vCpuUsed=vCpuUsed+NEW.cpuUsed, vMemoryUsed=vMemoryUsed+NEW.ramUsed
       WHERE idDataCenter = NEW.idDataCenter;
     END IF;
     IF NEW.idState != 2 THEN
-      UPDATE IGNORE cloud_usage_stats SET serversTotal = serversTotal+1 WHERE idDataCenter = NEW.idDataCenter;
-      UPDATE IGNORE cloud_usage_stats
-        SET vCpuTotal=vCpuTotal+(NEW.cpu*NEW.cpuRatio),
-          vMemoryTotal=vMemoryTotal+NEW.ram,
-          vStorageTotal=vStorageTotal+NEW.hd
+      CALL get_datastore_size(NEW.idPhysicalMachine,datastoreSize);
+      UPDATE IGNORE cloud_usage_stats SET serversTotal = serversTotal+1,
+             vStorageTotal = vStorageTotal + datastoreSize,
+             vCpuTotal=vCpuTotal+(NEW.cpu*NEW.cpuRatio), vMemoryTotal=vMemoryTotal+NEW.ram
       WHERE idDataCenter = NEW.idDataCenter;
     END IF;
   END IF;
@@ -2226,21 +2224,21 @@ CREATE TRIGGER `kinton`.`create_physicalmachine_update_stats` AFTER INSERT ON `k
 |
 CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `kinton`.`physicalmachine`
   FOR EACH ROW BEGIN
+    DECLARE datastoreUsedSize BIGINT(20);
+    DECLARE datastoreSize BIGINT(20);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState = 3 THEN
-      UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1 WHERE idDataCenter = OLD.idDataCenter;
-      UPDATE IGNORE cloud_usage_stats
-        SET vCpuUsed=vCpuUsed-OLD.cpuUsed,
-          vMemoryUsed=vMemoryUsed-OLD.ramUsed,
-          vStorageUsed=vStorageUsed-OLD.hdUsed
+      CALL get_datastore_used_size(OLD.idPhysicalMachine,datastoreUsedSize);
+      UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1,
+             vStorageUsed = vStorageUsed - datastoreUsedSize,
+             vCpuUsed=vCpuUsed-OLD.cpuUsed, vMemoryUsed=vMemoryUsed-OLD.ramUsed
       WHERE idDataCenter = OLD.idDataCenter;
     END IF;
     IF OLD.idState NOT IN (2, 6, 7) THEN
-      UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = OLD.idDataCenter;
-      UPDATE IGNORE cloud_usage_stats
-        SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
-          vMemoryTotal=vMemoryTotal-OLD.ram,
-          vStorageTotal=vStorageTotal-OLD.hd
+      CALL get_datastore_size(OLD.idPhysicalMachine,datastoreSize);
+      UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
+             vStorageTotal = vStorageTotal - datastoreSize,
+             vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio), vMemoryTotal=vMemoryTotal-OLD.ram
       WHERE idDataCenter = OLD.idDataCenter;
     END IF;
   END IF;
@@ -2257,59 +2255,63 @@ CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `k
 -- ************************************************************************************
 CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `kinton`.`physicalmachine`
   FOR EACH ROW BEGIN
+    DECLARE datastoreSize BIGINT(20);
+    DECLARE oldDatastoreSize BIGINT(20);
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       IF OLD.idState != NEW.idState THEN
         IF OLD.idState IN (2, 7) THEN
           -- Machine not managed changes into managed; or disabled_by_ha to Managed
-          UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1 WHERE idDataCenter = NEW.idDataCenter;
-          UPDATE IGNORE cloud_usage_stats
-          SET vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
-            vMemoryTotal=vMemoryTotal + NEW.ram,
-            vStorageTotal=vStorageTotal + NEW.hd
+          CALL get_datastore_size(NEW.idPhysicalMachine,datastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal+1, 
+                 vStorageTotal = vStorageTotal + datastoreSize,
+                 vCpuTotal=vCpuTotal + (NEW.cpu*NEW.cpuRatio),
+                 vMemoryTotal=vMemoryTotal + NEW.ram
           WHERE idDataCenter = NEW.idDataCenter;
         END IF;
         IF NEW.idState IN (2,7) THEN
           -- Machine managed changes into not managed or DisabledByHA
-          UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1 WHERE idDataCenter = NEW.idDataCenter;
-          UPDATE IGNORE cloud_usage_stats
-          SET vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
-            vMemoryTotal=vMemoryTotal-OLD.ram,
-            vStorageTotal=vStorageTotal-OLD.hd
+          CALL get_datastore_size(OLD.idPhysicalMachine,datastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET serversTotal=serversTotal-1,
+                 vStorageTotal = vStorageTotal - datastoreSize,
+                 vCpuTotal=vCpuTotal-(OLD.cpu*OLD.cpuRatio),
+                 vMemoryTotal=vMemoryTotal-OLD.ram
           WHERE idDataCenter = OLD.idDataCenter;
         END IF;
         IF NEW.idState = 3 THEN
         -- Stopped / Halted / Not provisioned passes to Managed (Running)
-          UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1 WHERE idDataCenter = NEW.idDataCenter;
-          UPDATE IGNORE cloud_usage_stats
-            SET vCpuUsed=vCpuUsed+NEW.cpuUsed,
-              vMemoryUsed=vMemoryUsed+NEW.ramUsed,
-              vStorageUsed=vStorageUsed+NEW.hdUsed
+          CALL get_datastore_used_size(NEW.idPhysicalMachine,datastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning+1,
+                 vStorageUsed = vStorageUsed + datastoreSize,
+                 vCpuUsed=vCpuUsed+NEW.cpuUsed,
+                 vMemoryUsed=vMemoryUsed+NEW.ramUsed
           WHERE idDataCenter = NEW.idDataCenter;
         ELSEIF OLD.idState = 3 THEN
         -- Managed (Running) passes to Stopped / Halted / Not provisioned
-          UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1 WHERE idDataCenter = NEW.idDataCenter;
-          UPDATE IGNORE cloud_usage_stats
-            SET vCpuUsed=vCpuUsed-OLD.cpuUsed,
-              vMemoryUsed=vMemoryUsed-OLD.ramUsed,
-              vStorageUsed=vStorageUsed-OLD.hdUsed
+          CALL get_datastore_used_size(OLD.idPhysicalMachine,datastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET serversRunning = serversRunning-1,
+                 vStorageUsed = vStorageUsed - datastoreSize,
+                 vCpuUsed=vCpuUsed-OLD.cpuUsed,
+                 vMemoryUsed=vMemoryUsed-OLD.ramUsed
           WHERE idDataCenter = OLD.idDataCenter;
         END IF;
       ELSE
       -- No State Changes
         IF NEW.idState NOT IN (2, 6, 7) THEN
 	-- If Machine is in a not managed state, changes into resources are ignored, Should we add 'Disabled' state to this condition?
-          UPDATE IGNORE cloud_usage_stats
-            SET vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
-              vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram),
-              vStorageTotal=vStorageTotal + (NEW.hd-OLD.hd)
+          CALL get_datastore_size(NEW.idPhysicalMachine,datastoreSize);
+          CALL get_datastore_size(OLD.idPhysicalMachine,oldDatastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET vStorageTotal = vStorageTotal + (datastoreSize - oldDatastoreSize),
+                 vCpuTotal=vCpuTotal+((NEW.cpu-OLD.cpu)*NEW.cpuRatio),
+                 vMemoryTotal=vMemoryTotal + (NEW.ram-OLD.ram)
           WHERE idDataCenter = OLD.idDataCenter;
         END IF;
         --
         IF NEW.idState = 3 THEN
-          UPDATE IGNORE cloud_usage_stats
-            SET vCpuUsed=vCpuUsed + (NEW.cpuUsed-OLD.cpuUsed),
-              vMemoryUsed=vMemoryUsed + (NEW.ramUsed-OLD.ramUsed),
-              vStorageUsed=vStorageUsed + (NEW.hdUsed-OLD.hdUsed)
+          CALL get_datastore_used_size(NEW.idPhysicalMachine,datastoreSize);
+          CALL get_datastore_used_size(OLD.idPhysicalMachine,oldDatastoreSize);
+          UPDATE IGNORE cloud_usage_stats SET vStorageUsed = vStorageUsed + (datastoreSize - oldDatastoreSize),
+                 vCpuUsed=vCpuUsed + (NEW.cpuUsed-OLD.cpuUsed),
+                 vMemoryUsed=vMemoryUsed + (NEW.ramUsed-OLD.ramUsed)
           WHERE idDataCenter = OLD.idDataCenter;
         END IF;
       END IF;
@@ -3639,10 +3641,13 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     AND v.state = "RUNNING"
     and v.idType = 1;
     --
-    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
+    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)) INTO vCpuTotal, vMemoryTotal, vCpuUsed, vMemoryUsed
     FROM physicalmachine
     WHERE idDataCenter = idDataCenterObj
     AND idState = 3; 
+    --
+    CALL get_datastore_size_by_dc(idDataCenterObj,vStorageTotal);
+    CALL get_datastore_used_size_by_dc(idDataCenterObj,vStorageUsed);
     --
     SELECT IF (SUM(vlanHard) IS NULL, 0, SUM(vlanHard))  INTO vlanReserved
     FROM enterprise_limits_by_datacenter 
@@ -4024,6 +4029,58 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
 |
 --
 DELIMITER ;
+
+
+-- ******************************************************************************************
+--
+--  Procedures to calculate datastore size
+--
+-- ****************************************************************************************
+DROP PROCEDURE IF EXISTS `kinton`.`get_datastore_size`;
+DROP PROCEDURE IF EXISTS `kinton`.`get_datastore_used_size`;
+DROP PROCEDURE IF EXISTS `kinton`.`get_datastore_size_by_dc`;
+DROP PROCEDURE IF EXISTS `kinton`.`get_datastore_used_size_by_dc`;
+
+DELIMITER |
+--
+CREATE PROCEDURE `kinton`.`get_datastore_size`(IN idPM INT, OUT size BIGINT(20))
+BEGIN
+    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
+    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+    WHERE da.idPhysicalMachine = idPM AND d.enabled = 1;
+END
+--
+| 
+--
+CREATE PROCEDURE `kinton`.`get_datastore_used_size`(IN idPM INT, OUT usedSize BIGINT(20))
+BEGIN
+    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.usedSize)) INTO usedSize
+    FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
+    WHERE da.idPhysicalMachine = idPM AND d.enabled = 1;
+END
+--
+|
+--
+CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT)
+BEGIN
+    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
+    FROM datastore d LEFT OUTER JOIN datastore_assigment da ON d.idDatastore = da.idDatastore 
+    LEFT OUTER JOIN phyisicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+END
+|
+--
+CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT)
+BEGIN
+    SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
+    FROM datastore d LEFT OUTER JOIN datastore_assigment da ON d.idDatastore = da.idDatastore
+    LEFT OUTER JOIN phyisicalmachine pm ON da.idPhysicalMachine = pm.idPhysicialMachine
+    WHERE pm.idDataCenter = idDC AND d.enabled = 1;
+END
+|
+--
+DELIMITER ;
+
 
 --
 -- STATISTICS INITIALIZATION (uncomment for Default datacenter (id=1))
