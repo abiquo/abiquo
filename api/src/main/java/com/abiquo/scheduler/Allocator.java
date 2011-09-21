@@ -188,7 +188,7 @@ public class Allocator implements IAllocator
         /*
          * ENTERPRISE LIMIT CHECK
          */
-        checkLimist(vapp, requirements, foreceEnterpriseSoftLimits, false);
+        checkLimist(vapp, requirements, foreceEnterpriseSoftLimits);
 
         /*
          * PHYSICAL MACHINE ALLOCATION
@@ -331,7 +331,7 @@ public class Allocator implements IAllocator
         throws LimitExceededException
     {
 
-        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN);
+        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN, false);
 
     }
 

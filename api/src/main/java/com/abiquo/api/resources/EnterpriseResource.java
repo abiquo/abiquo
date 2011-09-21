@@ -167,7 +167,7 @@ public class EnterpriseResource extends AbstractResource
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
-        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(0) final Integer limit,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {

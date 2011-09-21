@@ -21,9 +21,7 @@
 
 package com.abiquo.abiserver.commands;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 
@@ -53,12 +51,4 @@ public interface NetworkCommand
     public void assignDefaultNICResource(UserSession userSession, Integer vmId)
         throws NetworkCommandException;
 
-    /**
-     * Check the private VLAN limits. (this is also called before try to create a virtua
-     * datacenter).
-     * 
-     * @throws NetworkCommandException if the Hard Limit is exceeded.
-     */
-    public void checkPrivateVlan(VirtualDataCenterHB vdc, Integer datacenterId, EnterpriseHB enter,
-        UserSession userSession) throws NetworkCommandException;
 }

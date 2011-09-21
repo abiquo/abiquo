@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -115,7 +116,8 @@ public class DatacenterResource extends AbstractResource
     @Path(ENTERPRISES_PATH)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
-        @QueryParam(NETWORK) Boolean network, @QueryParam(LIMIT) @Min(0) final Integer limit,
+        @QueryParam(NETWORK) Boolean network,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {

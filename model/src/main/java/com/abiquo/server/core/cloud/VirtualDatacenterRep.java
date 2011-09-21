@@ -40,6 +40,7 @@ import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.DhcpDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,7 +50,6 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
@@ -229,6 +229,15 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return virtualDatacenterDAO.findUniqueByProperty(VirtualDatacenter.NAME_PROPERTY, name);
     }
 
+    public List<IpPoolManagement> findExternalIpsByVlan(final Integer entId,
+        final Integer dcLimitId, final Integer vlanId, final Integer startwith,
+        final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc, final Boolean onlyAvailable)
+    {
+        return ipManagementDAO.findExternalIpsByVlan(entId, dcLimitId, vlanId, startwith, limit,
+            filter, orderByEnum, descOrAsc, onlyAvailable);
+    }
+
     public VLANNetwork findExternalVlanByEnterprise(final Enterprise ent, final Integer vlanId)
     {
         return vlanDAO.findExternalVlanByEnterprise(ent, vlanId);
@@ -249,6 +258,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Datacenter datacenter)
     {
         return vlanDAO.findExternalVlansByEnterpriseInDatacenter(ent, datacenter);
+    }
+
+    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
+    {
+        return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
@@ -279,11 +293,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
     {
         return ipManagementDAO.findIpsByPrivateVLAN(vdcId, vlanId);
-    }
-
-    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
-    {
-        return ipManagementDAO.privateVLANinUseByAnyVDC(vlanId);
     }
 
     /**
@@ -346,11 +355,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
     {
         return ipManagementDAO.findIpsByVlan(vlan);
-    }
-
-    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
-    {
-        return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
     public List<IpPoolManagement> findIpsWithConfigurationIdInVirtualMachine(
@@ -430,11 +434,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findUsedIpsByPrivateVLAN(final Integer vdcId, final Integer vlanId)
     {
         return ipManagementDAO.findUsedIpsByPrivateVLAN(vdcId, vlanId);
-    }
-
-    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
-    {
-        return ipManagementDAO.isDefaultNetworkofanyVDC(vlanId);
     }
 
     public VirtualAppliance findVirtualApplianceById(final Integer vappId)
@@ -579,6 +578,16 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void inserVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         virtualApplianceDAO.persist(virtualAppliance);
+    }
+
+    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
+    {
+        return ipManagementDAO.isDefaultNetworkofanyVDC(vlanId);
+    }
+
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
+    {
+        return ipManagementDAO.privateVLANinUseByAnyVDC(vlanId);
     }
 
     public void update(final VirtualDatacenter vdc)
