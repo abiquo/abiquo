@@ -102,12 +102,14 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         try
         {
             virtualApplianceWs =
-                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium").newInstance();
+                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium")
+                    .newInstance();
 
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
+                    .newInstance();
         }
         catch (Exception e)
         {
@@ -133,8 +135,9 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         VirtualAppliance bundle = null;
 
         user =
-            new UserInfo(userSession.getUser(), new Long(userSession.getId()), userSession
-                .getEnterpriseName());
+            new UserInfo(userSession.getUser(),
+                new Long(userSession.getId()),
+                userSession.getEnterpriseName());
 
         platform =
             Platform.platform("abicloud").enterprise(
@@ -151,7 +154,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (BundleException e)
         {
             factory.rollbackConnection();
-            traceBundleError("Error bundling VirtualAppliance (" + va.getId() + ") "
+            traceBundleError("Error instantiating VirtualAppliance (" + va.getId() + ") "
                 + e.getMessage());
 
             updateVirtualAppliance(va.toPojoHB(), e.getPreviousState(), e.getPreviousState());
@@ -160,18 +163,19 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (PersistenceException e)
         {
             factory.rollbackConnection();
-            traceBundleError("Error bundling VirtualAppliance: " + va.getId());
+            traceBundleError("Error instantiating VirtualAppliance: " + va.getId());
 
             State notDeployed = new State(StateEnum.NOT_DEPLOYED);
             updateVirtualAppliance(va.toPojoHB(), notDeployed, notDeployed);
 
-            return reportBundleError(va, "bundleVirtualAppliance.databaseError", e.getMessage(), e);
+            return reportBundleError(va, "instanceVirtualAppliance.databaseError", e.getMessage(),
+                e);
         }
 
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
         dataResult.setData(bundle);
         dataResult.setSuccess(true);
-        dataResult.setMessage(resourceManager.getMessage("bundleVirtualAppliance.succes"));
+        dataResult.setMessage(resourceManager.getMessage("instanceVirtualAppliance.succes"));
 
         return dataResult;
     }
@@ -185,7 +189,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
         final Collection<Integer> nodeIds, final String userName) throws BundleException
     {
-        //        
+        //
         // // Block the virtual appliance
         factory.beginConnection();
 
@@ -195,7 +199,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         int enterpriseId = user.getEnterpriseHB().getIdEnterprise();
 
         VirtualappHB virtualApp = virtualappDAO.findByIdNamedExtended(idVirtualApp);
-        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.BUNDLING);
+        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.INSTANTIATING);
 
         factory.endConnection();
 
@@ -219,7 +223,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         // Power off all selected nodes
         if (!powerOffNodes(getNodes(nodeIds)))
         {
-            throw new BundleException("bundleVirtualAppliance.powerOffError",
+            throw new BundleException("instanceVirtualAppliance.powerOffError",
                 new State(StateEnum.RUNNING));
         }
 
@@ -234,8 +238,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
 
         if (!nodes.isEmpty())
         {
-            virtualApp.setNodesHB(CollectionUtils.collect(nodes, InvokerTransformer
-                .getInstance("toPojoHB")));
+            virtualApp.setNodesHB(CollectionUtils.collect(nodes,
+                InvokerTransformer.getInstance("toPojoHB")));
         }
 
         boolean completed = completeBundleProcess(virtualAppPojo);
@@ -243,16 +247,16 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         checkTransaction();
 
         // Power on the bundled nodes
-        if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes, InvokerTransformer
-            .getInstance("getId")))))
+        if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes,
+            InvokerTransformer.getInstance("getId")))))
         {
-            throw new BundleException("bundleVirtualAppliance.powerOnError",
+            throw new BundleException("instanceVirtualAppliance.powerOnError",
                 new State(StateEnum.RUNNING));
         }
 
         if (!completed)
         {
-            throw new BundleException("bundleVirtualAppliance", new State(StateEnum.RUNNING));
+            throw new BundleException("instanceVirtualAppliance", new State(StateEnum.RUNNING));
         }
 
         factory.endConnection();
@@ -430,11 +434,11 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         {
             if (!virtualApp.getNodes().isEmpty())
             {
-                for(Node node:virtualApp.getNodes())
+                for (Node node : virtualApp.getNodes())
                 {
-                    String message = "Bundle process started in "+ node.getName();
+                    String message = "Instance process started in " + node.getName();
                     TracerFactory.getTracer().log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                        EventType.VAPP_BUNDLE, message, user, platform);
+                        EventType.VAPP_INSTANCE, message, user, platform);
                 }
                 BasicResult result = virtualApplianceWs.bundleVirtualAppliance(virtualApp);
                 done = result.getSuccess();
@@ -443,7 +447,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         catch (Exception e)
         {
             logger.error(e.getMessage(), e);
-            traceBundleError("Error bundling virtual appliance " + virtualApp.getName() + "("
+            traceBundleError("Error instantiating virtual appliance " + virtualApp.getName() + "("
                 + virtualApp.getId() + "). " + e.getMessage());
             done = false;
         }
@@ -513,7 +517,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     {
         if (vi.getMaster() == null)
         {
-            final String cause = String.format("Provided [%s] is not a bundle", vi.getName());
+            final String cause = String.format("Provided [%s] is not an instance", vi.getName());
             throw new PersistenceException(cause);
         }
 
@@ -538,8 +542,8 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
      */
     public static String getSnapshotFomPath(final String bundlePath)
     {
-        return bundlePath.substring(bundlePath.lastIndexOf('/') + 1, bundlePath
-            .indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
+        return bundlePath.substring(bundlePath.lastIndexOf('/') + 1,
+            bundlePath.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
     }
 
     /**
@@ -598,7 +602,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     private void traceBundleError(final String message)
     {
         TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-            EventType.VAPP_BUNDLE, message, user, platform);
+            EventType.VAPP_INSTANCE, message, user, platform);
     }
 
     private void uploadNotManagedMachines(final VirtualappHB vapp,
@@ -618,7 +622,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                     vapp.getIdVirtualApp());
 
             logger.debug(cause);
-            throw new BundleException("bundleVirtualAppliance.uploadingError");
+            throw new BundleException("instanceVirtualAppliance.uploadingError");
         }
 
         for (NodeVirtualImageHB node : nodes)
@@ -632,7 +636,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                 if (image.getType() == DiskFormatType.UNKNOWN)
                 {
                     logger.debug("Unknown disk format for virtual image " + image.getName());
-                    throw new BundleException("bundleVirtualAppliance.unknownFormatError");
+                    throw new BundleException("instanceVirtualAppliance.unknownFormatError");
                 }
 
                 final Integer idEnterprise = image.getIdEnterprise();
@@ -652,7 +656,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                             + "for VirtualAppliance [%s]", vapp.getIdVirtualApp());
 
                     logger.debug(cause);
-                    throw new BundleException("bundleVirtualAppliance.uploadingError");
+                    throw new BundleException("instanceVirtualAppliance.uploadingError");
                 }
             }
         }
