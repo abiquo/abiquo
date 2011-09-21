@@ -106,9 +106,8 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
         final Datacenter datacenter, final Integer vlanId)
     {
         return findUniqueByCriterions(Restrictions.eq(VLANNetwork.ENTERPRISE_PROPERTY, ent),
-            sameNetwork(datacenter.getNetwork()), Restrictions.eq(PersistentEntity.ID_PROPERTY,
-                vlanId));
-
+            sameNetwork(datacenter.getNetwork()),
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
     }
 
     public List<VLANNetwork> findExternalVlansByEnterprise(final Enterprise ent)
@@ -133,8 +132,8 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     public VLANNetwork findPublicVlanByDatacenter(final Datacenter dc, final Integer vlanId)
     {
-        return findUniqueByCriterions(sameNetwork(dc.getNetwork()), Restrictions.eq(
-            PersistentEntity.ID_PROPERTY, vlanId));
+        return findUniqueByCriterions(sameNetwork(dc.getNetwork()),
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
     }
 
     public List<VLANNetwork> findPublicVLANNetworksByDatacenter(final Datacenter datacenter,
@@ -154,16 +153,17 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
 
     public VLANNetwork findVlanByNameInNetwork(final Network network, final String name)
     {
-        return findUniqueByCriterions(sameNetwork(network), Restrictions.eq(
-            VLANNetwork.NAME_PROPERTY, name));
+        return findUniqueByCriterions(sameNetwork(network),
+            Restrictions.eq(VLANNetwork.NAME_PROPERTY, name));
 
     }
 
     public VLANNetwork findVlanByVirtualDatacenterId(final VirtualDatacenter virtualDatacenter,
         final Integer vlanId)
     {
-        return findUniqueByCriterions(Restrictions.eq(VLANNetwork.NETWORK_PROPERTY,
-            virtualDatacenter.getNetwork()), Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
+        return findUniqueByCriterions(
+            Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, virtualDatacenter.getNetwork()),
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, vlanId));
     }
 
     public List<VLANNetwork> findVlanNetworks(final VirtualDatacenter virtualDatacenter)

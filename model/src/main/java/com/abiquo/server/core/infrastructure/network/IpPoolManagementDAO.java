@@ -45,6 +45,7 @@ import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaIpPoolManagementDAO")
+@SuppressWarnings("unchecked")
 public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagement>
 {
 
@@ -64,6 +65,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+
+    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
+        " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
+            + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
 
     public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
@@ -158,18 +163,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
-    public static final String BY_VLAN_WITHOUT_USED_IPS = " SELECT ip FROM IpPoolManagement ip "
+    public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-        + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
-        + " AND vdc.id = :vdc_id " + " AND vm is null AND " + "( ip.ip like :filterLike "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " join vn.enterprise ent, "
+        + " DatacenterLimits dcl" + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+        + " AND ent.id = :ent_id AND " + " dcl.enterprise.id = ent.id AND "
+        + " ip.available = 1 AND " + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
-    public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
-        " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
-            + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
 
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
@@ -183,6 +185,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
         + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
         + " OR vm.name like :filterLike " + ")";
+
+    public static final String BY_VLAN_WITHOUT_USED_IPS = " SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
+        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
+        + " AND vdc.id = :vdc_id " + " AND vm is null AND " + "( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
     private final static String GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL =
         "SELECT * " //
@@ -232,6 +243,53 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         assert !StringUtils.isEmpty(mac);
 
         return this.existsAnyByCriterions(equalMac(mac));
+    }
+
+    public List<IpPoolManagement> findExternalIpsByVlan(final Integer entId,
+        final Integer datacenterLimitId, final Integer vlanId, Integer startwith,
+        final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc, final Boolean onlyAvailable)
+    {
+        // TODO Auto-generated method stub
+        Query finalQuery =
+            getSession().createQuery(
+                BY_EXTERNAL_VLAN + " " + defineOnlyAvailableFilter(onlyAvailable)
+                    + defineOrderBy(orderByEnum, descOrAsc));
+        finalQuery.setParameter("ent_id", entId);
+        finalQuery.setParameter("dc_limit_id", datacenterLimitId);
+        finalQuery.setParameter("vlan_id", vlanId);
+        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+            + filter + "%");
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (limit != null)
+        {
+            finalQuery.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - limit;
+        }
+        finalQuery.setFirstResult(startwith);
+        finalQuery.setMaxResults(limit);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(limit);
+        ipList.setCurrentElement(startwith);
+
+        return ipList;
+    }
+
+    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
+    {
+        Criterion freeIps = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
+        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(freeIps);
+        criteria.add(Restrictions.isNull(IpPoolManagement.MAC_PROPERTY));
+        return criteria.list();
     }
 
     /**
@@ -346,20 +404,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         ipList.setCurrentElement(firstElem);
 
         return ipList;
-    }
-
-    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
-    {
-        List<IpPoolManagement> ippoolList;
-        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
-        query.setParameter("vlan_id", vlanId);
-        ippoolList = query.list();
-
-        if (ippoolList.isEmpty())
-        {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -542,14 +586,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     public List<IpPoolManagement> findIpsByVlan(final VLANNetwork vlan)
     {
         return findByCriterions(Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan));
-    }
-
-    public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
-    {
-        Criterion freeIps = Restrictions.eq(IpPoolManagement.VLAN_NETWORK_PROPERTY, vlan);
-        Criteria criteria = getSession().createCriteria(IpPoolManagement.class).add(freeIps);
-        criteria.add(Restrictions.isNull(IpPoolManagement.MAC_PROPERTY));
-        return criteria.list();
     }
 
     public IpPoolManagement findPublicIpPurchasedByVirtualDatacenter(final Integer vdcId,
@@ -772,14 +808,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return ipList;
     }
 
-    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
-    {
-        Query query = getSession().createSQLQuery(BY_DEFAULT_VLAN_USED_BY_ANY_VDC);
-        query.setParameter("vlan_id", vlanId);
-        return !query.list().isEmpty();
-    }
-
-    @SuppressWarnings("unchecked")
     public Collection<String> getAllMacs()
     {
         Criteria criteria = getSession().createCriteria(IpPoolManagement.class);
@@ -799,6 +827,13 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         return query.list();
     }
 
+    public boolean isDefaultNetworkofanyVDC(final Integer vlanId)
+    {
+        Query query = getSession().createSQLQuery(BY_DEFAULT_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
+        return !query.list().isEmpty();
+    }
+
     public Boolean isVlanAssignedToDifferentVM(final Integer virtualMachineId,
         final VLANNetwork vlanNetwork)
     {
@@ -808,6 +843,20 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
                 GET_IPPOOLMANAGEMENT_ASSIGNED_TO_DIFFERENT_VM_AND_DIFFERENT_FROM_NOT_DEPLOYED_SQL);
         query.setParameter("idVlanNetwork", vlanNetwork.getId());
         query.setParameter("idVM", virtualMachineId);
+        ippoolList = query.list();
+
+        if (ippoolList.isEmpty())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean privateVLANinUseByAnyVDC(final Integer vlanId)
+    {
+        List<IpPoolManagement> ippoolList;
+        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("vlan_id", vlanId);
         ippoolList = query.list();
 
         if (ippoolList.isEmpty())

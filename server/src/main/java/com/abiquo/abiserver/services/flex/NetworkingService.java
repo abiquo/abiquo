@@ -459,17 +459,21 @@ public class NetworkingService
     }
 
     public BasicResult getNetworkPoolInfoByExternalVlan(final UserSession userSession,
-        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available)
+        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available,
+        final ListRequest listRequest)
     {
-        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId, available,
-            Boolean.FALSE);
+        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc(), available, Boolean.FALSE);
     }
 
     public BasicResult getFreeIpsByExternalVlan(final UserSession userSession,
-        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available)
+        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available,
+        final ListRequest listRequest)
     {
-        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId, available,
-            Boolean.TRUE);
+        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc(), available, Boolean.TRUE);
     }
 
     public BasicResult requestExternalNICforVirtualMachine(final UserSession userSession,
@@ -497,8 +501,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)

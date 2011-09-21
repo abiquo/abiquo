@@ -970,7 +970,9 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     @Override
     public BasicResult getNetworkPoolInfoByExternalVlan(final VirtualDataCenter vdc,
-        final Integer vlanId, final Boolean available, final Boolean freeIps)
+        final Integer vlanId, final Integer offset, final Integer numberOfNodes,
+        final String filterLike, final String orderBy, final Boolean asc, final Boolean available,
+        final Boolean freeIps)
     {
         DataResult<ListResponse<IpPoolManagement>> result =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -984,15 +986,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 Integer.valueOf(dcLink.getHref().substring(dcLink.getHref().lastIndexOf("/") + 1));
             if (dcId.equals(vdc.getIdDataCenter()))
             {
-                String uriIps =
-                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanId + "/ips";
 
-                if (freeIps)
+                StringBuilder uriIps =
+                    new StringBuilder(limitDto.searchLink("externalnetworks").getHref() + "/"
+                        + vlanId + "/ips");
+                uriIps.append("?startwith=" + offset);
+                uriIps.append("&limit=" + numberOfNodes);
+                uriIps.append("&by=" + transformOrderBy(orderBy));
+                uriIps.append("&asc=" + (asc ? "true" : "false"));
+                uriIps.append("&free=" + (freeIps ? "true" : "false"));
+                if (!filterLike.isEmpty())
                 {
-                    uriIps = uriIps + "?free=true";
-
+                    uriIps.append("&has=" + filterLike);
                 }
-                response = get(uriIps);
+
+                response = get(uriIps.toString());
                 if (response.getStatusCode() == 200)
                 {
                     ListResponse<IpPoolManagement> listResponse =

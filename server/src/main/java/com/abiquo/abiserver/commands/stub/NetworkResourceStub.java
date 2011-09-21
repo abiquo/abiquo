@@ -115,6 +115,7 @@ public interface NetworkResourceStub
         throws NetworkCommandException;
 
     public BasicResult getNetworkPoolInfoByExternalVlan(VirtualDataCenter vdc, Integer vlanId,
+        Integer offset, Integer numberOfNodes, String filterLike, String orderBy, Boolean asc,
         Boolean available, Boolean freeIps);
 
     public BasicResult getNICsByVirtualMachine(Integer virtualDatacenterId, Integer vappId,
