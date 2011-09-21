@@ -33,6 +33,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.ChangeWatcher;
+        	import net.undf.abicloud.events.VirtualApplianceEvent;
+        	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.vo.user.PrivilegeType;
@@ -69,11 +72,22 @@
             [Bindable]
             public var nodeName:String;
             
+            private var _stateChangeWatcher:ChangeWatcher;
+            
             private function onCreationComplete():void{
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
+            	
+            	this._stateChangeWatcher = BindingUtils.bindSetter(updateStateChanges,busyIcon,"visible");
+            }
+            
+            //Need to know when blocked the virtual machine editon button
+            private function updateStateChanges(id:int):void{
+            	var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE);
+            	event.virtualMachine = this._virtualMachine;
+            	AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
             }
 
             [Bindable]
@@ -120,6 +134,8 @@
             public function set virtualMachine(value:VirtualMachine):void
             {
                 var update:Boolean;
+                
+                
                 if(this._virtualMachine){
                 	if(this._virtualMachine.id != value.id){
 		                update = true;                		
