@@ -322,10 +322,13 @@ public enum APIError
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_CLIENT_ALREADY_EXISTS(
-        "CHEF-1", "Chef client already exists"), CHEF_ERROR_CONNECTION("CHEF-2",
+        "CHEF-1", "A client named 'abiquo' already exists in the Chef Server. "
+            + "This client is used by Abiquo perform management tasks. "
+            + "Please, remove that client before proceeding."), CHEF_ERROR_CONNECTION("CHEF-2",
         "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
-        "The node does not exist in the Chef Server"), CHEF_RECIPE_DOES_NOT_EXIST("CHEF-4",
-        "The given recipe does not exist in the Chef Server"),
+        "The node does not exist in the Chef Server. "
+            + "If the virtual machine is bootstraping, please wait until the process completes."), CHEF_RECIPE_DOES_NOT_EXIST(
+        "CHEF-4", "The given recipe does not exist in the Chef Server"),
 
     ;
 
