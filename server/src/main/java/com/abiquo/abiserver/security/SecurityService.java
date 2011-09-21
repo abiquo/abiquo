@@ -53,6 +53,10 @@ public class SecurityService
 
     public static final String APPLIB_ALLOW_MODIFY_SHARED = "APPLIB_ALLOW_MODIFY_SHARED";
 
+    public static final String EVENTLOG_VIEW_ENTERPRISE = "EVENTLOG_VIEW_ENTERPRISE";
+
+    public static final String EVENTLOG_VIEW_ALL = "EVENTLOG_VIEW_ALL";
+
     public static boolean hasPrivilege(final String privilege, final Role role)
     {
         if (role.getPrivileges() != null)
