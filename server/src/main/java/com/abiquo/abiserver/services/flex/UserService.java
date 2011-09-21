@@ -410,4 +410,26 @@ public class UserService
     {
         return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
+
+    /**
+     * Checks if a Role has a Privilege
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @param String namePrivilege the name of a Privilege to check
+     * @return A DataResult object containing a Boolean if Role has a Privilege
+     */
+    public BasicResult checkRoleAccess(final UserSession userSession, final Integer idRole)
+    {
+        UserCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.checkRoleAccess(userSession, idRole);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
 }

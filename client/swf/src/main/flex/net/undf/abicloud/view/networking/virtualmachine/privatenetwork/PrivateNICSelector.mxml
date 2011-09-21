@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.networking.Network;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.collections.ArrayCollection;
             import mx.core.Application;
@@ -104,7 +105,10 @@
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
-            	_virtualDatacenter.network.networks.addAll(networks);
+            	if(!_virtualDatacenter.network){
+            		_virtualDatacenter.network = new Network();
+            	}
+            	_virtualDatacenter.network.networks = networks;
             }
 
             private function cleanFilteringOptions():void
