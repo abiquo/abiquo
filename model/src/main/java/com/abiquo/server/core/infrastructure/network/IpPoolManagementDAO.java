@@ -117,14 +117,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
-    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-        + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
-        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-        + " OR vm.name like :filterLike " + ")";
+    public static final String BY_VDC =
+        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
+            + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
+            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+            + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+            + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
+            + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+            + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_VDC_PURCHASED =
         " SELECT ip FROM "
@@ -178,13 +178,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
             + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
 
-    public static final String BY_VLAN_USED_BY_ANY_VM = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
-        + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-        + " OR vm.name like :filterLike " + ")";
+    public static final String BY_VLAN_USED_BY_ANY_VM =
+        " SELECT ip FROM IpPoolManagement ip " + " left join ip.virtualMachine vm "
+            + " left join ip.virtualAppliance vapp, " + " NetworkConfiguration nc, "
+            + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+            + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
+            + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+            + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+            + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_VLAN_WITHOUT_USED_IPS = " SELECT ip FROM IpPoolManagement ip "
         + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
@@ -205,21 +206,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "AND ip.vlan_network_id = :idVlanNetwork " //
             + "AND vm.state != 'NOT_DEPLOYED'"; //
 
-    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE = "SELECT ip "//
-        + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
-        + "INNER JOIN dc.network net, "//
-        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan "//
-        + "INNER JOIN vlan.configuration.dhcp dhcp, "//
-        + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
-        // + "LEFT JOIN join ip.virtualMachine vm "//
-        + "LEFT JOIN ip.virtualAppliance vapp, "//
-        + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
-        + "where net.id = vlan.network.id "//
-        + "and dhcp.id = ip.dhcp.id "//
-        + "and dc.id = vdc.datacenter.id "//
-        + "and vdc.enterprise.id = :enterpriseId "
-        + "and ip.virtualDatacenter.id = vdc.id "
-        + "and vlan.type = 'PUBLIC'";
+    private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE =
+        "SELECT ip "//
+            + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
+            + "INNER JOIN dc.network net, "//
+            + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan "//
+            + "INNER JOIN vlan.configuration.dhcp dhcp, "//
+            + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
+            // + "LEFT JOIN join ip.virtualMachine vm "//
+            + "LEFT JOIN ip.virtualAppliance vapp, "//
+            + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
+            + "where net.id = vlan.network.id "//
+            + "and dhcp.id = ip.dhcp.id "//
+            + "and dc.id = vdc.datacenter.id "//
+            + "and vdc.enterprise.id = :enterpriseId "
+            + "and ip.virtualDatacenter.id = vdc.id "
+            + "and vlan.type = 'PUBLIC'";
 
     private static Criterion equalMac(final String mac)
     {
@@ -498,7 +500,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         {
             finalQuery =
                 getSession().createQuery(
-                    BY_VLAN_WITHOUT_USED_IPS + " " + defineOrderBy(orderby, asc));
+                    BY_VLAN_WITHOUT_USED_IPS + " " + defineFilterAvailable()
+                        + defineOrderBy(orderby, asc));
         }
         finalQuery.setParameter("vdc_id", vdcId);
         finalQuery.setParameter("vlan_id", vlanId);
