@@ -169,13 +169,14 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             State notDeployed = new State(StateEnum.NOT_DEPLOYED);
             updateVirtualAppliance(va.toPojoHB(), notDeployed, notDeployed);
 
-            return reportBundleError(va, "bundleVirtualAppliance.databaseError", e.getMessage(), e);
+            return reportBundleError(va, "instanceVirtualAppliance.databaseError", e.getMessage(),
+                e);
         }
 
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
         dataResult.setData(bundle);
         dataResult.setSuccess(true);
-        dataResult.setMessage(resourceManager.getMessage("bundleVirtualAppliance.succes"));
+        dataResult.setMessage(resourceManager.getMessage("instanceVirtualAppliance.succes"));
 
         return dataResult;
     }
@@ -189,12 +190,14 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
         final Collection<Integer> nodeIds, final String userName) throws BundleException
     {
+
         return bundleVirtualAppliance(idVirtualApp, nodeIds, userName, AuthType.ABIQUO.name());
     }
 
     public VirtualAppliance bundleVirtualAppliance(final int idVirtualApp,
         final Collection<Integer> nodeIds, final String userName, final String authType)
     {
+
         //
         // // Block the virtual appliance
         factory.beginConnection();
@@ -205,7 +208,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         int enterpriseId = user.getEnterpriseHB().getIdEnterprise();
 
         VirtualappHB virtualApp = virtualappDAO.findByIdNamedExtended(idVirtualApp);
-        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.BUNDLING);
+        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.INSTANTIATING);
 
         factory.endConnection();
 
@@ -229,7 +232,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         // Power off all selected nodes
         if (!powerOffNodes(getNodes(nodeIds)))
         {
-            throw new BundleException("bundleVirtualAppliance.powerOffError",
+            throw new BundleException("instanceVirtualAppliance.powerOffError",
                 new State(StateEnum.RUNNING));
         }
 
@@ -256,13 +259,13 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         if (!powerOnNodes(getNodes(CollectionUtils.collect(nodes,
             InvokerTransformer.getInstance("getId")))))
         {
-            throw new BundleException("bundleVirtualAppliance.powerOnError",
+            throw new BundleException("instanceVirtualAppliance.powerOnError",
                 new State(StateEnum.RUNNING));
         }
 
         if (!completed)
         {
-            throw new BundleException("bundleVirtualAppliance", new State(StateEnum.RUNNING));
+            throw new BundleException("instanceVirtualAppliance", new State(StateEnum.RUNNING));
         }
 
         factory.endConnection();
@@ -523,7 +526,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
     {
         if (vi.getMaster() == null)
         {
-            final String cause = String.format("Provided [%s] is not a bundle", vi.getName());
+            final String cause = String.format("Provided [%s] is not an instance", vi.getName());
             throw new PersistenceException(cause);
         }
 
@@ -628,7 +631,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                     vapp.getIdVirtualApp());
 
             logger.debug(cause);
-            throw new BundleException("bundleVirtualAppliance.uploadingError");
+            throw new BundleException("instanceVirtualAppliance.uploadingError");
         }
 
         for (NodeVirtualImageHB node : nodes)
@@ -642,7 +645,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                 if (image.getType() == DiskFormatType.UNKNOWN)
                 {
                     logger.debug("Unknown disk format for virtual image " + image.getName());
-                    throw new BundleException("bundleVirtualAppliance.unknownFormatError");
+                    throw new BundleException("instanceVirtualAppliance.unknownFormatError");
                 }
 
                 final Integer idEnterprise = image.getIdEnterprise();
@@ -662,7 +665,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                             + "for VirtualAppliance [%s]", vapp.getIdVirtualApp());
 
                     logger.debug(cause);
-                    throw new BundleException("bundleVirtualAppliance.uploadingError");
+                    throw new BundleException("instanceVirtualAppliance.uploadingError");
                 }
             }
         }

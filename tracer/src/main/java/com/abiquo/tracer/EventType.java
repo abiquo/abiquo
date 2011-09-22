@@ -58,8 +58,7 @@ public enum EventType implements Serializable
         221, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(222, "VIRTUAL_APPLIANCE_STATE",
         "Virtual Appliance State Refreshed"), VAPP_CRASHED(223, "VAPP_CRASHED",
         "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(224, "VAPP_UNKNOWN",
-        "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(225, "VAPP_BUNDLE",
-        "Virtual Appliance bundle started"), VAPP_INSTANCE(224, "VAPP_INSTANCE",
+        "Virtual Appliance turned into 'unknown' state"), VAPP_INSTANCE(225, "VAPP_INSTANCE",
         "Virtual Appliance instance started"),
 
     // Infrastructure-related events
