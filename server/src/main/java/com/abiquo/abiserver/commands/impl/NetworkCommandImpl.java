@@ -94,6 +94,11 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 factory.getResourceAllocationSettingDataDAO();
 
             VirtualmachineHB vmHB = vmDAO.findById(vmId);
+            if (vmHB == null)
+            {
+                // Error handling.
+                return;
+            }
             VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
 
             // Get the default VLAN
@@ -209,7 +214,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         if (nextIp == null)
         {
             factory.rollbackConnection();
-            throw new NetworkCommandException("No more available IPs for default VLAN. ");
+            throw new NetworkCommandException("No more available IPs for this Virtual Datacenter's default VLAN. ");
         }
 
         return nextIp;
