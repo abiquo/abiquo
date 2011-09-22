@@ -261,8 +261,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             if (vlanNetwork.getTag() == null)
             {
                 List<VLANNetwork> publicVLANs =
-                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter(),
-                        Boolean.FALSE);
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter(), null);
                 List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 

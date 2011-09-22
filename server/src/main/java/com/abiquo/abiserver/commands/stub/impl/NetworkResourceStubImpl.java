@@ -29,6 +29,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.wink.client.ClientResponse;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
@@ -497,6 +499,13 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
         String uri = createEnterpriseLimitsByDatacenterLink(enterpriseId);
         ClientResponse response = get(uri);
+        List<VlanNetwork> listOfNetworks = new ArrayList<VlanNetwork>();
+        if (response.getStatusCode() == Status.NOT_FOUND.getStatusCode())
+        {
+            result.setData(listOfNetworks);
+            result.setSuccess(Boolean.TRUE);
+            return result;
+        }
         DatacentersLimitsDto limits = response.getEntity(DatacentersLimitsDto.class);
         for (DatacenterLimitsDto limitDto : limits.getCollection())
         {
@@ -508,7 +517,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                 response = get(limitDto.searchLink("externalnetworks").getHref());
                 if (response.getStatusCode() == 200)
                 {
-                    List<VlanNetwork> listOfNetworks = new ArrayList<VlanNetwork>();
                     VLANNetworksDto dtos = response.getEntity(VLANNetworksDto.class);
 
                     for (VLANNetworkDto dto : dtos.getCollection())

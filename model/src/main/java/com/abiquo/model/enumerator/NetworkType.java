@@ -32,4 +32,17 @@ package com.abiquo.model.enumerator;
 public enum NetworkType
 {
     INTERNAL, EXTERNAL, PUBLIC;
+
+    public static NetworkType fromValue(final String orderBy)
+    {
+        for (NetworkType currentOrder : NetworkType.values())
+        {
+            if (currentOrder.name().equalsIgnoreCase(orderBy))
+            {
+                return currentOrder;
+            }
+        }
+
+        return null;
+    }
 }
