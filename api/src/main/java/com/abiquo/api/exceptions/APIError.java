@@ -159,7 +159,8 @@ public enum APIError
         "The IP does not exists"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
         "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
-        "VLAN-43", "The IP address is not available to be used by a Virtual Machine"),
+        "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
+        "VLAN-44", "The requested IP object does not exist"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
