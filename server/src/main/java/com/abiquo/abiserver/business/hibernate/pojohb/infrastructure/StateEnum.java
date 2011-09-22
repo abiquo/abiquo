@@ -23,14 +23,14 @@ package com.abiquo.abiserver.business.hibernate.pojohb.infrastructure;
 
 public enum StateEnum
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN, HA_IN_PROGRESS;
+    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, INSTANTIATING, STATEFUL, UNKNOWN, HA_IN_PROGRESS;
 
     public int id()
     {
         return ordinal() + 1;
     }
 
-    public static StateEnum fromId(int id)
+    public static StateEnum fromId(final int id)
     {
         return StateEnum.values()[id - 1];
     }

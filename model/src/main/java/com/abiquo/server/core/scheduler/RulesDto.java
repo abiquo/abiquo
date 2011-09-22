@@ -23,10 +23,8 @@ package com.abiquo.server.core.scheduler;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
-
 @XmlRootElement(name = "rules")
-public class RulesDto extends SingleResourceTransportDto
+public class RulesDto
 {
 
     private FitPolicyRulesDto fitPolicyRules;

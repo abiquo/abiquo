@@ -81,7 +81,7 @@ public class VSMListener implements VSMCallback
         "from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB as vm";
 
     @Override
-    public void onEvent(VirtualSystemEvent event)
+    public void onEvent(final VirtualSystemEvent event)
     {
         try
         {
@@ -261,7 +261,7 @@ public class VSMListener implements VSMCallback
      * @param Session
      * @param nviHB
      */
-    protected void onDeleteNode(Session session, NodeVirtualImageHB nviHB)
+    protected void onDeleteNode(final Session session, final NodeVirtualImageHB nviHB)
     {
         VirtualApplianceCommand vaCommand = new VirtualApplianceCommandImpl();
         vaCommand.beforeDeletingNode(session, nviHB);
@@ -364,8 +364,8 @@ public class VSMListener implements VSMCallback
 
     private boolean isBundling(final VirtualAppliance virtualAppliance)
     {
-        return (virtualAppliance.getState().toEnum() == StateEnum.IN_PROGRESS && virtualAppliance
-            .getSubState().toEnum() == StateEnum.BUNDLING);
+        return virtualAppliance.getState().toEnum() == StateEnum.IN_PROGRESS
+            && virtualAppliance.getSubState().toEnum() == StateEnum.INSTANTIATING;
     }
 
     /**
@@ -376,8 +376,8 @@ public class VSMListener implements VSMCallback
      * @param destinationPhysicalMachineAddress : physical machine destination address
      * @param destinationPhysicalMachineType : physical machine destination hypervisorType
      */
-    protected void onVMMovedEvent(Session session, VirtualmachineHB vm,
-        String destinationPhysicalMachineAddress, String destinationPhysicalMachineType)
+    protected void onVMMovedEvent(final Session session, final VirtualmachineHB vm,
+        final String destinationPhysicalMachineAddress, final String destinationPhysicalMachineType)
     {
         // * Implemented as a Enterprise Edition feature
 
