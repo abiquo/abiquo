@@ -76,10 +76,8 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
-import com.abiquo.abiserver.commands.stub.ApprovalResourcesStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
-import com.abiquo.abiserver.commands.stub.impl.ApprovalResourcesStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualDatacenterResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
@@ -141,9 +139,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
     private IVirtualApplianceWS virtualApplianceWs;
 
-    /** The stub used to connect to the API. */
-    private ApprovalResourcesStub approvalStub;
-
     public VirtualApplianceCommandImpl()
     {
         try
@@ -156,13 +151,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             virtualApplianceWs = new VirtualApplianceWS();
         }
-
-        approvalStub = new ApprovalResourcesStubImpl();
-    }
-
-    private ApprovalResourcesStub proxyStub(final UserSession userSession)
-    {
-        return APIStubFactory.getInstance(userSession, approvalStub, ApprovalResourcesStub.class);
     }
 
     /*
@@ -2047,17 +2035,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             dataResult.setSuccess(false);
             dataResult.setData(vApp);
             return dataResult;
-        }
-
-        // Launch approval process
-        try
-        {
-            proxyStub(userSession).approvalProcess();
-        }
-        catch (Exception ex)
-        {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
         }
 
         logger.debug("Starting virtual appliance " + vApp.getId());

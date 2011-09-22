@@ -697,11 +697,4 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
-
-    protected String createApprovalsLink()
-    {
-        Map<String, String> params = new HashMap<String, String>();
-
-        return resolveURI(apiUri, "approvals", params);
-    }
 }
