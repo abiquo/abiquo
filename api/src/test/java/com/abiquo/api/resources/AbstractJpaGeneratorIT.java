@@ -86,6 +86,15 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
             .get();
     }
 
+    protected ClientResponse get(final String uri, final String username, final String password,
+        final String acceptType, final String contentType)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(acceptType).contentType(contentType)
+            .header("Authorization", "Basic " + basicAuth).get();
+    }
+
     protected ClientResponse post(final String uri, final Object dto)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(

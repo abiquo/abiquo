@@ -27,6 +27,7 @@ package com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware;
 import java.io.Serializable;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.LazyUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
@@ -110,7 +111,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualDataCenterHB getVirtualDataCenter()
     {
-        return virtualDataCenter;
+        return LazyUtils.lazyGet(virtualDataCenter);
     }
 
     /**
@@ -126,7 +127,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualmachineHB getVirtualMachine()
     {
-        return virtualMachine;
+        return LazyUtils.lazyGet(virtualMachine);
     }
 
     /**
@@ -142,7 +143,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public ResourceAllocationSettingData getRasd()
     {
-        return rasd;
+        return LazyUtils.lazyGet(rasd);
     }
 
     /**
@@ -158,7 +159,7 @@ public abstract class ResourceManagementHB implements Serializable, IPojoHB<Reso
      */
     public VirtualappHB getVirtualApp()
     {
-        return virtualApp;
+        return LazyUtils.lazyGet(virtualApp);
     }
 
     /**

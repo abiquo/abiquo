@@ -115,12 +115,14 @@ public enum APIError
         "VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
-    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
+    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
+        "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
+        "The virtual appliance is not running"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exist"), NON_MANAGED_RACK("RACK-5",
+        "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
@@ -166,7 +168,8 @@ public enum APIError
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
         "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name of an existing global role"),
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Hasn't got enough privileges to manage this role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -184,7 +187,8 @@ public enum APIError
         "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
-        "In Ldap mode can not modify user's enterprise"),
+        "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
+        "The user cannot delete his own user account"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
