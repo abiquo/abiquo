@@ -255,6 +255,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                     URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
                         "{datacenter}", "datacenter");
 
+                factory.beginConnection(true);
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
                 factory.endConnection();
 
@@ -271,7 +272,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 datacenters.add(vdctoadd);
             }
             result.setData(datacenters);
-            factory.endConnection();
+            /* factory.endConnection(); */
         }
         else
         {
