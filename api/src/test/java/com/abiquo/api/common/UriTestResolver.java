@@ -144,7 +144,7 @@ public class UriTestResolver
 
     public static String resolveRoleActionGetPrivilegesURI(final Integer entId)
     {
-        return resolveRoleURI(entId) + RoleResource.ROLE_ACTION_GET_PRIVILEGES;
+        return resolveRoleURI(entId) + "/" + RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH;
     }
 
     public static String resolveUsersURI(final Serializable enterpriseId)
@@ -180,7 +180,8 @@ public class UriTestResolver
     public static String resolveUserActionGetVirtualMachinesURI(final Integer enterpriseId,
         final Integer userId)
     {
-        return resolveUserURI(enterpriseId, userId) + UserResource.USER_ACTION_GET_VIRTUALMACHINES;
+        return resolveUserURI(enterpriseId, userId) + "/"
+            + UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
     public static String resolveDatacentersURI()
