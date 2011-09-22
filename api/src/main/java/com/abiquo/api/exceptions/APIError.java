@@ -328,7 +328,10 @@ public enum APIError
         "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
         "The node does not exist in the Chef Server. "
             + "If the virtual machine is bootstraping, please wait until the process completes."), CHEF_RECIPE_DOES_NOT_EXIST(
-        "CHEF-4", "The given recipe does not exist in the Chef Server"),
+        "CHEF-4", "The given recipe does not exist in the Chef Server"), CHEF_CANNOT_UPDATE_NODE(
+        "CHEF-5", "The node could not be updated in the Chef Server. "
+            + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
+        "Could not connect to the Chef server. Please, contact the administrator."),
 
     ;
 

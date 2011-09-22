@@ -158,8 +158,10 @@ public enum EventType implements Serializable
     ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
         1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
 
-    CHEF_RECIPE_ADDED(1510, "CHEF_RECIPE_ADDED", "Chef recipe added"), CHEF_RECIPE_DELETED(1511,
-        "CHEF_RECIPE_DELETED", "Chef recipe deleted"),
+    CHEF_RECIPE_ADD(1510, "CHEF_RECIPE_ADD", "Add Chef recipe"), CHEF_RECIPE_DELETE(1511,
+        "CHEF_RECIPE_DELETE", "Delete a Chef recipe"), CHEF_NODE_UPDATE(1512, "CHEF_NODE_UPDATE",
+        "The Chef node update"), CHEF_RECIPES_UPDATE(1513, "CHEF_RECIPES_UPDATE",
+        "Chef recipes update"), CHEF_CONNECTION(1513, "CHEF_SERVER_CONNECT", "Chef Server connect"),
 
     ;
 
