@@ -346,7 +346,8 @@ public enum APIError
         "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
-    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
+    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"), QUERY_NETWORK_TYPE_INVALID_PARAMETER(
+        "QUERY-1", "Invalid 'type' parameter. Only 'EXTERNAL' or 'PUBLIC' allowed"),
 
     VOLUME_GENERIC_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(

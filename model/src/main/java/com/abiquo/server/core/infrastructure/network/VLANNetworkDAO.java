@@ -33,6 +33,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -137,15 +138,22 @@ public class VLANNetworkDAO extends DefaultDAOBase<Integer, VLANNetwork>
     }
 
     public List<VLANNetwork> findPublicVLANNetworksByDatacenter(final Datacenter datacenter,
-        final Boolean onlyPublic)
+        final NetworkType netType)
     {
 
         Criterion inNetwork =
             Restrictions.eq(VLANNetwork.NETWORK_PROPERTY, datacenter.getNetwork());
         Criteria criteria = getSession().createCriteria(VLANNetwork.class).add(inNetwork);
-        if (onlyPublic)
+        if (netType != null)
         {
-            criteria.add(Restrictions.isNull(VLANNetwork.ENTERPRISE_PROPERTY));
+            if (netType.equals(NetworkType.PUBLIC))
+            {
+                criteria.add(Restrictions.isNull(VLANNetwork.ENTERPRISE_PROPERTY));
+            }
+            else
+            {
+                criteria.add(Restrictions.isNotNull(VLANNetwork.ENTERPRISE_PROPERTY));
+            }
         }
 
         return criteria.list();
