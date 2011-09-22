@@ -415,7 +415,11 @@
              **/
             private function onRollOver():void
             {
-                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS;
+                if(this._node && this._node is NodeVirtualImage && NodeVirtualImage(this._node).virtualMachine){
+	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS;
+                }else{
+                	buttonsContainer.visible = true;
+                }
             }
 
             /**
