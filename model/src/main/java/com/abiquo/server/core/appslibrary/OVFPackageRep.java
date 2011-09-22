@@ -8,12 +8,14 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
+@Repository
 public class OVFPackageRep extends DefaultRepBase
 {
 
@@ -32,8 +34,15 @@ public class OVFPackageRep extends DefaultRepBase
     @Autowired
     IconDAO iconDao;
 
+    public OVFPackageRep()
+    {
+
+    }
+
     public OVFPackageRep(final EntityManager em)
     {
+        this.entityManager = em;
+
         dao = new OVFPackageDAO(em);
         listDao = new OVFPackageListDAO(em);
         categoryDao = new CategoryDAO(em);

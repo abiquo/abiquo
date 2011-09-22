@@ -55,31 +55,26 @@ public class OVFPackageListResource extends AbstractResource
     public static final String OVF_PACKAGE_LIST_PARAM = "{" + OVF_PACKAGE_LIST + "}";
 
     @Autowired
-    OVFPackageListService service;
+    protected OVFPackageListService service;
 
     @Autowired
-    AppsLibraryTransformer transformer;
+    protected AppsLibraryTransformer transformer;
 
     @GET
     public OVFPackageListDto getOVFPackageList(
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList ovfPackageList = service.getOVFPackageList(ovfPackageListId);
-
-        if (ovfPackageList == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
-        }
 
         return transformer.createTransferObject(ovfPackageList, restBuilder);
     }
 
     @PUT
-    public OVFPackageListDto modifyOVFPackageList(OVFPackageListDto ovfPackageList,
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageListDto modifyOVFPackageList(final OVFPackageListDto ovfPackageList,
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList d = transformer.createPersistenceObject(ovfPackageList);
 
@@ -91,9 +86,9 @@ public class OVFPackageListResource extends AbstractResource
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     public OVFPackageListDto refreshOVFPackageList(
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList d;
 
@@ -103,7 +98,7 @@ public class OVFPackageListResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteOVFPackageList(@PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId)
+    public void deleteOVFPackageList(@PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId)
     {
         service.removeOVFPackageList(ovfPackageListId);
     }

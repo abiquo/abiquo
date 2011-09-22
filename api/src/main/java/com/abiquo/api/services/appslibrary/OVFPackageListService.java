@@ -55,20 +55,25 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFPackageListService extends DefaultApiService
 {
     @Autowired
-    OVFPackageListDAO dao;
+    protected OVFPackageListDAO dao;
 
     @Autowired
-    AppsLibraryDAO appsLibraryDao;
+    protected AppsLibraryDAO appsLibraryDao;
 
     @Autowired
-    EnterpriseRep entRepo;
+    protected EnterpriseRep entRepo;
 
     @Autowired
-    OVFPackageService ovfPackageService;
+    protected OVFPackageService ovfPackageService;
+
+    public OVFPackageListService()
+    {
+
+    }
 
     public OVFPackageListService(final EntityManager em)
     {
@@ -129,7 +134,13 @@ public class OVFPackageListService extends DefaultApiService
 
     public OVFPackageList getOVFPackageList(final Integer id)
     {
-        return dao.findById(id);
+        OVFPackageList ovfPackageList = dao.findById(id);
+        if (ovfPackageList == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
+        return ovfPackageList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

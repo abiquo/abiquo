@@ -70,6 +70,11 @@ public class OVFPackageService extends DefaultApiService
     @Autowired
     ApplianceManagerStub amStub;
 
+    public OVFPackageService()
+    {
+
+    }
+
     public OVFPackageService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
