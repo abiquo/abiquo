@@ -120,4 +120,13 @@ public interface UserDAO extends DAO<UserHB, Integer>
      * @return UserHB
      */
     public UserHB findUserHBById(final Integer id, String authType);
+
+    /**
+     * Gets the username and password of the current user.
+     * 
+     * @param user Current username
+     * @param auth Auth type
+     * @return An array of two fields [user, password]
+     */
+    public Object[] getCurrentUserCredentials(String user, String auth);
 }

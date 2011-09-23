@@ -39,6 +39,7 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Disjunction;
@@ -171,7 +172,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         try
         {
-            session = HibernateUtil.getSession();
+            session = HibernateUtil.getSession(true);
             transaction = session.beginTransaction();
 
             // Getting the given VirtualAppliance from the DataBase
@@ -878,7 +879,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (vapp == null)
         {
             transaction.rollback();
-            
+
             dataResult.setSuccess(false);
             dataResult.setMessage(resourceManager
                 .getMessage("applyChangesVirtualAppliance.modifyDeletedApp"));
@@ -886,7 +887,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             return dataResult;
         }
         transaction.commit();
-        
 
         DataResult<VirtualAppliance> currentStateAndAllow;
         try
@@ -1424,6 +1424,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
      * .abiserver.pojo.virtualappliance.VirtualAppliance)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public DataResult<Collection<Node>> getVirtualApplianceNodes(
         final VirtualAppliance virtualAppliance)
     {
@@ -1437,10 +1438,18 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            VirtualappHB virtualAppHB =
-                (VirtualappHB) session.get("VirtualappExtendedHB", virtualAppliance.getId());
+            String query = "from NodeHB nodes where nodes.idVirtualApp = :vappId";
 
-            Collection<Node> nodeList = virtualAppHB.toPojo().getNodes();
+            Query namedQuery =
+                session.createQuery(query).setParameter("vappId", virtualAppliance.getId());
+
+            List<NodeHB<Node< ? >>> nodes = namedQuery.list();
+            Collection<Node> nodeList = new ArrayList<Node>();
+
+            for (NodeHB<Node< ? >> n : nodes)
+            {
+                nodeList.add(n.toPojo());
+            }
 
             // Building result
             dataResult.setSuccess(true);
@@ -1457,6 +1466,54 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             }
 
             errorManager.reportError(resourceManager, dataResult, "getVirtualApplianceNodes", e,
+                virtualAppliance.getId());
+        }
+
+        return dataResult;
+    }
+
+    @Override
+    public DataResult<Collection<Log>> getVirtualApplianceLogs(final UserSession userSession,
+        final VirtualAppliance virtualAppliance)
+    {
+        DataResult<Collection<Log>> dataResult = new DataResult<Collection<Log>>();
+
+        Session session = null;
+        Transaction transaction = null;
+
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            String query = "from LogHB logs where logs.idVirtualAppliance = :vappId";
+
+            Query namedQuery =
+                session.createQuery(query).setParameter("vappId", virtualAppliance.getId());
+
+            List<LogHB> logs = namedQuery.list();
+            Collection<Log> logsList = new ArrayList<Log>();
+
+            for (LogHB l : logs)
+            {
+                logsList.add(l.toPojo());
+            }
+
+            // Building result
+            dataResult.setSuccess(true);
+            dataResult.setData(logsList);
+            dataResult.setMessage("VirtualAppliance logs successfully retrieved");
+
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            if (transaction != null && transaction.isActive())
+            {
+                transaction.rollback();
+            }
+
+            errorManager.reportError(resourceManager, dataResult, "getVirtualApplianceLogs", e,
                 virtualAppliance.getId());
         }
 
@@ -1614,6 +1671,25 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         return getVirtualDataCentersByEnterpriseAndDatacenter(userSession, enterprise, null);
     }
 
+    @Override
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
+        final UserSession userSession, final Enterprise enterprise)
+    {
+        VirtualDatacenterResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
+                VirtualDatacenterResourceStub.class);
+
+        DataResult<Collection<VirtualDataCenter>> dataResult =
+            proxy.getVirtualDatacentersByEnterprise(enterprise);
+
+        if (dataResult.getSuccess())
+        {
+            dataResult.setMessage(resourceManager.getMessage("getVirtualDataCenters.success"));
+        }
+
+        return dataResult;
+    }
+
     /*
      * (non-Javadoc)
      * @seecom.abiquo.abiserver.commands.VirtualApplianceCommand#
@@ -1664,7 +1740,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 new DataResult<Collection<VirtualAppliance>>();
 
             DAOFactory factory = HibernateDAOFactory.instance();
-            factory.beginConnection();
+            factory.beginConnection(true);
 
             VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
             UserDAO userDAO = factory.getUserDAO();
@@ -2051,11 +2127,21 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         EventType eventType, final int... resultCode)
     {
 
-        eventType = (eventType == null) ? EventType.VAPP_POWERON : eventType;
+        eventType = eventType == null ? EventType.VAPP_POWERON : eventType;
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
 
-        traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
-            .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+        if (resultCode != null && resultCode.length > 0
+            && resultCode[0] == BasicResult.SOFT_LIMT_EXCEEDED)
+        {
+            traceLog(SeverityType.INFO, componentType, eventType, userSession, null, vApp
+                .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+
+        }
+        else
+        {
+            traceLog(SeverityType.CRITICAL, componentType, eventType, userSession, null, vApp
+                .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
+        }
 
         errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
             vApp.getId());

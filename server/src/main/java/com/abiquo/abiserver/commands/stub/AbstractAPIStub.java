@@ -89,6 +89,25 @@ public class AbstractAPIStub
         this.currentSession = currentSession;
     }
 
+    private UserHB getCurrentUserCredentials()
+    {
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection();
+
+        Object[] credentials =
+            factory.getUserDAO().getCurrentUserCredentials(currentSession.getUser(),
+                currentSession.getAuthType());
+
+        UserHB user = new UserHB();
+        user.setUser((String) credentials[0]);
+        user.setPassword((String) credentials[1]);
+        user.setAuthType(currentSession.getAuthType());
+
+        factory.endConnection();
+
+        return user;
+    }
+
     protected ClientResponse get(final String uri, final String user, final String password)
     {
         return resource(uri, user, password).get();
@@ -104,8 +123,16 @@ public class AbstractAPIStub
      */
     protected ClientResponse get(final String uri, final MediaType mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+    }
+
+    protected ClientResponse getWithMediaType(final String uri, final String accept,
+        final String contentType)
+    {
+        UserHB user = getCurrentUserCredentials();
+        return resource(uri, user.getUser(), user.getPassword(), accept).contentType(contentType)
+            .get();
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String user,
@@ -139,44 +166,44 @@ public class AbstractAPIStub
 
     protected ClientResponse get(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).get();
     }
 
     protected ClientResponse get(final String uri, final String mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
     }
 
     protected ClientResponse post(final String uri, final Object dto)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
             .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML);
     }
 
     protected ClientResponse put(final String uri, final Object dto)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).contentType(
             MediaType.APPLICATION_XML).put(dto);
     }
-    
+
     // protected ClientResponse put(final String uri, final Object dto, String mediaType)
     // {
     // UserHB user = getCurrentUser();
@@ -185,14 +212,14 @@ public class AbstractAPIStub
 
     protected ClientResponse put(final String uri, final Object dto, final String mediaType)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword(), mediaType).contentType(mediaType)
             .put(dto);
     }
 
     protected ClientResponse delete(final String uri)
     {
-        UserHB user = getCurrentUser();
+        UserHB user = getCurrentUserCredentials();
         return resource(uri, user.getUser(), user.getPassword()).delete();
     }
 
@@ -203,9 +230,9 @@ public class AbstractAPIStub
 
     protected ClientResponse delete(final String uri, final String mediaType)
     {
-        UserHB user = getCurrentUser();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        UserHB user = getCurrentUserCredentials();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -328,6 +355,11 @@ public class AbstractAPIStub
         {
             ErrorsDto errors = response.getEntity(ErrorsDto.class);
             result.setMessage(errors.toString());
+            if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            }
+
         }
     }
 
@@ -415,8 +447,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -448,8 +480,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -549,8 +581,9 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLink(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -560,26 +593,29 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}",
             params);
     }
-    
-    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOn(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn",
-            params);
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
     }
-    
-    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId, final Integer machineId)
+
+    protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOff",
             params);
     }
 
@@ -671,7 +707,7 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/machines", params);
     }
-    
+
     protected String createMachinesLink(final Integer datacenterId, final Integer rackId)
     {
         Map<String, String> params = new HashMap<String, String>();

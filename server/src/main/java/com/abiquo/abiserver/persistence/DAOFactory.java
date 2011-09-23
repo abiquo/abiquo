@@ -72,6 +72,11 @@ public interface DAOFactory
     public abstract void beginConnection() throws PersistenceException;
 
     /**
+     * Beggining a connection to create a serial of BusinessLayer to PersistenceLayer operation
+     */
+    public abstract void beginConnection(boolean readOnly) throws PersistenceException;
+
+    /**
      * Finish the connection and persist the changes
      */
     public abstract void endConnection() throws PersistenceException;

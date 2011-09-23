@@ -115,12 +115,14 @@ public enum APIError
         "VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
-    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
+    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
+        "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
+        "The virtual appliance is not running"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exist"), NON_MANAGED_RACK("RACK-5",
+        "RACK-4", "This rack does not exists"), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
@@ -166,7 +168,8 @@ public enum APIError
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
         "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name of an existing global role"),
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Hasn't got enough privileges to manage this role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -184,7 +187,8 @@ public enum APIError
         "The email isn't valid"), NOT_USER_CREACION_LDAP_MODE("USER-6",
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
-        "In Ldap mode can not modify user's enterprise"),
+        "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
+        "The user cannot delete his own user account"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -218,8 +222,9 @@ public enum APIError
         "Bad credentials attempting to retrieve the list of physical machines from rack "), NC_BAD_CREDENTIALS_TO_MACHINE(
         "NC-3", "Bad credentials attempting to retrieve the machine "), NC_CONNECTION_EXCEPTION(
         "NC-4", "There is a machine running in the given IP. But any hypervisor responds"), NC_NOT_FOUND_EXCEPTION(
-        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION("NC-6",
-        "Unexpected exception building the request to Discovery Manager"), NC_UNAVAILABLE_EXCEPTION(
+        "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION(
+        "NC-6",
+        "Hypervisor information could not be discovered or retrieved. This error may be caused by misconfiguration of the platform or an error in the data provided. Please see the Event Log for more detail"), NC_UNAVAILABLE_EXCEPTION(
         "NC-7", "The discovery manager currently is not available"),
 
     // STORAGE POOL
@@ -227,7 +232,8 @@ public enum APIError
         "SP-2", "The id of the Storage Pool and the id of the submitted object must be the same"), NON_EXISTENT_STORAGE_POOL(
         "SP-3", "The requested Storage Pool does not exist"), STORAGE_POOL_ERROR_MODIFYING("SP-4",
         "There was an unexpected error while modifying the Storage Pool"), STORAGE_POOLS_SYNC(
-        "SP-5", "Could not get the Storage Pools from the target device"), STORAGE_POOL_SYNC(
+        "SP-5",
+        "Storage plugin not found. Storage plugin is required, please consult the Administrator Guide"), STORAGE_POOL_SYNC(
         "SP-6", "Could not get the requested Storage Pool from the target device"), CONFLICT_VOLUMES_CREATED(
         "SP-7", "Can not edit or delete the Storage Pool. There are volumes created "), STORAGE_POOL_DUPLICATED(
         "SP-8", "Duplicated Storage Pool"), STORAGE_POOL_TIER_IS_DISABLED("SP-9",
@@ -370,8 +376,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

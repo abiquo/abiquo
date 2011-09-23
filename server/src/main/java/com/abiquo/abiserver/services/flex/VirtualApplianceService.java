@@ -129,6 +129,22 @@ public class VirtualApplianceService
         }
     }
 
+    public BasicResult getVirtualDataCentersByEnterpriseFaster(final UserSession userSession,
+        final Enterprise enterprise)
+    {
+
+        VirtualApplianceCommand command = proxyCommand(userSession);
+
+        try
+        {
+            return command.getVirtualDataCentersByEnterpriseFaster(userSession, enterprise);
+        }
+        catch (UserSessionException e)
+        {
+            return e.getResult();
+        }
+    }
+
     /**
      * Creates a new VirtualDataCenter in the Data Base
      * 

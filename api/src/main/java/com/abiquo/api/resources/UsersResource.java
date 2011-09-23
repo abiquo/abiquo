@@ -22,13 +22,16 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.api.resources.UserResource.createTransferObject;
+import static com.abiquo.api.resources.UserResource.createUsersTransferObjectWithRole;
 
 import java.util.Collection;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -45,7 +48,9 @@ import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.UserWithRoleDto;
 import com.abiquo.server.core.enterprise.UsersDto;
+import com.abiquo.server.core.enterprise.UsersWithRolesDto;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(EnterpriseResource.class)
@@ -65,6 +70,8 @@ public class UsersResource extends AbstractResource
     SecurityService securityService;
 
     @GET
+    @Consumes(LINK_MEDIA_TYPE)
+    @Produces(LINK_MEDIA_TYPE)
     public UsersDto getUsers(@PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
@@ -86,38 +93,60 @@ public class UsersResource extends AbstractResource
                 numResults);
         UsersDto users = new UsersDto();
 
-        // Can only get my user
-        // if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
-        // {
-        // User currentUser = service.getCurrentUser();
-        // if (all != null && !all.isEmpty())
-        // {
-        // for (User u : all)
-        // {
-        // if (currentUser.getId().equals(u.getId()))
-        // {
-        // users.add(createTransferObject(u, restBuilder));
-        // break;
-        // }
-        // }
-        //
-        // if (all instanceof PagedList< ? >)
-        // {
-        // PagedList<User> list = (PagedList<User>) all;
-        // users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath()
-        // .toString(), list));
-        // users.setTotalSize(list.getTotalResults());
-        // }
-        // }
-        // return users;
-        // }
-
         // Can get all users
         if (all != null && !all.isEmpty())
         {
             for (User u : all)
             {
                 users.add(createTransferObject(u, restBuilder));
+            }
+
+            if (all instanceof PagedList< ? >)
+            {
+                PagedList<User> list = (PagedList<User>) all;
+                users.setLinks(restBuilder.buildPaggingLinks(uriInfo.getAbsolutePath().toString(),
+                    list));
+                users.setTotalSize(list.getTotalResults());
+            }
+        }
+
+        return users;
+    }
+
+    @GET
+    @Consumes(FLAT_MEDIA_TYPE)
+    @Produces(FLAT_MEDIA_TYPE)
+    public UsersWithRolesDto getUsersWithRoles(
+        @PathParam(EnterpriseResource.ENTERPRISE) final String enterpriseId,
+        @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
+        @QueryParam("desc") final boolean desc, @QueryParam("connected") final boolean connected,
+        @QueryParam("page") Integer page, @QueryParam("numResults") Integer numResults,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        if (page == null)
+        {
+            page = 0;
+        }
+
+        if (numResults == null)
+        {
+            numResults = DEFAULT_PAGE_LENGTH;
+        }
+
+        Collection<User> all =
+            service.getUsersByEnterprise(enterpriseId, filter, orderBy, desc, connected, page,
+                numResults);
+        UsersWithRolesDto users = new UsersWithRolesDto();
+
+        // Can get all users
+        if (all != null && !all.isEmpty())
+        {
+            for (User u : all)
+            {
+                UserWithRoleDto uDto = createUsersTransferObjectWithRole(u, restBuilder);
+                uDto.setRole(RoleResource.createTransferWithPrivilegesObject(u.getRole(),
+                    restBuilder));
+                users.add(uDto);
             }
 
             if (all instanceof PagedList< ? >)

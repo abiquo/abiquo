@@ -84,7 +84,8 @@ public enum DiskFormatType
 
     public static final DiskFormatType[] XEN_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT};
 
-    public static final DiskFormatType[] VMWARE_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT};
+    public static final DiskFormatType[] VMWARE_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT,
+    VMDK_SPARSE};
 
     public static final DiskFormatType[] HYPERV_COMPATIBLES =
         new DiskFormatType[] {VHD_FLAT, VHD_SPARSE};
