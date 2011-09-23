@@ -28,14 +28,17 @@ import javax.persistence.EntityManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 {
 
     @Override
-    protected RackDAO createDao(EntityManager arg0)
+    protected RackDAO createDao(final EntityManager arg0)
     {
         return new RackDAO(arg0);
     }
@@ -147,5 +150,86 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Rack> result = dao.findRacksWithHAEnabled(reload(dao, datacenter));
 
         Assert.assertEquals(result.size(), 2);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getRandomMachinesToShutDownFromRack()
+    {
+
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+        for (int i = 0; i < 7; i++)
+        {
+            Machine machine = machineGenerator.createUniqueInstance();
+            machine.setState(State.MANAGED);
+            machine.setRack(ucsRack);
+            machine.setDatacenter(datacenter);
+            machine.setBelongsToManagedRack(Boolean.TRUE);
+
+            Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+            visor.setMachine(machine);
+            ds().persistAll(machine, visor);
+        }
+
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getRandomMachinesToShutDownFromRack(ucsRack.getId(),
+                4);
+        Assert.assertEquals(machines.size(), 4);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    @Test
+    public void getRandomMachinesToPoweOnFromRack()
+    {
+
+        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        Datacenter datacenter = generator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+        ds().persistAll(datacenter, ucsRack);
+        for (int i = 0; i < 7; i++)
+        {
+            Machine machine = machineGenerator.createUniqueInstance();
+            machine.setState(State.HALTED_FOR_SAVE);
+            machine.setRack(ucsRack);
+            machine.setBelongsToManagedRack(Boolean.TRUE);
+
+            machine.setDatacenter(datacenter);
+            Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+            visor.setMachine(machine);
+            ds().persistAll(machine, visor);
+        }
+        Machine machine = machineGenerator.createUniqueInstance();
+        machine.setState(State.MANAGED);
+        machine.setRack(ucsRack);
+        machine.setBelongsToManagedRack(Boolean.TRUE);
+
+        machine.setDatacenter(datacenter);
+        Hypervisor visor = hypervisorGenerator.createUniqueInstance();
+        visor.setMachine(machine);
+        ds().persistAll(machine, visor);
+        List<Machine> machines =
+            createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
+        Assert.assertEquals(machines.size(), 4);
     }
 }

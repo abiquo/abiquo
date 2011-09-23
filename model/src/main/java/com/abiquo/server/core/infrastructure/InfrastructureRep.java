@@ -705,10 +705,23 @@ public class InfrastructureRep extends DefaultRepBase
      * @param rackId rack.
      * @return Machine
      */
-    public Machine getRandomMachineToStartFromRack(final Integer rackId)
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
     {
         // TODO Auto-generated method stub
-        return rackDao.getRandomMachineToStartFromRack(rackId);
+        return rackDao.getRandomMachinesToStartFromRack(rackId, howMany);
     }
 
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        // TODO Auto-generated method stub
+        return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
+    }
 }

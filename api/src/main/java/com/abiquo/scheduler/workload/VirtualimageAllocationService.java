@@ -533,9 +533,28 @@ public class VirtualimageAllocationService
         return datacenterRepo.getEmptyOnMachines(rackId);
     }
 
-    public Machine getRandomMachineToStartFromRack(final Integer rackId)
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
     {
-        return datacenterRepo.getRandomMachineToStartFromRack(rackId);
+        return datacenterRepo.getRandomMachinesToStartFromRack(rackId, howMany);
     }
 
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        return datacenterRepo.getRandomMachinesToShutDownFromRack(rackId, howMany);
+    }
 }
