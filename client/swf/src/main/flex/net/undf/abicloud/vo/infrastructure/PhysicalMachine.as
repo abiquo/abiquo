@@ -121,22 +121,19 @@ package net.undf.abicloud.vo.infrastructure
 
         override public function set assignedTo(iE:InfrastructureElement):void
         {
-            if (iE is Rack || iE == null){
+            if (iE is Rack || iE == null || iE is UcsRack){
                 _assignedTo = iE;
-            }else if(iE is UcsRack){
-                _assignedTo = iE;
-                _name = returnUCSFormattedName(_name);
             }else
                 throw Error("A physical machine can only be assigned to a rack");
         }
         
-        override public function set name(value:String):void{
+        /* override public function set name(value:String):void{
         	if(assignedTo is UcsRack){
         		_name = returnUCSFormattedName(value);
         	}else{
         		_name = value;
         	}
-        }
+        } */
         
          /**
          * Return the formatted name for UCS blades
