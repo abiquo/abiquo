@@ -64,7 +64,6 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-@Transactional(readOnly = true)
 public class NetworkService extends DefaultApiService
 {
     /** Static literal for 'FENCE_MODE' values. */
@@ -75,19 +74,19 @@ public class NetworkService extends DefaultApiService
 
     /** Autowired infrastructure DAO repository. */
     @Autowired
-    InfrastructureRep datacenterRepo;
+    protected InfrastructureRep datacenterRepo;
 
     /** Autowired Virtual Infrastructure DAO repository. */
     @Autowired
-    VirtualDatacenterRep repo;
+    protected VirtualDatacenterRep repo;
 
     /** Autowired tracer logger. */
     @Autowired
-    TracerLogger tracer;
+    protected TracerLogger tracer;
 
     /** User service for user-specific privileges */
     @Autowired
-    UserService userService;
+    protected UserService userService;
 
     /**
      * Default constructor. Needed by @Autowired injections
@@ -157,8 +156,9 @@ public class NetworkService extends DefaultApiService
 
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -181,7 +181,7 @@ public class NetworkService extends DefaultApiService
         {
             String messageTrace =
                 "Virtual Machine '" + vm.getName()
-                    + "' has created a NIC associated to IP Address '" + ip.getIp()
+                    + "' has created a NIC associated to private IP Address '" + ip.getIp()
                     + "' from VLAN '" + ip.getNetworkName() + "'";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                 EventType.NIC_ASSIGNED_VIRTUAL_MACHINE, messageTrace);
@@ -311,8 +311,9 @@ public class NetworkService extends DefaultApiService
      * Get the default network for virtual datacenter.
      * 
      * @param id identifier of the virtual datacenter
-     * @return
+     * @return the requested {@link VLANNetwork}
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VLANNetwork getDefaultNetworkForVirtualDatacenter(final Integer vdcId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
@@ -323,6 +324,8 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        LOGGER.debug("Returning the default network used by Virtual Datacenter '" + vdc.getName()
+            + "'.");
         return vdc.getDefaultVlan();
     }
 
@@ -337,6 +340,7 @@ public class NetworkService extends DefaultApiService
      * @param asc if the 'orderBy' should be ascendant or descendant.
      * @return the list of matching elements.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByEnterprise(final Integer entId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
         final Boolean asc)
@@ -367,6 +371,7 @@ public class NetworkService extends DefaultApiService
      * @param asc if the 'orderBy' should be ascendant or descendant.
      * @return the list of matching elements.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
         final Boolean asc)
@@ -381,13 +386,15 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        // Acquire the Virtual Datacenter
         VirtualDatacenter vdc = repo.findById(vdcId);
-
         if (vdc == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
+
+        // Query the list to database.
         List<IpPoolManagement> ips =
             repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
         LOGGER
@@ -401,6 +408,7 @@ public class NetworkService extends DefaultApiService
      * @param vapp Virtual Appliance object.
      * @return the list of matching elements.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVirtualApp(final VirtualAppliance vapp)
     {
         List<IpPoolManagement> ips = repo.findIpsByVirtualAppliance(vapp);
@@ -417,6 +425,7 @@ public class NetworkService extends DefaultApiService
      * @param vmId identifier of the Virtual Machine.
      * @return the list of matching elements.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVirtualMachine(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
@@ -425,7 +434,6 @@ public class NetworkService extends DefaultApiService
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
-        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
 
         for (IpPoolManagement ip : ips)
         {
@@ -434,11 +442,13 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
         return ips;
     }
 
@@ -454,6 +464,7 @@ public class NetworkService extends DefaultApiService
      * @param descOrAsc If the 'orderBy' should be ascendant or descendant.
      * @return The list of matching elements.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVlan(final Integer vdcId,
         final Integer vlanId, final Integer startwith, final String orderBy, final String filter,
         final Integer limit, final Boolean descOrAsc, final Boolean freeIps)
@@ -468,8 +479,13 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
-        return repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter,
-            orderByEnum, descOrAsc, freeIps);
+        List<IpPoolManagement> ips =
+            repo.findIpsByPrivateVLANFiltered(vdcId, vlanId, startwith, limit, filter, orderByEnum,
+                descOrAsc, freeIps);
+
+        LOGGER.debug("Returning the list of IPs used by private VLAN with id '" + vlanId + "'.");
+
+        return ips;
     }
 
     /**
@@ -479,12 +495,13 @@ public class NetworkService extends DefaultApiService
      * @param vlanId identifier of the vlan.
      * @return an instance of the requested {@link VLANNetwork}
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VLANNetwork getPrivateNetwork(final Integer vdcId, final Integer vlanId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VLANNetwork vlan = getPrivateVlan(vdc, vlanId);
 
-        LOGGER.debug("Returning the VLAN entity with name '" + vlan.getName() + "'.");
+        LOGGER.debug("Returning the private VLAN entity with name '" + vlan.getName() + "'.");
         return vlan;
     }
 
@@ -494,13 +511,14 @@ public class NetworkService extends DefaultApiService
      * @param virtualDatacenterId identifier of the virtual datacenter.
      * @return a Collection of {@link VLANNetwork} defined inside the Virtual Datacenter.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Collection<VLANNetwork> getPrivateNetworks(final Integer vdcId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         Collection<VLANNetwork> networks = null;
         networks = repo.findVlansByVirtualDatacener(vdc);
-        LOGGER.debug("Returning the list of internal VLANs for VirtualDatacenter '" + vdc.getName()
+        LOGGER.debug("Returning the list of private VLANs for VirtualDatacenter '" + vdc.getName()
             + "'.");
 
         return networks;
@@ -515,6 +533,7 @@ public class NetworkService extends DefaultApiService
      * @param vmConfigId Identifier of the configuration value.
      * @return
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VMNetworkConfiguration getVirtualMachineConfiguration(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer vmConfigId)
     {
@@ -567,6 +586,7 @@ public class NetworkService extends DefaultApiService
      * @param vmId Identifier of the Virtual Machine.
      * @return the found list of {@link VMNetworkConfiguration}.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<VMNetworkConfiguration> getVirtualMachineConfigurations(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
@@ -674,6 +694,7 @@ public class NetworkService extends DefaultApiService
                         ip.setMac(null);
                     }
                     Boolean privateIp = ip.isPrivateIp(); // set the private value before to set the
+                    Boolean publicIp = ip.isPublicIp();
                     // RASD to null;
                     ip.setRasd(null);
                     repo.updateIpManagement(ip);
@@ -691,10 +712,15 @@ public class NetworkService extends DefaultApiService
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                                 EventType.NIC_RELEASED_VIRTUAL_MACHINE, messageTrace);
                         }
-                        else
+                        else if (publicIp)
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                                 EventType.PUBLIC_IP_UNASSIGN, messageTrace);
+                        }
+                        else
+                        {
+                            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                                EventType.EXTERNAL_IP_UNASSIGN, messageTrace);
                         }
                     }
                 }
@@ -797,8 +823,13 @@ public class NetworkService extends DefaultApiService
             repo.updateRasd(ip.getRasd());
         }
 
-        LOGGER.debug("Reordering NICs into a Virtual Machine '" + vm.getName()
-            + "' finished successfully");
+        if (tracer != null)
+        {
+            String messageTrace =
+                "NICs from Virtual Machine with name '" + vm.getName() + "' have been reordered";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                EventType.NIC_REORDER_VIRTUAL_MACHINE, messageTrace);
+        }
     }
 
     /**
@@ -822,6 +853,15 @@ public class NetworkService extends DefaultApiService
         vdc.setDefaultVlan(vlan);
         repo.update(vdc);
 
+        if (tracer != null)
+        {
+            String messageTrace =
+                "Internal VLAN with name '" + vlan.getName()
+                    + "' has been marked as the default one in Virtual Datacenter '"
+                    + vdc.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER, EventType.VLAN_DEFAULT,
+                messageTrace);
+        }
     }
 
     /**
@@ -854,10 +894,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -870,8 +910,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1216,8 +1256,13 @@ public class NetworkService extends DefaultApiService
             }
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
-                    .getName(), type);
+                new IpPoolManagement(dhcp,
+                    vlan,
+                    macAddress,
+                    name,
+                    address.toString(),
+                    vlan.getName(),
+                    type);
 
             if (vdc != null)
             {
