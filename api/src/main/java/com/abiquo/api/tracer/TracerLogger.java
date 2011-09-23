@@ -145,7 +145,7 @@ public class TracerLogger
      * @param ex The error.
      */
     public void systemError(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message, final Exception error)
+        final EventType event, final String message, final Throwable error)
     {
         Trace trace = getSystemTrace(severity, component, event, message);
         LOGGER.error(trace.toString(), error);
