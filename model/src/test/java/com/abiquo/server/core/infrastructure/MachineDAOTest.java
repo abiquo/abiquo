@@ -45,6 +45,7 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -52,7 +53,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
     }
 
     @Override
-    protected MachineDAO createDao(EntityManager arg0)
+    protected MachineDAO createDao(final EntityManager arg0)
     {
         return new MachineDAO(arg0);
     }
@@ -269,7 +270,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Assert.assertFalse(ds().canFind(machine2_2));
         Assert.assertTrue(ds().canFind(machine3));
     }
-    
+
     @Test
     public void test_findRackEnabledMachines()
     {
@@ -389,18 +390,141 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         MachineDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertEquals(State.values().length, 8);
+        Assert.assertEquals(State.values().length, 9);
         Assert.assertEquals(dao.findRackEnabledForHAMachines(reload(dao, rack)).size(), 1);
     }
-    
-    
-    
-    
+
+    @Test
+    public void test_findRackEnabledMachinesAndUcs()
+    {
+        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        HypervisorGenerator hypervisorGenerator = new HypervisorGenerator(getSeed());
+        UcsRackGenerator ucsRackGenerator = new UcsRackGenerator(getSeed());
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+
+        UcsRack ucsRack = ucsRackGenerator.createInstance(datacenter);
+
+        Machine machine1 = machineGenerator.createMachine(datacenter);
+        Machine machine2 = machineGenerator.createMachine(datacenter);
+        Machine machine3 = machineGenerator.createMachine(datacenter);
+        Machine machine4 = machineGenerator.createMachine(datacenter);
+        Machine machine5 = machineGenerator.createMachine(datacenter);
+        Machine machine6 = machineGenerator.createMachine(datacenter);
+        Machine machine7 = machineGenerator.createMachine(datacenter);
+        Machine machine8 = machineGenerator.createMachine(datacenter);
+        Machine machine9 = machineGenerator.createMachine(datacenter);
+        Machine machine10 = machineGenerator.createMachine(datacenter);
+        Machine machine11 = machineGenerator.createMachine(datacenter);
+        Machine machine12 = machineGenerator.createMachine(datacenter);
+
+        machine1.setState(State.DISABLED_FOR_HA);
+        machine2.setState(State.HA_IN_PROGRESS);
+        machine3.setState(State.HALTED);
+        machine4.setState(State.MANAGED);
+        machine5.setState(State.NOT_MANAGED);
+        machine6.setState(State.PROVISIONED);
+        machine7.setState(State.STOPPED);
+        machine8.setState(State.UNLICENSED);
+        machine9.setState(State.MANAGED);
+        machine10.setState(State.MANAGED);
+        machine11.setState(State.MANAGED);
+        machine12.setState(State.MANAGED);
+
+        machine1.setRack(ucsRack);
+        machine2.setRack(ucsRack);
+        machine3.setRack(ucsRack);
+        machine4.setRack(ucsRack);
+        machine5.setRack(ucsRack);
+        machine6.setRack(ucsRack);
+        machine7.setRack(ucsRack);
+        machine8.setRack(ucsRack);
+        machine9.setRack(ucsRack);
+        machine10.setRack(ucsRack);
+        machine11.setRack(ucsRack);
+        machine12.setRack(ucsRack);
+
+        machine9.setIpmiIP("10.60.1.205");
+        machine9.setIpmiUser("earl.hickey");
+        machine9.setIpmiPassword("karma");
+
+        machine10.setIpmiIP("10.60.1.205");
+        machine10.setIpmiUser("earl.hickey");
+
+        machine11.setIpmiIP("10.60.1.205");
+        machine11.setIpmiUser("earl.hickey");
+        machine11.setIpmiPassword("karma");
+
+        Hypervisor hyp1 = hypervisorGenerator.createUniqueInstance();
+        hyp1.setType(HypervisorType.VMX_04);
+        hyp1.setMachine(machine1);
+        machine1.setHypervisor(hyp1);
+
+        Hypervisor hyp2 = hypervisorGenerator.createUniqueInstance();
+        hyp2.setType(HypervisorType.VMX_04);
+        hyp2.setMachine(machine2);
+        machine2.setHypervisor(hyp2);
+
+        Hypervisor hyp3 = hypervisorGenerator.createUniqueInstance();
+        hyp3.setType(HypervisorType.VMX_04);
+        hyp3.setMachine(machine3);
+        machine3.setHypervisor(hyp3);
+
+        Hypervisor hyp4 = hypervisorGenerator.createUniqueInstance();
+        hyp4.setType(HypervisorType.VMX_04);
+        hyp4.setMachine(machine4);
+        machine4.setHypervisor(hyp4);
+
+        Hypervisor hyp5 = hypervisorGenerator.createUniqueInstance();
+        hyp5.setType(HypervisorType.VMX_04);
+        hyp5.setMachine(machine5);
+        machine5.setHypervisor(hyp5);
+
+        Hypervisor hyp6 = hypervisorGenerator.createUniqueInstance();
+        hyp6.setType(HypervisorType.VMX_04);
+        hyp6.setMachine(machine6);
+        machine6.setHypervisor(hyp6);
+
+        Hypervisor hyp7 = hypervisorGenerator.createUniqueInstance();
+        hyp7.setType(HypervisorType.VMX_04);
+        hyp7.setMachine(machine7);
+        machine7.setHypervisor(hyp7);
+
+        Hypervisor hyp8 = hypervisorGenerator.createUniqueInstance();
+        hyp8.setType(HypervisorType.VMX_04);
+        hyp8.setMachine(machine8);
+        machine8.setHypervisor(hyp8);
+
+        Hypervisor hyp9 = hypervisorGenerator.createUniqueInstance();
+        hyp9.setType(HypervisorType.VMX_04);
+        hyp9.setMachine(machine9);
+        machine9.setHypervisor(hyp9);
+
+        Hypervisor hyp10 = hypervisorGenerator.createUniqueInstance();
+        hyp10.setType(HypervisorType.VMX_04);
+        hyp10.setMachine(machine10);
+        machine10.setHypervisor(hyp10);
+
+        Hypervisor hyp11 = hypervisorGenerator.createUniqueInstance();
+        hyp11.setType(HypervisorType.XENSERVER);
+        hyp11.setMachine(machine11);
+        machine11.setHypervisor(hyp11);
+
+        ds().persistAll(datacenter, ucsRack, machine1, machine2, machine3, machine4, machine5,
+            machine6, machine7, machine8, machine9, machine10, machine11, machine12, hyp1, hyp2,
+            hyp3, hyp4, hyp5, hyp6, hyp7, hyp8, hyp9, hyp10, hyp11);
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+
+        Assert.assertEquals(dao.findRackEnabledForHAMachines(reload(dao, ucsRack)).size(), 3);
+    }
+
     @Test
     public void test_reallocateReserved()
     {
         final String sharedDsUid = "xaredUUID";
-        
+
         HypervisorGenerator hGenerator = new HypervisorGenerator(getSeed());
         MachineGenerator machineGenerator = new MachineGenerator(getSeed());
         VirtualDatacenterGenerator vdcGenerator = new VirtualDatacenterGenerator(getSeed());
@@ -409,13 +533,13 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         Enterprise e = eGenerator.createInstanceNoLimits("someEnterprise");
         e.setIsReservationRestricted(true);
-        
+
         Datacenter datacenter = new Datacenter("Datacenter name", "Datacenter location");
         Datacenter datacenter2 = new Datacenter("Datacenter name2", "Datacenter location2");
-        
+
         Rack rack1 = datacenter.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2 = datacenter.createRack("Rack 2", 2, 4094, 2, 10);
-        
+
         Machine machine1_1 = machineGenerator.createMachine(datacenter, rack1);
         Machine machine1_2 = machineGenerator.createMachine(datacenter, rack1);
         Machine machine2_1 = machineGenerator.createMachine(datacenter, rack2);
@@ -425,22 +549,22 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Hypervisor h12 = hGenerator.createInstance(machine1_2, HypervisorType.VMX_04);
         Hypervisor h21 = hGenerator.createInstance(machine2_1, HypervisorType.VMX_04);
         Hypervisor h22 = hGenerator.createInstance(machine2_2, HypervisorType.VMX_04);
-        
+
         // all machines are reserved by the enterprise
         machine1_1.setEnterprise(e);
         machine1_2.setEnterprise(e);
         machine2_1.setEnterprise(e);
         machine2_2.setEnterprise(e);
-        
+
         machine1_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine1_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine2_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine2_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        
+
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);
         Datastore ds21 = dsGenerator.createInstance(machine2_1);
-        Datastore ds22 = dsGenerator.createInstance(machine2_2);        
+        Datastore ds22 = dsGenerator.createInstance(machine2_2);
         ds11.setDatastoreUUID(sharedDsUid);
         ds12.setDatastoreUUID(sharedDsUid);
         ds21.setDatastoreUUID(sharedDsUid);
@@ -457,37 +581,37 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         ds22.setEnabled(true);
         ds22.setSize(10);
         ds22.setUsedSize(0);
-        
+
         VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
         VirtualDatacenter vdc3 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
-        
-        ds().persistAll(e, datacenter, datacenter2, rack1, rack2, machine1_1,machine1_2, machine2_1, machine2_2, h11,h12,h21,h22, ds11, ds12, ds21, ds22, vdc1, vdc2,vdc3);
 
-        
+        ds().persistAll(e, datacenter, datacenter2, rack1, rack2, machine1_1, machine1_2,
+            machine2_1, machine2_2, h11, h12, h21, h22, ds11, ds12, ds21, ds22, vdc1, vdc2, vdc3);
+
         MachineDAO dao = createDaoForReadWriteTransaction();
-        
-        List<Machine> candidates2 = dao.findFirstCandidateMachinesReservedRestrictedHAExclude(rack1.getId(), vdc1.getId(), e,  h11.getId());
-        
+
+        List<Machine> candidates2 =
+            dao.findFirstCandidateMachinesReservedRestrictedHAExclude(rack1.getId(), vdc1.getId(),
+                e, h11.getId());
+
         Assert.assertEquals(candidates2.size(), 1);
         Assert.assertEquals(candidates2.get(0).getId(), machine1_2.getId());
-        
-        List<Machine> candidates = 
-        dao.findCandidateMachines(rack1.getId(), vdc1.getId(), e, sharedDsUid, h11.getId());
-        
+
+        List<Machine> candidates =
+            dao.findCandidateMachines(rack1.getId(), vdc1.getId(), e, sharedDsUid, h11.getId());
+
         Assert.assertEquals(candidates.size(), 1);
         Assert.assertEquals(candidates.get(0).getId(), machine1_2.getId());
-        
+
         EntityManagerHelper.commitAndClose(dao.getEntityManager());
     }
-    
-    
-    
+
     @Test
     public void test_reallocateNoReserved()
     {
         final String sharedDsUid = "xaredUUID";
-        
+
         HypervisorGenerator hGenerator = new HypervisorGenerator(getSeed());
         MachineGenerator machineGenerator = new MachineGenerator(getSeed());
         VirtualDatacenterGenerator vdcGenerator = new VirtualDatacenterGenerator(getSeed());
@@ -496,13 +620,13 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         Enterprise e = eGenerator.createInstanceNoLimits("someEnterprise");
         e.setIsReservationRestricted(false);
-        
+
         Datacenter datacenter = new Datacenter("Datacenter name", "Datacenter location");
         Datacenter datacenter2 = new Datacenter("Datacenter name2", "Datacenter location2");
-        
+
         Rack rack1 = datacenter.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2 = datacenter.createRack("Rack 2", 2, 4094, 2, 10);
-        
+
         Machine machine1_1 = machineGenerator.createMachine(datacenter, rack1);
         Machine machine1_2 = machineGenerator.createMachine(datacenter, rack1);
         Machine machine2_1 = machineGenerator.createMachine(datacenter, rack2);
@@ -512,28 +636,27 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Hypervisor h12 = hGenerator.createInstance(machine1_2, HypervisorType.VMX_04);
         Hypervisor h21 = hGenerator.createInstance(machine2_1, HypervisorType.VMX_04);
         Hypervisor h22 = hGenerator.createInstance(machine2_2, HypervisorType.VMX_04);
-        
+
         // ANY machines are reserved by the enterprise
         machine1_1.setEnterprise(null);
         machine1_2.setEnterprise(null);
         machine2_1.setEnterprise(null);
         machine2_2.setEnterprise(null);
-        
+
         machine1_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine1_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine2_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
         machine2_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        
-        
+
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);
         Datastore ds21 = dsGenerator.createInstance(machine2_1);
-        Datastore ds22 = dsGenerator.createInstance(machine2_2);        
+        Datastore ds22 = dsGenerator.createInstance(machine2_2);
         ds11.setDatastoreUUID(sharedDsUid);
         ds12.setDatastoreUUID(sharedDsUid);
         ds21.setDatastoreUUID(sharedDsUid);
         ds22.setDatastoreUUID(sharedDsUid);
-        
+
         ds11.setEnabled(true);
         ds11.setSize(10);
         ds11.setUsedSize(0);
@@ -546,22 +669,22 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         ds22.setEnabled(true);
         ds22.setSize(10);
         ds22.setUsedSize(0);
-        
+
         VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
         VirtualDatacenter vdc3 = vdcGenerator.createInstance(datacenter, e, HypervisorType.VMX_04);
 
-        
-        ds().persistAll(e, datacenter, datacenter2, rack1, rack2, machine1_1,machine1_2, machine2_1, machine2_2, h11,h12,h21,h22, ds11, ds12, ds21, ds22, vdc1, vdc2,vdc3);
+        ds().persistAll(e, datacenter, datacenter2, rack1, rack2, machine1_1, machine1_2,
+            machine2_1, machine2_2, h11, h12, h21, h22, ds11, ds12, ds21, ds22, vdc1, vdc2, vdc3);
 
         MachineDAO dao = createDaoForReadWriteTransaction();
 
-        List<Machine> candidates = 
-        dao.findCandidateMachines(rack1.getId(), vdc1.getId(), e, sharedDsUid, h11.getId());
-        
+        List<Machine> candidates =
+            dao.findCandidateMachines(rack1.getId(), vdc1.getId(), e, sharedDsUid, h11.getId());
+
         Assert.assertEquals(candidates.size(), 1);
         Assert.assertEquals(candidates.get(0).getId(), machine1_2.getId());
-        
+
         EntityManagerHelper.commitAndClose(dao.getEntityManager());
     }
 }
