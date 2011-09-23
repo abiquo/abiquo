@@ -347,7 +347,7 @@
                                                                                        "LABEL_WELCOME"),
                                                URLLoader(event.currentTarget).data.toString(),
                                                Alert.OK,
-                                               null);
+                                               null,true);
             }
 
             private function loadAlertFileIOErrorHandler(ioErrorEvent:IOErrorEvent):void
