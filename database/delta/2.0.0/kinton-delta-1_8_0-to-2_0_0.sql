@@ -12,7 +12,7 @@
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
-ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage, DROP COLUMN hd, DROP COLUMN hdUsed;
+-- ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage, DROP COLUMN hd, DROP COLUMN hdUsed;
 
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
@@ -36,7 +36,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 
 DELIMITER |
 --
-CREATE PROCEDURE `kinton`.`get_datastore_size`(IN idPM INT, OUT size BIGINT(20))
+CREATE PROCEDURE `kinton`.`get_datastore_size`(IN idPM INT, OUT size BIGINT UNSIGNED)
 BEGIN
     SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
     FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
@@ -45,16 +45,16 @@ END
 --
 | 
 --
-CREATE PROCEDURE `kinton`.`get_datastore_used_size`(IN idPM INT, OUT usedSize BIGINT(20))
+CREATE PROCEDURE `kinton`.`get_datastore_used_size`(IN idPM INT, OUT usedSize BIGINT UNSIGNED)
 BEGIN
-    SELECT IF (SUM(d.size) IS NULL,0,SUM(d.usedSize)) INTO usedSize
+    SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
     FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
     WHERE da.idPhysicalMachine = idPM AND d.enabled = 1;
 END
 --
 |
 --
-CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT)
+CREATE PROCEDURE `kinton`.`get_datastore_size_by_dc`(IN idDC INT, OUT size BIGINT UNSIGNED)
 BEGIN
     SELECT IF (SUM(d.size) IS NULL,0,SUM(d.size)) INTO size
     FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore 
@@ -64,7 +64,7 @@ END
 --
 |
 --
-CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT)
+CREATE PROCEDURE `kinton`.`get_datastore_used_size_by_dc`(IN idDC INT, OUT usedSize BIGINT UNSIGNED)
 BEGIN
     SELECT IF (SUM(d.usedSize) IS NULL,0,SUM(d.usedSize)) INTO usedSize
     FROM datastore d LEFT OUTER JOIN datastore_assignment da ON d.idDatastore = da.idDatastore
@@ -291,8 +291,8 @@ DELIMITER |
 
 CREATE TRIGGER `kinton`.`create_physicalmachine_update_stats` AFTER INSERT ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT(20);
-DECLARE datastoreSize BIGINT(20);
+DECLARE datastoreUsedSize BIGINT UNSIGNED;
+DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF NEW.idState = 3 THEN
         CALL get_datastore_used_size(NEW.idPhysicalMachine,datastoreUsedSize);
@@ -317,8 +317,8 @@ END
 
 CREATE TRIGGER `kinton`.`delete_physicalmachine_update_stats` AFTER DELETE ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreUsedSize BIGINT(20);
-DECLARE datastoreSize BIGINT(20);
+DECLARE datastoreUsedSize BIGINT UNSIGNED;
+DECLARE datastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState = 3 THEN
         CALL get_datastore_used_size(OLD.idPhysicalMachine,datastoreUsedSize);
@@ -343,8 +343,8 @@ END;
 
 CREATE TRIGGER `kinton`.`update_physicalmachine_update_stats` AFTER UPDATE ON `kinton`.`physicalmachine`
 FOR EACH ROW BEGIN
-DECLARE datastoreSize BIGINT(20);
-DECLARE oldDatastoreSize BIGINT(20);
+DECLARE datastoreSize BIGINT UNSIGNED;
+DECLARE oldDatastoreSize BIGINT UNSIGNED;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.idState != NEW.idState THEN
         IF OLD.idState IN (2, 7) THEN
