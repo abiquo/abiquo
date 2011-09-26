@@ -23,6 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineActionGetIPsURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineStateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -61,6 +62,7 @@ import com.abiquo.scheduler.AllocatorAction;
 import com.abiquo.scheduler.PopulateTestCase;
 import com.abiquo.scheduler.TestPopulate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -70,6 +72,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.tracer.Constants;
 
@@ -223,8 +226,9 @@ public class VirtualMachineResourceIT extends TestPopulate
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");
         assertNotNull(vmDto);
@@ -233,8 +237,9 @@ public class VirtualMachineResourceIT extends TestPopulate
         response = get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2
-            .getId()), "action", IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId()), "action",
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
             "edit");
         assertNotNull(vmDto);
@@ -406,8 +411,8 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), new Random()
-                .nextInt()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
+                new Random().nextInt()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -448,8 +453,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(), vapp.getId(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -490,8 +495,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -525,8 +530,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
 
         Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_XML);
 
         if (action.allocate)
         {
@@ -555,13 +560,13 @@ public class VirtualMachineResourceIT extends TestPopulate
 
                 if (action.targetMachineName.contains("no_resource"))
                 {
-                    Assert.assertTrue(noResources, String.format(
-                        "expected no_resource for vmId [%d]", virtualMachineId));
+                    Assert.assertTrue(noResources,
+                        String.format("expected no_resource for vmId [%d]", virtualMachineId));
                 }
                 else if (action.targetMachineName.contains("limit"))
                 {
-                    Assert.assertTrue(limit, String.format("expected limit for vmId [%d]",
-                        virtualMachineId));
+                    Assert.assertTrue(limit,
+                        String.format("expected limit for vmId [%d]", virtualMachineId));
                 }
                 else
                 {
@@ -630,5 +635,156 @@ public class VirtualMachineResourceIT extends TestPopulate
     static private void destroyTraceProcessor() throws Exception
     {
         broker.stop();
+    }
+
+    /**
+     * Create a virtual machines and retrieve its state.
+     */
+    @Test
+    public void getVirtualMachineStateTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        vm.setState(State.POWERED_OFF);
+
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Check for vm state
+        ClientResponse response =
+            get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()));
+        VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
+            IpAddressesResource.IP_ADDRESSES);
+        assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
+
+    }
+
+    /**
+     * Create a virtual machines and retrieve its state.
+     */
+    @Test
+    public void getVirtualMachineStateLinkTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        vm.setState(State.POWERED_OFF);
+
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Check for vm state
+        ClientResponse response =
+            get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()));
+        VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
+            IpAddressesResource.IP_ADDRESSES);
+
+    }
+
+    /**
+     * Create a virtual machines and retrieve its state.
+     */
+    @Test
+    public void getVirtualMachineSetStateTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        vm.setState(State.RUNNING);
+
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        VirtualMachineStateDto dto = new VirtualMachineStateDto();
+        dto.setPower(State.POWERED_OFF.name());
+        // Check for vm state
+        ClientResponse response =
+            put(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), dto);
+        VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
+        assertLinkExist(vmDto,
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
+            IpAddressesResource.IP_ADDRESSES);
+        assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
+
     }
 }

@@ -195,7 +195,7 @@ public class UriTestResolver
         return resolveURI(template,
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
-    
+
     public static String resolveRacksURI(final Integer datacenterId)
     {
         String template =
@@ -616,6 +616,36 @@ public class UriTestResolver
                 VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
                 VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
                 VirtualMachineResource.VIRTUAL_MACHINE_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/state
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineStateURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_STATE);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());

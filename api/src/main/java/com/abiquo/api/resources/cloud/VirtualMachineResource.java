@@ -35,6 +35,8 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.UserService;
@@ -46,6 +48,7 @@ import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -68,6 +71,8 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
+
+    public static final String VIRTUAL_MACHINE_STATE = "/state";
 
     @Autowired
     VirtualMachineService vmService;
@@ -191,8 +196,12 @@ public class VirtualMachineResource extends AbstractResource
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
+     * @deprecated use
+     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
+     *             instead
      */
     @POST
+    @Deprecated
     @Path("action/poweron")
     public void powerOnVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -211,15 +220,19 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /**
-     * Power off the virtual machine
+     * Power off the VirtualMachine
      * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
+     * @deprecated use
+     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
+     *             instead
      */
     @POST
+    @Deprecated
     @Path("action/poweroff")
     public void powerOffVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -229,11 +242,85 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-
         if (!vmService.sameState(vm, State.POWERED_OFF))
         {
-              vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+
         }
+    }
+
+    /**
+     * Change the {@link State} the virtual machine
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param state allowed <li><b>POWERED_OFF</b></li> <li><b>RUNNING</b></li> <li><b>REBOOTED</b></li>
+     *            <li><b>PAUSED</b></li>
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @PUT
+    @Path("state")
+    public void powerStateVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        State newState = validateState(state);
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
+        if (!vmService.sameState(vm, newState))
+        {
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, newState);
+        }
+    }
+
+    /**
+     * Retrieve the {@link State} the virtual machine
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @return state
+     * @throws Exception
+     */
+    @GET
+    @Path("state")
+    public VirtualMachineStateDto stateVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+        VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
+        stateDto.setPower(vm.getState().name());
+        return stateDto;
+    }
+
+    /**
+     * Validate that the state is allowed. <br>
+     * 
+     * @param state<li><b>POWERED_OFF</b></li> <li><b>RUNNING</b></li> <li><b>REBOOTED</b></li> <li>
+     *            <b>PAUSED</b></li>
+     * @return State
+     */
+    private State validateState(final VirtualMachineStateDto state)
+    {
+        if (!State.POWERED_OFF.name().equals(state.getPower())
+            && !State.RUNNING.name().equals(state.getPower())
+            && !State.REBOOTED.name().equals(state.getPower())
+            && !State.PAUSED.name().equals(state.getPower()))
+        {
+            throw new BadRequestException(APIError.VIRTUAL_MACHINE_INVALID_STATE);
+        }
+        return State.valueOf(state.getPower());
     }
 
     /**
@@ -244,8 +331,12 @@ public class VirtualMachineResource extends AbstractResource
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
+     * @deprecated use
+     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
+     *             instead
      */
     @POST
+    @Deprecated
     @Path("action/resume")
     public void resumeVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -269,8 +360,11 @@ public class VirtualMachineResource extends AbstractResource
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
+     * @throws Exception * @deprecated use
+     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
+     *             instead
      */
+    @Deprecated
     @POST
     @Path("action/pause")
     public void pauseVirtualMachine(
