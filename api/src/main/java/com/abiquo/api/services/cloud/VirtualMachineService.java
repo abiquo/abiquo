@@ -350,4 +350,16 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
     }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        if (!virtualMachine.getState().equals(State.NOT_DEPLOYED)
+            && !virtualMachine.getState().equals(State.UNKNOWN))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
+            flushErrors();
+        }
+        repo.deleteVirtualMachine(virtualMachine);
+    }
 }

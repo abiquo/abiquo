@@ -267,7 +267,8 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder) throws Exception
+        final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         State newState = validateState(state);
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
@@ -380,5 +381,29 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
         }
+    }
+
+    /**
+     * Deletes the virtual machine.<br>
+     * A {@link VirtualMachine} can only be deleted if is in one allowed are UNDEPLOYED and UNKNOWN.
+     * allowed <li><b>NOT_DEPLOYED</b></li> <li><b>UNKNOWN</b></li>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @DELETE
+    public void deleteVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
+        vmService.deleteVirtualMachine(vm);
     }
 }

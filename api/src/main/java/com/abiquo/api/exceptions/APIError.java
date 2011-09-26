@@ -159,7 +159,8 @@ public enum APIError
         "The virtual machine cannot change the state to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change the state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_INVALID_STATE(
-        "VM-7", "The allowed power states for Virtual Machines are POWERED_OFF and RUNNING"),
+        "VM-7", "The allowed power states for Virtual Machines are POWERED_OFF and RUNNING"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
+        "VM-7", "The allowed power states for Virtual Machines are UNKNOWN and NOT_DEPLOYED"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

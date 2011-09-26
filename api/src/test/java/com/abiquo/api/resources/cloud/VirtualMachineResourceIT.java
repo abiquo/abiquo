@@ -808,4 +808,96 @@ public class VirtualMachineResourceIT extends TestPopulate
         assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
 
     }
+
+    /**
+     * Delete a virtual machines state.
+     */
+    public void deleteVirtualMachineTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        vm.setState(State.NOT_DEPLOYED);
+
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Check for vm state
+        ClientResponse response =
+            delete(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
+                "sysadmin");
+        assertEquals(Status.NO_CONTENT.getStatusCode(), response.getStatusCode());
+
+    }
+
+    /**
+     * Delete a virtual machines fail its state.
+     */
+    public void deleteVirtualMachineInvalidTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        vm.setState(State.RUNNING);
+
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Check for vm state
+        ClientResponse response =
+            delete(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
+                "sysadmin");
+        assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
+
+    }
 }
