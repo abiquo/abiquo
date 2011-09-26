@@ -68,7 +68,8 @@ public class RolesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public RolesDto getRoles(@QueryParam("idEnterprise") final String enterpriseId,
+    public RolesDto getRoles(
+        @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("page") Integer page,
         @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
