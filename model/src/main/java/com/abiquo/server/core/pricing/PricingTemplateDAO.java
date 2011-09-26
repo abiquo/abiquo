@@ -82,14 +82,14 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
     }
 
     public Collection<PricingTemplate> find(final String filter, final String orderBy,
-        final boolean desc, final Integer offset, final Integer numResults)
+        final boolean desc, final Integer offset, Integer numResults)
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
         Long total = count(criteria);
 
         criteria = createCriteria(filter, orderBy, desc);
-
+        numResults = (int) (numResults != 0 ? numResults : total);
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
 
