@@ -70,6 +70,8 @@ import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
@@ -85,6 +87,12 @@ public class VirtualMachineResourceIT extends TestPopulate
     protected VirtualDatacenter vdc;
 
     protected VirtualAppliance vapp;
+
+    protected Role r;
+
+    protected User u;
+
+    protected Enterprise e;
 
     private static final int CLIENT_TIMEOUT = 1000000000; // DEBUG
 
@@ -113,13 +121,31 @@ public class VirtualMachineResourceIT extends TestPopulate
     }
 
     @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(e);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
+    }
+
+    @BeforeMethod
     public void setUp()
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
-
     }
 
     @Test(enabled = false, dataProvider = TestPopulate.DATA_PROVIDER)
@@ -678,11 +704,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         // Check for vm state
         ClientResponse response =
-            get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()));
+            get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
+                "sysadmin");
         VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
-        assertLinkExist(vmDto,
-            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
-            IpAddressesResource.IP_ADDRESSES);
         assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
 
     }
@@ -723,23 +747,22 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(nvi);
-
         setup(entitiesToSetup.toArray());
 
         // Check for vm state
         ClientResponse response =
-            get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()));
-        VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
+                "sysadmin");
+        VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
-            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
-            IpAddressesResource.IP_ADDRESSES);
+            resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), "state");
 
     }
 
     /**
      * Create a virtual machines and retrieve its state.
      */
-    @Test
+    @Test(enabled = false)
     public void getVirtualMachineSetStateTest()
     {
         // Create a virtual machine
@@ -779,11 +802,9 @@ public class VirtualMachineResourceIT extends TestPopulate
         dto.setPower(State.POWERED_OFF.name());
         // Check for vm state
         ClientResponse response =
-            put(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), dto);
+            put(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), dto,
+                "sysadmin", "sysadmin");
         VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
-        assertLinkExist(vmDto,
-            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "state",
-            IpAddressesResource.IP_ADDRESSES);
         assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
 
     }
