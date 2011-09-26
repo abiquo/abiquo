@@ -404,7 +404,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
                 return result;
             }
 
@@ -748,7 +748,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
                 return result;
             }
         }
