@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -700,9 +701,9 @@ public class InfrastructureRep extends DefaultRepBase
      * @return list of found {@link VLANNetwork}
      */
     public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter,
-        final Boolean onlyPublic)
+        final NetworkType netType)
     {
-        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter, onlyPublic);
+        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter, netType);
     }
 
     /**

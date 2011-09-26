@@ -26,17 +26,13 @@ import java.util.UUID;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.NetworkCommand;
-import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
@@ -98,6 +94,11 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 factory.getResourceAllocationSettingDataDAO();
 
             VirtualmachineHB vmHB = vmDAO.findById(vmId);
+            if (vmHB == null)
+            {
+                // Error handling.
+                return;
+            }
             VirtualappHB vapp = vappDAO.getVirtualAppByVirtualMachine(vmId);
 
             // Get the default VLAN
@@ -172,25 +173,6 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
 
     }
 
-    @Override
-    public void checkPrivateVlan(final VirtualDataCenterHB vdc, final Integer datacenterId,
-        final EnterpriseHB enter, final UserSession userSession) throws NetworkCommandException
-    {
-        NetworkHB netHB = vdc.getNetwork();
-
-        if (netHB == null)
-        {
-            return;
-        }
-
-        if (netHB.getNetworks().size() >= AbiConfigManager.getInstance().getAbiConfig()
-            .getVlanPerVDC())
-        {
-            throw new NetworkCommandException("You have reached the maximum number of VLANs for this VirtualDataCenter. "
-                + "Can not create more!");
-        }
-    }
-
     /* PROTECTED METHODS */
 
     /**
@@ -232,7 +214,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
         if (nextIp == null)
         {
             factory.rollbackConnection();
-            throw new NetworkCommandException("No more available IPs for default VLAN. ");
+            throw new NetworkCommandException("No more available IPs for this Virtual Datacenter's default VLAN. ");
         }
 
         return nextIp;

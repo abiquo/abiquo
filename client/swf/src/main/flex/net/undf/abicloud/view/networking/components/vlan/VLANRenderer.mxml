@@ -48,10 +48,26 @@
 
             [Bindable]
             private var _vlanNetwork:VlanNetwork;
+            
+            [Bindable]
+            private var _networkType:String;
 
             public function set vlanNetwork(value:VlanNetwork):void
             {
                 _vlanNetwork = value;
+                if(_vlanNetwork){
+	                switch(_vlanNetwork.networkType){
+	                	case VlanNetwork.EXTERNAL:
+	                	  this._networkType = resourceManager.getString('NetworkingPremium','LABEL_EXTERNAL_VLAN');
+	                	  break;
+	                	case VlanNetwork.PUBLIC:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_PUBLIC_VLAN');
+                          break;
+                        case VlanNetwork.INTERNAL:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_INTERNAL_VLAN');
+                          break;
+	                }
+                }
             }
             
             [Bindable]
@@ -128,6 +144,10 @@
 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_DNS_SUFIX')">
                     <mx:Label text="{_vlanNetwork.configuration.sufixDNS}"/>
+                </mx:FormItem>
+                
+                <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_TYPE')">
+                    <mx:Label text="{this._networkType}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:HBox>

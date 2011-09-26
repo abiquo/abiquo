@@ -124,7 +124,12 @@ public enum EventType implements Serializable
         "PRIVATE_IP_ASSIGN", "Private IP assigned"), PRIVATE_IP_UNASSIGN(810,
         "PRIVATE_IP_UNASSIGN", "Private IP unassigned"), PUBLIC_IP_ASSIGN(811, "PUBLIC_IP_ASSIGN",
         "Public IP assigned"), PUBLIC_IP_UNASSIGN(812, "PUBLIC_IP_UNASSIGN", "Public IP unassigned"), NETWORK_CONFIGURATION_UPDATED(
-        813, "NETWORK_CONFIGURATION_UPDATED", "Virtual Machine's network configuration updated"),
+        813, "NETWORK_CONFIGURATION_UPDATED", "Virtual Machine's network configuration updated"), EXTERNAL_IP_ASSIGN(
+        814, "EXTERNAL_IP_ASSIGN", "External IP assigned"), EXTERNAL_IP_UNASSIGN(815,
+        "EXTERNAL_IP_UNASSIGN", "External IP unassigned"), NIC_REORDER_VIRTUAL_MACHINE(816,
+        "NIC_REORDER_VIRTUAL_MACHINE", "Virtual Machine's NICs reordered"), VLAN_DEFAULT(817,
+        "VLAN_DEFAULT", "Vlan as default one"), VLAN_DEFAULT_ENTERPRISE(818,
+        "VLAN_DEFAULT_ENTERPRISE", "Default VLAN by enterprise changed"),
 
     // API events
     API_REQUEST(900, "API_REQUEST", "Functionallity executed by API request"), API_RESPONSE(901,
@@ -156,8 +161,13 @@ public enum EventType implements Serializable
         "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
-    ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
-        1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"), ;
+    ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
+        1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
+
+    // STORAGE DEVICE
+    STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
+        1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
+        "STORAGE DEVICE DELETED", "Storage device deleted");
 
     private final int event;
 

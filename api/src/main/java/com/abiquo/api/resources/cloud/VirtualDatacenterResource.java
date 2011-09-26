@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -119,19 +120,16 @@ public class VirtualDatacenterResource extends AbstractResource
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
-        @QueryParam(BY) final String orderBy, @QueryParam(FILTER) final String filter,
-        @QueryParam(LIMIT) @Min(0) final Integer limit, @QueryParam(ASC) final Boolean desc_or_asc,
+        @QueryParam(BY) @DefaultValue("ip") final String orderBy,
+        @QueryParam(FILTER) @DefaultValue("") final String filter,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
+        @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // Set query Params by default if they are not informed
-        Integer firstElem = startwith == null ? 0 : startwith;
-        String by = orderBy == null || orderBy.isEmpty() ? "ip" : orderBy;
-        String has = filter == null ? "" : filter;
-        Integer numElem = limit == null ? DEFAULT_PAGE_LENGTH : limit;
-        Boolean asc = desc_or_asc == null ? true : desc_or_asc;
 
         List<IpPoolManagement> all =
-            netService.getListIpPoolManagementByVdc(id, firstElem, numElem, has, by, asc);
+            netService.getListIpPoolManagementByVdc(id, startwith, limit, filter, orderBy,
+                desc_or_asc);
         /*
          * if (all == null || all.isEmpty()) { throw new
          * ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS); }
@@ -244,6 +242,9 @@ public class VirtualDatacenterResource extends AbstractResource
         final IRESTBuilder builder) throws Exception
     {
         VirtualDatacenterDto response = createTransferObject(vdc);
+        VLANNetworkDto vlan =
+            PrivateNetworkResource.createTransferObject(vdc.getDefaultVlan(), vdc.getId(), builder);
+        response.setVlan(vlan);
         response.setLinks(builder.buildVirtualDatacenterLinks(vdc, vdc.getDatacenter().getId(), vdc
             .getEnterprise().getId()));
 
@@ -266,5 +267,4 @@ public class VirtualDatacenterResource extends AbstractResource
         response.setPublicIPLimits(vdc.getPublicIpsSoft(), vdc.getPublicIpsHard());
         return response;
     }
-
 }

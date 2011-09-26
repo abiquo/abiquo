@@ -32,6 +32,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
@@ -52,10 +53,14 @@ import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
 import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
@@ -156,8 +161,22 @@ public class UserService extends DefaultApiService
             order = User.NAME_PROPERTY;
         }
 
-        return repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page,
-            numResults);
+        Collection<User> users =
+            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+
+        // Refresh all entities to avioid lazys
+        for (User u : users)
+        {
+            Hibernate.initialize(u.getEnterprise());
+            Hibernate.initialize(u.getRole());
+
+            for (Privilege p : u.getRole().getPrivileges())
+            {
+                Hibernate.initialize(p);
+            }
+        }
+
+        return users;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -205,6 +224,14 @@ public class UserService extends DefaultApiService
         }
 
         repo.insertUser(user);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_CREATE,
+            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
+                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
+                + user.getRole() + "]");
 
         return user;
     }
@@ -334,7 +361,17 @@ public class UserService extends DefaultApiService
             flushErrors();
         }
 
-        return updateUser(old);
+        updateUser(old);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_MODIFY,
+            "User " + old.getName() + " has been modified [Enterprise: "
+                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
+                + old.getSurname() + " Role: " + old.getRole() + "]");
+
+        return old;
     }
 
     public User updateUser(final User user)
@@ -349,6 +386,14 @@ public class UserService extends DefaultApiService
     {
         User user = getUser(id);
 
+        // user can not delete himself
+        User logged = getCurrentUser();
+        if (logged.getId() == user.getId())
+        {
+            addConflictErrors(APIError.USER_DELETING_HIMSELF);
+            flushErrors();
+        }
+
         checkEnterpriseAdminCredentials(user.getEnterprise());
 
         // Cloud Admins should only be editable by other Cloud Admins
@@ -362,6 +407,14 @@ public class UserService extends DefaultApiService
         }
 
         repo.removeUser(user);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_DELETE,
+            "User " + user.getName() + " has been deleted [Enterprise: "
+                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
+                + user.getSurname() + " Role: " + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)

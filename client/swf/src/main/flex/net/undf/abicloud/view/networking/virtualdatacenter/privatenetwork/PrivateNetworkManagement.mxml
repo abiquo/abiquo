@@ -91,6 +91,8 @@
 
                 vlanFormEdit = new PrivateVLANFormEdit();
                 vlanFormEdit.addEventListener("vlanFormEditClose", closeVLANFormEdit);
+                
+                AbiCloudModel.getInstance().networkingManager.addEventListener("vlanUpdated", getNetworksByVirtualDatacenter);
             }
 
             private function onCreationComplete():void
@@ -113,7 +115,7 @@
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
             }
             
-            private function getNetworksByVirtualDatacenter():void{
+            private function getNetworksByVirtualDatacenter(networkEvent:Event = null):void{
             	if(_virtualDatacenter && _virtualDatacenter.network){
 	            	_virtualDatacenter.network.networks = new ArrayCollection();            		
             	}
@@ -217,6 +219,17 @@
                                                                                     "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
                                             ResourceManager.getInstance().getString("Networking",
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
+                                            Alert.OK);
+                }
+                else if (_selectedVLAN.networkType == VlanNetwork.EXTERNAL)
+                {
+                    //The external VLAN cannot be deleted
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNABLE_DELETE_EXTERNAL_VLAN_TEXT"),
                                             Alert.OK);
                 }
                 else

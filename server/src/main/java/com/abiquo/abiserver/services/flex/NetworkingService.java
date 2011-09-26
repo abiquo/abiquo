@@ -164,7 +164,7 @@ public class NetworkingService
     {
         return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
             listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
-            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.TRUE);
+            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.TRUE, Boolean.TRUE);
     }
 
     /**
@@ -267,7 +267,7 @@ public class NetworkingService
     {
         return proxyStub(userSession).getListNetworkPoolByPrivateVLAN(vdcId, vlanId,
             listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
-            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.FALSE);
+            listRequest.getOrderBy(), listRequest.getAsc(), Boolean.FALSE, Boolean.FALSE);
     }
 
     /**
@@ -459,9 +459,21 @@ public class NetworkingService
     }
 
     public BasicResult getNetworkPoolInfoByExternalVlan(final UserSession userSession,
-        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available)
+        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available,
+        final ListRequest listRequest)
     {
-        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId, available);
+        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc(), available, Boolean.FALSE);
+    }
+
+    public BasicResult getFreeIpsByExternalVlan(final UserSession userSession,
+        final VirtualDataCenter vdc, final Integer vlanId, final Boolean available,
+        final ListRequest listRequest)
+    {
+        return proxyStub(userSession).getNetworkPoolInfoByExternalVlan(vdc, vlanId,
+            listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
+            listRequest.getOrderBy(), listRequest.getAsc(), available, Boolean.TRUE);
     }
 
     public BasicResult requestExternalNICforVirtualMachine(final UserSession userSession,

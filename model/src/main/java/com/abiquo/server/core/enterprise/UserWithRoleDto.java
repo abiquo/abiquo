@@ -19,30 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+package com.abiquo.server.core.enterprise;
 
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "userWithRole")
+public class UserWithRoleDto extends UserDto
 {
-    INTERNAL, EXTERNAL, PUBLIC;
+    private RoleWithPrivilegesDto role;
 
-    public static NetworkType fromValue(final String orderBy)
+    private EnterpriseDto enterprise;
+
+    public RoleWithPrivilegesDto getRole()
     {
-        for (NetworkType currentOrder : NetworkType.values())
-        {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
-        }
-
-        return null;
+        return role;
     }
+
+    public void setRole(final RoleWithPrivilegesDto role)
+    {
+        this.role = role;
+    }
+
+    public EnterpriseDto getEnterprise()
+    {
+        return enterprise;
+    }
+
+    public void setEnterprise(final EnterpriseDto enterprise)
+    {
+        this.enterprise = enterprise;
+    }
+
 }

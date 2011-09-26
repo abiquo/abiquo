@@ -61,6 +61,8 @@ public class IpAddressesResource extends AbstractResource
 
     public static final String ONLYAVAILABLE = "onlyAvailable";
 
+    public static final String FREE_IPS = "free";
+
     public static final String IP_ADDRESS = "ip";
 
     public static final String IP_ADDRESS_PARAM = "{" + IP_ADDRESS + "}";
@@ -78,15 +80,16 @@ public class IpAddressesResource extends AbstractResource
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
         @QueryParam(FILTER) @DefaultValue("") final String filter,
-        @QueryParam(LIMIT) @Min(0) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
+        @QueryParam(LIMIT) @Min(1) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) final Integer limit,
         @QueryParam(ASC) @DefaultValue("true") final Boolean descOrAsc,
         @QueryParam(ONLYAVAILABLE) @DefaultValue("false") final Boolean available,
+        @QueryParam(FREE_IPS) @DefaultValue("false") final Boolean freeIps,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
 
         List<IpPoolManagement> all =
             service.getListIpPoolManagementByVlan(vdcId, vlanId, startwith, orderBy, filter, limit,
-                descOrAsc);
+                descOrAsc, freeIps);
 
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
 
