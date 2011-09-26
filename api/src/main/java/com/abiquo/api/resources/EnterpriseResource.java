@@ -78,6 +78,9 @@ public class EnterpriseResource extends AbstractResource
 {
     public static final String ENTERPRISE = "enterprise";
 
+    // enterprise as query param
+    public static final String ENTERPRISE_AS_PARAM = "identerprise";
+
     public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
 
     public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
