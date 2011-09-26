@@ -90,6 +90,9 @@
             }
             
             private function getNetworksByVirtualDatacenter():void{
+            	if(!_virtualDatacenter.network){
+            		_virtualDatacenter.network = new Network();
+            	}
             	_virtualDatacenter.network.networks = new ArrayCollection();
             	
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
