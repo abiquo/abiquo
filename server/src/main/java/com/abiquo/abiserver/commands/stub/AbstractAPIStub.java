@@ -823,4 +823,14 @@ public class AbstractAPIStub
             "admin/datacenters/{datacenter}/racks/{rack}/logicServers/assocClone", params,
             queryParams);
     }
+
+    protected String createObjectFsmLink(final Integer datacenterId, final Integer rackId,
+        final String distinguished)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("dn", distinguished);
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/{dn}/fsm", params);
+    }
 }

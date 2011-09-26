@@ -210,4 +210,15 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
         return null;
     }
 
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#objectUcsCurrentTask(UcsRack,
+     *      String)
+     */
+    @Override
+    public BasicResult objectUcsCurrentTask(final UcsRack ucsRack, final String dn)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }

@@ -162,4 +162,10 @@ public interface RacksResourceStub
     public BasicResult assignLogicServerClone(final PhysicalMachine machine, String lsName,
         final String org, final String newName);
 
+    /**
+     * Retrieves the current task and progress of an object from the UCS rack.
+     * 
+     * @param dn of the object.
+     */
+    public BasicResult objectUcsCurrentTask(UcsRack ucsRack, String dn);
 }
