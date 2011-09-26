@@ -3249,7 +3249,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         NodeVirtualImageHB nodeVi = (NodeVirtualImageHB) nodePojo;
 
-                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
+                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED
+                            || virtualAppliance.getState().toEnum() == StateEnum.UNKNOWN)
                         {
                             // Before deleting logic
                             beforeDeletingNode(session, nodeVi);
