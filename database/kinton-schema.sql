@@ -4085,11 +4085,6 @@ CREATE TABLE `tasks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `kinton`.`prueba`;
-CREATE TABLE  `kinton`.`prueba` (
-  `id` int(11) unsigned NOT NULL auto_increment,
-  `name` varchar(40) default NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
 
 CALL `kinton`.`add_version_column_to_all`();
