@@ -621,6 +621,8 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME, "resume", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE, "state", params));
 
         return links;
     }
@@ -797,6 +799,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,
         final EnterpriseExclusionRule enterpriseExclusion)
@@ -811,6 +814,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
@@ -824,6 +828,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
         final FitPolicyRule fpr)
     {
