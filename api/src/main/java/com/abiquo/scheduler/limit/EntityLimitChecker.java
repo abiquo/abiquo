@@ -120,7 +120,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final boolean force) throws LimitExceededException
     {
 
-        checkLimits(entity, required, force, true, false);
+        checkLimits(entity, required, force, true, true);
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
