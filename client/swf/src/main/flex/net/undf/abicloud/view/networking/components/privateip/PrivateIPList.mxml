@@ -110,6 +110,7 @@
                 totalNumIPs = 0;
 
                 listRequest = new ListRequest();
+                listRequest.asc = true;
                 listRequest.numberOfNodes = IP_RESULTS_PER_PAGE;
 
                 ipFilter.text = "";
