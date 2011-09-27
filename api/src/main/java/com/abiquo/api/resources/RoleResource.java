@@ -29,6 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public class RoleResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Produces(RolesResource.LINK_MEDIA_TYPE)
+    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -125,7 +126,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES)
-    @Produces(RoleResource.LINK_MEDIA_TYPE)
+    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
