@@ -34,7 +34,7 @@ import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.nodecollector.domain.HypervisorCollector;
 import com.abiquo.nodecollector.exception.BadRequestException;
 import com.abiquo.nodecollector.exception.CannotExecuteException;
@@ -76,6 +76,16 @@ public class NodeCollectorRESTClient
      * Path value to the {@link VirtualSystemDto} resource.
      */
     protected static String virtualSystemPath = "virtualsystem";
+
+    /**
+     * Path value to filter a virtual system by its UUID.
+     */
+    protected static String byUUIDPath = "by_uuid";
+
+    /**
+     * Path value to filter a virtual system by its Name.
+     */
+    protected static String byNamePath = "by_name";
 
     // Query parameters.
     /**
@@ -342,7 +352,7 @@ public class NodeCollectorRESTClient
     }
 
     /**
-     * Get a unique and known remote Virtual Machine information.
+     * Get a unique and known remote Virtual Machine information based on its UUID.
      * 
      * @param uuid identifier of the remote virtual machine.
      * @param hypervisorIP IP address of the remote machine.
@@ -362,12 +372,72 @@ public class NodeCollectorRESTClient
      * @throws CollectorException for unexpected exceptions.
      * @throws CannotExecuteException
      */
-    public VirtualSystemDto getRemoteVirtualSystem(final String uuid, final String hypervisorIP,
-        final HypervisorType hypervisorType, final String user, final String password,
-        final Integer aimport) throws BadRequestException, LoginException, ConnectionException,
-        UnprovisionedException, CollectorException, CannotExecuteException
+    public VirtualSystemDto getRemoteVirtualSystemByUUID(final String uuid,
+        final String hypervisorIP, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport) throws BadRequestException, LoginException,
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
     {
-        String uri = appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, uuid);
+        String uri =
+            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byUUIDPath, uuid);
+        Resource resource =
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
+
+        if (aimport != null)
+        {
+            resource.queryParam(AIMPORT, aimport);
+        }
+
+        try
+        {
+            ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
+
+            if (response.getStatusCode() != 200)
+            {
+                throwAppropiateException(response);
+            }
+
+            return response.getEntity(VirtualSystemDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            if (e.getCause().getCause() instanceof SocketTimeoutException)
+            {
+                throw new ConnectionException(NodeCollectorRESTClient.TIMEOUT);
+            }
+            // Mostly caused by ConnectException
+            throw new ConnectionException(NodeCollectorRESTClient.UNREACHABLE);
+        }
+    }
+
+    /**
+     * Get a unique and known remote Virtual Machine information based on its Name.
+     * 
+     * @param uuid identifier of the remote virtual machine.
+     * @param hypervisorIP IP address of the remote machine.
+     * @param hypervisorType {@link HypervisorEnumTypeDto} object containgin Hypervisor is running
+     *            remotely.
+     * @param user user to login to the Hypervisor.
+     * @param password password to authenticate to the Hypervisor.
+     * @param aimport port of the aim
+     * @return the Virtual Machine information encapsulated into the {@link VirtualSystemDto}
+     *         object.
+     * @throws BadRequestException if any parameter is missing, wrong or null.
+     * @throws LoginException if the provided user and password don't match with any Hypervisor
+     *             user.
+     * @throws ConnectionException if the remote machine doesn't run the provided hypervisorType
+     *             parameter.
+     * @throws UnprovisionedException if the machine doesn't respond.
+     * @throws CollectorException for unexpected exceptions.
+     * @throws CannotExecuteException
+     */
+    public VirtualSystemDto getRemoteVirtualSystemByName(final String name,
+        final String hypervisorIP, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport) throws BadRequestException, LoginException,
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
+    {
+        String uri =
+            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byNamePath, name);
         Resource resource =
             client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
                 .queryParam(userKey, user).queryParam(passwordKey, password);
@@ -479,7 +549,7 @@ public class NodeCollectorRESTClient
         throws BadRequestException, LoginException, ConnectionException, UnprovisionedException,
         CollectorException, CannotExecuteException
     {
-        ErrorDto error;
+        ErrorsDto error;
 
         if (response.getStatusCode() == Status.INTERNAL_SERVER_ERROR.getStatusCode())
         {
@@ -494,7 +564,7 @@ public class NodeCollectorRESTClient
         // context)
         try
         {
-            error = response.getEntity(ErrorDto.class);
+            error = response.getEntity(ErrorsDto.class);
         }
         catch (Exception e)
         {
@@ -502,20 +572,21 @@ public class NodeCollectorRESTClient
             throw new ConnectionException(NodeCollectorRESTClient.UNREACHABLE);
         }
 
+        // In case of errors, we only serialize the first error.
         switch (response.getStatusCode())
         {
             case 400:
-                throw new BadRequestException(error.getMessage());
+                throw new BadRequestException(error.getCollection().get(0).getMessage());
             case 401:
-                throw new LoginException(error.getMessage());
+                throw new LoginException(error.getCollection().get(0).getMessage());
             case 404:
-                throw new UnprovisionedException(error.getMessage());
+                throw new UnprovisionedException(error.getCollection().get(0).getMessage());
             case 409:
-                throw new CannotExecuteException(error.getMessage());
+                throw new CannotExecuteException(error.getCollection().get(0).getMessage());
             case 412:
-                throw new ConnectionException(error.getMessage());
+                throw new ConnectionException(error.getCollection().get(0).getMessage());
             default:
-                throw new CollectorException(error.getMessage());
+                throw new CollectorException(error.getCollection().get(0).getMessage());
         }
     }
 
