@@ -80,12 +80,12 @@ public enum APIError
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
-        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+        "Cannot edit resource limits, current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), //
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
-        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "Cannot edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
         "LIMIT-11",
         "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
@@ -98,8 +98,8 @@ public enum APIError
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
-        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
         "VDC-6", "Virtual Datacenter must be created with a private network"),
 
     // VLANS
