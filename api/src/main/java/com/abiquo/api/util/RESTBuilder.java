@@ -818,10 +818,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-<<<<<<< HEAD
-=======
     @Override
->>>>>>> network
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
