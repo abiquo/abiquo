@@ -100,7 +100,8 @@ public enum APIError
         "VDC-5",
         "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
-        "VDC-6", "Virtual Datacenter must be created with a private network"),
+        "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MISSING_LINK(
+        "VDC-7", "Missing link to the virtual datacenter"),
 
     // VLANS
     VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
@@ -115,7 +116,8 @@ public enum APIError
         "VLAN-8", "The requested virtual network does not exist"),
 
     // VIRTUAL APPLIANCE
-    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
+    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUAL_APPLIANCE_MISSING_LINK(
+        "VAPP-1", "Missing link to the virtual appliance"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
@@ -377,8 +379,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

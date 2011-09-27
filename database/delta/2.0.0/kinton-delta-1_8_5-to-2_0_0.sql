@@ -26,7 +26,7 @@ CREATE TABLE `kinton`.`approval` (
   `approvalType` varchar(255) NOT NULL ,
   `status` varchar(255) NOT NULL ,
   `timeRequested` timestamp NOT NULL ,
-  `timeResponse` timestamp NOT NULL ,
+  `timeResponse` timestamp NULL ,
   `reason` text DEFAULT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idApproval`)
@@ -47,8 +47,8 @@ CREATE TABLE `kinton`.`approval_manager` (
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
-ALTER TABLE `kinton`.`virtualapp` ADD COLUMN `idApproval` int(11) unsigned DEFAULT NULL;
-ALTER TABLE `kinton`.`virtualapp` ADD CONSTRAINT `virtualAppliance_FK7` FOREIGN KEY (`idApproval`) REFERENCES `approval` (`idApproval`);
+ALTER TABLE `kinton`.`virtualapp` ADD COLUMN `idApproval` int(10) unsigned DEFAULT NULL;
+ALTER TABLE `kinton`.`virtualapp` ADD CONSTRAINT `virtualApp_FK6` FOREIGN KEY (`idApproval`) REFERENCES `approval` (`idApproval`);
 
 
 -- ---------------------------------------------- --

@@ -967,6 +967,7 @@ CREATE TABLE  `kinton`.`virtualapp` (
   `idVirtualApp` int(10) unsigned NOT NULL auto_increment,
   `idVirtualDataCenter` int(10) unsigned NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
+  `idApproval` int(10) unsigned default NULL,
   `name` varchar(30) NOT NULL,
   `public` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
   `state` varchar(50) NOT NULL,
@@ -978,8 +979,10 @@ CREATE TABLE  `kinton`.`virtualapp` (
   PRIMARY KEY  (`idVirtualApp`),
   KEY `VirtualApp_FK4` (`idVirtualDataCenter`),
   KEY `VirtualApp_FK5` (`idEnterprise`),
+  KEY `VirtualApp_FK6` (`idApproval`),
   CONSTRAINT `VirtualApp_FK4` FOREIGN KEY (`idVirtualDataCenter`) REFERENCES `virtualdatacenter` (`idVirtualDataCenter`) ON DELETE CASCADE,
-  CONSTRAINT `VirtualApp_FK5` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`)
+  CONSTRAINT `VirtualApp_FK5` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`),
+  CONSTRAINT `virtualApp_FK6` FOREIGN KEY (`idApproval`) REFERENCES `approval` (`idApproval`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
@@ -1806,7 +1809,7 @@ CREATE TABLE `kinton`.`approval` (
   `approvalType` varchar(255) NOT NULL ,
   `status` varchar(255) NOT NULL ,
   `timeRequested` timestamp NOT NULL ,
-  `timeResponse` timestamp NOT NULL ,
+  `timeResponse` timestamp NULL ,
   `reason` text DEFAULT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idApproval`)

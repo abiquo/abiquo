@@ -68,6 +68,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
+import com.abiquo.server.core.enterprise.ApprovalDto;
 import com.abiquo.server.core.enterprise.ApprovalManagerDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -831,4 +832,10 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildApprovalLinks(final ApprovalDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -68,6 +68,9 @@
         <class>com.abiquo.server.core.config.SystemProperty</class>
         <class>com.abiquo.server.core.tasks.Task</class>
         <!-- end: configuration -->
+        <!-- approval -->
+        <class>com.abiquo.server.core.enterprise.Approval</class>
+        <!-- end : approval -->
         <properties>
             <property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
             <property name="hibernate.hbm2ddl.auto" value="verify" />

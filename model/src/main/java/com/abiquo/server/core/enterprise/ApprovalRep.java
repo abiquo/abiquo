@@ -49,6 +49,12 @@ public class ApprovalRep extends DefaultRepBase
         return list;
     }
 
+    public void insertApproval(final Approval approval)
+    {
+        approvalDAO.persist(approval);
+        approvalDAO.flush();
+    }
+
     public List<ApprovalManager> findAllApprovalManager()
     {
         List<ApprovalManager> appmList = approvalManagerDAO.findAll();

@@ -32,6 +32,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
+import com.abiquo.server.core.enterprise.ApprovalDto;
 import com.abiquo.server.core.enterprise.ApprovalManagerDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -153,4 +154,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildApprovalManagerLinks(Integer idEnterprise, Integer idUser,
         ApprovalManagerDto dto);
+
+    public List<RESTLink> buildApprovalLinks(ApprovalDto dto);
 }

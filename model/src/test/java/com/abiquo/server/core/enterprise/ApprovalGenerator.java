@@ -30,13 +30,8 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
         ApprovalState approvalState = newEnum(ApprovalState.class, nextSeed());
         Date timeRequested = newDateTime(nextSeed()).toDate();
         Date timeResponse = newDateTime(nextSeed()).toDate();
-        String reason =
-            newString(nextSeed(), Approval.REASON_LENGTH_MIN, Approval.REASON_LENGTH_MAX);
 
-        Approval approval =
-            new Approval(token, approvalType, approvalState, timeRequested, timeResponse, reason);
-
-        return approval;
+        return new Approval(token, approvalType, approvalState, timeRequested, timeResponse);
     }
 
     @Override
@@ -44,7 +39,6 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
     }
 
 }

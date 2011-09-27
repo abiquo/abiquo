@@ -30,14 +30,13 @@ public class Approval extends DefaultEntityBase
     }
 
     public Approval(final String token, final ApprovalType type, final ApprovalState state,
-        final Date timeRequested, final Date timeResponse, final String reason)
+        final Date timeRequested, final Date timeResponse)
     {
         setToken(token);
         setApprovalType(type);
         setStatus(state);
         setTimeRequested(timeRequested);
         setTimeResponse(timeResponse);
-        setReason(reason);
     }
 
     private final static String ID_COLUMN = "idApproval";
@@ -124,19 +123,14 @@ public class Approval extends DefaultEntityBase
 
     private final static boolean REASON_REQUIRED = false;
 
-    /* package */final static int REASON_LENGTH_MIN = 0;
-
-    /* package */final static int REASON_LENGTH_MAX = 255;
-
     private final static boolean REASON_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String REASON_COLUMN = "reason";
 
-    @Column(name = REASON_COLUMN, nullable = !REASON_REQUIRED, length = REASON_LENGTH_MAX)
+    @Column(name = REASON_COLUMN, nullable = !REASON_REQUIRED, columnDefinition = "TEXT")
     private String reason;
 
     @Required(value = REASON_REQUIRED)
-    @Length(min = REASON_LENGTH_MIN, max = REASON_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = REASON_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getReason()
     {

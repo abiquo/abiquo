@@ -33,6 +33,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.user.Enterprise;
+import com.abiquo.server.core.enterprise.Approval;
 
 /**
  * This class represents a Virtual Appliance
@@ -83,6 +84,8 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
      */
     private Enterprise enterprise;
 
+    private Approval approval;
+
     public VirtualAppliance()
     {
         nodes = new ArrayList<Node>();
@@ -93,7 +96,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return id;
     }
 
-    public void setId(int id)
+    public void setId(final int id)
     {
         this.id = id;
     }
@@ -103,7 +106,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -113,7 +116,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return isPublic;
     }
 
-    public void setIsPublic(Boolean isPublic)
+    public void setIsPublic(final Boolean isPublic)
     {
         this.isPublic = isPublic;
     }
@@ -123,7 +126,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return state;
     }
 
-    public void setState(State state)
+    public void setState(final State state)
     {
         this.state = state;
     }
@@ -131,7 +134,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
     /**
      * @param subState the subState to set
      */
-    public void setSubState(State subState)
+    public void setSubState(final State subState)
     {
         this.subState = subState;
     }
@@ -149,7 +152,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return highDisponibility;
     }
 
-    public void setHighDisponibility(Boolean highDisponibility)
+    public void setHighDisponibility(final Boolean highDisponibility)
     {
         this.highDisponibility = highDisponibility;
     }
@@ -159,7 +162,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return nodes;
     }
 
-    public void setNodes(Collection<Node> nodes)
+    public void setNodes(final Collection<Node> nodes)
     {
         this.nodes = nodes;
     }
@@ -169,7 +172,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return nodeConnections;
     }
 
-    public void setNodeConnections(String nodeConnections)
+    public void setNodeConnections(final String nodeConnections)
     {
         this.nodeConnections = nodeConnections;
     }
@@ -179,7 +182,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return error;
     }
 
-    public void setError(Boolean error)
+    public void setError(final Boolean error)
     {
         this.error = error;
     }
@@ -189,7 +192,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return virtualDataCenter;
     }
 
-    public void setVirtualDataCenter(VirtualDataCenter virtualDataCenter)
+    public void setVirtualDataCenter(final VirtualDataCenter virtualDataCenter)
     {
         this.virtualDataCenter = virtualDataCenter;
     }
@@ -199,9 +202,19 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
+    }
+
+    public void setApproval(Approval approval)
+    {
+        this.approval = approval;
+    }
+
+    public Approval getApproval()
+    {
+        return approval;
     }
 
     public ArrayList<Log> getLogs()
@@ -209,7 +222,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         return logs;
     }
 
-    public void setLogs(ArrayList<Log> logs)
+    public void setLogs(final ArrayList<Log> logs)
     {
         this.logs = logs;
     }
