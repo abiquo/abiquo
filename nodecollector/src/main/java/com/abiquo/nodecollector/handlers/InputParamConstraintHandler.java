@@ -48,13 +48,14 @@ import org.hibernate.validator.method.MethodValidator;
 
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 public class InputParamConstraintHandler implements RequestHandler
 {
     MethodValidator validator;
 
     @Override
-    public void init(Properties props)
+    public void init(final Properties props)
     {
         validator =
             Validation.byProvider(HibernateValidator.class).configure().buildValidatorFactory()
@@ -62,7 +63,8 @@ public class InputParamConstraintHandler implements RequestHandler
     }
 
     @Override
-    public void handleRequest(MessageContext context, HandlersChain chain) throws Throwable
+    public void handleRequest(final MessageContext context, final HandlersChain chain)
+        throws Throwable
     {
         SearchResult searchResult = context.getAttribute(SearchResult.class);
 
@@ -73,64 +75,69 @@ public class InputParamConstraintHandler implements RequestHandler
         List<Injectable> fp = mr.getMetadata().getFormalParameters();
 
         // Define the variables needed to iterate the parameters and check the errors.
-        Set<MethodConstraintViolation<Object>> constraintViolations;
+        Set<MethodConstraintViolation<Object>> constraintViolations =
+            new LinkedHashSet<MethodConstraintViolation<Object>>();
+
         Object rsInstance = rs.getInstance(context);
         Set<CommonError> paramErrors = new LinkedHashSet<CommonError>();
-        
-        // Iterate the paramters and convert constraint violations into InvalidParameterConstraint error code.
+
+        // Iterate the paramters and convert constraint violations into InvalidParameterConstraint
+        // error code.
         for (int index = 0; index < fp.size(); index++)
         {
             Injectable inj = fp.get(index);
             Object value = new Object();
             String paramName = new String();
-            
+
             // Check it only if it is a QueryParam or a PathParam (forget EntityParams aka DTOs!!)
             if (inj instanceof QueryParamBinding)
             {
                 QueryParamBinding injQuery = (QueryParamBinding) inj;
                 paramName = injQuery.getName();
                 value = injQuery.getValue(context);
-                constraintViolations =
-                    validator.validateParameter(rsInstance, mr.getMetadata().getReflectionMethod(),
-                        value, index);
+                constraintViolations.addAll(validator.validateParameter(rsInstance, mr
+                    .getMetadata().getReflectionMethod(), value, index));
             }
             else if (inj instanceof PathParamBinding)
             {
                 PathParamBinding injPath = (PathParamBinding) inj;
                 paramName = injPath.getName();
                 value = injPath.getValue(context);
-                constraintViolations =
-                    validator.validateParameter(rsInstance, mr.getMetadata().getReflectionMethod(),
-                        value, index);
-            }
-            else
-            {
-                constraintViolations = new LinkedHashSet<MethodConstraintViolation<Object>>();
+                constraintViolations.addAll(validator.validateParameter(rsInstance, mr
+                    .getMetadata().getReflectionMethod(), value, index));
             }
 
             // Build the error object
             for (MethodConstraintViolation<Object> constraintViolation : constraintViolations)
             {
-                paramErrors.add(transformConstraintViolationToCommonError(constraintViolation, String.valueOf(value), paramName));
+                paramErrors.add(transformConstraintViolationToCommonError(constraintViolation,
+                    String.valueOf(value), paramName));
             }
+
+            constraintViolations.clear();
         }
 
         if (paramErrors.size() > 0)
         {
-            CommonError commonError = paramErrors.iterator().next();
+            ErrorsDto errors = new ErrorsDto();
 
-            ErrorDto error = new ErrorDto();
-            error.setCode(commonError.getCode());
-            error.setMessage(commonError.getMessage());
-                
+            for (CommonError commonError : paramErrors)
+            {
+                ErrorDto error = new ErrorDto();
+                error.setCode(commonError.getCode());
+                error.setMessage(commonError.getMessage());
+
+                errors.add(error);
+            }
+
             // If there are param errors set the exception in the 'searchResult' object
             // and return back.
             ResponseBuilder builder = new ResponseBuilderImpl();
-            builder.entity(error);
+            builder.entity(errors);
             builder.type(MediaType.APPLICATION_XML);
             builder.status(Status.BAD_REQUEST);
             searchResult.setError(new WebApplicationException(builder.build()));
-            return;
+
         }
         else
         {
@@ -138,19 +145,26 @@ public class InputParamConstraintHandler implements RequestHandler
             chain.doChain(context);
         }
     }
-    
+
     /**
      * Build the object InvalidParameterConstraint from the MethodConstraintViolation object.
+     * 
      * @param constraintViolation
      * @param value
      * @param paramName
      * @return
      */
     private CommonError transformConstraintViolationToCommonError(
-        MethodConstraintViolation<Object> constraintViolation, String value, String paramName)
+        final MethodConstraintViolation<Object> constraintViolation, final String value,
+        final String paramName)
     {
-        String code = "CONSTR-" + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName().toUpperCase();
-        String message = "Parameter " + paramName + " " + constraintViolation.getMessage() + " but value " + value + " was found";
+        String code =
+            "CONSTR-"
+                + constraintViolation.getConstraintDescriptor().getAnnotation().annotationType()
+                    .getSimpleName().toUpperCase();
+        String message =
+            "Parameter '" + paramName + "' " + constraintViolation.getMessage() + " but value '"
+                + value + "' was found";
         return new CommonError(code, message);
     }
 

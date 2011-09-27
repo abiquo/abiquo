@@ -60,12 +60,13 @@ public class VirtualSystemServiceImpl implements VirtualSystemService
         }
         col.setIpAddress(ipAddress);
         col.setAimPort(aimport);
-        
+
         try
         {
             // Connect to it and retrieve information
             col.connect(user, password);
-            LOGGER.info("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType().toString(), ipAddress);
+            LOGGER.info("Connected to hypervisor {} at cloud node {} ", col.getHypervisorType()
+                .toString(), ipAddress);
 
             return col.getVirtualMachines();
         }
@@ -79,9 +80,10 @@ public class VirtualSystemServiceImpl implements VirtualSystemService
     }
 
     @Override
-    public VirtualSystemDto getVirtualSystem(final String ip, final HypervisorType hypervisorType,
-        final String user, final String password, final Integer aimport, final String uuid)
-        throws CollectorException, LoginException, ConnectionException, UnprovisionedException
+    public VirtualSystemDto getVirtualSystemByUUID(final String ip,
+        final HypervisorType hypervisorType, final String user, final String password,
+        final Integer aimport, final String uuid) throws CollectorException, LoginException,
+        ConnectionException, UnprovisionedException
     {
 
         VirtualSystemCollectionDto listOfVS =
@@ -93,9 +95,29 @@ public class VirtualSystemServiceImpl implements VirtualSystemService
                 return vs;
             }
         }
-        
+
         LOGGER.info("Could not find the virtual system {} at cloud node {}", uuid, ip);
         throw new UnprovisionedException(MessageValues.NOVS_EXCP);
+    }
 
+    @Override
+    public VirtualSystemDto getVirtualSystemByName(final String ip,
+        final HypervisorType hypervisorType, final String user, final String password,
+        final Integer aimport, final String name) throws CollectorException, LoginException,
+        ConnectionException, UnprovisionedException
+    {
+
+        VirtualSystemCollectionDto listOfVS =
+            this.getVirtualSystemList(ip, hypervisorType, user, password, aimport);
+        for (VirtualSystemDto vs : listOfVS.getVirtualSystems())
+        {
+            if (vs.getName().equalsIgnoreCase(name))
+            {
+                return vs;
+            }
+        }
+
+        LOGGER.info("Could not find the virtual system {} at cloud node {}", name, ip);
+        throw new UnprovisionedException(MessageValues.NOVS_EXCP);
     }
 }
