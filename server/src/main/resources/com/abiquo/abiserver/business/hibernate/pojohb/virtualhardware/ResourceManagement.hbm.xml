@@ -47,6 +47,9 @@
             <property name="quarantine" type="boolean">
                 <column name="quarantine" not-null="true" />
             </property>
+            <property name="available" type="boolean">
+                <column name="available" not-null="true" />
+            </property>
         </joined-subclass>
     </class>
     <query name="IP_POOL_GET_ENTERPRISES_WITH_NETWORK_BY_DATACENTER"> Select distinct(ent) from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip inner join ip.virtualDataCenter vdc inner join vdc.enterpriseHB ent

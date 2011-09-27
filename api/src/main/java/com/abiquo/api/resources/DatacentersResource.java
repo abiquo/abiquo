@@ -46,7 +46,7 @@ import com.abiquo.server.core.infrastructure.DatacentersDto;
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Datacenters")
 public class DatacentersResource extends AbstractResource
 {
-    public static final String DATACENTERS_PATH = "admin/datacenters";
+    public static final String DATACENTERS_PATH = "admin/datacenters/";
 
     // TODO get allowed datacenters on DatacentersResourcePremium
 
@@ -54,7 +54,7 @@ public class DatacentersResource extends AbstractResource
     private DatacenterService service;
 
     @GET
-    public DatacentersDto getDatacenters(@Context IRESTBuilder restBuilder) throws Exception
+    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Datacenter> all = service.getDatacenters();
         DatacentersDto datacenters = new DatacentersDto();
@@ -67,8 +67,8 @@ public class DatacentersResource extends AbstractResource
     }
 
     @POST
-    public DatacenterDto postDatacenter(DatacenterDto datacenter, @Context IRESTBuilder builder)
-        throws Exception
+    public DatacenterDto postDatacenter(final DatacenterDto datacenter,
+        @Context final IRESTBuilder builder) throws Exception
     {
         DatacenterDto response = service.addDatacenter(datacenter);
         addLinks(builder, response);

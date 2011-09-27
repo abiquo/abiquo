@@ -28,9 +28,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -45,207 +43,12 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
     implements IpPoolManagementDAO
 {
 
-    /** Named queries */
-    private static final String IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC =
-        "IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC";
-
-    private static final String IP_POOL_GET_NETWORK_POOL_BY_VLAN =
-        "IP_POOL_GET_NETWORK_POOL_BY_VLAN";
-
     private static final String IP_POOL_GET_PRIVATE_NICS_BY_VIRTUALMACHINE =
         "IP_POOL_GET_PRIVATE_NICS_BY_VIRTUALMACHINE";
 
-    private static final String IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN =
-        "IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN";
-
-    private static final String IP_POOL_GET_PRIVATE_IP_BY_VLAN = "IP_POOL_GET_PRIVATE_IP_BY_VLAN";
-
-    private static final String IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT =
-        "IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT";
-
-    private static final String IP_POOL_GET_BY_VLAN = "IP_POOL.GET_BY_VLAN";
-
-    private static final String IP_POOL_GET_BY_VIRTUAL_MACHIE = "IP_POOL.GET_BY_VIRTUAL_MACHIE";
-
-
-    
-    @Override
-    public List<IpPoolManagementHB> findByVirtualMachine(Integer idVm)
-    {
-        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query query = session.getNamedQuery(IP_POOL_GET_BY_VIRTUAL_MACHIE);
-
-        query.setInteger("idVm", idVm);
-
-        return query.list();
-    }
-
-    @Override
-    public boolean isVlanAssignedToDifferentVM(Integer idVm, Integer vlan_network_id)
-    {
-        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query query = session.getNamedQuery(IP_POOL_GET_BY_VLAN);
-
-        query.setInteger("idVm", idVm);
-        query.setInteger("vlan_network_id", vlan_network_id);
-
-        List<IpPoolManagementHB> ippoolList = (List<IpPoolManagementHB>) query.list();
-        if (ippoolList.isEmpty())
-        {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean existingMACAddress(String MACaddress) throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC);
-            query.setString("mac", MACaddress);
-            if (query.uniqueResult() == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public IpPoolManagementHB getIpPoolManagementByVLANandIP(Integer vlanId, IPAddress requestedIP)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_PRIVATE_IP_BY_VLAN);
-            query.setInteger("vlanId", vlanId);
-            query.setString("ip", requestedIP.toString());
-
-            return (IpPoolManagementHB) query.uniqueResult();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     @Override
-    public List<IpPoolManagementHB> getNetworkPoolAvailableByVLAN(Integer vlanId, Integer offset,
-        Integer numElem, String filterLike) throws PersistenceException
-    {
-        List<IpPoolManagementHB> listOfPools;
-
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN);
-            query.setInteger("vlanId", vlanId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            query.setFirstResult(offset);
-            if (numElem != null)
-            {
-                query.setMaxResults(numElem);
-            }
-
-            listOfPools = query.list();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-
-        return listOfPools;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<IpPoolManagementHB> getNetworkPoolByVLAN(Integer vlanId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
-        throws PersistenceException
-    {
-        List<IpPoolManagementHB> listOfPools;
-
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_BY_VLAN);
-            if (orderBy != null)
-            {
-                String newQuery = createOrderByQuery(query.getQueryString(), orderBy, asc);
-                query = session.createQuery(newQuery);
-            }
-            query.setInteger("vlanId", vlanId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            query.setFirstResult(offset);
-            if (numElem != null)
-            {
-                query.setMaxResults(numElem);
-            }
-
-            listOfPools = query.list();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-
-        return listOfPools;
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolAvailableByVLAN(Integer vlanId, String filterLike)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_AVAILABLE_BY_VLAN);
-            query.setInteger("vlanId", vlanId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            return query.list().size();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Integer getNumberNetworkPoolByVLAN(Integer vlanId, String filterLike)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_NETWORK_POOL_BY_VLAN);
-            query.setInteger("vlanId", vlanId);
-            query.setString("filterLike", (filterLike.isEmpty()) ? "%" : "%" + filterLike + "%");
-
-            return query.list().size();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(Integer virtualMachineId)
+    public List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(final Integer virtualMachineId)
         throws PersistenceException
     {
         try
@@ -262,25 +65,7 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
         }
     }
 
-    @Override
-    public VlanNetworkHB getVlanByIpPoolManagement(Integer idManagement)
-        throws PersistenceException
-    {
-        try
-        {
-            Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-            Query query = session.getNamedQuery(IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT);
-            query.setInteger("id_pool", idManagement);
-
-            return (VlanNetworkHB) query.uniqueResult();
-        }
-        catch (HibernateException e)
-        {
-            throw new PersistenceException(e.getMessage(), e);
-        }
-    }
-
-    protected String createOrderByQuery(String query, String orderBy, Boolean asc)
+    protected String createOrderByQuery(final String query, final String orderBy, final Boolean asc)
     {
         StringBuilder queryString = new StringBuilder(query);
 
@@ -389,7 +174,8 @@ public class IpPoolManagementDAOHibernate extends HibernateDAO<IpPoolManagementH
         else
         {
             // order by IP by default
-            queryString .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) asc");
+            queryString
+                .append(" cast(substring(ip.ip, 1, locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip) + 1, locate('.', ip.ip, locate('.', ip.ip) + 1) - locate('.', ip.ip) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) - locate('.', ip.ip, locate('.', ip.ip) +  1) - 1) as integer), cast(substring(ip.ip, locate('.', ip.ip, locate('.', ip.ip, locate('.', ip.ip) + 1) + 1) + 1, 3) as integer) asc");
 
         }
 

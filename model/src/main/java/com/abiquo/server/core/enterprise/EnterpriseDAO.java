@@ -228,8 +228,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     {
 
         final List<IpPoolManagement> publicIPs =
-            ipPoolDao.getNetworkPoolPurchasedByEnterprise(idEnterprise);
-        // TODO count
+            ipPoolDao.getPublicNetworkPoolPurchasedByEnterprise(idEnterprise);
         return Long.valueOf(publicIPs.size());
     }
 

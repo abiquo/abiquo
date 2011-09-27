@@ -39,6 +39,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
@@ -115,17 +116,16 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
     }
 
     @Test
-    public void createVirtualDatacenterByUserWithVdcsAssigned()
+    public void createVirtualDatacenterByUserWithVdcsAssigned() throws Exception
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Datacenter d = datacenterGenerator.createUniqueInstance();
         Machine machine = machineGenerator.createMachine(d);
         Hypervisor hypervisor = hypervisorGenerator.createInstance(machine, HypervisorType.KVM);
         VirtualDatacenter vdc = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
-
         VirtualDatacenter vdc1 = vdcGenerator.createInstance(d, enterprise, HypervisorType.KVM);
-
-        setup(enterprise, d, machine, hypervisor, vdc);
+        DatacenterLimits dl = datacenterLimitsGenerator.createInstance(enterprise, d);
+        setup(enterprise, d, dl, machine, hypervisor, vdc);
 
         Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(enterprise, role);
@@ -146,7 +146,6 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
         VirtualDatacenterDto dto = VirtualDatacenterResource.createTransferObject(vdc1);
         VLANNetworkDto networkDto = new VLANNetworkDto();
         networkDto.setName("DefaultNetwork");
-        networkDto.setDefaultNetwork(Boolean.TRUE);
         networkDto.setAddress("192.168.0.0");
         networkDto.setGateway("192.168.0.1");
         networkDto.setMask(24);
@@ -164,7 +163,7 @@ public class VirtualDatacenterServiceTest extends AbstractUnitTest
 
         commitActiveTransaction(em);
 
-        Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
+        org.testng.Assert.assertTrue(currentUser.getAvailableVirtualDatacenters().endsWith(
             "," + virtualDatacenter.getId()));
 
     }
