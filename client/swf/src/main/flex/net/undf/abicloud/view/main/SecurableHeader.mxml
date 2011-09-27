@@ -275,7 +275,7 @@
 				}
 				
 				//Making available this resource
-				menuOption = new HeaderButton(5);
+				menuOption = new HeaderButton(6);
 				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
 				menuOption.height = 61;
 				menuOption.label = ResourceManager.getInstance().getString("Main",
@@ -291,7 +291,6 @@
 				headerSpacer2.source = o.source;
 				
 				menuOptions.addItem(headerSpacer2);					
-				
 				
 				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.SYSCONFIG_VIEW))
 				{
