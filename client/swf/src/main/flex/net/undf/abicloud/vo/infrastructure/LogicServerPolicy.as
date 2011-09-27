@@ -24,40 +24,26 @@ package net.undf.abicloud.vo.infrastructure
 	import mx.collections.ArrayCollection;
 	
 	[Bindable]
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServer")]
-	public class LogicServer
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServerPolicy")]
+	public class LogicServerPolicy
 	{
 		//Public attributes
 		
-		public var name:String;
+		public var dn:String;
 
-	    public var type:String;
-	
-	    public var associated:String;
-	
-	    public var associatedTo:String;
-	
-	    public var description:String;
-	    
-	    public var policies:ArrayCollection;
-	    
-	    //Constants
-	    
-	    public static const INSTANCE:String = "instance";
-	    
-	    public static const INITIAL_TEMPLATE:String = "initial-template";
-	    
-	    public static const UPDATING_TEMPLATE:String = "updating-template";
+        public var name:String;
+
+        public var priority:String;
+
+        public var description:String;
 		
 		  
-		public function LogicServer()
+		public function LogicServerPolicy()
 		{
-			name = "";
-			type = "";
-			associated = "";
-			associatedTo = "";
-			description = "";
-			policies = new ArrayCollection();
+			dn = "";
+            name = "";
+            priority = "";
+            description = "";
 		}
 
 	}
