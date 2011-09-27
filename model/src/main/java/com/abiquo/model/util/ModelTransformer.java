@@ -19,49 +19,52 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.transformer;
+package com.abiquo.model.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-
-import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.model.transport.WrapperDto;
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class ModelTransformer
 {
-    public static <T> T transportFromPersistence(Class<T> clazz, Object persistent)
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModelTransformer.class);
+
+    public static <T> T transportFromPersistence(final Class<T> clazz, final Object persistent)
         throws Exception
     {
         return transform(clazz, clazz, persistent);
     }
 
-    public static <T> T persistenceFromTransport(Class<T> clazz, Object transport) throws Exception
+    public static <T> T persistenceFromTransport(final Class<T> clazz, final Object transport)
+        throws Exception
     {
         return transform(transport.getClass(), clazz, transport);
     }
 
-    public static <T> T transform(Class sourceClass, Class<T> targetClass, Object template)
-        throws Exception
+    public static <T> T transform(final Class sourceClass, final Class<T> targetClass,
+        final Object template) throws Exception
     {
         T instance = targetClass.newInstance();
         transform(sourceClass, targetClass, template, instance);
         return instance;
     }
 
-    public static <T> void transform(Class sourceClass, Class<T> targetClass, Object source,
-        T target) throws Exception
+    public static <T> void transform(final Class sourceClass, final Class<T> targetClass,
+        final Object source, final T target) throws Exception
     {
         Field[] transportFields = sourceClass.getDeclaredFields();
         Class superClass = sourceClass.getSuperclass();
         while (!superClass.getSimpleName().equalsIgnoreCase("SingleResourceTransportDto"))
         {
-            transportFields = (Field[]) ArrayUtils.addAll(transportFields, superClass.getDeclaredFields());
+            transportFields =
+                (Field[]) ArrayUtils.addAll(transportFields, superClass.getDeclaredFields());
             superClass = superClass.getSuperclass();
         }
 
@@ -71,23 +74,33 @@ public class ModelTransformer
             if (!Modifier.isTransient(modifiers) && !Modifier.isStatic(modifiers))
             {
                 String name = field.getName();
-
-                if ((fieldExist(name, targetClass) && fieldExist(name, source.getClass()))
-                    || (getterExist(name, source.getClass()) && setterExist(name, targetClass,
-                        field.getType())))
+                try
                 {
-                    Object value = getter(name, source.getClass()).invoke(source, new Object[0]);
-
-                    if (setterExist(name, targetClass, field.getType()))
+                    if (fieldExist(name, targetClass) && fieldExist(name, source.getClass())
+                        || getterExist(name, source.getClass())
+                        && setterExist(name, targetClass, field.getType()))
                     {
-                        setter(name, targetClass, field.getType()).invoke(target, new Object[] {value});
+                        Object value =
+                            getter(name, source.getClass()).invoke(source, new Object[0]);
+
+                        if (setterExist(name, targetClass, field.getType()))
+                        {
+                            setter(name, targetClass, field.getType()).invoke(target,
+                                new Object[] {value});
+                        }
                     }
+                }
+                catch (InvocationTargetException e)
+                {
+                    LOGGER.debug("Unsupporterd Operation get or set on " + name + " at class "
+                        + source.getClass().getSimpleName() + " or "
+                        + target.getClass().getSimpleName());
                 }
             }
         }
     }
 
-    private static Method getter(String fieldName, Class clazz) throws Exception
+    private static Method getter(final String fieldName, final Class clazz) throws Exception
     {
         try
         {
@@ -99,17 +112,19 @@ public class ModelTransformer
         }
     }
 
-    private static Method getter(String prefix, String fieldName, Class clazz) throws Exception
+    private static Method getter(final String prefix, final String fieldName, final Class clazz)
+        throws Exception
     {
         String name = prefix + StringUtils.capitalize(fieldName);
         return clazz.getMethod(name, new Class[0]);
     }
 
-    private static Method setter(String fieldName, Class clazz, Class type) throws Exception
+    private static Method setter(final String fieldName, final Class clazz, final Class type)
+        throws Exception
     {
         String name = "set" + StringUtils.capitalize(fieldName);
         Method method = clazz.getMethod(name, new Class[] {type});
-        
+
         if (method != null)
         {
             method.setAccessible(true);
@@ -117,7 +132,7 @@ public class ModelTransformer
         return method;
     }
 
-    private static boolean fieldExist(String fieldName, Class clazz) throws Exception
+    private static boolean fieldExist(final String fieldName, final Class clazz) throws Exception
     {
         try
         {
@@ -129,7 +144,7 @@ public class ModelTransformer
         }
     }
 
-    private static boolean getterExist(String fieldName, Class clazz) throws Exception
+    private static boolean getterExist(final String fieldName, final Class clazz) throws Exception
     {
         try
         {
@@ -141,7 +156,8 @@ public class ModelTransformer
         }
     }
 
-    private static boolean setterExist(String fieldName, Class clazz, Class type) throws Exception
+    private static boolean setterExist(final String fieldName, final Class clazz, final Class type)
+        throws Exception
     {
         try
         {

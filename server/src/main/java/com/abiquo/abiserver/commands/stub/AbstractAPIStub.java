@@ -197,6 +197,13 @@ public class AbstractAPIStub
             MediaType.APPLICATION_XML);
     }
 
+    protected ClientResponse put(final String uri)
+    {
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword()).contentType(
+            MediaType.APPLICATION_XML).put(null);
+    }
+
     protected ClientResponse put(final String uri, final Object dto)
     {
         UserHB user = getCurrentUserCredentials();
@@ -359,7 +366,6 @@ public class AbstractAPIStub
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
             }
-
         }
     }
 
@@ -395,6 +401,14 @@ public class AbstractAPIStub
             Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
+    protected String createEnterpriseLimitsByDatacenterLink(final int enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits", params);
+    }
+
     protected String createEnterpriseLimitByDatacenterLink(final int enterpriseId, final int limitId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -403,6 +417,58 @@ public class AbstractAPIStub
 
         return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/limits/{limit}",
             params);
+    }
+
+    protected String createExternalNetworkLink(final Integer entId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver.resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/action/externalnetworks/{externalvlan}", params);
+    }
+
+    protected String createExternalNetworkByDatacenterLink(final Integer entId,
+        final Integer limitId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver
+            .resolveURI(apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/{externalvlan}",
+                params);
+    }
+
+    protected String createExternalNetworkByDatacenterSetDefaultLink(final Integer entId,
+        final Integer limitId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+        params.put("externalvlan", valueOf(vlanId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/{externalvlan}/action/default",
+                params);
+    }
+
+    protected String createExternalNetworksByDatacenterActionInternalDefaultLink(
+        final Integer entId, final Integer limitId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(entId));
+        params.put("limit", valueOf(limitId));
+
+        return URIResolver
+            .resolveURI(apiUri,
+                "admin/enterprises/{enterprise}/limits/{limit}/externalnetworks/action/default",
+                params);
     }
 
     protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
@@ -544,6 +610,14 @@ public class AbstractAPIStub
             new HashMap<String, String>(), queryParams);
     }
 
+    protected String createVirtualDatacenterLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}", params);
+    }
+
     protected String createVirtualDatacentersFromEnterpriseLink(final Integer idEnterprise)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -559,6 +633,110 @@ public class AbstractAPIStub
         params.put("vdcid", vdcId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/ips", params);
+    }
+
+    protected String createVirtualDatacenterPublicPurchasedIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased", params);
+    }
+
+    protected String createVirtualDatacenterPublicPurchasedIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/purchased/{ip}",
+            params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPsLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase", params);
+    }
+
+    protected String createVirtualDatacenterPublicToPurchaseIPLink(final Integer vdcId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/publicips/topurchase/{ip}",
+            params);
+    }
+
+    protected String createVirtualDatacenterActionDefaultVlan(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
+    }
+
+    protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations",
+            params);
+    }
+
+    protected String createVirtualMachineConfigurationLink(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer vmConfigId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("vmconfigid", vmConfigId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/configurations/{vmconfigid}",
+            params);
+    }
+
+    protected String createVirtualMachineNICsLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics",
+            params);
+    }
+
+    protected String createVirtualMachineNICLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer nicOrder)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("nicOrder", nicOrder.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/network/nics/{nicOrder}",
+            params);
     }
 
     protected String createMachineLink(final PhysicalMachine machine)
@@ -649,6 +827,90 @@ public class AbstractAPIStub
         params.put("vdc", vdcId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks", params);
+    }
+
+    protected String createPrivateNetworkLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}", params);
+    }
+
+    protected String createPrivateNetworkIPLink(final Integer vdcId, final Integer vlanId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips/{ip}",
+            params);
+    }
+
+    protected String createPrivateNetworkIPsLink(final Integer vdcId, final Integer vlanId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vlan", vlanId.toString());
+
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdc}/privatenetworks/{vlan}/ips",
+            params);
+    }
+
+    protected String createDatacenterPublicIPsLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/publicips", params);
+    }
+
+    protected String createDatacenterPublicTagCheck(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/action/checkavailability", params);
+    }
+
+    protected String createPublicNetworksLink(final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network", params);
+    }
+
+    protected String createPublicNetworkLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}", params);
+    }
+
+    protected String createPublicNetworkIPsLink(final Integer datacenterId, final Integer networkId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips", params);
+    }
+
+    protected String createPublicNetworkIPLink(final Integer datacenterId, final Integer networkId,
+        final Integer ipId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("dc", datacenterId.toString());
+        params.put("network", networkId.toString());
+        params.put("ip", ipId.toString());
+
+        return resolveURI(apiUri, "admin/datacenters/{dc}/network/{network}/ips/{ip}", params);
     }
 
     protected Resource resource(final String uri, final String user, final String password,

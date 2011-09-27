@@ -33,39 +33,32 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualApplianceDAO")
 public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualAppliance>
 {
+    private static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        return Restrictions.eq(VirtualAppliance.ENTERPRISE_PROPERTY, enterprise);
+    }
+
+    private static Criterion sameVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
+    {
+        return Restrictions.eq(VirtualAppliance.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
+    }
+
     public VirtualApplianceDAO()
     {
         super(VirtualAppliance.class);
     }
 
-    public VirtualApplianceDAO(EntityManager entityManager)
+    public VirtualApplianceDAO(final EntityManager entityManager)
     {
         super(VirtualAppliance.class, entityManager);
     }
 
-    private static Criterion sameVirtualDatacenter(VirtualDatacenter virtualDatacenter)
-    {
-        return Restrictions.eq(VirtualAppliance.VIRTUAL_DATACENTER_PROPERTY, virtualDatacenter);
-    }
-
-    private static Criterion sameEnterprise(Enterprise enterprise)
-    {
-        return Restrictions.eq(VirtualAppliance.ENTERPRISE_PROPERTY, enterprise);
-    }
-
-    public List<VirtualAppliance> findByVirtualDatacenter(VirtualDatacenter virtualDatacenter)
-    {
-        Criteria criteria = createCriteria(sameVirtualDatacenter(virtualDatacenter));
-        criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
-
-        return criteria.list();
-    }
-
-    public List<VirtualAppliance> findByEnterprise(Enterprise enterprise)
+    public List<VirtualAppliance> findByEnterprise(final Enterprise enterprise)
     {
         Criteria criteria = createCriteria(sameEnterprise(enterprise));
         criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
@@ -73,8 +66,24 @@ public class VirtualApplianceDAO extends DefaultDAOBase<Integer, VirtualApplianc
         return criteria.list();
     }
 
-    public VirtualAppliance findByName(String name)
+    public VirtualAppliance findById(final VirtualDatacenter vdc, final Integer vappId)
+    {
+        Criteria criteria = createCriteria(sameVirtualDatacenter(vdc));
+        criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, vappId));
+
+        return (VirtualAppliance) criteria.uniqueResult();
+    }
+
+    public VirtualAppliance findByName(final String name)
     {
         return findUniqueByProperty(VirtualAppliance.NAME_PROPERTY, name);
+    }
+
+    public List<VirtualAppliance> findByVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
+    {
+        Criteria criteria = createCriteria(sameVirtualDatacenter(virtualDatacenter));
+        criteria.addOrder(Order.asc(VirtualAppliance.NAME_PROPERTY));
+
+        return criteria.list();
     }
 }
