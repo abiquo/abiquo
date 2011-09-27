@@ -336,7 +336,7 @@ public class UriTestResolver
         final Integer rackId, final Integer machineId)
     {
         return UriHelper.appendPathToBaseUri(resolveMachineURI(datacenterId, rackId, machineId),
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES);
+            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH);
     }
 
     public static String resolveRemoteServicesURI(final Integer datacenterId)
