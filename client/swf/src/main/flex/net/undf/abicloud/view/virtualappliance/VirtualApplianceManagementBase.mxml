@@ -200,6 +200,8 @@
             {
                 isShowing = true;
                 requestCategories();
+                //Update the virtualAppliance object
+                checkVirtualAppliance();
             }
 
             public function willHide():void

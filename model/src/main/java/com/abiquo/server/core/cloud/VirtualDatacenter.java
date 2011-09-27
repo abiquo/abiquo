@@ -194,7 +194,8 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
     private final static String DEFAULT_VLAN_COLUMN = "default_vlan_network_id";
 
     @JoinColumn(name = DEFAULT_VLAN_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {javax.persistence.CascadeType.PERSIST,
+    javax.persistence.CascadeType.REFRESH})
     @ForeignKey(name = "FK_" + TABLE_NAME + "_vlan")
     private VLANNetwork defaultVlan;
 

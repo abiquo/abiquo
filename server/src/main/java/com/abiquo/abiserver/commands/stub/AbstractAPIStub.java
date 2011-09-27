@@ -1305,14 +1305,16 @@ public class AbstractAPIStub
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
 
-        if (offset != null && numResults != null)
+        if (numResults != null)
         {
-            offset = offset / numResults;
-
-            queryParams.put("page", new String[] {offset.toString()});
             queryParams.put("numResults", new String[] {numResults.toString()});
-        }
+            if (offset != null)
+            {
+                offset = offset / numResults;
 
+                queryParams.put("page", new String[] {offset.toString()});
+            }
+        }
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
