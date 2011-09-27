@@ -396,7 +396,8 @@ public enum APIError
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
         "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
-        "Duplicated name for Currency"),
+        "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
+        "Cannot remove currency associated with a Pricing Model"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
