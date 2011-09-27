@@ -49,4 +49,7 @@ public interface VirtualMachineResourceStub
     public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
         Integer virtualApplianceId, VirtualMachine virtualMachine);
 
+    public BasicResult deleteVirtualMachine(Integer virtualDatacenterId,
+        Integer virtualApplianceId, VirtualMachine virtualMachine);
+
 }

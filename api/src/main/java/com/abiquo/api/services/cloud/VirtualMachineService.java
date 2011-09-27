@@ -37,6 +37,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -46,6 +47,7 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
@@ -77,6 +79,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    protected VirtualMachineAllocatorService vmAllocatorService;
 
     public VirtualMachineService()
     {
@@ -351,6 +356,11 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
+    /**
+     * Delete a {@link VirtualMachine}.
+     * 
+     * @param virtualMachine to delete. void
+     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deleteVirtualMachine(final VirtualMachine virtualMachine)
     {
@@ -361,5 +371,35 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         repo.deleteVirtualMachine(virtualMachine);
+    }
+
+    /**
+     * Persists a {@link VirtualMachine}. If the preconditions are met.
+     * 
+     * @param virtualMachine to create. void
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+
+        // We check for a suitable conversion (PREMIUM)
+        attachVirtualImageConversion(virtualMachine.getVirtualImage(), virtualMachine);
+
+        return repo.createVirtualMachine(virtualMachine);
+    }
+
+    /**
+     * Prepares the virtual image, in premium it sets the conversion. Attachs the conversion if
+     * premium to the {@link VirtualMachine}.
+     * 
+     * @param virtualImage to prepare.
+     * @param virtualMachine virtual machine to persist.
+     * @return VirtualImage in premium the conversion.
+     */
+    public void attachVirtualImageConversion(final VirtualImage virtualImage,
+        final VirtualMachine virtualMachine)
+    {
+        // COMMUNITY does nothing.
     }
 }

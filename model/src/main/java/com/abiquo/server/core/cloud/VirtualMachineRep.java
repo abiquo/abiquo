@@ -129,4 +129,15 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         this.dao.remove(virtualMachine);
     }
+
+    /**
+     * Persists a {@link VirtualMachine}.
+     * 
+     * @param virtualMachine to create. void
+     */
+    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        this.dao.persist(virtualMachine);
+        return virtualMachine;
+    }
 }

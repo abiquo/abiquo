@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -58,13 +59,13 @@ public class VirtualMachinesResource extends AbstractResource
     public static final String VIRTUAL_MACHINES_PATH = "virtualmachines";
 
     @Autowired
-    VirtualMachineService service;
+    protected VirtualMachineService service;
 
     @Autowired
-    VirtualApplianceService vappService;
+    protected VirtualApplianceService vappService;
 
     @Autowired
-    HypervisorService hypervisorService;
+    protected HypervisorService hypervisorService;
 
     @GET
     public VirtualMachinesDto getVirtualMachines(
@@ -109,18 +110,16 @@ public class VirtualMachinesResource extends AbstractResource
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
 
         Hypervisor hypervisor = vm.getHypervisor();
-        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
-        Rack rack = (machine == null) ? null : machine.getRack();
-        Datacenter dc = (rack == null) ? null : rack.getDatacenter();
+        Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        Rack rack = machine == null ? null : machine.getRack();
+        Datacenter dc = rack == null ? null : rack.getDatacenter();
 
-        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
-        User user = (vm.getUser() == null) ? null : vm.getUser();
+        Enterprise enterprise = vm.getEnterprise() == null ? null : vm.getEnterprise();
+        User user = vm.getUser() == null ? null : vm.getUser();
 
-        vmDto
-            .addLinks(restBuilder.buildVirtualMachineAdminLinks((dc == null) ? null : dc.getId(),
-                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
-                (enterprise == null) ? null : enterprise.getId(),
-                (user == null) ? null : user.getId()));
+        vmDto.addLinks(restBuilder.buildVirtualMachineAdminLinks(dc == null ? null : dc.getId(),
+            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
         return vmDto;
     }
@@ -152,20 +151,52 @@ public class VirtualMachinesResource extends AbstractResource
         VirtualMachineDto vmDto =
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
         Hypervisor hypervisor = vm.getHypervisor();
-        Machine machine = (hypervisor == null) ? null : hypervisor.getMachine();
-        Rack rack = (machine == null) ? null : machine.getRack();
+        Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        Rack rack = machine == null ? null : machine.getRack();
 
-        Enterprise enterprise = (vm.getEnterprise() == null) ? null : vm.getEnterprise();
-        User user = (vm.getUser() == null) ? null : vm.getUser();
+        Enterprise enterprise = vm.getEnterprise() == null ? null : vm.getEnterprise();
+        User user = vm.getUser() == null ? null : vm.getUser();
 
-        vmDto
-            .addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
-                (rack == null) ? null : rack.getDatacenter().getId(),
-                (rack == null) ? null : rack.getId(), (machine == null) ? null : machine.getId(),
-                (enterprise == null) ? null : enterprise.getId(),
-                (user == null) ? null : user.getId()));
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
+            rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
+            machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
         return vmDto;
     }
 
+    /**
+     * Creates a resource {@link VirtualMachine} under this root.
+     * 
+     * @param v virtual machine
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder {@link IRESTBuilder} object injected by context.
+     * @return the generate {@link VirtualMachineDto} object.
+     * @throws Exception
+     */
+    @POST
+    public VirtualMachineDto createVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualMachineDto virtualMachineDto, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        VirtualMachine vm = createVirtualMachineFromDto(virtualMachineDto);
+        VirtualMachine virtualMachine = service.createVirtualMachine(vm);
+        VirtualMachineDto vappsDto =
+            createCloudTransferObject(virtualMachine, vapp.getVirtualDatacenter().getId(),
+                vapp.getId(), restBuilder);
+
+        return vappsDto;
+    }
+
+    private VirtualMachine createVirtualMachineFromDto(final VirtualMachineDto virtualMachineDto)
+        throws Exception
+    {
+        return ModelTransformer.persistenceFromTransport(VirtualMachine.class, virtualMachineDto);
+
+    }
 }

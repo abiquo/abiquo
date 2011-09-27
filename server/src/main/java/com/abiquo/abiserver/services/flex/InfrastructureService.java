@@ -33,7 +33,9 @@ import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.MachineResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -58,8 +60,11 @@ public class InfrastructureService
 
     private InfrastructureCommand infrastructureCommand;
 
+    private VirtualMachineResourceStub vmStub;
+
     public InfrastructureService()
     {
+        vmStub = new VirtualMachineResourceStubImpl();
         try
         {
             infrastructureCommand =
@@ -74,6 +79,11 @@ public class InfrastructureService
         {
             infrastructureCommand = new InfrastructureCommandImpl();
         }
+    }
+
+    protected VirtualMachineResourceStub proxyVmStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, vmStub, VirtualMachineResourceStub.class);
     }
 
     private InfrastructureCommand proxyCommand(final UserSession userSession)
@@ -600,6 +610,7 @@ public class InfrastructureService
         return command.createVirtualMachine(virtualMachine);
     }
 
+    
     /**
      * Deletes the virtual machine
      * 
@@ -613,6 +624,21 @@ public class InfrastructureService
 
         InfrastructureCommand command = proxyCommand(session);
         return command.deleteVirtualMachine(session, virtualMachine);
+    }
+    /**
+     * Deletes the virtual machine
+     * 
+     * @param sessionKey
+     * @param virtualMachine
+     * @return
+     */
+    public BasicResult deleteVirtualMachine(final UserSession session,
+        final Integer virtualDatacenterId, final Integer virtualApplianceId,
+        final VirtualMachine virtualMachine)
+    {
+
+        return proxyVmStub(session).deleteVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
     }
 
     /**

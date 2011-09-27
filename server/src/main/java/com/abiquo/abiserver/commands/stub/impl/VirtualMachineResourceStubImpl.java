@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
@@ -68,8 +69,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
@@ -90,12 +91,11 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    public void pause(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void pause(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
+        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
+        SchedulerException, NotEnoughResourcesException
     {
-
 
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
@@ -279,5 +279,28 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         dto.setVdrpPort(virtualMachine.getVdrpPort());
 
         return dto;
+    }
+
+    @Override
+    public BasicResult deleteVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        BasicResult result = new BasicResult();
+        String vmachineUrl =
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
+
+        ClientResponse response = delete(vmachineUrl);
+
+        if (response.getStatusCode() == Status.NO_CONTENT.getStatusCode())
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteVirtualMachine");
+        }
+
+        return result;
     }
 }
