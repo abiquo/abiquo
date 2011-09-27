@@ -920,6 +920,7 @@ CREATE TABLE  `kinton`.`user` (
   `availableVirtualDatacenters` varchar(255),
   `active` int(1) unsigned NOT NULL default '0',
   `authType` varchar(20) NOT NULL,
+  `creationDate` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idUser`),
   KEY `User_FK1` (`idRole`),
@@ -934,8 +935,8 @@ CREATE TABLE  `kinton`.`user` (
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
 LOCK TABLES `user` WRITE;
-INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0),
- (2,2,1,'user','Standard','User','Standard user','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', 0);
+INSERT INTO `kinton`.`user` VALUES  (1,1,1,'admin','Cloud','Administrator','Main administrator','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO', NOW(), 0),
+ (2,2,1,'user','Standard','User','Standard user','','en_US','c69a39bd64ffb77ea7ee3369dce742f3',null,1, 'ABIQUO',NOW(), 0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 
