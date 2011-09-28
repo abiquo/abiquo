@@ -1,7 +1,31 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -366,24 +390,41 @@ public class OVFPackage extends DefaultEntityBase
      */
     public static final String OVF_PACKAGE_LIST_TABLE = "ovf_package_list_has_ovf_package";
 
-    public static final String OVF_PACKAGE_LIST_PROPERTY = "ovf_packages_list";
+    public static final String OVF_PACKAGE_LIST_PROPERTY = "ovfPackageLists";
 
     static final String OVF_PACKAGE_LIST_ID_COLUMN = "id_ovf_package_list";
 
     static final String OVF_PACKAGES_ID_COLUMN = "id_ovf_package";
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = OVF_PACKAGE_LIST_TABLE, joinColumns = {@JoinColumn(name = OVF_PACKAGE_LIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = OVF_PACKAGES_ID_COLUMN)})
-    private List<OVFPackageList> ovfPackageLists;
+    @JoinTable(name = OVF_PACKAGE_LIST_TABLE, joinColumns = {@JoinColumn(name = OVF_PACKAGES_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = OVF_PACKAGE_LIST_ID_COLUMN)})
+    private List<OVFPackageList> ovfPackageLists = new ArrayList<OVFPackageList>();
 
     public List<OVFPackageList> getOvfPackageLists()
     {
+        if (ovfPackageLists == null)
+        {
+            ovfPackageLists = new ArrayList<OVFPackageList>();
+        }
         return ovfPackageLists;
     }
 
     public void setOvfPackageLists(final List<OVFPackageList> ovfPackageLists)
     {
         this.ovfPackageLists = ovfPackageLists;
+    }
+
+    public void addToOvfPackageLists(final OVFPackageList list)
+    {
+        if (ovfPackageLists == null)
+        {
+            ovfPackageLists = new ArrayList<OVFPackageList>();
+        }
+        if (!ovfPackageLists.contains(list))
+        {
+            ovfPackageLists.add(list);
+            list.addToOvfPackages(this);
+        }
     }
 
     public OVFPackage(final String name, final String productName, final String productUrl,

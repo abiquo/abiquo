@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services.appslibrary;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -29,6 +30,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -81,6 +83,7 @@ public class OVFPackageListService extends DefaultApiService
         dao = new OVFPackageListDAO(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         ovfPackageService = new OVFPackageService(em);
+        entRepo = new EnterpriseRep(em);
 
     }
 
@@ -109,8 +112,11 @@ public class OVFPackageListService extends DefaultApiService
 
         ovfPackageList.setAppsLibrary(appsLibrary);
 
+        dao.persist(ovfPackageList);
+
         for (OVFPackage ovfPackage : ovfPackageList.getOvfPackages())
         {
+            ovfPackage.addToOvfPackageLists(ovfPackageList);
             ovfPackageService.addOVFPackage(ovfPackage, idEnterprise);
         }
 
@@ -140,6 +146,7 @@ public class OVFPackageListService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
             flushErrors();
         }
+        Hibernate.initialize(ovfPackageList.getOvfPackages());
         return ovfPackageList;
     }
 
@@ -167,7 +174,9 @@ public class OVFPackageListService extends DefaultApiService
         Enterprise ent = entRepo.findById(idEnterprise);
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent); // TODO remove
 
-        return dao.findByEnterprise(idEnterprise);
+        List<OVFPackageList> ovfPackageList = new ArrayList<OVFPackageList>();
+        ovfPackageList = dao.findByEnterprise(idEnterprise);
+        return ovfPackageList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

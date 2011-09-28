@@ -24,6 +24,8 @@ package com.abiquo.abiserver.services.flex;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
+import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
@@ -32,6 +34,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -59,8 +62,8 @@ public class AppsLibraryService
         try
         {
             appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -498,12 +501,14 @@ public class AppsLibraryService
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
         try
         {
 
             OVFPackageListDto packagListsDto =
-                proxyService.getOVFPackageList(userSession, idEnterprise, nameOVFPackageList);
+                proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
 
             result.setData(transform(packagListsDto));
             result.setSuccess(true);
@@ -754,9 +759,9 @@ public class AppsLibraryService
     protected OVFPackage transform(final OVFPackageDto packDto)
     {
         OVFPackage pack = new OVFPackage();
-        if (packDto.getCategoryName() != null)
+        if (packDto.getName() != null)
         {
-            pack.setCategory(packDto.getCategoryName());
+            pack.setCategory(packDto.getName());
         }
         else
         {
@@ -849,7 +854,8 @@ public class AppsLibraryService
      * @return DataResult<OVFPackageInstanceStatus>
      */
     public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
-        UserSession userSession, String idsOvfpackageIn, Integer idEnterprise, Integer idRepository)
+        final UserSession userSession, final String idsOvfpackageIn, final Integer idEnterprise,
+        final Integer idRepository)
     {
 
         String idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist

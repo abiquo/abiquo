@@ -106,6 +106,7 @@ public class AppsLibraryTransformer
         dto.setName(ovfPackageList.getName());
         dto.setId(ovfPackageList.getId());
         dto.setOvfPackages(ovfpackDtoList);
+        dto.setUrl(ovfPackageList.getUrl());
 
         final Integer idEnterprise = ovfPackageList.getAppsLibrary().getEnterprise().getId();
         dto.setLinks(builder.buildOVFPackageListLinks(idEnterprise, dto));

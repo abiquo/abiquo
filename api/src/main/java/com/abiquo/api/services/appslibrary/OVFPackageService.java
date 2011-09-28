@@ -50,6 +50,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryDAO;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
@@ -57,7 +58,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+@Transactional
 public class OVFPackageService extends DefaultApiService
 {
 
@@ -98,10 +99,13 @@ public class OVFPackageService extends DefaultApiService
         return ovfpackage;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackage addOVFPackage(final OVFPackage ovfPackage, final Integer idEnterprise)
     {
         Enterprise ent = entRepo.findById(idEnterprise);
-        return repo.addOVFPackage(ovfPackage, ent);
+
+        OVFPackage ovfpackage = repo.addOVFPackage(ovfPackage, ent);
+        return ovfPackage;
     }
 
     public OVFPackage modifyOVFPackage(final Integer ovfPackageId, final OVFPackage ovfPackage,

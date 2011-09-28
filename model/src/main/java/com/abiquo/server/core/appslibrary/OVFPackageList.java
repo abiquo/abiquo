@@ -1,3 +1,24 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.server.core.appslibrary;
 
 import java.util.ArrayList;
@@ -139,8 +160,7 @@ public class OVFPackageList extends DefaultEntityBase
 
     static final String OVF_PACKAGES_LIST_ID_COLUMN = "id_ovf_package_list";
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = OVF_PACKAGE_TABLE, joinColumns = {@JoinColumn(name = OVF_PACKAGE_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = OVF_PACKAGES_LIST_ID_COLUMN)})
+    @ManyToMany(mappedBy = OVFPackage.OVF_PACKAGE_LIST_PROPERTY, fetch = FetchType.LAZY)
     private List<OVFPackage> ovfPackages = new ArrayList<OVFPackage>();
 
     public void setOvfPackages(final List<OVFPackage> ovfPackages)
@@ -152,7 +172,7 @@ public class OVFPackageList extends DefaultEntityBase
     {
         if (ovfPackages == null)
         {
-            ovfPackages = new LinkedList<OVFPackage>();
+            ovfPackages = new ArrayList<OVFPackage>();
         }
 
         return ovfPackages;
@@ -160,10 +180,15 @@ public class OVFPackageList extends DefaultEntityBase
 
     void addToOvfPackages(final OVFPackage ovfpackage)
     {
-        assert ovfpackage != null;
-        assert !this.ovfPackages.contains(ovfpackage);
-
-        this.ovfPackages.add(ovfpackage);
+        if (ovfPackages == null)
+        {
+            ovfPackages = new ArrayList<OVFPackage>();
+        }
+        if (!ovfPackages.contains(ovfpackage))
+        {
+            ovfPackages.add(ovfpackage);
+            ovfpackage.addToOvfPackageLists(this);
+        }
     }
 
     void removeFromOvfPackages(final OVFPackage ovfpackage)

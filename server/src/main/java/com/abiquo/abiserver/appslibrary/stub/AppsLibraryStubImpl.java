@@ -39,6 +39,7 @@ import org.apache.wink.client.RestClient;
 
 import com.abiquo.abiserver.business.authentication.TokenUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
+import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
@@ -49,7 +50,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
-public class AppsLibraryStubImpl implements AppsLibraryStub
+public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
 {
 
     private RestClient client;
@@ -140,8 +141,8 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML)
-                .post(ovfpackageListURL);
+            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML).post(
+                ovfpackageListURL);
 
         final Integer httpStatus = response.getStatusCode();
 
@@ -176,15 +177,15 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
     {
         final Integer idOvfPackageList =
             getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        String uri = createOVFPackageListLink(idEnterprise.toString(), idOvfPackageList.toString());
 
-        Resource resource = createResourceOVFPackageList(idEnterprise, idOvfPackageList);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
         {
-            throw new WebApplicationException(response(response));
+            // throw new WebApplicationException(response(response));
         }
 
         return response.getEntity(OVFPackageListDto.class);
@@ -284,8 +285,7 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
     }
 
     @Override
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
-        final String nameOVFPackageList)
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList)
     {
         final Integer idOvfPackageList =
             getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
@@ -302,13 +302,13 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
         return response.getEntity(OVFPackagesDto.class);
     }
-    
+
     public Resource createResourceOVFPackages(final Integer idEnterprise,
         final Integer idOvfpackageList)
     {
         final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH
-                + '/' + String.valueOf(idOvfpackageList);
+            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH + '/'
+                + String.valueOf(idOvfpackageList);
 
         Resource reso = client.resource(baseUri + "/" + path);
 
