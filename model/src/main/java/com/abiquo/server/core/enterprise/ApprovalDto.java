@@ -3,10 +3,13 @@ package com.abiquo.server.core.enterprise;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "approval")
+@XmlType(propOrder = {"id", "token", "approvalType", "status", "timeRequested", "timeResponse",
+"reason"})
 public class ApprovalDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 6985079950355525566L;
