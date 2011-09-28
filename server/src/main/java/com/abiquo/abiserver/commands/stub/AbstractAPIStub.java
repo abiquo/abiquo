@@ -743,10 +743,13 @@ public class AbstractAPIStub
 
         if (offset != null && numResults != null)
         {
-            offset = offset / numResults;
+            if (numResults != 0)
+            {
+                offset = offset / numResults;
 
-            queryParams.put("page", new String[] {offset.toString()});
-            queryParams.put("numResults", new String[] {numResults.toString()});
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
