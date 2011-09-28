@@ -28,6 +28,10 @@ import java.io.Serializable;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.abiserver.pojo.virtualhardware.Limit;
+import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
+import com.abiquo.model.transport.SingleResourceWithLimitsDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
  * Each one of the networks in transfer object to Flex.
@@ -173,7 +177,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         return defaultNetwork;
     }
 
-    public void setDefaultNetwork(Boolean defaultNetwork)
+    public void setDefaultNetwork(final Boolean defaultNetwork)
     {
         this.defaultNetwork = defaultNetwork;
     }
@@ -183,9 +187,31 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         return networkType;
     }
 
-    public void setNetworkType(String networkType)
+    public void setNetworkType(final String networkType)
     {
         this.networkType = networkType;
+    }
+
+    public static VlanNetwork create(final VLANNetworkDto dto)
+    {
+        VlanNetwork vlan = new VlanNetwork();
+
+        vlan.setDefaultNetwork(dto.getDefaultNetwork());
+
+        NetworkConfiguration conf = new NetworkConfiguration();
+        conf.setGateway(dto.getGateway());
+        conf.setMask(dto.getMask());
+        conf.setPrimaryDNS(dto.getPrimaryDNS());
+        conf.setSecondaryDNS(dto.getSecondaryDNS());
+        conf.setSufixDNS(dto.getSufixDNS());
+
+        vlan.setConfiguration(conf);
+        vlan.setNetworkName(dto.getName());
+        vlan.setNetworkType(dto.getType().toString());
+        vlan.setVlanNetworkId(dto.getId());
+        vlan.setVlanTag(dto.getTag());
+
+        return vlan;
     }
 
 }
