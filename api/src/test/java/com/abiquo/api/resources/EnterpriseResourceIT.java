@@ -30,6 +30,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveMachineURI;
 import static com.abiquo.api.common.UriTestResolver.resolvePrivateNetworkURI;
 import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualDatacenterURI;
+import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -75,7 +76,7 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 {
 
-    @BeforeMethod
+    @BeforeMethod(groups = {NETWORK_INTEGRATION_TESTS})
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
@@ -191,7 +192,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
     /**
      * Check if the action of get the IPs by an enterprise exists.
      */
-    @Test
+    @Test(groups = {NETWORK_INTEGRATION_TESTS})
     public void createAndGetPrivateNetworkIPsByEnterprise()
     {
         RemoteService rs = remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE);
@@ -206,12 +207,14 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
                 IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
                 IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
+        List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
-            setup(ippool.getRasd(), ippool);
+            ips.add(ippool);
             ip = ip.nextIPAddress();
         }
+        setup(ips.toArray());
 
         String validURI = resolveEnterpriseActionGetIPsURI(vdc.getEnterprise().getId());
         Resource resource = client.resource(validURI);

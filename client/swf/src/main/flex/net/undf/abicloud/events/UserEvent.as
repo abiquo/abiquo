@@ -69,6 +69,8 @@ package net.undf.abicloud.events
         
         public static const CHECK_ROLE_PRIVILEGE:String = "checkRolePrivilegeUserEvent";
         
+        public static const CHECK_ROLE_ACCESS:String = "checkRoleAccessUserEvent";
+        
         public static const GET_ROLES:String = "getRolesUserEvent";
                 
         public static const ROLE_RETRIEVED:String = "roleRetrievedUserEvent";

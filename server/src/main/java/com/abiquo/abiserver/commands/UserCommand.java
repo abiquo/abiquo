@@ -193,4 +193,13 @@ public interface UserCommand
     public BasicResult checkRolePrivilege(final UserSession userSession, final Integer idRole,
         String namePrivilege);
 
+    /**
+     * Checks if current user can access to the role
+     * 
+     * @param userSession
+     * @param idRole the Role id
+     * @return Boolean if current user can access to the role
+     */
+    public BasicResult checkRoleAccess(final UserSession userSession, final Integer idRole);
+
 }
