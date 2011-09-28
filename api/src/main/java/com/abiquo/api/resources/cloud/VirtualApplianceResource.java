@@ -39,7 +39,6 @@ import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;

@@ -71,15 +71,15 @@ public class MachineResource extends AbstractResource
 
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
 
-    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
+    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
-    public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
+    public static final String MACHINE_ACTION_POWER_OFF_PATH = "action/poweroff";
 
-    public static final String MACHINE_ACTION_POWER_OFF_REL = "powerOff";
+    public static final String MACHINE_ACTION_POWER_OFF_REL = "poweroff";
 
-    public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
+    public static final String MACHINE_ACTION_POWER_ON_PATH = "action/poweron";
 
-    public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
+    public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
     public static final String MACHINE_ACTION_LED_ON = "action/ledOn";
 
@@ -141,7 +141,7 @@ public class MachineResource extends AbstractResource
     }
 
     @GET
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
+    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -194,7 +194,7 @@ public class MachineResource extends AbstractResource
     }
 
     @DELETE
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
+    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH)
     public void deleteVirtualMachinesNotManaged(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
