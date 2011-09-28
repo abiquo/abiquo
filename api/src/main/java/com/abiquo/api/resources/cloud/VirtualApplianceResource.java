@@ -33,11 +33,11 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -73,7 +73,7 @@ public class VirtualApplianceResource
     VirtualApplianceService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
 
     @Autowired
     UserService userService;
@@ -119,7 +119,7 @@ public class VirtualApplianceResource
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
         // Get the list of ipPoolManagements objects
-        List<IpPoolManagement> all = ipService.getListIpPoolManagementByVirtualApp(vapp);
+        List<IpPoolManagement> all = netService.getListIpPoolManagementByVirtualApp(vapp);
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
         for (IpPoolManagement ip : all)
         {

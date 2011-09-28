@@ -18,6 +18,10 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    <logger name="com.abiquo.api.spring.security.rememberme">
+        <!-- Don't print the annoying 'Remember me' stuff -->
+        <level value="WARN" />
+    </logger>
     <logger name="com.abiquo">
         <level value="DEBUG" />
     </logger>
@@ -34,7 +38,7 @@
         <level value="WARN" />
     </logger>
     <root>
-        <level value="INFO" />
+        <level value="DEBUG" />
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </root>

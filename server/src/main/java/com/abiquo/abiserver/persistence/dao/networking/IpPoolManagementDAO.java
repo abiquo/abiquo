@@ -24,9 +24,7 @@ package com.abiquo.abiserver.persistence.dao.networking;
 import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.DAO;
 
 /**
@@ -38,84 +36,6 @@ import com.abiquo.abiserver.persistence.DAO;
  */
 public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
 {
-    // Publish all the needed extra functions //
-
-    // TODO TBD
-    boolean isVlanAssignedToDifferentVM(Integer vlan_network_id, Integer idVM);
-
-    // TODO TBD
-    List<IpPoolManagementHB> findByVirtualMachine(Integer idVm); 
-    
-    /**
-     * Returns if the MAC address is already created.
-     * 
-     * @param MACaddress MAC address to check
-     * @return true if exists , false otherwise
-     * @throws PersistenceException if any problem occurs
-     */
-    boolean existingMACAddress(String MACaddress) throws PersistenceException;
-
-    /**
-     * Identifies the {@link IpPoolManagement} object for its VLAN and IP Address.
-     * 
-     * @param vlankId identifer of the VLAN that stores the object.
-     * @param requestedIP IP address that defines the object.
-     * @return the matching object.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    IpPoolManagementHB getIpPoolManagementByVLANandIP(Integer vlanId, IPAddress requestedIP)
-        throws PersistenceException;
-
-    /**
-     * Return the list of {@link IpPoolManagement} objects with no virtual machine assigned
-     * (available) into a VLAN.
-     * 
-     * @param vlanId identifier of the VLAN.
-     * @param offset first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param filterLike filter the search.
-     * @return the list of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    List<IpPoolManagementHB> getNetworkPoolAvailableByVLAN(Integer vlanId, Integer offset,
-        Integer numElem, String filterLike) throws PersistenceException;
-
-    /**
-     * Return the list of {@link IpPoolManagement} objects into a VLAN.
-     * 
-     * @param vlanId identifier of the VLAN.
-     * @param offset first element to retrieve.
-     * @param numElem number of elements to retrieve.
-     * @param ipLike filter the search.
-     * @param orderBy the order criteria.
-     * @param asc related to orderBy filter: ascendant or descendant?
-     * @return the list of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    List<IpPoolManagementHB> getNetworkPoolByVLAN(Integer vlanId, Integer offset, Integer numElem,
-        String ipLike, String orderBy, Boolean asc) throws PersistenceException;
-
-    /**
-     * Return the number of {@link IpPoolManagement} objects with no virtual machine assigned
-     * (available) into a VLAN.
-     * 
-     * @param vlanId identifier of the VLAN.
-     * @param filterLike filter the search.
-     * @return the number of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    Integer getNumberNetworkPoolAvailableByVLAN(Integer vlanId, String filterLike)
-        throws PersistenceException;
-
-    /**
-     * Return the number of {@link IpPoolManagement} objects into a VLAN.
-     * 
-     * @param vlanId identifier of the VLAN.
-     * @param ipLike filter the search.
-     * @return the number of matching results.
-     * @throws PersistenceException encapsulates any database access exception.
-     */
-    Integer getNumberNetworkPoolByVLAN(Integer vlanId, String ipLike) throws PersistenceException;
 
     /**
      * Return the list of {@link IpPoolManagementHB} assigned to a virtual machine.
@@ -126,13 +46,5 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      */
     List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(Integer virtualMachineId)
         throws PersistenceException;
-
-    /**
-     * From an IpPoolIdentifier, get its VLAN.
-     * 
-     * @param idManagement identifier of the ipPool
-     * @return an {@link VlanNetworkHB} object.
-     */
-    VlanNetworkHB getVlanByIpPoolManagement(Integer idManagement) throws PersistenceException;
 
 }

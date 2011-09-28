@@ -29,6 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
@@ -43,9 +44,9 @@ import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.services.RoleService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
@@ -84,7 +85,7 @@ public class RoleResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Produces(RolesResource.LINK_MEDIA_TYPE)
+    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -125,7 +126,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES)
-    @Produces(RoleResource.LINK_MEDIA_TYPE)
+    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
