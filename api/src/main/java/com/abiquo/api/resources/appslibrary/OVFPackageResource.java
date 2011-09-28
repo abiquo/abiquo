@@ -61,7 +61,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class OVFPackageResource extends AbstractResource
 {
 
-    public static final String OVF_PACKAGE = "ovfPackage";
+    public static final String OVF_PACKAGE = "ovfpackage";
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
