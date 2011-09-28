@@ -165,8 +165,8 @@ public class NodeResource
      * @return the {@link VirtualSystemResource} object
      */
     @GET
-    @Path(VIRTUAL_SYSTEM + "/{uuid}")
-    public VirtualSystemDto getVirtualSystem(@PathParam("ip") @NotNull @Ip final String ip,
+    @Path(VIRTUAL_SYSTEM + "/by_uuid/{uuid}")
+    public VirtualSystemDto getVirtualSystemByUUID(@PathParam("ip") @NotNull @Ip final String ip,
         @PathParam("uuid") @NotNull final String uuid,
         @QueryParam("hyp") @NotNull final String hypervisorType,
         @QueryParam("user") @NotNull final String user,
@@ -185,7 +185,38 @@ public class NodeResource
             throw new BadRequestException(MessageValues.UNKNOWN_HYPERVISOR);
         }
 
-        return virtualSystemService.getVirtualSystem(ip, hypType, user, password, aimport, uuid);
+        return virtualSystemService.getVirtualSystemByUUID(ip, hypType, user, password, aimport,
+            uuid);
+    }
 
+    /**
+     * Routes the rest of the URI to {@link VirtualSystemResource}.
+     * 
+     * @param ipAddress IP address of the host
+     * @return the {@link VirtualSystemResource} object
+     */
+    @GET
+    @Path(VIRTUAL_SYSTEM + "/by_name/{name}")
+    public VirtualSystemDto getVirtualSystemByName(@PathParam("ip") @NotNull @Ip final String ip,
+        @PathParam("name") @NotNull final String name,
+        @QueryParam("hyp") @NotNull final String hypervisorType,
+        @QueryParam("user") @NotNull final String user,
+        @QueryParam("passwd") @NotNull final String password,
+        @QueryParam(AIMPORT) @DefaultValue("8889") @Port final Integer aimport)
+        throws NodecollectorException
+    {
+
+        HypervisorType hypType;
+        try
+        {
+            hypType = HypervisorType.fromValue(hypervisorType);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new BadRequestException(MessageValues.UNKNOWN_HYPERVISOR);
+        }
+
+        return virtualSystemService.getVirtualSystemByName(ip, hypType, user, password, aimport,
+            name);
     }
 }

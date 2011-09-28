@@ -49,7 +49,11 @@ public enum APIError
         "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
-        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"),
+        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
+        "GEN-7", "The property 'name', must not have whitespace at the beginning or the end."), WHITE_CODE(
+        "GEN-8", "The property 'code', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
+        "GEN-9",
+        "The property 'description', must not have whitespace at the beginning or the end."),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -83,12 +87,12 @@ public enum APIError
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
-        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+        "Cannot edit resource limits, current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), //
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
-        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "Cannot edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
         "LIMIT-11",
         "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
@@ -101,8 +105,8 @@ public enum APIError
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
-        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
         "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
         "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
@@ -396,7 +400,8 @@ public enum APIError
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
         "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
-        "Duplicated name for Currency"),
+        "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
+        "Cannot remove currency associated with a Pricing Model"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(

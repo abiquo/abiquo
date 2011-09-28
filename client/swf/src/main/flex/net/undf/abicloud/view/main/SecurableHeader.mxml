@@ -292,7 +292,6 @@
 				
 				menuOptions.addItem(headerSpacer2);					
 				
-				
 				if (SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.SYSCONFIG_VIEW))
 				{
 					//Making available this resource

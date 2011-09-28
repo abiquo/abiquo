@@ -134,6 +134,13 @@ public class EnterpriseResource extends AbstractResource
                 Enterprise enterprise = service.getEnterprise(enterpriseId);
                 return createTransferObject(enterprise, restBuilder);
             }
+            // We need to return the enterprise of the external VLAN to edit it,
+            // and for that wee need to have DC_ENUMERATE privilege.
+            else if (securityService.hasPrivilege(SecurityService.ROLE_PHYS_DC_ENUMERATE))
+            {
+                Enterprise enterprise = service.getEnterprise(enterpriseId);
+                return createTransferObject(enterprise, restBuilder);
+            }
             else
             {
                 // throws access denied exception

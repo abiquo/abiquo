@@ -404,10 +404,10 @@ public class VirtualApplianceService extends DefaultApiService
                     pricingTemplate.getMinimumChargePeriod()));
             }
 
-            dto.setTotalCost(rounded(
-                significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
-                    pricingTemplate.getStandingChargePeriod())));
+            dto.setTotalCost(rounded(significantDigits,
+                virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
+            // It is for enterprise so we don't have to add to the price
+            // .add( pricingTemplate.getStandingChargePeriod())
         }
 
         return dto;
