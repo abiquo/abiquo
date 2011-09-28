@@ -1317,27 +1317,28 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter)
     {
 
-        Session session = HibernateUtil.getSession();
-        Transaction tx = session.beginTransaction();
-
-        try
-        {
-            VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
-            checkLimits(vdcHb, userSession);
-        }
-        catch (HardLimitExceededException e)
-        {
-            BasicResult basicResult = new BasicResult();
-            basicResult.setSuccess(false);
-            basicResult.setMessage(resourceManager
-                .getMessage("editVirtualDataCenter.limitExceeded"));
-
-            return basicResult;
-        }
-        finally
-        {
-            tx.commit();
-        }
+        // Checked en api
+        // Session session = HibernateUtil.getSession();
+        // Transaction tx = session.beginTransaction();
+        //
+        // try
+        // {
+        // VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
+        // checkLimits(vdcHb, userSession);
+        // }
+        // catch (HardLimitExceededException e)
+        // {
+        // BasicResult basicResult = new BasicResult();
+        // basicResult.setSuccess(false);
+        // basicResult.setMessage(resourceManager
+        // .getMessage("editVirtualDataCenter.limitExceeded"));
+        //
+        // return basicResult;
+        // }
+        // finally
+        // {
+        // tx.commit();
+        // }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
