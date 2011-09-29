@@ -65,7 +65,8 @@ public class PricingTemplate extends DefaultEntityBase
         final boolean showMinimumCharge, final PricingPeriod chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final PricingPeriod minimumCharge, final Currency currency, final BigDecimal publicIp,
-        final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate)
+        final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate,
+        final String description)
     {
 
         setName(name);
@@ -83,6 +84,7 @@ public class PricingTemplate extends DefaultEntityBase
         setMemoryMB(memoryMB);
         setDefaultTemplate(defaultTemplate);
         setLastUpdate(new Date());
+        setDescription(description);
     }
 
     public final static String ID_COLUMN = "idPricingTemplate";
@@ -124,6 +126,34 @@ public class PricingTemplate extends DefaultEntityBase
     public void setName(final String name)
     {
         this.name = name;
+    }
+
+    public final static String DESCRIPTION_PROPERTY = "description";
+
+    private final static boolean DESCRIPTION_REQUIRED = true;
+
+    private final static int DESCRIPTION_LENGTH_MIN = 0;
+
+    private final static int DESCRIPTION_LENGTH_MAX = 500;
+
+    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String DESCRIPTION_COLUMN = "description";
+
+    @Column(name = DESCRIPTION_COLUMN, nullable = !DESCRIPTION_REQUIRED, length = DESCRIPTION_LENGTH_MAX)
+    private String description;
+
+    @Required(value = DESCRIPTION_REQUIRED)
+    @Length(min = DESCRIPTION_LENGTH_MIN, max = DESCRIPTION_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(final String description)
+    {
+        this.description = description;
     }
 
     public final static String HD_GB_PROPERTY = "hdGB";

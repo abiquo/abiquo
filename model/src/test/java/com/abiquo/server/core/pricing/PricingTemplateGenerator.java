@@ -97,6 +97,7 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final BigDecimal publicIp = seed;
         final BigDecimal vCpu = seed;
         final BigDecimal memoryMb = seed;
+        final String description = newString(nextSeed(), 0, 255);
 
         PricingTemplate pricingTemplate =
             new PricingTemplate(name,
@@ -112,7 +113,8 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 publicIp,
                 vCpu,
                 memoryMb,
-                false);
+                false,
+                description);
 
         return pricingTemplate;
     }

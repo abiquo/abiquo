@@ -401,12 +401,16 @@ public enum APIError
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
         "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
         "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
-        "Cannot remove currency associated with a Pricing Model"),
+        "Cannot remove currency associated with a Pricing Model"), CURRENCY_NAME_NOT_FOUND(
+        "CURRENCY-4", "Currency name is required"), CURRENCY_SYMBOL_NOT_FOUND("CURRENCY-5",
+        " Currency symbol is required"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
         "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
-        "Duplicated name for Cost Code"),
+        "Duplicated name for Cost Code"), COSTCODE_NAME_NOT_FOUND("COSTCODE-3",
+        "Cost Code name is required"), COSTCODE_DESCRITPION_NOT_FOUND("COSTCODE-4",
+        " Cost Code description is required"),
 
     // COST CODE- CURRENCY
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",

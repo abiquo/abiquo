@@ -68,6 +68,7 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `vlan` DECIMAL(20,5) NOT NULL default 0,
   `publicIp` DECIMAL(20,5) NOT NULL default 0,
   `defaultTemplate` boolean NOT NULL default 0,
+  `description` varchar(1000) NOT NULL,
   `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`) ,

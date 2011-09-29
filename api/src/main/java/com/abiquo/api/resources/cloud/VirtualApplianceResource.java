@@ -41,7 +41,6 @@ import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
-import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -245,15 +244,16 @@ public class VirtualApplianceResource
 
     @GET
     @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
-    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+    public String getPriceVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        VirtualAppliancePriceDto virtualAppliancePriceDto =
-            service.getPriceVirtualAppliance(vdcId, vappId);
-        return virtualAppliancePriceDto;
-
+        // VirtualAppliancePriceDto virtualAppliancePriceDto =
+        // service.getPriceVirtualAppliance(vdcId, vappId);
+        // return virtualAppliancePriceDto;
+        String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
+        return virtualAppliancePrice;
     }
 
 }
