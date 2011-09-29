@@ -35,6 +35,24 @@ public class VirtualMachinePrice
         COST_CODE, COMPUTE, NETWORK, STORAGE, ADDITIONAL_VOLUME, STANDING_CHARGE, TOTAL;
     }
 
+    public enum PricingModelVariables
+    {
+        CHARGE("%CHARGE_FORMATTED%"), CHARGE_PERIOD("%CHARGEPERIOD%"), MIN_CHARGE(
+            "%MINCHARGE_FORMATTED%"), MIN_PERIOD("%MINPERIOD%");
+
+        private String text;
+
+        PricingModelVariables(final String text)
+        {
+            this.text = text;
+        }
+
+        public String getText()
+        {
+            return text;
+        }
+    }
+
     /** Value for the image being deployed */
     private BigDecimal costCodeCost;
 
