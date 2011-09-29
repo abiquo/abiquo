@@ -659,7 +659,7 @@ CREATE TABLE  `kinton`.`rasd` (
   `parent` varchar(50) default NULL,
   `poolID` varchar(50) default NULL,
   `reservation` BIGINT default NULL,
-  `resourceSubType` varchar(15) default NULL,
+  `resourceSubType` varchar(15) default NULL COMMENT 'For IPs: 0 = private, 1 = public, 2 = external',
   `resourceType` int(5) NOT NULL,
   `virtualQuantity` int(20) default NULL,
   `weight` int(5) default NULL,
@@ -2750,6 +2750,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
            WHERE ipm.dhcp_service_id=nc.dhcp_service_id
            AND vn.network_configuration_id = nc.network_configuration_id
            AND vn.network_id = dc.network_id
+	   AND vn.networktype = 'PUBLIC'
            AND ra.idManagement = ipm.idManagement
            AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
 	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
@@ -2894,7 +2895,6 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
 --
 -- ******************************************************************************************
 |
-DROP TRIGGER IF EXISTS `kinton`.`update_rasd_management_update_stats`;
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
     FOR EACH ROW BEGIN
         DECLARE state VARCHAR(50);
@@ -2949,7 +2949,6 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 				WHERE r.instanceID = OLD.idResource;
 				-- INSERT INTO debug_msg (msg) VALUES (CONCAT('Updating ExtStorage: ',idState,' - ', IFNULL(idDataCenterObj, 'idDataCenterObj es NULL'), IFNULL(idEnterpriseObj, 'idEnterpriseObj es NULL'), reservedSize));	
 				UPDATE IGNORE cloud_usage_stats SET storageUsed = storageUsed-reservedSize WHERE idDataCenter = idDataCenterObj;
-				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
 				UPDATE IGNORE enterprise_resources_stats 
 				    SET     extStorageUsed = extStorageUsed - reservedSize
 				    WHERE idEnterprise = idEnterpriseObj;
@@ -2993,6 +2992,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 WHERE ipm.dhcp_service_id=nc.dhcp_service_id
                 AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
+		AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
                 -- Datacenter found ---> PublicIPUsed
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3021,6 +3021,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 WHERE ipm.dhcp_service_id=nc.dhcp_service_id
                 AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
+		AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
                 -- Datacenter found ---> Not PublicIPUsed
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3049,6 +3050,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 WHERE ipm.dhcp_service_id=nc.dhcp_service_id
                 AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
+		AND vn.networktype = 'PUBLIC'
                 AND OLD.idManagement = ipm.idManagement;
                 -- Datacenter found ---> Not PublicIPReserved
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3266,9 +3268,11 @@ CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON
             IF OLD.mac IS NULL AND NEW.mac IS NOT NULL THEN
                 -- Query for datacenter
                 SELECT vdc.idDataCenter, vdc.idVirtualDataCenter, vdc.idEnterprise  INTO idDataCenterObj, idVirtualDataCenterObj, idEnterpriseObj
-                FROM rasd_management rm, virtualdatacenter vdc
-                WHERE NEW.idManagement = rm.idManagement
-                AND vdc.idVirtualDataCenter = rm.idVirtualDataCenter;
+                FROM rasd_management rm, virtualdatacenter vdc, rasd r
+                WHERE vdc.idVirtualDataCenter = rm.idVirtualDataCenter
+		AND rm.idResource = r.instanceID 
+		AND r.resourceSubType = 1 -- where '1' means External VLAN
+		AND NEW.idManagement = rm.idManagement ;
                 -- New Public IP assignment for a VDC ---> Reserved
                 UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed+1 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved+1 WHERE idEnterprise = idEnterpriseObj;
@@ -3529,7 +3533,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
 --
 --
 --
- CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
+CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
    BEGIN
   DECLARE idDataCenterObj INTEGER;
   DECLARE serversTotal BIGINT UNSIGNED;
@@ -3598,7 +3602,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     AND vm.idManagement = rm.idManagement
     AND r.instanceID = rm.idResource
     AND rm.idResourceType = 8
-    AND (vm.state = 1 OR vm.state = 2)
+    AND (vm.state = 1)
     AND sd.idDataCenter = idDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsTotal
@@ -3613,6 +3617,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id
+    AND vn.networktype = 'PUBLIC'             
     AND ipm.mac IS NOT NULL
     AND dc.idDataCenter = idDataCenterObj;
     --
@@ -3621,6 +3626,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id
+    AND vn.networktype = 'PUBLIC'             
     AND rm.idManagement = ipm.idManagement
     AND ipm.mac IS NOT NULL
     AND rm.idVM IS NOT NULL
@@ -3790,7 +3796,8 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
-    AND vn.network_id = dc.network_id                
+    AND vn.network_id = dc.network_id   
+    AND vn.networktype = 'PUBLIC'             
     AND rm.idManagement = ipm.idManagement
     AND vdc.idVirtualDataCenter = rm.idVirtualDataCenter
     AND vdc.idEnterprise = idEnterpriseObj;
@@ -3799,7 +3806,8 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
-    AND vn.network_id = dc.network_id                
+    AND vn.network_id = dc.network_id            
+    AND vn.networktype = 'PUBLIC'    
     AND rm.idManagement = ipm.idManagement
     AND vdc.idVirtualDataCenter = rm.idVirtualDataCenter
     AND rm.idVM IS NOT NULL
@@ -3920,7 +3928,8 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
-    AND vn.network_id = dc.network_id                
+    AND vn.network_id = dc.network_id           
+    AND vn.networktype = 'PUBLIC'     
     AND rm.idManagement = ipm.idManagement
     AND rm.idVM IS NOT NULL
     AND rm.idVirtualDataCenter = idVirtualDataCenterObj;
@@ -3930,6 +3939,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     WHERE ipm.dhcp_service_id=nc.dhcp_service_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id                
+    AND vn.networktype = 'PUBLIC'
     AND rm.idManagement = ipm.idManagement
     AND rm.idVirtualDataCenter = idVirtualDataCenterObj;
     --
