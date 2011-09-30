@@ -89,7 +89,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
         final BigDecimal vlan = seed;
-        final boolean showMinimumCharge = true;
         final PricingPeriod chargingPeriod = PricingPeriod.DAY;
         final BigDecimal minimumChargePeriod = seed;
         final boolean showChangesBefore = true;
@@ -104,7 +103,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 hdGb,
                 standingChargePeriod,
                 vlan,
-                showMinimumCharge,
                 chargingPeriod,
                 minimumChargePeriod,
                 showChangesBefore,

@@ -305,16 +305,13 @@ public class VirtualApplianceService extends DefaultApiService
             price =
                 price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), "per "
                     + pricingTemplate.getChargingPeriod().name());
-            if (pricingTemplate.isShowMinimumCharge())
-            {
-                price =
-                    price.replace(PricingModelVariables.MIN_CHARGE.getText(),
-                        priceDto.getMinimumChargePeriod() + " "
-                            + pricingTemplate.getCurrency().getSymbol());
-                price =
-                    price.replace(PricingModelVariables.MIN_PERIOD.getText(), "per "
-                        + pricingTemplate.getMinimumCharge().name());
-            }
+            price =
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(),
+                    priceDto.getMinimumChargePeriod() + " "
+                        + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.MIN_PERIOD.getText(), "per "
+                    + pricingTemplate.getMinimumCharge().name());
 
         }
         return price + "\n";
@@ -359,13 +356,9 @@ public class VirtualApplianceService extends DefaultApiService
         dto.setNetworkCost(rounded(significantDigits,
             virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
         dto.setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
-        if (pricingTemplate.isShowMinimumCharge())
-        {
-            dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
-            dto.setMinimumChargePeriod(rounded(significantDigits,
-                pricingTemplate.getMinimumChargePeriod()));
-        }
-
+        dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
+        dto.setMinimumChargePeriod(rounded(significantDigits,
+            pricingTemplate.getMinimumChargePeriod()));
         dto.setTotalCost(rounded(significantDigits,
             virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
         // It is for enterprise so we don't have to add to the price

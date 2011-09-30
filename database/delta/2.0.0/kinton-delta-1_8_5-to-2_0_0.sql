@@ -20,9 +20,9 @@ DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
 -- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `symbol` varchar(256) NOT NULL ,
-  `name` varchar(256) NOT NULL ,
-   `digits` int(10)  NOT NULL default 2,
+  `symbol` varchar(10) NOT NULL ,
+  `name` varchar(20) NOT NULL ,
+   `digits` int(1)  NOT NULL default 2,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -31,8 +31,8 @@ CREATE TABLE `kinton`.`currency` (
 -- Definition of table `kinton`.`costCode`
 CREATE TABLE `kinton`.`costCode` (
   `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
-  `name` varchar(256) NOT NULL ,
-  `description` varchar(256) NOT NULL ,
+  `name` varchar(20) NOT NULL ,
+  `description` varchar(100) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -46,7 +46,6 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
-  `showMinimumCharge` boolean NOT NULL default 0,
   `standingChargePeriod` DECIMAL(20,5) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20,5) NOT NULL default 0,
   `vcpu` DECIMAL(20,5) NOT NULL default 0,
