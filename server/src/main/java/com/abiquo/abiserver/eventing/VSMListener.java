@@ -139,6 +139,24 @@ public class VSMListener implements VSMCallback
                 return;
             }
 
+            // Preparing the Log tracer system before commiting any changes in DB
+            Platform platform = Platform.SYSTEM_PLATFORM;
+
+            // Set a Datacenter object, with name and rack
+            DatacenterHB dcHB = virtualMachine.getHypervisor().getPhysicalMachine().getDataCenter();
+            RackHB rackHB = virtualMachine.getHypervisor().getPhysicalMachine().getRack();
+
+            Datacenter dc = Datacenter.datacenter(dcHB.getName());
+            Rack rack = new Rack(rackHB.getName());
+            VirtualMachine vm = VirtualMachine.virtualMachine(virtualMachine.getName());
+            Machine machine = new Machine(rackHB.getName() + "_machine");
+
+            machine.setVirtualMachine(vm);
+            rack.setMachine(machine);
+            dc.setRack(rack);
+
+            platform.setDatacenter(dc);
+
             // Checking if the VM is not null since the VM that we are receiving
             // the event was already deleted
             // If hypervisor is null, the Virtual Machine belongs to an
@@ -171,24 +189,6 @@ public class VSMListener implements VSMCallback
                 transaction.commit();
 
                 // Log the event, depending on the event type
-                Platform platform = Platform.SYSTEM_PLATFORM;
-
-                // Set a Datacenter object, with name and rack
-                DatacenterHB dcHB =
-                    virtualMachine.getHypervisor().getPhysicalMachine().getDataCenter();
-                RackHB rackHB = virtualMachine.getHypervisor().getPhysicalMachine().getRack();
-
-                Datacenter dc = Datacenter.datacenter(dcHB.getName());
-                Rack rack = new Rack(rackHB.getName());
-                VirtualMachine vm = VirtualMachine.virtualMachine(virtualMachine.getName());
-                Machine machine = new Machine(rackHB.getName() + "_machine");
-
-                machine.setVirtualMachine(vm);
-                rack.setMachine(machine);
-                dc.setRack(rack);
-
-                platform.setDatacenter(dc);
-
                 switch (eventType)
                 {
                     case POWER_ON:

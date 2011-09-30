@@ -2965,12 +2965,8 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
 				UPDATE IGNORE vdc_enterprise_stats 
 				    SET     volAttached = volAttached - 1, extStorageUsed = extStorageUsed - reservedSize
 				WHERE idVirtualDataCenter = OLD.idVirtualDatacenter;
-			    
-				
-		--		UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
-			    
-				
-				END IF;                 
+				UPDATE IGNORE vapp_enterprise_stats SET volAttached = volAttached-1 WHERE idVirtualApp = OLD.idVirtualApp;
+			    END IF;                 
 			END IF;
 			-- Volume added to VDC
 			IF OLD.idVirtualDataCenter IS NULL AND NEW.idVirtualDataCenter IS NOT NULL THEN        
@@ -4123,9 +4119,9 @@ DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
 
 CREATE TABLE `kinton`.`currency` (
   `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `symbol` varchar(256) NOT NULL ,
-  `name` varchar(256) NOT NULL,
-  `digits` int(10)  NOT NULL default 2,
+  `symbol` varchar(10) NOT NULL ,
+  `name` varchar(20) NOT NULL,
+  `digits` int(1)  NOT NULL default 2,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCurrency`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -4149,8 +4145,8 @@ UNLOCK TABLES;
 
 CREATE TABLE `kinton`.`costCode` (
   `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
-   `name` varchar(256) NOT NULL ,
-  `description` varchar(256) NOT NULL ,
+   `name` varchar(20) NOT NULL ,
+  `description` varchar(100) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idCostCode`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -4167,7 +4163,6 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
   `minimumCharge` int(10) UNSIGNED NOT NULL ,
   `showChangesBefore` boolean NOT NULL default 0,
-  `showMinimumCharge` boolean NOT NULL default 0,
   `standingChargePeriod` DECIMAL(20,5) NOT NULL default 0,
   `minimumChargePeriod` DECIMAL(20,5) NOT NULL default 0,
   `vcpu` DECIMAL(20,5) NOT NULL default 0,
@@ -4176,6 +4171,7 @@ CREATE TABLE `kinton`.`pricingTemplate` (
   `vlan` DECIMAL(20,5) NOT NULL default 0,
   `publicIp` DECIMAL(20,5) NOT NULL default 0,
   `defaultTemplate` boolean NOT NULL default 0,
+  `description` varchar(1000)  NOT NULL,
   `last_update` timestamp NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idPricingTemplate`) ,

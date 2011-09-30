@@ -23,10 +23,10 @@ package com.abiquo.server.core.scheduler;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 

@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.fit.AllocationFitMax;
 import com.abiquo.scheduler.fit.AllocationFitMin;
 import com.abiquo.scheduler.fit.IAllocationFit;
@@ -50,7 +51,6 @@ import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -211,8 +211,9 @@ public class VirtualimageAllocationService
      *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
-        Integer rackId) throws ResourceAllocationException
+        final Integer idVirtualAppliance, final String datastoreUuid,
+        final Integer originalHypervisorId, final Integer rackId)
+        throws ResourceAllocationException
     {
 
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
@@ -278,12 +279,12 @@ public class VirtualimageAllocationService
 
         final Long numberOfDeployedVLAN =
             datacenterRepo.getNumberOfDeployedVlanNetworksByRack(idRack);
-        final Integer vlanPerSwitch = (rack.getVlanIdMax() - rack.getVlanIdMin()) + 1;
+        final Integer vlanPerSwitch = rack.getVlanIdMax() - rack.getVlanIdMin() + 1;
 
         log.debug("The number of deployed VLAN for the rack: {}, is: {}", idRack,
             numberOfDeployedVLAN);
 
-        final int second_operator = Math.round((vlanPerSwitch * rack.getNrsq()) / 100);
+        final int second_operator = Math.round(vlanPerSwitch * rack.getNrsq() / 100);
         final int vlan_soft_limit = vlanPerSwitch - second_operator;
 
         if (numberOfDeployedVLAN.intValue() >= vlan_soft_limit)
@@ -296,9 +297,10 @@ public class VirtualimageAllocationService
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
-            throw new NotEnoughResourcesException(String.format(
-                "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
-                rack.getName()));
+            throw new NotEnoughResourcesException(String
+                .format(
+                    "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
+                    rack.getName()));
         }
 
         // log.debug("The network assigned to the VM, VLAN network ID: {},  "
@@ -331,15 +333,13 @@ public class VirtualimageAllocationService
         {
 
             final boolean passCPU =
-                pass(Long.valueOf(machine.getVirtualCpusUsed()),
-                    Long.valueOf(image.getCpuRequired()),
-                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
-                    100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image
+                    .getCpuRequired()), Long.valueOf(machine.getVirtualCpuCores()
+                    * machine.getVirtualCpusPerCore()), 100);
 
             final boolean passRAM =
-                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
-                    Long.valueOf(image.getRamRequired()),
-                    Long.valueOf(machine.getVirtualRamInMb()), 100);
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()), Long.valueOf(image
+                    .getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
@@ -371,7 +371,7 @@ public class VirtualimageAllocationService
             ruleFinder.initializeMachineLoadRuleCache(firstPassCandidates);
 
         physicalMachineFit =
-            (fitPolicy == FitPolicy.PROGRESSIVE) ? new AllocationFitMax() : new AllocationFitMin();
+            fitPolicy == FitPolicy.PROGRESSIVE ? new AllocationFitMax() : new AllocationFitMin();
 
         Machine bestTarget = null;
         long bestFitTarget = NO_FIT;
@@ -423,7 +423,9 @@ public class VirtualimageAllocationService
             }
             else
             {
-                log.error(String.format("Machine %s rejected by some load rule.", target.getName()));
+                log
+                    .error(String
+                        .format("Machine %s rejected by some load rule.", target.getName()));
             }
         }
 

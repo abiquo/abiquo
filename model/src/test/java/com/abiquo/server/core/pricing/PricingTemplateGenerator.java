@@ -89,7 +89,6 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
         final BigDecimal vlan = seed;
-        final boolean showMinimumCharge = true;
         final PricingPeriod chargingPeriod = PricingPeriod.DAY;
         final BigDecimal minimumChargePeriod = seed;
         final boolean showChangesBefore = true;
@@ -97,13 +96,13 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
         final BigDecimal publicIp = seed;
         final BigDecimal vCpu = seed;
         final BigDecimal memoryMb = seed;
+        final String description = newString(nextSeed(), 0, 255);
 
         PricingTemplate pricingTemplate =
             new PricingTemplate(name,
                 hdGb,
                 standingChargePeriod,
                 vlan,
-                showMinimumCharge,
                 chargingPeriod,
                 minimumChargePeriod,
                 showChangesBefore,
@@ -112,7 +111,8 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
                 publicIp,
                 vCpu,
                 memoryMb,
-                false);
+                false,
+                description);
 
         return pricingTemplate;
     }

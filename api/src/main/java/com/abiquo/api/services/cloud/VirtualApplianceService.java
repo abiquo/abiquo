@@ -56,6 +56,7 @@ import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
 import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
 import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -352,8 +353,37 @@ public class VirtualApplianceService extends DefaultApiService
         return results;
     }
 
-    public VirtualAppliancePriceDto getPriceVirtualAppliance(final Integer vdcId,
-        final Integer vappId)
+    public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
+    {
+        String price = "NA";
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        // if enterprise has pt associated
+        PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
+        if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
+        {
+            VirtualAppliancePriceDto priceDto =
+                getPriceVirtualAppliance(virtualAppliance, pricingTemplate);
+            price = pricingTemplate.getDescription();
+            price =
+                price.replace(PricingModelVariables.CHARGE.getText(), priceDto.getTotalCost() + " "
+                    + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), "per "
+                    + pricingTemplate.getChargingPeriod().name());
+            price =
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(),
+                    priceDto.getMinimumChargePeriod() + " "
+                        + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.MIN_PERIOD.getText(), "per "
+                    + pricingTemplate.getMinimumCharge().name());
+
+        }
+        return price + "\n";
+    }
+
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+        final VirtualAppliance virtualAppliance, final PricingTemplate pricingTemplate)
     {
         BigDecimal cost = new BigDecimal(0);
         Map<VirtualMachineCost, BigDecimal> virtualMachinesCost =
@@ -369,53 +399,42 @@ public class VirtualApplianceService extends DefaultApiService
         VirtualAppliancePriceDto dto =
             new VirtualAppliancePriceDto(cost, cost, cost, cost, cost, cost);
 
-        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-        // if enterprise has pt associated
-        PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
-        if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
+        int significantDigits = pricingTemplate.getCurrency().getDigits();
+
+        for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
-            int significantDigits = pricingTemplate.getCurrency().getDigits();
+            VirtualMachineRequirements virtualMachineRequirements =
+                allocatorService.getVirtualMachineRequirements(node.getVirtualMachine());
 
-            for (NodeVirtualImage node : virtualAppliance.getNodes())
-            {
-                VirtualMachineRequirements virtualMachineRequirements =
-                    allocatorService.getVirtualMachineRequirements(node.getVirtualMachine());
-
-                virtualMachinesCost =
-                    addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
-                        virtualMachineRequirements, pricingTemplate);
-            }
-            dto.setAdditionalVolumCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
-            dto.setCostCodeCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
-            dto.setComputeCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
-            dto.setStorageCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
-            dto.setNetworkCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
-            dto.setStandingCharge(rounded(significantDigits,
-                pricingTemplate.getStandingChargePeriod()));
-            if (pricingTemplate.isShowMinimumCharge())
-            {
-                dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
-                dto.setMinimumChargePeriod(rounded(significantDigits,
-                    pricingTemplate.getMinimumChargePeriod()));
-            }
-
-            dto.setTotalCost(rounded(significantDigits,
-                virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
-            // It is for enterprise so we don't have to add to the price
-            // .add( pricingTemplate.getStandingChargePeriod())
+            virtualMachinesCost =
+                addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
+                    virtualMachineRequirements, pricingTemplate);
         }
+        dto.setAdditionalVolumCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+        dto.setCostCodeCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
+        dto.setComputeCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
+        dto.setStorageCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
+        dto.setNetworkCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
+        dto.setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
+        dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
+        dto.setMinimumChargePeriod(rounded(significantDigits,
+            pricingTemplate.getMinimumChargePeriod()));
+        dto.setTotalCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
+        // It is for enterprise so we don't have to add to the price
+        // .add( pricingTemplate.getStandingChargePeriod())
 
         return dto;
     }
 
     private BigDecimal rounded(final int significantDigits, final BigDecimal aNumber)
     {
-        return aNumber.setScale(significantDigits, BigDecimal.ROUND_HALF_EVEN);
+        return aNumber.setScale(significantDigits, BigDecimal.ROUND_UP);
     }
 
     private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
@@ -455,12 +474,6 @@ public class VirtualApplianceService extends DefaultApiService
                 pricingTemplate.getPublicIp().multiply(
                     new BigDecimal(virtualMachineRequirements.getPublicIP()))));
 
-        // once, it is for virtual appliance not for vm.
-        // virtualMachinesCost.put(
-        // VirtualMachineCost.STANDING_CHARGE,
-        // virtualMachinesCost.get(VirtualMachineCost.STANDING_CHARGE).add(
-        // pricingTemplate.getStandingChargePeriod()));
-
         virtualMachinesCost.put(
             VirtualMachineCost.TOTAL,
             virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
@@ -468,7 +481,6 @@ public class VirtualApplianceService extends DefaultApiService
                     virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
                         virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
                             virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            // virtualMachinesCost.get(VirtualMachineCost.STANDING_CHARGE).add(
                                 virtualMachinesCost.get(VirtualMachineCost.NETWORK)))))));
         return virtualMachinesCost;
     }
@@ -476,7 +488,6 @@ public class VirtualApplianceService extends DefaultApiService
     private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine, final PricingTemplate pricing)
     {
-        // TODO just until change cost code field type in i
         CostCode cc = pricingRep.findCostCodeById(virtualMachine.getVirtualImage().getCostCode());
         PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
         if (pricingCostCode != null)
