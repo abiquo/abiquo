@@ -88,6 +88,7 @@ public class OVFPackageRep extends DefaultRepBase
         }
         ovfPackage.setAppsLibrary(appsLib);
         dao.persist(ovfPackage);
+        dao.flush();
 
         return ovfPackage;
     }

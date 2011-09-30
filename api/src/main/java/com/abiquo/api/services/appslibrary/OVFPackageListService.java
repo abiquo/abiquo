@@ -57,7 +57,6 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 @Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFPackageListService extends DefaultApiService
 {
     @Autowired
@@ -168,6 +167,7 @@ public class OVFPackageListService extends DefaultApiService
         return addOVFPackageList(newList, idEnterprise);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackageList> getOVFPackageListsByEnterprise(final Integer idEnterprise)
     {
 

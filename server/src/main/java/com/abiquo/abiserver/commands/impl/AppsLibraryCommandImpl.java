@@ -1032,11 +1032,14 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     {
         OVFPackageListDto packageList;
 
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
+
         try
         {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
 
-            packageList = appsLibClient.getOVFPackageList(idEnterprise, nameOVFPackageList);
+            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
         }
         catch (final WebApplicationException e)
         {
@@ -1278,12 +1281,13 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final List<String> ovfIds = new LinkedList<String>();
 
         OVFPackageListDto packageList;
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
 
         try
         {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-            packageList = appsLibClient.getOVFPackageList(idEnterprise, nameOVFPackageList);
+            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
         }
         catch (final WebApplicationException e)
         {
@@ -1368,11 +1372,12 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     {
         OVFPackagesDto packageList;
 
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
         try
         {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-            packageList = appsLibClient.getOVFPackages(idEnterprise, nameOVFPackageList);
+            packageList = proxy.getOVFPackages(idEnterprise, nameOVFPackageList);
         }
         catch (final WebApplicationException e)
         {

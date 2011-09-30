@@ -58,7 +58,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
-@Transactional
 public class OVFPackageService extends DefaultApiService
 {
 
@@ -83,11 +82,13 @@ public class OVFPackageService extends DefaultApiService
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
     {
         return repo.getOVFPackagesByEnterprise(idEnterprise);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public OVFPackage getOVFPackage(final Integer id, final IRESTBuilder restBuilder)
     {
         OVFPackage ovfpackage = repo.getOVFPackage(id);
@@ -108,6 +109,7 @@ public class OVFPackageService extends DefaultApiService
         return ovfPackage;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackage modifyOVFPackage(final Integer ovfPackageId, final OVFPackage ovfPackage,
         final Integer idEnterprise)
     {
@@ -116,6 +118,7 @@ public class OVFPackageService extends DefaultApiService
 
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeOVFPackage(final Integer id)
     {
         repo.removeOVFPackage(id);
@@ -177,6 +180,7 @@ public class OVFPackageService extends DefaultApiService
         return pack;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Response installOVFPackageOnDatacenter(final String amUri, final String idEnterprise,
         final String ovfLocation)
     {

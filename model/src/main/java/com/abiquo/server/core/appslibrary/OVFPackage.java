@@ -136,7 +136,7 @@ public class OVFPackage extends DefaultEntityBase
 
     private final static int NAME_LENGTH_MAX = 45;
 
-    private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 
     private final static String NAME_COLUMN = "name";
 
@@ -313,7 +313,7 @@ public class OVFPackage extends DefaultEntityBase
 
     private final static int PRODUCT_NAME_LENGTH_MAX = 255;
 
-    private final static boolean PRODUCT_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean PRODUCT_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 
     private final static String PRODUCT_NAME_COLUMN = "productName";
 
@@ -365,7 +365,7 @@ public class OVFPackage extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
-    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 
     private final static String DESCRIPTION_COLUMN = "description";
 

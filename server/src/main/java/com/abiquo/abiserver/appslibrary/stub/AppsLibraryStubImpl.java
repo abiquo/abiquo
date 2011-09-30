@@ -183,11 +183,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final Integer httpStatus = response.getStatusCode();
 
-        if (httpStatus / 200 != 1)
-        {
-            // throw new WebApplicationException(response(response));
-        }
-
         return response.getEntity(OVFPackageListDto.class);
     }
 
