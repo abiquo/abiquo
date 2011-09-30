@@ -62,11 +62,10 @@ public class PricingTemplate extends DefaultEntityBase
 
     public PricingTemplate(final String name, final BigDecimal hdGb,
         final BigDecimal standingChargePeriod, final BigDecimal vlan,
-        final boolean showMinimumCharge, final PricingPeriod chargingPeriod,
-        final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
-        final PricingPeriod minimumCharge, final Currency currency, final BigDecimal publicIp,
-        final BigDecimal vCpu, final BigDecimal memoryMB, final boolean defaultTemplate,
-        final String description)
+        final PricingPeriod chargingPeriod, final BigDecimal minimumChargePeriod,
+        final boolean showChangesBefore, final PricingPeriod minimumCharge,
+        final Currency currency, final BigDecimal publicIp, final BigDecimal vCpu,
+        final BigDecimal memoryMB, final boolean defaultTemplate, final String description)
     {
 
         setName(name);
@@ -74,7 +73,6 @@ public class PricingTemplate extends DefaultEntityBase
         setStandingChargePeriod(standingChargePeriod);
         setVlan(vlan);
         setShowChangesBefore(showChangesBefore);
-        setShowMinimumCharge(showMinimumCharge);
         setChargingPeriod(chargingPeriod);
         setMinimumCharge(minimumCharge);
         setMinimumChargePeriod(minimumChargePeriod);
@@ -205,28 +203,6 @@ public class PricingTemplate extends DefaultEntityBase
     public void setVlan(final BigDecimal vlan)
     {
         this.vlan = vlan;
-    }
-
-    public final static String SHOW_MINIMUM_CHARGE_PROPERTY = "showMinimumCharge";
-
-    private final static boolean SHOW_MINIMUM_CHARGE_REQUIRED = true;
-
-    private final static String SHOW_MINIMUM_CHARGE_COLUMN = "ShowMinimumCharge";
-
-    @Column(name = SHOW_MINIMUM_CHARGE_COLUMN, nullable = !SHOW_MINIMUM_CHARGE_REQUIRED)
-    private boolean showMinimumCharge;
-
-    @Required(value = SHOW_MINIMUM_CHARGE_REQUIRED)
-    public final static String CHARGING_PERIOD_PROPERTY = "chargingPeriod";
-
-    public boolean isShowMinimumCharge()
-    {
-        return showMinimumCharge;
-    }
-
-    public void setShowMinimumCharge(final boolean showMinimumCharge)
-    {
-        this.showMinimumCharge = showMinimumCharge;
     }
 
     private final static boolean CHARGING_PERIOD_REQUIRED = true;

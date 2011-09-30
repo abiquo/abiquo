@@ -403,14 +403,19 @@ public enum APIError
         "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
         "Cannot remove currency associated with a Pricing Model"), CURRENCY_NAME_NOT_FOUND(
         "CURRENCY-4", "Currency name is required"), CURRENCY_SYMBOL_NOT_FOUND("CURRENCY-5",
-        " Currency symbol is required"),
+        "Currency symbol is required"), CURRENCY_NAME_LONG("CURRENCY-6",
+        "Currency name maximum lenght is 20 characters"), CURRENCY_SYMBOL_LONG("CURRENCY-7",
+        "Currency symbol maximum lenght is 10 characters"), CURRENCY_DIGIT_LONG("CURRENCY-8",
+        "Currency digit maximum  is 9"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
         "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
         "Duplicated name for Cost Code"), COSTCODE_NAME_NOT_FOUND("COSTCODE-3",
         "Cost Code name is required"), COSTCODE_DESCRITPION_NOT_FOUND("COSTCODE-4",
-        " Cost Code description is required"),
+        "Cost Code description is required"), COSTCODE_NAME_LONG("COSTCODE-5",
+        "Cost Code name maximum lenght is 20 characters"), COSTCODE_DESCRIPTION_LONG("COSTCODE-6",
+        "Cost Code description maximum lenght is 100 characters"),
 
     // COST CODE- CURRENCY
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
