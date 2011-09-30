@@ -22,15 +22,16 @@
 package net.undf.abicloud.events
 {
     import flash.events.Event;
-
+    
     import mx.collections.ArrayCollection;
-
+    
+    import net.undf.abicloud.vo.infrastructure.DataCenter;
+    import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.NetworkConfiguration;
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.virtualappliance.Log;
     import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
-    import net.undf.abicloud.vo.infrastructure.DataCenter;
 
     public class VirtualApplianceEvent extends Event
     {
@@ -102,6 +103,12 @@ package net.undf.abicloud.events
         public static const VIRTUAL_DATACENTER_DELETED:String = "virtualDataCenterDeletedVirtualApplianceEvent";
 
 	public static const CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE_AND_DATACENTER:String = "checkVirtualDatacentersAndAppliancesByEnterpriseAndDatacenterEvent";
+	
+	   public static const GET_VIRTUAL_DATACENTERS_BY_ENTERPRISE_FASTER:String = "getVirtualDataCenterByEnterpriseFasterVirtualApplianceEvent";
+	
+	   public static const VIRTUAL_MACHINE_CHANGE_STATE:String = "virtualMachineChangeStateVirtualApplianceEvent";
+	   
+	   public static const GET_VIRTUAL_APPLIANCE_LOGS:String = "getVirtualApplianceLogsVirtualEvent";
 
         /* ------------- Public atributes ------------- */
         public var virtualAppliance:VirtualAppliance;
@@ -121,6 +128,10 @@ package net.undf.abicloud.events
         public var networkConfiguration:NetworkConfiguration;
 
         public var datacenter:DataCenter;
+        
+        public var virtualMachine:VirtualMachine;
+        
+        public var callback:Function;
 
 
         /* ------------- Constructor ------------- */

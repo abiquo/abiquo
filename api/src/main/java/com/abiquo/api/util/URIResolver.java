@@ -36,27 +36,29 @@ import com.abiquo.api.exceptions.PreconditionFailedException;
 
 public class URIResolver
 {
-    public static MultivaluedMap<String, String> resolve(String template, String uriString)
+    public static MultivaluedMap<String, String> resolve(final String template,
+        final String uriString)
     {
         UriTemplateProcessor processor = new JaxRsUriTemplateProcessor(template);
         return processor.matcher().match(uriString);
     }
 
-    public static String resolveURI(String baseUri, String pathTemplate, Map<String, String> values)
+    public static String resolveURI(final String baseUri, final String pathTemplate,
+        final Map<String, String> values)
     {
         UriTemplateProcessor template = new JaxRsUriTemplateProcessor(pathTemplate);
         return UriHelper.appendPathToBaseUri(baseUri, template.expand(values));
     }
 
-    public static String resolveURI(String baseUri, String pathTemplate,
-        Map<String, String> values, Map<String, String[]> queryParams)
+    public static String resolveURI(final String baseUri, final String pathTemplate,
+        final Map<String, String> values, final Map<String, String[]> queryParams)
     {
         UriTemplateProcessor template = new JaxRsUriTemplateProcessor(pathTemplate);
         String uriWithPath = UriHelper.appendPathToBaseUri(baseUri, template.expand(values));
         return UriHelper.appendQueryParamsToPath(uriWithPath, queryParams, true);
     }
 
-    public static String buildPath(String... values)
+    public static String buildPath(final String... values)
     {
         String path = "";
         for (String value : values)
@@ -66,7 +68,8 @@ public class URIResolver
         return path;
     }
 
-    public static MultivaluedMap<String, String> resolveFromURI(String buildPath, String uriString)
+    public static MultivaluedMap<String, String> resolveFromURI(final String buildPath,
+        final String uriString)
     {
         String targetPath = null;
 

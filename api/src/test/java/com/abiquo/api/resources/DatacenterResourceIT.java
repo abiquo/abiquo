@@ -65,39 +65,15 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void getDatacenter() throws Exception
-    {
-        assertNotNull(createDatacenter());
-    }
-
-    @Test
-    public void existRackLink()
+    public void existsLinks()
     {
         DatacenterDto dc = createDatacenter();
+        assertNotNull(dc);
         assertLinkExist(dc, resolveRacksURI(dc.getId()), RacksResource.RACKS_PATH);
-    }
-
-    @Test
-    public void existHypervisorsLink()
-    {
-        DatacenterDto dc = createDatacenter();
         assertLinkExist(dc, resolveHypervisorTypesURI(dc.getId()),
             DatacenterResource.HYPERVISORS_PATH);
-    }
-
-    @Test
-    public void existRemoteServicesLink()
-    {
-
-        DatacenterDto dc = createDatacenter();
         assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()),
             RemoteServicesResource.REMOTE_SERVICES_PATH);
-    }
-
-    @Test
-    public void existEditLink()
-    {
-        DatacenterDto dc = createDatacenter();
         assertLinkExist(dc, resolveDatacenterURI(dc.getId()), "edit");
     }
 

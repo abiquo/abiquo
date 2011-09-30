@@ -19,30 +19,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.transformer;
+package com.abiquo.server.core.enterprise;
 
-import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
-import static org.testng.Assert.assertEquals;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.testng.annotations.Test;
-
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
-
-@Test(groups = ALL_UNIT_TESTS)
-public class ModelTransformerTest
+@XmlRootElement(name = "userWithRole")
+public class UserWithRoleDto extends UserDto
 {
+    private RoleWithPrivilegesDto role;
 
-    @Test
-    public void transformPersistence() throws Exception
+    private EnterpriseDto enterprise;
+
+    public RoleWithPrivilegesDto getRole()
     {
-        Datacenter obj = new Datacenter("test", "situation test");
+        return role;
+    }
 
-        DatacenterDto dto = ModelTransformer.transportFromPersistence(DatacenterDto.class, obj);
+    public void setRole(final RoleWithPrivilegesDto role)
+    {
+        this.role = role;
+    }
 
-        assertEquals(obj.getId(), dto.getId());
-        assertEquals(obj.getName(), dto.getName());
-        assertEquals(obj.getLocation(), dto.getLocation());
+    public EnterpriseDto getEnterprise()
+    {
+        return enterprise;
+    }
+
+    public void setEnterprise(final EnterpriseDto enterprise)
+    {
+        this.enterprise = enterprise;
     }
 
 }

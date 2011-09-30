@@ -140,7 +140,9 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
         Integer Start = firstElem;
         if (totalResults < firstElem)
+        {
             Start = totalResults - numElem;
+        }
         // Get the list of elements
         finalQuery.setFirstResult(Start);
         finalQuery.setMaxResults(numElem);
@@ -165,7 +167,13 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "//and pm.idState != 7" // not HA_DISABLED
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and
+                                                                                               // pm.idState
+                                                                                               // !=
+                                                                                               // 7"
+                                                                                               // //
+                                                                                               // not
+                                                                                               // HA_DISABLED
             + " and pm.idDatacenter = :datacenterId and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     private static final String SUM_STORAGE_RESOURCES =
@@ -178,16 +186,18 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + "and vdc.idEnterprise = :enterpriseId";
 
     private static final String COUNT_IP_RESOURCES =
-        "select count(*) from ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc "
-            + " where ipm.dhcp_service_id=nc.dhcp_service_id and vn.network_configuration_id = nc.network_configuration_id and vn.network_id = dc.network_id and rm.idManagement = ipm.idManagement "
-            + " and ipm.mac is not null "
-            + " and rm.idVM is not null " /* reserved + use */
+        "select count(*) from ip_pool_management ipm, rasd_management rm, vlan_network vn, datacenter dc, virtualdatacenter vdc, enterprise_limits_by_datacenter el "
+            + " where ipm.vlan_network_id = vn.vlan_network_id "
+            + " and vn.network_id = dc.network_id "
+            + " and rm.idManagement = ipm.idManagement "
             + " and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
-            + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId";
+            + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId "
+            + " and el.idEnterprise = vdc.idEnterprise "
+            + " and el.idDataCenter = dc.idDataCenter " + " and vn.networktype = 'PUBLIC' ";
 
     private static final String COUNT_VLAN_RESOURCES =
-        "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el " +
-        "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId " +
-        "and vdc.idEnterprise = el.idEnterprise";
+        "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el "
+            + "where vn.network_id = vdc.networktypeId and el.idDatacenter = :datacenterId and el.idEnterprise = :enterpriseId "
+            + "and vdc.idEnterprise = el.idEnterprise";
 
 }

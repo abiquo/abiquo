@@ -21,9 +21,11 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -43,7 +45,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
     @Override
     public void assertAllPropertiesEqual(final VLANNetwork obj1, final VLANNetwork obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, VLANNetwork.ID_PROPERTY,
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, PersistentEntity.ID_PROPERTY,
             VLANNetwork.NAME_PROPERTY);
     }
 
@@ -62,7 +64,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
+        return new VLANNetwork(name, network, NetworkType.INTERNAL, configuration);
     }
 
     public VLANNetwork createInstance(final Network network, final RemoteService rsDHCP)
@@ -73,7 +75,7 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
+        return new VLANNetwork(name, network, NetworkType.INTERNAL, configuration);
     }
 
     public VLANNetwork createInstance(final Network network, final RemoteService rsDHCP,
@@ -86,14 +88,14 @@ public class VLANNetworkGenerator extends DefaultEntityGenerator<VLANNetwork>
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
                 VirtualDatacenter.NAME_LENGTH_MAX);
 
-        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
+        return new VLANNetwork(name, network, NetworkType.INTERNAL, configuration);
     }
 
     public VLANNetwork createInstance(final Network network, final String name)
     {
         NetworkConfiguration configuration = this.configuratorGenerator.createUniqueInstance();
 
-        return new VLANNetwork(name, network, Boolean.FALSE, configuration);
+        return new VLANNetwork(name, network, NetworkType.INTERNAL, configuration);
     }
 
     @Override

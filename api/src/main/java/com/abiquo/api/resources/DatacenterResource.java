@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -39,11 +40,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
-import com.abiquo.api.services.IpAddressService;
-import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
@@ -73,7 +74,7 @@ public class DatacenterResource extends AbstractResource
     DatacenterService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
 
     @Context
     UriInfo uriInfo;
@@ -103,7 +104,8 @@ public class DatacenterResource extends AbstractResource
     @Path(ENTERPRISES_PATH)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
-        @QueryParam(NETWORK) Boolean network, @QueryParam(LIMIT) @Min(0) final Integer limit,
+        @QueryParam(NETWORK) Boolean network,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {

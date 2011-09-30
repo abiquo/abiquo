@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="API network unit tests" verbose="1">
+    <listeners>
+        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
+    </listeners>
+    <test name="Network unit tests">
+        <groups>
+            <run>
+                <include name="test-network" />
+            </run>
+        </groups>
+        <packages>
+            <package name="com.abiquo.api.*" />
+        </packages>
+    </test>
+</suite>

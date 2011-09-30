@@ -34,8 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.PrivateNetworkService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -45,12 +46,14 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.common.Limit;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
@@ -76,7 +79,7 @@ public class VirtualDatacenterService extends DefaultApiService
     DatacenterLimitsDAO datacenterLimitsDao;
 
     @Autowired
-    PrivateNetworkService networkService;
+    NetworkService networkService;
 
     @Autowired
     SecurityService securityService;
@@ -95,7 +98,7 @@ public class VirtualDatacenterService extends DefaultApiService
         userService = new UserService(em);
         datacenterLimitsDao = new DatacenterLimitsDAO(em);
         securityService = new SecurityService();
-        networkService = new PrivateNetworkService(em);
+        networkService = new NetworkService(em);
     }
 
     public Collection<VirtualDatacenter> getVirtualDatacenters(final Enterprise enterprise,
@@ -113,10 +116,9 @@ public class VirtualDatacenterService extends DefaultApiService
         // && (user.getRole().getType() == Role.Type.USER && !StringUtils.isEmpty(user
         // .getAvailableVirtualDatacenters()));
         boolean findByUser =
-            user != null
-                && (!securityService.canManageOtherEnterprises()
-                    && !securityService.canManageOtherUsers() && !StringUtils.isEmpty(user
-                    .getAvailableVirtualDatacenters()));
+            user != null && !securityService.canManageOtherEnterprises()
+                && !securityService.canManageOtherUsers()
+                && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters());
 
         if (enterprise == null && user != null)
         {
@@ -141,13 +143,12 @@ public class VirtualDatacenterService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
             flushErrors();
         }
-        userService.checkCurrentEnterprise(vdc.getEnterprise());
         return vdc;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualDatacenter createVirtualDatacenter(final VirtualDatacenterDto dto,
-        final Datacenter datacenter, final Enterprise enterprise)
+        final Datacenter datacenter, final Enterprise enterprise) throws Exception
     {
         if (!isValidEnterpriseDatacenter(enterprise, datacenter))
         {
@@ -159,8 +160,22 @@ public class VirtualDatacenterService extends DefaultApiService
         VirtualDatacenter vdc = createVirtualDatacenter(dto, datacenter, enterprise, network);
 
         // set as default vlan (as it is the first one) and create it.
-        dto.getVlan().setDefaultNetwork(Boolean.TRUE);
-        networkService.createPrivateNetwork(vdc.getId(), dto.getVlan());
+        VLANNetwork vlan =
+            networkService.createPrivateNetwork(vdc.getId(),
+                PrivateNetworkResource.createPersistenceObject(dto.getVlan()));
+
+        // find the default vlan stablished by the enterprise-datacenter limits
+        DatacenterLimits dcLimits =
+            datacenterRepo.findDatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
+        if (dcLimits.getDefaultVlan() != null)
+        {
+            vdc.setDefaultVlan(dcLimits.getDefaultVlan());
+        }
+        else
+        {
+            vdc.setDefaultVlan(vlan);
+        }
+        repo.update(vdc);
 
         assignVirtualDatacenterToUser(vdc);
 
