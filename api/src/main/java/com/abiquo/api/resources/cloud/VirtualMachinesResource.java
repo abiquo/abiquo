@@ -21,6 +21,10 @@
 
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
+import static com.abiquo.api.util.URIResolver.buildPath;
+import static com.abiquo.api.util.URIResolver.resolveFromURI;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -29,17 +33,22 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.cloud.HypervisorService;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -63,9 +72,6 @@ public class VirtualMachinesResource extends AbstractResource
 
     @Autowired
     protected VirtualApplianceService vappService;
-
-    @Autowired
-    protected HypervisorService hypervisorService;
 
     @GET
     public VirtualMachinesDto getVirtualMachines(
@@ -182,21 +188,75 @@ public class VirtualMachinesResource extends AbstractResource
         final VirtualMachineDto virtualMachineDto, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
 
         VirtualMachine vm = createVirtualMachineFromDto(virtualMachineDto);
-        VirtualMachine virtualMachine = service.createVirtualMachine(vm);
+
+        Integer enterpriseId =
+            getLinkId(virtualMachineDto.searchLink(ENTERPRISE),
+                EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
+                ENTERPRISE, APIError.NON_EXISTENT_ENTERPRISE);
+
+        // TODO this depends on VirtualImage resource and is not done yet
+        Integer vImageId = 1;
+        // getLinkId(virtualMachineDto.searchLink("virtualimage"),
+        // EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
+        // ENTERPRISE, APIError.NON_EXISTENT_VIRTUAL_IMAGE);
+
+        VirtualMachine virtualMachine =
+            service.createVirtualMachine(vm, enterpriseId, vImageId, vdcId, vappId);
+
         VirtualMachineDto vappsDto =
-            createCloudTransferObject(virtualMachine, vapp.getVirtualDatacenter().getId(),
-                vapp.getId(), restBuilder);
+            createCloudTransferObject(virtualMachine, vdcId, vappId, restBuilder);
 
         return vappsDto;
     }
 
+    private Integer getVirtualImageId(final RESTLink searchLink)
+    {
+        // TODO Auto-generated method stub
+        return 1;
+    }
+
+    /**
+     * Creates a {@link VirtualMachine} out of the {@link VirtualMachineDto}.
+     * 
+     * @param virtualMachineDto
+     * @return
+     * @throws Exception VirtualMachine
+     */
     private VirtualMachine createVirtualMachineFromDto(final VirtualMachineDto virtualMachineDto)
         throws Exception
     {
         return ModelTransformer.persistenceFromTransport(VirtualMachine.class, virtualMachineDto);
 
+    }
+
+    /**
+     * Extracts an Id from the link with the given rel.
+     * 
+     * @param link where the id.
+     * @param path the resource.
+     * @param param the parameter.
+     * @param key the rel.
+     * @param error what do we output.
+     * @return Integer
+     */
+    private Integer getLinkId(final RESTLink link, final String path, final String param,
+        final String key, final APIError error)
+    {
+        if (link == null)
+        {
+            throw new NotFoundException(error);
+        }
+
+        String buildPath = buildPath(path, param);
+        MultivaluedMap<String, String> values = resolveFromURI(buildPath, link.getHref());
+
+        if (values == null || !values.containsKey(key))
+        {
+            throw new NotFoundException(error);
+        }
+
+        return Integer.valueOf(values.getFirst(key));
     }
 }

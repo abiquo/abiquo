@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -36,13 +37,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 
@@ -57,6 +63,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
     protected VirtualAppliance vapp;
 
+    protected VirtualImage vImage;
+
     @BeforeMethod
     public void setUp()
     {
@@ -64,6 +72,27 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         datacenter = datacenterGenerator.createUniqueInstance();
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
+        vImage = virtualImageGenerator.createInstance(ent);
+    }
+
+    @BeforeMethod
+    public void setupSysadmin()
+    {
+        Enterprise sysEnterprise = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstanceSysAdmin();
+        User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(sysEnterprise);
+        for (Privilege p : r.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(r);
+        entitiesToSetup.add(u);
+
+        setup(entitiesToSetup.toArray());
     }
 
     /**
@@ -171,6 +200,79 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Creates a virtual machine. Disabled until the VirtualImage resource is done
+     */
+    @Test(enabled = false)
+    public void createVirtualMachine()
+    {
+        setup(ent, datacenter, vdc, vapp);
+        setup(vImage);
+
+        VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+    }
+
+    /**
+     * Creates a virtual machine.Disabled until the VirtualImage resource is done
+     */
+    @Test(enabled = false)
+    public void createVirtualMachine404InvalidDatacenterId()
+    {
+        setup(ent, datacenter, vdc, vapp);
+
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        ClientResponse response =
+            post(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()), dto, "sysadmin",
+                "sysadmin");
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Creates a virtual machine.Disabled until the VirtualImage resource is done
+     */
+    @Test(enabled = false)
+    public void createVirtualMachine404InvalidVapp()
+    {
+        setup(ent, datacenter, vdc, vapp);
+
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()), dto, "sysadmin",
+                "sysadmin");
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+    }
+
+    private VirtualMachineDto fromVirtualMachineToDto(final VirtualMachine vm)
+    {
+        VirtualMachineDto dto = new VirtualMachineDto();
+        dto.setCpu(vm.getCpu());
+        dto.setDescription(vm.getDescription());
+        dto.setHd(vm.getHdInBytes());
+        dto.setHighDisponibility(vm.getHighDisponibility());
+        dto.setName(vm.getName());
+
+        dto.setIdType(vm.getIdType());
+        dto.setPassword(vm.getPassword());
+        dto.setRam(vm.getRam());
+        dto.setVdrpIP(vm.getVdrpIP());
+        dto.setVdrpPort(vm.getVdrpPort());
+        RESTLink enterpriseLink =
+            new RESTLink("enterprise", resolveEnterpriseURI(vm.getEnterprise().getId()));
+        dto.addLink(enterpriseLink);
+
+        RESTLink vImageLink =
+            new RESTLink("virtualimage", resolveEnterpriseURI(vm.getVirtualImage().getId()));
+        dto.addLink(vImageLink);
+
+        return dto;
     }
 
 }

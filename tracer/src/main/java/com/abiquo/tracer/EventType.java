@@ -58,7 +58,9 @@ public enum EventType implements Serializable
         "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
         "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
         "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(224, "VAPP_BUNDLE",
-        "Virtual Appliance bundle started"),
+        "Virtual Appliance bundle started"), VM_CREATE(225, "VM_CREATE", "Created Virtual Machine"), VM_DELETE(
+        226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
+        "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",

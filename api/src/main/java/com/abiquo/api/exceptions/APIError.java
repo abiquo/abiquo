@@ -137,12 +137,14 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_IQN_MISSING(
+        "MACHINE-8", "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"), HYPERVISOR_TYPE_MISSING(
+        "HYPERVISOR-3", "The Hypervisor technology of the target Hypervisor is not set."),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -160,7 +162,11 @@ public enum APIError
         "VM-5", "The virtual machine cannot change the state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
         "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_INVALID_STATE(
         "VM-7", "The allowed power states for Virtual Machines are POWERED_OFF and RUNNING"), VIRTUAL_MACHINE_INVALID_STATE_DELETE(
-        "VM-7", "The allowed power states for Virtual Machines are UNKNOWN and NOT_DEPLOYED"),
+        "VM-7", "The allowed power states for Virtual Machines are UNKNOWN and NOT_DEPLOYED"), NON_EXISTENT_VIRTUAL_IMAGE(
+        "VM-8", "The requested Virtual Image does not exists"), VIRTUAL_MACHINE_EDIT_STATE("VM-9",
+        "The Virtual Machine is in a state that does not allow the request, therefore can't be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
+        "VM-10",
+        "The Virtual Machine is not allocated. Therefore the change of the state cannot be applied"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -317,7 +323,8 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume"),
+        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-19",
+        "Could not get the Storage Manager remote service"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

@@ -30,7 +30,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaVirtualImageDAO")
+@Repository("jpaVirtualImageConversionDAO")
 public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualImageConversion>
 {
     public VirtualImageConversionDAO()

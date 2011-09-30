@@ -56,6 +56,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.AllocatorAction;
@@ -73,7 +74,9 @@ import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.tracer.Constants;
@@ -773,15 +776,23 @@ public class VirtualMachineResourceIT extends TestPopulate
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
 
+        Datastore datastore = datastoreGenerator.createInstance(machine);
+
+        vm.setDatastore(datastore);
+
         // Asociate it to the created virtual appliance
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
+        RemoteService rs =
+            remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY, datacenter);
 
-        entitiesToSetup.add(ent);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(rs);
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);
+        entitiesToSetup.add(datastore);
 
         for (Privilege p : vm.getUser().getRole().getPrivileges())
         {
@@ -867,7 +878,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
-
         // Asociate it to the created virtual appliance
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 

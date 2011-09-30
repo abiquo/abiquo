@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.springframework.stereotype.Repository;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -47,7 +46,6 @@ import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-@Repository("jpaVirtualImageDAO")
 public class VirtualImageConversionDAOTest extends
     DefaultDAOTestBase<VirtualImageConversionDAO, VirtualImageConversion>
 {

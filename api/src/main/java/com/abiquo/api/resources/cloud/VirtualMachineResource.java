@@ -47,6 +47,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -67,6 +68,8 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
 
     public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
+
+    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
 
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
@@ -184,7 +187,6 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-
         service.deallocateVirtualMachine(virtualMachineId);
     }
 
@@ -271,13 +273,7 @@ public class VirtualMachineResource extends AbstractResource
         throws Exception
     {
         State newState = validateState(state);
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-
-        if (!vmService.sameState(vm, newState))
-        {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, newState);
-        }
+        vmService.changeVirtualMachineState(vmId, vappId, vdcId, newState);
     }
 
     /**
@@ -299,7 +295,7 @@ public class VirtualMachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+
         VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
         stateDto.setPower(vm.getState().name());
         return stateDto;
@@ -401,9 +397,75 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+        vmService.deleteVirtualMachine(vmId, vappId, vdcId);
+    }
 
-        vmService.deleteVirtualMachine(vm);
+    /**
+     * Deploys a {@link VirtualMachine}. This involves some steps. <br>
+     * <ul>
+     * <li>Select a machine to allocate the virtual machine</li>
+     * <li>Check limits</li>
+     * <li>Check resources</li>
+     * <li>Check remote services</li>
+     * <li>In premium call initiator</li>
+     * <li>Subscribe to VSM</li>
+     * <li>Build the Task DTO</li>
+     * <li>Enqueue in tarantino</li>
+     * <li>Register in redis</li>
+     * <li>Add Task DTO to rabbitmq</li>
+     * <li>Enable the resource <code>Progress<code></li>
+     * </ul>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @param forceSoftLimits dto of options
+     * @throws Exception
+     */
+    @POST
+    @Path("action/deploy")
+    public void deployVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        vmService.deployVirtualMachine(vmId, vappId, vdcId,
+            forceSoftLimits.isForeceEnterpriseSoftLimits());
+    }
+
+    /**
+     * Deploys a {@link VirtualMachine}. This involves some steps. <br>
+     * <ul>
+     * <li>Select a machine to allocate the virtual machine</li>
+     * <li>Check limits</li>
+     * <li>Check resources</li>
+     * <li>Check remote services</li>
+     * <li>In premium call initiator</li>
+     * <li>Subscribe to VSM</li>
+     * <li>Build the Task DTO</li>
+     * <li>Enqueue in tarantino</li>
+     * <li>Register in redis</li>
+     * <li>Add Task DTO to rabbitmq</li>
+     * <li>Enable the resource <code>Progress<code></li>
+     * </ul>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @POST
+    @Path("action/deploy")
+    public void deployVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
     }
 }

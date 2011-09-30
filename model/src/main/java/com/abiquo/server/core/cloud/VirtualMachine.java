@@ -67,7 +67,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public static final int NOT_MANAGED = 0;
 
-    protected VirtualMachine()
+    public VirtualMachine()
     {
     }
 
@@ -493,7 +493,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }

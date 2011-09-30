@@ -614,15 +614,17 @@ public class RESTBuilder implements IRESTBuilder
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON, "power on", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON, "poweron", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF, "power off", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF, "poweroff", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME, "resume", params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE, "state", params));
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY, "deploy", params));
 
         return links;
     }

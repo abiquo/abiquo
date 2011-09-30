@@ -45,6 +45,9 @@ public class VirtualMachineRep extends DefaultRepBase
     @Autowired
     private RasdManagementDAO rasdDao;
 
+    @Autowired
+    private VirtualImageDAO imageDao;
+
     public VirtualMachineRep()
     {
 
@@ -58,6 +61,7 @@ public class VirtualMachineRep extends DefaultRepBase
         this.entityManager = entityManager;
 
         this.dao = new VirtualMachineDAO(entityManager);
+        imageDao = new VirtualImageDAO(entityManager);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -139,5 +143,17 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         this.dao.persist(virtualMachine);
         return virtualMachine;
+    }
+
+    /**
+     * Retrieve a {@link VirtualImage}.
+     * 
+     * @param virtualImage id.
+     * @return
+     */
+    public VirtualImage getVirtualImage(final Integer id)
+    {
+
+        return this.imageDao.findById(id);
     }
 }

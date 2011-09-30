@@ -26,7 +26,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,15 +38,20 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -55,6 +63,9 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -72,7 +83,7 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    protected InfrastructureService infrastructureService;
 
     @Autowired
     protected OVFGeneratorService ovfService;
@@ -81,7 +92,22 @@ public class VirtualMachineService extends DefaultApiService
     UserService userService;
 
     @Autowired
+    protected EnterpriseService enterpriseService;
+
+    @Autowired
     protected VirtualMachineAllocatorService vmAllocatorService;
+
+    @Autowired
+    protected NodeVirtualImageDAO nodeVirtualImageDAO;
+
+    @Autowired
+    protected VirtualDatacenterService vdcService;
+
+    @Autowired
+    protected MachineService machineService;
+
+    /** The logger object **/
+    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
     public VirtualMachineService()
     {
@@ -94,6 +120,7 @@ public class VirtualMachineService extends DefaultApiService
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
         this.infrastructureService = new InfrastructureService(em);
+        vdcService = new VirtualDatacenterService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -138,9 +165,18 @@ public class VirtualMachineService extends DefaultApiService
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
+            logger.error("Error retrieving the virtual machine: {} does not exist", vmId);
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
             flushErrors();
         }
+        logger.debug("virtual machine {} found", vmId);
+        return vm;
+    }
+
+    public VirtualMachine getVirtualMachine(final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+
         return vm;
     }
 
@@ -149,7 +185,12 @@ public class VirtualMachineService extends DefaultApiService
         final Integer vmId, final VirtualMachineDto dto)
     {
         VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
+        return updateVirtualMachineFromDto(dto, old);
+    }
 
+    private VirtualMachine updateVirtualMachineFromDto(final VirtualMachineDto dto,
+        final VirtualMachine old)
+    {
         old.setName(dto.getName());
         old.setDescription(dto.getDescription());
         old.setCpu(dto.getCpu());
@@ -157,7 +198,7 @@ public class VirtualMachineService extends DefaultApiService
         old.setHdInBytes(dto.getHd());
         old.setHighDisponibility(dto.getHighDisponibility());
 
-        if (dto.getPassword() != null && !dto.getPassword().equals(""))
+        if (StringUtils.isNotBlank(old.getPassword()))
         {
             old.setPassword(dto.getPassword());
         }
@@ -165,9 +206,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             old.setPassword(null);
         }
-
         updateVirtualMachine(old);
-
         return old;
     }
 
@@ -251,6 +290,19 @@ public class VirtualMachineService extends DefaultApiService
         final Integer vdcId, final State state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
+        // the if(!hypervisor)
+        if (State.NOT_ALLOCATED.equals(vm.getState()))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
+            flushErrors();
+        }
+        if (sameState(vm, state))
+        {
+            // The state is the same, we warn the user and do nothing
+            return;
+        }
         // TODO revisar
         checkPauseAllowed(vm, state);
 
@@ -362,8 +414,15 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine to delete. void
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteVirtualMachine(final VirtualMachine virtualMachine)
+    public void deleteVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId)
     {
+        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // those VirtualAppliance and VirtualDatacenter
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        // The user must have the proper permission
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+
         if (!virtualMachine.getState().equals(State.NOT_DEPLOYED)
             && !virtualMachine.getState().equals(State.UNKNOWN))
         {
@@ -379,14 +438,76 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine to create. void
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine)
+    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine,
+        final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
+        final Integer vappId)
     {
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
+
+        // We need the VirtualImage
+        VirtualImage virtualImage = repo.getVirtualImage(vImageId);
+        virtualMachine.setVirtualImage(virtualImage);
+
+        // We need the Enterprise
+        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
+        virtualMachine.setEnterprise(enterprise);
 
         // We check for a suitable conversion (PREMIUM)
         attachVirtualImageConversion(virtualMachine.getVirtualImage(), virtualMachine);
 
+        // The entity that defines the relation between a virtual machine, virtual applicance and
+        // virtual image is VirtualImageNode
+        createNodeVirtualImage(virtualMachine, virtualAppliance);
+
+        // At this stage the virtual machine is not associated with any hypervisor
+        virtualMachine.setState(State.NOT_ALLOCATED);
+
+        // TODO update the virtual appliance according to the rules. As the virtual appliance state
+        // is the sum (pondered) of the states of its virtual machines
+
         return repo.createVirtualMachine(virtualMachine);
+    }
+
+    /**
+     * Check if the current request is ok. Checks if the {@link VirtualAppliance} belongs to the
+     * {@link VirtualMachine} and if the user has the appropiate grant.<br>
+     * <br>
+     * Throws <b>all</b> the exceptions.
+     * 
+     * @param virtualMachine virtual machine.
+     * @param vdcId virtual datacenter.
+     * @param vappId virtuap appliance.
+     * @return VirtualAppliance
+     */
+    private VirtualAppliance checkVdcVappAndPrivilege(final VirtualMachine virtualMachine,
+        final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        return virtualAppliance;
+    }
+
+    /**
+     * Creates the {@link NodeVirtualImage} that is the relation of {@link VirtualMachine}
+     * {@link VirtualAppliance} and {@link VirtualImage}.
+     * 
+     * @param virtualMachine virtual machine to be associated with the virtual appliance. It must
+     *            contain the virtual image.
+     * @param virtualAppliance void where the virtual machine exists.
+     */
+    private void createNodeVirtualImage(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance)
+    {
+        logger.debug("Create node virtual image with name virtual machine: {}"
+            + virtualMachine.getName());
+        NodeVirtualImage nodeVirtualImage =
+            new NodeVirtualImage(virtualMachine.getName(),
+                virtualAppliance,
+                virtualMachine.getVirtualImage(),
+                virtualMachine);
+        nodeVirtualImageDAO.persist(nodeVirtualImage);
+        logger.debug("Node virtual image created!");
     }
 
     /**
@@ -401,5 +522,163 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
+        logger.debug("attachVirtualImageConversion community edition");
+    }
+
+    /**
+     * Deploys a {@link VirtualMachine}. This involves some steps. <br>
+     * <ol>
+     * <li>Select a machine to allocate the virtual machine</li>
+     * <li>Check limits</li>
+     * <li>Check resources</li>
+     * <li>Check remote services</li>
+     * <li>In premium call initiator</li>
+     * <li>Subscribe to VSM</li>
+     * <li>Build the Task DTO</li>
+     * <li>Enqueue in tarantino</li>
+     * <li>Register in redis</li>
+     * <li>Add Task DTO to rabbitmq</li>
+     * <li>Enable the resource <code>Progress<code></li>
+     * </ol>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deployVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId,
+        final Boolean foreceEnterpriseSoftLimits)
+    {
+        logger.debug("Starting the deploy of the virtual machine {}", vmId);
+        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // those VirtualAppliance and VirtualDatacenter
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        logger.debug("Check for permissions");
+        // The user must have the proper permission
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        logger.debug("Permission granted");
+
+        logger
+            .debug("Checking the virtual machine state. It must be in either NOT_ALLOCATED or NOT_DEPLOYED");
+        // If the machine is already allocated we did compute its resources consume before, now
+        // we've been doubling it
+        checkVirtualMachineStateAllowsDeploy(virtualMachine);
+        logger.debug("The state is valid for deploy");
+
+        logger
+            .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
+        /*
+         * Select a machine to allocate the virtual machine, Check limits, Check resources If one of
+         * the above fail we cannot allocate the VirtualMachine
+         */
+        vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
+        logger.debug("Allocated!");
+
+        logger.debug("Check remote services");
+        // The remote services must be up for this Datacenter if we are to deploy
+        checkRemoteServicesByVirtualDatacenter(vdcId);
+        logger.debug("Remote services are ok!");
+
+        logger.debug("Mapping the external volumes");
+        // We need to map all attached volumes if any
+        initiatorMappings(virtualMachine);
+        logger.debug("Mapping done!");
+
+        logger.debug("Registering the machine VSM");
+        // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
+        machineService.getVsm().monitor(virtualMachine.getHypervisor().getIpService(),
+            virtualMachine.getHypervisor().getIp(), virtualMachine.getHypervisor().getPort(),
+            virtualMachine.getHypervisor().getType().name(),
+            virtualMachine.getHypervisor().getUser(), virtualMachine.getHypervisor().getPassword());
+        logger.debug("Machine registered!");
+    }
+
+    /**
+     * Checks the {@link RemoteService} of the {@link VirtualDatacenter} and logs if any error.
+     * 
+     * @param vdcId void
+     */
+    private void checkRemoteServicesByVirtualDatacenter(final Integer vdcId)
+    {
+        logger.debug("Checking remote services for virtual datacenter {}", vdcId);
+        VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        ErrorsDto rsErrors =
+            infrastructureService.checkRemoteServiceStatusByDatacenter(virtualDatacenter
+                .getDatacenter().getId());
+        if (!rsErrors.isEmpty())
+        {
+            logger.error("Some errors found while cheking remote services");
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+            // For the Admin to know all errors
+            traceAdminErrors(rsErrors, SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "The Remote Service is down or not configured", true);
+
+            // There is no point in continue
+            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        logger.debug("Remote services Ok!");
+    }
+
+    /**
+     * The {@link State} allowed for deploy are: <br>
+     * <ul>
+     * <li>NOT_ALLOCATED</li>
+     * <li>NOT_DEPLOYED</li>
+     * </ul>
+     * 
+     * @param virtualMachine with a state void
+     */
+    private void checkVirtualMachineStateAllowsDeploy(final VirtualMachine virtualMachine)
+    {
+        if (!State.NOT_ALLOCATED.equals(virtualMachine.getState())
+            && !State.NOT_DEPLOYED.equals(virtualMachine.getState()))
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                APIError.VIRTUAL_MACHINE_INVALID_STATE.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "The Virtual Machine is already deployed or Allocated.");
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE);
+            flushErrors();
+        }
+        logger.debug("The virtual machine is in state {}" + virtualMachine.getState().name());
+    }
+
+    /**
+     * Properly documented in Premium.
+     * 
+     * @param virtualMachine void
+     */
+    protected void initiatorMappings(final VirtualMachine virtualMachine)
+    {
+        // PREMIUM
+        logger.debug("initiatorMappings community edition");
+    }
+
+    /**
+     * /** Trace the Errors from a {@link ErrorsDto} to promote encapsulation.
+     * 
+     * @param rsErrors void
+     * @param severityType severity.
+     * @param componentType component.
+     * @param eventType type.
+     * @param msg message.
+     * @param appendExceptionMsg should we append the exception message? the format would be
+     *            <code>: error message</code> void
+     */
+    private void traceAdminErrors(final ErrorsDto rsErrors, final SeverityType severityType,
+        final ComponentType componentType, final EventType eventType, final String msg,
+        final boolean appendExceptionMsg)
+    {
+        for (ErrorDto e : rsErrors.getCollection())
+        {
+            tracer.systemLog(severityType, componentType, eventType, msg
+                + (appendExceptionMsg ? ": " + e.getMessage() : ""));
+        }
     }
 }
