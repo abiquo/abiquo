@@ -326,7 +326,11 @@ public enum APIError
         "RULE-6", "The load balance type indicated is null or invalid"),
 
     // APPROVAL
-    NON_EXISTENT_APPM("APPROVAL-1", "The requested approval manager does not exist")
+    NON_EXISTENT_APPM("APPROVAL-1", "The requested approval manager does not exist"), NON_EXISTENT_APPROVAL(
+        "APPROVAL-2", "The approval request does not exist"), APPROVAL_DETELE_ERROR("APPROVAL-3",
+        "An unexpected error occured and the approval request could not be deleted"), APPROVAL_UPDATE_ERROR(
+        "APPROVAL-4", "An unexpected error occured and the approval request could not be updated"), APPROVAL_CREATE_ERROR(
+        "APPROVAL-5", "An unexpected error occured and the approval request could not be created")
 
     ;
 

@@ -55,6 +55,17 @@ public class ApprovalRep extends DefaultRepBase
         approvalDAO.flush();
     }
 
+    public void updateApproval(final Approval approval)
+    {
+        approvalDAO.flush();
+    }
+
+    public void removeApproval(final Approval approval)
+    {
+        approvalDAO.remove(approval);
+        approvalDAO.flush();
+    }
+
     public List<ApprovalManager> findAllApprovalManager()
     {
         List<ApprovalManager> appmList = approvalManagerDAO.findAll();

@@ -91,7 +91,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     UserService userService;
-    
+
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
@@ -105,8 +105,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-    	this.vdcService = new VirtualDatacenterService(em);
-    	this.infrastructureService = new InfrastructureService(em);
+        this.vdcService = new VirtualDatacenterService(em);
+        this.infrastructureService = new InfrastructureService(em);
     }
 
     /**
@@ -121,7 +121,7 @@ public class VirtualApplianceService extends DefaultApiService
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
     }
 
-    public VirtualAppliance getVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
     }
@@ -258,6 +258,16 @@ public class VirtualApplianceService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         vapp.setName(dto.getName());
+
+        repo.updateVirtualAppliance(vapp);
+
+        return vapp;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualAppliance updateVirtualAppliance(final VirtualAppliance vapp)
+    {
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         repo.updateVirtualAppliance(vapp);
 

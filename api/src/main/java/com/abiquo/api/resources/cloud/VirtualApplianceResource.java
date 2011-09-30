@@ -75,22 +75,22 @@ public class VirtualApplianceResource
      */
     @GET
     public VirtualApplianceDto getVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
         return createTransferObject(vapp, restBuilder);
     }
-    
+
     @PUT
     public VirtualApplianceDto updateVirtualAppliance(
-		@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        VirtualApplianceDto dto, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualApplianceDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-    	VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
+        VirtualAppliance vapp = service.updateVirtualAppliance(vdcId, vappId, dto);
 
         return createTransferObject(vapp, restBuilder);
     }
@@ -98,9 +98,9 @@ public class VirtualApplianceResource
     @GET
     @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
@@ -123,12 +123,12 @@ public class VirtualApplianceResource
      * @return the result Dto object
      * @throws Exception
      */
-    public static VirtualApplianceDto createTransferObject(VirtualAppliance vapp,
-        IRESTBuilder builder) throws Exception
+    public static VirtualApplianceDto createTransferObject(final VirtualAppliance vapp,
+        final IRESTBuilder builder) throws Exception
     {
         VirtualApplianceDto dto =
             ModelTransformer.transportFromPersistence(VirtualApplianceDto.class, vapp);
-        
+
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());
@@ -136,8 +136,8 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private static VirtualApplianceDto addLinks(IRESTBuilder builder, VirtualApplianceDto dto,
-        Integer vdcId, Integer enterpriseId)
+    private static VirtualApplianceDto addLinks(final IRESTBuilder builder,
+        final VirtualApplianceDto dto, final Integer vdcId, final Integer enterpriseId)
     {
         dto.setLinks(builder.buildVirtualApplianceLinks(dto, vdcId, enterpriseId));
 
@@ -151,8 +151,10 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void addImage(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId, VirtualImageDto image)
+    public void addImage(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualImageDto image)
     {
 
     }
@@ -164,8 +166,9 @@ public class VirtualApplianceResource
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
-    public void deploy(@PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) Integer vappId)
+    public void deploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
     {
         service.startVirtualAppliance(vdcId, vappId);
     }
