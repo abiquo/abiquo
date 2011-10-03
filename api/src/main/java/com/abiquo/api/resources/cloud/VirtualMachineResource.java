@@ -71,6 +71,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
 
+    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
+
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
@@ -461,6 +463,36 @@ public class VirtualMachineResource extends AbstractResource
     @POST
     @Path("action/deploy")
     public void deployVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+    }
+
+    /**
+     * Undeploys a {@link VirtualMachine}. This involves some steps. <br>
+     * <ul>
+     * <li>Deallocate the virtual machine</li>
+     * <li>Delete the relations to the {@link Hypervisor}, {@link Datastore}</li>
+     * <li>Set to NOT_DEPLOYED</li>
+     * <li>Unsuscribe to VSM</li>
+     * <li>Enqueue in tarantino</li>
+     * <li>Register in redis</li>
+     * <li>Add Task DTO to rabbitmq</li>
+     * <li>Enable the resource <code>Progress<code></li>
+     * </ul>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @throws Exception
+     */
+    @POST
+    @Path("action/undeploy")
+    public void undeployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,

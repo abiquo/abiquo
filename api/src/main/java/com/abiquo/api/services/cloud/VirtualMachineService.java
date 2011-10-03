@@ -681,4 +681,65 @@ public class VirtualMachineService extends DefaultApiService
                 + (appendExceptionMsg ? ": " + e.getMessage() : ""));
         }
     }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void undeployVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
+    {
+        logger.debug("Starting the undeploy of the virtual machine {}", vmId);
+        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // those VirtualAppliance and VirtualDatacenter
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        logger.debug("Check for permissions");
+        // The user must have the proper permission
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        logger.debug("Permission granted");
+
+        logger.debug("The virtual machine state to NOT_DEPLOYED");
+        virtualMachine.setState(State.NOT_DEPLOYED);
+        // Hypervisor == null in order to delete the relation between
+        // virtualMachine
+        // and physicalMachine
+        Hypervisor hyper = virtualMachine.getHypervisor();
+        virtualMachine.setHypervisor(null);
+        // Datastore == null in order to delete the relation virtualmachine
+        // datastore
+        virtualMachine.setDatastore(null);
+        logger.debug("The state is valid  undeploy");
+
+        logger.debug("Deallocating");
+        /*
+         * Free the resources and recalculate.
+         */
+        vmAllocatorService.deallocateVirtualMachine(vmId);
+        logger.debug("Deallocated!");
+
+        logger.debug("Check remote services");
+        // The remote services must be up for this Datacenter if we are to deploy
+        checkRemoteServicesByVirtualDatacenter(vdcId);
+        logger.debug("Remote services are ok!");
+
+        logger.debug("Detaching the external volumes");
+        // We need to de attached volumes if any
+        detachVolumes(virtualMachine);
+        logger.debug("Detach done!");
+
+        logger.debug("Registering the machine VSM");
+        // We don't need the messages from the hypervisors we need to unsubscribe to VSM
+        machineService.getVsm().shutdownMonitor(hyper.getIpService(), hyper.getIp(),
+            hyper.getPort());
+        logger.debug("Machine registered!");
+    }
+
+    /**
+     * Properly documented in Premium.
+     * 
+     * @param virtualMachine void
+     */
+    protected void detachVolumes(final VirtualMachine virtualMachine)
+    {
+        // PREMIUM
+        logger.debug("detachVolumes community edition");
+    }
 }
