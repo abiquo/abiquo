@@ -137,7 +137,7 @@ public enum APIError
         "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
         "VLAN-27",
         "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
-            + "configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+            + "its VLAN configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
         "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
