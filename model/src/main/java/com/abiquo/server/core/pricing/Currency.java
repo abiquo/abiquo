@@ -79,7 +79,7 @@ public class Currency extends DefaultEntityBase
 
     private final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    public final static int NAME_LENGTH_MAX = 20;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -107,7 +107,7 @@ public class Currency extends DefaultEntityBase
 
     private final static int SYMBOL_LENGTH_MIN = 0;
 
-    private final static int SYMBOL_LENGTH_MAX = 255;
+    public final static int SYMBOL_LENGTH_MAX = 10;
 
     private final static boolean SYMBOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -134,6 +134,8 @@ public class Currency extends DefaultEntityBase
     private final static boolean DIGITS_REQUIRED = true;
 
     private final static String DIGITS_COLUMN = "digits";
+
+    public final static int DIGITS_MAX = 9;
 
     @Column(name = DIGITS_COLUMN, nullable = !DIGITS_REQUIRED)
     private int digits;

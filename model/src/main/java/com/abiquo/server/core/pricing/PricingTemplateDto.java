@@ -41,8 +41,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
     }
 
     public PricingTemplateDto(final String name, final BigDecimal hdGb,
-        final BigDecimal standingChargePeriod, final BigDecimal vlan,
-        final boolean showMinimumCharge, final Integer chargingPeriod,
+        final BigDecimal standingChargePeriod, final BigDecimal vlan, final Integer chargingPeriod,
         final BigDecimal minimumChargePeriod, final boolean showChangesBefore,
         final Integer minimumCharge, final BigDecimal publicIp, final BigDecimal vCpu,
         final BigDecimal memoryMB, final boolean defaultTemplate, final String description)
@@ -51,7 +50,6 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.hdGB = hdGb;
         this.standingChargePeriod = standingChargePeriod;
         this.vlan = vlan;
-        this.showMinimumCharge = showMinimumCharge;
         this.chargingPeriod = chargingPeriod;
         this.minimumChargePeriod = minimumChargePeriod;
         this.showChangesBefore = showChangesBefore;
