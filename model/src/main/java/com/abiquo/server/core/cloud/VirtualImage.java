@@ -47,6 +47,12 @@ import com.abiquo.server.core.infrastructure.Repository;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
+/**
+ * TODO icon and category
+ */
+/**
+ * TODO master
+ * */
 @Entity
 @Table(name = VirtualImage.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualImage.TABLE_NAME)
@@ -397,7 +403,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.idMaster;
     }
 
-    private void setIdMaster(Integer idMaster)
+    public void setIdMaster(Integer idMaster)
     {
         this.idMaster = idMaster;
     }
@@ -492,7 +498,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(String description)
+    public void setDescription(String description)
     {
         this.description = description;
     }

@@ -269,6 +269,14 @@ public enum APIError
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_OVF_PACKAGE_LIST(
         "OVF-PACKAGE-1", "The requested OVF package list does not exist"),
 
+    // VIRTUAL IMAGE
+    VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
+        "Virtual image can not be added due invalid allocation units"), VIMAGE_SYNCH_DC_REPO(
+        "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Can't obtain downloaded OVF in the datacenter."), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
+        "DATACENTER-REPOSITORY-NOT-CREATED",
+        "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VIMAGE_REPOSITORY_CHANGED(
+        "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
+        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"),
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
         "Missing query parameter ip"), NC_BAD_CREDENTIALS_TO_RACK("NC-2",

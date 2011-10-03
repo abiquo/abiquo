@@ -634,6 +634,12 @@ public class InfrastructureRep extends DefaultRepBase
         return repositoryDao.findByDatacenter(datacenter);
     }
 
+    public com.abiquo.server.core.infrastructure.Repository findRepositoryByLocation(
+        final String location)
+    {
+        return repositoryDao.findByRepositoryLocation(location);
+    }
+
     public boolean existDeployedVirtualMachines(final Datacenter datacenter)
     {
         assert datacenter != null;

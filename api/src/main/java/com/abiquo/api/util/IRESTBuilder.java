@@ -101,6 +101,13 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
         final VLANNetwork network);
+    
+    public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer repoId);
+    
+    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer vimageId);
+    
 
     /*
      * Premium methods

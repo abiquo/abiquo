@@ -242,4 +242,15 @@ public class OVFPackageConventions
 
         return fileURL;
     }
+    
+    
+
+    /**
+     * Creates the OVFPackageInstance downloadlink from the path parameter (not include URL protocol
+     * in order to avoid URLEncoding)
+     */
+    public static String ovfUrl(final String ovfIn)
+    {
+        return "http://" + ovfIn; // XXX only http supported
+    }
 }

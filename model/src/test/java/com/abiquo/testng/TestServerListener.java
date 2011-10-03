@@ -37,15 +37,15 @@ import org.testng.ISuiteListener;
  */
 public class TestServerListener implements ISuiteListener
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestServerListener.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TestServerListener.class);
 
-    private static final String WEBAPP_DIR = "webapp.dir";
+    protected static final String WEBAPP_DIR = "webapp.dir";
 
-    private static final String WEBAPP_CONTEXT = "webapp.context";
+    protected static final String WEBAPP_CONTEXT = "webapp.context";
 
-    private static final String WEBAPP_PORT = "webapp.port";
+    protected static final String WEBAPP_PORT = "webapp.port";
 
-    private Server server;
+    protected Server server;
 
     @Override
     public void onStart(final ISuite suite)

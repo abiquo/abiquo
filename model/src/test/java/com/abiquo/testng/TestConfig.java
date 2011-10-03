@@ -41,6 +41,9 @@ public class TestConfig
     /** TestNG group for networking integration tests. */
     public static final String NETWORK_INTEGRATION_TESTS = "it-network";
 
+    /** TestNG group for appliance library tests. */
+    public static final String AM_INTEGRATION_TESTS = "it-am";
+
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";
 

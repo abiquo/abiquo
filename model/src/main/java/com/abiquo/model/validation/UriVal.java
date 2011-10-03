@@ -37,10 +37,10 @@ import javax.validation.Payload;
 
 
 @Documented
-@Constraint(validatedBy = Uri.Validator.class)
+@Constraint(validatedBy = UriVal.Validator.class)
 @Target( {METHOD, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Uri
+public @interface UriVal
 {
     boolean required() default true;
 
@@ -52,10 +52,10 @@ public @interface Uri
     
     static Pattern pattern = Pattern.compile("^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$", Pattern.CASE_INSENSITIVE);
 
-    static class Validator implements ConstraintValidator<Uri, String>
+    static class Validator implements ConstraintValidator<UriVal, String>
     {
         @Override
-        public void initialize(Uri constraintAnnotation)
+        public void initialize(UriVal constraintAnnotation)
         {            
         }
 

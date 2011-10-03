@@ -57,10 +57,13 @@
                 <ref bean="virtualMachineResource" />
                 <ref bean="virtualMachineNetworkConfigurationResource" />
                 <!-- AM as REST Resource -->
-                <ref bean="AMResource" />
-                <ref bean="enterpriseRepositoryResource" />
-                <ref bean="OVFPackageInstancesResource" />
-                <ref bean="OVFPackageInstanceResource" />
+
+                <ref bean="datacenterRepositoryResource" />
+                <ref bean="datacenterRepositoriesResource" />
+                <ref bean="virtualImageResource" />
+                <ref bean="virtualImagesResource" />
+                
+                
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->

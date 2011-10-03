@@ -21,21 +21,13 @@
 
 package com.abiquo.appliancemanager.client;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-import javax.ws.rs.WebApplicationException;
-
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.uri.UriEncoder;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.appliancemanager.util.URIResolver;
@@ -47,6 +39,10 @@ public class ApplianceManagerResourceStub
     private RestClient clientTimeout;
 
     private final String serviceUri;
+
+    private final static String REPOSITORY_PATH = "erepo";
+
+    private final static String OVFPACKAGEINSTANCE_PATH = "ovf";
 
     /**
      * Timeout only of ''slow nfs filesystem access'' (getting the repository usage or refresh the
@@ -66,26 +62,20 @@ public class ApplianceManagerResourceStub
         this.clientTimeout = new RestClient(confTimeout);
     }
 
-    Resource ovfPackage(final String idEnterprise, final String idOVF)
+    Resource ovfPackage(final String idEnterprise, String ovfid)
     {
-        Map<String, String> params;
-        try
+
+        if (ovfid.startsWith("http://"))
         {
-            params = new HashMap<String, String>()
-            {
-                {
-                    // FIXME ABICLOUDPREMIUM-1798
-                    put("erepo", idEnterprise);
-                    put("ovfpi", URLEncoder.encode(idOVF, "UTF-8"));
-                }
-            };
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new RuntimeException("Can not encode", e);
+            ovfid = ovfid.substring("http://".length());
         }
 
-        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovfpi}", params);
+        Map<String, String> params;
+        params = new HashMap<String, String>();
+        params.put(REPOSITORY_PATH, idEnterprise);
+        params.put(OVFPACKAGEINSTANCE_PATH, ovfid);
+
+        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovf}", params);
 
         Resource resource = client.resource(url);
 

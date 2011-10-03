@@ -46,10 +46,13 @@ import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -648,6 +651,64 @@ public class RESTBuilder implements IRESTBuilder
         links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId));
 
         return links;
+    }
+
+    public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer repoId)
+    {
+
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> paramsDc = new HashMap<String, String>();
+        paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
+
+        links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
+            paramsDc));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+
+        params.put(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, repoId.toString());
+
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
+
+        links.add(builder.buildRestLink(VirtualImagesResource.class,
+            VirtualImagesResource.VIRTUAL_IMAGES_PATH, params));
+
+        return links;
+    }
+
+    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final Integer vimageId)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> paramsDc = new HashMap<String, String>();
+        paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
+
+        links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
+            paramsDc));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+
+        params.put(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, dcId.toString());
+
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
+            DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, params));
+
+        params.put(VirtualImageResource.VIRTUAL_IMAGE_PATH, vimageId.toString());
+
+        links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
+
+        return links;
+
     }
 
     @Override
