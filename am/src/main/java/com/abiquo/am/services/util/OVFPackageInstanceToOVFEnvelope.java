@@ -27,17 +27,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.namespace.QName;
+
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.ProductSectionType;
+import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Icon;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.ReferencesType;
 import org.dmtf.schemas.ovf.envelope._1.VSSDType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Icon;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.CIMResourceAllocationSettingDataType;
 
 import com.abiquo.appliancemanager.exceptions.RepositoryException;
@@ -66,19 +68,20 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use the imageSize
      **/
-    public static EnvelopeType createEnvelopeFromOVFPackageInstance(OVFPackageInstanceDto disk)
+    public static EnvelopeType createEnvelopeFromOVFPackageInstance(final OVFPackageInstanceDto disk)
         throws RepositoryException
     {
         EnvelopeType envelope = new EnvelopeType();
         ReferencesType references = new ReferencesType();
 
         final String diskPath = disk.getDiskFilePath();
-        //final String packRelPath = getRelativePackagePath(disk.getOvfUrl(), String.valueOf(disk.getIdEnterprise()));
+        // final String packRelPath = getRelativePackagePath(disk.getOvfUrl(),
+        // String.valueOf(disk.getIdEnterprise()));
 
         final Long diskSize = disk.getDiskFileSize();
-        
-        //final String completPath =  packRelPath +'/'+diskPath;        
-        //System.err.println(packRelPath);
+
+        // final String completPath = packRelPath +'/'+diskPath;
+        // System.err.println(packRelPath);
 
         try
         {
@@ -106,12 +109,11 @@ public class OVFPackageInstanceToOVFEnvelope
         return envelope;
     }
 
-   
-    
     /***
      * Use ImageType and HD
      */
-    private static DiskSectionType createDiskSection(OVFPackageInstanceDto disk) throws Exception
+    private static DiskSectionType createDiskSection(final OVFPackageInstanceDto disk)
+        throws Exception
     {
         DiskFormat format = DiskFormat.fromName(disk.getDiskFileFormat().name());
 
@@ -131,12 +133,12 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use Description and name.
      */
-    private static VirtualSystemType createVirtualSystem(OVFPackageInstanceDto disk)
+    private static VirtualSystemType createVirtualSystem(final OVFPackageInstanceDto disk)
         throws Exception
     {
         VirtualSystemType vsystem =
-            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(), disk
-                .getDescription());
+            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(),
+                disk.getDescription());
 
         VirtualHardwareSectionType vhs = createVirtualHardwareSection(disk);
 
@@ -148,7 +150,7 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use Description, Name and IconPath.
      */
-    private static ProductSectionType createProductSection(OVFPackageInstanceDto disk)
+    private static ProductSectionType createProductSection(final OVFPackageInstanceDto disk)
         throws Exception
     {
         ProductSectionType product = new ProductSectionType();
@@ -165,6 +167,8 @@ public class OVFPackageInstanceToOVFEnvelope
         }
         // warn
 
+        product.getOtherAttributes().put(new QName("CategoryName"), disk.getCategoryName());
+
         return product;
     }
 
@@ -173,7 +177,7 @@ public class OVFPackageInstanceToOVFEnvelope
      * on the OVF Envelope.
      */
     private static VirtualHardwareSectionType createVirtualHardwareSection(
-        OVFPackageInstanceDto disk) throws RequiredAttributeException
+        final OVFPackageInstanceDto disk) throws RequiredAttributeException
     {
         VirtualHardwareSectionType vhsection = new VirtualHardwareSectionType();
 
@@ -206,9 +210,8 @@ public class OVFPackageInstanceToOVFEnvelope
         return vhsection;
     }
 
-    
-    
-    public static EnvelopeType fixFilePathsAndSize(EnvelopeType envelope, final String snapshot, final String packagePath) throws RepositoryException
+    public static EnvelopeType fixFilePathsAndSize(final EnvelopeType envelope,
+        final String snapshot, final String packagePath) throws RepositoryException
     {
         Set<String> diskFileIds = new HashSet<String>();
 
