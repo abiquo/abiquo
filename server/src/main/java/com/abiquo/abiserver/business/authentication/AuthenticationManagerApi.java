@@ -71,8 +71,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager =
-        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager = ErrorManager
+        .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     public AuthenticationManagerApi()
     {
@@ -521,14 +521,16 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
-                    .getPassword())
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
+                    userHB.getPassword())
                     + userHB.getAuthType();
 
             if (!signature.equals(tokenSignature))
             {
                 return null;
             }
+            userHB.setEnterpriseHB(getEnterpriseDAO().findById(
+                userHB.getEnterpriseHB().getIdEnterprise()));
         }
 
         return userHB;
