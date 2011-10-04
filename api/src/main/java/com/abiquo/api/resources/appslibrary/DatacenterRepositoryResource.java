@@ -50,13 +50,15 @@ import com.abiquo.server.core.infrastructure.Repository;
  * NOTE: DatacenterRepositoryId is the same as its associated Datacenter.
  */
 @Parent(DatacenterRepositoriesResource.class)
-@Path(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH)
+@Path(DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM)
 @Controller
 public class DatacenterRepositoryResource extends AbstractResource
 {
-    public final static String REMOTE_REPOSITORY_PATH = "datacenterrepository";
+    public final static String DATACENTER_REPOSITORY = "datacenterrepository";
 
-    public final static String REMOTE_REPOSITORY_REFRESH_PATH = "/actions/refresh";
+    public final static String DATACENTER_REPOSITORY_PARAM = "{" + DATACENTER_REPOSITORY + "}";
+
+    public final static String DATACENTER_REPOSITORY_REFRESH_PATH = "/actions/refresh";
 
     @Autowired
     private DatacenterRepositoryService repoService;
@@ -76,7 +78,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     @GET
     public DatacenterRepositoryDto getDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH) final Integer dcId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO check enterprise can use the datacenter
@@ -89,10 +91,10 @@ public class DatacenterRepositoryResource extends AbstractResource
     }
 
     @PUT
-    @Path(REMOTE_REPOSITORY_REFRESH_PATH)
+    @Path(DATACENTER_REPOSITORY_REFRESH_PATH)
     public void refreshDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH) final Integer dcId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO check enterprise can use the datacenter
@@ -112,6 +114,8 @@ public class DatacenterRepositoryResource extends AbstractResource
         DatacenterRepositoryDto dto =
             ModelTransformer.transportFromPersistence(DatacenterRepositoryDto.class, repo);
 
+        dto.setRepositoryLocation(repo.getUrl());
+        
         // use datacenterId as self id
         final Integer dcId = repo.getDatacenter().getId();
         dto = addLinks(builder, dto, enterpId, dcId, dcId, amUri);
@@ -133,7 +137,7 @@ public class DatacenterRepositoryResource extends AbstractResource
         final Integer enterpriseId)
     {
         // FIXME buggy
-        String erepoUri = String.format("%s/erepo/%s", amUri, enterpriseId.toString());
+        String erepoUri = String.format("%s/erepos/%s", amUri, enterpriseId.toString());
         return new RESTLink("applianceManagerRepositoryUri", erepoUri);
     }
 

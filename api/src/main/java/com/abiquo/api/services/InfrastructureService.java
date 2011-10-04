@@ -656,10 +656,17 @@ public class InfrastructureService extends DefaultApiService
         flushErrors();
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Repository getRepositoryFromLocation(final String location)
     {
         return repo.findRepositoryByLocation(location);
     }
+
+//    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+//    public Integer getDatacenterIdByRepository(Repository repository)
+//    {
+//        return repository.getDatacenter().getId();
+//    }
 
     public Repository getRepository(final Datacenter dc)
     {

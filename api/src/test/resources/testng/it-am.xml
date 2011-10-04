@@ -1,8 +1,8 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="AppsLibrary integration tests" verbose="1">
 	<listeners>
-		<listener class-name="com.abiquo.testng.TestServerAndAMListener" />
 		<listener class-name="com.abiquo.testng.TestDatabaseListener" />
+		<listener class-name="com.abiquo.testng.TestServerAndAMListener" />
 	</listeners>
 	<test name="AppsLibrary integration tests">
 		<classes>

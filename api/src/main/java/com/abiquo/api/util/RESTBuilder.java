@@ -671,7 +671,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
 
-        params.put(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, repoId.toString());
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, repoId.toString());
 
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
 
@@ -698,12 +698,12 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
 
-        params.put(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, dcId.toString());
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
 
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
-            DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH, params));
+            DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
 
-        params.put(VirtualImageResource.VIRTUAL_IMAGE_PATH, vimageId.toString());
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
 
         links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
 

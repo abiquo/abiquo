@@ -68,8 +68,6 @@ public class TestServerAndAMListener extends TestServerListener
         try
         {
             server.start();
-            server.join();
-
             LOGGER.info("Test server started with am.");
         }
         catch (Exception ex)

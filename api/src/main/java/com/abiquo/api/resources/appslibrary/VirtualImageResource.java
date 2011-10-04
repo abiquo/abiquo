@@ -42,12 +42,14 @@ import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 
 @Parent(VirtualImagesResource.class)
-@Path(VirtualImageResource.VIRTUAL_IMAGE_PATH)
+@Path(VirtualImageResource.VIRTUAL_IMAGE_PARAM)
 @Controller
 public class VirtualImageResource extends AbstractResource
 {
 
-    public final static String VIRTUAL_IMAGE_PATH = "virtualimage";
+    public final static String VIRTUAL_IMAGE = "virtualimage";
+
+    public final static String VIRTUAL_IMAGE_PARAM = "{" + VIRTUAL_IMAGE + "}";
 
     @Autowired
     private VirtualImageService vimageService;
@@ -61,8 +63,8 @@ public class VirtualImageResource extends AbstractResource
     @GET
     public VirtualImageDto getVirtualImage(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH) final Integer dcId,
-        @PathParam(VirtualImageResource.VIRTUAL_IMAGE_PATH) final Integer vimageId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
+        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer vimageId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO check enterprise can use the datacenter
@@ -109,7 +111,7 @@ public class VirtualImageResource extends AbstractResource
         }
 
         final String href =
-            String.format("%s/erepo/%s/ovf/%s", amUri, enterpriseId.toString(), ovfid);
+            String.format("%s/erepos/%s/ovfs/%s", amUri, enterpriseId.toString(), ovfid);
         return new RESTLink("applianceManagerOVFPackageInstanceUri", href);
     }
 }

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceStatusEventProcessor;
+import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.AMConsumer;
 
 /**
@@ -77,9 +78,9 @@ public class AmqpConsumerContextListener implements ServletContextListener
      */
     protected void initializeAMListener(ServletContextEvent sce) throws IOException
     {
-        OVFPackageInstanceStatusEventProcessor processor =
+        AMCallback processor =
             WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean(OVFPackageInstanceStatusEventProcessor.class);
+                .getBean("ovfPackageInstanceStatusEventProcessor", AMCallback.class);
 
         amconsumer = new AMConsumer();
         amconsumer.addCallback(processor);

@@ -44,12 +44,12 @@ import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
 import com.abiquo.server.core.infrastructure.Repository;
 
 @Parent(EnterpriseResource.class)
-@Path(DatacenterRepositoriesResource.REMOTE_REPOSITORIES_PATH)
+@Path(DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH)
 @Controller
 public class DatacenterRepositoriesResource extends AbstractResource
 {
 
-    public static final String REMOTE_REPOSITORIES_PATH = "datacenterrepositories";
+    public static final String DATACENTER_REPOSITORIES_PATH = "datacenterrepositories";
 
     @Autowired
     private VirtualImageService service;

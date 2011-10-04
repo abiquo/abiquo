@@ -21,18 +21,17 @@
 
 package com.abiquo.api.services.appslibrary.event;
 
-import static com.abiquo.tracer.Enterprise.enterprise;
-import static com.abiquo.tracer.Platform.platform;
-import static com.abiquo.tracer.User.user;
-
 import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
@@ -41,25 +40,18 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.Platform;
+import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.UserInfo;
-import com.abiquo.tracer.client.TracerFactory;
 
 /**
  * Receives events from the ApplianceManager indicating new available {@link OVFPackageInstanceDto}
  * and create new {@link VirtualImage}
  */
-@Service
+@Service("ovfPackageInstanceStatusEventProcessor")
 public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 {
     private final static Logger logger = LoggerFactory
         .getLogger(OVFPackageInstanceStatusEventProcessor.class);
-
-    static Platform platform = platform("abicloud").enterprise(
-        enterprise("abiCloud").user(user("SYSTEM")));
-
-    static UserInfo ui = new UserInfo("SYSTEM");
 
     @Autowired
     private InfrastructureService infService;
@@ -67,31 +59,33 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     @Autowired
     private OVFPackageInstanceToVirtualImage ovfToVimage;
 
+    @Autowired
+    private TracerLogger tracer;
+
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void onDownload(OVFPackageInstanceStatusEvent event)
     {
-        logger.debug("VirtualImage [{}] added", event.getOvfId());
+        logger.debug("Virtual image [{}] added", event.getOvfId());
 
         try
         {
             processDownload(event);
 
-            TracerFactory.getTracer().log(
-                SeverityType.INFO,
-                ComponentType.APPLIANCE_MANAGER,
-                com.abiquo.tracer.EventType.VI_ADD,
+            final String msg =
                 String.format("Virtual image [%s] added to repository [%s]", event.getOvfId(),
-                    event.getRepositoryLocation()), ui, platform);
+                    event.getRepositoryLocation());
+            tracer.systemLog(SeverityType.INFO, ComponentType.APPLIANCE_MANAGER, EventType.VI_ADD,
+                msg);
+
         }
         catch (Exception e)
         {
-            TracerFactory.getTracer().log(
-                SeverityType.NORMAL,
-                ComponentType.APPLIANCE_MANAGER,
-                com.abiquo.tracer.EventType.VI_ADD,
-                String.format("Virtual image [%s] can not be added to repository [%s]: %s",
-                    event.getOvfId(), event.getRepositoryLocation(), e.getMessage()),
-                new UserInfo("SYSTEM"), platform);
+            final String msg =
+                String.format("Virtual image [%s] can not be added to repository [%s]",
+                    event.getOvfId(), event.getRepositoryLocation());
+            tracer.systemError(SeverityType.NORMAL, ComponentType.APPLIANCE_MANAGER,
+                EventType.VI_ADD, msg, e);
         }
 
     }
@@ -104,6 +98,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 
         final Repository repository = infService.getRepositoryFromLocation(repoLocation);
         final Integer dcId = repository.getDatacenter().getId();
+
         final String amServiceUri =
             infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
 
@@ -112,8 +107,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 
         OVFPackageInstanceDto packageInstance = amStub.getOVFPackageInstance(idEnterp, ovfId);
 
-        ovfToVimage.insertVirtualImages(Collections.singletonList(packageInstance),
-            repository);
+        ovfToVimage.insertVirtualImages(Collections.singletonList(packageInstance), repository);
     }
 
     @Override
@@ -121,12 +115,12 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     {
         logger.debug("VirtualImage [{}] canceled/deleted ", event.getOvfId());
 
-        TracerFactory.getTracer().log(
-            SeverityType.INFO,
-            ComponentType.APPLIANCE_MANAGER,
-            com.abiquo.tracer.EventType.VI_DELETE,
+        final String msg =
             String.format("Virtual image [%s] deleted from repository [%s]", event.getOvfId(),
-                event.getRepositoryLocation()), ui, platform);
+                event.getRepositoryLocation());
+
+        tracer.systemLog(SeverityType.INFO, ComponentType.APPLIANCE_MANAGER, EventType.VI_DELETE,
+            msg);
     }
 
     @Override
@@ -136,12 +130,13 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 
         logger.error("VirtualImage download error :" + errorCause);
 
-        TracerFactory.getTracer().log(
-            SeverityType.CRITICAL,
-            ComponentType.APPLIANCE_MANAGER,
-            com.abiquo.tracer.EventType.VI_DOWNLOAD,
+        final String msg =
             String.format("Error during the virtual image [%s] download to repository [%s]: %s ",
-                event.getOvfId(), event.getRepositoryLocation(), errorCause), ui, platform);
+                event.getOvfId(), event.getRepositoryLocation(), errorCause);
+
+        tracer.systemLog(SeverityType.CRITICAL, ComponentType.APPLIANCE_MANAGER,
+            EventType.VI_DOWNLOAD, msg);
+
     }
 
     @Override

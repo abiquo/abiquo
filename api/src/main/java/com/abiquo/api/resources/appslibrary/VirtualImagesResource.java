@@ -60,7 +60,7 @@ public class VirtualImagesResource extends AbstractResource
     @GET
     public VirtualImagesDto getVirtualImages(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.REMOTE_REPOSITORY_PATH) final Integer dcId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
         @Context IRESTBuilder restBuilder) throws Exception
     {
         VirtualImagesDto reposDto = new VirtualImagesDto();

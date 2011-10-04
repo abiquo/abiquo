@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -57,8 +59,8 @@ public class OVFPackageInstanceToVirtualImage
     @Autowired
     private EnterpriseRep entRepo;
 
-    public List<VirtualImage> insertVirtualImages(List<OVFPackageInstanceDto> disks,
-        Repository repo)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public List<VirtualImage> insertVirtualImages(List<OVFPackageInstanceDto> disks, Repository repo)
     {
         List<VirtualImage> addedvimages = new LinkedList<VirtualImage>();
         List<OVFPackageInstanceDto> disksToInsert =
