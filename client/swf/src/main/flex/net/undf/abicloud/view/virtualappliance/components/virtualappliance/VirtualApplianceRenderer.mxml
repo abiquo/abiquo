@@ -280,7 +280,7 @@
         styleName="VerticalStateBlackBarSkin">
 
          <utils:SmoothImage id="startImage"
-            source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING:StateIcons.NOT_DEPLOYED}"/>
+            source="{(this._virtualAppliance.state.id == State.RUNNING &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN) ? StateIcons.RUNNING:StateIcons.NOT_DEPLOYED}"/>
 
         <utils:SmoothImage id="applyChangesImage"
             source="{(this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.PAUSED:StateIcons.NOT_DEPLOYED}"/>

@@ -17,6 +17,5 @@
             <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" />
         </bag>
     </class>
-    <query name="GET_VLAN_WITH_NAME_BY_NETWORK_ID"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB where network_id = :network_id and networkName = :vlan_network_name
-    </query>
+    <query name="GET_VLAN_WITH_NAME_BY_NETWORK_ID"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB where network_id = :network_id and networkName = :vlan_network_name</query>
 </hibernate-mapping>

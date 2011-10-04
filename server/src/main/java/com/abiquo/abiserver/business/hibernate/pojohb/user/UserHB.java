@@ -23,8 +23,9 @@ package com.abiquo.abiserver.business.hibernate.pojohb.user;
 
 // Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.LazyUtils;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.server.core.enterprise.User.AuthType;
 
@@ -60,6 +61,8 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
 
     private String availableVirtualDatacenters;
 
+    private Date creationDate;
+
     private String authType;
 
     public String getAvailableVirtualDatacenters()
@@ -84,7 +87,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
 
     public RoleHB getRoleHB()
     {
-        return LazyUtils.lazyGet(roleHB);
+        return roleHB;
     }
 
     public void setRoleHB(final RoleHB roleHB)
@@ -174,7 +177,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
 
     public EnterpriseHB getEnterpriseHB()
     {
-        return LazyUtils.lazyGet(enterpriseHB);
+        return enterpriseHB;
     }
 
     public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
@@ -190,6 +193,16 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
     public void setAuthType(final String authType)
     {
         this.authType = authType;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
     }
 
     @Override
@@ -208,6 +221,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         user.setActive(active == 1 ? true : false);
         user.setAuthType(AuthType.valueOf(authType));
         user.setLocale(locale);
+        user.setCreationDate(creationDate);
         if (enterpriseHB != null)
         {
             user.setEnterprise(enterpriseHB.toPojo());

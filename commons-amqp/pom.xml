@@ -1,26 +1,23 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
     <!-- Maven coordinates -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.abiquo</groupId>
     <artifactId>commons-amqp</artifactId>
     <packaging>jar</packaging>
-
     <!-- Reference the parent project -->
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8.0-HF5-SNAPSHOT</version>
+        <version>1.8.5</version>
     </parent>
-
     <!-- Set dependencies -->
     <dependencies>
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>2.1.1</version>
-	</dependency>
+        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -31,7 +28,6 @@
             <artifactId>jackson-jaxrs</artifactId>
             <version>1.6.1</version>
         </dependency>
-
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -47,16 +43,21 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.6</version>
         </dependency>
-
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>5.12.1</version>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <!-- Project properties -->
     <name>Abiquo Commons AMQP</name>
     <url>http://www.abiquo.com</url>
@@ -67,7 +68,6 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
     <build>
         <finalName>commons-amqp</finalName>
         <plugins>

@@ -476,7 +476,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static int PASSWORD_LENGTH_MIN = 0;
 
-    private final static int PASSWORD_LENGTH_MAX = 255;
+    private final static int PASSWORD_LENGTH_MAX = 32;
 
     private final static boolean PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -493,7 +493,7 @@ public class VirtualMachine extends DefaultEntityBase
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }

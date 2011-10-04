@@ -20,6 +20,5 @@
             <many-to-many column="idPrivilege" class="com.abiquo.abiserver.business.hibernate.pojohb.user.PrivilegeHB" />
         </set>
     </class>
-    <query name="GET_ROLE_BY_NAME"> from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB where name like :name
-    </query>
+    <query name="GET_ROLE_BY_NAME"> from com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB where name like :name</query>
 </hibernate-mapping>

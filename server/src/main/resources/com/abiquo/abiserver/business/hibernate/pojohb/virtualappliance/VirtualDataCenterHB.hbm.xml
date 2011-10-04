@@ -21,6 +21,9 @@
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB" lazy="false" fetch="select" name="network">
             <column name="networktypeID" />
         </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" lazy="false" fetch="select" name="defaultVlan">
+            <column name="default_vlan_network_id" />
+        </many-to-one>
         <!-- Limits -->
         <component name="limits" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
             <component name="cpu" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
@@ -49,15 +52,10 @@
             </component>
         </component>
     </class>
-    <query name="VIRTUAL_DATACENTER.GET_BY_NETWORK"> Select vd from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd inner join vd.network n where
-        n.networkId = :network_id
-    </query>
-    <query name="VIRTUAL_DATACENTER_GET_BY_VAPP"> Select vd from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd, VirtualappHB vapp where
-        vapp.virtualDataCenterHB.idVirtualDataCenter = vd.idVirtualDataCenter and vapp.idVirtualApp = :vappId
-    </query>
-    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE"> from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd where enterpriseHB.idEnterprise = :enterpriseId order by vd.name asc
-    </query>
+    <query name="VIRTUAL_DATACENTER.GET_BY_NETWORK"> Select vd from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd inner join vd.network n where n.networkId = :network_id</query>
+    <query name="VIRTUAL_DATACENTER_GET_BY_VAPP"> Select vd from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd, VirtualappHB vapp where vapp.virtualDataCenterHB.idVirtualDataCenter =
+        vd.idVirtualDataCenter and vapp.idVirtualApp = :vappId</query>
+    <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE"> from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd where enterpriseHB.idEnterprise = :enterpriseId order by vd.name asc</query>
     <query name="VIRTUAL_DATACENTER_BY_ENTERPRISE_AND_DATACENTER"> from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vd where enterpriseHB.idEnterprise = :enterpriseId and idDataCenter = :datacenterId
-        order by vd.name asc
-    </query>
+        order by vd.name asc</query>
 </hibernate-mapping>

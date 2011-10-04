@@ -56,8 +56,11 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
@@ -190,8 +193,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -221,6 +224,14 @@ public class UserService extends DefaultApiService
         }
 
         repo.insertUser(user);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_CREATE,
+            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
+                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
+                + user.getRole() + "]");
 
         return user;
     }
@@ -350,7 +361,17 @@ public class UserService extends DefaultApiService
             flushErrors();
         }
 
-        return updateUser(old);
+        updateUser(old);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_MODIFY,
+            "User " + old.getName() + " has been modified [Enterprise: "
+                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
+                + old.getSurname() + " Role: " + old.getRole() + "]");
+
+        return old;
     }
 
     public User updateUser(final User user)
@@ -365,6 +386,14 @@ public class UserService extends DefaultApiService
     {
         User user = getUser(id);
 
+        // user can not delete himself
+        User logged = getCurrentUser();
+        if (logged.getId() == user.getId())
+        {
+            addConflictErrors(APIError.USER_DELETING_HIMSELF);
+            flushErrors();
+        }
+
         checkEnterpriseAdminCredentials(user.getEnterprise());
 
         // Cloud Admins should only be editable by other Cloud Admins
@@ -378,6 +407,14 @@ public class UserService extends DefaultApiService
         }
 
         repo.removeUser(user);
+
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.USER,
+            EventType.USER_DELETE,
+            "User " + user.getName() + " has been deleted [Enterprise: "
+                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
+                + user.getSurname() + " Role: " + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)

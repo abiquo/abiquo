@@ -1,18 +1,14 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
-        <version>1.8.0-HF5-SNAPSHOT</version>
+        <version>1.8.5</version>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
     <artifactId>task-service</artifactId>
     <groupId>com.abiquo.abicloud</groupId>
-
     <dependencies>
-    
         <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -29,7 +25,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.6</version>
         </dependency>
-        
         <!-- Quartz -->
         <dependency>
             <groupId>opensymphony</groupId>
@@ -37,7 +32,6 @@
             <version>1.6.3</version>
             <optional>true</optional>
         </dependency>
-        
         <!-- Apache Commons -->
         <dependency>
             <groupId>commons-logging</groupId>
@@ -49,23 +43,27 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
         </dependency>
-
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
             <version>${spring.version}</version>
         </dependency>
-
         <!-- Testing -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.6</version>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <name>Task Service</name>
     <url>http://abicloud.org</url>
     <inceptionYear>2009</inceptionYear>
@@ -75,15 +73,8 @@
             <url>http://www.gnu.org/licenses/lgpl.html</url>
         </license>
     </licenses>
-
     <build>
         <finalName>task-service</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-        </plugins>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <resources>
             <resource>
@@ -92,5 +83,4 @@
             </resource>
         </resources>
     </build>
-
 </project>

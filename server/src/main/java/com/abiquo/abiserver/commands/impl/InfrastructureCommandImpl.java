@@ -1840,8 +1840,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+
                             return basicResult;
                         }
                     }

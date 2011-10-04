@@ -17,8 +17,6 @@
             <column length="10" name="idVirtualDataCenter" not-null="true" />
         </property>
     </class>
-    <query name="NET_ASSIG.GET_BY_VDC"> SELECT na FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE na.idVirtualDataCenter =:idVirtualDataCenter
-    </query>
-    <query name="NET_ASSIG.GET_BY_VLAN"> SELECT na FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE na.vlanNetworkId =:vlanNetworkId
-    </query>
+    <query name="NET_ASSIG.GET_BY_VDC"> SELECT na FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE na.idVirtualDataCenter =:idVirtualDataCenter</query>
+    <query name="NET_ASSIG.GET_BY_VLAN"> SELECT na FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB na WHERE na.vlanNetworkId =:vlanNetworkId</query>
 </hibernate-mapping>

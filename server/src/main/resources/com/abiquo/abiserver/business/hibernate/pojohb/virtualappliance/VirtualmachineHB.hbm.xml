@@ -47,7 +47,7 @@
             <column name="idType" not-null="true" />
         </property>
         <property name="password" type="string">
-            <column length="15" name="password" />
+            <column length="32" name="password" />
         </property>
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" fetch="select" lazy="false" name="userHB">
             <column name="idUser" />
@@ -63,6 +63,5 @@
         </set>
     </class>
     <query name="VIRTUALMACHINE.VIRTUAL_MACHINE_SEARCH_VAPP"> SELECT va FROM VirtualappExtendedHB as va inner join va.nodesHB as n, com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB as nvi inner join
-        nvi.virtualMachineHB as vm WHERE n.type = :type AND nvi.idNode=n.idNode AND vm.idVm = :idVm
-    </query>
+        nvi.virtualMachineHB as vm WHERE n.type = :type AND nvi.idNode=n.idNode AND vm.idVm = :idVm</query>
 </hibernate-mapping>

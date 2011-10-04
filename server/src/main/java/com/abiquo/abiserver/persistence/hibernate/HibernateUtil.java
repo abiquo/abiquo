@@ -55,6 +55,7 @@ public class HibernateUtil
             conf.configure(hibernateConfRootDir + "hibernate.cfg.xml");
 
             hibernateConfRootDir += "ext/";
+
             URL url = HibernateUtil.class.getClassLoader().getResource(hibernateConfRootDir);
 
             if (url != null)
@@ -72,6 +73,7 @@ public class HibernateUtil
             }
 
             sessionFactory = conf.buildSessionFactory();
+
             logger.info("SessionFactory created!");
 
         }
@@ -96,6 +98,7 @@ public class HibernateUtil
     // public static SessionFactory getSessionFactory()
     // {
     // return sessionFactory;
+    //
     //
     // }
 

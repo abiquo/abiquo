@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="AM all unit tests" verbose="1">
+    <test name="All unit tests">
+        <groups>
+            <run>
+                <include name="test-basic" />
+                <include name="test-all" />
+            </run>
+        </groups>
+        <packages>
+            <package name="com.abiquo.appliancemanager.*" />
+        </packages>
+    </test>
+</suite>

@@ -14,12 +14,10 @@
         <property name="uri" type="java.lang.String" not-null="true" />
         <property name="status" type="java.lang.Integer" />
     </class>
-    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_DATACENTER"> select rs from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.idDataCenter = :idDataCenter
-    </query>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_DATACENTER"> select rs from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.idDataCenter = :idDataCenter</query>
     <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_TYPE"> select rs from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.idDataCenter = :idDataCenter and rs.remoteServiceType = :remoteServiceType
     </query>
-    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_URL"> select rs from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.uri = :uri
-    </query>
+    <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_BY_URL"> select rs from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.uri = :uri</query>
     <query name="REMOTE_SERVICE.GET_REMOTE_SERVICES_LOCATION_BY_TYPE"> select rs.uri from com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB rs where rs.idDataCenter = :idDataCenter and rs.remoteServiceType = :remoteServiceType
     </query>
 </hibernate-mapping>
