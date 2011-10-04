@@ -22,7 +22,7 @@
     <parent>
         <artifactId>client</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
-        <version>1.8.5</version>
+        <version>1.8.5-HF1-SNAPSHOT</version>
     </parent>
     <!-- Depencences -->
     <dependencies>
