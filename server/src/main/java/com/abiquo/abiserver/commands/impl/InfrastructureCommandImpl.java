@@ -361,9 +361,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         physicalmachineHB, enterpriseId);
             }
 
-            if ((numberOfVM.equals(new Long(0)))
-                && ((physicalmachineHB.getIdEnterprise() == null) || (physicalmachineHB
-                    .getIdEnterprise() == 0)))
+            if (numberOfVM.equals(new Long(0))
+                && (physicalmachineHB.getIdEnterprise() == null || physicalmachineHB
+                    .getIdEnterprise() == 0))
             {
                 infrastructures.add(physicalmachineHB.toPojo());
             }
@@ -906,8 +906,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 {
                     // VMs not managed must be deleted too
                     deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-                    
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
+
+                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(),
+                        userSession);
                 }
                 else
                 {
@@ -1066,8 +1067,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 
@@ -1839,8 +1840,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+
                             return basicResult;
                         }
                     }
@@ -2487,7 +2493,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB)
      */
     @Override
-    public BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter)
+    public BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -2498,7 +2504,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             factory.beginConnection();
             DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
 
-            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
+            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter);
             basicResult.setSuccess(true);
             basicResult.setMessage(InfrastructureCommandImpl.resourceManager
                 .getMessage("updateUsedResourcesByDatacenter.success"));
@@ -2664,7 +2670,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         DatacenterHB dataCenter = pm.getDataCenter();
         factory.endConnection();
 
-        return updateUsedResourcesByDatacenter(dataCenter);
+        return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
     /*

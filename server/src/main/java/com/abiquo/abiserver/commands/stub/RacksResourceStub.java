@@ -60,4 +60,6 @@ public interface RacksResourceStub
      *         appropiate object.
      */
     public DataResult<List<UcsRack>> getUcsRacks(DataCenter datacenter);
+
+    public DataResult<UcsRack> editUcsRack(UcsRack ucsRack);
 }

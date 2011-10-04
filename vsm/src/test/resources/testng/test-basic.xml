@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="VSM basic unit tests" verbose="1">
+    <test name="Basic unit tests">
+        <packages>
+            <package name="com.abiquo.vsm.*" />
+        </packages>
+    </test>
+</suite>

@@ -24,7 +24,6 @@ package com.abiquo.server.core.infrastructure;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorDAO;
@@ -44,8 +44,12 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.util.PagedList;
@@ -96,6 +100,12 @@ public class InfrastructureRep extends DefaultRepBase
     private NetworkDAO networkDao;
 
     @Autowired
+    private VLANNetworkDAO vlanDao;
+
+    @Autowired
+    private IpPoolManagementDAO ipPoolDao;
+
+    @Autowired
     private RepositoryDAO repositoryDao;
 
     @Autowired
@@ -130,6 +140,8 @@ public class InfrastructureRep extends DefaultRepBase
         this.networkDao = new NetworkDAO(entityManager);
         this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
         this.storageRep = new StorageRep(entityManager);
+        this.vlanDao = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
     public Datacenter findById(final Integer id)
@@ -269,11 +281,17 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.existsAnyOtherWithDatacenterAndName(rack, name);
     }
 
-    public boolean existsAnyUcsRackWithIp(String ip)
+    public boolean existsAnyUcsRackWithIp(final String ip)
     {
         return this.ucsRackDao.existAnyOtherWithIP(ip);
     }
-    
+
+    public boolean existsAnyVirtualMachineUsingNetwork(final Integer vlanId)
+    {
+        assert vlanId != null;
+        return !this.ipPoolDao.findUsedIpsByPrivateVLAN(vlanId).isEmpty();
+    }
+
     public boolean existsAnyMachineWithName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
@@ -303,7 +321,7 @@ public class InfrastructureRep extends DefaultRepBase
         this.ucsRackDao.flush();
     }
 
-    public UcsRack findUcsRackById(Integer rackId)
+    public UcsRack findUcsRackById(final Integer rackId)
     {
         return ucsRackDao.findById(rackId);
     }
@@ -344,6 +362,12 @@ public class InfrastructureRep extends DefaultRepBase
         assert id != null;
 
         return this.machineDao.findById(id);
+    }
+
+    public Machine findMachineByIds(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
 
     public void insertMachine(final Machine machine)
@@ -535,8 +559,9 @@ public class InfrastructureRep extends DefaultRepBase
             enterprise);
     }
 
-    public List<Machine> findCandidateMachines(Integer idRack, Integer idVirtualDatacenter,
-        Enterprise enterprise, String datastoreUuid, Integer originalHypervisorId)
+    public List<Machine> findCandidateMachines(final Integer idRack,
+        final Integer idVirtualDatacenter, final Enterprise enterprise, final String datastoreUuid,
+        final Integer originalHypervisorId)
     {
         return machineDao.findCandidateMachines(idRack, idVirtualDatacenter, enterprise,
             datastoreUuid, originalHypervisorId);
@@ -588,8 +613,9 @@ public class InfrastructureRep extends DefaultRepBase
     {
         return repositoryDao.existRepositoryInOtherDatacenter(datacenter, repositoryLocation);
     }
-    
-    public boolean existRepositoryInSameDatacenter(Datacenter datacenter, String repositoryLocation)
+
+    public boolean existRepositoryInSameDatacenter(final Datacenter datacenter,
+        final String repositoryLocation)
     {
         return repositoryDao.existRepositoryInSameDatacenter(datacenter, repositoryLocation);
     }
@@ -613,9 +639,9 @@ public class InfrastructureRep extends DefaultRepBase
         assert datacenter != null;
         List<VirtualMachine> vmachinesInDC =
             virtualMachineDao.findVirtualMachinesByDatacenter(datacenter.getId());
-        for (Iterator iterator = vmachinesInDC.iterator(); iterator.hasNext();)
+        for (Object element : vmachinesInDC)
         {
-            VirtualMachine virtualMachine = (VirtualMachine) iterator.next();
+            VirtualMachine virtualMachine = (VirtualMachine) element;
             // We can ignore CRASHED state: it means the VM is actually not deployed
             if (!(virtualMachine.getState().equals("NOT_DEPLOYED") || virtualMachine.getState()
                 .equals("CRASHED")))
@@ -626,17 +652,17 @@ public class InfrastructureRep extends DefaultRepBase
         return false;
     }
 
-    public Rack findRackByIds(Integer datacenterId, Integer rackId)
+    public Rack findRackByIds(final Integer datacenterId, final Integer rackId)
     {
         return rackDao.findByIds(datacenterId, rackId);
     }
 
-    public List<Rack> findRacksWithHAEnabled(Datacenter dc)
+    public List<Rack> findRacksWithHAEnabled(final Datacenter dc)
     {
         return rackDao.findRacksWithHAEnabled(dc);
     }
 
-    public List<Machine> findRackEnabledForHAMachines(Rack rack)
+    public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
         return machineDao.findRackEnabledForHAMachines(rack);
     }
@@ -663,8 +689,72 @@ public class InfrastructureRep extends DefaultRepBase
         return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
     }
 
-    public boolean existAnyHypervisorWithIpInDatacenter(String ip, Integer datacenterId)
+    public boolean existAnyHypervisorWithIpInDatacenter(final String ip, final Integer datacenterId)
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
     }
+
+    /**
+     * Return all the public VLANs by Datacenter.
+     * 
+     * @param datacenter {@link Datacenter} where we search for.
+     * @return list of found {@link VLANNetwork}
+     */
+    public List<VLANNetwork> findAllPublicVlansByDatacenter(final Datacenter datacenter,
+        final NetworkType netType)
+    {
+        return vlanDao.findPublicVLANNetworksByDatacenter(datacenter, netType);
+    }
+
+    /**
+     * Return all the public VLANs by Datacenter.
+     * 
+     * @param datacenter {@link Datacenter} where we search for.
+     * @return list of found {@link VLANNetwork}
+     */
+    public List<VLANNetwork> findAllPrivateVlansByDatacenter(final Datacenter datacenter)
+    {
+        return vlanDao.findPrivateVLANNetworksByDatacenter(datacenter);
+    }
+
+    /**
+     * Return an unique VLAN inside a Datacenter.
+     * 
+     * @param dc {@link Datacenter} where we search for.
+     * @param vlanId identifier of the vlan.
+     * @return the found {@link VLANNetwork}.
+     */
+    public VLANNetwork findPublicVlanByDatacenter(final Datacenter dc, final Integer vlanId)
+    {
+        return vlanDao.findPublicVlanByDatacenter(dc, vlanId);
+    }
+
+    /**
+     * Return the list of purchased IPs by VLAN.
+     * 
+     * @param vlan vlan to search into.
+     * @return the list of purchased IPs.
+     */
+    public List<IpPoolManagement> findIpsPurchasedInPublicVlan(final VLANNetwork vlan)
+    {
+        return ipPoolDao.findPublicIpsPurchasedByVlan(vlan);
+    }
+
+    /**
+     * Return all the IPs from a VLAN.
+     * 
+     * @param network {@link Network} network entity that stores all the VLANs
+     * @param vlanId identifier of the VLAN to search into.
+     * @return all the {@link IpPoolManagement} ips.
+     */
+    public List<IpPoolManagement> findIpsByNetwork(final Network network, final Integer vlanId)
+    {
+        return ipPoolDao.findIpsByNetwork(network, vlanId);
+    }
+
+    public void updateLimits(final DatacenterLimits dclimits)
+    {
+        datacenterLimitDao.flush();
+    }
+
 }

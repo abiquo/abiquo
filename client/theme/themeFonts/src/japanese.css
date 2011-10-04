@@ -18,17 +18,12 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-	Application{
-		modal-transparency-duration:	500;
-		modal-transparency-blur:		1;
-		modal-transparency-color:		#000000;
-		modal-transparency:				0.4;
-		
-		font-size:						11;
-		theme-color:					#505050;
-		color:							#505050;
-	}
-
-
-	
+Application {
+	modal-transparency-duration: 500;
+	modal-transparency-blur: 1;
+	modal-transparency-color: #000000;
+	modal-transparency: 0.4;
+	font-size: 11;
+	theme-color: #505050;
+	color: #505050;
+}

@@ -18,21 +18,16 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+.ConfigurationConfigurationManagementBaseLabel1 {
+	font-size: "14";
+	font-weight: "bold";
+}
 
-	.ConfigurationConfigurationManagementBaseLabel1
-	{
-		font-size:"14";
-		font-weight:"bold";
+.ConfigurationConfigurationManagementBaseLabel2 {
+	font-size: "14";
+}
 
-	}
-
-	.ConfigurationConfigurationManagementBaseLabel2
-	{
-		font-size:"14";
-	}
-	.ConfigurationConfigurationManagementBaseHBox1
-	{
-		padding-bottom:"10";
-		padding-top:"15";
-	}
-
+.ConfigurationConfigurationManagementBaseHBox1 {
+	padding-bottom: "10";
+	padding-top: "15";
+}

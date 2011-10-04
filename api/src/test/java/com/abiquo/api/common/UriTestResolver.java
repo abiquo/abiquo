@@ -62,6 +62,7 @@ import com.abiquo.api.resources.cloud.VirtualApplianceResource;
 import com.abiquo.api.resources.cloud.VirtualAppliancesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
+import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
@@ -195,7 +196,7 @@ public class UriTestResolver
         return resolveURI(template,
             Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
-    
+
     public static String resolveRacksURI(final Integer datacenterId)
     {
         String template =
@@ -637,8 +638,9 @@ public class UriTestResolver
     public static String resolveVirtualMachineActionGetIPsURI(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
-        return resolveVirtualMachineURI(vdcId, vappId, vmId)
-            + VirtualMachineResource.VIRTUAL_MACHINE_ACTION_GET_IPS;
+        return resolveVirtualMachineURI(vdcId, vappId, vmId) + "/"
+            + VirtualMachineNetworkConfigurationResource.NETWORK + "/"
+            + VirtualMachineNetworkConfigurationResource.NICS_PATH;
     }
 
     public static String resolveVirtualDatacenterURI(final Integer virtualDatacenterId)

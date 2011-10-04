@@ -172,4 +172,17 @@ public class UserDAOHibernate extends HibernateDAO<UserHB, Integer> implements U
         return requestedUser;
 
     }
+
+    @Override
+    public Object[] getCurrentUserCredentials(String user, String auth)
+    {
+        Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+        Query query =
+            session
+                .createSQLQuery("select user, password from user where user = :name and authType = :auth");
+        query.setString("name", user);
+        query.setString("auth", auth);
+
+        return (Object[]) query.uniqueResult();
+    }
 }

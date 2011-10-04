@@ -213,6 +213,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
     /**
      * Create multiple physical machines in the same time.
+     * 
      * @throws Exception
      */
     @Test
@@ -228,19 +229,20 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         MachineDto m2 = getValidMachine();
         IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
+        m2.setName(m2.getName() + "-two");
         m2.setIp(nextIP.toString());
         m2.setIpService(nextIP.toString());
         DatastoreDto dto2 = new DatastoreDto();
         dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/");
-        dto2.setDirectory("var/lib/virt");
+        dto2.setRootPath("/another-root");
+        dto2.setDirectory("var/lib/virt2");
         dto2.setEnabled(Boolean.TRUE);
         m2.getDatastores().add(dto2);
 
         MachinesDto machinesDto = new MachinesDto();
         machinesDto.add(m);
         machinesDto.add(m2);
-        
+
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
             resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)

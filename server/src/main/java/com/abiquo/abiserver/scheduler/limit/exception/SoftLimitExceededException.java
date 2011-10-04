@@ -34,10 +34,10 @@ public class SoftLimitExceededException extends LimitExceededException
 {
     private static final long serialVersionUID = 3730346356676985389L;
 
-    public SoftLimitExceededException(Object entity, long required, long actual, LimitHB limit,
-        LimitResource resource)
+    public SoftLimitExceededException(final Object entity, final long required, final long actual,
+        final LimitHB limit, final LimitResource resource, final boolean editLimits)
     {
-        super(entity, required, actual, limit, resource); 
+        super(entity, required, actual, limit, resource, editLimits);
     }
 
 }

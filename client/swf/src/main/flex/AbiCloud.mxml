@@ -183,8 +183,8 @@
             	 
             	if(channel){
             		//We need to know when the user has logged in or logged out from the application
-                	BindingUtils.bindSetter(trackUserLogged, AbiCloudModel.getInstance().loginManager,
-                                        "userLogged"); 
+                	/* BindingUtils.bindSetter(trackUserLogged, AbiCloudModel.getInstance().loginManager,
+                                        "userLogged"); */ 
             		checkSingleSignOn();
             	}
             }

@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.Random;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -82,35 +84,46 @@ public class MachineLoadRuleGenerator extends DefaultEntityGenerator<MachineLoad
         return machineLoadRule;
     }
 
+    public MachineLoadRule createInstance(Datacenter datacenter)
+    {
+        MachineLoadRule machineLoadRule = createUniqueInstance();
+
+        machineLoadRule.setDatacenter(datacenter);
+
+        return machineLoadRule;
+    }
+
+    public MachineLoadRule createInstance(Rack rack)
+    {
+        MachineLoadRule machineLoadRule = createUniqueInstance();
+
+        machineLoadRule.setRack(rack);
+
+        return machineLoadRule;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(MachineLoadRule entity, List<Object> entitiesToPersist)
     {
-
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        Machine machine = entity.getMachine();
-        if (machine != null)
+        if (entity.getMachine() != null)
         {
+            Machine machine = entity.getMachine();
             machineGen.addAuxiliaryEntitiesToPersist(machine, entitiesToPersist);
             entitiesToPersist.add(machine);
         }
-        // else
-        // {
-        // Rack rack = entity.getRack();
-        //
-        // if (rack != null)
-        // {
-        // rackGen.addAuxiliaryEntitiesToPersist(rack, entitiesToPersist);
-        // entitiesToPersist.add(rack);
-        // }
-        // else
-        // {
-        // Datacenter datacenter = entity.getDatacenter();
-        // // if no machine and no rack then a datacenter exist
-        // datacenterGen.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
-        // entitiesToPersist.add(datacenter);
-        //
-        // }// no rack
-        // }// no machien
+        else if (entity.getRack() != null)
+        {
+            Rack rack = entity.getRack();
+            rackGen.addAuxiliaryEntitiesToPersist(rack, entitiesToPersist);
+            entitiesToPersist.add(rack);
+        }
+        else if (entity.getDatacenter() != null)
+        {
+            Datacenter datacenter = entity.getDatacenter();
+            datacenterGen.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);
+            entitiesToPersist.add(datacenter);
+        }
     }
 }

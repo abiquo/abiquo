@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="TRACER basic unit tests" verbose="1">
+    <test name="Basic unit tests">
+        <groups>
+            <run>
+                <include name="test-basic" />
+            </run>
+        </groups>
+        <packages>
+            <package name="com.abiquo.tracer.*" />
+        </packages>
+    </test>
+</suite>

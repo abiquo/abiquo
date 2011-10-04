@@ -1,92 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-
-	<!--                                      -->
-	<!--    POM RELATIONSHIPS                 -->
-	<!--                                      -->
-
-	<!--    Maven Coordinates                 -->
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>database</artifactId>
-
-	<!--    Inheritance                       -->
-	<parent>
-		<groupId>com.abiquo.abicloud</groupId>
-		<artifactId>platform</artifactId>
-		<version>1.8-SNAPSHOT</version>
-	</parent>
-
-	<!--                                      -->
-	<!--    PROJECT INFORMATION               -->
-	<!--                                      -->
-	<name>Database</name>
-	<url>http://www.abiquo.com</url>
-	<inceptionYear>2009</inceptionYear>
-	<licenses>
-		<license>
-			<name>LGPL</name>
-			<url>http://www.gnu.org/licenses/lgpl.html</url>
-		</license>
-	</licenses>
-
-	<!--                                      -->
-	<!--    BUILD SETTINGS                    -->
-	<!--                                      -->
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<id>generate-database-test</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>python</executable>
-							<arguments>
-								<argument>create_schema_test.py</argument>
-							</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>install</id>
-						<phase>install</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>mysql</executable>
-							<arguments>
-								<argument>-hlocalhost</argument>
-								<argument>-uroot</argument>
-								<argument>-proot</argument>
-								<argument>&lt;kinton-schema.sql</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.abiquo.maven</groupId>
-				<artifactId>maven-redis-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-		<filters>
-			<filter>../system-properties/src/main/filters/${env}-${env.family}.properties
-			</filter>
-		</filters>
-	</build>
-
+    <!-- -->
+    <!-- POM RELATIONSHIPS -->
+    <!-- -->
+    <!-- Maven Coordinates -->
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>database</artifactId>
+    <!-- Inheritance -->
+    <parent>
+        <groupId>com.abiquo.abicloud</groupId>
+        <artifactId>platform</artifactId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <!-- -->
+    <!-- PROJECT INFORMATION -->
+    <!-- -->
+    <name>Database</name>
+    <url>http://www.abiquo.com</url>
+    <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>LGPL</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+        </license>
+    </licenses>
+    <!-- -->
+    <!-- BUILD SETTINGS -->
+    <!-- -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-database-test</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>python</executable>
+                            <arguments>
+                                <argument>create_schema_test.py</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>mysql</executable>
+                            <arguments>
+                                <argument>-hlocalhost</argument>
+                                <argument>-uroot</argument>
+                                <argument>-proot</argument>
+                                <argument>&lt;kinton-schema.sql</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <filters>
+            <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
+        </filters>
+    </build>
 </project>

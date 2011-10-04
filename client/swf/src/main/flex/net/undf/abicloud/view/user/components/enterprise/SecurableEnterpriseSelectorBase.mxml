@@ -78,9 +78,17 @@
             private function onCreationComplete():void
             {
                 //Check privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",addEnterpriseButton,enterpriseToolBar);
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_ENTERPRISE)
+                || !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)){
+                    SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",addEnterpriseButton,enterpriseToolBar);
+                }
+                
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",editEnterpriseButton,enterpriseToolBar);
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_ENTERPRISE,"removeChild",deleteEnterpriseButton,enterpriseToolBar);
+                
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_ENTERPRISE)
+                || !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)){
+                    SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",deleteEnterpriseButton,enterpriseToolBar);
+                }
 
 
                 //Listening for changes in model related to enterprises

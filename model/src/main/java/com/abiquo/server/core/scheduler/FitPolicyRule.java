@@ -40,7 +40,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = FitPolicyRule.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = FitPolicyRule.TABLE_NAME)
-public class FitPolicyRule extends DefaultEntityBase
+public class FitPolicyRule extends DefaultEntityBase implements PersistentRule
 {
     public static final String TABLE_NAME = "workload_fit_policy_rule";
 

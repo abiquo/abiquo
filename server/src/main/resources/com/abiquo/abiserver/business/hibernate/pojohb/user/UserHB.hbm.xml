@@ -2,68 +2,50 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-  <class catalog="kinton" lazy="false" name="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" polymorphism="explicit" table="user">
-    <id name="idUser" type="java.lang.Integer">
-      <column name="idUser"/>
-      <generator class="identity"/>
-    </id>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" fetch="select" lazy="false" name="roleHB">
-      <column name="idRole"/>
-    </many-to-one>
-    <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" lazy="false" name="enterpriseHB">
-      <column name="idEnterprise"/>
-    </many-to-one>
-    <property name="name" type="string">
-      <column length="30" name="name" not-null="true"/>
-    </property>
-    <property name="surname" type="string">
-      <column length="50" name="surname"/>
-    </property>
-    <property name="description" type="string">
-      <column length="100" name="description"/>
-    </property>
-    <property name="email" type="string">
-      <column length="200" name="email" not-null="true"/>
-    </property>
-    <property name="locale" type="string">
-      <column length="10" name="locale" not-null="true"/>
-    </property>
-    <property name="user" type="string" unique="true">
-      <column length="20" name="user" not-null="true"/>
-    </property>
-    <property name="password" type="string">
-      <column length="15" name="password" not-null="true"/>
-    </property>
-    <property name="active" type="java.lang.Integer">
-      <column name="active"/>
-    </property>
-    
-    <property name="availableVirtualDatacenters" type="string"/>
-    <property name="authType" type="string" column="authType" />
-  </class>
-  <!--  gets only active users -->
-  <query name="GET_USER_BY_USER_NAME">
-  	select user
-    from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as user
-    where user.user = :username and user.active=1 and user.authType = :authType
-  </query>
-  
-  <query name="GET_USERS_BY_PRIVILEGE">
-    select userhb
-    from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb
-    inner join userhb.enterpriseHB as enterprisehb
-    inner join userhb.roleHB as rolehb
-    inner join rolehb.privilegesHB as privilegehb
-    where enterprisehb.id = :enterprise
-    and privilegehb.name = :privilege
-  </query>
-  
-  <query name="GET_USERS_BY_ROLE_DESC">
-    select userhb
-    from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb
-    inner join userhb.enterpriseHB as enterprisehb
-    inner join userhb.roleHB as rolehb
-  </query>
-  
-  
+    <class catalog="kinton" lazy="false" name="com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB" polymorphism="explicit" table="user">
+        <id name="idUser" type="java.lang.Integer">
+            <column name="idUser" />
+            <generator class="identity" />
+        </id>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB" fetch="select" name="roleHB">
+            <column name="idRole" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" fetch="select" name="enterpriseHB">
+            <column name="idEnterprise" />
+        </many-to-one>
+        <property name="name" type="string">
+            <column length="30" name="name" not-null="true" />
+        </property>
+        <property name="surname" type="string">
+            <column length="50" name="surname" />
+        </property>
+        <property name="description" type="string">
+            <column length="100" name="description" />
+        </property>
+        <property name="email" type="string">
+            <column length="200" name="email" not-null="true" />
+        </property>
+        <property name="locale" type="string">
+            <column length="10" name="locale" not-null="true" />
+        </property>
+        <property name="user" type="string" unique="true">
+            <column length="20" name="user" not-null="true" />
+        </property>
+        <property name="password" type="string">
+            <column length="15" name="password" not-null="true" />
+        </property>
+        <property name="active" type="java.lang.Integer">
+            <column name="active" />
+        </property>
+        <property name="availableVirtualDatacenters" type="string" />
+        <property name="authType" type="string" column="authType" />
+        <property name="creationDate" type="java.util.Date">
+            <column length="100" name="creationDate" not-null="true" />
+        </property>
+    </class>
+    <!-- gets only active users -->
+    <query name="GET_USER_BY_USER_NAME"> select user from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as user where user.user = :username and user.active=1 and user.authType = :authType</query>
+    <query name="GET_USERS_BY_PRIVILEGE"> select userhb from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb inner join userhb.enterpriseHB as enterprisehb inner join userhb.roleHB as rolehb inner
+        join rolehb.privilegesHB as privilegehb where enterprisehb.id = :enterprise and privilegehb.name = :privilege</query>
+    <query name="GET_USERS_BY_ROLE_DESC"> select userhb from com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB as userhb inner join userhb.enterpriseHB as enterprisehb inner join userhb.roleHB as rolehb</query>
 </hibernate-mapping>

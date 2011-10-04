@@ -24,18 +24,17 @@ package com.abiquo.api.resources;
 import static com.abiquo.api.common.UriTestResolver.resolveRemoteServicesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
@@ -89,10 +88,7 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(dto.getUri(), entityPost.getUri());
         assertEquals(dto.getStatus(), dto.getStatus());
 
-        ErrorsDto configurationErrors = entityPost.getConfigurationErrors();
-        assertNotNull(configurationErrors);
-        Assert
-            .assertError(configurationErrors, APIError.REMOTE_SERVICE_CONNECTION_FAILED.getCode());
+        assertNull(entityPost.getConfigurationErrors());
     }
 
     @Test

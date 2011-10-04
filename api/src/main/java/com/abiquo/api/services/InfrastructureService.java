@@ -463,7 +463,7 @@ public class InfrastructureService extends DefaultApiService
         if (type.canBeChecked())
         {
             ClientConfig config = new ClientConfig();
-            config.connectTimeout(5);
+            config.connectTimeout(5000);
 
             RestClient restClient = new RestClient(config);
             Resource checkResource =
