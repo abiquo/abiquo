@@ -1,26 +1,12 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="API network integration tests" verbose="1">
-    <listeners>
-        <listener class-name="com.abiquo.testng.TestServerAndAMListener" />
-    <!-- 
-        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
-     -->
-    </listeners>
-     <test name="Single class integration test">
-        <classes>
-            <class name="com.abiquo.testng.TestFactory" />
-        </classes>
-    </test>
-    <!--  
-    <test name="AppsLibrary integration tests">
-        <groups>
-            <run>
-                <include name="it-am" />
-            </run>
-        </groups>
-        <packages>
-            <package name="com.abiquo.api.*" />
-        </packages>
-    </test>
-    -->
+<suite name="AppsLibrary integration tests" verbose="1">
+	<listeners>
+		<listener class-name="com.abiquo.testng.TestServerAndAMListener" />
+		<listener class-name="com.abiquo.testng.TestDatabaseListener" />
+	</listeners>
+	<test name="AppsLibrary integration tests">
+		<classes>
+			<class name="com.abiquo.api.resources.appslibrary.VirtualImageResourceIT"></class>
+		</classes>
+	</test>
 </suite>
