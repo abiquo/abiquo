@@ -18,37 +18,40 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 package net.undf.abicloud.vo.infrastructure
 {
-	[Bindable]
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.infrastructure.UcsRack")]
-	public class UcsRack extends Rack
-	{
-		
-		/* ------------- Public atributes ------------- */
 
-        public var ip:String;
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.Fsm")]
+    [Bindable]
+    public class Fsm
+    {
 
-        public var user:String;
-
-        public var password:String;
+        public static const FINISH:String = "nop";
         
-        public var port:int;
-        
-        public var defaultTemplate:String;
-        
-        public static const TYPE:String = "Cisco UCS";
-        public static const DEFAULT_PORT:int = 80;
+        //fsm name
+        public var dn:String;
 
-        /* ------------- Constructor ------------- */
-		public function UcsRack()
-		{
-			super();
-			ip = "";
-			user = "";
-			password = "";
-			port = DEFAULT_PORT;
-		}
-		
-	}
+	    //FINISH
+	    public var status:String;
+	
+	    //0-100
+	    public var progress:String;
+	
+	    //current task
+	    public var description:String;
+	
+	    //if error != empty -> show error
+	    public var error:String;
+	    
+        public function Fsm()
+        {
+        	dn = "";
+	        status = "";
+	        progress = "";
+	        description = "";
+	        error = "";
+        }
+
+    }
 }
