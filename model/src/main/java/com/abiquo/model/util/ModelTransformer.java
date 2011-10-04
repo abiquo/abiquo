@@ -21,6 +21,7 @@
 
 package com.abiquo.model.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -51,7 +52,10 @@ public class ModelTransformer
     public static <T> T transform(final Class sourceClass, final Class<T> targetClass,
         final Object template) throws Exception
     {
-        T instance = targetClass.newInstance();
+        Constructor<T> cons = targetClass.getDeclaredConstructor();
+        cons.setAccessible(true);
+        T instance = cons.newInstance();
+
         transform(sourceClass, targetClass, template, instance);
         return instance;
     }
