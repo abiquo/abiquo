@@ -62,6 +62,7 @@ public class UcsRack extends Rack
         setPort(port);
         setUser(user);
         setPassword(password);
+        setDefaultTemplate(defaultTemplate);
         setMaxMachinesOn(maxMachinesOn);
     }
 

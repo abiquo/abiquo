@@ -31,6 +31,7 @@ import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
+import com.abiquo.abiserver.pojo.ucs.Fsm;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -118,7 +119,7 @@ public interface RacksResourceStub
      * @param lsName dn.
      * @return BasicResult.
      */
-    public BasicResult associateLogicServer(final PhysicalMachine machine, String lsName);
+    public BasicResult associateLogicServer(final PhysicalMachine machine, final String lsName);
 
     /**
      * LogicServer from the UCS rack.
@@ -127,7 +128,8 @@ public interface RacksResourceStub
      * @param bladeDn dn blade.
      * @return BasicResult.
      */
-    public BasicResult dissociateLogicServer(final PhysicalMachine machine, String lsName);
+    public BasicResult dissociateLogicServer(final Rack rack, final String machineDn,
+        final String lsName);
 
     /**
      * Delete LogicServer from the UCS rack.
@@ -167,5 +169,5 @@ public interface RacksResourceStub
      * 
      * @param dn of the object.
      */
-    public BasicResult objectUcsCurrentTask(UcsRack ucsRack, String dn);
+    public DataResult<Fsm> objectUcsCurrentTask(UcsRack ucsRack, String dn);
 }

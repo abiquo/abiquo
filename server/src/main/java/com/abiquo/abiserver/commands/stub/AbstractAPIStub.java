@@ -825,12 +825,12 @@ public class AbstractAPIStub
     }
 
     protected String createObjectFsmLink(final Integer datacenterId, final Integer rackId,
-        final String distinguished)
+        final Map<String, String[]> queryParams)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
-        params.put("dn", distinguished);
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/{dn}/fsm", params);
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/fsm", params,
+            queryParams);
     }
 }
