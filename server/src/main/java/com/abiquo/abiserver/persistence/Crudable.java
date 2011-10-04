@@ -103,4 +103,14 @@ public interface Crudable<T, ID extends Serializable>
      */
     T merge(String entityName, T entity) throws PersistenceException;
 
+    /**
+     * Refreshes an entity. It means to actually retrieve the entity from DB.
+     * 
+     * @param entity entity to refresh.
+     * @return the updated entity.
+     * @throws PersistenceException If an error.
+     */
+
+    void refresh(T entity) throws PersistenceException;
+
 }
