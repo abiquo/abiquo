@@ -119,6 +119,10 @@ public enum APIError
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"),
 
+    // VIRTUAL CONVERSION
+    NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
+        "The requested stateful conversion does not exist"),
+
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
@@ -376,8 +380,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

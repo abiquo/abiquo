@@ -26,6 +26,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 
 @Repository
@@ -40,32 +42,40 @@ public class VirtualApplianceRep extends DefaultRepBase
     @Autowired
     private NodeVirtualImageDAO nodeVirtualImageDao;
 
+    private VirtualApplianceStatefulConversionDAO vAppSConversionDao;
+
     public VirtualApplianceRep()
     {
 
     }
 
-    public VirtualApplianceRep(EntityManager em)
+    public VirtualApplianceRep(final EntityManager em)
     {
         this.entityManager = em;
 
         this.virtualApplianceDao = new VirtualApplianceDAO(em);
         this.virtualMachineDao = new VirtualMachineDAO(em);
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
+        this.vAppSConversionDao = new VirtualApplianceStatefulConversionDAO(em);
     }
 
-    public VirtualAppliance findVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return nodeVirtualImageDao.findVirtualAppliance(virtualMachine);
     }
 
-    public VirtualAppliance findById(Integer id)
+    public VirtualAppliance findById(final Integer id)
     {
         return virtualApplianceDao.findById(id);
     }
 
-    public void updateVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void updateVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         this.virtualApplianceDao.flush();
+    }
+
+    public VirtualApplianceStatefulConversion findConversionById(final Integer id)
+    {
+        return vAppSConversionDao.findById(id);
     }
 }
