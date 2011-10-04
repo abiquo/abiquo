@@ -51,8 +51,8 @@ public enum APIError
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
         "Invalid credentials"), WHITE_NAME("GEN-6",
-        "The property 'name', must not have whitespace at the beginning or the end."), WHITE_CODE(
-        "GEN-7", "The property 'code', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
+        "The property 'name', must not have whitespace at the beginning or the end."), WHITE_SYMBOL(
+        "GEN-7", "The property 'symbol', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
         "GEN-8",
         "The property 'description', must not have whitespace at the beginning or the end."),
 
@@ -341,7 +341,7 @@ public enum APIError
         "Currency symbol is required"), CURRENCY_NAME_LONG("CURRENCY-6",
         "Currency name maximum lenght is 20 characters"), CURRENCY_SYMBOL_LONG("CURRENCY-7",
         "Currency symbol maximum lenght is 10 characters"), CURRENCY_DIGIT_LONG("CURRENCY-8",
-        "Currency digit maximum  is 9"),
+        "Currency digit maximum value is 9"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
