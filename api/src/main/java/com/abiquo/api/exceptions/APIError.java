@@ -421,7 +421,8 @@ public enum APIError
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
         "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
         "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"), NOT_ASSIGNED_COSTCODE_CURRENCY(
-        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"),
+        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"), NOT_ASSIGNED_COSTCODE_CURRENCY_PRICE(
+        "COSTCODE_CURRENCY-3", "Price is required"),
 
     // PRICING - COST CODE
     PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
