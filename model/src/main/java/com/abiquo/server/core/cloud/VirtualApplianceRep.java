@@ -21,11 +21,15 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionDAO;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -42,7 +46,11 @@ public class VirtualApplianceRep extends DefaultRepBase
     @Autowired
     private NodeVirtualImageDAO nodeVirtualImageDao;
 
+    @Autowired
     private VirtualApplianceStatefulConversionDAO vAppSConversionDao;
+
+    @Autowired
+    private NodeVirtualImageStatefulConversionDAO nodeVirtualImageStatefulDao;
 
     public VirtualApplianceRep()
     {
@@ -57,6 +65,7 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.virtualMachineDao = new VirtualMachineDAO(em);
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
         this.vAppSConversionDao = new VirtualApplianceStatefulConversionDAO(em);
+        this.nodeVirtualImageStatefulDao = new NodeVirtualImageStatefulConversionDAO(em);
     }
 
     public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
@@ -77,5 +86,16 @@ public class VirtualApplianceRep extends DefaultRepBase
     public VirtualApplianceStatefulConversion findConversionById(final Integer id)
     {
         return vAppSConversionDao.findById(id);
+    }
+
+    public NodeVirtualImageStatefulConversion findNodeStatefulConversionById(final Integer id)
+    {
+        return nodeVirtualImageStatefulDao.findById(id);
+    }
+
+    public Collection<NodeVirtualImageStatefulConversion> findNodeStatefulConversionsByVirtualImageConversion(
+        final VirtualImageConversion virtualImageConversion)
+    {
+        return nodeVirtualImageStatefulDao.findByVirtualImageConversion(virtualImageConversion);
     }
 }

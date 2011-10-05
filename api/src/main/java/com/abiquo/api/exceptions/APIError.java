@@ -123,6 +123,10 @@ public enum APIError
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
         "The requested stateful conversion does not exist"),
 
+    // NODE VIRTUAL IMAGE STATEFUL CONVERSION
+    NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
+        "The requested node virtual image stateful conversion does not exist"),
+
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(

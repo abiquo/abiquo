@@ -21,10 +21,17 @@
 
 package com.abiquo.server.core.cloud.stateful;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaNodeVirtualImageStatefulConversionDAO")
@@ -41,4 +48,21 @@ public class NodeVirtualImageStatefulConversionDAO extends
         super(NodeVirtualImageStatefulConversion.class, entityManager);
     }
 
+    public Collection<NodeVirtualImageStatefulConversion> findByVirtualImageConversion(
+        final VirtualImageConversion virtualImageConversion)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameVIConversion(virtualImageConversion));
+        return getResultList(criteria);
+    }
+
+    public static Criterion sameVIConversion(final VirtualImageConversion vic)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.eq(
+            NodeVirtualImageStatefulConversion.VIRTUAL_IMAGE_CONVERSION_PROPERTY, vic));
+
+        return filterDisjunction;
+    }
 }
