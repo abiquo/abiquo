@@ -16,6 +16,9 @@
         <property name="vlanTag" type="java.lang.Integer">
             <column name="vlan_tag" />
         </property>
+        <property name="networkType" type="string">
+            <column length="40" name="networktype" />
+        </property>
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB" lazy="false" fetch="select" name="configuration">
             <column name="network_configuration_id" />
         </many-to-one>
