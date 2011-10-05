@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services.cloud;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,10 +41,19 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
+import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
+import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
+import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
+import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
+import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ConfigureVirtualMachineOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -62,6 +72,7 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -105,6 +116,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected MachineService machineService;
+
+    @Autowired
+    protected IpAddressService ipService;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -535,6 +549,8 @@ public class VirtualMachineService extends DefaultApiService
      * <li>In premium call initiator</li>
      * <li>Subscribe to VSM</li>
      * <li>Build the Task DTO</li>
+     * <li>Build the Configure DTO</li>
+     * <li>Build the Power On DTO</li>
      * <li>Enqueue in tarantino</li>
      * <li>Register in redis</li>
      * <li>Add Task DTO to rabbitmq</li>
@@ -595,6 +611,166 @@ public class VirtualMachineService extends DefaultApiService
             virtualMachine.getHypervisor().getType().name(),
             virtualMachine.getHypervisor().getUser(), virtualMachine.getHypervisor().getPassword());
         logger.debug("Machine registered!");
+
+        logger.debug("Creating the DatacenterTask");
+
+        // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
+        // VirtualMachine is the definition of the VirtualMachine and the job, power on
+        DatacenterTasks deployTask = new DatacenterTasks();
+
+        VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
+
+        // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
+        // so Task 1 and its job would be 1.1, another 1.2
+        deployTask.setId("1");
+
+        logger.debug("Creating disk information");
+        // Disk related configuration
+        primaryDiskDefinitionConfiguration(virtualMachine, vmDesc);
+        logger.debug("Disk information created!");
+
+        vmDesc.setRdPort(virtualMachine.getVdrpPort());
+
+        logger.debug("Creating the network related configuration");
+        // Network related configuration
+        vnicDefinitionConfiguration(virtualMachine, vmDesc);
+        logger.debug("Network configuration done!");
+
+        logger.debug("Configure the hypervisor connection");
+        // Hypervisor connection related configuration
+        HypervisorConnection hypervisorConnection =
+            hypervisorConnectionConfiguration(virtualMachine);
+        logger.debug("Hypervisor connection configuration done");
+
+        logger.debug("Configuration job");
+        ConfigureVirtualMachineOp configJob =
+            configureJobConfiguration(virtualMachine, deployTask, vmDesc, hypervisorConnection);
+        logger.debug("Configuration job done with id {}", configJob.getId());
+
+        logger.debug("Apply state job");
+        ApplyVirtualMachineStateOp stateJob =
+            applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
+                hypervisorConnection);
+        logger.debug("Apply state job done with id {}", stateJob.getId());
+
+        // The jobs are to be rolled back
+        deployTask.setDependent(Boolean.TRUE);
+        deployTask.getJobs().add(configJob);
+        deployTask.getJobs().add(stateJob);
+
+        // The producer needs the Datacenter
+        VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        TarantinoRequestProducer producer =
+            new TarantinoRequestProducer(virtualDatacenter.getDatacenter().getName());
+
+        try
+        {
+            producer.publish(deployTask);
+        }
+        catch (IOException e)
+        {
+
+            logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
+                + e.getMessage());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY,
+                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
+                        + e.getMessage());
+
+            // There is no point in continue
+            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+    }
+
+    private ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
+        final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
+        final VirtualMachineDescriptionBuilder vmDesc,
+        final HypervisorConnection hypervisorConnection)
+    {
+        ApplyVirtualMachineStateOp stateJob = new ApplyVirtualMachineStateOp();
+        stateJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
+        stateJob.setHypervisorConnection(hypervisorConnection);
+        stateJob.setTransaction(StateTransition.POWERON);
+        stateJob.setId(deployTask.getId() + "." + virtualMachine.getUuid());
+        return stateJob;
+    }
+
+    private ConfigureVirtualMachineOp configureJobConfiguration(
+        final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
+        final VirtualMachineDescriptionBuilder vmDesc,
+        final HypervisorConnection hypervisorConnection)
+    {
+        ConfigureVirtualMachineOp configJob = new ConfigureVirtualMachineOp();
+        configJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
+        configJob.setHypervisorConnection(hypervisorConnection);
+        configJob.setId(deployTask.getId() + "." + virtualMachine.getUuid() + "configure");
+        return configJob;
+    }
+
+    private HypervisorConnection hypervisorConnectionConfiguration(
+        final VirtualMachine virtualMachine)
+    {
+        HypervisorConnection hypervisorConnection = new HypervisorConnection();
+        hypervisorConnection.setHypervisorType(HypervisorConnection.HypervisorType
+            .valueOf(virtualMachine.getHypervisor().getType().name()));
+        hypervisorConnection.setIp(virtualMachine.getHypervisor().getIp());
+        hypervisorConnection.setLoginPassword(virtualMachine.getHypervisor().getPassword());
+        hypervisorConnection.setLoginUser(virtualMachine.getHypervisor().getUser());
+        return hypervisorConnection;
+    }
+
+    private void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder vmDesc)
+    {
+        vmDesc.primaryDisk(
+            DiskDescription.DiskFormatType.valueOf(virtualMachine.getVirtualImage()
+                .getDiskFormatType().name()), virtualMachine.getHdInBytes(),
+            virtualMachine.getVirtualImage().getRepository().getUrl(),
+            virtualMachine.getVirtualImage().getPathName(),
+            virtualMachine.getDatastore().getDatastoreUUID(),
+            virtualMachine.getVirtualImage().getRepository().getUrl()).hardware(
+            virtualMachine.getCpu(), virtualMachine.getRam());
+    }
+
+    private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder vmDesc)
+    {
+        List<IpPoolManagement> ipPoolManagementByMachine =
+            ipService.getListIpPoolManagementByMachine(virtualMachine);
+
+        for (IpPoolManagement i : ipPoolManagementByMachine)
+        {
+            if (i.getConfigureGateway())
+            {
+                logger.debug("Network configuration with gateway");
+                // This interface is the one that configures the Network parameters.
+                // We force the forward mode to BRIDGED
+                vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor()
+                    .getMachine().getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork()
+                    .getTag(), i.getName(), i.getVlanNetwork().getConfiguration().getFenceMode(), i
+                    .getVlanNetwork().getConfiguration().getAddress(), i.getVlanNetwork()
+                    .getConfiguration().getGateway(), i.getVlanNetwork().getConfiguration()
+                    .getNetMask(), i.getVlanNetwork().getConfiguration().getPrimaryDNS(), i
+                    .getVlanNetwork().getConfiguration().getSecondaryDNS(), i.getVlanNetwork()
+                    .getConfiguration().getSufixDNS(), Integer.valueOf(i.getRasd()
+                    .getConfigurationName()));
+                continue;
+            }
+            logger.debug("Network configuration without gateway");
+            // Only the data not related to the network since this data is configured based on the
+            // configureNetwork parameter
+            vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
+                .getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork().getTag(), i.getName(),
+                null, null, null, null, null, null, null,
+                Integer.valueOf(i.getRasd().getConfigurationName()));
+        }
     }
 
     /**
