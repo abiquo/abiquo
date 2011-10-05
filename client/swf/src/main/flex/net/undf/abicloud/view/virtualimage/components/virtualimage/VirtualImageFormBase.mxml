@@ -840,7 +840,6 @@
                 <mx:ComboBox id="costInput"
                 	prompt="@Resource(bundle='Common',key='LABEL_NOT_AVAILABLE')"
                 	enabled="{costInput.dataProvider}"
-                    editable="{this._isEditable}"
                 	labelField="name"
                     height="18"/>
             </mx:FormItem>
