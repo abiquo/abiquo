@@ -93,7 +93,7 @@ package net.undf.abicloud.vo.infrastructure
         
         public static const STATE_DISABLED_BY_HA:int = 7;
         
-        public static const STATE_HALTED_FOR_SAVE:int = 16;
+        public static const STATE_HALTED_FOR_SAVE:int = 8;
 
         /* ------------- Constructor ------------- */
         public function PhysicalMachine()

@@ -1334,6 +1334,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.infra.googleMapskey","0","The map\'s Google key used in infrastructure section"),
  ("client.infra.googleMapsLadTimeOut","10","Time, in seconds, that applications waits Google Maps to load. After that, application considers that Google Maps service is temporarily unavailable, and is not used"),
  ("client.infra.InfrastructureUpdateInterval","30","Time interval in seconds"),
+ ("client.infra.ucsManagerLink","/ucsm/ucsm.jnlp","URL to display UCS Manager Interface"),
  ("client.metering.meteringUpdateInterval","10","Time interval in seconds"),
  ("client.network.numberIpAdressesPerPage","25","Number entries that will appear when listing IP addresses in different parts of the application"),
  ("client.theme.defaultEnterpriseLogoPath","themes/abicloudDefault/logo.png","This is the path to the Enterprise logo used in the app"),

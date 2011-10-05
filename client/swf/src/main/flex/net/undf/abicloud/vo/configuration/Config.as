@@ -58,6 +58,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_infra_googleMapsDefaultZoom:SystemProperty;
 		public var client_infra_googleMapskey:SystemProperty;
 		public var client_infra_googleMapsLadTimeOut:SystemProperty;
+		public var client_infra_ucsManagerLink:SystemProperty;
 		public var client_infra_InfrastructureUpdateInterval:SystemProperty;
 		public var client_metering_meteringUpdateInterval:SystemProperty;
 		public var client_network_numberIpAdressesPerPage:SystemProperty;
