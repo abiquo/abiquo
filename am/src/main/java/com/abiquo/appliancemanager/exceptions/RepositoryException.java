@@ -21,30 +21,46 @@
 
 package com.abiquo.appliancemanager.exceptions;
 
+import com.abiquo.am.exceptions.AMError;
+
 /**
  * Thrown when using an RepositorySpace identifier/locator with invalid or not reachable
  * ''ovfindex.xml'' is provided as RS ID or during some malfunction on the OVFIndex internal logic.
  * 
  * @author apuig
  */
-public class RepositoryException extends Exception
+public class RepositoryException extends RuntimeException
 {
 
-    /** Auto-generated serial UID */
-    private static final long serialVersionUID = 6859088415011865559L;
+    final AMError error;
 
-    public RepositoryException(String message)
+    public AMError getError()
     {
-        super(message);
+        return error;
     }
 
-    public RepositoryException(String message, Throwable cause)
+    public RepositoryException(AMError error)
     {
-        super(message, cause);
+        super(error.getMessage());
+        this.error = error;
     }
 
-    public RepositoryException(Throwable cause)
+    public RepositoryException(AMError error, String msg)
     {
-        super(cause);
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg));
+        this.error = error;
     }
+
+    public RepositoryException(AMError error, String msg, Throwable th)
+    {
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg), th);
+        this.error = error;
+    }
+
+    public RepositoryException(AMError error, Throwable th)
+    {
+        super(error.getMessage(), th);
+        this.error = error;
+    }
+
 }

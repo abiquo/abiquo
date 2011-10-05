@@ -24,29 +24,29 @@
  */
 package com.abiquo.appliancemanager.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import com.abiquo.am.exceptions.AMError;
 
-public class AMException extends WebApplicationException
+public class AMException extends RepositoryException
 {
-    private static final long serialVersionUID = -7905368963874709865L;
 
-    public AMException(final Status status, final String message)
+    public AMException(AMError error, String msg, Throwable th)
     {
-        super(Response.status(status).entity(message).build());
+        super(error, msg, th);
     }
 
-    public AMException(final Status status, final String message, Throwable cause)
+    public AMException(AMError error, String msg)
     {
-        super(cause, Response.status(status).entity(message).build());
+        super(error, msg);
     }
 
-    /***
-     * Internal server error
-     */
-    public AMException(final RepositoryException repoException)
+    public AMException(AMError error, Throwable th)
     {
-        super(Response.status(Status.INTERNAL_SERVER_ERROR).entity(repoException.getLocalizedMessage()).build()); 
+        super(error, th);
     }
+
+    public AMException(AMError error)
+    {
+        super(error);
+    }
+
 }

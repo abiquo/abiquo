@@ -53,8 +53,10 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.am.services.util.TimeoutFSUtils;
+import com.abiquo.api.service.DefaultApiService;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
@@ -66,11 +68,13 @@ import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
+import static com.abiquo.am.services.OVFPackageConventions.*;
+
 /**
  * Each enterprise have its own logical separation on the current physical Repository. This is
  * implemented using a folder (with the Enterprise identifier)
  */
-public class EnterpriseRepositoryService extends OVFPackageConventions
+public class EnterpriseRepositoryService extends DefaultApiService
 {
     /** The constant logger object. */
     private final static Logger logger = LoggerFactory.getLogger(EnterpriseRepositoryService.class);
@@ -78,43 +82,21 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
     private final static String BASE_REPO_PATH = AMConfigurationManager.getInstance()
         .getAMConfiguration().getRepositoryPath();
 
+    private final static Integer FS_TIMOUT_MS = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getFsTimeoutMs();
+
     /** Immutable singelton instances base on its Enterprise Identifier. */
     private static Map<String, EnterpriseRepositoryService> enterpriseHandlers =
         new HashMap<String, EnterpriseRepositoryService>();
 
-    /** Enterprise of the current handler. */
-    private final String idEnterprise;
-
     /** Repository path particular of the current enterprise. */
     private final String enterpriseRepositoryPath;
 
-    private final Integer FS_TIMOUT_MS = AMConfigurationManager.getInstance().getAMConfiguration()
-        .getFsTimeoutMs();
-
-    private List<String> cachedpackages = null;
-
     private EnterpriseRepositoryService(final String idEnterprise)
     {
-        this.idEnterprise = idEnterprise;
-        this.enterpriseRepositoryPath = codifyEnterpriseRepositoryPath(idEnterprise);
+        enterpriseRepositoryPath = codifyEnterpriseRepositoryPath(BASE_REPO_PATH, idEnterprise);
 
-        try
-        {
-            validateEnterpirseRepositoryPathFile();
-        }
-        catch (RepositoryException e)
-        {
-            final String cause =
-                String.format("The enterprise repository for idEnterprise "
-                    + "= [%s] can not be accessed:\n %s", idEnterprise, e.getLocalizedMessage());
-
-            logger.error(cause, e);
-
-            AMConfigurationManager.getInstance().addConfigurationError(cause); // XXX
-        }
-        //
-        // traverseOVFFolderStructure(new File(enterpriseRepositoryPath).getAbsolutePath(),
-        // new String(), false, true);
+        validateEnterpirseRepositoryPathFile();
     }
 
     /**
@@ -132,6 +114,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         {
             TimeoutFSUtils.getInstance().canWriteRepository();
         }
+
         if (!enterpriseHandlers.containsKey(idEnterprise))
         {
             enterpriseHandlers.put(idEnterprise, new EnterpriseRepositoryService(idEnterprise));
@@ -140,29 +123,10 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         return enterpriseHandlers.get(idEnterprise);
     }
 
-    public String getEnterpriseRepositoryPath()
-    {
-        return enterpriseRepositoryPath;
-    }
-
-    /**
-     * @param idEnterprise, the enterprise of this repository handler.
-     * @return the repository path particular of the current enterprise.
-     */
-    private String codifyEnterpriseRepositoryPath(final String idEnterprise)
-    {
-        assert BASE_REPO_PATH != null && !BASE_REPO_PATH.isEmpty() && BASE_REPO_PATH.endsWith("/");
-
-        return BASE_REPO_PATH + String.valueOf(idEnterprise) + '/';
-    }
-
     /**
      * Check if it exist or create it.
-     * 
-     * @throws RepositoryException, if it can not create the ''reposioryPath''.
      */
-
-    private void validateEnterpirseRepositoryPathFile() throws RepositoryException
+    private void validateEnterpirseRepositoryPathFile()
     {
         TimeoutFSUtils.getInstance().canUseRepository();
 
@@ -172,105 +136,25 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         {
             if (!enterpriseRepositoryFile.mkdirs())
             {
-                final String cause =
-                    String.format("Can not create the Enterprise "
-                        + "Repository Path at [%s] for enterprise id [%s]",
-                        enterpriseRepositoryPath, idEnterprise);
-
-                throw new RepositoryException(cause);
+                addError(new AMException(AMError.REPO_NOT_ACCESSIBLE, enterpriseRepositoryPath));
+                flushErrors();
             }
         }
-        // XXX exist and its a directory
 
-        assert enterpriseRepositoryFile.exists() && enterpriseRepositoryFile.canWrite()
-            && enterpriseRepositoryFile.isDirectory();
-
-        // XXX else(canWrite)XXX the base path can be written so we do not check this child folders
-        // can be written (and if the mkdirs success).
-
-    }
-
-    /**
-     * Create a path in the Enterprise Repository based on the OVF location. Codify the hostname and
-     * the path to the root folder. ej (wwww.abiquo.com/ovfindex/package1/envelope.ovf ->
-     * enterpriseRepo/www.abiquo.com/ovfindex/package1 )
-     * 
-     * @return the path where the OVF will be deployed into the current enterprise repository.
-     */
-    private String getOVFPackagePath(final String ovfid)
-    {
-        return enterpriseRepositoryPath + getRelativePackagePath(ovfid);
-    }
-
-    /**
-     * return
-     * 
-     * @throws MalformedURLException
-     */
-    public String createFileInfo(final FileType fileType, final String ovfId)
-        throws DownloadException, MalformedURLException
-    {
-        String packagePath = getOVFPackagePath(ovfId);
-
-        return packagePath + normalizeFileHref(fileType.getHref());
-    }
-
-    private String normalizeFileHref(final String filehref) throws MalformedURLException
-    {
-        if (filehref.startsWith("http://"))
+        if (!(enterpriseRepositoryFile.exists() && enterpriseRepositoryFile.canWrite() && enterpriseRepositoryFile
+            .isDirectory()))
         {
-            URL fileurl = new URL(filehref);
-
-            String file = fileurl.getFile();
-
-            if (file == null || file.isEmpty())
-            {
-                throw new MalformedURLException("Expected file in " + fileurl.toString());
-            }
-
-            return file;
-        }
-        else
-        // already relative to package
-        {
-            return filehref;
+            addError(new AMException(AMError.REPO_NOT_ACCESSIBLE, enterpriseRepositoryPath));
+            flushErrors();
         }
     }
 
-    // /**
-    // * /opt/vm_repository/1/some/path.d --> some/path.d
-    // * */
-    // private String pathRelative(String absolutePath)
-    // {
-    // if(!absolutePath.startsWith(enterpriseRepositoryPath))
-    // {
-    // throw new IllegalArgumentException("");
-    // }
-    //
-    // return absolutePath.substring(enterpriseRepositoryPath.length());
-    // }
-    //
-    // private String getOVFLocationFromEnvelopePath(final String ovfPath)
-    // {
-    // final String relative = ovfPath.substring(enterpriseRepositoryPath.length());
-    // return relative;
-    // }
-    //
-    // /**
-    // * Locate the envelope on the enterprise repository filesystem. (equals to use
-    // getOVFPackagePath
-    // * + Name )
-    // */
-    // private String getOVFIdPath(final String ovfId)
-    // {
-    // return ;
-    // }
-
-    /**
-     * XXX doc (included ) Get the list of OVF identifiers ('download URL')
-     */
     public List<String> getAllOVF(final boolean includeBundeles)
     {
+
+        /**
+         * TODO caching results
+         */
         File enterpriseRepositoryFile = new File(enterpriseRepositoryPath);
 
         TimeoutFSUtils.getInstance().canUseRepository();
@@ -315,8 +199,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         }
         else
         {
-            throw new AMException(Status.INTERNAL_SERVER_ERROR, String.format(
-                "Can't list content of the folder [%s] ", enterpriseRepositoryPath));
+            addError(new AMException(AMError.REPO_TIMEOUT_REFRESH, enterpriseRepositoryPath));
         }
 
         List<String> cleanovfids = new LinkedList<String>();
@@ -327,139 +210,6 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
         }
 
         return cleanovfids;
-    }
-
-    /**
-     * Run a folder list in another thread in order to cancel if it take too long
-     */
-    class TraverseFSWithTimeout implements Callable<List<String>>
-    {
-        final String erPath;
-
-        final String relativePath;
-
-        final Boolean includeBundles;
-
-        final Boolean cleanDeploys;
-
-        public TraverseFSWithTimeout(String erPath, String relativePath, Boolean includeBundles,
-            Boolean cleanDeploys)
-        {
-            this.erPath = erPath;
-            this.relativePath = relativePath;
-            this.includeBundles = includeBundles;
-            this.cleanDeploys = cleanDeploys;
-        }
-
-        @Override
-        public List<String> call() throws Exception
-        {
-            return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys);
-        }
-
-        /**
-         * @param includeBundles, if true return also the OVF packages identifier for the bundled
-         *            packages (only used on status = DOWNLOAD).
-         * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
-         */
-        private List<String> traverseOVFFolderStructure(final String erPath,
-            final String relativePath, final Boolean includeBundles, final Boolean cleanDeploys)
-        {
-            List<String> ovfids = new LinkedList<String>();
-            File enterpriseRepositoryFile = new File(erPath);
-
-            if (!enterpriseRepositoryFile.exists() || !enterpriseRepositoryFile.isDirectory())
-            {
-                return new LinkedList<String>();
-            }
-
-            for (File file : enterpriseRepositoryFile.listFiles())
-            {
-                /**
-                 * TODO assert inside a folder only one .ovf (to exactly know the bundle parent!)
-                 */
-                String recRelativePath;
-                if (relativePath.isEmpty())
-                {
-
-                    recRelativePath = file.getName();
-                }
-                else
-                {
-                    recRelativePath = relativePath + '/' + file.getName();
-                }
-
-                if (file.exists() && file.isDirectory() && file.listFiles().length != 0)
-                {
-                    List<String> recOvfids =
-                        traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
-                            includeBundles, cleanDeploys);
-
-                    ovfids.addAll(recOvfids);
-                }
-                // else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION) &&
-                // file.getName().contains(OVF_BUNDLE_PATH_IDENTIFIER))
-                // { logger.debug("deleting [{}]", file.getName());
-                // file.delete();
-                // }
-                else if (file.exists() && file.isFile()
-                    && file.getName().endsWith(OVF_FILE_EXTENSION))
-                // an ovf
-                {
-                    recRelativePath = customDencode(recRelativePath);
-
-                    String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
-
-                    OVFPackageInstanceStatusType ovfStatus = getOVFStatus(ovfId);
-
-                    if (cleanDeploys && ovfStatus == OVFPackageInstanceStatusType.DOWNLOADING)
-                    {
-                        try
-                        {
-                            FileUtils.deleteDirectory(enterpriseRepositoryFile);
-                        }
-                        catch (Exception e)
-                        {
-                            logger.error("Can not delete the interrupted download [{}], \n{}",
-                                ovfId, e);
-                        }
-                    }
-                    else if (ovfStatus == OVFPackageInstanceStatusType.DOWNLOAD)
-                    {
-                        ovfids.add(ovfId);
-
-                        if (includeBundles)
-                        {
-                            for (String fileBund : enterpriseRepositoryFile
-                                .list(new BundleImageFileFilter()))
-                            {
-                                final String snapshot =
-                                    fileBund.substring(0,
-                                        fileBund.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
-
-                                final String bundleOvfId = createBundleOvfId(ovfId, snapshot);
-
-                                ovfids.add(bundleOvfId);
-                            }
-                        }// includeBundles
-                    }
-
-                }// an OVF
-
-            }// files
-
-            return ovfids;
-        }
-
-    }// traverse class
-
-    private class BundleImageFileFilter implements FilenameFilter
-    {
-        @Override
-        public boolean accept(final File dir, final String name)
-        {
-            return name.contains(OVF_BUNDLE_PATH_IDENTIFIER);
-        }
     }
 
     /***
@@ -489,7 +239,7 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
             return;
         }
 
-        final String packagePath = getOVFPackagePath(ovfId);
+        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
 
         File packageFile = new File(packagePath);
         String[] bundles = packageFile.list(new BundleImageFileFilter());
@@ -520,7 +270,8 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
                     }
                     catch (IOException e1)
                     {
-                        throw new RepositoryException(e);
+                        addError(new AMException(AMError.OVFPI_DELETE, enterpriseRepositoryPath, e1));
+                        flushErrors();
                     }
                 }// nfs issue
 
@@ -541,24 +292,27 @@ public class EnterpriseRepositoryService extends OVFPackageConventions
 
             stBuffer.append("\n It can not be deleted.");
 
-            throw new RepositoryException(stBuffer.toString());
+            addError(new AMException(AMError.OVFPI_DELETE_INSTANCES, stBuffer.toString()));
+            flushErrors();
         }
     }
 
-    public void deleteImportedBundle(final String ovfId) throws IdNotFoundException
+    /**
+     * imported bundles do not use the ''enterpriserepopath''
+     */
+    public void deleteImportedBundle(final String ovfId)     
     {
         final String path =
             ovfId.substring(OVF_BUNDLE_IMPORTED_PREFIX.length(), ovfId.lastIndexOf('/'));
-        final String absPath = BASE_REPO_PATH + path; // imported bundles do not use the
-                                                      // ''enterpriserepopath''
+        final String absPath = BASE_REPO_PATH + path;
 
         File importBundleDir = new File(absPath);
 
         if (!importBundleDir.exists())
         {
-            throw new IdNotFoundException(String.format(
-                "The path do not exist. %s\nShould be a bundle of an imported virtual machine.",
-                absPath));
+            addError(new AMException(AMError.OVFPI_SNAPSHOT_NOT_EXIST, msg));
+            
+            
         }
         else if (!importBundleDir.isDirectory())
         {

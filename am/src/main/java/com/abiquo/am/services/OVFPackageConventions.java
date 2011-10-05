@@ -21,8 +21,13 @@
 
 package com.abiquo.am.services;
 
+import static com.abiquo.am.services.OVFPackageConventions.getOVFPackagePath;
+import static com.abiquo.am.services.OVFPackageConventions.getRelativePackagePath;
+
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import org.dmtf.schemas.ovf.envelope._1.FileType;
 
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 
@@ -49,29 +54,29 @@ public class OVFPackageConventions
     /**
      * XXX document me !!! return the last segment of the OVF location path. (ends with ''.ovf'')
      */
-    public String getOVFPackageName(final String ovfid)
+    public static String getOVFPackageName(final String ovfid)
     {
         assert isValidOVFLocation(ovfid);
 
         return ovfid.substring(ovfid.lastIndexOf('/') + 1);
     }
 
-    boolean isValidOVFLocation(final String ovfid)
+    public static boolean isValidOVFLocation(final String ovfid)
     {
         return ovfid.startsWith(OVF_LOCATION_PREFIX) && ovfid.endsWith(OVF_LOCATION_POSTFIX);
     }
 
-    boolean isImportedBundleOvfId(final String ovfId)
+    public static boolean isImportedBundleOvfId(final String ovfId)
     {
         return ovfId.startsWith(OVF_BUNDLE_IMPORTED_PREFIX);
     }
 
-    boolean isBundleOvfId(final String ovfId)
+    public static boolean isBundleOvfId(final String ovfId)
     {
         return ovfId.contains(OVF_BUNDLE_PATH_IDENTIFIER);
     }
 
-    String createBundleOvfId(final String ovfId, final String snapshot)
+    public static String createBundleOvfId(final String ovfId, final String snapshot)
     {
         final String masterPre = ovfId.substring(0, ovfId.lastIndexOf('/') + 1);
         final String masterPost = ovfId.substring(ovfId.lastIndexOf('/') + 1, ovfId.length());
@@ -81,7 +86,7 @@ public class OVFPackageConventions
         return bundleOvfId;
     }
 
-    String getBundleMasterOvfId(final String bundleOvfId)
+    public static String getBundleMasterOvfId(final String bundleOvfId)
     {
         final String masterPre = bundleOvfId.substring(0, bundleOvfId.lastIndexOf('/') + 1);
         final String masterPost =
@@ -91,7 +96,7 @@ public class OVFPackageConventions
         return masterPre + masterPost;
     }
 
-    String getBundleSnapshot(final String bundleOvfId)
+    public static String getBundleSnapshot(final String bundleOvfId)
     {
         final String snapshot =
             bundleOvfId.substring(bundleOvfId.lastIndexOf('/') + 1,
@@ -100,13 +105,14 @@ public class OVFPackageConventions
         return snapshot;
     }
 
-    String codifyBundleOVFId(final String ovfid, final String snapshotMark, final String packageName)
+    public static String codifyBundleOVFId(final String ovfid, final String snapshotMark,
+        final String packageName)
     {
         return ovfid.substring(0, ovfid.lastIndexOf('/') + 1).concat(snapshotMark)
             .concat(packageName);
     }
 
-    String cleanOVFurlOnOldRepo(String ovfid)
+    public static String cleanOVFurlOnOldRepo(String ovfid)
     {
         ovfid = ovfid.replaceFirst("http://http", "http://");
         ovfid = ovfid.replaceFirst(".coms3direct", ".com/s3direct");
@@ -114,7 +120,7 @@ public class OVFPackageConventions
         return ovfid;
     }
 
-    String cleanOVFurlForOldRepo(String ovfid)
+    public static String cleanOVFurlForOldRepo(String ovfid)
     {
         if (ovfid.startsWith("http://http"))
         {
@@ -127,7 +133,7 @@ public class OVFPackageConventions
         return ovfid;
     }
 
-    public String getRelativePackagePath(final String ovfid)
+    public static String getRelativePackagePath(final String ovfid)
     {
         // TODO check OVFid do not contains any query param (envelope.ovf?queryparam=XXX)
         assert isValidOVFLocation(ovfid);
@@ -137,7 +143,7 @@ public class OVFPackageConventions
         return customEncode(path);
     }
 
-    String getRelativeOVFPath(final String ovfId)
+    public static String getRelativeOVFPath(final String ovfId)
     {
         assert ovfId.startsWith(OVF_LOCATION_PREFIX);
 
@@ -175,7 +181,7 @@ public class OVFPackageConventions
      * <li>&</li>
      * </ul>
      */
-    public String customDencode(String path)
+    public static String customDencode(String path)
     {
         path = path.replaceAll("/abiport", ":");
         path = path.replaceAll("/abiintermark", "\\?");
@@ -188,7 +194,7 @@ public class OVFPackageConventions
         return path;
     }
 
-    String getMasterOVFPackage(String ovfIdSnapshot)
+    public static String getMasterOVFPackage(String ovfIdSnapshot)
     {
 
         // TODO convention
@@ -209,7 +215,7 @@ public class OVFPackageConventions
      * @param ovfId, the OVF Package identifier (and locator).
      * @throws DownloadException, it the URL can not be created.
      */
-    URL getFileUrl(String relativeFilePath, String ovfId) throws DownloadException
+    public static URL getFileUrl(String relativeFilePath, String ovfId) throws DownloadException
     {
         URL fileURL;
 
@@ -242,8 +248,6 @@ public class OVFPackageConventions
 
         return fileURL;
     }
-    
-    
 
     /**
      * Creates the OVFPackageInstance downloadlink from the path parameter (not include URL protocol
@@ -252,5 +256,75 @@ public class OVFPackageConventions
     public static String ovfUrl(final String ovfIn)
     {
         return "http://" + ovfIn; // XXX only http supported
+    }
+
+    // /
+    /**
+     * EnterpriseRepository
+     */
+    //
+
+    /**
+     * @param idEnterprise, the enterprise of this repository handler.
+     * @return the repository path particular of the current enterprise.
+     */
+    public static String codifyEnterpriseRepositoryPath(final String BASE_REPO_PATH,
+        final String idEnterprise)
+    {
+        assert BASE_REPO_PATH != null && !BASE_REPO_PATH.isEmpty() && BASE_REPO_PATH.endsWith("/");
+
+        return BASE_REPO_PATH + String.valueOf(idEnterprise) + '/';
+    }
+
+    
+
+    /**
+     * Create a path in the Enterprise Repository based on the OVF location. Codify the hostname and
+     * the path to the root folder. ej (wwww.abiquo.com/ovfindex/package1/envelope.ovf ->
+     * enterpriseRepo/www.abiquo.com/ovfindex/package1 )
+     * 
+     * @return the path where the OVF will be deployed into the current enterprise repository.
+     */
+    public static String getOVFPackagePath(final String enterpriseRepositoryPath, final String ovfid)
+    {
+        return enterpriseRepositoryPath + getRelativePackagePath(ovfid);
+    }
+    
+    
+    
+    
+    /**
+     * return
+     * 
+     * @throws MalformedURLException
+     */
+    public static String createFileInfo(final String enterpriseRepositoryPath, final FileType fileType, final String ovfId)
+        throws DownloadException, MalformedURLException
+    {
+        String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+
+        return packagePath + normalizeFileHref(fileType.getHref());
+    }
+
+    private static String normalizeFileHref(final String filehref) throws MalformedURLException
+    {
+        if (filehref.startsWith("http://"))
+        {
+            URL fileurl = new URL(filehref);
+
+            String file = fileurl.getFile();
+
+            if (file == null || file.isEmpty())
+            {
+                throw new MalformedURLException("Expected file in " + fileurl.toString());
+            }
+
+            return file;
+        }
+        else
+        // already relative to package
+        {
+            return filehref;
+        }
     }
 }
