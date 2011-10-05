@@ -835,7 +835,6 @@
                 visible="{this._virtualImage != null}">
                 <mx:TextInput id="costInput"
                     height="18"
-                    editable="{this._isEditable}"
                     maxChars="50"
                     change="validateForm()"/>
             </mx:FormItem>
