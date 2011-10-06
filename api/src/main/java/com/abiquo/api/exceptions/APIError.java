@@ -107,7 +107,7 @@ public enum APIError
         "VDC-5",
         "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
-        "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
+        "VDC-6", "Virtual Datacenter must always have at least one private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
         "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
     // VLANS
