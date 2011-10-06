@@ -43,8 +43,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
 
     private Integer virtualCpuCores, virtualCpusUsed, virtualCpusPerCore;
 
-    private Long virtualHardDiskInMb, virtualHardDiskUsedInMb;
-
     private MachineState state;
 
     private String virtualSwitch;
@@ -260,28 +258,6 @@ public class MachineDto extends SingleResourceTransportDto implements Serializab
     public void setVirtualCpusPerCore(final Integer virtualCpusPerCore)
     {
         this.virtualCpusPerCore = virtualCpusPerCore;
-    }
-
-    @XmlElement(name = "hd")
-    public Long getVirtualHardDiskInMb()
-    {
-        return (Long) getDefaultMb(virtualHardDiskInMb);
-    }
-
-    public void setVirtualHardDiskInMb(final Long virtualHardDiskInMb)
-    {
-        this.virtualHardDiskInMb = virtualHardDiskInMb;
-    }
-
-    @XmlElement(name = "hdUsed")
-    public Long getVirtualHardDiskUsedInMb()
-    {
-        return getDefaultMb(virtualHardDiskUsedInMb).longValue();
-    }
-
-    public void setVirtualHardDiskUsedInMb(final Long virtualHardDiskUsedInMb)
-    {
-        this.virtualHardDiskUsedInMb = virtualHardDiskUsedInMb;
     }
 
     private Number getDefaultMb(final Number mb)

@@ -77,14 +77,14 @@ public class PopulateInfrastructureModelTest
         // "physicalMachineIp", "http://virtualfactorylocation:8080/vf");
     }
 
-    private static Infrastructure readInfraestructure(String path) throws JAXBException
+    private static Infrastructure readInfraestructure(final String path) throws JAXBException
     {
         JAXBContext jaxbContext = JAXBContext.newInstance(Infrastructure.class);
 
         return (Infrastructure) jaxbContext.createUnmarshaller().unmarshal(new File(path));
     }
 
-    public void createTestInfrastructure(Infrastructure infra) throws PersistenceException
+    public void createTestInfrastructure(final Infrastructure infra) throws PersistenceException
     {
         DAOFactory daoFacto = HibernateDAOFactory.instance();
         daoFacto.beginConnection();
@@ -99,7 +99,7 @@ public class PopulateInfrastructureModelTest
         daoFacto.endConnection();
     }
 
-    private void createTestDatacenter(com.abicloud.model.test.infrastructure.Datacenter tstDc)
+    private void createTestDatacenter(final com.abicloud.model.test.infrastructure.Datacenter tstDc)
         throws PersistenceException
     {
 
@@ -122,8 +122,8 @@ public class PopulateInfrastructureModelTest
         }
     }
 
-    private void createTestMachine(com.abicloud.model.test.infrastructure.Machine tstMachine,
-        RackHB rack) throws PersistenceException
+    private void createTestMachine(final com.abicloud.model.test.infrastructure.Machine tstMachine,
+        final RackHB rack) throws PersistenceException
     {
         HypervisorType htype = tstMachine.getHypervisorType();
         PhysicalmachineHB pm =
@@ -133,7 +133,7 @@ public class PopulateInfrastructureModelTest
     }
 
     private void createTestVirtualDatacenter(
-        com.abicloud.model.test.infrastructure.VirtualDatacenter tstVdc, DatacenterHB dc)
+        final com.abicloud.model.test.infrastructure.VirtualDatacenter tstVdc, final DatacenterHB dc)
         throws PersistenceException
     {
         HypervisorType htype = tstVdc.getHypervisorType();
@@ -148,8 +148,8 @@ public class PopulateInfrastructureModelTest
     }
 
     private void createTestVirtualAppliance(
-        com.abicloud.model.test.infrastructure.VirtualAppliance tstVa, VirtualDataCenterHB vdc)
-        throws HibernateException, PersistenceException
+        final com.abicloud.model.test.infrastructure.VirtualAppliance tstVa,
+        final VirtualDataCenterHB vdc) throws HibernateException, PersistenceException
     {
         VirtualappHB va = createVirtualAppliance(tstVa.getName(), vdc);
     }
@@ -161,9 +161,9 @@ public class PopulateInfrastructureModelTest
     /**
      * @return the VirtualDatacenter identifier
      */
-    public Integer createVirtualDatacenter(String datacenterName, String hypervisorType,
-        String physicalMachineName, String physicalMachineIp, String virtualFactoryURL)
-        throws PersistenceException
+    public Integer createVirtualDatacenter(final String datacenterName,
+        final String hypervisorType, final String physicalMachineName,
+        final String physicalMachineIp, final String virtualFactoryURL) throws PersistenceException
     {
         DAOFactory daoFacto = HibernateDAOFactory.instance();
         daoFacto.beginConnection();
@@ -185,8 +185,9 @@ public class PopulateInfrastructureModelTest
         return vdc.getIdDataCenter();
     }
 
-    private VirtualappHB createVirtualAppliance(String name, VirtualDataCenterHB virtualDatacenter)
-        throws HibernateException, PersistenceException
+    private VirtualappHB createVirtualAppliance(final String name,
+        final VirtualDataCenterHB virtualDatacenter) throws HibernateException,
+        PersistenceException
     {
         VirtualappHB va = new VirtualappHB();
 
@@ -203,8 +204,8 @@ public class PopulateInfrastructureModelTest
         return va;
     }
 
-    private RemoteServiceHB createVirtualFactory(String virtualFactoryURL, DatacenterHB datacenter)
-        throws HibernateException, PersistenceException
+    private RemoteServiceHB createVirtualFactory(final String virtualFactoryURL,
+        final DatacenterHB datacenter) throws HibernateException, PersistenceException
     {
 
         RemoteServiceHB vf = new RemoteServiceHB();
@@ -221,8 +222,9 @@ public class PopulateInfrastructureModelTest
         return null;
     }
 
-    protected PhysicalmachineHB createPhysicalMachine(String physicalMachineName, RackHB rack,
-        HypervisorType htype, int cpu, int ram, long hd) throws PersistenceException
+    protected PhysicalmachineHB createPhysicalMachine(final String physicalMachineName,
+        final RackHB rack, final HypervisorType htype, final int cpu, final int ram, final long hd)
+        throws PersistenceException
     {
 
         PhysicalmachineHB machine = new PhysicalmachineHB();
@@ -231,12 +233,10 @@ public class PopulateInfrastructureModelTest
 
         machine.setCpu(cpu);
         machine.setRam(ram);
-        machine.setHd(hd);
 
         machine.setCpuRatio(1); // XXX
 
         machine.setCpuUsed(0);
-        machine.setHdUsed(0);
         machine.setRamUsed(0);
 
         machine.setRack(rack);
@@ -251,8 +251,8 @@ public class PopulateInfrastructureModelTest
         return machine;
     }
 
-    private HypervisorHB createHypervisor(HypervisorType hType, PhysicalmachineHB physicalMachien,
-        String ip) throws PersistenceException
+    private HypervisorHB createHypervisor(final HypervisorType hType,
+        final PhysicalmachineHB physicalMachien, final String ip) throws PersistenceException
     {
         HypervisorHB hyp = new HypervisorHB();
 
@@ -269,8 +269,8 @@ public class PopulateInfrastructureModelTest
         return hyp;
     }
 
-    private VirtualDataCenterHB createVirtualDataCenter(DatacenterHB dc, HypervisorType htype)
-        throws PersistenceException
+    private VirtualDataCenterHB createVirtualDataCenter(final DatacenterHB dc,
+        final HypervisorType htype) throws PersistenceException
     {
 
         VirtualDataCenterHB vdc = new VirtualDataCenterHB();
@@ -293,7 +293,7 @@ public class PopulateInfrastructureModelTest
         return vdc;
     }
 
-    private RackHB createRack(DatacenterHB dc) throws PersistenceException
+    private RackHB createRack(final DatacenterHB dc) throws PersistenceException
     {
         RackHB rack = new RackHB();
 
@@ -309,7 +309,7 @@ public class PopulateInfrastructureModelTest
         return rack;
     }
 
-    private DatacenterHB createDataCenter(String datacenterName) throws PersistenceException
+    private DatacenterHB createDataCenter(final String datacenterName) throws PersistenceException
     {
         DatacenterHB data = new DatacenterHB();
 
