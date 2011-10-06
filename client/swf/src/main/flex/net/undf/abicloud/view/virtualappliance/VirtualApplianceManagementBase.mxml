@@ -98,6 +98,7 @@
             protected var _virtualAppliance:VirtualAppliance;
 
             //The current Virtual DataCenter where we are
+            [Bindable]
             protected var _currentVirtualDataCenter:VirtualDataCenter;
 
             //This component is currently displaying more info from this NodeRenderer
@@ -199,6 +200,8 @@
             {
                 isShowing = true;
                 requestCategories();
+                //Update the virtualAppliance object
+                checkVirtualAppliance();
             }
 
             public function willHide():void
@@ -1051,6 +1054,8 @@
                     <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                         width="100%"
                         top="10" bottom="0"
+                        virtualDatacenter="{_currentVirtualDataCenter}"
+                        virtualAppliance="{_virtualAppliance}"
                         usedBy="{VirtualMachineRendererBase.USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT}"/>
                 </mx:Canvas>
             </mx:Canvas>

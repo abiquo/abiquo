@@ -45,4 +45,6 @@ public interface VirtualDatacenterResourceStub
     public DataResult<Collection<VirtualDataCenter>> getVirtualDatacenters(Enterprise enterprise,
         DataCenter datacenter);
 
+    public DataResult<Collection<VirtualDataCenter>> getVirtualDatacentersByEnterprise(
+        final Enterprise enterprise);
 }

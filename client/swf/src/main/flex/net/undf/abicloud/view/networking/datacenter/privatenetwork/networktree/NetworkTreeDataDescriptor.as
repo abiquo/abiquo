@@ -25,6 +25,7 @@ package net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree
     import mx.collections.ICollectionView;
     import mx.controls.treeClasses.ITreeDataDescriptor;
     
+    import net.undf.abicloud.vo.networking.VlanNetwork;
     import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
     public class NetworkTreeDataDescriptor implements ITreeDataDescriptor
@@ -53,6 +54,8 @@ package net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree
             else if (node is VirtualDataCenter)
             {
                 if(VirtualDataCenter(node).network){
+                	//We need to update network's virtualdatacenter references
+                	updateVirtualdatacentersReferences(VirtualDataCenter(node));
 	                return VirtualDataCenter(node).network.networks;
                 }else{
                 	return new ArrayCollection();
@@ -60,6 +63,14 @@ package net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree
             }
             else
                 return null;
+        }
+        
+        private function updateVirtualdatacentersReferences(virtualDatacenter:VirtualDataCenter):void{
+        	var vlanNetwork:VlanNetwork;
+        	for(var i:int = 0 ; i < virtualDatacenter.network.networks.length ; i++){
+        		vlanNetwork = virtualDatacenter.network.networks.getItemAt(i) as VlanNetwork;
+        		vlanNetwork.virtualDatacenter = virtualDatacenter;
+        	}
         }
 
         public function hasChildren(node:Object, model:Object = null):Boolean

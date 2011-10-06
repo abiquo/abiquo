@@ -22,21 +22,22 @@ package com.abiquo.server.core.infrastructure.network;
 import java.util.UUID;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class NetworkGenerator extends DefaultEntityGenerator<Network>
 {
-    public NetworkGenerator(SeedGenerator seed)
+    public NetworkGenerator(final SeedGenerator seed)
     {
         super(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Network obj1, Network obj2)
+    public void assertAllPropertiesEqual(final Network obj1, final Network obj2)
     {
-        AssertEx
-            .assertPropertiesEqualSilent(obj1, obj2, Network.ID_PROPERTY, Network.UUID_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, PersistentEntity.ID_PROPERTY,
+            Network.UUID_PROPERTY);
     }
 
     @Override

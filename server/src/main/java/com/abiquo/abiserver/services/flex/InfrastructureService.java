@@ -27,7 +27,6 @@ import java.util.List;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
@@ -676,7 +675,7 @@ public class InfrastructureService
     {
 
         InfrastructureCommand command = proxyCommand(session);
-        return command.updateUsedResourcesByDatacenter(dataCenter.toPojoHB());
+        return command.updateUsedResourcesByDatacenter(dataCenter.getId());
 
     }
 

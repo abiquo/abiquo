@@ -71,7 +71,10 @@ public enum ComponentType implements Serializable
     ROLE_LDAP(1048576, "Role LDAP"),
 
     // HA
-    HIGH_AVAILABILITY(2621444, "High availability engine");
+    HIGH_AVAILABILITY(2621444, "High availability engine"),
+
+    // STORAGE DEVICES
+    STORAGE_DEVICE(5242888, "Storage device");
 
     private final int component;
 

@@ -42,21 +42,39 @@ public class LimitExceededException extends AllocatorException
 
     private final LimitResource resource;
 
-    public LimitExceededException(Object entity, long required, long actual, LimitHB limit,
-        LimitResource resource)
+    public LimitExceededException(final Object entity, final long required, final long actual,
+        final LimitHB limit, final LimitResource resource, final boolean editLimits)
     {
 
-        super(
-            String
-                .format(
-                    "It's not possible to reserve a new %s, your hard limit it's defined to %d, your soft limit is %d and you have %d %s allocated. ",
-                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual, resource.getEntityName()));
+        super(formatMessage(actual, limit, resource, editLimits));
 
         this.entity = entity;
         this.required = required;
         this.actual = actual;
         this.limit = limit;
         this.resource = resource;
+    }
+
+    private static String formatMessage(final long actual, final LimitHB limit,
+        final LimitResource resource, final boolean editLimits)
+    {
+        String message =
+            String
+                .format(
+                    "It's not possible to reserve a new %s, your hard limit it's defined to %d, your soft limit is %d and you have %d %s allocated. ",
+                    resource.getEntityName(), limit.getHard(), limit.getSoft(), actual,
+                    resource.getEntityName());
+        if (editLimits)
+        {
+            message =
+                String
+                    .format(
+                        "Cannot edit %s limits to define hard limit of %d and soft limit of %d. You already have %d %s allocated.",
+                        resource.getEntityName(), limit.getHard(), limit.getSoft(), actual,
+                        resource.getEntityName());
+        }
+
+        return message;
     }
 
     public Object getEntity()

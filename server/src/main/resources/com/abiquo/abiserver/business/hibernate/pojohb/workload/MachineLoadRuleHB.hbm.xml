@@ -2,8 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton" lazy="false" table="workload_machine_load_rule"
-        name="com.abiquo.abiserver.business.hibernate.pojohb.workload.MachineLoadRuleHB">
+    <class catalog="kinton" lazy="false" table="workload_machine_load_rule" name="com.abiquo.abiserver.business.hibernate.pojohb.workload.MachineLoadRuleHB">
         <id name="id" type="java.lang.Integer">
             <column name="id" />
             <generator class="identity" />
@@ -14,17 +13,13 @@
         <property name="ramLoadPercentage" type="int" not-null="true">
             <column name="ramLoadPercentage" />
         </property>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
-            fetch="select" lazy="false" name="datacenter" not-null="true">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" fetch="select" lazy="false" name="datacenter" not-null="true">
             <column name="idDatacenter" />
         </many-to-one>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB"
-            fetch="select" lazy="false" name="rack" not-null="false">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB" fetch="select" lazy="false" name="rack" not-null="false">
             <column name="idRack" />
         </many-to-one>
-        <many-to-one
-            class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
-            fetch="select" lazy="false" name="machine" not-null="false">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" fetch="select" lazy="false" name="machine" not-null="false">
             <column name="idMachine" />
         </many-to-one>
     </class>

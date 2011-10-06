@@ -18,15 +18,10 @@
     -->
     <!-- url: The JDBC connection url for connecting to your MySQL dB.
     -->
-    <Resource name="jdbc/abiquoDB" auth="Container" type="javax.sql.DataSource"
-        initialSize="10" suspectTimeout="60" timeBetweenEvictionRunsMillis="30000"
-        minEvictableIdleTimeMillis="60000" maxActive="100" minIdle="10" maxIdle="50" maxWait="10000"
-        removeAbandoned="true" removeAbandonedTimeout="60" logAbandoned="true"
-        username="${server.database.username}" password="${server.database.password}"
+    <Resource name="jdbc/abiquoDB" auth="Container" type="javax.sql.DataSource" initialSize="10" suspectTimeout="60" timeBetweenEvictionRunsMillis="30000" minEvictableIdleTimeMillis="60000"
+        maxActive="100" minIdle="10" maxIdle="50" maxWait="10000" removeAbandoned="true" removeAbandonedTimeout="60" logAbandoned="true" username="${server.database.username}" password="${server.database.password}"
         driverClassName="${server.database.driverClassName}" url="${server.database.url}" />
-    <Resource name="jdbc/heartbeatDB" auth="Container" type="javax.sql.DataSource"
-        maxActive="100" minIdle="10" maxIdle="50" maxWait="10000" removeAbandoned="true"
-        removeAbandonedTimeout="60" logAbandoned="true" username="${server.database.username}"
-        password="${server.database.password}" driverClassName="${server.database.driverClassName}"
+    <Resource name="jdbc/heartbeatDB" auth="Container" type="javax.sql.DataSource" maxActive="100" minIdle="10" maxIdle="50" maxWait="10000" removeAbandoned="true" removeAbandonedTimeout="60"
+        logAbandoned="true" username="${server.database.username}" password="${server.database.password}" driverClassName="${server.database.driverClassName}"
         url="${heartbeat.database.url}?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
 </Context>
