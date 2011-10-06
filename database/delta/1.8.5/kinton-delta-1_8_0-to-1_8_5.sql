@@ -28,6 +28,15 @@ ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) 
 ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `defaultTemplate` varchar(200);
 ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `maxMachinesOn` int(4) DEFAULT 0;
 
+ALTER TABLE `kinton`.`physicalmachine` CHANGE  `idState` `idState` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - STOPPED
+1 - NOT PROVISIONED
+2 - NOT MANAGED
+3 - MANAGED
+4 - HALTED
+5 - UNLICENSED
+6 - HA_IN_PROGRESS
+7 - DISABLED_FOR_HA,
+8 - HALTED_FOR_SAVE';
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
