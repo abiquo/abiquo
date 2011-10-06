@@ -26,39 +26,19 @@
 // Generated on: 2011.05.25 at 12:44:58 PM CEST 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector;
+package com.abiquo.server.core.infrastructure;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Wrapper class to get a list of Organizations.
- * <p>
- * Java class for OrganizationsDto complex type.
- * <p>
- * The following schema fragment specifies the expected content contained within this class.
- * 
- * <pre>
- * &lt;complexType name="OrganizationsDto">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="organization" type="{http://abiquo.com/server/core/infrastructure/nodecollector}OrganizationDto" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
- * </pre>
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "organizations")
+@XmlRootElement(name = "organizations")
 public class OrganizationsDto extends WrapperDto<OrganizationDto>
 {
 

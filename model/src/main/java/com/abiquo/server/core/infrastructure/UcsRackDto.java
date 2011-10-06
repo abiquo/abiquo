@@ -75,4 +75,28 @@ public class UcsRackDto extends RackDto
     {
         this.user = user;
     }
+
+    private String defaultTemplate;
+
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
+    }
+
+    private Integer maxMachinesOn;
+
+    public Integer getMaxMachinesOn()
+    {
+        return maxMachinesOn;
+    }
+
+    public void setMaxMachinesOn(final Integer maxMachinesOn)
+    {
+        this.maxMachinesOn = maxMachinesOn;
+    }
 }

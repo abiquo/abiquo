@@ -28,25 +28,38 @@
 
 package com.abiquo.abiserver.pojo.ucs;
 
-import com.abiquo.server.core.infrastructure.OrganizationDto;
 
 /**
- * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
+ * The object contains the current needed values of the State Machine capabilities to retrieve
  */
-public class Organization
+public class Fsm
 {
-
-    protected String name;
-
-    protected String level;
-
     protected String dn;
 
+    protected String status;
+
+    protected String progress;
+
+    protected String description;
+
+    protected String error;
+
     /**
-     * Gets the value of the name property.
+     * Gets the value of the status property.
      * 
      * @return possible object is {@link String }
      */
+    public String getStatus()
+    {
+        return status;
+    }
+
+    /**
+     * Gets the value of the associated property.
+     * 
+     * @return possible object is {@link String }
+     */
+
     public String getDn()
     {
         return dn;
@@ -57,74 +70,39 @@ public class Organization
      * 
      * @param value allowed object is {@link String }
      */
-
     public void setDn(final String dn)
     {
         this.dn = dn;
     }
 
-    protected String status;
-
-    protected String description;
-
     /**
-     * Gets the value of the name property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * Sets the value of the name property.
+     * Sets the value of the status property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setName(final String value)
+    public void setStatus(final String status)
     {
-        this.name = value;
+        this.status = status;
     }
 
     /**
-     * Gets the value of the associated property.
+     * Gets the value of the progress property.
      * 
      * @return possible object is {@link String }
      */
-    public String getLevel()
+    public String getProgress()
     {
-        return level;
+        return progress;
     }
 
     /**
-     * Sets the value of the associated property.
+     * Sets the value of the progress property.
      * 
      * @param value allowed object is {@link String }
      */
-    public void setLevel(final String value)
+    public void setProgress(final String progress)
     {
-        this.level = value;
-    }
-
-    /**
-     * Gets the value of the associatedTo property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getStatus()
-    {
-        return status;
-    }
-
-    /**
-     * Sets the value of the associatedTo property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setStatus(final String value)
-    {
-        this.status = value;
+        this.progress = progress;
     }
 
     /**
@@ -142,19 +120,29 @@ public class Organization
      * 
      * @param value allowed object is {@link String }
      */
-    public void setDescription(final String value)
+    public void setDescription(final String description)
     {
-        this.description = value;
+        this.description = description;
     }
 
-    public static Organization create(final OrganizationDto dto)
+    /**
+     * Gets the value of the error property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getError()
     {
-        Organization organization = new Organization();
-        organization.setDn(dto.getDn());
-        organization.setName(dto.getName());
-        organization.setLevel(dto.getLevel());
-        organization.setStatus(dto.getStatus());
-        organization.setDescription(dto.getDescription());
-        return organization;
+        return error;
     }
+
+    /**
+     * Sets the value of the error property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setError(final String error)
+    {
+        this.error = error;
+    }
+
 }

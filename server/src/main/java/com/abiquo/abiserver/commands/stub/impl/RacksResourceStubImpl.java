@@ -36,6 +36,7 @@ import com.abiquo.abiserver.pojo.infrastructure.UcsRack;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
+import com.abiquo.abiserver.pojo.ucs.Fsm;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.abiserver.pojo.ucs.Organization;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -329,7 +330,8 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
      *      String)
      */
     @Override
-    public BasicResult dissociateLogicServer(final PhysicalMachine machine, final String lsName)
+    public BasicResult dissociateLogicServer(final Rack rack, final String machineDn,
+        final String lsName)
     {
         // PREMIUM
         return null;
@@ -365,6 +367,17 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
     @Override
     public BasicResult assignLogicServerClone(final PhysicalMachine machine, final String lsName,
         final String org, final String newName)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#objectUcsCurrentTask(UcsRack,
+     *      String)
+     */
+    @Override
+    public DataResult<Fsm> objectUcsCurrentTask(final UcsRack ucsRack, final String dn)
     {
         // PREMIUM
         return null;

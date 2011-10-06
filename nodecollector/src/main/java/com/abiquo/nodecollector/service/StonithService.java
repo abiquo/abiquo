@@ -51,4 +51,16 @@ public interface StonithService
      */
     public boolean isStonithUp(final String host, final Integer port, final String user,
         final String password);
+
+    /**
+     * Changes power state of chassis to power off.
+     * 
+     * @param host Remote host name for LAN interface
+     * @param port Remote RMCP port [default=623]
+     * @param user Remote session username
+     * @param password Remote session password
+     * @return True if the chassis are succesfully down. Otherwise false.
+     */
+    public boolean shootTheOtherNodeInTheHeadUcs(final String host, final Integer port,
+        final String user, final String password, String blade);
 }

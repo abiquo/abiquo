@@ -40,10 +40,14 @@
              * not be placed inside the ViewStack, and a ViewStack only
              * accepts components that extends from Container class
              */
-            public function addContent(content:Container, label:String = "Untitled"):void
+            public function addContent(content:Container, label:String = "Untitled", index:int = -1):void
             {
                 content.label = label;
-                viewStack.addChild(content);
+                if(index == -1){
+	                viewStack.addChild(content);
+                }else{
+                	viewStack.addChildAt(content,index);
+                }
             }
 
             private var _selectedIndex:int = 0;

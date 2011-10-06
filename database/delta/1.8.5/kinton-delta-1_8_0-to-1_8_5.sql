@@ -21,6 +21,13 @@ ALTER TABLE `kinton`.`enterprise_limits_by_datacenter` ADD CONSTRAINT `enterpris
 ALTER TABLE `kinton`.`ip_pool_management` ADD COLUMN `available` boolean NOT NULL default 1; 
 ALTER TABLE `kinton`.`rasd`  CHANGE COLUMN `resourceSubType` `resourceSubType` varchar(15) default NULL COMMENT 'For IPs: 0 = private, 1 = public, 2 = external';
 
+
+ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
+
+-- UCS default template
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `defaultTemplate` varchar(200);
+ALTER TABLE `kinton`.`ucs_rack` ADD COLUMN `maxMachinesOn` int(4) DEFAULT 0;
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
@@ -46,6 +53,8 @@ ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 -- update vlan_network_id (pre 1.6.8 bug)
 update vlan_network vn, network_configuration nc, ip_pool_management ip set ip.vlan_network_id = vn.vlan_network_id where vn.network_configuration_id = nc.network_configuration_id and ip.dhcp_service_id = nc.dhcp_service_id; 
 
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES 
+ ("client.infra.ucsManagerLink","/ucsm/ucsm.jnlp","URL to display UCS Manager Interface");
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --
 -- ---------------------------------------------- --

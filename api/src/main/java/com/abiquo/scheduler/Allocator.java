@@ -21,6 +21,8 @@
 
 package com.abiquo.scheduler;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.jms.ResourceAllocationException;
 
@@ -50,6 +52,7 @@ import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
@@ -249,8 +252,12 @@ public class Allocator implements IAllocator
             throw new NotEnoughResourcesException(cause);
         }
 
-        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]", targetMachine
-            .getName(), vmachine.getName());
+        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
+            targetMachine.getName(), vmachine.getName());
+        if (fitPolicy.equals(FitPolicy.PROGRESSIVE))
+        {
+            adjustPoweredMachinesInRack(targetMachine.getRack());
+        }
 
         return vmachine;
     }
@@ -368,6 +375,26 @@ public class Allocator implements IAllocator
         final Integer idDatacenter, final Integer idEnterprise)
     {
         return machineChecker.check(machine);
+    }
+
+    /**
+     * @see com.abiquo.scheduler.IAllocator#adjustPoweredMachinesInRack(com.abiquo.server.core.infrastructure.Rack)
+     */
+    @Override
+    public void adjustPoweredMachinesInRack(final Rack rack)
+    {
+        // PREMIUM
+    }
+
+    protected void powerOnMachine(final List<Machine> machines)
+    {
+        // PREMIUM
+    }
+
+    protected void shutDownMachine(final List<Machine> machines)
+    {
+        // PREMIUM
+
     }
 
     /*
