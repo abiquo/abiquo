@@ -50,8 +50,8 @@ public enum APIError
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
         "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
-        "GEN-7", "The property 'name', must not have whitespace at the beginning or the end."), WHITE_CODE(
-        "GEN-8", "The property 'code', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
+        "GEN-7", "The property 'name', must not have whitespace at the beginning or the end."), WHITE_SYMBOL(
+        "GEN-8", "The property 'symbol', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
         "GEN-9",
         "The property 'description', must not have whitespace at the beginning or the end."),
 
@@ -107,7 +107,7 @@ public enum APIError
         "VDC-5",
         "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
-        "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
+        "VDC-6", "Virtual Datacenter must always have at least one private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
         "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
     // VLANS
@@ -144,7 +144,7 @@ public enum APIError
         "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
         "VLAN-27",
         "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
-            + "configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+            + "its VLAN configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
         "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
@@ -406,7 +406,7 @@ public enum APIError
         "Currency symbol is required"), CURRENCY_NAME_LONG("CURRENCY-6",
         "Currency name maximum lenght is 20 characters"), CURRENCY_SYMBOL_LONG("CURRENCY-7",
         "Currency symbol maximum lenght is 10 characters"), CURRENCY_DIGIT_LONG("CURRENCY-8",
-        "Currency digit maximum  is 9"),
+        "Currency digit maximum value is 9"),
 
     // COST CODE
     NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
@@ -421,7 +421,8 @@ public enum APIError
     COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
         "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
         "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"), NOT_ASSIGNED_COSTCODE_CURRENCY(
-        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"),
+        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"), NOT_ASSIGNED_COSTCODE_CURRENCY_PRICE(
+        "COSTCODE_CURRENCY-3", "Price is required"),
 
     // PRICING - COST CODE
     PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",

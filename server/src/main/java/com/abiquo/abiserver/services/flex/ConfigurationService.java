@@ -29,6 +29,7 @@ import com.abiquo.abiserver.commands.ConfigurationCommand;
 import com.abiquo.abiserver.commands.impl.ConfigurationCommandImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.heartbeat.shared.dto.RegisterDTO;
 
 public class ConfigurationService
@@ -43,7 +44,7 @@ public class ConfigurationService
         configurationCommand = new ConfigurationCommandImpl();
     }
 
-    protected ConfigurationCommand proxyCommand(UserSession userSession)
+    protected ConfigurationCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, configurationCommand,
             ConfigurationCommand.class);
@@ -105,7 +106,7 @@ public class ConfigurationService
      * @return a BasicResult object, with success=true if the registration information was set
      *         successfully, or false otherwise
      */
-    public BasicResult setRegistrationData(final UserSession userSession,
+    public DataResult<RegisterDTO> setRegistrationData(final UserSession userSession,
         final RegisterDTO registrationData)
     {
         ConfigurationCommand command = proxyCommand(userSession);
