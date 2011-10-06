@@ -127,4 +127,11 @@ public enum RemoteServiceType
         }
         return protocol;
     }
+
+    @Override
+    public String toString()
+    {
+        // Returns the api resource name of the remote service (used by api clients)
+        return this.getName().replace("_", "");
+    }
 }
