@@ -28,6 +28,9 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
  */
@@ -43,6 +46,8 @@ public class LogicServer
     protected String associatedTo;
 
     protected String description;
+
+    protected List<LogicServerPolicy> policies;
 
     /**
      * Gets the value of the type property.
@@ -144,4 +149,27 @@ public class LogicServer
         this.description = value;
     }
 
+    /**
+     * Gets the value of the host property.
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the host property.
+     * <p>
+     * For example, to add a new item, do as follows:
+     * 
+     * <pre>
+     * getCollection().add(newItem);
+     * </pre>
+     * <p>
+     * Objects of the following type(s) are allowed in the list {@link LogicServerPolicyDto }
+     */
+    public List<LogicServerPolicy> getCollection()
+    {
+        if (policies == null)
+        {
+            policies = new ArrayList<LogicServerPolicy>();
+        }
+        return this.policies;
+    }
 }
