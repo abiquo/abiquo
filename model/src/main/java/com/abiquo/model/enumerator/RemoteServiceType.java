@@ -119,6 +119,6 @@ public enum RemoteServiceType
     public String toString()
     {
         // Returns the api resource name of the remote service (used by api clients)
-        return super.toString().replace("_", "");
+        return super.toString().replace("_", "").toLowerCase();
     }
 }
