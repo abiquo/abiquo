@@ -121,7 +121,8 @@ public enum APIError
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
-        "The requested stateful conversion does not exist"),
+        "The requested stateful conversion does not exist"), INVALID_VASC_STATE("VASC-1",
+        "Invalid expected state"),
 
     // NODE VIRTUAL IMAGE STATEFUL CONVERSION
     NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
@@ -323,7 +324,8 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume"),
+        "Cannot resize a generic Iscsi volume"), NON_EXISTENT_VOLUME_MAPPING("VOL-19",
+        "The requested initiator mapping does not exist"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

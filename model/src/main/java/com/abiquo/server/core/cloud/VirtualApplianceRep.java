@@ -28,6 +28,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
+import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionDAO;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
@@ -41,16 +43,16 @@ public class VirtualApplianceRep extends DefaultRepBase
     private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
-    private VirtualMachineDAO virtualMachineDao;
-
-    @Autowired
     private NodeVirtualImageDAO nodeVirtualImageDao;
 
     @Autowired
-    private VirtualApplianceStatefulConversionDAO vAppSConversionDao;
+    private VirtualApplianceStatefulConversionDAO vAppStatefulConversionDao;
 
     @Autowired
-    private NodeVirtualImageStatefulConversionDAO nodeVirtualImageStatefulDao;
+    private NodeVirtualImageStatefulConversionDAO nodeVirtualImageStatefulConversioDao;
+
+    @Autowired
+    private DiskStatefulConversionDAO diskStatefulConversionDAO;
 
     public VirtualApplianceRep()
     {
@@ -62,10 +64,9 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.entityManager = em;
 
         this.virtualApplianceDao = new VirtualApplianceDAO(em);
-        this.virtualMachineDao = new VirtualMachineDAO(em);
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
-        this.vAppSConversionDao = new VirtualApplianceStatefulConversionDAO(em);
-        this.nodeVirtualImageStatefulDao = new NodeVirtualImageStatefulConversionDAO(em);
+        this.vAppStatefulConversionDao = new VirtualApplianceStatefulConversionDAO(em);
+        this.nodeVirtualImageStatefulConversioDao = new NodeVirtualImageStatefulConversionDAO(em);
     }
 
     public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
@@ -85,17 +86,31 @@ public class VirtualApplianceRep extends DefaultRepBase
 
     public VirtualApplianceStatefulConversion findConversionById(final Integer id)
     {
-        return vAppSConversionDao.findById(id);
+        return vAppStatefulConversionDao.findById(id);
     }
 
     public NodeVirtualImageStatefulConversion findNodeStatefulConversionById(final Integer id)
     {
-        return nodeVirtualImageStatefulDao.findById(id);
+        return nodeVirtualImageStatefulConversioDao.findById(id);
     }
 
     public Collection<NodeVirtualImageStatefulConversion> findNodeStatefulConversionsByVirtualImageConversion(
         final VirtualImageConversion virtualImageConversion)
     {
-        return nodeVirtualImageStatefulDao.findByVirtualImageConversion(virtualImageConversion);
+        return nodeVirtualImageStatefulConversioDao.findByVirtualImageConversion(virtualImageConversion);
+    }
+
+    public DiskStatefulConversion insertDiskStatefulConversion(final DiskStatefulConversion dsc)
+    {
+        diskStatefulConversionDAO.persist(dsc);
+        diskStatefulConversionDAO.flush();
+
+        return dsc;
+    }
+
+    public void updateNodeVirtualImageStatefulConversion(
+        final NodeVirtualImageStatefulConversion nvisc)
+    {
+        nodeVirtualImageStatefulConversioDao.flush();
     }
 }
