@@ -71,7 +71,7 @@ public enum RemoteServiceType
         this.defaultPort = defaultPort;
     }
 
-    RemoteServiceType(String name, String serviceMapping)
+    RemoteServiceType(final String name, final String serviceMapping)
     {
         this.name = name;
         this.serviceMapping = serviceMapping;
@@ -84,11 +84,10 @@ public enum RemoteServiceType
 
     public boolean checkUniqueness()
     {
-        return this == APPLIANCE_MANAGER
-            || this == VIRTUAL_FACTORY;
+        return this == APPLIANCE_MANAGER || this == VIRTUAL_FACTORY;
     }
 
-    public String fixUri(URI uri)
+    public String fixUri(final URI uri)
     {
         String protocol = uri.getScheme();
         String domainName = uri.getHost();
@@ -114,5 +113,12 @@ public enum RemoteServiceType
             protocol += "://";
         }
         return protocol;
+    }
+
+    @Override
+    public String toString()
+    {
+        // Returns the api resource name of the remote service (used by api clients)
+        return this.getName().replace("_", "");
     }
 }
