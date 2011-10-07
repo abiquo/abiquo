@@ -161,13 +161,13 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
         entitiesToPersist.add(hypervisor);
 
-        VirtualImage vimage = entity.getVirtualImage();
-        vImageGenerator.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
-        entitiesToPersist.add(vimage);
-
         Enterprise enterprise = entity.getEnterprise();
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
+
+        VirtualImage vimage = entity.getVirtualImage();
+        vImageGenerator.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
+        entitiesToPersist.add(vimage);
 
         User user = entity.getUser();
         userGenerator.addAuxiliaryEntitiesToPersist(user, entitiesToPersist);

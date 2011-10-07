@@ -59,20 +59,24 @@ public class OVFPackageListsResource extends AbstractResource
 
     @GET
     public OVFPackageListsDto getOVFPackageLists(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<OVFPackageList> all = service.getOVFPackageListsByEnterprise(idEnterprise);
 
         OVFPackageListsDto ovfPackageListsDto = new OVFPackageListsDto();
 
+        Integer totalSize = 0;
         if (all != null && !all.isEmpty())
         {
             for (OVFPackageList r : all)
             {
                 ovfPackageListsDto.add(transformer.createTransferObject(r, restBuilder));
             }
+            totalSize = all.size();
         }
+
+        ovfPackageListsDto.setTotalSize(totalSize);
 
         return ovfPackageListsDto;
     }
@@ -83,8 +87,9 @@ public class OVFPackageListsResource extends AbstractResource
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     public OVFPackageListDto postOVFPackageList(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        OVFPackageListDto ovfPackageList, @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        final OVFPackageListDto ovfPackageList, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         OVFPackageList opl = transformer.createPersistenceObject(ovfPackageList);
@@ -99,11 +104,11 @@ public class OVFPackageListsResource extends AbstractResource
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     public OVFPackageListDto postOVFPackageListWithOVFIndex(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise, String ovfindexURL,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        final String ovfindexURL, @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList opl = service.addOVFPackageList(ovfindexURL, idEnterprise);
 
         return transformer.createTransferObject(opl, restBuilder);
-    }   
+    }
 }

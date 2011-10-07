@@ -24,6 +24,10 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -136,8 +140,9 @@ public class TestDataAccessManager
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
             VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
-            AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
-            VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
+            OVFPackageList.class, OVFPackage.class, AppsLibrary.class, Icon.class,
+            VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
+            Category.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
             Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
@@ -148,13 +153,8 @@ public class TestDataAccessManager
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class);
 
-        // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
-        // AppsLibrary.class,
-        // Icon.class,
-        // XXX last -- Category.class
-
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
-            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE
-        /* , OVFPackageList.ASSOCIATION_TABLE */);
+            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE,
+            OVFPackageList.OVF_PACKAGE_TABLE);
     }
 }

@@ -41,7 +41,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
 
 @Repository
-@Transactional
 public class EnterpriseRep extends DefaultRepBase
 {
 

@@ -390,7 +390,8 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageList.getId().toString());
 
-        links.add(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT, params));
+        ovfPackageList.addEditLink(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT,
+            params));
 
         return links;
     }
@@ -409,8 +410,7 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(OVFPackageResource.OVF_PACKAGE, ovfPackage.getId().toString());
-
-        links.add(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+        ovfPackage.addEditLink(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
 
         return links;
     }

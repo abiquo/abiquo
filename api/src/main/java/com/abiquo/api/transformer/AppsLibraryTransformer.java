@@ -30,12 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.persistence.impl.CategoryDAO;
-import com.abiquo.api.persistence.impl.IconDAO;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryDAO;
 import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.IconDAO;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
@@ -54,8 +54,8 @@ public class AppsLibraryTransformer
     /**
      * ModelTransformer.transportFromPersistence(OVFPackageDto.class, ovfPackage);
      */
-    public OVFPackageDto createTransferObject(OVFPackage ovfPackage, IRESTBuilder builder)
-        throws Exception
+    public OVFPackageDto createTransferObject(final OVFPackage ovfPackage,
+        final IRESTBuilder builder) throws Exception
     {
 
         OVFPackageDto dto = new OVFPackageDto();
@@ -71,11 +71,11 @@ public class AppsLibraryTransformer
 
         if (ovfPackage.getCategory() != null)
         {
-            dto.setCategoryName(ovfPackage.getCategory().getName());
+            dto.setName(ovfPackage.getCategory().getName());
         }
         else
         {
-            dto.setCategoryName("Others");
+            dto.setName("Others");
         }
 
         dto.setDiskFormatTypeUri(ovfPackage.getType().uri);
@@ -92,8 +92,8 @@ public class AppsLibraryTransformer
         return dto;
     }
 
-    public OVFPackageListDto createTransferObject(OVFPackageList ovfPackageList,
-        IRESTBuilder builder) throws Exception
+    public OVFPackageListDto createTransferObject(final OVFPackageList ovfPackageList,
+        final IRESTBuilder builder) throws Exception
     {
 
         List<OVFPackageDto> ovfpackDtoList = new LinkedList<OVFPackageDto>();
@@ -106,6 +106,7 @@ public class AppsLibraryTransformer
         dto.setName(ovfPackageList.getName());
         dto.setId(ovfPackageList.getId());
         dto.setOvfPackages(ovfpackDtoList);
+        dto.setUrl(ovfPackageList.getUrl());
 
         final Integer idEnterprise = ovfPackageList.getAppsLibrary().getEnterprise().getId();
         dto.setLinks(builder.buildOVFPackageListLinks(idEnterprise, dto));
@@ -116,7 +117,7 @@ public class AppsLibraryTransformer
     /**
      * ModelTransformer.persistenceFromTransport(OVFPackage.class, ovfPackage);
      */
-    public OVFPackage createPersistenceObject(OVFPackageDto ovfDto) throws Exception
+    public OVFPackage createPersistenceObject(final OVFPackageDto ovfDto) throws Exception
     {
 
         DiskFormatType diskFormatType = DiskFormatType.fromURI(ovfDto.getDiskFormatTypeUri());
@@ -131,14 +132,14 @@ public class AppsLibraryTransformer
 
         try
         {
-            category = categoryDao.findByName(ovfDto.getCategoryName());
+            category = categoryDao.findByName(ovfDto.getName());
         }
         catch (NoResultException e)
         {
-            category = new Category(ovfDto.getCategoryName());
+            category = new Category(ovfDto.getName());
             category.setIsDefault(0);
             category.setIsErasable(1);
-            category = categoryDao.makePersistent(category);
+            categoryDao.persist(category);
         }
 
         Icon icon;
@@ -150,7 +151,12 @@ public class AppsLibraryTransformer
         catch (Exception e)
         {
             icon = new Icon(ovfDto.getIconPath());
-            icon = iconDao.makePersistent(icon);
+            iconDao.persist(icon);
+        }
+        if (icon == null)
+        {
+            icon = new Icon(ovfDto.getIconPath());
+            iconDao.persist(icon);
         }
 
         OVFPackage pack = new OVFPackage();
@@ -172,7 +178,7 @@ public class AppsLibraryTransformer
         return pack;
     }
 
-    public OVFPackageList createPersistenceObject(OVFPackageListDto ovfDto) throws Exception
+    public OVFPackageList createPersistenceObject(final OVFPackageListDto ovfDto) throws Exception
     {
 
         List<OVFPackage> ovfPackList = new LinkedList<OVFPackage>();

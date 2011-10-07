@@ -19,30 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+  package com.abiquo.server.core.appslibrary;
 
-import javax.persistence.EntityManager;
+  import com.abiquo.server.core.common.DefaultEntityTestBase;
+  import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-import org.springframework.stereotype.Repository;
+  public class CategoryTest extends DefaultEntityTestBase<Category>
+  {
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-
-@Repository("jpaIconDAO")
-public class IconDAO extends DefaultDAOBase<Integer, Icon>
-{
-    public IconDAO()
-    {
-        super(Icon.class);
-    }
-
-    public IconDAO(final EntityManager entityManager)
-    {
-        super(Icon.class, entityManager);
-    }
-
-    public Icon findByPath(final String path)
-    {
-        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
-    }
-
-}
+      @Override
+      protected InstanceTester<Category> createEntityInstanceGenerator()
+      {
+          return new CategoryGenerator(getSeed());
+      }
+  }
