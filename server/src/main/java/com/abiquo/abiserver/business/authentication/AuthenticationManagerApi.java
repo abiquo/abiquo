@@ -529,7 +529,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 return null;
             }
-            userHB.setEnterpriseHB(getEnterpriseDAO().findById(
+            userHB.setEnterpriseHB(getFactory().getEnterpriseDAO().findById(
                 userHB.getEnterpriseHB().getIdEnterprise()));
         }
 
