@@ -84,14 +84,15 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         OVFPackage ovfPackage1 = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
         OVFPackage ovfPackage2 = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
         List<OVFPackage> listofpackages = new ArrayList<OVFPackage>();
-        listofpackages.add(ovfPackage);
-        listofpackages.add(ovfPackage1);
-        listofpackages.add(ovfPackage2);
 
         list = new OVFPackageList("ovfPackageList_1", "http://www.abiquo.com");
         ovfPackage.addToOvfPackageLists(list);
         ovfPackage1.addToOvfPackageLists(list);
         ovfPackage2.addToOvfPackageLists(list);
+
+        list.addToOvfPackages(ovfPackage);
+        list.addToOvfPackages(ovfPackage1);
+        list.addToOvfPackages(ovfPackage2);
         list.setOvfPackages(listofpackages);
         list.setAppsLibrary(appsLibrary);
         List<Object> entitiesToSetup = new ArrayList<Object>();

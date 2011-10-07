@@ -178,7 +178,7 @@ public class OVFPackageList extends DefaultEntityBase
         return ovfPackages;
     }
 
-    void addToOvfPackages(final OVFPackage ovfpackage)
+    public void addToOvfPackages(final OVFPackage ovfpackage)
     {
         if (ovfPackages == null)
         {
@@ -191,7 +191,7 @@ public class OVFPackageList extends DefaultEntityBase
         }
     }
 
-    void removeFromOvfPackages(final OVFPackage ovfpackage)
+    public void removeFromOvfPackages(final OVFPackage ovfpackage)
     {
         assert ovfpackage != null;
         assert this.ovfPackages.contains(ovfpackage);

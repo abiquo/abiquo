@@ -67,7 +67,7 @@ public class OVFPackageListService extends DefaultApiService
     protected EnterpriseRep entRepo;
 
     @Autowired
-    OVFPackageRep repo;
+    protected OVFPackageRep repo;
 
     @Autowired
     protected OVFPackageService ovfPackageService;
@@ -80,6 +80,7 @@ public class OVFPackageListService extends DefaultApiService
     public OVFPackageListService(final EntityManager em)
     {
 
+        repo = new OVFPackageRep(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         ovfPackageService = new OVFPackageService(em);
         entRepo = new EnterpriseRep(em);
@@ -137,6 +138,7 @@ public class OVFPackageListService extends DefaultApiService
         return addOVFPackageList(ovfPackageList, idEnterprise);
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackageList getOVFPackageList(final Integer id)
     {
         OVFPackageList ovfPackageList = repo.getOVFPackageList(id);

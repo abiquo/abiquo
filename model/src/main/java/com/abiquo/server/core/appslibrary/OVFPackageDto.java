@@ -29,6 +29,11 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "ovfPackage")
 public class OVFPackageDto extends SingleResourceTransportDto
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
