@@ -427,10 +427,13 @@ public class InfrastructureService extends DefaultApiService
         validate(old);
         repo.updateRack(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY,
+        tracer.log(
+            SeverityType.INFO,
+            ComponentType.RACK,
+            EventType.RACK_MODIFY,
             "Rack '" + old.getName() + "' has been modified [Name: " + rack.getName()
-                + ", Short description: " + rack.getShortDescription() + ", Large description: "
-                + rack.getLongDescription() + "]");
+                + ", Short description: " + rack.getShortDescription() + ", HA enabled: "
+                + (rack.isHaEnabled() ? "yes" : "no") + "]");
 
         return old;
     }
