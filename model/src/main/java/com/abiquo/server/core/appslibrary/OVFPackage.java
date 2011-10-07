@@ -37,6 +37,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.abiquo.server.core.config.Category;
+
 /**
  * OVFPackages TODO: Description
  * 

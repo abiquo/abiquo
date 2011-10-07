@@ -19,38 +19,42 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.persistence.impl;
+package com.abiquo.api.services;
 
-import org.springframework.stereotype.Repository;
+import java.util.Collection;
 
-import com.abiquo.api.persistence.JpaDAO;
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryRep;
 
-@Repository
-public class CategoryDAO extends JpaDAO<Category, Integer>
+@Service
+public class CategoryService extends DefaultApiService
 {
-    @Override
-    protected Class<Category> getPersistentClass()
+
+    @Autowired
+    CategoryRep repo;
+
+    public CategoryService()
     {
-        return Category.class;
+
     }
 
-    private final static String QUERY_GET_BY_NAME = "FROM " + Category.class.getName() + " WHERE " //
-        + "name = :name";
-
-    private final static String QUERY_GET_DEFAULT = "FROM " + Category.class.getName() + " WHERE " //
-        + "isDefault = 1";
-
-    public Category findByName(final String name)
+    public CategoryService(final EntityManager em)
     {
-        return (Category) entityManager.createQuery(QUERY_GET_BY_NAME)
-        //
-            .setParameter("name", name).getSingleResult();
+        repo = new CategoryRep(em);
     }
 
-    public Category findDefault()
+    public Collection<Category> getCategories()
     {
-        return (Category) entityManager.createQuery(QUERY_GET_DEFAULT).getSingleResult();
+        return repo.findAll();
     }
 
+    public Category getCategory(final Integer categoryId)
+    {
+        return repo.findCategoryById(categoryId);
+    }
 }

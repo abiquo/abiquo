@@ -44,10 +44,10 @@ import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.config.Category;
 
 @Service
 @Transactional

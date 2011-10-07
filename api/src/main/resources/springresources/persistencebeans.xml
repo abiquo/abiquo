@@ -69,6 +69,8 @@
                 <!-- Configuration -->
                 <ref bean="systemPropertiesResource" />
                 <ref bean="systemPropertyResource" />
+                <ref bean="categoriesResource" />
+                <ref bean="categoryResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
             </set>

@@ -19,38 +19,48 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.persistence.impl;
+package com.abiquo.server.core.config;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.persistence.JpaDAO;
-import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.common.DefaultRepBase;
 
 @Repository
-public class CategoryDAO extends JpaDAO<Category, Integer>
+@Transactional
+public class CategoryRep extends DefaultRepBase
 {
-    @Override
-    protected Class<Category> getPersistentClass()
+
+    @Autowired
+    private CategoryDAO categoryDAO;
+
+    public CategoryRep()
     {
-        return Category.class;
+
     }
 
-    private final static String QUERY_GET_BY_NAME = "FROM " + Category.class.getName() + " WHERE " //
-        + "name = :name";
-
-    private final static String QUERY_GET_DEFAULT = "FROM " + Category.class.getName() + " WHERE " //
-        + "isDefault = 1";
-
-    public Category findByName(final String name)
+    public CategoryRep(final EntityManager entityManager)
     {
-        return (Category) entityManager.createQuery(QUERY_GET_BY_NAME)
-        //
-            .setParameter("name", name).getSingleResult();
+        assert entityManager != null;
+        assert entityManager.isOpen();
+
+        this.entityManager = entityManager;
+        categoryDAO = new CategoryDAO(entityManager);
     }
 
-    public Category findDefault()
+    public List<Category> findAll()
     {
-        return (Category) entityManager.createQuery(QUERY_GET_DEFAULT).getSingleResult();
+        return categoryDAO.findAll();
+    }
+
+    public Category findCategoryById(final Integer categoryId)
+    {
+        return categoryDAO.findById(categoryId);
     }
 
 }

@@ -70,6 +70,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.config.CategoryDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -653,6 +654,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
         final Integer dcId, final Integer repoId)
     {
@@ -681,6 +683,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
         final Integer vimageId)
     {
@@ -993,6 +996,12 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         final IpPoolManagement ip)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
     {
         return null;
     }
