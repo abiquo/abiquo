@@ -377,10 +377,6 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             used.setHdInBytes(0l); // stateful virtual images doesn't use the datastores
         }
 
-        final Long newHd =
-            isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
-
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
