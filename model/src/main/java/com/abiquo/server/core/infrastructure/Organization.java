@@ -26,7 +26,7 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-package com.abiquo.server.core.infrastructure.nodecollector;
+package com.abiquo.server.core.infrastructure;
 
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.

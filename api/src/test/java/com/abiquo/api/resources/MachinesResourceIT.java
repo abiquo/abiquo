@@ -273,9 +273,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setVirtualCpusPerCore(1);
         m.setVirtualCpusUsed(0);
 
-        m.setVirtualHardDiskInMb(100L);
-        m.setVirtualHardDiskUsedInMb(10L);
-
         m.setState(MachineState.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
 

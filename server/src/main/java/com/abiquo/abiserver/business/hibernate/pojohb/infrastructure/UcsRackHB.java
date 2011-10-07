@@ -40,6 +40,8 @@ public class UcsRackHB extends RackHB
 
     private String user;
 
+    private String defaultTemplate;
+
     /* ------------- Constructor ------------- */
     public UcsRackHB()
     {
@@ -55,7 +57,7 @@ public class UcsRackHB extends RackHB
         return port;
     }
 
-    public void setPort(int port)
+    public void setPort(final int port)
     {
         this.port = port;
     }
@@ -65,7 +67,7 @@ public class UcsRackHB extends RackHB
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -75,7 +77,7 @@ public class UcsRackHB extends RackHB
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -85,9 +87,19 @@ public class UcsRackHB extends RackHB
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
+    }
+
+    public String getDefaultTemplate()
+    {
+        return this.defaultTemplate;
+    }
+
+    public void setDefaultTemplate(final String defaultTemplate)
+    {
+        this.defaultTemplate = defaultTemplate;
     }
 
     @Override
@@ -111,7 +123,7 @@ public class UcsRackHB extends RackHB
                 getVlan_per_vdc_expected());
         vlanNetworkParameters.setVlans_id_avoided(getVlans_id_avoided());
         rackPojo.setVlanNetworkParameters(vlanNetworkParameters);
-
+        rackPojo.setDefaultTemplate(getDefaultTemplate());
         return rackPojo;
     }
 

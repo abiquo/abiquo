@@ -135,7 +135,6 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
 
             // Currently we only use one pm per datastore...
             PhysicalmachineHB pmHB = pmDAO.getPhysicalMachineListByDatastore(datastoreId).get(0);
-            pmHB.setHd(pmHB.getHd() - dataHB.getSize() + datastore.getSize());
             pmDAO.makePersistent(pmHB);
 
             if (!datastore.getDirectory().equals(dataHB.getDirectory()))

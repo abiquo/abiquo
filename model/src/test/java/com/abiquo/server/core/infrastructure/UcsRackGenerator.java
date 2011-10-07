@@ -43,7 +43,8 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     public void assertAllPropertiesEqual(final UcsRack obj1, final UcsRack obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, UcsRack.PORT_PROPERTY,
-            UcsRack.IP_PROPERTY, UcsRack.PASSWORD_PROPERTY, UcsRack.USER_PROPERTY);
+            UcsRack.IP_PROPERTY, UcsRack.PASSWORD_PROPERTY, UcsRack.USER_PROPERTY,
+            UcsRack.DEFAULT_TEMPLATE_PROPERTY, UcsRack.MAX_MACHINES_ON_PROPERTY);
     }
 
     @Override
@@ -79,7 +80,9 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
                 "10.60.1.28",
                 80,
                 "user",
-                "password");
+                "password",
+                "org-root/ls-" + new Random().nextInt(),
+                0);
         ucsRack.setVlansIdAvoided(vlans_id_avoided);
         ucsRack.setShortDescription(shortDescription);
         ucsRack.setLongDescription(longDescription);

@@ -151,9 +151,10 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/virtualmachines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/virtualmachines" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/reenableafterha" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/poweron" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/poweroff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/ledOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/logicServer" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <!-- PUBLIC NETWORKS -->
         <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network" method="POST" access="ROLE_PHYS_DC_MANAGE" />
@@ -166,7 +167,6 @@
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/logicServer" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- DATASTORES -->
@@ -298,6 +298,10 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/ips" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweron" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweroff" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/pause" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/resume" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />

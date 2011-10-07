@@ -222,6 +222,8 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildRestLink(RackResource.class,
                 RackResource.RACK_ACTION_ORGANIZATIONS, RackResource.RACK_ACTION_ORGANIZATIONS_REL,
                 params));
+            links.add(builder.buildRestLink(RackResource.class, RackResource.RACK_ACTION_FSM,
+                RackResource.RACK_ACTION_FSM_REL, params));
         }
         return links;
     }
@@ -252,7 +254,6 @@ public class RESTBuilder implements IRESTBuilder
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_ON_PATH,
                 MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
-
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_POWER_OFF_PATH,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));

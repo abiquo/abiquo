@@ -84,7 +84,7 @@ public class OrganizationDto
     }
 
     /**
-     * Gets the value of the associated property.
+     * Gets the value of the dn property.
      * 
      * @return possible object is {@link String }
      */
@@ -95,7 +95,7 @@ public class OrganizationDto
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the dn property.
      * 
      * @param value allowed object is {@link String }
      */
@@ -115,7 +115,7 @@ public class OrganizationDto
     }
 
     /**
-     * Gets the value of the associated property.
+     * Gets the value of the level property.
      * 
      * @return possible object is {@link String }
      */
@@ -125,7 +125,7 @@ public class OrganizationDto
     }
 
     /**
-     * Sets the value of the associated property.
+     * Sets the value of the level property.
      * 
      * @param value allowed object is {@link String }
      */
@@ -135,7 +135,7 @@ public class OrganizationDto
     }
 
     /**
-     * Gets the value of the associatedTo property.
+     * Gets the value of the status property.
      * 
      * @return possible object is {@link String }
      */
@@ -145,7 +145,7 @@ public class OrganizationDto
     }
 
     /**
-     * Sets the value of the associatedTo property.
+     * Sets the value of the status property.
      * 
      * @param value allowed object is {@link String }
      */

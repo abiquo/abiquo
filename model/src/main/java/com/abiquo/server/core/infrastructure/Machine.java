@@ -196,30 +196,30 @@ public class Machine extends DefaultEntityBase
         this.virtualCpuCores = virtualCpuCores;
     }
 
-    public final static String VIRTUAL_HARD_DISK_IN_BYTES_PROPERTY = "virtualHardDiskInBytes";
-
-    /* package */final static String VIRTUAL_HARD_DISK_IN_BYTES_COLUMN = "hd";
-
-    /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MIN = 0;
-
-    /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
-
-    /* package */final static boolean VIRTUAL_HARD_DISK_IN_BYTES_REQUIRED = true;
-
-    @Column(name = VIRTUAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
-    @Range(min = VIRTUAL_HARD_DISK_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_IN_BYTES_MAX)
-    private Long virtualHardDiskInBytes;
-
-    @Required(value = VIRTUAL_HARD_DISK_IN_BYTES_REQUIRED)
-    public Long getVirtualHardDiskInBytes()
-    {
-        return this.virtualHardDiskInBytes;
-    }
-
-    public void setVirtualHardDiskInBytes(final Long virtualHardDiskInBytes)
-    {
-        this.virtualHardDiskInBytes = virtualHardDiskInBytes;
-    }
+    // public final static String VIRTUAL_HARD_DISK_IN_BYTES_PROPERTY = "virtualHardDiskInBytes";
+    //
+    // /* package */final static String VIRTUAL_HARD_DISK_IN_BYTES_COLUMN = "hd";
+    //
+    // /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MIN = 0;
+    //
+    // /* package */final static long VIRTUAL_HARD_DISK_IN_BYTES_MAX = Long.MAX_VALUE;
+    //
+    // /* package */final static boolean VIRTUAL_HARD_DISK_IN_BYTES_REQUIRED = true;
+    //
+    // @Column(name = VIRTUAL_HARD_DISK_IN_BYTES_COLUMN, nullable = false)
+    // @Range(min = VIRTUAL_HARD_DISK_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_IN_BYTES_MAX)
+    // private Long virtualHardDiskInBytes;
+    //
+    // @Required(value = VIRTUAL_HARD_DISK_IN_BYTES_REQUIRED)
+    // public Long getVirtualHardDiskInBytes()
+    // {
+    // return this.virtualHardDiskInBytes;
+    // }
+    //
+    // public void setVirtualHardDiskInBytes(final Long virtualHardDiskInBytes)
+    // {
+    // this.virtualHardDiskInBytes = virtualHardDiskInBytes;
+    // }
 
     // public final static String REAL_RAM_IN_MB_PROPERTY = "realRamInMb";
     //
@@ -346,31 +346,31 @@ public class Machine extends DefaultEntityBase
         this.virtualCpusUsed = virtualCpusUsed;
     }
 
-    public final static String VIRTUAL_HARD_DISK_USED_IN_BYTES_PROPERTY =
-        "virtualHardDiskUsedInBytes";
-
-    /* package */final static String VIRTUAL_HARD_DISK_USED_IN_BYTES_COLUMN = "hdUsed";
-
-    /* package */final static long VIRTUAL_HARD_DISK_USED_IN_BYTES_MIN = 0;
-
-    /* package */final static long VIRTUAL_HARD_DISK_USED_IN_BYTES_MAX = Long.MAX_VALUE;
-
-    /* package */final static boolean VIRTUAL_HARD_DISK_USED_IN_BYTES_REQUIRED = true;
-
-    @Column(name = VIRTUAL_HARD_DISK_USED_IN_BYTES_COLUMN, nullable = false)
-    @Range(min = VIRTUAL_HARD_DISK_USED_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_USED_IN_BYTES_MAX)
-    private Long virtualHardDiskUsedInBytes;
-
-    @Required(value = VIRTUAL_HARD_DISK_USED_IN_BYTES_REQUIRED)
-    public Long getVirtualHardDiskUsedInBytes()
-    {
-        return this.virtualHardDiskUsedInBytes;
-    }
-
-    public void setVirtualHardDiskUsedInBytes(final Long virtualHardDiskUsedInMb)
-    {
-        this.virtualHardDiskUsedInBytes = virtualHardDiskUsedInMb;
-    }
+    // public final static String VIRTUAL_HARD_DISK_USED_IN_BYTES_PROPERTY =
+    // "virtualHardDiskUsedInBytes";
+    //
+    // /* package */final static String VIRTUAL_HARD_DISK_USED_IN_BYTES_COLUMN = "hdUsed";
+    //
+    // /* package */final static long VIRTUAL_HARD_DISK_USED_IN_BYTES_MIN = 0;
+    //
+    // /* package */final static long VIRTUAL_HARD_DISK_USED_IN_BYTES_MAX = Long.MAX_VALUE;
+    //
+    // /* package */final static boolean VIRTUAL_HARD_DISK_USED_IN_BYTES_REQUIRED = true;
+    //
+    // @Column(name = VIRTUAL_HARD_DISK_USED_IN_BYTES_COLUMN, nullable = false)
+    // @Range(min = VIRTUAL_HARD_DISK_USED_IN_BYTES_MIN, max = VIRTUAL_HARD_DISK_USED_IN_BYTES_MAX)
+    // private Long virtualHardDiskUsedInBytes;
+    //
+    // @Required(value = VIRTUAL_HARD_DISK_USED_IN_BYTES_REQUIRED)
+    // public Long getVirtualHardDiskUsedInBytes()
+    // {
+    // return this.virtualHardDiskUsedInBytes;
+    // }
+    //
+    // public void setVirtualHardDiskUsedInBytes(final Long virtualHardDiskUsedInMb)
+    // {
+    // this.virtualHardDiskUsedInBytes = virtualHardDiskUsedInMb;
+    // }
 
     public final static String VIRTUAL_CPUS_PER_CORE_PROPERTY = "virtualCpusPerCore";
 
@@ -395,6 +395,11 @@ public class Machine extends DefaultEntityBase
     public void setVirtualCpusPerCore(final Integer virtualCpusPerCore)
     {
         this.virtualCpusPerCore = virtualCpusPerCore;
+    }
+
+    public enum State
+    {
+        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA, HALTED_FOR_SAVE;
     }
 
     public final static String STATE_PROPERTY = "state";
@@ -720,9 +725,9 @@ public class Machine extends DefaultEntityBase
     // *************************** Mandatory constructors
     // ***********************
     public Machine(final Datacenter datacenter, final String name, final String description,
-        final int virtualRamInMb, final int virtualRamUsedInMb, final long virtualHardDiskInMb,
-        final long virtualHardDiskUsed, final int virtualCpuCores, final int virtualCpusUsed,
-        final int virtualCpusPerCore, final MachineState state, final String virtualSwitch)
+        final int virtualRamInMb, final int virtualRamUsedInMb, final int virtualCpuCores,
+        final int virtualCpusUsed, final int virtualCpusPerCore, final MachineState state,
+        final String virtualSwitch)
     {
         setDatacenter(datacenter);
         setName(name);
@@ -730,9 +735,6 @@ public class Machine extends DefaultEntityBase
 
         setVirtualRamInMb(virtualRamInMb);
         setVirtualRamUsedInMb(virtualRamUsedInMb);
-
-        setVirtualHardDiskInBytes(virtualHardDiskInMb);
-        setVirtualHardDiskUsedInBytes(virtualHardDiskUsed);
 
         setVirtualCpuCores(virtualCpuCores);
         setVirtualCpusUsed(virtualCpusUsed);
@@ -791,7 +793,11 @@ public class Machine extends DefaultEntityBase
 
     public Boolean getBelongsToManagedRack()
     {
-        return belongsToManagedRack;
+        if (getRack() != null)
+        {
+            return getRack() instanceof UcsRack;
+        }
+        return this.belongsToManagedRack;
     }
 
 }

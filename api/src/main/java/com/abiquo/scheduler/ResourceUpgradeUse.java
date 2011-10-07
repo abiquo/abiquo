@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.event.HyperlinkEvent;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
@@ -39,8 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
 import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
@@ -60,6 +61,8 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.scheduler.FitPolicyRule;
+import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 
 /**
  * Updates the following resource.
@@ -96,9 +99,18 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
     @Autowired
     VirtualMachineDAO vmachineDao;
-    
+
     @Autowired
     HypervisorDAO hypervisorDao;
+
+    @Autowired
+    VirtualimageAllocationService allocationService;
+
+    @Autowired
+    FitPolicyRuleDAO fitPolicyDao;
+
+    @Autowired
+    private IAllocator allocator;
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
@@ -118,11 +130,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     public void updateUseHa(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
         final Integer sourceHypervisorId)
     {
-        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA hypervisor  
+        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
+                                                             // hypervisor
 
         // hypervisor
         // free resources on the original hypervisor
-        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();        
+        Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
@@ -201,6 +214,14 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             throw new ResourceUpgradeUseException("Can not update resource utilization"
                 + e.getMessage());
         }
+
+        if (getAllocationFitPolicyOnDatacenter(
+            virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
+            FitPolicy.PROGRESSIVE))
+        {
+            allocator.adjustPoweredMachinesInRack(virtualMachine.getHypervisor().getMachine()
+                .getRack());
+        }
     }
 
     /**
@@ -266,8 +287,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
                 Integer freeTag = getFreeVLANFromUsedList(vlanTagsUsed, rack);
-                log.debug("The VLAN tag chosen for the vlan network: {} is : {}", vlanNetwork
-                    .getId(), freeTag);
+                log.debug("The VLAN tag chosen for the vlan network: {} is : {}",
+                    vlanNetwork.getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
 
                 vlanNetworkDao.flush();
@@ -356,15 +377,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             used.setHdInBytes(0l); // stateful virtual images doesn't use the datastores
         }
 
-        final Long newHd =
-            isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes()
-                + used.getHdInBytes();
-
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
-        machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
 
         datacenterRepo.updateMachine(machine);
     }
@@ -417,8 +432,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         if (newUsed > datastore.getSize())
         {
 
-            log.error("Target datastore usage is over capacity !!!!! datastore : %s", datastore
-                .getName());
+            log.error("Target datastore usage is over capacity !!!!! datastore : %s",
+                datastore.getName());
         }
 
         datastore.setUsedSize(newUsed >= 0 ? newUsed : 0); // prevent negative usage
@@ -463,12 +478,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             }
         }
 
-
         if (vlanTagsOrdered.isEmpty())
         {
             return candidatePort;
         }
-        
+
         // Checking the minimal interval
         if (vlanTagsOrdered.get(0).compareTo(rack.getVlanIdMin()) != 0)
         {
@@ -566,5 +580,15 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         }
 
         return publicTagsList;
+    }
+
+    /**
+     * By datacenter
+     */
+    protected FitPolicy getAllocationFitPolicyOnDatacenter(final Integer idDatacenter)
+    {
+        FitPolicyRule fit = fitPolicyDao.getFitPolicyForDatacenter(idDatacenter);
+
+        return fit != null ? fit.getFitPolicy() : fitPolicyDao.getGlobalFitPolicy().getFitPolicy();
     }
 }
