@@ -35,6 +35,9 @@ public class TestConfig
     /** TestNG group for default integration tests. */
     public static final String BASIC_INTEGRATION_TESTS = "it-basic";
 
+    /** TestNG group for appslibrary integration tests. */
+    public static final String APPS_INTEGRATION_TESTS = "it-appslibrary";
+
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";
 

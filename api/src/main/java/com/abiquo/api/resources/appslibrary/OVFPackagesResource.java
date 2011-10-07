@@ -57,8 +57,8 @@ public class OVFPackagesResource extends AbstractResource
 
     @GET
     public OVFPackagesDto getOVFPackages(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<OVFPackage> all = service.getOVFPackagesByEnterprise(idEnterprise);
 
@@ -76,8 +76,8 @@ public class OVFPackagesResource extends AbstractResource
 
     @POST
     public OVFPackageDto postOVFPackage(
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise, OVFPackageDto ovfPackage,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise, final OVFPackageDto ovfPackage,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackage opl = transformer.createPersistenceObject(ovfPackage);
         opl = service.addOVFPackage(opl, idEnterprise);

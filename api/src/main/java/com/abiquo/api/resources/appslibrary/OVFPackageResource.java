@@ -135,5 +135,4 @@ public class OVFPackageResource extends AbstractResource
 
         return rs.getUri();
     }
-
 }

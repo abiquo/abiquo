@@ -41,6 +41,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.appslibrary.OVFPackageListService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 

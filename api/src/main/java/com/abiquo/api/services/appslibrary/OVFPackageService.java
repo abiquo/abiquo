@@ -30,6 +30,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -121,6 +122,12 @@ public class OVFPackageService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeOVFPackage(final Integer id)
     {
+        OVFPackage ovfpackage = repo.getOVFPackage(id);
+        if (ovfpackage == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE);
+            flushErrors();
+        }
         repo.removeOVFPackage(id);
     }
 
@@ -281,4 +288,5 @@ public class OVFPackageService extends DefaultApiService
 
         return format;
     }
+
 }

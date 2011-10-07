@@ -30,12 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.persistence.impl.CategoryDAO;
-import com.abiquo.api.persistence.impl.IconDAO;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryDAO;
 import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.IconDAO;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
@@ -139,7 +139,7 @@ public class AppsLibraryTransformer
             category = new Category(ovfDto.getName());
             category.setIsDefault(0);
             category.setIsErasable(1);
-            category = categoryDao.makePersistent(category);
+            categoryDao.persist(category);
         }
 
         Icon icon;
@@ -151,7 +151,12 @@ public class AppsLibraryTransformer
         catch (Exception e)
         {
             icon = new Icon(ovfDto.getIconPath());
-            icon = iconDao.makePersistent(icon);
+            iconDao.persist(icon);
+        }
+        if (icon == null)
+        {
+            icon = new Icon(ovfDto.getIconPath());
+            iconDao.persist(icon);
         }
 
         OVFPackage pack = new OVFPackage();

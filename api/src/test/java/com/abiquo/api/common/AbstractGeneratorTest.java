@@ -34,6 +34,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
+import com.abiquo.server.core.appslibrary.IconGenerator;
+import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
@@ -118,6 +122,14 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected RoleLdapGenerator roleLdapGenerator = new RoleLdapGenerator(seed);
 
+    protected CategoryGenerator categoryGeneartor = new CategoryGenerator(seed);
+
+    protected OVFPackageGenerator ovfPackageGenerator = new OVFPackageGenerator(seed);
+
+    protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
+
+    protected IconGenerator iconGenerator = new IconGenerator(seed);
+
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
@@ -155,7 +167,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     public void tearDown()
     {
         String[] entities =
-            {"ip_pool_management", "volume_management", "diskstateful_conversions",
+            {"category", "ip_pool_management", "volume_management", "diskstateful_conversions",
             "initiator_mapping", "rasd_management", "rasd", "nodevirtualimage", "nodenetwork",
             "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage",
             "virtualimage_conversions", "node_virtual_image_stateful_conversions",

@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "ovfPackages")
+@XmlRootElement(name = "ovfPackage")
 public class OVFPackageDto extends SingleResourceTransportDto
 {
     private Integer id;

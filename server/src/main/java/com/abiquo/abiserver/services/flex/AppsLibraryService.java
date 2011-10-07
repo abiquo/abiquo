@@ -534,12 +534,13 @@ public class AppsLibraryService
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
+        OVFPackageListDto packagListsDto =
+            proxy.createOVFPackageList(idEnterprise, ovfpackageListURL);
         try
         {
-
-            OVFPackageListDto packagListsDto =
-                proxyService.createOVFPackageList(userSession, idEnterprise, ovfpackageListURL);
 
             OVFPackageList packagList = transform(packagListsDto);
             packagList.setUrl(ovfpackageListURL); // XXX
@@ -569,12 +570,13 @@ public class AppsLibraryService
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
+        OVFPackageListDto packagListsDto =
+            proxy.refreshOVFPackageList(idEnterprise, nameOvfpackageList);
         try
         {
-
-            OVFPackageListDto packagListsDto =
-                proxyService.refreshOVFPackageList(userSession, idEnterprise, nameOvfpackageList);
 
             result.setData(transform(packagListsDto));
             result.setSuccess(true);
@@ -599,17 +601,14 @@ public class AppsLibraryService
     {
         BasicResult result = new BasicResult();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
+        AppsLibraryStub proxy =
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+                AppsLibraryStub.class);
         try
         {
-            proxyService.deleteOVFPackageList(userSession, idEnterprise, nameOvfpackageList);
+            proxy.deleteOVFPackageList(idEnterprise, nameOvfpackageList);
 
             result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
         }
         catch (UserSessionException e)
         {

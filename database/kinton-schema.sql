@@ -123,7 +123,8 @@ CREATE TABLE  `kinton`.`category` (
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
   `version_c` int(11) default 0,
-  PRIMARY KEY  (`idCategory`)
+  PRIMARY KEY  (`idCategory`),
+  UNIQUE KEY (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --

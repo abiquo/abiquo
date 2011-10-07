@@ -41,11 +41,13 @@ import com.abiquo.abiserver.business.authentication.TokenUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
+import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
@@ -180,8 +182,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         String uri = createOVFPackageListLink(idEnterprise.toString(), idOvfPackageList.toString());
 
         ClientResponse response = get(uri);
-
-        final Integer httpStatus = response.getStatusCode();
 
         return response.getEntity(OVFPackageListDto.class);
     }

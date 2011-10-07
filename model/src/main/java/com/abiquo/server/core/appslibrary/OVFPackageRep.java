@@ -109,7 +109,7 @@ public class OVFPackageRep extends DefaultRepBase
 
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(enterprise);
         ovfPackage.setAppsLibrary(appsLib);
-
+        old.setId(ovfPackageId);
         old.setCategory(ovfPackage.getCategory());
         old.setType(ovfPackage.getType());
         old.setIcon(ovfPackage.getIcon());
@@ -120,9 +120,15 @@ public class OVFPackageRep extends DefaultRepBase
         old.setUrl(ovfPackage.getUrl());
         old.setOvfPackageLists(ovfPackage.getOvfPackageLists());
 
-        dao.persist(old);
+        update(old);
 
         return old;
+    }
+
+    public void update(final OVFPackage old)
+    {
+        dao.flush();
+
     }
 
     public void removeOVFPackage(final Integer id)
@@ -134,14 +140,13 @@ public class OVFPackageRep extends DefaultRepBase
         // must be done manually for the dependant (not owner) side in the relation: OVFPackage in
         // this case
         List<OVFPackageList> lists = ovfPackage.getOvfPackageLists();
-        for (Object element : lists)
+        for (OVFPackageList ovfPackageList : lists)
         {
-            OVFPackageList ovfPackageList = (OVFPackageList) element;
             ovfPackageList.getOvfPackages().remove(ovfPackage);
             listDao.persist(ovfPackageList);
         }
 
-        dao.persist(ovfPackage);
+        dao.remove(ovfPackage);
     }
 
     public Icon findByIconPathOrCreateNew(final String iconPath)
@@ -189,4 +194,48 @@ public class OVFPackageRep extends DefaultRepBase
         return cat;
     }
 
+    public void removeOVFPackageList(final OVFPackageList ovfPackageList)
+    {
+        for (OVFPackage ovf : ovfPackageList.getOvfPackages())
+        {
+            if (ovf.getOvfPackageLists().size() == 1)
+            {
+                dao.remove(ovf);
+            }
+            else
+            {
+                ovf.getOvfPackageLists().remove(ovfPackageList);
+            }
+        }
+        listDao.remove(ovfPackageList);
+
+    }
+
+    public List<OVFPackageList> getAllOVFPackageLists()
+    {
+        return listDao.findAll();
+    }
+
+    public OVFPackageList findOVFPackageListByNameAndEnterprise(final String name,
+        final Enterprise ent)
+    {
+
+        return listDao.findByNameAndEnterprise(name, ent);
+    }
+
+    public void persistList(final OVFPackageList ovfPackageList)
+    {
+        listDao.persist(ovfPackageList);
+    }
+
+    public OVFPackageList getOVFPackageList(final Integer id)
+    {
+        return listDao.findById(id);
+    }
+
+    public List<OVFPackageList> getOVFPackageListsByEnterprise(final Integer idEnterprise)
+    {
+        return listDao.findByEnterprise(idEnterprise);
+
+    }
 }
