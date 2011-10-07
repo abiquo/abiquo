@@ -149,6 +149,12 @@ public class RemoteServiceService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
+        if (rs.getType() == null)
+        {
+            addValidationErrors(APIError.WRONG_REMOTE_SERVICE_TYPE);
+            flushErrors();
+        }
+
         Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
         if (datacenter == null)
         {
