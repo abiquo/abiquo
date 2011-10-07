@@ -670,14 +670,19 @@
             	hideNodeInfoContainer();
             }
 
-            private function powerOnVirtualAppliance():void
+            protected function powerOnVirtualAppliance():void
             {
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.START_VIRTUALAPPLIANCE);
 
                 virtualApplianceEvent.virtualAppliance = _virtualAppliance;
                 dispatchEvent(virtualApplianceEvent);
 
-                startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+                startPowerOnProcess();
+            }
+            
+            protected function startPowerOnProcess(event:Event = null):void
+            {
+            	startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
                 hideNodeInfoContainer();
             }
 
