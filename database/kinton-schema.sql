@@ -512,7 +512,8 @@ CREATE TABLE  `kinton`.`physicalmachine` (
 4 - HALTED
 5 - UNLICENSED
 6 - HA_IN_PROGRESS
-7 - DISABLED_FOR_HA',
+7 - DISABLED_FOR_HA,
+8 - HALTED_FOR_SAVE',
   `vswitchName` VARCHAR(200)  NOT NULL,
   `idEnterprise` int(10) unsigned default NULL,
   `initiatorIQN` VARCHAR(256) DEFAULT NULL,
@@ -582,6 +583,8 @@ CREATE TABLE  `kinton`.`ucs_rack` (
   `user_rack` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `version_c` int(11) DEFAULT '0',
+  `defaultTemplate` varchar(200),
+  `maxMachinesOn` int(4) DEFAULT 0,
   KEY `id_rack_FK` (`idRack`),
   CONSTRAINT `id_rack_FK` FOREIGN KEY (`idRack`) REFERENCES `rack` (`idRack`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1336,6 +1339,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.infra.googleMapskey","0","The map\'s Google key used in infrastructure section"),
  ("client.infra.googleMapsLadTimeOut","10","Time, in seconds, that applications waits Google Maps to load. After that, application considers that Google Maps service is temporarily unavailable, and is not used"),
  ("client.infra.InfrastructureUpdateInterval","30","Time interval in seconds"),
+ ("client.infra.ucsManagerLink","/ucsm/ucsm.jnlp","URL to display UCS Manager Interface"),
  ("client.metering.meteringUpdateInterval","10","Time interval in seconds"),
  ("client.network.numberIpAdressesPerPage","25","Number entries that will appear when listing IP addresses in different parts of the application"),
  ("client.theme.defaultEnterpriseLogoPath","themes/abicloudDefault/logo.png","This is the path to the Enterprise logo used in the app"),

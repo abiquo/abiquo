@@ -742,7 +742,56 @@ public class InfrastructureRep extends DefaultRepBase
     }
 
     /**
-     * Return all the public VLANs by Datacenter.
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+
+        return rackDao.getEmptyOffMachines(rackId);
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+
+        return rackDao.getEmptyOnMachines(rackId);
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        // TODO Auto-generated method stub
+        return rackDao.getRandomMachinesToStartFromRack(rackId, howMany);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        // TODO Auto-generated method stub
+        return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
+    }
+     
+    /* Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}

@@ -19,9 +19,39 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
-
-public enum MachineState
+package net.undf.abicloud.vo.infrastructure
 {
-    STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA, HALTED_FOR_SAVE;
+
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.Fsm")]
+    [Bindable]
+    public class Fsm
+    {
+
+        public static const FINISH:String = "nop";
+        
+        //fsm name
+        public var dn:String;
+
+	    //FINISH
+	    public var status:String;
+	
+	    //0-100
+	    public var progress:String;
+	
+	    //current task
+	    public var description:String;
+	
+	    //if error != empty -> show error
+	    public var error:String;
+	    
+        public function Fsm()
+        {
+        	dn = "";
+	        status = "";
+	        progress = "";
+	        description = "";
+	        error = "";
+        }
+
+    }
 }

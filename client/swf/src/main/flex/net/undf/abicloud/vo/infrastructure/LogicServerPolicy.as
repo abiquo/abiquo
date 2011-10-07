@@ -18,10 +18,33 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-package com.abiquo.model.enumerator;
-
-public enum MachineState
+ 
+package net.undf.abicloud.vo.infrastructure
 {
-    STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA, HALTED_FOR_SAVE;
+	import mx.collections.ArrayCollection;
+	
+	[Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServerPolicy")]
+	public class LogicServerPolicy
+	{
+		//Public attributes
+		
+		public var dn:String;
+
+        public var name:String;
+
+        public var priority:String;
+
+        public var description:String;
+		
+		  
+		public function LogicServerPolicy()
+		{
+			dn = "";
+            name = "";
+            priority = "";
+            description = "";
+		}
+
+	}
 }

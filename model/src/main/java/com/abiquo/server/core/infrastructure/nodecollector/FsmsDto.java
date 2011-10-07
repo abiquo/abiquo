@@ -39,18 +39,18 @@ import javax.xml.bind.annotation.XmlType;
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Wrapper class to get a list of Organizations.
+ * Wrapper class to get a list of State Machines.
  * <p>
- * Java class for OrganizationsDto complex type.
+ * Java class for FsmsDto complex type.
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="OrganizationsDto">
+ * &lt;complexType name="FsmsDto">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="organization" type="{http://abiquo.com/server/core/infrastructure/nodecollector}OrganizationDto" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="fsm" type="{http://abiquo.com/server/core/infrastructure/nodecollector}FsmDto" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -58,8 +58,8 @@ import com.abiquo.model.transport.WrapperDto;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "organizations")
-public class OrganizationsDto extends WrapperDto<OrganizationDto>
+@XmlType(name = "fsms")
+public class FsmsDto extends WrapperDto<FsmDto>
 {
 
     /**
@@ -80,15 +80,15 @@ public class OrganizationsDto extends WrapperDto<OrganizationDto>
      * getCollection().add(newItem);
      * </pre>
      * <p>
-     * Objects of the following type(s) are allowed in the list {@link OrganizationDto }
+     * Objects of the following type(s) are allowed in the list {@link FsmDto }
      */
     @Override
-    @XmlElement(name = "organization")
-    public List<OrganizationDto> getCollection()
+    @XmlElement(name = "fsm")
+    public List<FsmDto> getCollection()
     {
         if (collection == null)
         {
-            collection = new ArrayList<OrganizationDto>();
+            collection = new ArrayList<FsmDto>();
         }
         return this.collection;
     }

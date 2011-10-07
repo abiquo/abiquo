@@ -42,6 +42,7 @@ import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Machine.State;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
@@ -147,6 +148,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     public List<Machine> findRackEnabledForHAMachines(final Rack rack)
     {
+        if (rack instanceof UcsRack)
+        {
+            return findRackEnabledForHAMachinesInUcs((UcsRack) rack);
+        }
         Criteria criteria = createCriteria(sameRack(rack));
         criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
 
@@ -157,6 +162,24 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         criteria.add(Restrictions.isNotNull(Machine.IPMI_IP_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_USER_PROPERTY));
         criteria.add(Restrictions.isNotNull(Machine.IPMI_PASSWORD_PROPERTY));
+
+        // XenServer does not support HA
+        criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,
+            HypervisorType.XENSERVER));
+
+        // Order by name
+        criteria.addOrder(Order.asc(Machine.NAME_PROPERTY));
+
+        return getResultList(criteria);
+    }
+
+    public List<Machine> findRackEnabledForHAMachinesInUcs(final UcsRack rack)
+    {
+        Criteria criteria = createCriteria(sameRack(rack));
+        criteria.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        // Is a managed one
+        criteria.add(Restrictions.eq(Machine.STATE_PROPERTY, State.MANAGED));
 
         // XenServer does not support HA
         criteria.add(Restrictions.ne("hypervisor." + Hypervisor.TYPE_PROPERTY,

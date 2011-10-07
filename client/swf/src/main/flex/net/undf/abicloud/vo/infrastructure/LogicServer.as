@@ -21,6 +21,8 @@
  
 package net.undf.abicloud.vo.infrastructure
 {
+	import mx.collections.ArrayCollection;
+	
 	[Bindable]
     [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.LogicServer")]
 	public class LogicServer
@@ -36,6 +38,8 @@ package net.undf.abicloud.vo.infrastructure
 	    public var associatedTo:String;
 	
 	    public var description:String;
+	    
+	    public var policies:ArrayCollection;
 	    
 	    //Constants
 	    
@@ -53,6 +57,7 @@ package net.undf.abicloud.vo.infrastructure
 			associated = "";
 			associatedTo = "";
 			description = "";
+			policies = new ArrayCollection();
 		}
 
 	}

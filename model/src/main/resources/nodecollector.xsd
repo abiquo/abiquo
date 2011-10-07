@@ -18,6 +18,8 @@
     <xs:element name="LogicServers" type="nc:LogicServersDto" />
     <xs:element name="Organization" type="nc:OrganizationDto" />
     <xs:element name="Organizations" type="nc:OrganizationsDto" />
+    <xs:element name="Fsm" type="nc:FsmDto" />
+    <xs:element name="Fsms" type="nc:FsmsDto" />
     
     <!--                                      -->
     <!-- Definition of the main complex types -->
@@ -128,7 +130,7 @@
             <xs:element name="name" type="xs:string" nillable="false" />
             <xs:element name="level" type="xs:string" nillable="true" />
             <xs:element name="status" type="xs:string" nillable="true" />
-            <xs:element name="descriptioni" type="xs:string" nillable="true" />
+            <xs:element name="description" type="xs:string" nillable="true" />
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="OrganizationsDto">
@@ -139,6 +141,31 @@
         </xs:annotation>
             <xs:sequence>
                 <xs:element name="organizations" type="nc:OrganizationDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="FsmDto">
+        <xs:annotation>
+            <xs:documentation>
+                The object contains the current needed values of the State Machine in UCS
+                capabilities to retrieve
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="dn" type="xs:string" nillable="false" />
+            <xs:element name="status" type="xs:string" nillable="false" />
+            <xs:element name="progress" type="xs:string" nillable="true" />
+            <xs:element name="description" type="xs:string" nillable="true" />
+            <xs:element name="error" type="xs:string" nillable="true" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="FsmsDto">
+        <xs:annotation>
+            <xs:documentation>
+                Wrapper class to get a list of Fsm.
+            </xs:documentation>
+        </xs:annotation>
+            <xs:sequence>
+                <xs:element name="fsms" type="nc:FsmDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
             </xs:sequence>
     </xs:complexType>
     <!--                                      -->

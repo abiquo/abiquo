@@ -34,105 +34,44 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * The object contains the current needed values of the Organizations capabilities to retrieve
+ * The object contains the current needed values of the State Machine capabilities to retrieve
  * <p>
- * Java class for OrganizationDto complex type.
+ * Java class for FsmDto complex type.
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="OrganizationDto">
+ * &lt;complexType name="FsmDto">
  *   &lt;complexContent>
  *       &lt;sequence>
  *        &lt;element name="dn" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="level" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="status" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="progress" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="error" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "OrganizationDto", propOrder = {"dn", "name", "level", "status", "description"})
-public class OrganizationDto
+@XmlType(name = "FsmDto", propOrder = {"dn", "status", "progress", "description", "error"})
+public class FsmDto
 {
     @XmlElement(required = true)
     protected String dn;
 
     @XmlElement(required = true)
-    protected String name;
+    protected String status;
 
     @XmlElement(required = true)
-    protected String level;
-
-    @XmlElement(required = true, nillable = true)
-    protected String status;
+    protected String progress;
 
     @XmlElement(required = true, nillable = true)
     protected String description;
 
-    /**
-     * Gets the value of the name property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * Gets the value of the dn property.
-     * 
-     * @return possible object is {@link String }
-     */
-
-    public String getDn()
-    {
-        return dn;
-    }
-
-    /**
-     * Sets the value of the dn property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setDn(final String dn)
-    {
-        this.dn = dn;
-    }
-
-    /**
-     * Sets the value of the name property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setName(final String value)
-    {
-        this.name = value;
-    }
-
-    /**
-     * Gets the value of the level property.
-     * 
-     * @return possible object is {@link String }
-     */
-    public String getLevel()
-    {
-        return level;
-    }
-
-    /**
-     * Sets the value of the level property.
-     * 
-     * @param value allowed object is {@link String }
-     */
-    public void setLevel(final String value)
-    {
-        this.level = value;
-    }
+    @XmlElement(required = true, nillable = true)
+    protected String error;
 
     /**
      * Gets the value of the status property.
@@ -145,6 +84,27 @@ public class OrganizationDto
     }
 
     /**
+     * Gets the value of the associated property.
+     * 
+     * @return possible object is {@link String }
+     */
+
+    public String getDn()
+    {
+        return dn;
+    }
+
+    /**
+     * Sets the value of the name property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setDn(final String dn)
+    {
+        this.dn = dn;
+    }
+
+    /**
      * Sets the value of the status property.
      * 
      * @param value allowed object is {@link String }
@@ -152,6 +112,26 @@ public class OrganizationDto
     public void setStatus(final String value)
     {
         this.status = value;
+    }
+
+    /**
+     * Gets the value of the progress property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getProgress()
+    {
+        return progress;
+    }
+
+    /**
+     * Sets the value of the progress property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setProgress(final String value)
+    {
+        this.progress = value;
     }
 
     /**
@@ -172,6 +152,26 @@ public class OrganizationDto
     public void setDescription(final String value)
     {
         this.description = value;
+    }
+
+    /**
+     * Gets the value of the error property.
+     * 
+     * @return possible object is {@link String }
+     */
+    public String getError()
+    {
+        return error;
+    }
+
+    /**
+     * Sets the value of the error property.
+     * 
+     * @param value allowed object is {@link String }
+     */
+    public void setError(final String value)
+    {
+        this.error = value;
     }
 
 }

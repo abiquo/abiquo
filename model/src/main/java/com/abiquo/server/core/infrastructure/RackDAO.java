@@ -243,4 +243,84 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
         return q.list();
     }
+
+    private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and h.machine.state = "
+        + Machine.State.HALTED_FOR_SAVE.ordinal();
+
+    private final static String HQL_EMPTY_ON_MACHINES_IN_RACK = "select h.machine "
+        + "from Hypervisor h inner join h.machine m where m.rack.id = :rackId and h not in "
+        + "(select vm.hypervisor from VirtualMachine vm) " + "and h.machine.state = "
+        + Machine.State.MANAGED.ordinal();
+
+    /**
+     * Return all machines in a rack that are empty of VM and powered off.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+        return q.list().size();
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+
+        Query q =
+            getSession().createQuery(HQL_EMPTY_OFF_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        List<Machine> machines = q.list();
+        if (machines.isEmpty())
+        {
+            return null;
+        }
+        return machines.subList(0, howMany < machines.size() ? howMany : machines.size() - 1);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        if (howMany <= 0)
+        {
+            return null;
+        }
+        Query q =
+            getSession().createQuery(HQL_EMPTY_ON_MACHINES_IN_RACK).setInteger("rackId", rackId);
+
+        List<Machine> machines = q.list();
+        if (machines.isEmpty())
+        {
+            return null;
+        }
+        return machines.subList(0, howMany < machines.size() ? howMany : machines.size() - 1);
+    }
 }
