@@ -143,7 +143,7 @@ public class OVFPackageRep extends DefaultRepBase
         for (OVFPackageList ovfPackageList : lists)
         {
             ovfPackageList.getOvfPackages().remove(ovfPackage);
-            listDao.persist(ovfPackageList);
+            listDao.flush();
         }
 
         dao.remove(ovfPackage);
@@ -226,6 +226,11 @@ public class OVFPackageRep extends DefaultRepBase
     public void persistList(final OVFPackageList ovfPackageList)
     {
         listDao.persist(ovfPackageList);
+    }
+
+    public void updateList(final OVFPackageList ovfPackageList)
+    {
+        listDao.flush();
     }
 
     public OVFPackageList getOVFPackageList(final Integer id)

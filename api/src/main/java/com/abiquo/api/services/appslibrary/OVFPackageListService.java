@@ -162,7 +162,7 @@ public class OVFPackageListService extends DefaultApiService
             return oldList;
         }
 
-        repo.persistList(oldList);
+        repo.updateList(oldList);
 
         OVFPackageList newList = obtainOVFPackageListFromRepositorySpaceLocation(listUrl);
         return addOVFPackageList(newList, idEnterprise);
@@ -193,7 +193,7 @@ public class OVFPackageListService extends DefaultApiService
         Enterprise ent = entRepo.findById(idEnterprise);
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
-        repo.persistList(old);
+        repo.updateList(old);
 
         return old;
     }
