@@ -355,7 +355,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
     {
-        String price = "NA";
+        String price = "";
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
         // if enterprise has pt associated
         PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
@@ -368,18 +368,22 @@ public class VirtualApplianceService extends DefaultApiService
                 price.replace(PricingModelVariables.CHARGE.getText(), priceDto.getTotalCost() + " "
                     + pricingTemplate.getCurrency().getSymbol());
             price =
-                price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), "per "
-                    + pricingTemplate.getChargingPeriod().name());
+                price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), pricingTemplate
+                    .getChargingPeriod().name());
             price =
                 price.replace(PricingModelVariables.MIN_CHARGE.getText(),
                     priceDto.getMinimumChargePeriod() + " "
                         + pricingTemplate.getCurrency().getSymbol());
             price =
-                price.replace(PricingModelVariables.MIN_PERIOD.getText(), "per "
-                    + pricingTemplate.getMinimumCharge().name());
+                price.replace(PricingModelVariables.MIN_PERIOD.getText(), pricingTemplate
+                    .getMinimumCharge().name());
 
         }
-        return price + "\n";
+        if (!price.equals(""))
+        {
+            price = price + "\n";
+        }
+        return price;// + "\n";
     }
 
     public VirtualAppliancePriceDto getPriceVirtualAppliance(

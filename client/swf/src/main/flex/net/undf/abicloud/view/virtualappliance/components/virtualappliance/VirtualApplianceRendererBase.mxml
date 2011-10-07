@@ -60,7 +60,7 @@
 
             //The VirtualAppliance that will be rendered
             [Bindable]
-            private var _virtualAppliance:VirtualAppliance;
+            protected var _virtualAppliance:VirtualAppliance;
             
             [Bindable]
             private var _logs:ArrayCollection;
@@ -212,7 +212,7 @@
                 }
             }
 
-            private function powerOnVirtualAppliance():void
+            protected function powerOnVirtualAppliance():void
             {
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.START_VIRTUALAPPLIANCE);
 
