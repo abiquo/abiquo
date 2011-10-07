@@ -52,3 +52,8 @@ DROP PROCEDURE update_vlans |
 
 
 DELIMITER ;
+
+-- remove a bug introduced in 1.6.8 and increased in 1.8.5
+update ip_pool_management ip1, ip_pool_management ip2 set ip1.vlan_network_id = ip2.vlan_network_id where ip1.vlan_network_id is null and ip2.vlan_network_id is not null and ip1.ip = ip2.ip and ip1.dhcp_service_id = ip2.dhcp_service_id and ip1.idManagement != ip2.idManagement;
+
+delete ip1 from ip_pool_management ip1, ip_pool_management ip2 where ip1.ip = ip2.ip and ip1.dhcp_service_id = ip2.dhcp_service_id and ip1.available = 0 and ip1.idManagement != ip2.idManagement;
