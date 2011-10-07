@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.XmlType;
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Wrapper class to get a list of Logic Servers.
+ * Wrapper class to get a list of Organizations.
  * <p>
  * Java class for OrganizationsDto complex type.
  * <p>

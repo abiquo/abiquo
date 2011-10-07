@@ -28,6 +28,8 @@ import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.UcsRack;
 
 /**
  * Selects the target machine to allocate a virtual machines.
@@ -107,4 +109,12 @@ public interface IAllocator
 
     VirtualMachineRequirements getVirtualMachineRequirements(VirtualMachine virtualMachine);
 
+    /**
+     * We check how many empty machines are in a rack. Then we power on or off to fit the
+     * configuration. In 2.0 only in {@link UcsRack}.
+     * 
+     * @param targetMachine machine we are deploy void
+     * @since 2.0
+     */
+    public void adjustPoweredMachinesInRack(final Rack rack);
 }

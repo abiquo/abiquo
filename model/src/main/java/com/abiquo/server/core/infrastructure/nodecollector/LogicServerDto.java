@@ -28,9 +28,15 @@
 
 package com.abiquo.server.core.infrastructure.nodecollector;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -49,6 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="associated" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="associatedTo" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="policies"type="{http://abiquo.com/server/core/infrastructure/nodecollector/ucs}LogicServerPolicyDto" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -56,7 +63,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LogicServerDto", propOrder = {"name", "type", "associated", "associatedTo",
-"description"})
+"description", "content"})
 public class LogicServerDto
 {
 
@@ -75,6 +82,10 @@ public class LogicServerDto
 
     @XmlElement(required = false)
     protected String description;
+
+    @XmlElementRef(name = "policies")
+    @XmlMixed
+    protected List<LogicServerPolicyDto> content;
 
     /**
      * Gets the value of the name property.
@@ -134,6 +145,31 @@ public class LogicServerDto
     public void setAssociated(final String value)
     {
         this.associated = value;
+    }
+
+    /**
+     * Gets the value of the policies property.
+     * <p>
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the content property.
+     * <p>
+     * For example, to add a new item, do as follows:
+     * 
+     * <pre>
+     * getContent().add(newItem);
+     * </pre>
+     * <p>
+     * Objects of the following type(s) are allowed in the list {@link JAXBElement }{@code <}
+     * {@link ConfigSet }{@code >} {@link String }
+     */
+    public List<LogicServerPolicyDto> getContent()
+    {
+        if (content == null)
+        {
+            content = new ArrayList<LogicServerPolicyDto>();
+        }
+        return this.content;
     }
 
     /**

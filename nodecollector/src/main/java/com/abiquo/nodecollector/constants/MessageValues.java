@@ -310,31 +310,31 @@ public final class MessageValues
      * The Logic Server is already associated to a LS.
      */
     public static final String UCS_LS_ASSOC_ERROR =
-        "Cannot associate the Logic Server because it is already associated";
+        "Cannot associate the Service Profile because it is already associated";
 
     /**
      * The Logic Server is already unassociated.
      */
     public static final String UCS_LS_UNASSOC_ERROR =
-        "Cannot disassociate the Logic Server because it is already unassociated";
+        "Cannot disassociate the Service Profile because it is already unassociated";
 
     /**
      * The Logic Server is wan not associated to a LS due to an unknown error.
      */
     public static final String UCS_LS_ASSOC_GEN_ERROR =
-        "Cannot associate the Logic Server due to an unknown error. Take a look at the log for more info.";
+        "Cannot associate the Service Profile due to an unknown error. Please see the log for more info.";
 
     /**
      * The Logic Server was not unassociated due unknown error.
      */
     public static final String UCS_LS_UNASSOC_GEN_ERROR =
-        "Cannot disassociate the Logic Server due to an unknown error";
+        "Cannot disassociate the Service Profile due to an unknown error. Please see the log for more info.";
 
     /**
      * The Logic Server does not exists.
      */
 
-    public static final String UCS_LS_NO_EXISTS_ERROR = "The Logic Server does not exists";
+    public static final String UCS_LS_NO_EXISTS_ERROR = "The Service Profile does not exists";
 
     /**
      * The Organization does not exists.
@@ -343,7 +343,7 @@ public final class MessageValues
         "The Organization does not exists";
 
     /** The Logic Server already exists. */
-    public static final String UCS_LS_EXISTS_ERROR = "The Logic Server already exists";
+    public static final String UCS_LS_EXISTS_ERROR = "The Service Profile already exists";
 
     /**
      * The UCS could not be reached.
@@ -354,13 +354,13 @@ public final class MessageValues
     /**
      * The Logic Server is not a template.
      */
-    public static final String UCS_LS_NO_TEMPLATE_ERROR = "The Logic Server is not a template";
+    public static final String UCS_LS_NO_TEMPLATE_ERROR = "The Service Profile is not a template";
 
     /**
      * No instance.
      */
     public static final String UCS_LS_TEMPLATE_INSTANTIATION_ERROR =
-        "Cannot instantiate the Logic Server due to an unknown error";
+        "Cannot instantiate the Service Profile due to an unknown error. Please see the log for more info.";
 
     /**
      * The Logic Server is already unassociated.
@@ -378,7 +378,7 @@ public final class MessageValues
      * No assoc.
      */
     public static final String UCS_LS_ASSOCIATION_SEE_LOGS_ERROR =
-        "Cannot associate the Logic Server due to an unknown error. Review the logs of the application for more information";
+        "Cannot associate the Service Profile due to an unknown error. Review the logs of the application for more information";
 
     /**
      * Task ongoing.

@@ -77,7 +77,7 @@ public class StonithResource
         }
     }
 
-    private void validateQueryParams(final String host, final Integer port, final String user,
+    protected void validateQueryParams(final String host, final Integer port, final String user,
         final String password) throws NodecollectorException
     {
         if (host == null || user == null || password == null)

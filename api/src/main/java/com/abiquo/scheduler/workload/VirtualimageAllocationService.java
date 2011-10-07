@@ -45,6 +45,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -297,10 +298,9 @@ public class VirtualimageAllocationService
         }
         if (numberOfDeployedVLAN.compareTo(new Long(vlanPerSwitch)) >= 0)
         {
-            throw new NotEnoughResourcesException(String
-                .format(
-                    "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
-                    rack.getName()));
+            throw new NotEnoughResourcesException(String.format(
+                "Not enough VLAN resource on rack [%s] to instantiate the required virtual appliance.",
+                rack.getName()));
         }
 
         // log.debug("The network assigned to the VM, VLAN network ID: {},  "
@@ -333,18 +333,32 @@ public class VirtualimageAllocationService
         {
 
             final boolean passCPU =
-                pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image
-                    .getCpuRequired()), Long.valueOf(machine.getVirtualCpuCores()
-                    * machine.getVirtualCpusPerCore()), 100);
+                pass(Long.valueOf(machine.getVirtualCpusUsed()),
+                    Long.valueOf(image.getCpuRequired()),
+                    Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
+                    100);
 
             final boolean passRAM =
-                pass(Long.valueOf(machine.getVirtualRamUsedInMb()), Long.valueOf(image
-                    .getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()), 100);
+                pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
+                    Long.valueOf(image.getRamRequired()),
+                    Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
-            Long machineAllowedMb = machine.getVirtualHardDiskInBytes() / (1024 * 1024);
-            Long machineUsedMb = machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
+
+            Long machineAllowedMb = 0L;
+            Long machineUsedMb = 0L;
+            if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+            {
+                for (Datastore d : machine.getDatastores())
+                {
+                    machineAllowedMb += d.getSize() / (1024 * 1024);
+                    machineUsedMb += d.getUsedSize() / (1024 * 1024);
+                }
+            }
+
+            // machine.getVirtualHardDiskInBytes() / (1024 * 1024);
+            // machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
 
             final boolean passHD = pass(machineUsedMb, imageRequiredMb, machineAllowedMb, 100);
 
@@ -423,9 +437,7 @@ public class VirtualimageAllocationService
             }
             else
             {
-                log
-                    .error(String
-                        .format("Machine %s rejected by some load rule.", target.getName()));
+                log.error(String.format("Machine %s rejected by some load rule.", target.getName()));
             }
         }
 
@@ -510,4 +522,52 @@ public class VirtualimageAllocationService
         return pass;
     }
 
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOffMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOffMachines(rackId);
+    }
+
+    /**
+     * Return all machines in a rack that are empty of VM.
+     * 
+     * @param rackId rack.
+     * @return Integer
+     */
+    public Integer getEmptyOnMachines(final Integer rackId)
+    {
+
+        return datacenterRepo.getEmptyOnMachines(rackId);
+    }
+
+    /**
+     * Returns any machine that is in the rack in HALTED_FOR_SAVE.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+
+    public List<Machine> getRandomMachinesToStartFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        return datacenterRepo.getRandomMachinesToStartFromRack(rackId, howMany);
+    }
+
+    /**
+     * Returns any machine that is in the rack in MANAGED.
+     * 
+     * @param rackId rack.
+     * @return Machine
+     */
+    public List<Machine> getRandomMachinesToShutDownFromRack(final Integer rackId,
+        final Integer howMany)
+    {
+        return datacenterRepo.getRandomMachinesToShutDownFromRack(rackId, howMany);
+    }
 }

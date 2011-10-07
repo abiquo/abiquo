@@ -58,8 +58,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
 
     private int cpu;
 
-    private long hd;
-
     private String vswitchName;
 
     private String initiatorIQN;
@@ -100,8 +98,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     private int ramUsed;
 
     private int cpuUsed;
-
-    private long hdUsed;
 
     /**
      * This parameter identifies the state of the physicalMachine. 0 - Stopped 1 - Not Provisioned 2
@@ -199,16 +195,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         cpu = i;
     }
 
-    public long getHd()
-    {
-        return hd;
-    }
-
-    public void setHd(final long hd)
-    {
-        this.hd = hd;
-    }
-
     // used
     public int getRamUsed()
     {
@@ -228,16 +214,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
     public void setCpuUsed(final int cpu)
     {
         cpuUsed = cpu;
-    }
-
-    public long getHdUsed()
-    {
-        return hdUsed;
-    }
-
-    public void setHdUsed(final long hd)
-    {
-        hdUsed = hd;
     }
 
     public HypervisorHB getHypervisor()
@@ -374,8 +350,6 @@ public class PhysicalmachineHB implements java.io.Serializable, IPojoHB<Physical
         physicalMachine.setCpu(cpu);
         physicalMachine.setCpuUsed(cpuUsed);
         physicalMachine.setDescription(description);
-        physicalMachine.setHd(hd);
-        physicalMachine.setHdUsed(hdUsed);
         physicalMachine.setId(getIdPhysicalMachine());
         physicalMachine.setName(name);
         physicalMachine.setAssignedTo(rack == null ? null : (Rack) rack.toPojo());

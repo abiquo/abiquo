@@ -377,41 +377,37 @@ public class NodecollectorServiceStub extends DefaultApiService
                 host.getDescription(),
                 ram,
                 0,
-                0L,
-                0L,
                 cpus,
                 0,
                 0,
                 transfromToState(host.getStatus()),
                 "");
 
-        Long totalStorage = 0L;
         String switches = "";
         for (ResourceType resource : host.getResources())
         {
-            if (resource.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
+
+            // TODO remove code
+            // if (resource.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
+            // {
+            // Datastore datastore =
+            // new Datastore(machine, resource.getElementName(), resource.getAddress(), "");
+            // datastore.setEnabled(Boolean.FALSE);
+            // datastore.setSize(resource.getUnits());
+            // datastore.setUsedSize(resource.getUnits() - resource.getAvailableUnits());
+            // datastore.setDatastoreUUID(resource.getConnection());
+            // totalStorage += datastore.getSize();
+            // }
+            // else
+            if (resource.getResourceType().equals(ResourceEnumType.NETWORK_INTERFACE))
             {
-                Datastore datastore =
-                    new Datastore(machine, resource.getElementName(), resource.getAddress(), "");
-                datastore.setEnabled(Boolean.FALSE);
-                datastore.setSize(resource.getUnits());
-                datastore.setUsedSize(resource.getUnits() - resource.getAvailableUnits());
-                datastore.setDatastoreUUID(resource.getConnection());
-                totalStorage += datastore.getSize();
-            }
-            else
-            {
-                if (resource.getResourceType().equals(ResourceEnumType.NETWORK_INTERFACE))
-                {
-                    switches = switches.concat(resource.getElementName()) + "/";
-                    machine.getListOfMacs().add(resource.getAddress());
-                }
+                switches = switches.concat(resource.getElementName()) + "/";
+                machine.getListOfMacs().add(resource.getAddress());
             }
 
         }
 
         switches = switches.substring(0, switches.lastIndexOf('/'));
-        machine.setVirtualHardDiskInBytes(totalStorage);
         machine.setVirtualSwitch(switches);
         return machine;
     }

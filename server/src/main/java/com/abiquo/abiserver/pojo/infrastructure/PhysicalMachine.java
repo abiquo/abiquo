@@ -350,8 +350,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachineHB.setCpuUsed(getCpuUsed());
         physicalMachineHB.setRam(getRam());
         physicalMachineHB.setRamUsed(getRamUsed());
-        physicalMachineHB.setHd(getHd());
-        physicalMachineHB.setHdUsed(getHdUsed());
         Rack rack = (Rack) getAssignedTo();
         physicalMachineHB.setRack(rack.toPojoHB());
         physicalMachineHB.setIdState(getIdState());
@@ -403,8 +401,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setCpu(dto.getVirtualCpuCores());
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());
-        physicalMachine.setHd(dto.getVirtualHardDiskInMb());
-        physicalMachine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
         physicalMachine.setId(dto.getId());
         physicalMachine.setName(dto.getName());
         physicalMachine.setAssignedTo(rack);
@@ -432,8 +428,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         physicalMachine.setCpu(dto.getVirtualCpuCores());
         physicalMachine.setCpuUsed(dto.getVirtualCpusUsed());
         physicalMachine.setDescription(dto.getDescription());
-        physicalMachine.setHd(dto.getVirtualHardDiskInMb());
-        physicalMachine.setHdUsed(dto.getVirtualHardDiskUsedInMb());
         physicalMachine.setId(dto.getId());
         physicalMachine.setName(dto.getName());
         physicalMachine.setAssignedTo(rack);

@@ -28,7 +28,11 @@
 
 package com.abiquo.abiserver.pojo.ucs;
 
-import com.abiquo.server.core.infrastructure.nodecollector.LogicServerDto;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.abiquo.server.core.infrastructure.LogicServerDto;
+import com.abiquo.server.core.infrastructure.LogicServerPolicyDto;
 
 /**
  * This class is not persisted in Abiquo but we needed to provide compatibility with the server.
@@ -45,6 +49,28 @@ public class LogicServer
     protected String associatedTo;
 
     protected String description;
+
+    protected List<LogicServerPolicy> policies;
+
+    /**
+     * @return List<LogicServerPolicy>
+     */
+    public List<LogicServerPolicy> getPolicies()
+    {
+        if (policies == null)
+        {
+            this.policies = new ArrayList<LogicServerPolicy>();
+        }
+        return policies;
+    }
+
+    /**
+     * @param policies void
+     */
+    public void setPolicies(final List<LogicServerPolicy> policies)
+    {
+        this.policies = policies;
+    }
 
     /**
      * Gets the value of the type property.
@@ -154,6 +180,10 @@ public class LogicServer
         logicServer.setAssociated(dto.getAssociated());
         logicServer.setAssociatedTo(dto.getAssociatedTo());
         logicServer.setDescription(dto.getDescription());
+        for (LogicServerPolicyDto d : dto.getCollection())
+        {
+            logicServer.getPolicies().add(LogicServerPolicy.create(d));
+        }
         return logicServer;
     }
 }
