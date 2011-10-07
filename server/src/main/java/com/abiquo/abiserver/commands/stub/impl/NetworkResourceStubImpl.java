@@ -90,6 +90,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setVlanTag(dto.getTag());
         newNet.setNetworkId(dto.getId());
         newNet.setNetworkType(dto.getType().toString());
+        newNet.setDefaultNetwork(dto.getDefaultNetwork());
 
         return newNet;
     }
