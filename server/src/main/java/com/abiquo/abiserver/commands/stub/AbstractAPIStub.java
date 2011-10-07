@@ -848,11 +848,12 @@ public class AbstractAPIStub
         final int virtualApplianceId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("{virtualDatacenter}", String.valueOf(virtualDatacenterId));
-        params.put("{vapp}", String.valueOf(virtualApplianceId));
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("vapp", String.valueOf(virtualApplianceId));
 
-        return URIResolver.resolveURI(apiUri,
-            "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}/action/price", params);
+        return resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{vapp}/action/price",
+            params);
     }
 
 }
