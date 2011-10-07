@@ -161,8 +161,8 @@ public class VirtualDatacenterService extends DefaultApiService
 
         // set as default vlan (as it is the first one) and create it.
         VLANNetwork vlan =
-            networkService.createPrivateNetwork(vdc.getId(),
-                PrivateNetworkResource.createPersistenceObject(dto.getVlan()));
+            networkService.createPrivateNetwork(vdc.getId(), PrivateNetworkResource
+                .createPersistenceObject(dto.getVlan()), false);
 
         // find the default vlan stablished by the enterprise-datacenter limits
         DatacenterLimits dcLimits =
@@ -277,11 +277,8 @@ public class VirtualDatacenterService extends DefaultApiService
         final Datacenter datacenter, final Enterprise enterprise, final Network network)
     {
         VirtualDatacenter vdc =
-            new VirtualDatacenter(enterprise,
-                datacenter,
-                network,
-                dto.getHypervisorType(),
-                dto.getName());
+            new VirtualDatacenter(enterprise, datacenter, network, dto.getHypervisorType(), dto
+                .getName());
 
         setLimits(dto, vdc);
         validateVirtualDatacenter(vdc, dto.getVlan(), datacenter);
