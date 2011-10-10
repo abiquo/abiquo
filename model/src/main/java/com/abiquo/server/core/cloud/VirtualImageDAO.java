@@ -65,7 +65,7 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
 
     private static Criterion sharedImage()
     {
-        return Restrictions.eq(VirtualImage.SHARED_PROPERTY, 1);
+        return Restrictions.eq(VirtualImage.SHARED_PROPERTY, true);
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)

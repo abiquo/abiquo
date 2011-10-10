@@ -25,6 +25,7 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -33,7 +34,9 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -53,9 +56,11 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -93,6 +98,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     private Enterprise ent;
 
     private Datacenter datacenter;
+
+    private VirtualImage virtualImage;
 
     @BeforeMethod
     public void setUpDatacenterRepository()
@@ -220,21 +227,45 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         }
 
         List<VirtualImage> images = vimageService.getVirtualImages(enterpriseId, datacenterId);
-        assertVirtualImageExist(images, DEFAULT_OVF);
+        virtualImage = assertVirtualImageExist(images, DEFAULT_OVF);
     }
 
-    private static void assertVirtualImageExist(final List<VirtualImage> vimages,
+    @Test
+    public void testGetVirtualImage()
+    {
+        // TODO: Change this to create the VI in the DB when we have the category, icon and other
+        // mandatory objects in the model.
+        createOVFandWaitUntilVirtualImageCreated();
+        assertNotNull(virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+        String href = amOVFPackageInstanceUrl(ent.getId(), dto.getOvfid());
+
+        assertLinkExist(dto, href, "ovfpackageinstance");
+        assertLinkExist(dto, href + "?format=status", "ovfpackagestatus");
+        assertLinkExist(dto, href + "?format=envelope", "ovfdocument");
+        assertLinkExist(dto, href + "?format=diskFile", "imagefile");
+    }
+
+    // TODO: Make test for VirtualImage with master. Test link existance
+
+    private static VirtualImage assertVirtualImageExist(final List<VirtualImage> vimages,
         final String ovfurl)
     {
         for (VirtualImage vimage : vimages)
         {
             if (vimage.getOvfid().equalsIgnoreCase(ovfurl))
             {
-                return;
+                return vimage;
             }
         }
 
         fail("virtual image not found " + ovfurl);
+        return null;
     }
 
     @Autowired
@@ -247,7 +278,10 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
     private static String amOVFPackageInstanceUrl(final Integer enterpriseId, final String ovf)
     {
-        return String.format("%s/erepos/%s", AM_BASE_URI, enterpriseId.toString());
-    }
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("erepo", enterpriseId.toString());
+        params.put("ovf", ovf);
 
+        return URIResolver.resolveURI(AM_BASE_URI, "erepos/{erepo}/ovfs/{ovf}", params);
+    }
 }
