@@ -24,6 +24,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +104,7 @@ public class OVFPackageInstanceFileSystem
         TimeoutFSUtils.getInstance().canUseRepository();
 
         final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
-        final String ovfEnvelopePath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId);
+        final String ovfEnvelopePath = FilenameUtils.concat(enterpriseRepositoryPath, getRelativeOVFPath(ovfId));
 
         File errorMarkFile = new File(packagePath + OVF_STATUS_ERROR_MARK);
         if (errorMarkFile.exists())

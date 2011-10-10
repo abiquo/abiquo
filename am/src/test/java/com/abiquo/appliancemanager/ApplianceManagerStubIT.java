@@ -336,6 +336,7 @@ public class ApplianceManagerStubIT
             rsServer.stop();
         }
         deleteDiskFile();
+        cleanupRepository();
     }
 
     protected static void cleanupRepository() throws IOException

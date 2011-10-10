@@ -27,6 +27,7 @@ import static com.abiquo.am.services.OVFPackageConventions.getRelativePackagePat
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.commons.io.FilenameUtils;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 
 import com.abiquo.appliancemanager.exceptions.DownloadException;
@@ -276,8 +277,6 @@ public class OVFPackageConventions
         return BASE_REPO_PATH + String.valueOf(idEnterprise) + '/';
     }
 
-    
-
     /**
      * Create a path in the Enterprise Repository based on the OVF location. Codify the hostname and
      * the path to the root folder. ej (wwww.abiquo.com/ovfindex/package1/envelope.ovf ->
@@ -287,19 +286,17 @@ public class OVFPackageConventions
      */
     public static String getOVFPackagePath(final String enterpriseRepositoryPath, final String ovfid)
     {
-        return enterpriseRepositoryPath + getRelativePackagePath(ovfid);
+        return FilenameUtils.concat(enterpriseRepositoryPath, getRelativePackagePath(ovfid));
     }
-    
-    
-    
-    
+
     /**
      * return
      * 
      * @throws MalformedURLException
      */
-    public static String createFileInfo(final String enterpriseRepositoryPath, final FileType fileType, final String ovfId)
-        throws DownloadException, MalformedURLException
+    public static String createFileInfo(final String enterpriseRepositoryPath,
+        final FileType fileType, final String ovfId) throws DownloadException,
+        MalformedURLException
     {
         String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
 

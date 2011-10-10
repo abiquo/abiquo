@@ -86,7 +86,7 @@ public class EnterpriseRepositoryFileSystem
 
         try
         {
-            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS);
+            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS); 
         }
         catch (TimeoutException e)
         {
