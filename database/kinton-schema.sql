@@ -1685,14 +1685,27 @@ CREATE TABLE  `kinton`.`volume_management` (
   CONSTRAINT `volumemanagement_FK3` FOREIGN KEY (`idImage`) REFERENCES `virtualimage` (`idImage`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `kinton`.`volume_management`
---
-
 /*!40000 ALTER TABLE `volume_management` DISABLE KEYS */;
 LOCK TABLES `volume_management` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `volume_management` ENABLE KEYS */;
+--
+-- Definition of table `kinton`.`disk_management`
+--
+DROP TABLE IF EXISTS `kinton`.`disk_management`;
+CREATE TABLE  `kinton`.`disk_management` (
+  `idManagement` int(10) unsigned NOT NULL,
+  `idDatastore` int(10) unsigned default NULL,
+  KEY `disk_idManagement_FK` (`idManagement`),
+  KEY `disk_management_datastore_FK` (`idDatastore`),
+  CONSTRAINT `disk_idManagement_FK` FOREIGN KEY (`idManagement`) REFERENCES `rasd_management` (`idManagement`) ON DELETE CASCADE,
+  CONSTRAINT `disk_datastore_FK` FOREIGN KEY (`idDatastore`) REFERENCES `datastore` (`idDatastore`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `kinton`.`volume_management`
+--
+
 
 --
 -- Definition of table `kinton`.`initiator_mapping`
