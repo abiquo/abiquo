@@ -1,3 +1,4 @@
+use kinton;
 -- ---------------------------------------------- --
 --                  TABLE DROP                    --
 -- ---------------------------------------------- --
@@ -96,7 +97,8 @@ CREATE PROCEDURE update_vlans()
         vlan_loop: LOOP
             FETCH cur_vlans INTO vlan_id, vlan_name, address, intmask, dhcp_id;
             IF done THEN LEAVE vlan_loop; END IF;
-            UPDATE `kinton`.`vlan_network` SET networktype = 'PUBLIC' WHERE vlan_network_id = vlan_id;
+            UPDATE `kinton`.`vlan_network` SET networktype = 'PUBLIC' WHERE vlan_network_id = vlan_id AND enterprise_id IS NULL;
+            UPDATE `kinton`.`vlan_network` SET networktype = 'EXTERNAL' WHERE vlan_network_id = vlan_id AND enterprise_id IS NOT NULL;
             CALL update_ips(vlan_id, vlan_name, address, intmask, dhcp_id);
         END LOOP;
 
