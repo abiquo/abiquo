@@ -98,9 +98,6 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
 
         criteria.setMaxResults(numResults);
 
-        criteria.setFirstResult(startwith);
-        criteria.setMaxResults(numResults);
-
         List<PricingTemplate> result = getResultList(criteria);
 
         PagedList<PricingTemplate> page = new PagedList<PricingTemplate>();
