@@ -347,7 +347,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
                 .getVirtualRamUsedInMb() + used.getRam();
 
-        if (used.getVirtualImage().getStateful() == 1)
+        if (used.getVirtualImage().isStateful())
         {
             used.setHdInBytes(0l); // stateful virtual images doesn't use the datastores
         }
@@ -387,7 +387,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     private void updateUsageDatastore(final VirtualMachine virtual, final boolean isRollback)
     {
 
-        if (virtual.getVirtualImage().getStateful() == 1)
+        if (virtual.getVirtualImage().isStateful())
         {
             // statefull images doesn't update the datastore utilization.
             return;

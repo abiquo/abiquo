@@ -48,12 +48,6 @@ import com.abiquo.server.core.infrastructure.Repository;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
-/**
- * TODO icon and category
- */
-/**
- * TODO master
- */
 @Entity
 @Table(name = VirtualImage.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualImage.TABLE_NAME)
@@ -73,7 +67,6 @@ public class VirtualImage extends DefaultEntityBase
         // XXX FIXME Category cat = new Category("OTHER", 1, 0);
         // setCategory(cat);
         setDiskFormatType(DiskFormatType.UNKNOWN);
-        setShared(0);
 
     }
 
@@ -85,7 +78,6 @@ public class VirtualImage extends DefaultEntityBase
         // setCategory(cat);
         setDiskFormatType(diskFormatType);
         setName("FIXME"); // TODO: change this.
-        setShared(0);
     }
 
     private final static String ID_COLUMN = "idImage";
@@ -156,20 +148,18 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static String STATEFUL_COLUMN = "stateful";
 
-    private final static int STATEFUL_MIN = Integer.MIN_VALUE;
+    private final static boolean STATEFUL_REQUIRED = true;
 
-    private final static int STATEFUL_MAX = Integer.MAX_VALUE;
+    @Column(name = STATEFUL_COLUMN, nullable = false)
+    private boolean stateful = false;
 
-    @Column(name = STATEFUL_COLUMN, nullable = true)
-    @Range(min = STATEFUL_MIN, max = STATEFUL_MAX)
-    private Integer stateful = 0;
-
-    public Integer getStateful()
+    @Required(value = STATEFUL_REQUIRED)
+    public boolean isStateful()
     {
         return this.stateful;
     }
 
-    private void setStateful(final Integer stateful)
+    private void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
@@ -178,20 +168,18 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static String TREATY_COLUMN = "treaty";
 
-    private final static int TREATY_MIN = Integer.MIN_VALUE;
+    private final static boolean TREATY_REQUIRED = true;
 
-    private final static int TREATY_MAX = Integer.MAX_VALUE;
+    @Column(name = TREATY_COLUMN, nullable = false)
+    private boolean treaty = false;
 
-    @Column(name = TREATY_COLUMN, nullable = true)
-    @Range(min = TREATY_MIN, max = TREATY_MAX)
-    private Integer treaty = 0;
-
-    public Integer getTreaty()
+    @Required(value = TREATY_REQUIRED)
+    public boolean isTreaty()
     {
         return this.treaty;
     }
 
-    private void setTreaty(final Integer treaty)
+    private void setTreaty(final boolean treaty)
     {
         this.treaty = treaty;
     }
@@ -200,23 +188,18 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static String SHARED_COLUMN = "shared";
 
-    private final static int SHARED_MIN = Integer.MIN_VALUE;
-
-    private final static int SHARED_MAX = Integer.MAX_VALUE;
+    private final static boolean SHARED_REQUIRED = true;
 
     @Column(name = SHARED_COLUMN, nullable = false)
-    @Range(min = TREATY_MIN, max = TREATY_MAX)
-    private Integer shared = 0; // NOT-SHARED
+    private boolean shared = false;
 
-    /**
-     * @return 0 not shared, 1 shared
-     */
-    public Integer getShared()
+    @Required(value = SHARED_REQUIRED)
+    public boolean isShared()
     {
-        return this.treaty;
+        return this.shared;
     }
 
-    private void setShared(final Integer shared)
+    private void setShared(final boolean shared)
     {
         this.shared = shared;
     }
@@ -369,69 +352,44 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static String DELETED_COLUMN = "deleted";
 
-    private final static int DELETED_MIN = Integer.MIN_VALUE;
-
-    private final static int DELETED_MAX = Integer.MAX_VALUE;
+    private final static boolean DELETED_REQUIRED = true;
 
     @Column(name = DELETED_COLUMN, nullable = true)
-    @Range(min = DELETED_MIN, max = DELETED_MAX)
-    private Integer deleted = 0;
+    private boolean deleted = false;
 
-    public Integer getDeleted()
+    @Required(value = DELETED_REQUIRED)
+    public boolean isDeleted()
     {
         return this.deleted;
     }
 
-    private void setDeleted(final Integer deleted)
+    private void setDeleted(final boolean deleted)
     {
         this.deleted = deleted;
     }
 
-    public final static String ID_MASTER_PROPERTY = "idMaster";
+    public final static String MASTER_PROPERTY = "master";
 
-    private final static String ID_MASTER_COLUMN = "idMaster";
+    private final static boolean MASTER_REQUIRED = false;
 
-    private final static int ID_MASTER_MIN = Integer.MIN_VALUE;
+    private final static String MASTER_ID_COLUMN = "idMaster";
 
-    private final static int ID_MASTER_MAX = Integer.MAX_VALUE;
+    @JoinColumn(name = MASTER_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_master")
+    private VirtualImage master;
 
-    @Column(name = ID_MASTER_COLUMN, nullable = true)
-    @Range(min = ID_MASTER_MIN, max = ID_MASTER_MAX)
-    private Integer idMaster;
-
-    public Integer getIdMaster()
+    @Required(value = MASTER_REQUIRED)
+    public VirtualImage getMaster()
     {
-        return this.idMaster;
+        return this.master;
     }
 
-    public void setIdMaster(final Integer idMaster)
+    public void setMaster(final VirtualImage master)
     {
-        this.idMaster = idMaster;
+        this.master = master;
     }
 
-    // public final static String ID_CATEGORY_PROPERTY = "idCategory";
-    //
-    // private final static String ID_CATEGORY_COLUMN = "idCategory";
-    //
-    // private final static int ID_CATEGORY_MIN = Integer.MIN_VALUE;
-    //
-    // private final static int ID_CATEGORY_MAX = Integer.MAX_VALUE;
-    //
-    // @Column(name = ID_CATEGORY_COLUMN, nullable = true)
-    // @Range(min = ID_CATEGORY_MIN, max = ID_CATEGORY_MAX)
-    // private Integer idCategory = 1; // others
-    //
-    // public Integer getIdCategory()
-    // {
-    // return this.idCategory;
-    // }
-    //
-    // public void setIdCategory(Integer idCategory)
-    // {
-    // this.idCategory = idCategory;
-    // }
-
-    // FIXME
     public final static String CATEGORY_PROPERTY = "category";
 
     private final static boolean CATEGORY_REQUIRED = true;
@@ -580,11 +538,6 @@ public class VirtualImage extends DefaultEntityBase
     public boolean isManaged()
     {
         return getRepository() != null;
-    }
-
-    public boolean isStateful()
-    {
-        return getStateful() != 0;
     }
 
     public String getFileRef()

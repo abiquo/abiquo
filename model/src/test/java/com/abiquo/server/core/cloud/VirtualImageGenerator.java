@@ -61,26 +61,21 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.TREATY_PROPERTY, VirtualImage.CPU_REQUIRED_PROPERTY,
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
-            VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
-            VirtualImage.DISK_FILE_SIZE_PROPERTY, VirtualImage.DESCRIPTION_PROPERTY,
-            VirtualImage.ID_ICON_PROPERTY, VirtualImage.ID_REPOSITORY_PROPERTY);
+            VirtualImage.DELETED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
+            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY,
+            VirtualImage.ID_REPOSITORY_PROPERTY);
     }
 
     @Override
     public VirtualImage createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-
         Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
         vi.setCategory(category);
 
         return vi;
-
-        // return new VirtualImage(enterprise);
-
     }
 
     public VirtualImage createInstance(final Enterprise enterprise)
@@ -91,14 +86,11 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         vi.setCategory(category);
 
         return vi;
-
-        // return new VirtualImage(enterprise);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
-
         VirtualImage vimage = new VirtualImage(enterprise);
 
         vimage.setCpuRequired(cpuRequired);
@@ -108,8 +100,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
         String ovfid =
             newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
-        // String name =
-        // newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
 
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
 
@@ -146,6 +136,13 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
 
+        if (entity.getMaster() != null)
+        {
+            VirtualImage master = entity.getMaster();
+            // Take care of recursion here
+            addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
+            entitiesToPersist.add(master);
+        }
     }
 
     public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
@@ -157,6 +154,13 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
 
+        if (entity.getMaster() != null)
+        {
+            VirtualImage master = entity.getMaster();
+            // Take care of recursion here
+            addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
+            entitiesToPersist.add(master);
+        }
     }
 
 }
