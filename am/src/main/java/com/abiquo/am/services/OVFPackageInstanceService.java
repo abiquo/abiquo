@@ -52,13 +52,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.am.services.util.OVFPackageInstanceFromOVFEnvelope;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
@@ -67,7 +68,6 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
-import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
@@ -88,20 +88,14 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     /** The constant logger object. */
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFPackageInstanceDownloader.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFPackageInstanceDownloader.class);
 
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout =
-        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getTimeout();
 
-    public OVFPackageInstanceService()
-    {
-        super();
-    }
-
-    public void delete(final String erId, final String ovfId) throws RepositoryException,
-        IdNotFoundException
+    public void delete(final String erId, final String ovfId)
     {
         OVFPackageInstanceStatusType status = getOVFStatus(erId, ovfId);
 
@@ -132,8 +126,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
     }
 
-    public void startDownload(final String erId, final String ovfId) throws DownloadException,
-        RepositoryException
+    public void startDownload(final String erId, final String ovfId)
     {
         // first create the folder in order to allow the creation of ERROR marks.
         EnterpriseRepositoryService erep = EnterpriseRepositoryService.getRepo(erId);
@@ -160,7 +153,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile)
-        throws RepositoryException, IOException, IdNotFoundException, EventException
+        throws IOException,  EventException
     {
         downloader.uploadOVFPackage(diskinfo, diskFile);
 
@@ -171,7 +164,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public OVFPackageInstanceDto getOVFPackage(final String erId, final String ovfId)
-        throws IdNotFoundException
     {
         EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
 
@@ -179,12 +171,15 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
         if (!isBundleOvfId(ovfId))
         {
-            EnvelopeType envelope = erepo.getEnvelope(ovfId);
 
+            EnvelopeType envelope =
+                OVFPackageInstanceFileSystem
+                    .getEnvelope(erepo.getEnterpriseRepositoryPath(), ovfId);
+
+            String relativePackagePath = OVFPackageConventions.getRelativePackagePath(ovfId);
+            relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
             try
             {
-                String relativePackagePath = erepo.getRelativePackagePath(ovfId);
-                relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
 
                 packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
                 packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
@@ -201,10 +196,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
                     checkEnvelopeIsValid(envelope);
 
                     // TODO restore OVF Envelope on filesystem
-
-                    String relativePackagePath = erepo.getRelativePackagePath(ovfId);
-                    relativePackagePath = erId + '/' + relativePackagePath; // FIXME use
-                    // EnterpriseRepo
 
                     packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
                     packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
@@ -224,7 +215,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
                         logger.error(cause, e);
                     }
 
-                    throw new IdNotFoundException(String.format("Invalid OVF at %s", ovfId));
+                    throw new AMException(AMError.OVF_INVALID, String.format("Invalid OVF at %s",
+                        ovfId));
                 }
 
             }// try to change the envelope in order to make abiquo compatible.
@@ -234,9 +226,11 @@ public class OVFPackageInstanceService extends OVFPackageConventions
             final String masterOvf = getBundleMasterOvfId(ovfId);
             final String snapshot = getBundleSnapshot(ovfId);
 
-            EnvelopeType envelope = erepo.getEnvelope(masterOvf);
+            EnvelopeType envelope =
+                OVFPackageInstanceFileSystem.getEnvelope(erepo.getEnterpriseRepositoryPath(),
+                    masterOvf);
 
-            String relativePackagePath = erepo.getRelativePackagePath(masterOvf);
+            String relativePackagePath = OVFPackageConventions.getRelativePackagePath(masterOvf);
             relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
 
             packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(masterOvf, envelope);
@@ -271,7 +265,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      *             repository.
      */
     public String createOVFBundle(final OVFPackageInstanceDto diskInfo, final String snapshot)
-        throws RepositoryException
     {
 
         final String erId = String.valueOf(diskInfo.getIdEnterprise());
@@ -509,8 +502,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
-                .toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
+                e.toString()));
         }
 
         return envelope;
@@ -534,8 +527,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
         catch (Exception e)
         {
-            throw new DownloadException(String.format("Can not obtain file [%s] size", fileUrl
-                .toExternalForm()), e);
+            throw new DownloadException(String.format("Can not obtain file [%s] size",
+                fileUrl.toExternalForm()), e);
         }
     }
 
@@ -801,7 +794,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile, String errorMsg)
-        throws RepositoryException, IOException, IdNotFoundException, EventException
+        throws IOException,  EventException
     {
 
         upload(diskinfo, diskFile);

@@ -23,11 +23,11 @@ package com.abiquo.am.resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
@@ -44,9 +44,8 @@ public class CheckResource
         AMConfigurationManager configManager = AMConfigurationManager.getInstance();
         if (!configManager.validateAMConfiguration())
         {
-            throw new AMException(Status.SERVICE_UNAVAILABLE, configManager.getConfigurationError());
+            throw new AMException(AMError.AM_CHECK, configManager.getConfigurationError());
         }
-
     }
 
     @GET

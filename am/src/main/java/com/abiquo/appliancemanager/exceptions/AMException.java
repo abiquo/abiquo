@@ -26,27 +26,38 @@ package com.abiquo.appliancemanager.exceptions;
 
 import com.abiquo.am.exceptions.AMError;
 
-public class AMException extends RepositoryException
+public class AMException extends RuntimeException
 {
 
-    public AMException(AMError error, String msg, Throwable th)
-    {
-        super(error, msg, th);
-    }
+    final AMError error;
 
-    public AMException(AMError error, String msg)
+    public AMError getError()
     {
-        super(error, msg);
-    }
-
-    public AMException(AMError error, Throwable th)
-    {
-        super(error, th);
+        return error;
     }
 
     public AMException(AMError error)
     {
-        super(error);
+        super(error.getMessage());
+        this.error = error;
+    }
+
+    public AMException(AMError error, String msg)
+    {
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg));
+        this.error = error;
+    }
+
+    public AMException(AMError error, String msg, Throwable th)
+    {
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg), th);
+        this.error = error;
+    }
+
+    public AMException(AMError error, Throwable th)
+    {
+        super(error.getMessage(), th);
+        this.error = error;
     }
 
 }

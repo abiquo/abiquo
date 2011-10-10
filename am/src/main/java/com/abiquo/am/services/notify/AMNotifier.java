@@ -24,9 +24,9 @@ package com.abiquo.am.services.notify;
 import java.io.IOException;
 
 import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.OVFPackageInstanceFileSystem;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.commons.amqp.impl.am.AMProducer;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
@@ -50,14 +50,14 @@ public class AMNotifier extends AMProducer// BasicProducer<AMConfiguration,
      * @throws EventException
      */
     public void setOVFStatus(final String erId, final String ovfId,
-        OVFPackageInstanceStatusType status) throws IdNotFoundException, RepositoryException,
-        EventException
+        OVFPackageInstanceStatusType status) throws EventException
     {
         assert status != OVFPackageInstanceStatusType.ERROR;
 
-        EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
-
-        erepo.createOVFStatusMarks(ovfId, status, null);
+        final String enterpriseRepositoryPath =
+            EnterpriseRepositoryService.getRepo(erId).getEnterpriseRepositoryPath();
+        OVFPackageInstanceFileSystem.createOVFStatusMarks(enterpriseRepositoryPath, ovfId, status,
+            null);
 
         notifyOVFStatusEvent(erId, ovfId, status, null);
     }
@@ -72,20 +72,20 @@ public class AMNotifier extends AMProducer// BasicProducer<AMConfiguration,
      * @throws RepositoryException
      */
     public void setOVFStatusError(final String erId, final String ovfId, final String errorMessage)
-        throws IdNotFoundException, RepositoryException, EventException
+        throws EventException
     {
         assert errorMessage != null;
 
-        EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
-
-        erepo.createOVFStatusMarks(ovfId, OVFPackageInstanceStatusType.ERROR, errorMessage);
+        final String enterpriseRepositoryPath =
+            EnterpriseRepositoryService.getRepo(erId).getEnterpriseRepositoryPath();
+        OVFPackageInstanceFileSystem.createOVFStatusMarks(enterpriseRepositoryPath, ovfId,
+            OVFPackageInstanceStatusType.ERROR, errorMessage);
 
         notifyOVFStatusEvent(erId, ovfId, OVFPackageInstanceStatusType.ERROR, errorMessage);
     }
 
     private void notifyOVFStatusEvent(final String erId, final String ovfId,
-        final OVFPackageInstanceStatusType status, final String errorMsg)
-        throws IdNotFoundException, RepositoryException, EventException
+        final OVFPackageInstanceStatusType status, final String errorMsg) throws EventException
     {
         assert status != OVFPackageInstanceStatusType.ERROR || errorMsg != null;
 
@@ -113,17 +113,4 @@ public class AMNotifier extends AMProducer// BasicProducer<AMConfiguration,
             }
         }
     }
-
-    //
-    // @Override
-    // public AMConfiguration configurationInstance()
-    // {
-    // return AMConfiguration.getInstance();
-    // }
-    //
-    // @Override
-    // public void publish(OVFPackageInstanceStatusEvent message) throws IOException
-    // {
-    // publishPersistentText(channel, AM_EXCHANGE, AM_ROUTING_KEY, message.toByteArray());
-    // }
 }

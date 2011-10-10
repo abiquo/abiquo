@@ -30,6 +30,7 @@ import java.util.Random;
 import junit.framework.Assert;
 
 import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.OVFPackageConventions;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.OVFPackageDiskFormat;
@@ -42,8 +43,7 @@ public class ApplianceManagerStubTestUtils
 {
 
     private ApplianceManagerResourceStubImpl stub;
-   
-    
+
     protected final static String idEnterprise = ApplianceManagerStubIT.idEnterprise;
 
     protected final static String baseUrl = ApplianceManagerStubIT.baseUrl;
@@ -56,13 +56,13 @@ public class ApplianceManagerStubTestUtils
     {
         this.stub = stub;
     }
-    
-    public  void ovfStatus(final String ovfId,
-        final OVFPackageInstanceStatusType expectedStatus) 
+
+    public void ovfStatus(final String ovfId, final OVFPackageInstanceStatusType expectedStatus)
     {
-        
-        OVFPackageInstanceStatusDto prevStatus = stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
-            //stub..getOVFPackageStatus(baseUrl, idEnterprise, ovfId);
+
+        OVFPackageInstanceStatusDto prevStatus =
+            stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        // stub..getOVFPackageStatus(baseUrl, idEnterprise, ovfId);
 
         Assert.assertEquals(expectedStatus, prevStatus.getOvfPackageStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
@@ -81,7 +81,7 @@ public class ApplianceManagerStubTestUtils
     /**
      * @return the number of ovf availables
      */
-    public  Integer ovfAvailable(final String ovfId, final Boolean isContained)
+    public Integer ovfAvailable(final String ovfId, final Boolean isContained)
     {
         OVFPackageInstanceStatusListDto prevList =
             stub.getOVFPackagInstanceStatusList(idEnterprise);
@@ -91,19 +91,19 @@ public class ApplianceManagerStubTestUtils
         return prevList.getOvfPackageInstancesStatus().size();
     }
 
-    public  void installOvf(final String ovfId)
+    public void installOvf(final String ovfId)
     {
-        //TODO OVFPackageInstanceStatusDto statusInstall =
-            stub.createOVFPackageInstance(idEnterprise, ovfId);
+        // TODO OVFPackageInstanceStatusDto statusInstall =
+        stub.createOVFPackageInstance(idEnterprise, ovfId);
 
         // Assert.assertNull(statusInstall.getErrorCause());
         // Assert.assertEquals(statusInstall.getOvfId(), ovfId);
         // TODO download or downloading
-//        Assert.assertEquals(statusInstall.getOvfPackageStatus(),
-//            OVFPackageInstanceStatusType.DOWNLOADING);
+        // Assert.assertEquals(statusInstall.getOvfPackageStatus(),
+        // OVFPackageInstanceStatusType.DOWNLOADING);
     }
 
-    public  void installOvfAndWaitCompletion(final String ovfId) throws Exception
+    public void installOvfAndWaitCompletion(final String ovfId) throws Exception
     {
         installOvf(ovfId);
 
@@ -118,9 +118,9 @@ public class ApplianceManagerStubTestUtils
     protected static void createBundleDiskFile(final String ovfId, final String snapshot)
         throws Exception
     {
-        EnterpriseRepositoryService er =
-            EnterpriseRepositoryService.getRepo(idEnterprise);
-        final String ovfpath = er.getRelativePackagePath(ovfId);
+        EnterpriseRepositoryService er = EnterpriseRepositoryService.getRepo(idEnterprise);
+
+        final String ovfpath = OVFPackageConventions.getRelativePackagePath(ovfId);
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         // final String diskFilePathRel = diskFilePath.substring(diskFilePath.lastIndexOf('/'));
         final String path = ovfpath + '/' + snapshot + "-snapshot-" + diskFilePathRel;
@@ -221,7 +221,7 @@ public class ApplianceManagerStubTestUtils
         return false;
     }
 
-    protected  void waitUnitlDownloaded(final String ovfId) throws Exception
+    protected void waitUnitlDownloaded(final String ovfId) throws Exception
     {
         Thread.sleep(downloadProgressInterval);
 

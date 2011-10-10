@@ -6,32 +6,38 @@ import java.util.Comparator;
 public enum AMError
 {
 
-    // STATUSCODES
-    STATUS_BAD_REQUEST("400-BAD REQUEST", "Request not valid"), STATUS_UNAUTHORIZED(
-        "401-UNAUTHORIZED", "This requests requires user authentication"), STATUS_FORBIDDEN(
-        "403-FORBIDDEN", "Access is denied"), STATUS_NOT_FOUND("404-NOT FOUND",
-        "The Resource requested does not exist"), STATUS_METHOD_NOT_ALLOWED(
-        "405-METHOD NOT ALLOWED", "The resource doesn't expose this method"), STATUS_CONFLICT(
-        "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
-        "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
-        "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
-        "412 - Unprovisioned", "Unprovisioned exception"),
-
+    AM_CHECK("AM-CHECK",
+        "Appliance Manager is not well configured. Check the repository filesystem"), //
+    OVF_INVALID("OVF-INVALID", "Invalid OVF document"), //
+    OVF_NOT_FOUND("OVF-NOT-FOUND", "OVF document not found in the repository"), //
+    OVF_MALFORMED("OVF-MALFORMED", "OVF document can not be read"), //
+    OVF_INSTALL("OVF-INSTALL", "Can't create the ovf package folder"), //
+    OVF_DOWNLOAD("OVF-DOWNLOAD", "Can't download the ovf package"), //
+    OVF_CANCEL("OVF-CANCEL", "Can't cancel the ovf package install"), //
+    REPO_NO_SPACE("REPO-NO-SPACE", "No space left in the repository file system"), //
+    OVF_BOUNDLE("OVF-BOUNDLE", "Can't create the instance"), //
+    OVF_UPLOAD("OVF-UPLOAD", "Can't upload the ovf package"), //
     REPO_NOT_ACCESSIBLE("REPO-NOT-ACCESSIBLE",
-        "Repository is not accessible. Check the exported location (propably NFS is stopped)"), REPO_NOT_WRITABLE(
-        "REPO-NOT-WRITABLE", "Repository is read only. Check the mount parameters."),
-
+        "Repository is not accessible. Check the exported location (propably NFS is stopped)"), //
+    REPO_NOT_WRITABLE("REPO-NOT-WRITABLE", "Repository is read only. Check the mount parameters."), //
     REPO_TIMEOUT_REFRESH("REPO-TIMEOUT-REFRESH",
-        "Timeout during repository file system synchronization."),
-        
-        OVFPI_DELETE("OVFPI-DELETE", "Can't delete ovf package content"),
-        OVFPI_DELETE_INSTANCES("OVFPI-DELETE", "Can't delete ovf package content. It have instances"),
-        
-        OVFPI_SNAPSHOT_NOT_EXIST("OVF-SNAPSHOT-NOT-EXIST","Snapshot not found. Should be a bundle of an imported virtual machine."),
-
-    DISK_FILE_NOT_FOUND("DISK-NOT-FOUND", "Requested disk doesn't exist in the current repository"), DISK_FILE_COPY_ERROR(
-        "DISK-FILE-COPY", "Some error during disk file copy"), DISK_FILE_ALREADY_EXIST(
-        "DISK-ALREADY-EXIST",
+        "Timeout during repository file system synchronization."), //
+    OVFPI_DELETE("OVFPI-DELETE", "Can't delete ovf package content"), //
+    OVFPI_DELETE_INSTANCES("OVFPI-DELETE", "Can't delete ovf package content. It have instances"), //
+    OVFPI_SNAPSHOT_ALREADY_EXIST("OVF-SNAPSHOT-ALREADY-EXIST",
+        "Can't create snapshot, other with the same name exist"), //
+    OVFPI_SNAPSHOT_CREATE("OVF-SNAPSHOT-CREATE", "Can't create snapshot, invalid ovf xml document"), //
+    OVFPI_UNKNOW_STATUS("OVF-UNKNOW-STATUS", "Can't obtain the ovf package instance status"), //
+    OVFPI_CHANGE_STATUS(
+        "OVF-CHANGE-STATUS",
+        "Can't update the ovf package instance status. Can't create the file mark in the repository file system"), //
+    DISK_FILE_MOVE("DISK-FILE-MOVE", "Disk failed to move into the repository"), //
+    OVFPI_SNAPSHOT_IMPORT_NOT_EXIST(
+        "OVF-SNAPSHOT-IMPORT-NOT-EXIST",
+        "Imported snapshot not found. Should be a bundle of an imported virtual machine or isn't a directory"), //
+    DISK_FILE_NOT_FOUND("DISK-NOT-FOUND", "Requested disk doesn't exist in the current repository"), //
+    DISK_FILE_COPY_ERROR("DISK-FILE-COPY", "Some error during disk file copy"), //
+    DISK_FILE_ALREADY_EXIST("DISK-ALREADY-EXIST",
         "The destination path of the copy already exist in the current repository");
 
     /**

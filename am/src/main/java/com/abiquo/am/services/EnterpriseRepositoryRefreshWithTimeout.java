@@ -7,20 +7,27 @@ import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.customDencode;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.abiquo.am.services.util.BundleImageFileFilter;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+
+import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getOVFStatus;
 
 /**
  * Run a folder list in another thread in order to cancel if it take too long
  */
 public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<String>>
 {
+    private final static Logger LOG = LoggerFactory
+        .getLogger(EnterpriseRepositoryRefreshWithTimeout.class);
+
     final String erPath;
 
     final String relativePath;
@@ -41,7 +48,8 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
     @Override
     public List<String> call() throws Exception
     {
-        return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys);
+        return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys,
+            erPath);
     }
 
     /**
@@ -50,7 +58,8 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
      * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
      */
     private List<String> traverseOVFFolderStructure(final String erPath, final String relativePath,
-        final Boolean includeBundles, final Boolean cleanDeploys)
+        final Boolean includeBundles, final Boolean cleanDeploys,
+        final String enterpriseRepositoryPath)
     {
         List<String> ovfids = new LinkedList<String>();
         File enterpriseRepositoryFile = new File(erPath);
@@ -80,7 +89,7 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
             {
                 List<String> recOvfids =
                     traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
-                        includeBundles, cleanDeploys);
+                        includeBundles, cleanDeploys, enterpriseRepositoryPath);
 
                 ovfids.addAll(recOvfids);
             }
@@ -96,7 +105,8 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
 
                 String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
 
-                OVFPackageInstanceStatusType ovfStatus = getOVFStatus(ovfId);
+                OVFPackageInstanceStatusType ovfStatus =
+                    getOVFStatus(enterpriseRepositoryPath, ovfId);
 
                 if (cleanDeploys && ovfStatus == OVFPackageInstanceStatusType.DOWNLOADING)
                 {
@@ -106,8 +116,7 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
                     }
                     catch (Exception e)
                     {
-                        logger
-                            .error("Can not delete the interrupted download [{}], \n{}", ovfId, e);
+                        LOG.error("Can not delete the interrupted download [{}], \n{}", ovfId, e);
                     }
                 }
                 else if (ovfStatus == OVFPackageInstanceStatusType.DOWNLOAD)
@@ -134,15 +143,6 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
         }// files
 
         return ovfids;
-    }
-
-    private class BundleImageFileFilter implements FilenameFilter
-    {
-        @Override
-        public boolean accept(final File dir, final String name)
-        {
-            return name.contains(OVF_BUNDLE_PATH_IDENTIFIER);
-        }
     }
 
 }// traverse class

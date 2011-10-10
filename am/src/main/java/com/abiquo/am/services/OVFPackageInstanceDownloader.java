@@ -36,13 +36,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.fileserver.HttpClientOVFPackage;
 import com.abiquo.am.fileserver.info.FileInfo;
 import com.abiquo.am.fileserver.info.PackageInfo;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 
@@ -73,7 +74,6 @@ public class OVFPackageInstanceDownloader
         this.httpClient = httpClient;
     }
 
-
     /**
      * Make the provided OVF package available on the enterprise repository. Creates a new directory
      * for the provided OVFPackage into the repository (using the OVF file name), inspect the
@@ -88,7 +88,7 @@ public class OVFPackageInstanceDownloader
      *             the download of some file on the package.
      */
     public void deployOVFPackage(final String enterpriseId, final String ovfId,
-        EnvelopeType envelope) throws DownloadException, RepositoryException
+        EnvelopeType envelope)
     {
 
         // TODO check it was not already deployed!
@@ -111,7 +111,7 @@ public class OVFPackageInstanceDownloader
         }
         catch (MalformedURLException e)
         {
-            throw new DownloadException(ovfId, "", e.getMessage());
+            throw new DownloadException(ovfId, e);
         }
 
         htCurrentTransfers.put(ovfId, packa);
@@ -126,7 +126,6 @@ public class OVFPackageInstanceDownloader
      * @throws RepositoryException if the package is not on DOWNLOADING state.
      */
     public void cancelDeployOVFPackage(final String ovfId, String enterpriseId)
-        throws RepositoryException
     {
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(enterpriseId);
@@ -138,28 +137,21 @@ public class OVFPackageInstanceDownloader
 
             if (htCurrentTransfers.containsKey(ovfId))
             {
-                htCurrentTransfers.get(ovfId).cancelDownload(true); // also delete all the being
-                // download files.
+                // also delete all the being download files.
+                htCurrentTransfers.get(ovfId).cancelDownload(true);
 
             }
             else
             {
-                final String cause =
-                    String
-                        .format(
-                            "Provided OVF[%s] appears as DOWNLOADING but is not beeing deployed",
-                            ovfId);
-                throw new RepositoryException(cause);
+                throw new AMException(AMError.OVF_CANCEL, String.format(
+                    "Provided OVF[%s] appears as DOWNLOADING but is not beeing deployed", ovfId));
             }
         }
         else
         {
-            final String cause =
-                String
-                    .format(
-                        "Provided OVF[%s] is not on DOWNLOADING state, its [%s]. So it can not be cancelled",
-                        ovfId, status.name());
-            throw new RepositoryException(cause);
+            throw new AMException(AMError.OVF_CANCEL, String.format(
+                "Provided OVF[%s] is not on DOWNLOADING state,"
+                    + " its [%s]. So it can not be cancelled", ovfId, status.name()));
         }
     }
 
@@ -176,8 +168,7 @@ public class OVFPackageInstanceDownloader
      * @throws MalformedURLException
      */
     private PackageInfo createFileTransfers(final String ovfId, final EnvelopeType envelope,
-        final String enterpriseId) throws DownloadException, RepositoryException,
-        MalformedURLException
+        final String enterpriseId) throws MalformedURLException
     {
         PackageInfo packa = new PackageInfo(ovfId, enterpriseId, htCurrentTransfers);
 
@@ -186,7 +177,9 @@ public class OVFPackageInstanceDownloader
 
         for (FileType fileType : envelope.getReferences().getFile())
         {
-            final String destinationPath = enterpirseRepository.createFileInfo(fileType, ovfId);
+            final String destinationPath =
+                OVFPackageConventions.createFileInfo(
+                    enterpirseRepository.getEnterpriseRepositoryPath(), fileType, ovfId);
 
             /**
              * TODO change the envelope in order to set the package relative path (if href is http)
@@ -208,13 +201,9 @@ public class OVFPackageInstanceDownloader
                 AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryLocation();
             final Long expectedMb = allExpectedSize / 1048576;
 
-            final String msg =
-                String
-                    .format(
-                        "There is not enough free space on [%s] to download the OVF [%s], it requires [%s]Mb",
-                        repoLoc, ovfId, expectedMb.toString());
-
-            throw new RepositoryException(msg);
+            throw new AMException(AMError.REPO_NO_SPACE, String.format(
+                "There is not enough free space on [%s] to download "
+                    + "the OVF [%s], it requires [%s]Mb", repoLoc, ovfId, expectedMb.toString()));
         }
 
         return packa;
@@ -272,7 +261,7 @@ public class OVFPackageInstanceDownloader
      * @throws IOException
      */
     public String uploadOVFPackage(OVFPackageInstanceDto diskInfo, File diskFile)
-        throws RepositoryException, IOException
+        throws IOException
     {
 
         final long idEnterprise = diskInfo.getIdEnterprise();
