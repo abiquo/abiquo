@@ -23,10 +23,13 @@ package com.abiquo.api.persistence.impl;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.api.persistence.JpaDAO;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 
 @Repository
 public class OVFPackageListDAO extends JpaDAO<OVFPackageList, Integer>

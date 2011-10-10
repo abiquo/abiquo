@@ -21,56 +21,66 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "ovfPackageList")
-public class OVFPackageListDto extends SingleResourceTransportDto implements Serializable
-{    
-    private static final long serialVersionUID = 6951687879883540967L;
+public class OVFPackageListDto extends SingleResourceTransportDto
+{
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     private Integer id;
-
-    private String name;
-
-    private List<OVFPackageDto> ovfPackages = new LinkedList<OVFPackageDto>();
-    
-    @XmlElement(name = "ovfPackage")
-    public List<OVFPackageDto> getOvfPackages()
-    {
-        return ovfPackages;
-    }
-
-    public void setOvfPackages(List<OVFPackageDto> ovfPackages)
-    {
-        this.ovfPackages = ovfPackages;
-    }
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
+
+    private String name;
 
     public String getName()
     {
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
 
-    
+    private String url;
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public void setUrl(final String url)
+    {
+        this.url = url;
+    }
+
+    private List<OVFPackageDto> ovfPackages;
+
+    public List<OVFPackageDto> getOvfPackages()
+    {
+        return ovfPackages;
+    }
+
+    public void setOvfPackages(final List<OVFPackageDto> ovfPackages)
+    {
+        this.ovfPackages = ovfPackages;
+    }
+
 }

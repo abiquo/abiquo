@@ -47,8 +47,8 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     @Override
     public void assertAllPropertiesEqual(final NodeVirtualImage obj1, final NodeVirtualImage obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, NodeVirtualImage.MODIFIED_PROPERTY,
-            NodeVirtualImage.NAME_PROPERTY);
+        AssertEx
+            .assertPropertiesEqualSilent(obj1, obj2, Node.MODIFIED_PROPERTY, Node.NAME_PROPERTY);
 
         vApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
             .getVirtualAppliance());
@@ -86,6 +86,12 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     {
         return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vMachine
             .getVirtualImage(), vMachine);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
+        final VirtualMachine vMachine, final VirtualImage vImage)
+    {
+        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vImage, vMachine);
     }
 
     @Override

@@ -63,4 +63,25 @@ public class CategoryRep extends DefaultRepBase
         return categoryDAO.findById(categoryId);
     }
 
+    public Category findByCategoryNameOrCreateNew(final String categoryName)
+    {
+        if (categoryName == null || categoryName.isEmpty())
+        {
+            return categoryDAO.findDefault();
+        }
+
+        Category cat = categoryDAO.findByName(categoryName);
+
+        if (cat == null)
+        {
+            cat = new Category();
+            cat.setName(categoryName);
+            cat.setIsDefault(0);
+            cat.setIsErasable(1);
+            categoryDAO.persist(cat);
+        }
+
+        return cat;
+    }
+
 }

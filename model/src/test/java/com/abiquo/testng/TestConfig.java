@@ -44,6 +44,9 @@ public class TestConfig
     /** TestNG group for appliance library tests. */
     public static final String AM_INTEGRATION_TESTS = "it-am";
 
+    /** TestNG group for appslibrary integration tests. */
+    public static final String APPS_INTEGRATION_TESTS = "it-appslibrary";
+
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";
 
