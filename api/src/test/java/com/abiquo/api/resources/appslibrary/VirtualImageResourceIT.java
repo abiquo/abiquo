@@ -84,7 +84,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
     private static final String SYSADMIN = "sysadmin";
 
-    private static final String DEFAULT_OVF = "http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
+    private static final String DEFAULT_OVF = "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
+        //"http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
 
     private RemoteServiceDto amDto()
     {
@@ -285,4 +286,5 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         // Must use the URI resolver in the AM in order to encode the ovf parameter
         return URIResolver.resolveURI(AM_BASE_URI, "erepos/{erepo}/ovfs/{ovf}", params);
     }
+
 }

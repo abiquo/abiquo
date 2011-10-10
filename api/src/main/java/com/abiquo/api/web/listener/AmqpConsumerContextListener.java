@@ -78,9 +78,13 @@ public class AmqpConsumerContextListener implements ServletContextListener
      */
     protected void initializeAMListener(ServletContextEvent sce) throws IOException
     {
+        // AMCallback processor =
+        // WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+        // .getBean("ovfPackageInstanceStatusEventProcessor", AMCallback.class);
+
         AMCallback processor =
             WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean("ovfPackageInstanceStatusEventProcessor", AMCallback.class);
+                .getBean("OVFPackageInstanceStatusEventProcessor", AMCallback.class);
 
         amconsumer = new AMConsumer();
         amconsumer.addCallback(processor);

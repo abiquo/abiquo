@@ -22,6 +22,7 @@
 package com.abiquo.api.services.appslibrary.event;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +48,14 @@ import com.abiquo.tracer.SeverityType;
  * Receives events from the ApplianceManager indicating new available {@link OVFPackageInstanceDto}
  * and create new {@link VirtualImage}
  */
-@Service("ovfPackageInstanceStatusEventProcessor")
+@Service
 public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 {
-    private final static Logger logger = LoggerFactory
+    protected final static Logger logger = LoggerFactory
         .getLogger(OVFPackageInstanceStatusEventProcessor.class);
 
     @Autowired
-    private InfrastructureService infService;
+    protected InfrastructureService infService;
 
     @Autowired
     private OVFPackageInstanceToVirtualImage ovfToVimage;
@@ -63,7 +64,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     private TracerLogger tracer;
 
     @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void onDownload(OVFPackageInstanceStatusEvent event)
     {
         logger.debug("Virtual image [{}] added", event.getOvfId());
@@ -90,7 +91,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 
     }
 
-    protected void processDownload(final OVFPackageInstanceStatusEvent evnt)
+    protected List<VirtualImage> processDownload(final OVFPackageInstanceStatusEvent evnt)
     {
         final String ovfId = evnt.getOvfId();
         final String idEnterp = evnt.getEnterpriseId();
@@ -107,7 +108,8 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
 
         OVFPackageInstanceDto packageInstance = amStub.getOVFPackageInstance(idEnterp, ovfId);
 
-        ovfToVimage.insertVirtualImages(Collections.singletonList(packageInstance), repository);
+        return ovfToVimage.insertVirtualImages(Collections.singletonList(packageInstance),
+            repository);
     }
 
     @Override
