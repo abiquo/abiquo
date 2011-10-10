@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "virtualImage")
 public class VirtualImageDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,7 +37,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,7 +49,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return idFormat;
     }
 
-    public void setIdFormat(int idFormat)
+    public void setIdFormat(final int idFormat)
     {
         this.idFormat = idFormat;
     }
@@ -59,7 +61,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -71,7 +73,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return stateful;
     }
 
-    public void setStateful(int stateful)
+    public void setStateful(final int stateful)
     {
         this.stateful = stateful;
     }
@@ -83,7 +85,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return treaty;
     }
 
-    public void setTreaty(int treaty)
+    public void setTreaty(final int treaty)
     {
         this.treaty = treaty;
     }
@@ -95,7 +97,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return cpuRequired;
     }
 
-    public void setCpuRequired(int cpuRequired)
+    public void setCpuRequired(final int cpuRequired)
     {
         this.cpuRequired = cpuRequired;
     }
@@ -107,7 +109,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return pathName;
     }
 
-    public void setPathName(String pathName)
+    public void setPathName(final String pathName)
     {
         this.pathName = pathName;
     }
@@ -119,7 +121,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return ovfid;
     }
 
-    public void setOvfid(String ovfid)
+    public void setOvfid(final String ovfid)
     {
         this.ovfid = ovfid;
     }
@@ -131,7 +133,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return ramRequired;
     }
 
-    public void setRamRequired(int ramRequired)
+    public void setRamRequired(final int ramRequired)
     {
         this.ramRequired = ramRequired;
     }
@@ -143,7 +145,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return hdRequired;
     }
 
-    public void setHdRequired(long hdRequired)
+    public void setHdRequired(final long hdRequired)
     {
         this.hdRequired = hdRequired;
     }
@@ -155,21 +157,9 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return deleted;
     }
 
-    public void setDeleted(int deleted)
+    public void setDeleted(final int deleted)
     {
         this.deleted = deleted;
-    }
-
-    private int idMaster;
-
-    public int getIdMaster()
-    {
-        return idMaster;
-    }
-
-    public void setIdMaster(int idMaster)
-    {
-        this.idMaster = idMaster;
     }
 
     private int idCategory;
@@ -179,7 +169,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return idCategory;
     }
 
-    public void setIdCategory(int idCategory)
+    public void setIdCategory(final int idCategory)
     {
         this.idCategory = idCategory;
     }
@@ -191,7 +181,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return diskFileSize;
     }
 
-    public void setDiskFileSize(long diskFileSize)
+    public void setDiskFileSize(final long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -203,7 +193,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -215,7 +205,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return idIcon;
     }
 
-    public void setIdIcon(int idIcon)
+    public void setIdIcon(final int idIcon)
     {
         this.idIcon = idIcon;
     }
@@ -227,7 +217,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
         return idRepository;
     }
 
-    public void setIdRepository(int idRepository)
+    public void setIdRepository(final int idRepository)
     {
         this.idRepository = idRepository;
     }

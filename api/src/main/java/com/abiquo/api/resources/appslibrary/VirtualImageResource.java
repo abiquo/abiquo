@@ -86,15 +86,16 @@ public class VirtualImageResource extends AbstractResource
         VirtualImageDto dto =
             ModelTransformer.transportFromPersistence(VirtualImageDto.class, vimage);
 
-        dto = addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri);
+        dto = addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri, vimage.getMaster());
 
         return dto;
     }
 
-    private static VirtualImageDto addLinks(final IRESTBuilder builder, VirtualImageDto dto,
-        final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri)
+    private static VirtualImageDto addLinks(final IRESTBuilder builder, final VirtualImageDto dto,
+        final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri,
+        final VirtualImage master)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId, master));
 
         dto.addLink(ovfpackageinstanceUri(amUri, vimageId, dto.getOvfid()));
 

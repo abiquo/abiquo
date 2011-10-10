@@ -21,14 +21,12 @@
 
 package com.abiquo.server.core.cloud;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -45,12 +43,12 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
         super(VirtualImage.class);
     }
 
-    public VirtualImageDAO(EntityManager entityManager)
+    public VirtualImageDAO(final EntityManager entityManager)
     {
         super(VirtualImage.class, entityManager);
     }
 
-    private static Criterion sameEnterprise(Enterprise enterprise)
+    private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
 
@@ -58,7 +56,7 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
     }
 
     private static Criterion sameRepository(
-        com.abiquo.server.core.infrastructure.Repository repository)
+        final com.abiquo.server.core.infrastructure.Repository repository)
     {
         assert repository != null;
 
@@ -70,20 +68,20 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
         return Restrictions.eq(VirtualImage.SHARED_PROPERTY, 1);
     }
 
-    private static Criterion sameEnterpriseOrShared(Enterprise enterprise)
+    private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)
     {
         return Restrictions.or(sameEnterprise(enterprise), sharedImage());
     }
 
-    private static Criterion sameEnterpriseOrSharedInRepo(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository)
+    private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository)
     {
         return Restrictions.and(sameRepository(repository),
             Restrictions.or(sameEnterprise(enterprise), sharedImage()));
     }
 
-    private static Criterion sameEnterpriseOrSharedInRepo(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository, final String path)
+    private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
             Restrictions.and(sameRepository(repository),
@@ -93,40 +91,32 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
             sameEnterpriseOrSharedInRepo);
     }
 
-    public List<VirtualImage> findVirtualMachinesByEnterprise(Enterprise enterprise)
+    public List<VirtualImage> findVirtualMachinesByEnterprise(final Enterprise enterprise)
     {
-        assert enterprise != null;
-        assert isManaged2(enterprise);
-
         Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualImage> result = getResultList(criteria);
         return result;
     }
 
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository)
+    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
+        final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        assert enterprise != null;
-        assert isManaged2(enterprise);
-
         Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualImage> result = getResultList(criteria);
         return result;
     }
 
-    public VirtualImage findByName(String name)
+    public VirtualImage findByName(final String name)
     {
         return findUniqueByProperty(VirtualImage.NAME_PROPERTY, name);
     }
 
-    public VirtualImage findVirtualImageByPath(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository, String path)
+    public VirtualImage findVirtualImageByPath(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
-        assert enterprise != null;
-        assert isManaged2(enterprise);
-
         Criteria criteria =
             createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
@@ -134,12 +124,9 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
         return getSingleResult(criteria);
     }
 
-    public boolean existWithSamePath(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository, String path)
+    public boolean existWithSamePath(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
-        assert enterprise != null;
-        assert isManaged2(enterprise);
-
         Criteria criteria =
             createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
