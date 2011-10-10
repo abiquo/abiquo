@@ -615,4 +615,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
         vlanDAO.flush();
     }
 
+    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
+    {
+        return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
+    }
+
 }

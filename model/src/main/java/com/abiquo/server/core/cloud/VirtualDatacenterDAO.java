@@ -179,6 +179,11 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.id = :virtualDatacenterId";
 
+    private static final String GET_VDC_FROM_DEFAULT_VLAN = " SELECT vdc "//
+        + "FROM VirtualDatacenter vdc "//
+        + "WHERE vdc.defaultVlan.id = :vlanId "//
+        + "and vdc.defaultVlan.type = 'EXTERNAL'";
+
     public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
         Object[] vmResources =
@@ -213,6 +218,14 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     {
         Query query = getSession().createQuery(COUNT_PRIVATE_VLANS_RESOURCES);
         query.setParameter("virtualDatacenterId", virtualdatacenterId);
+
+        return query.list();
+    }
+
+    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
+    {
+        Query query = getSession().createQuery(GET_VDC_FROM_DEFAULT_VLAN);
+        query.setParameter("vlanId", defaultVlanId);
 
         return query.list();
     }
