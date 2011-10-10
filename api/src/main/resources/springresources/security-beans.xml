@@ -357,7 +357,7 @@
         <security:intercept-url pattern="/config/pricingtemplates" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates" method="POST" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/config/pricingtemplates/*" method="GET" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingtemplates/*" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes" method="GET" access="ROLE_PRICING_VIEW" />

@@ -142,9 +142,10 @@ public class PricingRep extends DefaultRepBase
     }
 
     public Collection<PricingTemplate> findPricingTemplates(final String filter,
-        final String order, final boolean desc, final Integer page, final Integer numResults)
+        final String order, final boolean desc, final Integer page, final Integer numResults,
+        final Integer startwith)
     {
-        return pricingTemplateDao.find(filter, order, desc, page, numResults);
+        return pricingTemplateDao.find(filter, order, desc, page, numResults, startwith);
     }
 
     public PricingTemplate findPricingTemplateById(final Integer id)

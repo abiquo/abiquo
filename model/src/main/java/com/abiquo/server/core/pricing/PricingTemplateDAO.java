@@ -82,7 +82,7 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
     }
 
     public Collection<PricingTemplate> find(final String filter, final String orderBy,
-        final boolean desc, final Integer offset, Integer numResults)
+        final boolean desc, final Integer offset, Integer numResults, final Integer startwith)
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
@@ -91,6 +91,11 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
         criteria = createCriteria(filter, orderBy, desc);
         numResults = (int) (numResults != 0 ? numResults : total);
         criteria.setFirstResult(offset * numResults);
+        if (startwith != -1)
+        {
+            criteria.setFirstResult(startwith);
+        }
+
         criteria.setMaxResults(numResults);
 
         List<PricingTemplate> result = getResultList(criteria);
@@ -98,6 +103,10 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
         PagedList<PricingTemplate> page = new PagedList<PricingTemplate>();
         page.addAll(result);
         page.setCurrentElement(offset);
+        if (startwith != -1)
+        {
+            page.setCurrentElement(startwith);
+        }
         page.setPageSize(numResults);
         page.setTotalResults(total.intValue());
 

@@ -82,7 +82,7 @@ public class PricingTemplateDAOTest extends DefaultDAOTestBase<PricingTemplateDA
 
         PricingTemplateDAO dao = createDaoForRollbackTransaction();
 
-        Collection<PricingTemplate> pts = dao.find(null, null, false, 0, 25);
+        Collection<PricingTemplate> pts = dao.find(null, null, false, 0, 25, -1);
         AssertEx.assertSize(pts, 2);
 
     }
