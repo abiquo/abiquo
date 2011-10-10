@@ -21,23 +21,28 @@
 
 package com.abiquo.server.core.appslibrary;
 
-public class IconDAO
+import javax.persistence.EntityManager;
+
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+
+@Repository("jpaIconDAO")
+public class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
+    public IconDAO()
+    {
+        super(Icon.class);
+    }
+
+    public IconDAO(final EntityManager entityManager)
+    {
+        super(Icon.class, entityManager);
+    }
+
+    public Icon findByPath(final String path)
+    {
+        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
+    }
 
 }
-
-// @Repository("jpaIconDAO")
-// public class IconDAO extends DefaultDAOBase<Integer, Icon>
-// {
-// public IconDAO()
-// {
-// super(Icon.class);
-// }
-//
-// public IconDAO(EntityManager entityManager)
-// {
-// super(Icon.class, entityManager);
-// }
-//
-//      
-// }

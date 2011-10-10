@@ -123,7 +123,8 @@ CREATE TABLE  `kinton`.`category` (
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
   `version_c` int(11) default 0,
-  PRIMARY KEY  (`idCategory`)
+  PRIMARY KEY  (`idCategory`),
+  UNIQUE KEY (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
@@ -1426,7 +1427,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package_list` (
   CONSTRAINT `fk_ovf_package_list_repository`
     FOREIGN KEY (`id_apps_library`)
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
@@ -1454,7 +1455,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   CONSTRAINT `fk_ovf_package_repository`
     FOREIGN KEY (`id_apps_library`)
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
-    ON DELETE NO ACTION,
+    ON DELETE CASCADE,
     -- ON UPDATE NO ACTION
   CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL,
     CONSTRAINT `fk_ovf_package_icon`    FOREIGN KEY (`idIcon`)   REFERENCES `icon` (`idIcon`) ON DELETE SET NULL

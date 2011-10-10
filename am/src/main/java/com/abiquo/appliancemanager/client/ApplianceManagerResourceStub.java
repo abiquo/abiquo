@@ -62,7 +62,7 @@ public class ApplianceManagerResourceStub
         this.clientTimeout = new RestClient(confTimeout);
     }
 
-    Resource ovfPackage(final String idEnterprise, String ovfid)
+    public Resource ovfPackage(final String idEnterprise, String ovfid)
     {
 
         if (ovfid.startsWith("http://"))

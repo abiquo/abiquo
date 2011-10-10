@@ -70,6 +70,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -390,7 +391,8 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageList.getId().toString());
 
-        links.add(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT, params));
+        ovfPackageList.addEditLink(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT,
+            params));
 
         return links;
     }
@@ -409,8 +411,7 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(OVFPackageResource.OVF_PACKAGE, ovfPackage.getId().toString());
-
-        links.add(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+        ovfPackage.addEditLink(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
 
         return links;
     }
@@ -653,6 +654,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
         final Integer dcId, final Integer repoId)
     {
@@ -662,7 +664,6 @@ public class RESTBuilder implements IRESTBuilder
 
         Map<String, String> paramsDc = new HashMap<String, String>();
         paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
-
         links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
             paramsDc));
 
@@ -672,17 +673,16 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, repoId.toString());
-
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
-
         links.add(builder.buildRestLink(VirtualImagesResource.class,
             VirtualImagesResource.VIRTUAL_IMAGES_PATH, params));
 
         return links;
     }
 
+    @Override
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId)
+        final Integer vimageId, final VirtualImage master)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
@@ -699,16 +699,27 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
-
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
             DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
 
         params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
-
         links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
 
-        return links;
+        // TODO: How to build a link for an imported one??
 
+        if (master != null)
+        {
+            // Master's enterprise may differ from the current virtual image.
+            // Datacenter repository id will be the same (the id of the datacenter)
+            params.put(EnterpriseResource.ENTERPRISE, master.getEnterprise().getId().toString());
+            params.put(VirtualImageResource.VIRTUAL_IMAGE, master.getId().toString());
+            RESTLink masterLink =
+                builder.buildRestLink(VirtualImageResource.class, "master", params);
+            masterLink.setTitle(master.getName());
+            links.add(masterLink);
+        }
+
+        return links;
     }
 
     @Override

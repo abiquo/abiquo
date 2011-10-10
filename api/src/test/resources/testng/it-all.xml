@@ -9,7 +9,8 @@
             <run>
                 <include name="it-basic" />
                 <include name="it-network" />
-                <include name="it-all" />
+                <include name="it-appslibrary" />
+                <include name="it-all" />            
             </run>
         </groups>
         <packages>

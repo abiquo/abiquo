@@ -24,6 +24,8 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -41,12 +43,14 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     RepositoryGenerator repositoryGenerator;
 
+    CategoryGenerator categoryGenerator;
+
     public VirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
         enterpriseGenerator = new EnterpriseGenerator(seed);
         repositoryGenerator = new RepositoryGenerator(seed);
-        // XXX categoryGenerator = new CategoryGenerator(seed);
+        categoryGenerator = new CategoryGenerator(seed);
     }
 
     @Override
@@ -57,8 +61,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.TREATY_PROPERTY, VirtualImage.CPU_REQUIRED_PROPERTY,
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
-            VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
-            /* VirtualImage.ID_CATEGORY_PROPERTY, */VirtualImage.DISK_FILE_SIZE_PROPERTY,
+            VirtualImage.DELETED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
             VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY,
             VirtualImage.ID_REPOSITORY_PROPERTY);
     }
@@ -66,36 +69,28 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     @Override
     public VirtualImage createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-
-        // XXX Category category = categoryGenerator.createUniqueInstance();
+        Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
-        // XXX vi.setCategory(category);
+        vi.setCategory(category);
 
         return vi;
-
-        // return new VirtualImage(enterprise);
-
     }
 
     public VirtualImage createInstance(final Enterprise enterprise)
     {
-        // XXX Category category = categoryGenerator.createUniqueInstance();
+        Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
-        // XXX vi.setCategory(category);
+        vi.setCategory(category);
 
         return vi;
-
-        // return new VirtualImage(enterprise);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
-
         VirtualImage vimage = new VirtualImage(enterprise);
 
         vimage.setCpuRequired(cpuRequired);
@@ -105,8 +100,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
         String ovfid =
             newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
-        // String name =
-        // newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
 
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
 
@@ -139,10 +132,35 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
 
-        // XXX Category category = entity.getCategory();
-        // categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
-        // entitiesToPersist.add(category);
+        Category category = entity.getCategory();
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        entitiesToPersist.add(category);
 
+        if (entity.getMaster() != null)
+        {
+            VirtualImage master = entity.getMaster();
+            // Take care of recursion here
+            addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
+            entitiesToPersist.add(master);
+        }
+    }
+
+    public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
+        final List<Object> entitiesToPersist)
+    {
+        super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        Category category = entity.getCategory();
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        entitiesToPersist.add(category);
+
+        if (entity.getMaster() != null)
+        {
+            VirtualImage master = entity.getMaster();
+            // Take care of recursion here
+            addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
+            entitiesToPersist.add(master);
+        }
     }
 
 }

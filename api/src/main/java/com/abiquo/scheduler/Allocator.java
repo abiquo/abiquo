@@ -272,7 +272,7 @@ public class Allocator implements IAllocator
         vimage.setCpuRequired(vmachine.getCpu());
         vimage.setRamRequired(vmachine.getRam());
 
-        if (vmachine.getVirtualImage().getStateful() == 0)
+        if (!vmachine.getVirtualImage().isStateful())
         {
             vimage.setHdRequiredInBytes(vmachine.getHdInBytes());
         }
