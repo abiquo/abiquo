@@ -32,22 +32,21 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
 public class ApplianceManagerStubIT
 {
@@ -56,8 +55,8 @@ public class ApplianceManagerStubIT
 
     public static final int RS_FILE_SERVER_PORT = 8282;
 
-    protected final static String ovfId =
-        String.format("http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
+    protected final static String ovfId = String.format(
+        "http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
 
     protected final static String ovfIdInvalid =
         "http://localhost:8080/testovf/description-INVALID.ovf";
@@ -72,33 +71,32 @@ public class ApplianceManagerStubIT
 
     protected static String REPO_PATH;
 
-    
-//    @Test
-//    public void testDownload()
-//    {
-//        stub = new ApplianceManagerResourceStubImpl("http://localhost:80/am");
-//        
-//        OVFPackageInstanceStatusListDto statuslist = 
-//        stub.getOVFPackagInstanceStatusList(idEnterprise);
-//        
-//        for(OVFPackageInstanceStatusDto status : statuslist.getOvfPackageInstancesStatus())
-//        {
-//            OVFPackageInstanceDto inst = stub.getOVFPackageInstance(idEnterprise, status.getOvfId());
-//            EnvelopeType envelope = stub.getOVFPackageInstanceEnvelope(idEnterprise, status.getOvfId());
-//        }        
-//    }
-//    
+    // @Test
+    // public void testDownload()
+    // {
+    // stub = new ApplianceManagerResourceStubImpl("http://localhost:80/am");
+    //
+    // OVFPackageInstanceStatusListDto statuslist =
+    // stub.getOVFPackagInstanceStatusList(idEnterprise);
+    //
+    // for(OVFPackageInstanceStatusDto status : statuslist.getOvfPackageInstancesStatus())
+    // {
+    // OVFPackageInstanceDto inst = stub.getOVFPackageInstance(idEnterprise, status.getOvfId());
+    // EnvelopeType envelope = stub.getOVFPackageInstanceEnvelope(idEnterprise, status.getOvfId());
+    // }
+    // }
+    //
     /**
      * Clear the test configured repository.path folder.
      * 
      * @throws IOException
      */
-    // @BeforeTest
-    @BeforeClass // XXX BeforeMethod
+    @BeforeClass
+    // XXX BeforeMethod
     public void initializeRepositoryFileSystem() throws IOException
     {
 
-        REPO_PATH ="/tmp/testrepo/";
+        REPO_PATH = "/tmp/testrepo/";
         File vmrepo = new File(REPO_PATH);
         if (vmrepo.exists())
         {
@@ -107,8 +105,7 @@ public class ApplianceManagerStubIT
 
         vmrepo.mkdirs();
         new File(REPO_PATH + ".abiquo_repository").createNewFile();
-//        REPO_PATH = AMConfigurationManager.getInstance()
-//        .getAMConfiguration().getRepositoryPath();
+
     }
 
     @Test
@@ -301,7 +298,35 @@ public class ApplianceManagerStubIT
     /** Should be the same of on the References size on the ''src/test/resources/description.ovf'' */
     private final static Long diskFileSize = 1024 * 1024 * 10l;
 
-    //
+    
+    private static Server server;
+
+    @BeforeClass
+    protected void setupAm()
+    {
+        server = new Server(9008);
+
+        WebAppContext webapp = new WebAppContext();
+        webapp.setContextPath("/am");
+        webapp.setWar("src/main/webapp");
+        webapp.setServer(server);
+        server.setHandler(webapp);
+
+        try
+        {
+            server.start();
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException("Could not start test server", ex);
+        }
+    }
+
+    @AfterClass
+    protected void teardownAm() throws Exception
+    {
+        server.stop();
+    }
 
     @BeforeClass
     protected void configureFileServerTestResources() throws Exception
@@ -321,6 +346,8 @@ public class ApplianceManagerStubIT
         rsServer.setHandler(handlers);
         rsServer.start();
         // rsServer.join();
+
+        
 
         stub = new ApplianceManagerResourceStubImpl(baseUrl);
         testUtils = new ApplianceManagerStubTestUtils(stub);
@@ -378,7 +405,8 @@ public class ApplianceManagerStubIT
 
     protected static String getLocation()
     {
-        return "http://localhost:9009/am"; // TODO jetty port configured on pom.xml
+        return "http://localhost:9008/am"; 
+        // TODO jetty port configured on pom.xml
         // return String.format("http://localhost:%s/am", AM_SERVICE_MAPPING_PORT);
     }
 

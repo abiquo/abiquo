@@ -244,15 +244,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<configuration>
-					<systemPropertyVariables>
-						<webapp.context>/am</webapp.context>
-						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>
-						<abiquo.appliancemanager.repositoryLocation>nfs-test:/test/repostiory</abiquo.appliancemanager.repositoryLocation>
-						<abiquo.appliancemanager.localRepositoryPath>/tmp/testrepo</abiquo.appliancemanager.localRepositoryPath>
-					</systemPropertyVariables>
-				</configuration>
+				
 			</plugin>
+
 			<!-- Generate the jar with the test classes to allow premium test cases 
 				inherit from community ones -->
 			<plugin>
@@ -292,19 +286,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<configuration>
-					<scanIntervalSeconds>3</scanIntervalSeconds>
-				</configuration>
-			</plugin>
 		</plugins>
-		<!-- Properties filters <filters> <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter> 
-			</filters> <resources> <resource> <directory>src/main/resources</directory> 
-			<filtering>true</filtering> </resource> </resources> -->
 	</build>
 	<!-- -->
 	<!-- ENVIRONMENT SETTINGS -->
