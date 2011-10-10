@@ -282,6 +282,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         params.put("erepo", enterpriseId.toString());
         params.put("ovf", ovf);
 
+        // Must use the URI resolver in the AM in order to encode the ovf parameter
         return URIResolver.resolveURI(AM_BASE_URI, "erepos/{erepo}/ovfs/{ovf}", params);
     }
 }
