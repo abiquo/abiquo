@@ -333,9 +333,11 @@
         <security:intercept-url pattern="/config/categories" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/categories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
         <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         
         <!--=================================== -->
         <!--============= LOGIN =============== -->

@@ -24,9 +24,9 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.infrastructure.Repository;

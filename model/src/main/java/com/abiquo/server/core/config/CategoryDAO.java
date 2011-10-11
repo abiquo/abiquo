@@ -23,6 +23,8 @@ package com.abiquo.server.core.config;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -51,6 +53,16 @@ public class CategoryDAO extends DefaultDAOBase<Integer, Category>
     public Category findByName(final String categoryName)
     {
         return findUniqueByProperty(Category.NAME_PROPERTY, categoryName);
+    }
+
+    boolean existCategoryWithSameName(final String name)
+    {
+        return existsAnyByCriterions(equalName(name));
+    }
+
+    private static Criterion equalName(final String name)
+    {
+        return Restrictions.eq(Category.NAME_PROPERTY, name);
     }
 
 }

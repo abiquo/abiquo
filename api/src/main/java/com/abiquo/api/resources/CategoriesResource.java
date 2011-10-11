@@ -21,15 +21,19 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.resources.CategoryResource.createPersistenceObject;
 import static com.abiquo.api.resources.CategoryResource.createTransferObject;
 
 import java.util.Collection;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -37,6 +41,7 @@ import com.abiquo.api.services.CategoryService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.config.CategoriesDto;
 import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryDto;
 
 @Path(CategoriesResource.CATEGORIES_PATH)
 @Controller
@@ -49,6 +54,9 @@ public class CategoriesResource extends AbstractResource
 
     @Autowired
     private CategoryService service;
+
+    /** The logger. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoriesResource.class);
 
     @GET
     public CategoriesDto getCategory(@Context final IRESTBuilder restBuilder) throws Exception
@@ -63,12 +71,18 @@ public class CategoriesResource extends AbstractResource
         return categories;
     }
 
-    // @POST
-    // public CategoryDto postCategory(final CategoryDto categoryDto,
-    // @Context final IRESTBuilder builder) throws Exception
-    // {
-    // CategoryDto response = service.addCategory(categoryDto);
-    //
-    // return response;
-    // }
+    @POST
+    public CategoryDto postCategory(final CategoryDto categoryDto,
+        @Context final IRESTBuilder builder) throws Exception
+    {
+        Category category = createPersistenceObject(categoryDto);
+
+        LOGGER.info("Adding category");
+
+        Category cat = service.addCategory(category);
+
+        return createTransferObject(cat, builder);
+
+    }
+
 }

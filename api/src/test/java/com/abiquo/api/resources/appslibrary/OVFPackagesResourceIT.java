@@ -35,11 +35,11 @@ import org.testng.annotations.Test;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.config.Category;
 
 public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -49,7 +49,7 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
     {
         // Resource resource = client.resource(ovfPackagesURI).accept(MediaType.APPLICATION_XML);
 
-        Category category = categoryGeneartor.createUniqueInstance();
+        Category category = categoryGenerator.createUniqueInstance();
         Icon icon = iconGenerator.createUniqueInstance();
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();

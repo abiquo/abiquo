@@ -35,7 +35,7 @@ public class CategoryDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,31 +47,31 @@ public class CategoryDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
 
-    private int isDefault;
+    private Integer isDefault;
 
-    public int getIsDefault()
+    public Integer getIsDefault()
     {
         return isDefault;
     }
 
-    public void setIsDefault(int isDefault)
+    public void setIsDefault(final Integer isDefault)
     {
         this.isDefault = isDefault;
     }
 
-    private int isErasable;
+    private Integer isErasable;
 
-    public int getIsErasable()
+    public Integer getIsErasable()
     {
         return isErasable;
     }
 
-    public void setIsErasable(int isErasable)
+    public void setIsErasable(final Integer isErasable)
     {
         this.isErasable = isErasable;
     }

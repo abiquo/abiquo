@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.CategoryResource;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatastoreResource;
 import com.abiquo.api.resources.DatastoresResource;
@@ -1003,7 +1004,15 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
     {
-        return null;
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        RESTLink editLink = builder.buildRestLink(CategoryResource.class, REL_EDIT, params);
+        links.add(editLink);
+
+        return links;
     }
 
 }

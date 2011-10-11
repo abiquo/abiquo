@@ -84,4 +84,33 @@ public class CategoryRep extends DefaultRepBase
         return cat;
     }
 
+    public Category findDefaultCategory()
+    {
+        return categoryDAO.findDefault();
+    }
+
+    public void insertCategory(final Category category)
+    {
+        categoryDAO.persist(category);
+        categoryDAO.flush();
+
+    }
+
+    public void updateCategory(final Category old)
+    {
+        categoryDAO.flush();
+
+    }
+
+    public void removeCategory(final Category category)
+    {
+        categoryDAO.remove(category);
+        categoryDAO.flush();
+    }
+
+    public boolean existAnyOtherCategoryWithName(final String name)
+    {
+        return categoryDAO.existCategoryWithSameName(name);
+    }
+
 }

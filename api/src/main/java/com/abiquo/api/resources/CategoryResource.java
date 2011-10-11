@@ -23,12 +23,16 @@ package com.abiquo.api.resources;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -48,6 +52,8 @@ public class CategoryResource extends AbstractResource
 
     public static final String CATEGORY_PARAM = "{" + CATEGORY + "}";
 
+    private static final Logger logger = LoggerFactory.getLogger(CategoryResource.class);
+
     @Autowired
     private CategoryService service;
 
@@ -56,7 +62,35 @@ public class CategoryResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         Category category = service.getCategory(categoryId);
+
+        logger.info(String.format("Getting category id %s", categoryId));
+
         return createTransferObject(category, restBuilder);
+    }
+
+    @PUT
+    public CategoryDto modifyCategory(
+        @PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
+        final CategoryDto categoryDto, @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        logger.info("Updating category with id " + categoryId);
+
+        Category category = createPersistenceObject(categoryDto);
+
+        category = service.modifyCategory(category, categoryId);
+
+        logger.info("Category with id " + categoryId + " updated successfully");
+
+        return createTransferObject(category, restBuilder);
+    }
+
+    @DELETE
+    public void deleteCategory(@PathParam(CATEGORY) final Integer categoryId)
+    {
+        logger.info(String.format("Deleting category id %s", categoryId));
+
+        service.removeCategory(categoryId);
     }
 
     public static CategoryDto createTransferObject(final Category category,
@@ -66,6 +100,12 @@ public class CategoryResource extends AbstractResource
         // Add the links.
         dto.addLinks(restBuilder.buildCategoryLinks(dto));
         return dto;
+    }
+
+    // Create the persistence object.
+    public static Category createPersistenceObject(final CategoryDto category) throws Exception
+    {
+        return ModelTransformer.persistenceFromTransport(Category.class, category);
     }
 
 }

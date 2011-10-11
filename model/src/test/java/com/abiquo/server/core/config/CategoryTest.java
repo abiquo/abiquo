@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+  package com.abiquo.server.core.config;
 
   import com.abiquo.server.core.common.DefaultEntityTestBase;
   import com.softwarementors.bzngine.entities.test.InstanceTester;
