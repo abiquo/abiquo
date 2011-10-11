@@ -1,6 +1,7 @@
 package com.abiquo.api.services;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,8 @@ public class EventService extends DefaultApiService
         return event;
     }
 
-    public List<Event> getEvents(final FilterOptions filterOptions)
+    public List<Event> getEvents(final FilterOptions filterOptions,
+        final HashMap<String, String> filters)
     {
         User currentUser = userService.getCurrentUser();
 
@@ -47,7 +49,7 @@ public class EventService extends DefaultApiService
             userService.getUsersByEnterprise(currentUser.getEnterprise().getId().toString(),
                 filterOptions.getFilter(), filterOptions.getOrderBy(), filterOptions.getAsc());
 
-        List<Event> listEvents = eventRep.getEvents(filterOptions);
+        List<Event> listEvents = eventRep.getEvents(filterOptions, filters);
 
         return listEvents;
     }

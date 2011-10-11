@@ -2,7 +2,9 @@ package com.abiquo.server.core.enterprise;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -29,19 +31,15 @@ public class EventDAO extends DefaultDAOBase<Integer, Event>
     }
 
     @SuppressWarnings("unchecked")
-    public List<Event> getEvents(final FilterOptions filterOptions)
+    public List<Event> getEvents(final FilterOptions filterOptions,
+        final HashMap<String, String> filters)
     {
         // TODO : Redo method MeterDAOHibernate.findAllByFilter()
 
         Query query = getEntityManager().createNamedQuery(Event.EVENT_BY_FILTER);
 
-        // Create Dates
-        Timestamp fromDateInit = new Timestamp(0);
-        Timestamp toDateEnd = new Timestamp(new Date().getTime());
-
-        query.setParameter("timestampInit", fromDateInit);
-        query.setParameter("timestampEnd", toDateEnd);
-        query.setParameter("enterprise", replaceApostrophe("Abiquo"));
+        // Add parameters
+        query = setParameters(query, filters);
 
         Integer size = query.getResultList().size();
 
@@ -61,11 +59,42 @@ public class EventDAO extends DefaultDAOBase<Integer, Event>
         Criteria criteria = createCriteria(Restrictions.eq("id", eventId));
         Object obj = criteria.uniqueResult();
         return (Event) obj;
-        // return findUniqueByProperty("id", eventId.toString());
+    }
+
+    private Query setParameters(final Query query, final HashMap<String, String> filters)
+    {
+        Query queryWithParams = query;
+
+        // Create Dates
+        Timestamp dateFrom =
+            filters.containsKey("datefrom") && !"%".equals(filters.get("datefrom")) ? convertDate(
+                filters.get("datefrom"), 0) : new Timestamp(0);
+
+        Timestamp dateTo =
+            filters.containsKey("dateto") && !"%".equals(filters.get("dateto")) ? convertDate(
+                filters.get("dateto"), 86400) : new Timestamp(new Date().getTime());
+
+        queryWithParams.setParameter("datefrom", dateFrom);
+        queryWithParams.setParameter("dateto", dateTo);
+
+        filters.remove("datefrom");
+        filters.remove("dateto");
+
+        for (Entry<String, String> filter : filters.entrySet())
+        {
+            queryWithParams.setParameter(filter.getKey(), replaceApostrophe(filter.getValue()));
+        }
+
+        return queryWithParams;
     }
 
     private final String replaceApostrophe(final String name)
     {
         return name.replaceAll("'", "''");
+    }
+
+    private Timestamp convertDate(final String date, final Integer sec)
+    {
+        return new Timestamp(Long.valueOf(date) * sec);
     }
 }

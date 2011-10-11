@@ -26,8 +26,16 @@ public class Event extends DefaultEntityBase
     public static final String EVENT_BY_FILTER = "EVENT.BY_FILTER";
 
     public static final String BY_FILTER =
-        "SELECT event FROM Event event WHERE (event.timestamp BETWEEN :timestampInit AND :timestampEnd)"
-            + " AND event.enterprise LIKE :enterprise ORDER BY event.timestamp DESC";
+        "SELECT event FROM Event event WHERE (event.timestamp BETWEEN :datefrom AND :dateto)"
+            + " AND event.datacenter LIKE :datacenter AND event.rack LIKE :rack"
+            + " AND event.physicalMachine LIKE :physicalmachine AND event.storageSystem LIKE :storagesystem"
+            + " AND event.storagePool LIKE :storagepool AND event.volume LIKE :volume"
+            + " AND event.network LIKE :network AND event.subnet LIKE :subnet"
+            + " AND event.enterprise LIKE :enterprise AND event.user LIKE :user"
+            + " AND event.virtualDatacenter LIKE :virtualdatacenter AND event.virtualApp LIKE :virtualapp"
+            + " AND event.virtualMachine LIKE :virtualmachine AND event.severity LIKE :severity"
+            + " AND event.performedBy LIKE :performedby AND event.actionPerformed LIKE :actionperformed"
+            + " AND event.component LIKE :component ORDER BY event.timestamp DESC";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code

@@ -24,6 +24,7 @@
  */
 package com.abiquo.server.core.enterprise;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -56,9 +57,10 @@ public class EventRep extends DefaultRepBase
         this.eventDAO = new EventDAO(entityManager);
     }
 
-    public List<Event> getEvents(final FilterOptions filterOptions)
+    public List<Event> getEvents(final FilterOptions filterOptions,
+        final HashMap<String, String> filters)
     {
-        return eventDAO.getEvents(filterOptions);
+        return eventDAO.getEvents(filterOptions, filters);
     }
 
     public Event getEvent(final Integer eventId)
