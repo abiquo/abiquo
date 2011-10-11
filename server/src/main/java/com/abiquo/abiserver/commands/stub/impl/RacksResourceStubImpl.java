@@ -243,7 +243,7 @@ public class RacksResourceStubImpl extends AbstractAPIStub implements RacksResou
             dto.setNrsq(rack.getVlanNetworkParameters().getNRSQ());
             dto.setVlanIdMax(rack.getVlanNetworkParameters().getVlan_id_max());
             dto.setVlanIdMin(rack.getVlanNetworkParameters().getVlan_id_min());
-            dto.setVlanPerVdcExpected(rack.getVlanNetworkParameters().getVlan_per_vdc_expected());
+            dto.setVlanPerVdcReserved(rack.getVlanNetworkParameters().getVlan_per_vdc_expected());
             dto.setVlansIdAvoided(rack.getVlanNetworkParameters().getVlans_id_avoided());
         }
 
