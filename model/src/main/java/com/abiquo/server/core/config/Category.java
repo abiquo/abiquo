@@ -51,6 +51,8 @@ public class Category extends DefaultEntityBase
     public Category(final String name)
     {
         setName(name);
+        setIsDefault(0);
+        setIsErasable(1);        
     }
 
     private final static String ID_COLUMN = "idCategory";

@@ -54,9 +54,11 @@ public class TestServerAndAMListener extends TestServerListener
 
     public static final int RS_FILE_SERVER_PORT = 8282;
 
-    private final static String fileServerPath = getParameter("rs.basedir")+"/src/test/resources/";
+    private final static String fileServerPath = getParameter("rs.basedir")
+        + "/src/test/resources/";
 
-    private final static String diskFilePath = getParameter("rs.basedir")+"/src/test/resources/testovf/diskFile.vmdk";
+    private final static String diskFilePath = getParameter("rs.basedir")
+        + "/src/test/resources/testovf/diskFile.vmdk";
 
     /** Should be the same of on the References size on the ''src/test/resources/description.ovf'' */
     private final static Long diskFileSize = 1024 * 1024 * 10l;
@@ -92,13 +94,12 @@ public class TestServerAndAMListener extends TestServerListener
         try
         {
             createRepository();
-            
+
             server.start();
             LOGGER.info("Test server started with am.");
 
             startRemoteServiceServer();
 
-            
         }
         catch (Exception ex)
         {
@@ -138,7 +139,7 @@ public class TestServerAndAMListener extends TestServerListener
         {
             FileUtils.deleteDirectory(vmrepo);
         }
-        
+
         vmrepo = new File(REPO_PATH);
         vmrepo.mkdirs();
 
@@ -179,7 +180,6 @@ public class TestServerAndAMListener extends TestServerListener
      */
     private void createDiskFile() throws IOException
     {
-        System.err.println("*********************"+diskFilePath);
         File diskFile = new File(diskFilePath);
         RandomAccessFile f = new RandomAccessFile(diskFile, "rw");
         f.setLength(diskFileSize);

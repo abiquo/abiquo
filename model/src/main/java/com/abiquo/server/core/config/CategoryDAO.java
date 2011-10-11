@@ -32,9 +32,6 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 @Repository("jpaCategoryDAO")
 public class CategoryDAO extends DefaultDAOBase<Integer, Category>
 {
-    private final static String QUERY_GET_DEFAULT = "FROM " + Category.class.getName() + " WHERE " //
-        + "isDefault = 1";
-
     public CategoryDAO()
     {
         super(Category.class);
@@ -45,9 +42,14 @@ public class CategoryDAO extends DefaultDAOBase<Integer, Category>
         super(Category.class, entityManager);
     }
 
+    private Criterion isDefault()
+    {
+        return Restrictions.eq(Category.IS_DEFAULT_PROPERTY, 1);
+    }
+
     public Category findDefault()
     {
-        return findUniqueByProperty(Category.IS_DEFAULT_PROPERTY, "1");
+        return getSingleResult(createCriteria(isDefault()));
     }
 
     public Category findByName(final String categoryName)

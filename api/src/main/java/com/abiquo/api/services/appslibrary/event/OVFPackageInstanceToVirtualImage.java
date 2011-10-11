@@ -36,6 +36,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
+import com.abiquo.server.core.config.CategoryDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -76,6 +77,7 @@ public class OVFPackageInstanceToVirtualImage
                 {
                     VirtualImage vi = imageFromDisk(disk, repo);
                     vimageDao.persist(vi);
+
                     addedvimages.add(vi);
                     logger.info("Inserted virtual image [{}]", vi.getPathName());
                 }
@@ -134,6 +136,10 @@ public class OVFPackageInstanceToVirtualImage
         return notInsertedDisks;
     }
 
+    @Autowired
+    private CategoryDAO categoryDao;
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     protected VirtualImage imageFromDisk(final OVFPackageInstanceDto disk,
         final Repository repository)
     {
@@ -162,6 +168,8 @@ public class OVFPackageInstanceToVirtualImage
         {
             vimage.setMaster(master);
         }
+
+        vimage.setCategory(categoryDao.findDefault()); // TODO find by ProductSection
 
         /**
          * TODO category and icon
