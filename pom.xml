@@ -33,8 +33,8 @@
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
-        <module>vsm</module>
         <module>database</module>
+        <module>vsm</module>
         <module>model</module>
         <module>am</module>
         <module>server</module>
