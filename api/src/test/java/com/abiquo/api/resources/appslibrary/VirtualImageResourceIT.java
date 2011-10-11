@@ -27,12 +27,15 @@ import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.getParameter;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +43,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.wink.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +89,13 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
     private static final String SYSADMIN = "sysadmin";
 
-    private static final String DEFAULT_OVF = "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
-        //"http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
+    private static final String DEFAULT_OVF = "http://localhost:8282/testovf/description.ovf";
+
+    // "http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
+    // "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
+
+    protected final static String REPO_PATH = getParameter(
+        "abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
 
     private RemoteServiceDto amDto()
     {
@@ -114,6 +124,30 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
         setUpUser();
         setUpApplianceManagerInDatacenter();
+
+        cleanupRepository();
+    }
+
+    private static void cleanupRepository()
+    {
+        try
+        {
+            File vmrepo = new File(REPO_PATH);
+            if (vmrepo.exists())
+            {
+                FileUtils.deleteDirectory(vmrepo);
+
+            }
+
+            vmrepo = new File(REPO_PATH);
+            vmrepo.mkdirs();
+
+            new File(FilenameUtils.concat(REPO_PATH, ".abiquo_repository")).createNewFile();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException("Can't clean up " + REPO_PATH, e);
+        }
     }
 
     private void setUpUser()
