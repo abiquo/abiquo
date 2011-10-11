@@ -94,7 +94,13 @@ public class SecurityService
         {
             for (Privilege p : user.getRole().getPrivileges())
             {
-                if (p.getName().equals(privilege))
+                String name = p.getName();
+
+                if (!name.startsWith(DRP))
+                {
+                    name = DRP + name;
+                }
+                if (name.equals(privilege))
                 {
                     return true;
                 }
