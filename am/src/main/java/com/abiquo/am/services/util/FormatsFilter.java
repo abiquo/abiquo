@@ -19,13 +19,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services;
+package com.abiquo.am.services.util;
 
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import java.io.File;
+import java.io.FilenameFilter;
 
-public interface OVFPackageInstanceNotifier
+public class FormatsFilter implements FilenameFilter
 {
-    void setOVFStatus(final String erId, final String ovfId, OVFPackageInstanceStatusType status);
+    final String baseFile;
 
-    void setOVFStatusError(final String erId, final String ovfId, final String errorMessage);
+    public FormatsFilter(final String baseFile)
+    {
+        this.baseFile = baseFile;
+    }
+
+    @Override
+    public boolean accept(final File dir, final String name)
+    {
+        return name.startsWith(baseFile);
+    }
 }

@@ -25,7 +25,9 @@ import static com.abiquo.testng.TestConfig.DEFAULT_SERVER_PORT;
 import static com.abiquo.testng.TestConfig.getParameter;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -43,6 +45,14 @@ public class TestServerAndAMListener extends TestServerListener
 
     protected static final String AM_WEBAPP_CONTEXT_DEFAULT = "/am";
 
+    
+    public static final int RS_FILE_SERVER_PORT = 8282;
+
+    protected final static String ovfId = String.format(
+        "http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
+    
+    
+    
     @Override
     public void onStart(final ISuite suite)
     {

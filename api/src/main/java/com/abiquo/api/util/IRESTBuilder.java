@@ -30,6 +30,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.config.CategoryDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -107,7 +108,7 @@ public interface IRESTBuilder
         final Integer dcId, final Integer repoId);
 
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId);
+        final Integer vimageId, VirtualImage master);
 
     /*
      * Premium methods

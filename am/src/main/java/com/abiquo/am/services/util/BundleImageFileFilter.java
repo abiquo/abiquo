@@ -19,32 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.appliancemanager.exceptions;
+package com.abiquo.am.services.util;
 
-/**
- * Thrown when using an RepositorySpace identifier/locator with invalid or not reachable
- * ''ovfindex.xml'' is provided as RS ID or during some malfunction on the OVFIndex internal logic.
- * 
- * @author apuig
- */
-public class RepositoryException extends Exception
+import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
+
+import java.io.File;
+import java.io.FilenameFilter;
+
+public class BundleImageFileFilter  implements FilenameFilter
 {
-
-    /** Auto-generated serial UID */
-    private static final long serialVersionUID = 6859088415011865559L;
-
-    public RepositoryException(String message)
+    @Override
+    public boolean accept(final File dir, final String name)
     {
-        super(message);
-    }
-
-    public RepositoryException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
-
-    public RepositoryException(Throwable cause)
-    {
-        super(cause);
+        return name.contains(OVF_BUNDLE_PATH_IDENTIFIER);
     }
 }

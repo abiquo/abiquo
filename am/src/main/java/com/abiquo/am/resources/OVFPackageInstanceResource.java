@@ -22,10 +22,9 @@
 package com.abiquo.am.resources;
 
 import static com.abiquo.am.services.OVFPackageConventions.ovfUrl;
-import java.io.UnsupportedEncodingException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -49,15 +48,15 @@ import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.OVFPackageInstanceFileSystem;
 import com.abiquo.am.services.OVFPackageInstanceService;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
-import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 @Parent(OVFPackageInstancesResource.class)
 @Path(OVFPackageInstanceResource.OVFPI_PATH)
@@ -76,7 +75,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     public static final String OVFPI_PARAM = "{" + OVFPI + ": .*}"; // FIXME take care of .*
 
     /** The resource path. */
-    public static final String OVFPI_PATH =  OVFPI_PARAM;
+    public static final String OVFPI_PATH = OVFPI_PARAM;
 
     private final static String HEADER_PROGRESS = "progress";
 
@@ -239,14 +238,10 @@ public class OVFPackageInstanceResource extends AbstractResource
             bundleOVFId = service.createOVFBundle(diskInfo, snapshot);
             bundleUri = new URI(bundleOVFId);
         }
-        catch (RepositoryException e)
-        {
-            throw new AMException(e);
-        }
         catch (URISyntaxException e)
         {
             final String cause = String.format("The Bundle URI is not valid [%s]", bundleOVFId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
+            throw new AMException(AMError.OVF_BOUNDLE, cause, e);
         }
 
         return Response.created(bundleUri).type(MediaType.TEXT_PLAIN).build(); // XXX location
@@ -260,21 +255,9 @@ public class OVFPackageInstanceResource extends AbstractResource
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
         @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn)
     {
-
         final String ovfId = ovfUrl(ovfIdIn);
 
-        try
-        {
-            service.delete(idEnterprise, ovfId);
-        }
-        catch (IdNotFoundException e)
-        {
-            throw new AMException(Status.NOT_FOUND, e.getLocalizedMessage());
-        }
-        catch (RepositoryException e)
-        {
-            throw new AMException(Status.PRECONDITION_FAILED, e.getLocalizedMessage());
-        }
+        service.delete(idEnterprise, ovfId);
     }
 
     /*
@@ -284,31 +267,12 @@ public class OVFPackageInstanceResource extends AbstractResource
     private OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(String idEnterprise,
         String ovfId)
     {
-
-        try
-        {
-            return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
-        }
-        catch (DownloadException e)
-        {
-            throw new AMException(Status.NOT_FOUND, "OVF Package Instance not found or "
-                + "can't obtain the status", e);
-        }
+        return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
     }
 
     private OVFPackageInstanceDto getOVFPackageInstance(String idEnterprise, String ovfId)
     {
-
-        try
-        {
-            return service.getOVFPackage(idEnterprise, ovfId);
-        }
-        catch (IdNotFoundException e)
-        {
-            final String cause =
-                String.format("Can not obtain the OVF Package Instance of OVF [%s]", ovfId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
-        }
+        return service.getOVFPackage(idEnterprise, ovfId);
     }
 
     private EnvelopeType getOVFEnvelope(String idEnterprise, String ovfId)
@@ -316,17 +280,7 @@ public class OVFPackageInstanceResource extends AbstractResource
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(idEnterprise);
 
-        try
-        {
-            final EnvelopeType envelop = enterpriseRepository.getEnvelope(ovfId);
-
-            return envelop;
-        }
-        catch (IdNotFoundException e)
-        {
-            final String cause =
-                String.format("Can not obtain the Envelope document of OVF [%s]", ovfId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
-        }
+        return OVFPackageInstanceFileSystem.getEnvelope(
+            enterpriseRepository.getEnterpriseRepositoryPath(), ovfId);
     }
 }

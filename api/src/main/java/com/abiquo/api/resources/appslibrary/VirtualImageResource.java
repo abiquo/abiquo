@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
+import org.apache.wink.client.Resource;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,6 +36,7 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
@@ -86,32 +88,30 @@ public class VirtualImageResource extends AbstractResource
         VirtualImageDto dto =
             ModelTransformer.transportFromPersistence(VirtualImageDto.class, vimage);
 
-        dto = addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri);
+        dto = addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri, vimage.getMaster());
 
         return dto;
     }
 
-    private static VirtualImageDto addLinks(final IRESTBuilder builder, VirtualImageDto dto,
-        final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri)
+    private static VirtualImageDto addLinks(final IRESTBuilder builder, final VirtualImageDto dto,
+        final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri,
+        final VirtualImage master)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId));
-
-        dto.addLink(ovfpackageinstanceUri(amUri, vimageId, dto.getOvfid()));
-
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId, master));
+        addApplianceManagerLinks(dto, amUri, vimageId, dto.getOvfid());
         return dto;
     }
 
-    private static RESTLink ovfpackageinstanceUri(final String amUri, final Integer enterpriseId,
-        String ovfid)
+    private static void addApplianceManagerLinks(final VirtualImageDto dto, final String amUri,
+        final Integer enterpriseId, final String ovfid)
     {
+        ApplianceManagerResourceStub am = new ApplianceManagerResourceStub(amUri);
+        Resource resource = am.ovfPackage(enterpriseId.toString(), ovfid);
+        String href = resource.getUriBuilder().build(new Object[] {}).toString();
 
-        if (ovfid.startsWith("http://"))
-        {
-            ovfid = ovfid.substring("http://".length());
-        }
-
-        final String href =
-            String.format("%s/erepos/%s/ovfs/%s", amUri, enterpriseId.toString(), ovfid);
-        return new RESTLink("applianceManagerOVFPackageInstanceUri", href);
+        dto.addLink(new RESTLink("ovfpackageinstance", href));
+        dto.addLink(new RESTLink("ovfpackagestatus", href + "?format=status"));
+        dto.addLink(new RESTLink("ovfdocument", href + "?format=envelope"));
+        dto.addLink(new RESTLink("imagefile", href + "?format=diskFile"));
     }
 }

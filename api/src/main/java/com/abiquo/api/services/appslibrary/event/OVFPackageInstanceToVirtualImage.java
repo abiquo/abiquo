@@ -60,7 +60,8 @@ public class OVFPackageInstanceToVirtualImage
     private EnterpriseRep entRepo;
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<VirtualImage> insertVirtualImages(List<OVFPackageInstanceDto> disks, Repository repo)
+    public List<VirtualImage> insertVirtualImages(final List<OVFPackageInstanceDto> disks,
+        final Repository repo)
     {
         List<VirtualImage> addedvimages = new LinkedList<VirtualImage>();
         List<OVFPackageInstanceDto> disksToInsert =
@@ -112,7 +113,7 @@ public class OVFPackageInstanceToVirtualImage
      * repository.
      */
     private List<OVFPackageInstanceDto> filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(
-        List<OVFPackageInstanceDto> disks, final Repository repository)
+        final List<OVFPackageInstanceDto> disks, final Repository repository)
     {
 
         List<OVFPackageInstanceDto> notInsertedDisks = new LinkedList<OVFPackageInstanceDto>();
@@ -133,7 +134,8 @@ public class OVFPackageInstanceToVirtualImage
         return notInsertedDisks;
     }
 
-    protected VirtualImage imageFromDisk(OVFPackageInstanceDto disk, final Repository repository)
+    protected VirtualImage imageFromDisk(final OVFPackageInstanceDto disk,
+        final Repository repository)
     {
         Enterprise enterprise = entRepo.findById(disk.getIdEnterprise());
 
@@ -158,7 +160,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setRepository(repository);
         if (master != null)
         {
-            vimage.setIdMaster(master.getId()); // XXX
+            vimage.setMaster(master);
         }
 
         /**
@@ -206,7 +208,7 @@ public class OVFPackageInstanceToVirtualImage
      * @param alloctionUnit, bytes by default but can be Kb, Mb, Gb or Tb.
      * @return capacity on bytes
      **/
-    private static BigInteger getBytes(String capacity, String allocationUnits)
+    private static BigInteger getBytes(final String capacity, final String allocationUnits)
     {
         BigInteger capa = new BigInteger(capacity);
 
