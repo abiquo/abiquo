@@ -202,9 +202,9 @@ public enum APIError
         "Invalid ip range"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
-        "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
+        "Invalid hypervisor IP. There is already a hypervisor with this IP address"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. There is already a hypervisor with this service IP"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -487,8 +487,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
