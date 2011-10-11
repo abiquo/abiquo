@@ -389,6 +389,10 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
+    // CATEGORY
+    NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
+        "CATEGORY-2", "Duplicated name for the category")
+
     ;
 
     /**

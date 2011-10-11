@@ -22,10 +22,8 @@
 package com.abiquo.server.core.appslibrary;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -44,6 +42,7 @@ import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.config.Category;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -68,6 +67,7 @@ public class OVFPackage extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;

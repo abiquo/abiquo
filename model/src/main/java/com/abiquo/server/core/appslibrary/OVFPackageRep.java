@@ -21,9 +21,6 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -32,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository
@@ -171,27 +170,6 @@ public class OVFPackageRep extends DefaultRepBase
         }
 
         return icon;
-    }
-
-    public Category findByCategoryNameOrCreateNew(final String categoryName)
-    {
-        if (categoryName == null || categoryName.isEmpty())
-        {
-            return categoryDao.findDefault();
-        }
-
-        Category cat = categoryDao.findByName(categoryName);
-
-        if (cat == null)
-        {
-            cat = new Category();
-            cat.setName(categoryName);
-            cat.setIsDefault(0);
-            cat.setIsErasable(1);
-            categoryDao.persist(cat);
-        }
-
-        return cat;
     }
 
     public void removeOVFPackageList(final OVFPackageList ovfPackageList)

@@ -19,60 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+  package com.abiquo.server.core.config;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+  import com.abiquo.server.core.common.DefaultEntityTestBase;
+  import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
-
-  @XmlRootElement(name = "")
-  public class CategoryDto extends SingleResourceTransportDto
+  public class CategoryTest extends DefaultEntityTestBase<Category>
   {
-      private Integer id;
-      public Integer getId()
+
+      @Override
+      protected InstanceTester<Category> createEntityInstanceGenerator()
       {
-          return id;
+          return new CategoryGenerator(getSeed());
       }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private String name;
-
-public String getName()
-{
-    return name;
-}
-
-public void setName(String name)
-{
-    this.name = name;
-}
-
-private int isDefault;
-
-public int getIsDefault()
-{
-    return isDefault;
-}
-
-public void setIsDefault(int isDefault)
-{
-    this.isDefault = isDefault;
-}
-
-private int isErasable;
-
-public int getIsErasable()
-{
-    return isErasable;
-}
-
-public void setIsErasable(int isErasable)
-{
-    this.isErasable = isErasable;
-}
-
   }

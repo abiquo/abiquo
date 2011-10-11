@@ -32,14 +32,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.CategoryDAO;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDAO;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryDAO;
 
 @Service
 @Transactional

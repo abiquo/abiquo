@@ -27,14 +27,9 @@ import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +40,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.CategoryDAO;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
@@ -66,6 +60,9 @@ public class OVFPackageService extends DefaultApiService
 
     @Autowired
     EnterpriseRep entRepo;
+
+    @Autowired
+    CategoryRep catRep;
 
     public OVFPackageService()
     {
@@ -164,7 +161,7 @@ public class OVFPackageService extends DefaultApiService
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());
         pack.setType(format);
 
-        Category category = repo.findByCategoryNameOrCreateNew(descr.getOVFCategories());
+        Category category = catRep.findByCategoryNameOrCreateNew(descr.getOVFCategories());
         pack.setCategory(category);
 
         Long diskSizeL = null;

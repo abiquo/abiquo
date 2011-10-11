@@ -21,30 +21,26 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListURI;
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageURI;
+import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.api.services.appslibrary.OVFPackageService;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
+import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
@@ -67,7 +63,7 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
     {
         enterprise = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
-        category = categoryGeneartor.createUniqueInstance();
+        category = categoryGenerator.createUniqueInstance();
         icon = iconGenerator.createUniqueInstance();
     }
 

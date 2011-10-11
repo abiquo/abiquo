@@ -24,7 +24,7 @@ package com.abiquo.api.persistence.impl;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.api.persistence.JpaDAO;
-import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.config.Category;
 
 @Repository
 public class CategoryDAO extends JpaDAO<Category, Integer>

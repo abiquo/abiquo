@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.CategoryResource;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatastoreResource;
 import com.abiquo.api.resources.DatastoresResource;
@@ -71,6 +72,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.config.CategoryDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -1006,6 +1008,20 @@ public class RESTBuilder implements IRESTBuilder
         final IpPoolManagement ip)
     {
         return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        RESTLink editLink = builder.buildRestLink(CategoryResource.class, REL_EDIT, params);
+        links.add(editLink);
+
+        return links;
     }
 
 }

@@ -30,6 +30,8 @@ import java.util.Map;
 
 import org.apache.wink.common.internal.utils.UriHelper;
 
+import com.abiquo.api.resources.CategoriesResource;
+import com.abiquo.api.resources.CategoryResource;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.resources.DatastoreResource;
@@ -774,6 +776,27 @@ public class UriTestResolver
     public static String resolveLoginURI()
     {
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
+    }
+
+    /**
+     * Creates something like http://example.com/config/categories/${categoryId}
+     * 
+     * @param categoryId identifier of the category
+     * @return the an URI-like string to call the 'ips' action.
+     */
+    public static String resolveCategoryURI(final Integer categoryId)
+    {
+        String template =
+            buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
+
+        return resolveURI(template,
+            Collections.singletonMap(CategoryResource.CATEGORY, categoryId.toString()));
+    }
+
+    public static String resolveCategoriesURI()
+    {
+        String uri = resolveURI(CategoriesResource.CATEGORIES_PATH, new HashMap<String, String>());
+        return uri;
     }
 
 }
