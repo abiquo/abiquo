@@ -43,6 +43,7 @@
         <class>com.abiquo.server.core.enterprise.User</class>
         <class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
         <class>com.abiquo.server.core.enterprise.Session</class>
+        <class>com.abiquo.server.core.enterprise.Event</class>
         <!-- end: enterprise -->
         <!-- networking -->
         <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>

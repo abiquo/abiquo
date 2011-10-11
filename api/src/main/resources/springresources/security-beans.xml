@@ -33,7 +33,9 @@
         <security:intercept-url pattern="/admin/rules/machineLoadLevel/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- EVENTS -->
         <security:intercept-url pattern="/admin/events" method="GET" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/events" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/events/*" method="GET" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/events/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- ROLES -->
         <security:intercept-url pattern="/admin/roles" method="POST" access="ROLE_USERS_MANAGE_ROLES" />
         <security:intercept-url pattern="/admin/roles" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_MANAGE_ROLES,ROLE_USERS_VIEW_PRIVILEGES,ROLE_USERS_VIEW" />

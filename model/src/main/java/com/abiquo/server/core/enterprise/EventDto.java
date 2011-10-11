@@ -1,5 +1,7 @@
 package com.abiquo.server.core.enterprise;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -57,14 +59,14 @@ public class EventDto extends SingleResourceTransportDto
         this.performedBy = performedBy;
     }
 
-    private int storagePool;
+    private String storagePool;
 
-    public int getStoragePool()
+    public String getStoragePool()
     {
         return storagePool;
     }
 
-    public void setStoragePool(final int storagePool)
+    public void setStoragePool(final String storagePool)
     {
         this.storagePool = storagePool;
     }
@@ -81,146 +83,146 @@ public class EventDto extends SingleResourceTransportDto
         this.stracktrace = stracktrace;
     }
 
-    private int timestamp;
+    private Date timestamp;
 
-    public int getTimestamp()
+    public Date getTimestamp()
     {
         return timestamp;
     }
 
-    public void setTimestamp(final int timestamp)
+    public void setTimestamp(final Date timestamp)
     {
         this.timestamp = timestamp;
     }
 
-    private int virtualApp;
+    private String virtualApp;
 
-    public int getVirtualApp()
+    public String getVirtualApp()
     {
         return virtualApp;
     }
 
-    public void setVirtualApp(final int virtualApp)
+    public void setVirtualApp(final String virtualApp)
     {
         this.virtualApp = virtualApp;
     }
 
-    private int datacenter;
+    private String datacenter;
 
-    public int getDatacenter()
+    public String getDatacenter()
     {
         return datacenter;
     }
 
-    public void setDatacenter(final int datacenter)
+    public void setDatacenter(final String datacenter)
     {
         this.datacenter = datacenter;
     }
 
-    private int virtualDatacenter;
+    private String virtualDatacenter;
 
-    public int getVirtualDatacenter()
+    public String getVirtualDatacenter()
     {
         return virtualDatacenter;
     }
 
-    public void setVirtualDatacenter(final int virtualDatacenter)
+    public void setVirtualDatacenter(final String virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }
 
-    private int enterprise;
+    private String enterprise;
 
-    public int getEnterprise()
+    public String getEnterprise()
     {
         return enterprise;
     }
 
-    public void setEnterprise(final int enterprise)
+    public void setEnterprise(final String enterprise)
     {
         this.enterprise = enterprise;
     }
 
-    private int storageSystem;
+    private String storageSystem;
 
-    public int getStorageSystem()
+    public String getStorageSystem()
     {
         return storageSystem;
     }
 
-    public void setStorageSystem(final int storageSystem)
+    public void setStorageSystem(final String storageSystem)
     {
         this.storageSystem = storageSystem;
     }
 
-    private int network;
+    private String network;
 
-    public int getNetwork()
+    public String getNetwork()
     {
         return network;
     }
 
-    public void setNetwork(final int network)
+    public void setNetwork(final String network)
     {
         this.network = network;
     }
 
-    private int physicalMachine;
+    private String physicalMachine;
 
-    public int getPhysicalMachine()
+    public String getPhysicalMachine()
     {
         return physicalMachine;
     }
 
-    public void setPhysicalMachine(final int physicalMachine)
+    public void setPhysicalMachine(final String physicalMachine)
     {
         this.physicalMachine = physicalMachine;
     }
 
-    private int rack;
+    private String rack;
 
-    public int getRack()
+    public String getRack()
     {
         return rack;
     }
 
-    public void setRack(final int rack)
+    public void setRack(final String rack)
     {
         this.rack = rack;
     }
 
-    private int virtualMachine;
+    private String virtualMachine;
 
-    public int getVirtualMachine()
+    public String getVirtualMachine()
     {
         return virtualMachine;
     }
 
-    public void setVirtualMachine(final int virtualMachine)
+    public void setVirtualMachine(final String virtualMachine)
     {
         this.virtualMachine = virtualMachine;
     }
 
-    private int volume;
+    private String volume;
 
-    public int getVolume()
+    public String getVolume()
     {
         return volume;
     }
 
-    public void setVolume(final int volume)
+    public void setVolume(final String volume)
     {
         this.volume = volume;
     }
 
-    private int subnet;
+    private String subnet;
 
-    public int getSubnet()
+    public String getSubnet()
     {
         return subnet;
     }
 
-    public void setSubnet(final int subnet)
+    public void setSubnet(final String subnet)
     {
         this.subnet = subnet;
     }
@@ -237,14 +239,14 @@ public class EventDto extends SingleResourceTransportDto
         this.severity = severity;
     }
 
-    private int user;
+    private String user;
 
-    public int getUser()
+    public String getUser()
     {
         return user;
     }
 
-    public void setUser(final int user)
+    public void setUser(final String user)
     {
         this.user = user;
     }

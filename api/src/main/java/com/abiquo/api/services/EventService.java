@@ -3,8 +3,6 @@ package com.abiquo.api.services;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +20,6 @@ import com.abiquo.server.core.util.FilterOptions;
 @Transactional(readOnly = true)
 public class EventService extends DefaultApiService
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventService.class);
-
     @Autowired
     private UserService userService;
 
@@ -32,7 +28,7 @@ public class EventService extends DefaultApiService
 
     public Event getEvent(final Integer eventId)
     {
-        Event event = null;
+        Event event = eventRep.getEvent(eventId);
 
         if (event == null)
         {
@@ -51,7 +47,7 @@ public class EventService extends DefaultApiService
             userService.getUsersByEnterprise(currentUser.getEnterprise().getId().toString(),
                 filterOptions.getFilter(), filterOptions.getOrderBy(), filterOptions.getAsc());
 
-        List<Event> listEvents = eventRep.getEventByFilter(filterOptions);
+        List<Event> listEvents = eventRep.getEvents(filterOptions);
 
         return listEvents;
     }

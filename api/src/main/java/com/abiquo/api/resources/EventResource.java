@@ -29,12 +29,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.EventService;
+import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Event;
 import com.abiquo.server.core.enterprise.EventDto;
@@ -47,8 +48,6 @@ import com.abiquo.server.core.enterprise.EventDto;
 @Controller
 public class EventResource extends AbstractResource
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventsResource.class);
-
     public static final String EVENT = "event";
 
     public static final String EVENT_PARAM = "{" + EVENT + "}";
@@ -62,6 +61,10 @@ public class EventResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         Event event = eventService.getEvent(eventId);
+        if (event == null)
+        {
+            throw new NotFoundException(APIError.NON_EXISTENT_EVENT);
+        }
 
         return createTransferObject(event, restBuilder);
     }
@@ -69,13 +72,7 @@ public class EventResource extends AbstractResource
     public static EventDto createTransferObject(final Event event, final IRESTBuilder restBuilder)
         throws Exception
     {
-        EventDto dto = new EventDto();
-        dto.setId(event.getId());
-        dto.setActionPerformed(event.getActionPerformed());
-        dto.setDatacenter(event.getDatacenter().getId());
-        dto.setEnterprise(event.getEnterprise().getId());
-
-        // TODO : add all the dto.* here
+        EventDto dto = ModelTransformer.transportFromPersistence(EventDto.class, event);
 
         // dto.setLinks(restBuilder.buildVolumeCloudLinks(event));
         // dto.addLinks(restBuilder.buildRasdLinks(event));

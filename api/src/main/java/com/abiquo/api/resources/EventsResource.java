@@ -12,8 +12,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Workspace;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -31,8 +29,6 @@ import com.abiquo.server.core.util.FilterOptions;
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Events")
 public class EventsResource extends AbstractResource
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventsResource.class);
-
     public static final String EVENTS_PATH = "admin/events";
 
     @Autowired

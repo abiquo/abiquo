@@ -322,6 +322,7 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
+    // EVENTS
     NON_EXISTENT_EVENT("EVENT-1", "The event does not exist")
 
     ;

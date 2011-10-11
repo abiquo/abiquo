@@ -56,8 +56,13 @@ public class EventRep extends DefaultRepBase
         this.eventDAO = new EventDAO(entityManager);
     }
 
-    public List<Event> getEventByFilter(final FilterOptions filterOptions)
+    public List<Event> getEvents(final FilterOptions filterOptions)
     {
-        return eventDAO.getEventByFilter(filterOptions);
+        return eventDAO.getEvents(filterOptions);
+    }
+
+    public Event getEvent(final Integer eventId)
+    {
+        return eventDAO.getEventById(eventId);
     }
 }

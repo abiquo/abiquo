@@ -1,29 +1,18 @@
 package com.abiquo.server.core.enterprise;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.network.Network;
-import com.abiquo.server.core.infrastructure.storage.StoragePool;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -34,11 +23,11 @@ public class Event extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "metering";
 
-    public static final String EVENT_BY_FILTER = "EVENT_BY_FILTER";
+    public static final String EVENT_BY_FILTER = "EVENT.BY_FILTER";
 
     public static final String BY_FILTER =
-        "SELECT event FROM Event event WHERE event.timestamp BETWEEN :timestampInit AND :timestampEnd"
-            + " AND event.enterprise.name LIKE :enterprise ORDER BY event.timestamp DESC";
+        "SELECT event FROM Event event WHERE (event.timestamp BETWEEN :timestampInit AND :timestampEnd)"
+            + " AND event.enterprise LIKE :enterprise ORDER BY event.timestamp DESC";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -47,26 +36,41 @@ public class Event extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public Event(final String actionPerformed, final String component, final String performedBy,
-        final String severity, final int storageSystem, final String stacktrace, final int subnet,
-        final int timestamp)
+    public Event(final String actionPerformed, final String component, final String dc,
+        final String enterprise, final String network, final String performedBy,
+        final String machine, final String rack, final String severity, final String sp,
+        final String storageSystem, final String stacktrace, final String subnet,
+        final Date timestamp, final String user, final String vapp, final String vdc,
+        final String vm, final String volume)
     {
         super();
-        this.actionPerformed = actionPerformed;
-        this.component = component;
-        this.performedBy = performedBy;
-        this.severity = severity;
-        this.storageSystem = storageSystem;
-        this.stracktrace = stacktrace;
-        this.subnet = subnet;
-        this.timestamp = timestamp;
+
+        setActionPerformed(actionPerformed);
+        setComponent(component);
+        setPerformedBy(performedBy);
+        setSeverity(severity);
+        setStorageSystem(storageSystem);
+        setStacktrace(stacktrace);
+        setSubnet(subnet);
+        setTimestamp(timestamp);
+        setDatacenter(dc);
+        setEnterprise(enterprise);
+        setNetwork(network);
+        setPhysicalMachine(machine);
+        setRack(rack);
+        setStoragePool(sp);
+        setUser(user);
+        setVirtualApp(vapp);
+        setVirtualDatacenter(vdc);
+        setVirtualMachine(vm);
+        setVolume(volume);
     }
 
     private final static String ID_COLUMN = "idMeter";
 
     @Id
     @GeneratedValue
-    @Column(name = ID_COLUMN, nullable = false)
+    @Column(name = ID_COLUMN, nullable = false, columnDefinition = "BIGINT")
     private Integer id;
 
     public Integer getId()
@@ -97,7 +101,7 @@ public class Event extends DefaultEntityBase
         return this.component;
     }
 
-    private void setComponent(final String component)
+    public void setComponent(final String component)
     {
         this.component = component;
     }
@@ -125,7 +129,7 @@ public class Event extends DefaultEntityBase
         return this.actionPerformed;
     }
 
-    private void setActionPerformed(final String actionPerformed)
+    public void setActionPerformed(final String actionPerformed)
     {
         this.actionPerformed = actionPerformed;
     }
@@ -153,7 +157,7 @@ public class Event extends DefaultEntityBase
         return this.performedBy;
     }
 
-    private void setPerformedBy(final String performedBy)
+    public void setPerformedBy(final String performedBy)
     {
         this.performedBy = performedBy;
     }
@@ -162,24 +166,31 @@ public class Event extends DefaultEntityBase
 
     private final static boolean STORAGE_POOL_REQUIRED = false;
 
-    private final static String STORAGE_POOL_ID_COLUMN = "idStorage";
+    private final static String STORAGE_POOL_COLUMN = "storagePool";
 
-    @JoinColumn(name = STORAGE_POOL_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private StoragePool storagePool;
+    private final static int STORAGE_POOL_LENGTH_MIN = 0;
+
+    private final static int STORAGE_POOL_LENGTH_MAX = 255;
+
+    private final static boolean STORAGE_POOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = STORAGE_POOL_COLUMN, nullable = !STORAGE_POOL_REQUIRED, length = STORAGE_POOL_LENGTH_MAX)
+    private String storagePool;
 
     @Required(value = STORAGE_POOL_REQUIRED)
-    public StoragePool getStoragePool()
+    @Length(min = STORAGE_POOL_LENGTH_MIN, max = STORAGE_POOL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = STORAGE_POOL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getStoragePool()
     {
         return this.storagePool;
     }
 
-    public void setStoragePool(final StoragePool storagePool)
+    public void setStoragePool(final String storagePool)
     {
         this.storagePool = storagePool;
     }
 
-    public final static String STRACKTRACE_PROPERTY = "stracktrace";
+    public final static String STRACKTRACE_PROPERTY = "stacktrace";
 
     private final static boolean STRACKTRACE_REQUIRED = false;
 
@@ -189,22 +200,22 @@ public class Event extends DefaultEntityBase
 
     private final static boolean STRACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String STRACKTRACE_COLUMN = "stracktrace";
+    private final static String STRACKTRACE_COLUMN = "stacktrace";
 
-    @Column(name = STRACKTRACE_COLUMN, nullable = !STRACKTRACE_REQUIRED, length = STRACKTRACE_LENGTH_MAX)
-    private String stracktrace;
+    @Column(name = STRACKTRACE_COLUMN, nullable = !STRACKTRACE_REQUIRED, length = STRACKTRACE_LENGTH_MAX, columnDefinition = "TEXT")
+    private String stacktrace;
 
     @Required(value = STRACKTRACE_REQUIRED)
     @Length(min = STRACKTRACE_LENGTH_MIN, max = STRACKTRACE_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = STRACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getStracktrace()
+    public String getStacktrace()
     {
-        return this.stracktrace;
+        return this.stacktrace;
     }
 
-    private void setStracktrace(final String stracktrace)
+    public void setStacktrace(final String stracktrace)
     {
-        this.stracktrace = stracktrace;
+        this.stacktrace = stracktrace;
     }
 
     public final static String TIMESTAMP_PROPERTY = "timestamp";
@@ -213,20 +224,17 @@ public class Event extends DefaultEntityBase
 
     private final static String TIMESTAMP_COLUMN = "timestamp";
 
-    private final static int TIMESTAMP_MIN = Integer.MIN_VALUE;
-
-    private final static int TIMESTAMP_MAX = Integer.MAX_VALUE;
-
     @Column(name = TIMESTAMP_COLUMN, nullable = !TIMESTAMP_REQUIRED)
-    @Range(min = TIMESTAMP_MIN, max = TIMESTAMP_MAX)
-    private int timestamp;
+    // @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp;
 
-    public int getTimestamp()
+    @Required(value = TIMESTAMP_REQUIRED)
+    public Date getTimestamp()
     {
         return this.timestamp;
     }
 
-    private void setTimestamp(final int timestamp)
+    public void setTimestamp(final Date timestamp)
     {
         this.timestamp = timestamp;
     }
@@ -235,19 +243,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean VIRTUAL_APP_REQUIRED = false;
 
-    private final static String VIRTUAL_APP_COLUMN = "idVirtualApp";
+    private final static String VIRTUAL_APP_COLUMN = "virtualApp";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = VIRTUAL_APP_COLUMN)
-    private VirtualAppliance virtualApp;
+    private final static int VIRTUAL_APP_LENGTH_MIN = 0;
+
+    private final static int VIRTUAL_APP_LENGTH_MAX = 255;
+
+    private final static boolean VIRTUAL_APP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = VIRTUAL_APP_COLUMN, nullable = !VIRTUAL_APP_REQUIRED, length = VIRTUAL_APP_LENGTH_MAX)
+    private String virtualApp;
 
     @Required(value = VIRTUAL_APP_REQUIRED)
-    public VirtualAppliance getVirtualApp()
+    @Length(min = VIRTUAL_APP_LENGTH_MIN, max = VIRTUAL_APP_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = VIRTUAL_APP_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getVirtualApp()
     {
         return this.virtualApp;
     }
 
-    private void setVirtualApp(final VirtualAppliance virtualApp)
+    public void setVirtualApp(final String virtualApp)
     {
         this.virtualApp = virtualApp;
     }
@@ -256,19 +271,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean DATACENTER_REQUIRED = false;
 
-    private final static String DATACENTER_COLUMN = "idDatacenter";
+    private final static String DATACENTER_COLUMN = "datacenter";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = DATACENTER_COLUMN)
-    private Datacenter datacenter;
+    private final static int DATACENTER_LENGTH_MIN = 0;
+
+    private final static int DATACENTER_LENGTH_MAX = 255;
+
+    private final static boolean DATACENTER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = DATACENTER_COLUMN, nullable = !DATACENTER_REQUIRED, length = DATACENTER_LENGTH_MAX)
+    private String datacenter;
 
     @Required(value = DATACENTER_REQUIRED)
-    public Datacenter getDatacenter()
+    @Length(min = DATACENTER_LENGTH_MIN, max = DATACENTER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = DATACENTER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getDatacenter()
     {
         return this.datacenter;
     }
 
-    private void setDatacenter(final Datacenter datacenter)
+    public void setDatacenter(final String datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -277,19 +299,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean VIRTUAL_DATACENTER_REQUIRED = false;
 
-    private final static String VIRTUAL_DATACENTER_COLUMN = "idVirtualDatacenter";
+    private final static String VIRTUAL_DATACENTER_COLUMN = "virtualDataCenter";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = VIRTUAL_DATACENTER_COLUMN)
-    private VirtualDatacenter virtualDatacenter;
+    private final static int VIRTUAL_DATACENTER_LENGTH_MIN = 0;
+
+    private final static int VIRTUAL_DATACENTER_LENGTH_MAX = 255;
+
+    private final static boolean VIRTUAL_DATACENTER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = VIRTUAL_DATACENTER_COLUMN, nullable = !VIRTUAL_DATACENTER_REQUIRED, length = VIRTUAL_DATACENTER_LENGTH_MAX)
+    private String virtualDatacenter;
 
     @Required(value = VIRTUAL_DATACENTER_REQUIRED)
-    public VirtualDatacenter getVirtualDatacenter()
+    @Length(min = VIRTUAL_DATACENTER_LENGTH_MIN, max = VIRTUAL_DATACENTER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = VIRTUAL_DATACENTER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getVirtualDatacenter()
     {
         return this.virtualDatacenter;
     }
 
-    private void setVirtualDatacenter(final VirtualDatacenter virtualDatacenter)
+    public void setVirtualDatacenter(final String virtualDatacenter)
     {
         this.virtualDatacenter = virtualDatacenter;
     }
@@ -298,19 +327,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean ENTERPRISE_REQUIRED = false;
 
-    private final static String ENTERPRISE_COLUMN = "idEnterprise";
+    private final static String ENTERPRISE_COLUMN = "enterprise";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = ENTERPRISE_COLUMN)
-    private Enterprise enterprise;
+    private final static int ENTERPRISE_LENGTH_MIN = 0;
+
+    private final static int ENTERPRISE_LENGTH_MAX = 255;
+
+    private final static boolean ENTERPRISE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = ENTERPRISE_COLUMN, nullable = !ENTERPRISE_REQUIRED, length = ENTERPRISE_LENGTH_MAX)
+    private String enterprise;
 
     @Required(value = ENTERPRISE_REQUIRED)
-    public Enterprise getEnterprise()
+    @Length(min = ENTERPRISE_LENGTH_MIN, max = ENTERPRISE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = ENTERPRISE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getEnterprise()
     {
         return this.enterprise;
     }
 
-    private void setEnterprise(final Enterprise enterprise)
+    public void setEnterprise(final String enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -319,22 +355,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean STORAGE_SYSTEM_REQUIRED = false;
 
-    private final static String STORAGE_SYSTEM_COLUMN = "idStorageSystem";
+    private final static String STORAGE_SYSTEM_COLUMN = "storageSystem";
 
-    private final static int STORAGE_SYSTEM_MIN = Integer.MIN_VALUE;
+    private final static int STORAGE_SYSTEM_LENGTH_MIN = 0;
 
-    private final static int STORAGE_SYSTEM_MAX = Integer.MAX_VALUE;
+    private final static int STORAGE_SYSTEM_LENGTH_MAX = 255;
 
-    @Column(name = STORAGE_SYSTEM_COLUMN, nullable = !STORAGE_SYSTEM_REQUIRED)
-    @Range(min = STORAGE_SYSTEM_MIN, max = STORAGE_SYSTEM_MAX)
-    private int storageSystem;
+    private final static boolean STORAGE_SYSTEM_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    public int getStorageSystem()
+    @Column(name = STORAGE_SYSTEM_COLUMN, nullable = !STORAGE_SYSTEM_REQUIRED, length = STORAGE_SYSTEM_LENGTH_MAX)
+    private String storageSystem;
+
+    @Required(value = STORAGE_SYSTEM_REQUIRED)
+    @Length(min = STORAGE_SYSTEM_LENGTH_MIN, max = STORAGE_SYSTEM_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = STORAGE_SYSTEM_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getStorageSystem()
     {
         return this.storageSystem;
     }
 
-    private void setStorageSystem(final int storageSystem)
+    public void setStorageSystem(final String storageSystem)
     {
         this.storageSystem = storageSystem;
     }
@@ -343,19 +383,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean NETWORK_REQUIRED = false;
 
-    private final static String NETWORK_COLUMN = "idNetwork";
+    private final static String NETWORK_COLUMN = "network";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = NETWORK_COLUMN)
-    private Network network;
+    private final static int NETWORK_LENGTH_MIN = 0;
+
+    private final static int NETWORK_LENGTH_MAX = 255;
+
+    private final static boolean NETWORK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = NETWORK_COLUMN, nullable = !NETWORK_REQUIRED, length = NETWORK_LENGTH_MAX)
+    private String network;
 
     @Required(value = NETWORK_REQUIRED)
-    public Network getNetwork()
+    @Length(min = NETWORK_LENGTH_MIN, max = NETWORK_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = NETWORK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getNetwork()
     {
         return this.network;
     }
 
-    private void setNetwork(final Network network)
+    public void setNetwork(final String network)
     {
         this.network = network;
     }
@@ -364,19 +411,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean PHYSICAL_MACHINE_REQUIRED = false;
 
-    private final static String PHYSICAL_MACHINE_COLUMN = "idPhysicalMachine";
+    private final static String PHYSICAL_MACHINE_COLUMN = "physicalmachine";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = PHYSICAL_MACHINE_COLUMN)
-    private Machine physicalMachine;
+    private final static int PHYSICAL_MACHINE_LENGTH_MIN = 0;
+
+    private final static int PHYSICAL_MACHINE_LENGTH_MAX = 255;
+
+    private final static boolean PHYSICAL_MACHINE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = PHYSICAL_MACHINE_COLUMN, nullable = !PHYSICAL_MACHINE_REQUIRED, length = PHYSICAL_MACHINE_LENGTH_MAX)
+    private String physicalMachine;
 
     @Required(value = PHYSICAL_MACHINE_REQUIRED)
-    public Machine getPhysicalMachine()
+    @Length(min = PHYSICAL_MACHINE_LENGTH_MIN, max = PHYSICAL_MACHINE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = PHYSICAL_MACHINE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getPhysicalMachine()
     {
         return this.physicalMachine;
     }
 
-    private void setPhysicalMachine(final Machine physicalMachine)
+    public void setPhysicalMachine(final String physicalMachine)
     {
         this.physicalMachine = physicalMachine;
     }
@@ -385,19 +439,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean RACK_REQUIRED = false;
 
-    private final static String RACK_COLUMN = "idRack";
+    private final static String RACK_COLUMN = "rack";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = RACK_COLUMN)
-    private Rack rack;
+    private final static int RACK_LENGTH_MIN = 0;
+
+    private final static int RACK_LENGTH_MAX = 255;
+
+    private final static boolean RACK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = RACK_COLUMN, nullable = !RACK_REQUIRED, length = RACK_LENGTH_MAX)
+    private String rack;
 
     @Required(value = RACK_REQUIRED)
-    public Rack getRack()
+    @Length(min = RACK_LENGTH_MIN, max = RACK_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = RACK_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getRack()
     {
         return this.rack;
     }
 
-    private void setRack(final Rack rack)
+    public void setRack(final String rack)
     {
         this.rack = rack;
     }
@@ -406,19 +467,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean VIRTUAL_MACHINE_REQUIRED = false;
 
-    private final static String VIRTUAL_MACHINE_COLUMN = "idVirtualMachine";
+    private final static String VIRTUAL_MACHINE_COLUMN = "virtualmachine";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = VIRTUAL_MACHINE_COLUMN, nullable = !VIRTUAL_MACHINE_REQUIRED)
-    private VirtualMachine virtualMachine;
+    private final static int VIRTUAL_MACHINE_LENGTH_MIN = 0;
+
+    private final static int VIRTUAL_MACHINE_LENGTH_MAX = 255;
+
+    private final static boolean VIRTUAL_MACHINE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = VIRTUAL_MACHINE_COLUMN, nullable = !VIRTUAL_MACHINE_REQUIRED, length = VIRTUAL_MACHINE_LENGTH_MAX)
+    private String virtualMachine;
 
     @Required(value = VIRTUAL_MACHINE_REQUIRED)
-    public VirtualMachine getVirtualMachine()
+    @Length(min = VIRTUAL_MACHINE_LENGTH_MIN, max = VIRTUAL_MACHINE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = VIRTUAL_MACHINE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getVirtualMachine()
     {
         return this.virtualMachine;
     }
 
-    private void setVirtualMachine(final VirtualMachine virtualMachine)
+    public void setVirtualMachine(final String virtualMachine)
     {
         this.virtualMachine = virtualMachine;
     }
@@ -427,19 +495,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean VOLUME_REQUIRED = false;
 
-    private final static String VOLUME_COLUMN = "idVolume";
+    private final static String VOLUME_COLUMN = "volume";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = VOLUME_COLUMN)
-    private VolumeManagement volume;
+    private final static int VOLUME_LENGTH_MIN = 0;
+
+    private final static int VOLUME_LENGTH_MAX = 255;
+
+    private final static boolean VOLUME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = VOLUME_COLUMN, nullable = !VOLUME_REQUIRED, length = VOLUME_LENGTH_MAX)
+    private String volume;
 
     @Required(value = VOLUME_REQUIRED)
-    public VolumeManagement getVolume()
+    @Length(min = VOLUME_LENGTH_MIN, max = VOLUME_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = VOLUME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getVolume()
     {
         return this.volume;
     }
 
-    private void setVolume(final VolumeManagement volume)
+    public void setVolume(final String volume)
     {
         this.volume = volume;
     }
@@ -448,22 +523,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean SUBNET_REQUIRED = false;
 
-    private final static String SUBNET_COLUMN = "idSubnet";
+    private final static String SUBNET_COLUMN = "subnet";
 
-    private final static int SUBNET_MIN = Integer.MIN_VALUE;
+    private final static int SUBNET_LENGTH_MIN = 0;
 
-    private final static int SUBNET_MAX = Integer.MAX_VALUE;
+    private final static int SUBNET_LENGTH_MAX = 255;
 
-    @Column(name = SUBNET_COLUMN, nullable = !SUBNET_REQUIRED)
-    @Range(min = SUBNET_MIN, max = SUBNET_MAX)
-    private int subnet;
+    private final static boolean SUBNET_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    public int getSubnet()
+    @Column(name = SUBNET_COLUMN, nullable = !SUBNET_REQUIRED, length = SUBNET_LENGTH_MAX)
+    private String subnet;
+
+    @Required(value = SUBNET_REQUIRED)
+    @Length(min = SUBNET_LENGTH_MIN, max = SUBNET_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = SUBNET_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getSubnet()
     {
         return this.subnet;
     }
 
-    private void setSubnet(final int subnet)
+    public void setSubnet(final String subnet)
     {
         this.subnet = subnet;
     }
@@ -491,7 +570,7 @@ public class Event extends DefaultEntityBase
         return this.severity;
     }
 
-    private void setSeverity(final String severity)
+    public void setSeverity(final String severity)
     {
         this.severity = severity;
     }
@@ -500,19 +579,26 @@ public class Event extends DefaultEntityBase
 
     private final static boolean USER_REQUIRED = false;
 
-    private final static String USER_COLUMN = "idUser";
+    private final static String USER_COLUMN = "user";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = USER_COLUMN)
-    private User user;
+    private final static int USER_LENGTH_MIN = 0;
+
+    private final static int USER_LENGTH_MAX = 255;
+
+    private final static boolean USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    @Column(name = USER_COLUMN, nullable = !USER_REQUIRED, length = USER_LENGTH_MAX)
+    private String user;
 
     @Required(value = USER_REQUIRED)
-    public User getUser()
+    @Length(min = USER_LENGTH_MIN, max = USER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getUser()
     {
         return this.user;
     }
 
-    private void setUser(final User user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
