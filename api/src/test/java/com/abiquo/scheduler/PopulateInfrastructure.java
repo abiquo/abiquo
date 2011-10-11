@@ -207,7 +207,7 @@ public class PopulateInfrastructure extends PopulateConstants
 
                 rack.setVlanIdMin(Integer.valueOf(minVlan));
                 rack.setVlanIdMax(Integer.valueOf(maxVlan));
-                rack.setVlanPerVdcExpected(Integer.valueOf(vlanxvdcExpected));
+                rack.setVlanPerVdcReserved(Integer.valueOf(vlanxvdcExpected));
                 rack.setNrsq(Integer.valueOf(nsqr));
 
                 avoids = avoids.substring(1, avoids.length() - 1);

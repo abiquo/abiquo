@@ -177,9 +177,9 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
 
     // *************************** Business methods ***********************
     public Rack createRack(final String name, final Integer vlanIdMin, final Integer vlanIdMax,
-        final Integer vlanPerVdcExpected, final Integer nrsq)
+        final Integer vlanPerVdcReserved, final Integer nrsq)
     {
-        return new Rack(name, this, vlanIdMin, vlanIdMax, vlanPerVdcExpected, nrsq);
+        return new Rack(name, this, vlanIdMin, vlanIdMax, vlanPerVdcReserved, nrsq);
     }
 
     public Machine createMachine(final String name, final String description, final int ramInMb,

@@ -48,7 +48,7 @@ public class UcsRack extends Rack
     }
 
     /* package */UcsRack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
-        final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer nrsq,
+        final Integer vlanIdMax, final Integer vlanPerVdcReserved, final Integer nrsq,
         final String ip, final Integer port, final String user, final String password,
         final String defaultTemplate, final Integer maxMachinesOn)
     {
@@ -56,7 +56,7 @@ public class UcsRack extends Rack
         setName(name);
         setVlanIdMin(vlanIdMin);
         setVlanIdMax(vlanIdMax);
-        setVlanPerVdcExpected(vlanPerVdcExpected);
+        setVlanPerVdcReserved(vlanPerVdcReserved);
         setNrsq(nrsq);
         setIp(ip);
         setPort(port);
