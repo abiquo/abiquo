@@ -428,7 +428,6 @@ DELIMITER ;
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
 -- ---------------------------------------------- --
-<<<<<<< HEAD
 DELIMITER |
 
 /* cost code has changed from string to int */
