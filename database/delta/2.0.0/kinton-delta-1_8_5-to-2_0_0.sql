@@ -297,7 +297,7 @@ DELIMITER ;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateCloudUsageStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateEnterpriseResourcesStats`;
 DROP PROCEDURE IF EXISTS `kinton`.`CalculateVdcEnterpriseStats`;
-|
+
 --
 --
 --
