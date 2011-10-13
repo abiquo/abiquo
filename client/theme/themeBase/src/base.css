@@ -275,3 +275,10 @@ CursorManager {
 .CommonAssetsAlertIconError { /**custom property**/
 	source: Embed("/assets/customcomponents/abicloudalert/icon_error.png");
 }
+
+.TokenProgressBar {
+	bar-color: #FE9608;
+	border-color: #666666;
+	track-height: 10;
+	color: #505050;
+}
