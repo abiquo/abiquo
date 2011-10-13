@@ -144,7 +144,6 @@ UNLOCK TABLES;
 --
 -- DROP THE TABLES RELATED TO NETWORK --
 DROP TABLE IF EXISTS `kinton`.`vlan_network`;
-DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 DROP TABLE IF EXISTS `kinton`.`network_configuration`;
 DROP TABLE IF EXISTS `kinton`.`network`;
 DROP TABLE IF EXISTS `kinton`.`vlan_network_assignment`;
@@ -159,24 +158,12 @@ CREATE TABLE  `kinton`.`network` (
   PRIMARY KEY  (`network_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Definition of table `kinton`.`dhcp_service`
---
-CREATE TABLE `kinton`.`dhcp_service` (
-  `dhcp_service_id` int(11) unsigned NOT NULL auto_increment,
-  `dhcp_remote_service` int(10) unsigned,
-  `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY (`dhcp_service_id`),
-  KEY `dhcp_remote_service_FK` (`dhcp_remote_service`),
-  CONSTRAINT `dhcp_remote_service_FK` FOREIGN KEY (`dhcp_remote_service`) REFERENCES `remote_service` (`idRemoteService`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Definition of table `kinton`.`network_configuration`
 --
 CREATE TABLE `kinton`.`network_configuration` (
   `network_configuration_id` int(11) unsigned NOT NULL auto_increment,
-  `dhcp_service_id` int(11) unsigned,
   `gateway` varchar(40),
   `network_address` varchar(40) NOT NULL,
   `mask` int(4) NOT NULL,
@@ -186,9 +173,7 @@ CREATE TABLE `kinton`.`network_configuration` (
   `sufix_dns` varchar(40),
   `fence_mode` varchar(20) NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
-  PRIMARY KEY  (`network_configuration_id`),
-  KEY `configuration_dhcp_FK` (`dhcp_service_id`),
-  CONSTRAINT `configuration_dhcp_FK` FOREIGN KEY (`dhcp_service_id`) REFERENCES `dhcp_service` (`dhcp_service_id`) ON DELETE SET NULL
+  PRIMARY KEY  (`network_configuration_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -715,7 +700,6 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`ip_pool_management`;
 CREATE TABLE  `kinton`.`ip_pool_management` (
   `idManagement` int(10) unsigned NOT NULL,
-  `dhcp_service_id` int(11) unsigned NOT NULL,
   `mac` varchar(20),
   `name` varchar(30),
   `ip` varchar(20) NOT NULL,
@@ -726,10 +710,8 @@ CREATE TABLE  `kinton`.`ip_pool_management` (
   `available` boolean NOT NULL default 1,
   `version_c` integer NOT NULL DEFAULT 1,
   KEY `id_management_FK` (`idManagement`),
-  KEY `ippool_dhcpservice_FK` (`dhcp_service_id`),
   KEY `ippool_vlan_network_FK` (`vlan_network_id`),
   CONSTRAINT `id_management_FK` FOREIGN KEY (`idManagement`) REFERENCES `rasd_management` (`idManagement`) ON DELETE CASCADE,
-  CONSTRAINT `ippool_dhcpservice_FK` FOREIGN KEY (`dhcp_service_id`) REFERENCES `dhcp_service` (`dhcp_service_id`)  ON DELETE RESTRICT,
   CONSTRAINT `ippool_vlan_network_FK` FOREIGN KEY (`vlan_network_id`) REFERENCES `vlan_network` (`vlan_network_id`)  ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2818,42 +2800,41 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`vi
 -- ******************************************************************************************
 CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
-	DECLARE currentIdManagement INTEGER DEFAULT -1;
-	DECLARE currentDataCenter INTEGER DEFAULT -1;
-	DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
-	DECLARE no_more_ipsfreed INT;
-	DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement	
+    DECLARE currentIdManagement INTEGER DEFAULT -1;
+    DECLARE currentDataCenter INTEGER DEFAULT -1;
+    DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+    DECLARE no_more_ipsfreed INT;
+    DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement   
            FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
-           WHERE ipm.dhcp_service_id=nc.dhcp_service_id
-           AND vn.network_configuration_id = nc.network_configuration_id
+           WHERE ipm.vlan_network_id = vn.vlan_network_id
            AND vn.network_id = dc.network_id
-	   AND vn.networktype = 'PUBLIC'
+       AND vn.networktype = 'PUBLIC'
            AND ra.idManagement = ipm.idManagement
            AND ra.idVirtualDataCenter = OLD.idVirtualDataCenter;
-	   DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;	  
+       DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_ipsfreed = 1;   
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
             UPDATE IGNORE cloud_usage_stats SET numVDCCreated = numVDCCreated-1 WHERE idDataCenter = OLD.idDataCenter;  
             -- Remove Stats
-            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;	
-           -- 	
-	SET no_more_ipsfreed = 0;	    
-	    OPEN curIpFreed;  	    	
-   		my_loop:WHILE(no_more_ipsfreed=0) DO 
-   		FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
-		IF no_more_ipsfreed=1 THEN
-                	LEAVE my_loop;
-	         END IF;
---		INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
-		-- We reset MAC and NAME for the reserved IPs. Java code should do this!
-		UPDATE ip_pool_management set mac=NULL, name=NULL WHERE idManagement = currentIdManagement;
-		IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
-               		CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
-           	END IF;                    
-		UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
-		UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
-		UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise;	
-	    END WHILE my_loop;	       
-	    CLOSE curIpFreed;
+            DELETE FROM vdc_enterprise_stats WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;   
+           --   
+    SET no_more_ipsfreed = 0;       
+        OPEN curIpFreed;            
+        my_loop:WHILE(no_more_ipsfreed=0) DO 
+        FETCH curIpFreed INTO currentDataCenter, currentIpAddress, currentIdManagement;
+        IF no_more_ipsfreed=1 THEN
+                    LEAVE my_loop;
+             END IF;
+--      INSERT INTO debug_msg (msg) VALUES (CONCAT('IP_FREED: ',currentIpAddress, ' - idManagement: ', currentIdManagement, ' - OLD.idVirtualDataCenter: ', OLD.idVirtualDataCenter, ' - idEnterpriseObj: ', OLD.idEnterprise));
+        -- We reset MAC and NAME for the reserved IPs. Java code should do this!
+        UPDATE ip_pool_management set mac=NULL, name=NULL WHERE idManagement = currentIdManagement;
+        IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingIPsRegisterEvents' ) THEN
+                    CALL AccountingIPsRegisterEvents('IP_FREED',currentIdManagement,currentIpAddress,OLD.idVirtualDataCenter, OLD.idEnterprise);
+            END IF;                    
+        UPDATE IGNORE cloud_usage_stats SET publicIPsUsed = publicIPsUsed-1 WHERE idDataCenter = currentDataCenter;
+        UPDATE IGNORE dc_enterprise_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idDataCenter = currentDataCenter;
+        UPDATE IGNORE enterprise_resources_stats SET publicIPsReserved = publicIPsReserved-1 WHERE idEnterprise = OLD.idEnterprise; 
+        END WHILE my_loop;         
+        CLOSE curIpFreed;
         END IF;
     END;
 --
@@ -2982,7 +2963,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
         DECLARE reservedSize BIGINT;
         DECLARE ipAddress VARCHAR(20);
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
-            --	   
+            --     
             IF OLD.idResourceType = 8 THEN
                 -- vol Attached ?? -- is stateful
                 SELECT IF(count(*) = 0, 0, vm.state), idImage INTO idState, idImage
@@ -3071,10 +3052,9 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 -- Query for datacenter
                 SELECT dc.idDataCenter INTO idDataCenterObj
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
-                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
-                AND vn.network_configuration_id = nc.network_configuration_id
+                WHERE ipm.vlan_network_id = vn.vlan_network_id
                 AND vn.network_id = dc.network_id
-		AND vn.networktype = 'PUBLIC'
+        AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
                 -- Datacenter found ---> PublicIPUsed
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3100,10 +3080,9 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 -- Query for datacenter
                 SELECT dc.idDataCenter INTO idDataCenterObj
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
-                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
-                AND vn.network_configuration_id = nc.network_configuration_id
+                WHERE ipm.vlan_network_id = vn.vlan_network_id
                 AND vn.network_id = dc.network_id
-		AND vn.networktype = 'PUBLIC'
+        AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
                 -- Datacenter found ---> Not PublicIPUsed
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3129,10 +3108,9 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 -- Query for datacenter
                 SELECT dc.idDataCenter, ipm.ip INTO idDataCenterObj, ipAddress
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
-                WHERE ipm.dhcp_service_id=nc.dhcp_service_id
-                AND vn.network_configuration_id = nc.network_configuration_id
+                WHERE ipm.vlan_network_id = vn.vlan_network_id
                 AND vn.network_id = dc.network_id
-		AND vn.networktype = 'PUBLIC'
+        AND vn.networktype = 'PUBLIC'
                 AND OLD.idManagement = ipm.idManagement;
                 -- Datacenter found ---> Not PublicIPReserved
                 IF idDataCenterObj IS NOT NULL THEN
@@ -3217,8 +3195,9 @@ CREATE TRIGGER `kinton`.`create_ip_pool_management_update_stats` AFTER INSERT ON
       -- SELECT COUNT(*) INTO numPublicIpsCreated
       SELECT distinct dc.idDataCenter INTO idDataCenterObj
       FROM vlan_network vn, network_configuration nc, datacenter dc
-      WHERE NEW.dhcp_service_id = nc.dhcp_service_id
-      AND vn.network_configuration_id = nc.network_configuration_id
+      WHERE NEW.vlan_network_id = vn.network_id 
+      -- AND 
+      --  vn.network_configuration_id = nc.network_configuration_id
       AND vn.network_id = dc.network_id;
       IF idDataCenterObj IS NOT NULL THEN
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+1 WHERE idDataCenter = idDataCenterObj;
@@ -3239,11 +3218,10 @@ CREATE TRIGGER `kinton`.`delete_ip_pool_management_update_stats` AFTER DELETE ON
       -- Query for Public Ips deleted (disabled)
       SELECT distinct dc.idDataCenter INTO idDataCenterObj
       FROM vlan_network vn, network_configuration nc, datacenter dc
-      WHERE OLD.dhcp_service_id = nc.dhcp_service_id
-      AND vn.network_configuration_id = nc.network_configuration_id
+       WHERE OLD.vlan_network_id = vn.vlan_network_id
       AND vn.network_id = dc.network_id;
       IF idDataCenterObj IS NOT NULL THEN
-	-- detects IP disabled/enabled at Edit Public Ips
+    -- detects IP disabled/enabled at Edit Public Ips
         UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal-1 WHERE idDataCenter = idDataCenterObj;
       END IF;
     END IF;
@@ -3367,39 +3345,7 @@ CREATE TRIGGER `kinton`.`update_ip_pool_management_update_stats` AFTER UPDATE ON
         END IF;
     END;
 |
--- ******************************************************************************************
--- Description: 
---  * Registers/Unregister new IPS defined for a datacenter's network
---
--- Fires: On IP Creation / Deletion in a Datacenter
--- ******************************************************************************************
-CREATE TRIGGER `kinton`.`update_network_configuration_update_stats` AFTER UPDATE ON  `network_configuration`
-FOR EACH ROW BEGIN
-	DECLARE newPublicIps INTEGER;
-	DECLARE idDataCenterObj INTEGER;
-	-- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE network_configuration with dhcp_service_id OLD ',IFNULL(OLD.dhcp_service_id,'NULL'),' and NEW ', IFNULL(NEW.dhcp_service_id,'NULL')));
-	 IF OLD.dhcp_service_id IS NULL AND NEW.dhcp_service_id IS NOT NULL THEN
-	 	-- New Public IPs added
-	 	SELECT count(*), dc.idDataCenter INTO newPublicIps, idDataCenterObj
-	      FROM vlan_network vn, datacenter dc, ip_pool_management ipm
-	      WHERE ipm.dhcp_service_id = NEW.dhcp_service_id
-	      AND vn.network_configuration_id = NEW.network_configuration_id
-	      AND vn.network_id = dc.network_id;	 	
-	      -- INSERT INTO debug_msg (msg) VALUES (CONCAT('New Public Ips Detected ',IFNULL(newPublicIps,'NULL'),' for DC ', IFNULL(idDataCenterObj,'NULL')));
-	      UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal+newPublicIps WHERE idDataCenter = idDataCenterObj;
-	 END IF;
-	IF NEW.dhcp_service_id IS NULL AND OLD.dhcp_service_id IS NOT NULL THEN
-	 	-- New Public IPs deleted 
-	 	SELECT count(*), dc.idDataCenter INTO newPublicIps, idDataCenterObj
-	      FROM vlan_network vn, datacenter dc, ip_pool_management ipm
-	      WHERE ipm.dhcp_service_id = OLD.dhcp_service_id
-	      AND vn.network_configuration_id = OLD.network_configuration_id
-	      AND vn.network_id = dc.network_id;	 	
-	      -- INSERT INTO debug_msg (msg) VALUES (CONCAT('New Public Ips Deleted ',IFNULL(newPublicIps,'NULL'),' for DC ', IFNULL(idDataCenterObj,'NULL')));
-	      UPDATE IGNORE cloud_usage_stats SET publicIPsTotal = publicIPsTotal - newPublicIps WHERE idDataCenter = idDataCenterObj;	
-	 END IF;
-END;
-|
+
 -- ******************************************************************************************
 -- Description: 
 --  * Registers new limits created for datacenter by enterprise, so they show in statistics
@@ -3689,14 +3635,14 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsTotal
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id
     AND dc.idDataCenter = idDataCenterObj;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsReserved
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id
     AND vn.networktype = 'PUBLIC'             
@@ -3705,7 +3651,7 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsUsed
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id
     AND vn.networktype = 'PUBLIC'             
@@ -3879,7 +3825,7 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsReserved
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id   
     AND vn.networktype = 'PUBLIC'             
@@ -3889,7 +3835,7 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsUsed
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm, virtualdatacenter vdc
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id            
     AND vn.networktype = 'PUBLIC'    
@@ -4011,7 +3957,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsUsed
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id           
     AND vn.networktype = 'PUBLIC'     
@@ -4021,7 +3967,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO publicIPsReserved
     FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management rm
-    WHERE ipm.dhcp_service_id=nc.dhcp_service_id
+    WHERE ipm.vlan_network_id = vn.vlan_network_id
     AND vn.network_configuration_id = nc.network_configuration_id
     AND vn.network_id = dc.network_id                
     AND vn.networktype = 'PUBLIC'
