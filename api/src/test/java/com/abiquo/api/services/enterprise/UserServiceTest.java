@@ -37,7 +37,7 @@ import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.UserService;
-import com.abiquo.api.spring.security.SecurityService;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -58,8 +58,8 @@ public class UserServiceTest extends AbstractUnitTest
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        Privilege p1 = new Privilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES);
-        Privilege p2 = new Privilege(SecurityService.USERS_MANAGE_USERS);
+        Privilege p1 = new Privilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(Privileges.USERS_MANAGE_USERS);
         r = roleGenerator.createInstance(p1, p2);
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
@@ -164,11 +164,11 @@ public class UserServiceTest extends AbstractUnitTest
 
         Collection<User> users = service.getUsersByEnterprise("_", null, "nick", false);
         User u = users.iterator().next();
-        Assert.assertEquals(u.getNick(), "nack");
+        org.testng.Assert.assertEquals(u.getNick(), "nack");
 
         users = service.getUsersByEnterprise("_", null, "nick", true);
         u = users.iterator().next();
-        Assert.assertEquals(u.getNick(), "sysadmin");
+        org.testng.Assert.assertEquals(u.getNick(), "sysadmin");
     }
 
     @Test
@@ -182,7 +182,7 @@ public class UserServiceTest extends AbstractUnitTest
         try
         {
             service.addUser(dto, e.getId(), r);
-            Assert.fail("");
+            org.testng.Assert.fail("");
         }
         catch (APIException e)
         {
@@ -213,7 +213,7 @@ public class UserServiceTest extends AbstractUnitTest
         try
         {
             service.modifyUser(u2.getId(), dto);
-            Assert.fail("");
+            org.testng.Assert.fail("");
         }
         catch (APIException e)
         {

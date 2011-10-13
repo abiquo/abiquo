@@ -26,6 +26,7 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
 
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.User;
 
@@ -38,69 +39,27 @@ import com.abiquo.server.core.enterprise.User;
 @Service
 public class SecurityService
 {
-    public static final String DRP = AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX;
-
-    public static final String ENTRPRISE_ADMINISTER_ALL = DRP + "ENTERPRISE_ADMINISTER_ALL";
-
-    public static final String PHYS_DC_ENUMERATE = DRP + "PHYS_DC_ENUMERATE";
-
-    public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
-        + "USERS_MANAGE_OTHER_ENTERPRISES";
-
-    public static final String USERS_MANAGE_ROLES = DRP + "USERS_MANAGE_ROLES";
-
-    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES = DRP
-        + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
-
-    public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
-
-    public static final String USERS_MANAGE_USERS = DRP + "USERS_MANAGE_USERS";
-
-    public static final String USERS_VIEW = DRP + "USERS_VIEW";
-
-    public static final String USERS_VIEW_PRIVILEGES = DRP + "USERS_VIEW_PRIVILEGES";
-
-    public static final String USERS_PROHIBIT_VDC_RESTRICTION = DRP
-        + "USERS_PROHIBIT_VDC_RESTRICTION";
-
-    public static final String USERS_MANAGE_LDAP_GROUP = DRP + "USERS_MANAGE_LDAP_GROUP";
-
-    public static final String VDC_ENUMERATE = DRP + "VDC_ENUMERATE";
-
-    public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
-
-    public static final String PRICING_VIEW = DRP + "PRICING_VIEW";
-
-    public static final String PRICING_MANAGE = DRP + "PRICING_MANAGE";
-
-    public static final String ROLE_PHYS_DC_ENUMERATE = "ROLE_PHYS_DC_ENUMERATE";
-
-    public boolean hasPrivilege(final String privilege)
+    public boolean hasPrivilege(final Privileges privilege)
     {
-        return AuthorityUtils.userHasAuthority(privilege);
+        return AuthorityUtils.userHasAuthority(AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
+            + privilege.name());
     }
 
-    public void requirePrivilege(final String privilege)
+    public void requirePrivilege(final Privileges privilege)
     {
         if (!hasPrivilege(privilege))
         {
-            throw new AccessDeniedException("Missing privilege " + privilege);
+            throw new AccessDeniedException("Missing privilege " + privilege.name());
         }
     }
 
-    public boolean hasPrivilege(final String privilege, final User user)
+    public boolean hasPrivilege(final Privileges privilege, final User user)
     {
         if (user.getRole().getPrivileges() != null)
         {
             for (Privilege p : user.getRole().getPrivileges())
             {
-                String name = p.getName();
-
-                if (!name.startsWith(DRP))
-                {
-                    name = DRP + name;
-                }
-                if (name.equals(privilege))
+                if (p.getName().equals(privilege.name()))
                 {
                     return true;
                 }
@@ -111,22 +70,22 @@ public class SecurityService
 
     public boolean canManageOtherEnterprises()
     {
-        return hasPrivilege(USERS_MANAGE_OTHER_ENTERPRISES);
+        return hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
     }
 
     public boolean canManageOtherUsers()
     {
-        return hasPrivilege(USERS_MANAGE_USERS);
+        return hasPrivilege(Privileges.USERS_MANAGE_USERS);
     }
 
     public boolean canManageOtherEnterprises(final User user)
     {
-        return hasPrivilege(USERS_MANAGE_OTHER_ENTERPRISES, user);
+        return hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES, user);
     }
 
     public boolean canManageOtherUsers(final User user)
     {
-        return hasPrivilege(USERS_MANAGE_USERS, user);
+        return hasPrivilege(Privileges.USERS_MANAGE_USERS, user);
     }
 
     public boolean isCloudAdmin()
@@ -160,12 +119,9 @@ public class SecurityService
         return false;
     }
 
-    public static String[] getAllPrivileges()
+    public static Privileges[] getAllPrivileges()
     {
-        return new String[] {ENTRPRISE_ADMINISTER_ALL, USERS_MANAGE_OTHER_ENTERPRISES,
-        USERS_MANAGE_ROLES_OTHER_ENTERPRISES, USERS_MANAGE_SYSTEM_ROLES, USERS_MANAGE_USERS,
-        USERS_VIEW, USERS_VIEW_PRIVILEGES, USERS_PROHIBIT_VDC_RESTRICTION, USERS_MANAGE_LDAP_GROUP,
-        VDC_ENUMERATE, USERS_MANAGE_ROLES, PHYS_DC_ENUMERATE, PRICING_MANAGE, PRICING_VIEW};
+        return Privileges.values();
     }
 
 }

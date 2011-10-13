@@ -29,6 +29,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -48,6 +49,12 @@ public class Privilege extends DefaultEntityBase
     {
         super();
         this.name = name;
+    }
+
+    public Privilege(final Privileges privilege)
+    {
+        super();
+        this.name = privilege.name();
     }
 
     private final static String ID_COLUMN = "idPrivilege";
