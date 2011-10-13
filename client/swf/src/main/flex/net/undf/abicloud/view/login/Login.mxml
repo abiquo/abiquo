@@ -143,13 +143,12 @@
             /**
              * Return the selected language passed in the URL if proceed 
              **/
-            public function returnLanguage(language:String):int{
+            public function returnLanguage(language:String):String{
             	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languageDP,language);
             	if(indexLanguage != -1){
-            		setLanguage( languageDP[indexLanguage].data );
-            		return indexLanguage;
+            		return languageDP[indexLanguage].data;
             	}
-                return -1;    
+                return "en_US";    
             }
             
             /**
