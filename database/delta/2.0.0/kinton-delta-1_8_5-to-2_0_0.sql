@@ -139,6 +139,10 @@ ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu,
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
+
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+("client.logout.url","","Redirect to this URL after logout (empty -> login screen)");
+
 -- First I need to update some rows before to delete the `default_network` field
 UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
