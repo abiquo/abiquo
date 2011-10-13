@@ -17,12 +17,14 @@ UPDATE kinton.metering SET actionperformed="VAPP_INSTANCE" WHERE actionperformed
 
 -- PRICING --
 -- DROP THE TABLES RELATED TO PRICING --
-DROP TABLE IF EXISTS `kinton`.`pricing_template`;
-DROP TABLE IF EXISTS `kinton`.`costCode`;
+
+DROP TABLE IF EXISTS `kinton`.`pricingTemplate`;
 DROP TABLE IF EXISTS `kinton`.`pricingCostCode`;
+DROP TABLE IF EXISTS `kinton`.`costCode`;
 DROP TABLE IF EXISTS `kinton`.`pricingTier`;
-DROP TABLE IF EXISTS `kinton`.`currency`;
 DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
+DROP TABLE IF EXISTS `kinton`.`currency`;
+
 ALTER TABLE `kinton`.`ip_pool_management` DROP FOREIGN KEY `ippool_dhcpservice_FK`;
 ALTER TABLE `kinton`.`ip_pool_management` DROP KEY `ippool_dhcpservice_FK`;
 ALTER TABLE `kinton`.`ip_pool_management` DROP COLUMN dhcp_service_id;
@@ -59,7 +61,7 @@ CREATE TABLE `kinton`.`costCode` (
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- PRICING --
--- Definition of table `kinton`.`pricing`
+-- Definition of table `kinton`.`pricingTemplate`
 CREATE TABLE `kinton`.`pricingTemplate` (
   `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `idCurrency` int(10) UNSIGNED NOT NULL ,
