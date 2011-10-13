@@ -48,7 +48,6 @@
         <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>
         <class>com.abiquo.server.core.infrastructure.network.Network</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkConfiguration</class>
-        <class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
         <class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
         <!-- end: networking -->

@@ -51,7 +51,6 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -80,8 +79,8 @@ public class TestDataAccessManager
 {
     private static JpaEntityManagerFactoryForTesting factory;
 
-    private static List<String> associationTablesInAssociationDeletionOrder =
-        ListUtils.createList();
+    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
+        .createList();
 
     private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
         ListUtils.createList();
@@ -138,13 +137,13 @@ public class TestDataAccessManager
             VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
-            NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
-            VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
-            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
-            EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
-            Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
-            RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
-            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
+            NetworkConfiguration.class, VirtualDatacenterResources.class, VirtualDatacenter.class,
+            DatacenterResources.class, DatacenterLimits.class, Session.class, User.class,
+            RoleLdap.class, Role.class, Privilege.class, EnterpriseResources.class,
+            Enterprise.class, Hypervisor.class, Datastore.class, Machine.class, Rack.class,
+            StoragePool.class, Tier.class, StorageDevice.class, RemoteService.class,
+            Repository.class, CloudUsage.class, Datacenter.class, Network.class,
+            SystemProperty.class, Rasd.class, License.class, Task.class,
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class);
 

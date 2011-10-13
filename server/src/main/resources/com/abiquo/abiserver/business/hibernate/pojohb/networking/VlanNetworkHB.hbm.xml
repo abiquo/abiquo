@@ -27,10 +27,10 @@
         </many-to-one>
     </class>
     <query name="GET_DEFAULT_VLAN_BY_NETWORK_ID"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB where network_id = :network_id and default_network is true</query>
-    <query name="GET_NUMBER_IPS_USED_BY_VLAN"> Select count(ip) from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vn inner join vn.configuration.dhcpService.ipPoolManagement ip where
-        vn.vlanNetworkId = :vlan_network_id and ip.virtualMachine is not null</query>
-    <query name="GET_NUMBER_VDCS_USED_BY_VLAN"> Select count(ip) from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vn inner join vn.configuration.dhcpService.ipPoolManagement ip where
-        vn.vlanNetworkId = :vlan_network_id and ip.virtualDataCenter is not null</query>
+    <query name="GET_NUMBER_IPS_USED_BY_VLAN"> Select count(ip) from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vn, com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where
+        vn.vlanNetworkId = :vlan_network_id and vn.vlanNetworkId = ip.vlanNetworkId and ip.virtualMachine is not null</query>
+    <query name="GET_NUMBER_VDCS_USED_BY_VLAN"> Select count(ip) from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vn, com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where
+        vn.vlanNetworkId = :vlan_network_id and vn.vlanNetworkId = ip.vlanNetworkId and ip.virtualDataCenter is not null</query>
     <query name="IS_PUBLIC_VLAN"> Select count(dc) from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB dc inner join dc.network net,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan where net.networkId = vlan.networkId and vlan.vlanNetworkId = :vlan_network_id</query>
     <query name="GET_NUMBER_VLAN_BY_ENTERPRISE"> Select vlan from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan,
@@ -47,4 +47,11 @@
         com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB vna WHERE vn.vlanNetworkId = vna.vlanNetworkId AND vna.idRack = :idRack</query>
     <query name="VLAN_NETWORK.GET_PUBLIC_VLANS_FROM_DATACENTER"> Select vlan from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB datacenter, com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB
         vlan where vlan.networkId = datacenter.network.networkId and idDataCenter = :datacenterId</query>
+    <query name="VLAN_GET_AVAILABLE_IP_MANAGEMENT"> Select host from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan ,
+        com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB host
+     where vlan.vlanNetworkId = :vlanNetworkId and vlan.vlanNetworkId = host.vlanNetworkId and host.ip != :gateway and
+        host.available = 1 and host.virtualMachine is null order by cast(substring(host.ip, 1, locate('.', host.ip) - 1) as integer), cast(substring(host.ip, locate('.', host.ip) + 1, locate('.', host.ip, locate('.',
+        host.ip) + 1) - locate('.', host.ip) - 1) as integer), cast(substring(host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1, locate('.', host.ip, locate('.', host.ip, locate('.',
+        host.ip) + 1) + 1) - locate('.', host.ip, locate('.', host.ip) + 1) - 1) as integer), cast(substring(host.ip, locate('.', host.ip, locate('.', host.ip, locate('.', host.ip) + 1) + 1) + 1, 3)
+        as integer)</query>
 </hibernate-mapping>

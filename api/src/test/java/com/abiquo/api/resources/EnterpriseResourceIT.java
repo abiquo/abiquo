@@ -199,7 +199,7 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =

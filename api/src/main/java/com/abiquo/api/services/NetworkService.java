@@ -41,7 +41,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -50,9 +49,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.management.Rasd;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
@@ -242,9 +239,10 @@ public class NetworkService extends DefaultApiService
             addValidationErrors(APIError.VLANS_GATEWAY_OUT_OF_RANGE);
             flushErrors();
         }
-        createDhcp(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range,
-            IpPoolManagement.Type.PRIVATE);
 
+        // store the dhcp and all the ips.
+        storeIPs(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range,
+            IpPoolManagement.Type.PRIVATE);
         // Trace
         if (tracer != null)
         {
@@ -1209,77 +1207,6 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
-     * Create the {@link Dhcp} object and store all the IPs of the network in database.
-     * 
-     * @param datacenter Datacenter where the network is created. Needed to get the DHCP.
-     * @param vdc Virtual Dataceneter where the network are assigned. Can be null for public
-     *            networks.
-     * @param vlan VLAN to assign its ips.
-     * @param range List of ips to create inside the DHCP
-     * @return The created {@link Dhpc} object
-     */
-    protected Dhcp createDhcp(final Datacenter datacenter, final VirtualDatacenter vdc,
-        final VLANNetwork vlan, final Collection<IPAddress> range, final IpPoolManagement.Type type)
-    {
-        List<RemoteService> dhcpServiceList =
-            datacenterRepo.findRemoteServiceWithTypeInDatacenter(datacenter,
-                RemoteServiceType.DHCP_SERVICE);
-        Dhcp dhcp = new Dhcp();
-
-        if (!dhcpServiceList.isEmpty())
-        {
-            RemoteService dhcpService = dhcpServiceList.get(0);
-            dhcp = new Dhcp(dhcpService);
-        }
-
-        repo.insertDhcp(dhcp);
-
-        Collection<String> allMacAddresses = repo.getAllMacs();
-
-        for (IPAddress address : range)
-        {
-            String macAddress = null;
-            String name = null;
-            if (vdc != null)
-            {
-                do
-                {
-                    macAddress = IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType());
-                }
-                while (allMacAddresses.contains(macAddress));
-                allMacAddresses.add(macAddress);
-
-                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when
-                // reload
-                // leases with the ':' char in the lease name)
-                name = macAddress.replace(":", "") + "_host";
-            }
-
-            IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp,
-                    vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName(),
-                    type);
-
-            if (vdc != null)
-            {
-                // public network does not have VDC by default.
-                ipManagement.setVirtualDatacenter(vdc);
-            }
-
-            repo.insertIpManagement(ipManagement);
-        }
-
-        // check the gateway belongs to the networks.
-        vlan.getConfiguration().setDhcp(dhcp);
-
-        return dhcp;
-    }
-
-    /**
      * Gets a private Vlan. Raises a NOT_FOUND exception if it does not exist.
      * 
      * @param vdc {@link VirtualDatacenter} instance where the Vlan should be.
@@ -1348,6 +1275,60 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
         return vm;
+
+    }
+
+    /**
+     * Store all the IPs of the network in database.
+     * 
+     * @param datacenter Datacenter where the network is created.
+     * @param vdc Virtual Dataceneter where the network are assigned. Can be null for public
+     *            networks.
+     * @param vlan VLAN to assign its ips.
+     * @param range List of ips to create inside the DHCP
+     * @return
+     */
+    protected void storeIPs(final Datacenter datacenter, final VirtualDatacenter vdc,
+        final VLANNetwork vlan, final Collection<IPAddress> range, final IpPoolManagement.Type type)
+    {
+
+        Collection<String> allMacAddresses = repo.getAllMacs();
+
+        for (IPAddress address : range)
+        {
+            String macAddress = null;
+            String name = null;
+            if (vdc != null)
+            {
+                do
+                {
+                    macAddress = IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType());
+                }
+                while (allMacAddresses.contains(macAddress));
+                allMacAddresses.add(macAddress);
+
+                // Replacing the ':' char into an empty char (it seems the dhcp.leases fails when
+                // reload
+                // leases with the ':' char in the lease name)
+                name = macAddress.replace(":", "") + "_host";
+            }
+
+            IpPoolManagement ipManagement =
+                new IpPoolManagement(vlan,
+                    macAddress,
+                    name,
+                    address.toString(),
+                    vlan.getName(),
+                    type);
+
+            if (vdc != null)
+            {
+                // public network does not have VDC by default.
+                ipManagement.setVirtualDatacenter(vdc);
+            }
+
+            repo.insertIpManagement(ipManagement);
+        }
 
     }
 
