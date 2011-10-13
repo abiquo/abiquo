@@ -18,6 +18,8 @@ use kinton;
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
 
+INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+("client.logout.url","","Redirect to this URL after logout (empty -> login screen)");
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --
