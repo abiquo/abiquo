@@ -41,6 +41,7 @@ import com.abiquo.api.services.RoleService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.User;
@@ -96,9 +97,9 @@ public class RolesResource extends AbstractResource
         RolesDto roles = new RolesDto();
 
         // Can only get my role
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES)
-            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_ROLES)
+            && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (all != null && !all.isEmpty())
