@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DHCPServiceType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -53,8 +54,8 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
@@ -65,9 +66,11 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
+import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.Datastore;
@@ -83,6 +86,7 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
@@ -437,6 +441,8 @@ public class OVFModelFromVirtualAppliance
         DAOFactory factory = HibernateDAOFactory.instance();
         VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
         VlanNetworkDAO vlanDAO = factory.getVlanNetworkDAO();
+        VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
+        DataCenterDAO dcDAO = factory.getDataCenterDAO();
 
         factory.beginConnection();
 
@@ -487,14 +493,29 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
-            DHCPServiceHB service = (DHCPServiceHB) vlan.getConfiguration().getDhcpService();
-            if (service.getDhcpRemoteServiceId() != null)
+            VlanNetworkHB vlanHB = vlanDAO.findById(vlanId);
+            Integer idDataCenter = null;
+            if (vlanHB.getNetworkType().equals(NetworkType.INTERNAL.name()))
+            {
+                idDataCenter =
+                    dcDAO.getDatacenterWhereThePrivateNetworkStays(vlanHB.getNetworkId())
+                        .getIdDataCenter();
+            }
+            else
+            {
+                idDataCenter =
+                    dcDAO.getDatacenterWhereThePublicNetworkStays(vlanHB.getNetworkId())
+                        .getIdDataCenter();
+            }
+            DHCPServiceType service = new DHCPServiceType();
+            if (idDataCenter != null)
             {
                 RemoteServiceDAO rmDAO = factory.getRemoteServiceDAO();
-                RemoteServiceHB remo = rmDAO.findById(service.getDhcpRemoteServiceId());
-
-                service.setDhcpAddress(remo.getURI().getHost());
-                service.setDhcpPort(remo.getURI().getPort());
+                List<RemoteServiceHB> remo =
+                    rmDAO.getRemoteServicesByType(idDataCenter, RemoteServiceType.DHCP_SERVICE);
+                service.setDhcpAddress(remo.get(0).getURI().getHost());
+                service.setDhcpPort(remo.get(0).getURI().getPort());
+                vlan.getConfiguration().setDhcpService(service);
             }
 
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.

@@ -23,9 +23,9 @@
         </many-to-one>
         <joined-subclass name="com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB" table="ip_pool_management">
             <key column="idManagement" />
-            <property name="dhcpServiceId" type="java.lang.Integer">
+           <!--  <property name="dhcpServiceId" type="java.lang.Integer">
                 <column name="dhcp_service_id" not-null="true" />
-            </property>
+            </property>--> 
             <property name="vlanNetworkName" type="java.lang.String">
                 <column name="vlan_network_name" not-null="true" />
             </property>
@@ -57,7 +57,7 @@
     </query>
     <query name="IP_POOL_MANAGEMENT_GET_IPADDRESS_FROM_MAC"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB where mac = :mac
     </query>
-    <query name="IP_POOL_GET_NETWORK_POOL_BY_VLAN"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration conf,
+   <!-- <query name="IP_POOL_GET_NETWORK_POOL_BY_VLAN"> Select ip from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration conf,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB dhcp inner join dhcp.ipPoolManagement ip left join ip.virtualMachine vm left join ip.virtualApp vapp left join
         ip.virtualDataCenter vdc left join vdc.enterpriseHB ent where vlan.vlanNetworkId = :vlanId and conf.dhcpService.dhcpServiceId = dhcp.dhcpServiceId and ( ip.ip like :filterLike or ip.mac like
         :filterLike or ip.vlanNetworkName like :filterLike or vapp.name like :filterLike or vm.name like :filterLike or ent.name like :filterLike )
@@ -74,7 +74,7 @@
     </query>
     <query name="IP_POOL_GET_VLAN_BY_IP_POOL_MANAGEMENT"> Select vlan from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vlan inner join vlan.configuration.dhcpService dhcp,
         com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ip where dhcp.dhcpServiceId = ip.dhcpServiceId and ip.idManagement = :id_pool
-    </query>
+    </query>-->
     <query name="IP_POOL.GET_BY_VLAN"> SELECT ippool FROM com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB ippool WHERE ippool.virtualMachine.idVm != :idVm AND ippool.vlanNetworkId =
         :vlanNetworkId
     </query>

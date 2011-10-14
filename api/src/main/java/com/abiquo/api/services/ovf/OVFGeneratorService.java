@@ -100,7 +100,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class OVFGeneratorService
 {
-
     @Autowired
     VirtualDatacenterRep vdcRepo;
 
@@ -155,8 +154,10 @@ public class OVFGeneratorService
      * 
      * @param virtualMachine
      * @param machineState
-     * @return an OVFEnvelope with the information contained on the virtualMachine
-     * @throws Exception, if the virtualMachine can not be represented as an OVF document.
+     * @return an OVFEnvelope with the information contained on the virtualMachine <<<<<<< HEAD
+     * @throws Exception, if the virtualMachine can not be represented as an OVF document. =======
+     * @throws Exception , if the virtualMachine can not be represented as an OVF document. >>>>>>>
+     *             dhcp_service_remove
      */
     public EnvelopeType constructEnvelopeType(final VirtualMachine virtualMachine,
         final String machineState) throws Exception
@@ -576,9 +577,13 @@ public class OVFGeneratorService
             Integer numberOfRules = 0;
             Collection<IpPoolManagement> ips =
                 vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
+            List<RemoteService> remoteServices =
+                datacenterRepo.findRemoteServiceWithTypeInDatacenter(vdc.getDatacenter(),
+                    RemoteServiceType.DHCP_SERVICE);
+            // RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp()
+            // .getRemoteService();
 
-            RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
-            URI uri = new URI(dhcpRemoteService.getUri());
+            URI uri = new URI(remoteServices.get(0).getUri());
 
             DHCPServiceType dhcp = new DHCPServiceType();
             dhcp.setDhcpAddress(uri.getHost());

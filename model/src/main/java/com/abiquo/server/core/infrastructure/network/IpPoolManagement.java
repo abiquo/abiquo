@@ -43,7 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
-@NamedQueries( {@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
+@NamedQueries({@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)})
 public class IpPoolManagement extends RasdManagement
@@ -65,24 +65,22 @@ public class IpPoolManagement extends RasdManagement
 
     public static final String TABLE_NAME = "ip_pool_management";
 
-    public static final String BY_VLAN =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, " + " VLANNetwork vn "
-            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.id = :vlan_id";
+    public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + "WHERE ip.vlanNetwork.id = vn.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id";
 
-    public static final String BY_VDC =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-            + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
-            + " AND vdc.id = :vdc_id";
+    public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id";
 
-    public static final String BY_ENT =
-        " SELECT ip FROM IpPoolManagement ip, " + " NetworkConfiguration nc, "
-            + " VirtualDatacenter vdc, " + " VLANNetwork vn, " + " Enterprise ent "
-            + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
-            + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
-            + " AND ent.id = :ent_id";
+    public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip, "
+        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
+        + " Enterprise ent " + "WHERE ip.vlanNetwork.id = vn.id "
+        + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
+        + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id";
 
+    // " WHERE ip.dhcp.id = nc.dhcp.id "
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     public IpPoolManagement()
@@ -90,12 +88,11 @@ public class IpPoolManagement extends RasdManagement
         // Just for JPA support
     }
 
-    public IpPoolManagement(final Dhcp dhcp, final VLANNetwork vlan, final String mac,
-        final String name, final String ip, final String networkName, final Type type)
+    public IpPoolManagement(final VLANNetwork vlan, final String mac, final String name,
+        final String ip, final String networkName, final Type type)
     {
         super(DISCRIMINATOR);
 
-        setDhcp(dhcp);
         setMac(mac);
         setName(name);
         setIp(ip);
@@ -274,28 +271,6 @@ public class IpPoolManagement extends RasdManagement
     public void setIp(final String ip)
     {
         this.ip = ip;
-    }
-
-    public final static String DHCP_PROPERTY = "dhcp";
-
-    private final static boolean DHCP_REQUIRED = true;
-
-    private final static String DHCP_ID_COLUMN = "dhcp_service_id";
-
-    @JoinColumn(name = DHCP_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_dhcp")
-    private Dhcp dhcp;
-
-    @Required(value = DHCP_REQUIRED)
-    public Dhcp getDhcp()
-    {
-        return this.dhcp;
-    }
-
-    public void setDhcp(final Dhcp dhcp)
-    {
-        this.dhcp = dhcp;
     }
 
     public final static String NETWORK_NAME_PROPERTY = "networkName";
