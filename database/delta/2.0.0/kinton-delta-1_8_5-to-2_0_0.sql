@@ -63,6 +63,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement   
            FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
            WHERE ipm.vlan_network_id = vn.vlan_network_id
+           AND vn.network_configuration_id = nc.network_configuration_id
            AND vn.network_id = dc.network_id
        AND vn.networktype = 'PUBLIC'
            AND ra.idManagement = ipm.idManagement
@@ -193,6 +194,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 SELECT dc.idDataCenter INTO idDataCenterObj
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
                 WHERE ipm.vlan_network_id = vn.vlan_network_id
+                AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
         AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
@@ -221,6 +223,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 SELECT dc.idDataCenter INTO idDataCenterObj
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
                 WHERE ipm.vlan_network_id = vn.vlan_network_id
+                AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
         AND vn.networktype = 'PUBLIC'
                 AND NEW.idManagement = ipm.idManagement;
@@ -249,6 +252,7 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
                 SELECT dc.idDataCenter, ipm.ip INTO idDataCenterObj, ipAddress
                 FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc
                 WHERE ipm.vlan_network_id = vn.vlan_network_id
+                AND vn.network_configuration_id = nc.network_configuration_id
                 AND vn.network_id = dc.network_id
         AND vn.networktype = 'PUBLIC'
                 AND OLD.idManagement = ipm.idManagement;
