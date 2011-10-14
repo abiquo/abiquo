@@ -1632,6 +1632,8 @@ CREATE TABLE `kinton`.`storage_device` (
   `iscsi_ip` varchar(256) NOT NULL,
   `iscsi_port` int(5) unsigned NOT NULL DEFAULT '0',
   `storage_technology` varchar(256) DEFAULT NULL,
+  `username` varchar(256) DEFAULT NULL,
+  `password` varchar(256) DEFAULT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`id`),
   CONSTRAINT `storage_device_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
