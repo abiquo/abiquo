@@ -72,6 +72,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -684,7 +685,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId, final VirtualImage master)
+        final Integer vimageId, final VirtualImage master, final Category category)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
@@ -703,6 +704,9 @@ public class RESTBuilder implements IRESTBuilder
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
             DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
+
+        params.put(CategoryResource.CATEGORY, category.getId().toString());
+        links.add(builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params));
 
         params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
         links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));

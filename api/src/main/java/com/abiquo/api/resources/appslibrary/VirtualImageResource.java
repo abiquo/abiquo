@@ -42,6 +42,7 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.config.Category;
 
 @Parent(VirtualImagesResource.class)
 @Path(VirtualImageResource.VIRTUAL_IMAGE_PARAM)
@@ -88,17 +89,20 @@ public class VirtualImageResource extends AbstractResource
         VirtualImageDto dto =
             ModelTransformer.transportFromPersistence(VirtualImageDto.class, vimage);
 
-        dto = addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri, vimage.getMaster());
+        dto =
+            addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri, vimage.getMaster(),
+                vimage.getCategory());
 
         return dto;
     }
 
     private static VirtualImageDto addLinks(final IRESTBuilder builder, final VirtualImageDto dto,
         final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri,
-        final VirtualImage master)
+        final VirtualImage master, final Category category)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId, master));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId, master, category));
         addApplianceManagerLinks(dto, amUri, vimageId, dto.getOvfid());
+
         return dto;
     }
 

@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoriesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static org.testng.Assert.assertEquals;
@@ -29,6 +30,7 @@ import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.config.CategoriesDto;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDto;
@@ -92,13 +94,23 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(cat1.getName(), dto.getName());
     }
 
+    @Test
+    public void postWithDuplicatedNameTest()
+    {
+        CategoryDto cat = createCategoryDto(category);
+
+        String href = resolveCategoriesURI();
+        ClientResponse response = post(href, cat);
+
+        assertErrors(response, 409, APIError.CATEGORY_DUPLICATED_NAME.getCode());
+    }
+
     // ********************* Helper methods ************************
     private CategoryDto createCategoryDto(final Category category)
     {
         CategoryDto dto = new CategoryDto();
         dto.setId(category.getId());
         dto.setName(category.getName());
-        dto.setIsDefault(category.getIsDefault());
         dto.setIsErasable(category.getIsErasable());
         return dto;
     }

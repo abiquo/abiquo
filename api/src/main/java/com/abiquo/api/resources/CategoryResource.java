@@ -1,4 +1,5 @@
 /**
+
  * Abiquo community edition
  * cloud management application for hybrid clouds
  * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
@@ -23,12 +24,15 @@ package com.abiquo.api.resources;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
@@ -69,6 +73,8 @@ public class CategoryResource extends AbstractResource
     }
 
     @PUT
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
     public CategoryDto modifyCategory(
         @PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
         final CategoryDto categoryDto, @Context final IRESTBuilder restBuilder) throws Exception

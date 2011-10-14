@@ -391,7 +391,8 @@ public enum APIError
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
-        "CATEGORY-2", "Duplicated name for the category")
+        "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "This category is not erasable")
 
     ;
 

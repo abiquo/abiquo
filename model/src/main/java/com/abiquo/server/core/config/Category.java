@@ -52,7 +52,7 @@ public class Category extends DefaultEntityBase
     {
         setName(name);
         setIsDefault(0);
-        setIsErasable(1);        
+        setIsErasable(1);
     }
 
     private final static String ID_COLUMN = "idCategory";

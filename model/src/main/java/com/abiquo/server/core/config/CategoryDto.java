@@ -52,18 +52,6 @@ public class CategoryDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private Integer isDefault;
-
-    public Integer getIsDefault()
-    {
-        return isDefault;
-    }
-
-    public void setIsDefault(final Integer isDefault)
-    {
-        this.isDefault = isDefault;
-    }
-
     private Integer isErasable;
 
     public Integer getIsErasable()

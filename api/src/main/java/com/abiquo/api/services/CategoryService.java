@@ -79,7 +79,9 @@ public class CategoryService extends DefaultApiService
     public Category addCategory(final Category category)
     {
         validate(category);
-
+        // there is one default category already created by the system
+        // so user cannot manage this property currently
+        category.setIsDefault(0);
         // Check if there is a category with the same name
         if (repo.existAnyOtherCategoryWithName(category.getName()))
         {
@@ -97,9 +99,13 @@ public class CategoryService extends DefaultApiService
     public Category modifyCategory(final Category category, final Integer categoryId)
     {
         Category old = repo.findCategoryById(categoryId);
+        if (old == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
 
         old.setName(category.getName());
-        old.setIsDefault(category.getIsDefault());
         old.setIsErasable(category.getIsErasable());
 
         validate(old);
@@ -120,6 +126,12 @@ public class CategoryService extends DefaultApiService
         if (category == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
+
+        if (category.getIsErasable() == 0)
+        {
+            addConflictErrors(APIError.CATEGORY_NOT_ERASABLE);
             flushErrors();
         }
 
