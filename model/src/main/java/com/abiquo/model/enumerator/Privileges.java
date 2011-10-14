@@ -52,5 +52,7 @@ public enum Privileges
 
     VDC_ENUMERATE,
 
+    PRICING_VIEW,
+
     ENTERPRISE_ENUMERATE;
 }
