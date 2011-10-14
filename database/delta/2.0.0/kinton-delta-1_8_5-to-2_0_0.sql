@@ -144,6 +144,9 @@ ALTER TABLE `kinton`.`virtualimage` MODIFY COLUMN `cost_code` int(4) DEFAULT 0;
 -- PHYSICAL MACHINE --
 ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage, DROP COLUMN hd, DROP COLUMN hdUsed;
 
+-- VFILER --
+ALTER TABLE `kinton`.`storage_device` ADD COLUMN `username` varchar(256) DEFAULT NULL;
+ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT NULL;
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
@@ -250,7 +253,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     END;
 
 --
---
+|
 --
 
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
@@ -428,7 +431,9 @@ CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `k
         END IF;
     END;
     
-|  
+--
+|
+--  
 
 CREATE TRIGGER `kinton`.`delete_ip_pool_management_update_stats` AFTER DELETE ON `kinton`.`ip_pool_management`
   FOR EACH ROW BEGIN
@@ -445,7 +450,9 @@ CREATE TRIGGER `kinton`.`delete_ip_pool_management_update_stats` AFTER DELETE ON
       END IF;
     END IF;
   END;
+--
 |
+--
 
 /* cost code has changed from string to int */
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
@@ -1133,7 +1140,9 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
 
    END;
 
+--
 |
+--
 
 CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
    BEGIN
