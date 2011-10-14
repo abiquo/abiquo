@@ -38,6 +38,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
@@ -92,6 +93,7 @@ public class VirtualMachineService extends DefaultApiService
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
         this.remoteServiceService = new RemoteServiceService(em);
+        this.tracer = new TracerLogger();
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)

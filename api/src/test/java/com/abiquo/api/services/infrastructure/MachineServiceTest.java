@@ -92,6 +92,7 @@ public class MachineServiceTest extends AbstractUnitTest
         VirtualMachine vm =
             vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, "vm_test");
         vm.setState(RUNNING);
+        vm.setIdType(VirtualMachine.MANAGED);
 
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
