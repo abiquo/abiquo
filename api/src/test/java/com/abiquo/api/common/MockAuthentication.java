@@ -21,8 +21,6 @@
 
 package com.abiquo.api.common;
 
-import java.util.List;
-
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;
@@ -59,9 +57,10 @@ public class MockAuthentication implements Authentication
         GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
 
         int i = 0;
-        for (String authString : authorityStrings)
+        for (Privileges authString : authorityStrings)
         {
-            authorities[i] = new GrantedAuthorityImpl(authorityStrings[i].name());
+            authorities[i] = new GrantedAuthorityImpl(authString.name());
+            i++;
         }
 
         return authorities;
