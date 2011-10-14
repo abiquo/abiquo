@@ -51,8 +51,9 @@ public class VsmServiceStub extends DefaultApiService
      * @param username The username used to connect to the hypervisor.
      * @param password The password used to connect to the hypervisor.
      */
-    public void monitor(String serviceUri, String physicalMachineIP, Integer physicalMachinePort,
-        String type, String username, String password)
+    public void monitor(final String serviceUri, final String physicalMachineIP,
+        final Integer physicalMachinePort, final String type, final String username,
+        final String password)
     {
         VSMClient vsmClient = initializeVSMClient(serviceUri);
         try
@@ -83,14 +84,19 @@ public class VsmServiceStub extends DefaultApiService
      * @param physicalMachinePort the physical machine port
      * @param type The hypervisor type of the physical machine.
      */
-    public void shutdownMonitor(String serviceUri, String physicalMachineIP,
-        Integer physicalMachinePort)
+    public void shutdownMonitor(final String serviceUri, final String physicalMachineIP,
+        final Integer physicalMachinePort)
     {
         VSMClient vsmClient = initializeVSMClient(serviceUri);
         try
         {
             URL pmURL = new URL("http", physicalMachineIP, physicalMachinePort, "");
-            vsmClient.shutdown(pmURL.toString());
+            String urlString = pmURL.toString();
+            if (!urlString.endsWith("/"))
+            {
+                urlString += "/";
+            }
+            vsmClient.shutdown(urlString);
         }
         catch (Exception e)
         {
@@ -101,7 +107,7 @@ public class VsmServiceStub extends DefaultApiService
 
     }
 
-    protected VSMClient initializeVSMClient(String serviceURI)
+    protected VSMClient initializeVSMClient(final String serviceURI)
     {
         return new VSMClient(serviceURI);
     }

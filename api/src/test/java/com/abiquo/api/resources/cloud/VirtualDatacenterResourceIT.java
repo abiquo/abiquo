@@ -121,8 +121,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
                 vdc.getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
-            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
+            vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         assertNotNull(dto);
@@ -159,8 +159,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
                 vdc.getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
-            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
+            vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
 
@@ -183,8 +183,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
                 vdc.getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vlan
-            .getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vdc);
+        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
+            vlan.getConfiguration(), vlan, vdc);
 
         VirtualDatacenterDto dto = getValidVdc(vdc);
         dto.setCpuCountLimits(1000, 1001);
@@ -248,7 +248,6 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         RemoteService rs =
             remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
                 vdc.getDatacenter());
-        ip.getDhcp().setRemoteService(rs);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         ipGenerator.addAuxiliaryEntitiesToPersist(ip, entitiesToPersist);
@@ -273,7 +272,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs);
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
         String validURI = resolveVirtualDatacenterActionGetIPsURI(vdc.getId());
 
         ClientResponse response = get(validURI, SYSADMIN, SYSADMIN, MediaType.APPLICATION_XML);
@@ -290,7 +289,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -301,7 +300,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         persistIP(ip, lastIP, vdc, vlan);
 
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan2.getConfiguration(), vlan2);
 
         IPAddress ip2 =
             IPAddress.newIPAddress(vlan2.getConfiguration().getAddress()).nextIPAddress();
@@ -330,7 +329,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -358,7 +357,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -386,7 +385,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -414,7 +413,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -442,7 +441,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -470,7 +469,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -498,7 +497,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -526,7 +525,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -554,7 +553,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
@@ -605,7 +604,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
