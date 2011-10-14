@@ -2366,7 +2366,7 @@ CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`
 FOR EACH ROW BEGIN
 DECLARE idDatacenter INT UNSIGNED;
 DECLARE machineState INT UNSIGNED;
-SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON da.idPhysicalMachine = da.idPhysicalMachine
+SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
 WHERE da.idDatastore = NEW.idDatastore;
 IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     IF OLD.enabled = 1 THEN
@@ -2399,7 +2399,7 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
         END IF;
     END IF;
 END IF;
-END
+END;
 --
 --
 -- ******************************************************************************************
