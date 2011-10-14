@@ -294,7 +294,7 @@
         <security:intercept-url pattern="/config/currencies" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/currencies" method="POST" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/currencies" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/config/currencies/*" method="GET" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/currencies/*" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/currencies/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/currencies/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates" method="GET" access="ROLE_PRICING_VIEW" />
