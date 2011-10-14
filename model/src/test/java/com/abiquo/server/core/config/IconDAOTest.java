@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
 import javax.persistence.EntityManager;
 
@@ -29,6 +29,8 @@ import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconDAO;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 

@@ -21,39 +21,27 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListURI;
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageURI;
-import static com.abiquo.api.util.URIResolver.buildPath;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 

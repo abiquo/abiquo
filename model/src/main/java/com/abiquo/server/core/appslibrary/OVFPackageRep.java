@@ -21,9 +21,6 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -50,9 +47,6 @@ public class OVFPackageRep extends DefaultRepBase
     @Autowired
     CategoryDAO categoryDao;
 
-    @Autowired
-    IconDAO iconDao;
-
     public OVFPackageRep()
     {
 
@@ -69,7 +63,6 @@ public class OVFPackageRep extends DefaultRepBase
         listDao = new OVFPackageListDAO(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         categoryDao = new CategoryDAO(em);
-        iconDao = new IconDAO(em);
     }
 
     public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
@@ -147,30 +140,6 @@ public class OVFPackageRep extends DefaultRepBase
         }
 
         dao.remove(ovfPackage);
-    }
-
-    public Icon findByIconPathOrCreateNew(final String iconPath)
-    {
-        if (iconPath == null)
-        {
-            return null;
-        }
-
-        Icon icon;
-
-        icon = iconDao.findByPath(iconPath);
-
-        if (icon == null)
-        {
-            icon = new Icon();
-            icon.setName("unname"); // TODO
-            icon.setPath(iconPath);
-
-            iconDao.persist(icon);
-            iconDao.flush();
-        }
-
-        return icon;
     }
 
     public Category findByCategoryNameOrCreateNew(final String categoryName)

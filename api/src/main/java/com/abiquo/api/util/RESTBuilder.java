@@ -63,6 +63,7 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.IconResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
@@ -70,6 +71,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.config.IconDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -598,6 +600,20 @@ public class RESTBuilder implements IRESTBuilder
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(SystemPropertyResource.class, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildIconLinks(final IconDto icon)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(IconResource.ICON, icon.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(IconResource.class, REL_EDIT, params));
 
         return links;
     }

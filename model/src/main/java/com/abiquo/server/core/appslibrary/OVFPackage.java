@@ -44,6 +44,7 @@ import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.config.Icon;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 

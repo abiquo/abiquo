@@ -19,11 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.config.Icon;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 

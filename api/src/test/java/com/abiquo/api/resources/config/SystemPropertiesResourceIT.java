@@ -25,6 +25,7 @@ import static com.abiquo.api.common.Assert.assertSize;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURIByComponent;
 import static com.abiquo.api.common.UriTestResolver.resolveSystemPropertiesURIByName;
+import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 

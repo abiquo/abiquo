@@ -25,7 +25,6 @@ import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -38,6 +37,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;

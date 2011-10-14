@@ -29,7 +29,6 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
@@ -448,8 +447,8 @@ public class EnterpriseRep extends DefaultRepBase
         return virtualImageDAO.findVirtualMachinesByEnterprise(enterprise);
     }
 
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(Enterprise enterprise,
-        com.abiquo.server.core.infrastructure.Repository repository)
+    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository)
     {
         return virtualImageDAO.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
     }

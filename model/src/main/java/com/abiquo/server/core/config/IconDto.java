@@ -19,30 +19,51 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
-import javax.persistence.EntityManager;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.springframework.stereotype.Repository;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-
-@Repository("jpaIconDAO")
-public class IconDAO extends DefaultDAOBase<Integer, Icon>
+@XmlRootElement(name = "icon")
+public class IconDto extends SingleResourceTransportDto
 {
-    public IconDAO()
+    private static final long serialVersionUID = 1L;
+
+    private Integer id;
+
+    public Integer getId()
     {
-        super(Icon.class);
+        return id;
     }
 
-    public IconDAO(final EntityManager entityManager)
+    public void setId(final Integer id)
     {
-        super(Icon.class, entityManager);
+        this.id = id;
     }
 
-    public Icon findByPath(final String path)
+    private String name;
+
+    public String getName()
     {
-        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
+        return name;
+    }
+
+    public void setName(final String name)
+    {
+        this.name = name;
+    }
+
+    private String path;
+
+    public String getPath()
+    {
+        return path;
+    }
+
+    public void setPath(final String path)
+    {
+        this.path = path;
     }
 
 }

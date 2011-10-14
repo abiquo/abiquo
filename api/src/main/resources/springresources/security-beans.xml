@@ -315,6 +315,12 @@
         <security:intercept-url pattern="/config/licenses/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
         <security:intercept-url pattern="/config/licenses/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/licenses/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- ICONS -->
+        <security:intercept-url pattern="/config/icons" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_PHYS_DC_MANAGE" />
+        <security:intercept-url pattern="/config/icons/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/icons/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <!-- PRIVILEGES -->
         <security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/config/privileges" method="OPTIONS" access="ROLE_AUTHENTICATED" />

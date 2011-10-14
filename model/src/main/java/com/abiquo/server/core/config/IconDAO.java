@@ -19,42 +19,59 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.persistence.impl;
+package com.abiquo.server.core.config;
 
-import javax.persistence.NoResultException;
+import javax.persistence.EntityManager;
 
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.api.persistence.JpaDAO;
-import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository
-public class IconDAO extends JpaDAO<Icon, Integer>
+@Repository("jpaIconDAO")
+public class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
-    @Override
-    protected Class<Icon> getPersistentClass()
+    public IconDAO()
     {
-        return Icon.class;
+        super(Icon.class);
     }
 
-    private final static String QUERY_GET_BY_PATH = "FROM " + Icon.class.getName() + " WHERE " //
-        + "path = :path";
+    public IconDAO(final EntityManager entityManager)
+    {
+        super(Icon.class, entityManager);
+    }
 
     public Icon findByPath(final String path)
     {
-        Icon icon = null;
+        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
+    }
 
-        try
+    public Icon findByIconPathOrCreateNew(final String iconPath)
+    {
+        if (iconPath == null)
         {
-            icon =
-                (Icon) entityManager.createQuery(QUERY_GET_BY_PATH).setParameter("path", path)
-                    .getSingleResult();
+            return null;
         }
-        catch (NoResultException e)
-        {
 
+        Icon icon;
+
+        icon = findByPath(iconPath);
+
+        if (icon == null)
+        {
+            icon = new Icon();
+            icon.setName("unname"); // TODO
+            icon.setPath(iconPath);
+
+            persist(icon);
+            flush();
         }
+
         return icon;
+    }
+
+    public void update(final Icon icon)
+    {
+        flush();
     }
 
 }

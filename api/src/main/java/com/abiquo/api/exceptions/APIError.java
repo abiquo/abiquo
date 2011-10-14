@@ -388,8 +388,11 @@ public enum APIError
         "At least one load balance rule is required"), ONE_LINK_REQUIRED("RULE-5",
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
-
-    ;
+    // ICONS
+    ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISENT_ICON("ICON-2",
+        "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
+        "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
+        "Cannot delete the icon because it is in use by some virtual image");
 
     /**
      * Internal error code
@@ -440,8 +443,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

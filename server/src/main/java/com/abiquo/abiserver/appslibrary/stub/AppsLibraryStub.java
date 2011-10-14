@@ -22,6 +22,7 @@ package com.abiquo.abiserver.appslibrary.stub;
 
 import java.util.List;
 
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
@@ -40,6 +41,8 @@ public interface AppsLibraryStub
 
     void deleteOVFPackageList(final Integer idEnterprise, final String nameOvfpackageList);
 
+    void deleteIcon(final Integer idIcon);
+
     /**
      * Recupera la
      * 
@@ -47,6 +50,5 @@ public interface AppsLibraryStub
      * @param nameOVFPackageList
      * @return
      */
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
-        final String nameOVFPackageList);
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
 }

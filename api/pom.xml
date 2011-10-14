@@ -175,12 +175,6 @@
 		<!-- END: WINK DEPENDENCIES -->
 		<!-- TEST DEPENDENCIES -->
 		<dependency>
-			<groupId>org.dbunit</groupId>
-			<artifactId>dbunit</artifactId>
-			<version>2.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>${testng.version}</version>

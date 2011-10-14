@@ -19,7 +19,7 @@
         <class>com.abiquo.server.core.appslibrary.OVFPackage</class>
         <class>com.abiquo.server.core.appslibrary.OVFPackageList</class>
         <class>com.abiquo.server.core.appslibrary.Category</class>
-        <class>com.abiquo.server.core.appslibrary.Icon</class>
+        <class>com.abiquo.server.core.config.Icon</class>
         <!-- end: appliance library -->
         <!-- cloud infrastructure -->
         <class>com.abiquo.server.core.cloud.VirtualDatacenter</class>

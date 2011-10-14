@@ -69,6 +69,8 @@
                 <!-- Configuration -->
                 <ref bean="systemPropertiesResource" />
                 <ref bean="systemPropertyResource" />
+                <ref bean="iconsResource" />
+                <ref bean="iconResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
             </set>

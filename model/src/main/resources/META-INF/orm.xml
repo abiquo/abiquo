@@ -70,7 +70,7 @@
     <!-- appliance manager -->
     <orm:entity class="com.abiquo.server.core.appslibrary.AppsLibrary"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.Category"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.appslibrary.Icon"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.config.Icon"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end: appliance manager -->

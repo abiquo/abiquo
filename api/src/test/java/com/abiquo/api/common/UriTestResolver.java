@@ -65,6 +65,8 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.config.IconResource;
+import com.abiquo.api.resources.config.IconsResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.PrivilegesResource;
 import com.abiquo.api.resources.config.SystemPropertiesResource;
@@ -99,8 +101,8 @@ public class UriTestResolver
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
+        return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
+            enterpriseId.toString()));
     }
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
@@ -130,8 +132,8 @@ public class UriTestResolver
         String template =
             buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
+        return resolveURI(template, Collections.singletonMap(PrivilegeResource.PRIVILEGE,
+            privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)
@@ -193,8 +195,8 @@ public class UriTestResolver
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRacksURI(final Integer datacenterId)
@@ -202,8 +204,8 @@ public class UriTestResolver
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
                 RacksResource.RACKS_PATH);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
@@ -467,8 +469,8 @@ public class UriTestResolver
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
                 + RacksResource.RACKS_PATH;
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
@@ -767,8 +769,8 @@ public class UriTestResolver
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+        return resolveURI(template, Collections.singletonMap(
+            SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
     }
 
     public static String resolveLoginURI()
@@ -776,4 +778,14 @@ public class UriTestResolver
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
     }
 
+    public static String resolveIconURI(final Integer iconId)
+    {
+        String template = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
+        return resolveURI(template, Collections.singletonMap(IconResource.ICON, iconId.toString()));
+    }
+
+    public static String resolveIconsURI()
+    {
+        return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
+    }
 }
