@@ -301,6 +301,9 @@ public class MachineService extends DefaultApiService
             // we can ignore this error
         }
 
+        // Delete not maneged vms is needed before update virtual appliances
+        virtualMachineService.deleteNotManagedVirtualMachines(hypervisor, true);
+
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
         for (VirtualMachine vm : virtualMachines)
