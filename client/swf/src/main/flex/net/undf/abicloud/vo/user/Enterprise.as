@@ -63,6 +63,10 @@ package net.undf.abicloud.vo.user
         public var chefValidatorCertificate:String;
         
         public var chefValidator:String;
+        
+        public var chefClient:String;
+        
+        public var chefClientCertificate:String;
 
         public function Enterprise()
         {
@@ -73,7 +77,7 @@ package net.undf.abicloud.vo.user
             limits = new ResourceAllocationLimit();
             dcLimits = new ArrayCollection();
             reservedMachines = new ArrayCollection();
-	    isReservationRestricted = false;
+	       isReservationRestricted = false;
         }
 
     }
