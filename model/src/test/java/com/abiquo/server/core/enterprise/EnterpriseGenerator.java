@@ -24,6 +24,7 @@ import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
+import com.softwarementors.commons.testng.AssertEx;
 
 public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
 {
@@ -34,9 +35,16 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
     }
 
     @Override
-    public void assertAllPropertiesEqual(final Enterprise obj1, final Enterprise obj2)
+    public void assertAllPropertiesEqual(final Enterprise ent1, final Enterprise ent2)
     {
+        AssertEx.assertPropertiesEqualSilent(ent1, ent2, Enterprise.NAME_PROPERTY);
 
+        if (ent1.getChefURL() != null)
+        {
+            AssertEx.assertPropertiesEqualSilent(ent1, ent2, Enterprise.CHEF_URL_PROPERTY,
+                Enterprise.CHEF_CLIENT_PROPERTY, Enterprise.CHEF_VALIDATOR_PROPERTY,
+                Enterprise.CHEF_CLIENT_CERT_PROPERTY, Enterprise.CHEF_VALIDATOR_CERT_PROPERTY);
+        }
     }
 
     @Override
@@ -81,6 +89,9 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
     public Enterprise addChefConfig(final Enterprise enterprise)
     {
         String chefServerURL = "https://api.opscode.com/organizations/ent" + nextSeed();
+        String clientName =
+            newString(nextSeed(), Enterprise.CHEF_CLIENT_LENGTH_MIN,
+                Enterprise.CHEF_CLIENT_LENGTH_MAX);
         String validatorName =
             newString(nextSeed(), Enterprise.CHEF_VALIDATOR_LENGTH_MIN,
                 Enterprise.CHEF_VALIDATOR_LENGTH_MAX);
@@ -88,6 +99,7 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
         String validationCert = newString(nextSeed(), 0, 100);
 
         enterprise.setChefURL(chefServerURL);
+        enterprise.setChefClient(clientName);
         enterprise.setChefValidator(validatorName);
         enterprise.setChefValidatorCertificate(validationCert);
         enterprise.setChefClientCertificate(clientCert);

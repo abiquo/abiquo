@@ -31,7 +31,8 @@ CREATE TABLE  `kinton`.`chef_recipe` (
 ALTER TABLE `kinton`.`virtualmachine` ADD COLUMN `subState` VARCHAR(50)  DEFAULT NULL AFTER `state`;
 ALTER TABLE `kinton`.`virtualimage` ADD COLUMN `chefEnabled` BOOLEAN  NOT NULL DEFAULT false AFTER `cost_code`;
 ALTER TABLE `kinton`.`enterprise` ADD COLUMN `chef_url` VARCHAR(255)  DEFAULT NULL AFTER `publicIPHard`,
- ADD COLUMN `chef_validator` VARCHAR(50)  DEFAULT NULL AFTER `chef_url`,
+ ADD COLUMN `chef_client` VARCHAR(50)  DEFAULT NULL AFTER `chef_url`,
+ ADD COLUMN `chef_validator` VARCHAR(50)  DEFAULT NULL AFTER `chef_client`,
  ADD COLUMN `chef_client_certificate` TEXT  DEFAULT NULL AFTER `chef_validator`,
  ADD COLUMN `chef_validator_certificate` TEXT  DEFAULT NULL AFTER `chef_client_certificate`;
 

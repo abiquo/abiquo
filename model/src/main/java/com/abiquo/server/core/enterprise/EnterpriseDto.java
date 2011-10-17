@@ -40,6 +40,8 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
 
     private String chefURL;
 
+    private String chefClient;
+
     private String chefValidator;
 
     private String chefClientCertificate;
@@ -102,6 +104,16 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     public void setChefURL(final String chefURL)
     {
         this.chefURL = chefURL;
+    }
+
+    public String getChefClient()
+    {
+        return chefClient;
+    }
+
+    public void setChefClient(final String chefClient)
+    {
+        this.chefClient = chefClient;
     }
 
     public String getChefValidator()
