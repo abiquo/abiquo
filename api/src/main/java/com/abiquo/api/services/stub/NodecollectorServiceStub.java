@@ -379,7 +379,7 @@ public class NodecollectorServiceStub extends DefaultApiService
      * @param host hostDto object.
      * @return a {@link Machine} entity.
      */
-    private Machine hostToMachine(final Datacenter datacenter, final HostDto host)
+    protected Machine hostToMachine(final Datacenter datacenter, final HostDto host)
     {
 
         final Integer MEGABYTE = 1048576;
@@ -399,26 +399,35 @@ public class NodecollectorServiceStub extends DefaultApiService
                 transfromToState(host.getStatus()),
                 "");
 
+        // Long totalStorage = 0L;
         String switches = "";
         for (ResourceType resource : host.getResources())
         {
-
             // TODO remove code
-            // if (resource.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
-            // {
-            // Datastore datastore =
-            // new Datastore(machine, resource.getElementName(), resource.getAddress(), "");
-            // datastore.setEnabled(Boolean.FALSE);
-            // datastore.setSize(resource.getUnits());
-            // datastore.setUsedSize(resource.getUnits() - resource.getAvailableUnits());
-            // datastore.setDatastoreUUID(resource.getConnection());
-            // totalStorage += datastore.getSize();
-            // }
-            // else
-            if (resource.getResourceType().equals(ResourceEnumType.NETWORK_INTERFACE))
+            if (resource.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
             {
-                switches = switches.concat(resource.getElementName()) + "/";
-                machine.getListOfMacs().add(resource.getAddress());
+                Datastore datastore =
+                    new Datastore(machine, resource.getElementName(), resource.getAddress(), "");
+                datastore.setEnabled(Boolean.FALSE);
+                datastore.setSize(resource.getUnits());
+                datastore.setUsedSize(resource.getUnits() - resource.getAvailableUnits());
+                if (resource.getConnection() == null)
+                {
+                    datastore.setDatastoreUUID(UUID.randomUUID().toString());
+                }
+                else
+                {
+                    datastore.setDatastoreUUID(resource.getConnection());
+                }
+                // totalStorage += datastore.getSize();
+            }
+            else
+            {
+                if (resource.getResourceType().equals(ResourceEnumType.NETWORK_INTERFACE))
+                {
+                    switches = switches.concat(resource.getElementName()) + "/";
+                    machine.getListOfMacs().add(resource.getAddress());
+                }
             }
 
         }
@@ -489,7 +498,8 @@ public class NodecollectorServiceStub extends DefaultApiService
                     {
                         Datastore ds = new Datastore();
                         ds.setDirectory(rt.getAddress());
-                        ds.setName(rt.getConnection());
+                        ds.setRootPath(rt.getConnection());
+                        ds.setName(rt.getElementName());
                         vm.setDatastore(ds);
                     }
 
