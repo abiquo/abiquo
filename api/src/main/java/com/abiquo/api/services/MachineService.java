@@ -201,6 +201,12 @@ public class MachineService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeMachine(final Integer id)
     {
+        removeMachine(id, true);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeMachine(final Integer id, final boolean force)
+    {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
             remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
@@ -218,28 +224,41 @@ public class MachineService extends DefaultApiService
 
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
-        for (VirtualMachine vm : virtualMachines)
+
+        if (virtualMachines != null && !virtualMachines.isEmpty())
         {
-            vm.setState(State.NOT_DEPLOYED);
-            vm.setDatastore(null);
-            vm.setHypervisor(null);
-
-            VirtualAppliance vapp = virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
-
-            State newState = State.NOT_DEPLOYED;
-            for (NodeVirtualImage node : vapp.getNodes())
+            for (VirtualMachine vm : virtualMachines)
             {
-                if (node.getVirtualMachine().getState() != State.NOT_DEPLOYED)
-                {
-                    newState = State.APPLY_CHANGES_NEEDED;
-                    break;
-                }
-            }
+                VirtualAppliance vapp =
+                    virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
 
-            vapp.setState(newState);
-            vapp.setSubState(newState);
-            virtualDatacenterRep.updateVirtualAppliance(vapp);
-            virtualMachineService.updateVirtualMachine(vm);
+                State newState = State.NOT_DEPLOYED;
+                for (NodeVirtualImage node : vapp.getNodes())
+                {
+                    if (node.getVirtualMachine().getState() != State.NOT_DEPLOYED)
+                    {
+                        if (!force)
+                        {
+                            addConflictErrors(APIError.RACK_CANNOT_REMOVE_VMS);
+                            flushErrors();
+                        }
+                        else
+                        {
+                            newState = State.APPLY_CHANGES_NEEDED;
+                            break;
+                        }
+                    }
+                }
+
+                vm.setState(State.NOT_DEPLOYED);
+                vm.setDatastore(null);
+                vm.setHypervisor(null);
+
+                vapp.setState(newState);
+                vapp.setSubState(newState);
+                virtualDatacenterRep.updateVirtualAppliance(vapp);
+                virtualMachineService.updateVirtualMachine(vm);
+            }
         }
 
         deleteMachineLoadRulesFromMachine(machine);
