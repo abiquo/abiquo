@@ -37,13 +37,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.cloud.chef.ChefRecipe;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -524,41 +525,36 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
-    public static final String CHEFRECIPES_TABLE = "chef_recipe";
+    public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
 
-    public static final String CHEFRECIPES_PROPERTY = "recipes";
+    public static final String CHEF_RUNLIST_PROPERTY = "runlist";
 
-    static final String CHEFRECIPES_ID_COLUMN = "idRecipe";
+    static final String CHEF_RUNLIST_ID_COLUMN = "id";
 
     static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = CHEFRECIPES_TABLE, joinColumns = {@JoinColumn(name = CHEFRECIPES_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
-    private List<ChefRecipe> recipes = new ArrayList<ChefRecipe>();
+    @JoinTable(name = CHEF_RUNLIST_TABLE, joinColumns = {@JoinColumn(name = CHEF_RUNLIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    @OrderBy(RunlistElement.PRIORITY_PROPERTY + " ASC")
+    private List<RunlistElement> runlist = new ArrayList<RunlistElement>();
 
-    public List<ChefRecipe> getRecipes()
+    public List<RunlistElement> getRunlist()
     {
-        if (recipes == null)
+        if (runlist == null)
         {
-            recipes = new ArrayList<ChefRecipe>();
+            runlist = new ArrayList<RunlistElement>();
         }
-        return recipes;
+        return runlist;
     }
 
-    /* package */void addRecipe(final ChefRecipe recipe)
+    /* package */void addRunlistElement(final RunlistElement element)
     {
-        assert recipes != null;
-        assert !this.recipes.contains(recipe);
-
-        this.recipes.add(recipe);
+        this.runlist.add(element);
     }
 
-    /* package */void removeRecipe(final ChefRecipe recipe)
+    /* package */void removeRunlistElement(final RunlistElement element)
     {
-        assert recipe != null;
-        assert this.recipes.contains(recipe);
-
-        this.recipes.remove(recipe);
+        this.runlist.remove(element);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,

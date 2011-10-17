@@ -1160,19 +1160,20 @@ CREATE TABLE  `kinton`.`remote_service` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 --
--- Definition of table `kinton`.`chef_recipe`
+-- Definition of table `kinton`.`chef_runlist`
 --
 
-DROP TABLE IF EXISTS `kinton`.`chef_recipe`;
-CREATE TABLE  `kinton`.`chef_recipe` (
-  `idRecipe` int(10) unsigned NOT NULL auto_increment,
+DROP TABLE IF EXISTS `kinton`.`chef_runlist`;
+CREATE TABLE  `kinton`.`chef_runlist` (
+  `id` int(10) unsigned NOT NULL auto_increment,
   `idVM` int(10) unsigned NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` varchar(255),
+  `priority` int(10) NOT NULL default 0,
   `version_c` int(11) default 0,
-  PRIMARY KEY  (`idRecipe`),
-  KEY `chef_recipe_FK1` (`idVM`),
-  CONSTRAINT `chef_recipe_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+  PRIMARY KEY  (`id`),
+  KEY `chef_runlist_FK1` (`idVM`),
+  CONSTRAINT `chef_runlist_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

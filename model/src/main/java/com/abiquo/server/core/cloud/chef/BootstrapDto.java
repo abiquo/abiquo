@@ -62,7 +62,7 @@ public class BootstrapDto implements Serializable
     }
 
     @XmlRootElement(name = "chef")
-    @XmlType(propOrder = {"chefServerURL", "validatorName", "validationCertificate", "recipes"})
+    @XmlType(propOrder = {"chefServerURL", "validatorName", "validationCertificate", "runlist"})
     public static class ChefBootstrap implements Serializable
     {
         private static final long serialVersionUID = 1L;
@@ -73,7 +73,7 @@ public class BootstrapDto implements Serializable
 
         private String validationCertificate;
 
-        private RecipeListDto recipes = new RecipeListDto();
+        private RunlistDto runlist = new RunlistDto();
 
         @XmlElement(name = "chef-server-url")
         public String getChefServerURL()
@@ -108,42 +108,42 @@ public class BootstrapDto implements Serializable
             this.validationCertificate = validationCertificate;
         }
 
-        public RecipeListDto getRecipes()
+        public RunlistDto getRunlist()
         {
-            return recipes;
+            return runlist;
         }
 
-        public void setRecipes(final RecipeListDto recipes)
+        public void setRunlist(final RunlistDto runlist)
         {
-            this.recipes = recipes;
+            this.runlist = runlist;
         }
 
-        @XmlRootElement(name = "recipes")
-        public static class RecipeListDto implements Serializable
+        @XmlRootElement(name = "runlist")
+        public static class RunlistDto implements Serializable
         {
             private static final long serialVersionUID = 1L;
 
-            private List<String> recipes = new LinkedList<String>();
+            private List<String> elements = new LinkedList<String>();
 
-            public void add(final String recipe)
+            public void add(final String element)
             {
-                recipes.add(recipe);
+                elements.add(element);
             }
 
             public int size()
             {
-                return recipes.size();
+                return elements.size();
             }
 
-            @XmlElement(name = "recipe")
-            public List<String> getRecipes()
+            @XmlElement(name = "element")
+            public List<String> getElements()
             {
-                return recipes;
+                return elements;
             }
 
-            public void setRecipes(final List<String> recipes)
+            public void setElements(final List<String> elements)
             {
-                this.recipes = recipes;
+                this.elements = elements;
             }
         }
     }

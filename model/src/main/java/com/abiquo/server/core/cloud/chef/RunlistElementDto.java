@@ -26,22 +26,24 @@ import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "recipe")
-@XmlType(propOrder = {"name", "description", "selected"})
-public class ChefRecipeDto extends SingleResourceTransportDto
+@XmlRootElement(name = "element")
+@XmlType(propOrder = {"name", "description", "selected", "order"})
+public class RunlistElementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
-    public static final String EXTENDED_RECIPES_MIME_TYPE = "application/vnd.extended-recipes+xml";
+    public static final String EXTENDED_RUNLIST_MIME_TYPE = "application/vnd.extended-runlist+xml";
 
-    // Recipes should not return the ID, since the resource is not a regular resource in the DB. It
-    // is synchronized with the Chef Server every time it is requested
+    // Runlist elements should not return the ID, since the resource is not a regular resource in
+    // the DB. It is synchronized with the Chef Server every time it is requested
 
     private String name;
 
     private String description;
 
     private boolean selected;
+
+    private int order;
 
     public String getName()
     {
@@ -63,14 +65,14 @@ public class ChefRecipeDto extends SingleResourceTransportDto
         this.description = description;
     }
 
-    public boolean isSelected()
+    public int getOrder()
     {
-        return selected;
+        return order;
     }
 
-    public void setSelected(final boolean selected)
+    public void setOrder(final int order)
     {
-        this.selected = selected;
+        this.order = order;
     }
 
 }

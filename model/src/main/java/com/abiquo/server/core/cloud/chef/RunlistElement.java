@@ -34,32 +34,36 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.validation.RunlistItem;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.util.chef.ChefUtils;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = ChefRecipe.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = ChefRecipe.TABLE_NAME)
-public class ChefRecipe extends DefaultEntityBase
+@Table(name = RunlistElement.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = RunlistElement.TABLE_NAME)
+public class RunlistElement extends DefaultEntityBase
 {
-    public static final String TABLE_NAME = "chef_recipe";
+    public static final String TABLE_NAME = "chef_runlist";
 
-    protected ChefRecipe()
+    protected RunlistElement()
     {
         super();
     }
 
-    public ChefRecipe(final String name, final String description)
+    public RunlistElement(final String name, final String description, final int priority)
     {
         super();
         setName(name);
         setDescription(description);
+        setPriority(priority);
     }
 
-    private final static String ID_COLUMN = "idRecipe";
+    private final static String ID_COLUMN = "id";
 
     @Id
     @GeneratedValue
@@ -79,7 +83,7 @@ public class ChefRecipe extends DefaultEntityBase
 
     public final static String VIRTUALMACHINE_PROPERTY = "virtualMachine";
 
-    private final static boolean VIRTUALMACHINE_REQUIRED = false;
+    private final static boolean VIRTUALMACHINE_REQUIRED = true;
 
     private final static String VIRTUALMACHINE_ID_COLUMN = "idVM";
 
@@ -117,6 +121,7 @@ public class ChefRecipe extends DefaultEntityBase
     @Required(value = NAME_REQUIRED)
     @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
     @LeadingOrTrailingWhitespace(allowed = NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @RunlistItem
     public String getName()
     {
         return this.name;
@@ -155,21 +160,83 @@ public class ChefRecipe extends DefaultEntityBase
         this.description = description;
     }
 
+    public final static String PRIORITY_PROPERTY = "priority";
+
+    final static String PRIORITY_COLUMN = "priority";
+
+    /* package */final static int PRIORITY_MIN = 0;
+
+    /* package */final static int PRIORITY_MAX = Integer.MAX_VALUE;
+
+    final static boolean PRIORITY_REQUIRED = true;
+
+    @Column(name = PRIORITY_COLUMN, nullable = false)
+    @Range(min = PRIORITY_MIN, max = PRIORITY_MAX)
+    private int priority;
+
+    @Required(value = PRIORITY_REQUIRED)
+    public int getPriority()
+    {
+        return this.priority;
+    }
+
+    public void setPriority(final int priority)
+    {
+        this.priority = priority;
+    }
+
     /* ************ Utility methods ************ */
 
     public boolean isCookbook()
     {
-        return !name.contains("::");
+        return isRecipe() && !getRecipeName().contains("::");
     }
 
-    public static enum RecipeOrder implements Comparator<ChefRecipe>
+    public boolean isRecipe()
+    {
+        return ChefUtils.isRecipe(name);
+    }
+
+    public boolean isRole()
+    {
+        return ChefUtils.isRole(name);
+    }
+
+    public String getRecipeName()
+    {
+        if (!isRecipe())
+        {
+            throw new IllegalArgumentException("The current runlist element is not a recipe");
+        }
+        return ChefUtils.getRecipeName(name);
+    }
+
+    public String getRoleName()
+    {
+        if (!isRole())
+        {
+            throw new IllegalArgumentException("The current runlist element is not a role");
+        }
+        return ChefUtils.getRoleName(name);
+    }
+
+    public static enum RunlistElementOrder implements Comparator<RunlistElement>
     {
         BY_NAME
         {
             @Override
-            public int compare(final ChefRecipe r1, final ChefRecipe r2)
+            public int compare(final RunlistElement r1, final RunlistElement r2)
             {
                 return String.CASE_INSENSITIVE_ORDER.compare(r1.getName(), r2.getName());
+            }
+        },
+
+        BY_PRIORITY
+        {
+            @Override
+            public int compare(final RunlistElement r1, final RunlistElement r2)
+            {
+                return r1.getPriority() - r2.getPriority();
             }
         }
     }

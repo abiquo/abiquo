@@ -34,28 +34,28 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaChefRecipeDAO")
-public class ChefRecipeDAO extends DefaultDAOBase<Integer, ChefRecipe>
+@Repository("jpaRunlistElementDAO")
+public class RunlistElementDAO extends DefaultDAOBase<Integer, RunlistElement>
 {
-    public ChefRecipeDAO()
+    public RunlistElementDAO()
     {
-        super(ChefRecipe.class);
+        super(RunlistElement.class);
     }
 
-    public ChefRecipeDAO(final EntityManager entityManager)
+    public RunlistElementDAO(final EntityManager entityManager)
     {
-        super(ChefRecipe.class, entityManager);
+        super(RunlistElement.class, entityManager);
     }
 
-    public List<ChefRecipe> findByVirtualMachine(final VirtualMachine virtualmachine)
+    public List<RunlistElement> findByVirtualMachine(final VirtualMachine virtualmachine)
     {
         Criteria criteria = createCriteria(sameVirtualMachine(virtualmachine));
-        criteria.addOrder(Order.asc(ChefRecipe.VIRTUALMACHINE_PROPERTY));
+        criteria.addOrder(Order.asc(RunlistElement.PRIORITY_PROPERTY));
         return getResultList(criteria);
     }
 
     private static Criterion sameVirtualMachine(final VirtualMachine virtualmachine)
     {
-        return Restrictions.eq(ChefRecipe.VIRTUALMACHINE_PROPERTY, virtualmachine);
+        return Restrictions.eq(RunlistElement.VIRTUALMACHINE_PROPERTY, virtualmachine);
     }
 }

@@ -26,61 +26,64 @@ import java.util.List;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.util.chef.ChefUtils;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class ChefRecipeGenerator extends DefaultEntityGenerator<ChefRecipe>
+public class RunlistElementGenerator extends DefaultEntityGenerator<RunlistElement>
 {
     protected VirtualMachineGenerator virtualMachineGenerator;
 
-    public ChefRecipeGenerator(final SeedGenerator seed)
+    public RunlistElementGenerator(final SeedGenerator seed)
     {
         super(seed);
         virtualMachineGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(final ChefRecipe obj1, final ChefRecipe obj2)
+    public void assertAllPropertiesEqual(final RunlistElement obj1, final RunlistElement obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, ChefRecipe.NAME_PROPERTY,
-            ChefRecipe.DESCRIPTION_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, RunlistElement.NAME_PROPERTY,
+            RunlistElement.DESCRIPTION_PROPERTY, RunlistElement.PRIORITY_PROPERTY);
 
         virtualMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(),
             obj2.getVirtualMachine());
     }
 
     @Override
-    public ChefRecipe createUniqueInstance()
+    public RunlistElement createUniqueInstance()
     {
         VirtualMachine virtualMachine = virtualMachineGenerator.createUniqueInstance();
         return createInstance(virtualMachine);
     }
 
-    public ChefRecipe createInstanceWithoutVirtualMachine()
+    public RunlistElement createInstanceWithoutVirtualMachine()
     {
         return createInstance(null);
     }
 
-    public ChefRecipe createInstance(final VirtualMachine virtualMachine)
+    public RunlistElement createInstance(final VirtualMachine virtualMachine)
     {
-        String name = newString(nextSeed(), ChefRecipe.NAME_LENGTH_MIN, ChefRecipe.NAME_LENGTH_MAX);
+        String name =
+            newString(nextSeed(), RunlistElement.NAME_LENGTH_MIN, RunlistElement.NAME_LENGTH_MAX);
         return createInstance(name, virtualMachine);
     }
 
-    public ChefRecipe createInstance(final String name, final VirtualMachine virtualMachine)
+    public RunlistElement createInstance(final String name, final VirtualMachine virtualMachine)
     {
         String description =
-            newString(nextSeed(), ChefRecipe.DESCRIPTION_LENGTH_MIN,
-                ChefRecipe.DESCRIPTION_LENGTH_MAX);
+            newString(nextSeed(), RunlistElement.DESCRIPTION_LENGTH_MIN,
+                RunlistElement.DESCRIPTION_LENGTH_MAX);
 
-        ChefRecipe recipe = new ChefRecipe(name, description);
-        recipe.setVirtualMachine(virtualMachine);
+        RunlistElement element =
+            new RunlistElement(ChefUtils.toRecipe(name), description, nextSeed());
+        element.setVirtualMachine(virtualMachine);
 
-        return recipe;
+        return element;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(final ChefRecipe entity,
+    public void addAuxiliaryEntitiesToPersist(final RunlistElement entity,
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);

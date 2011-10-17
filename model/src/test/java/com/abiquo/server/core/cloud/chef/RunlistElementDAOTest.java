@@ -34,7 +34,7 @@ import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class ChefRecipeDAOTest extends DefaultDAOTestBase<ChefRecipeDAO, ChefRecipe>
+public class RunlistElementDAOTest extends DefaultDAOTestBase<RunlistElementDAO, RunlistElement>
 {
     protected VirtualMachineGenerator vmGenerator;
 
@@ -47,36 +47,36 @@ public class ChefRecipeDAOTest extends DefaultDAOTestBase<ChefRecipeDAO, ChefRec
     }
 
     @Override
-    protected ChefRecipeDAO createDao(final EntityManager entityManager)
+    protected RunlistElementDAO createDao(final EntityManager entityManager)
     {
-        return new ChefRecipeDAO(entityManager);
+        return new RunlistElementDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<ChefRecipe> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<RunlistElement> createEntityInstanceGenerator()
     {
-        return new ChefRecipeGenerator(getSeed());
+        return new RunlistElementGenerator(getSeed());
     }
 
     @Override
-    public ChefRecipeGenerator eg()
+    public RunlistElementGenerator eg()
     {
-        return (ChefRecipeGenerator) super.eg();
+        return (RunlistElementGenerator) super.eg();
     }
 
     @Test
     public void testFindByVirtualMachine()
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
-        ChefRecipe recipe = eg().createInstance(vm);
+        RunlistElement element = eg().createInstance(vm);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        eg().addAuxiliaryEntitiesToPersist(recipe, entitiesToPersist);
-        persistAll(ds(), entitiesToPersist, recipe);
+        eg().addAuxiliaryEntitiesToPersist(element, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, element);
 
-        ChefRecipeDAO dao = createDaoForRollbackTransaction();
+        RunlistElementDAO dao = createDaoForRollbackTransaction();
 
-        List<ChefRecipe> chefRecipes = dao.findByVirtualMachine(vm);
-        assertEquals(chefRecipes.size(), 1);
+        List<RunlistElement> elements = dao.findByVirtualMachine(vm);
+        assertEquals(elements.size(), 1);
     }
 }

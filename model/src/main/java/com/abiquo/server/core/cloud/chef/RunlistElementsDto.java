@@ -32,18 +32,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Represents a collection of {@link ChefRecipeDto}.
+ * Represents a collection of {@link RunlistElementDto}.
  * 
  * @author ibarrera
  */
-@XmlRootElement(name = "recipes")
-public class ChefRecipesDto extends WrapperDto<ChefRecipeDto>
+@XmlRootElement(name = "runlist")
+public class RunlistElementsDto extends WrapperDto<RunlistElementDto>
 {
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "recipe")
-    public List<ChefRecipeDto> getCollection()
+    @XmlElement(name = "element")
+    public List<RunlistElementDto> getCollection()
     {
         return collection;
     }

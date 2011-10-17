@@ -29,8 +29,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.chef.ChefRecipe;
-import com.abiquo.server.core.cloud.chef.ChefRecipeDAO;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
+import com.abiquo.server.core.cloud.chef.RunlistElementDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -48,7 +48,7 @@ public class VirtualMachineRep extends DefaultRepBase
     private RasdManagementDAO rasdDao;
 
     @Autowired
-    private ChefRecipeDAO chefDao;
+    private RunlistElementDAO chefDao;
 
     public VirtualMachineRep()
     {
@@ -64,7 +64,7 @@ public class VirtualMachineRep extends DefaultRepBase
 
         this.dao = new VirtualMachineDAO(entityManager);
         this.rasdDao = new RasdManagementDAO(entityManager);
-        this.chefDao = new ChefRecipeDAO(entityManager);
+        this.chefDao = new RunlistElementDAO(entityManager);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -127,22 +127,23 @@ public class VirtualMachineRep extends DefaultRepBase
         return rasdDao.findByVirtualMachine(virtualMachine);
     }
 
-    public ChefRecipe findRecipeById(final Integer id)
+    public RunlistElement findRunlistElementById(final Integer id)
     {
         return chefDao.findById(id);
     }
 
-    public void insertRecipe(final ChefRecipe recipe)
+    public void insertRunlistElement(final RunlistElement runlistElement)
     {
-        chefDao.persist(recipe);
+        chefDao.persist(runlistElement);
     }
 
-    public void deleteRecipe(final ChefRecipe recipe)
+    public void deleteRunlistElement(final RunlistElement runlistElement)
     {
-        chefDao.remove(recipe);
+        chefDao.remove(runlistElement);
     }
 
-    public List<ChefRecipe> findRecipesByVirtualMachine(final VirtualMachine virtualMachine)
+    public List<RunlistElement> findRunlistElementsByVirtualMachine(
+        final VirtualMachine virtualMachine)
     {
         return chefDao.findByVirtualMachine(virtualMachine);
     }

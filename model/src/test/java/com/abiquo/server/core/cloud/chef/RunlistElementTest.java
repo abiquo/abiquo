@@ -27,54 +27,54 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.abiquo.server.core.cloud.chef.ChefRecipe.RecipeOrder;
+import com.abiquo.server.core.cloud.chef.RunlistElement.RunlistElementOrder;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-public class ChefRecipeTest extends DefaultEntityTestBase<ChefRecipe>
+public class RunlistElementTest extends DefaultEntityTestBase<RunlistElement>
 {
 
     @Override
-    protected InstanceTester<ChefRecipe> createEntityInstanceGenerator()
+    protected InstanceTester<RunlistElement> createEntityInstanceGenerator()
     {
-        return new ChefRecipeGenerator(getSeed());
+        return new RunlistElementGenerator(getSeed());
     }
 
     @Test
     public void testIsCookBook()
     {
-        ChefRecipe recipe = createUniqueEntity();
+        RunlistElement recipe = createUniqueEntity();
 
-        recipe.setName("");
-        assertTrue(recipe.isCookbook());
-
-        recipe.setName(":");
-        assertTrue(recipe.isCookbook());
-
-        recipe.setName("testcookbook");
-        assertTrue(recipe.isCookbook());
-
-        recipe.setName("::");
+        recipe.setName("recipe[]");
         assertFalse(recipe.isCookbook());
 
-        recipe.setName("test::recipe");
+        recipe.setName("recipe[:]");
+        assertTrue(recipe.isCookbook());
+
+        recipe.setName("recipe[testcookbook]");
+        assertTrue(recipe.isCookbook());
+
+        recipe.setName("recipe[::]");
+        assertFalse(recipe.isCookbook());
+
+        recipe.setName("recipe[test::recipe]");
         assertFalse(recipe.isCookbook());
     }
 
     @Test
     public void testSortRecipes()
     {
-        ChefRecipe r1 = createUniqueEntity();
-        ChefRecipe r2 = createUniqueEntity();
+        RunlistElement r1 = createUniqueEntity();
+        RunlistElement r2 = createUniqueEntity();
 
-        r1.setName("testrecipe");
-        r2.setName("testrecipe::recipe");
+        r1.setName("recipe[AAtestrecipe]");
+        r2.setName("recipe[testrecipe::recipe]");
 
-        List<ChefRecipe> recipes = new ArrayList<ChefRecipe>();
+        List<RunlistElement> recipes = new ArrayList<RunlistElement>();
         recipes.add(r2);
         recipes.add(r1);
 
-        Collections.sort(recipes, RecipeOrder.BY_NAME);
+        Collections.sort(recipes, RunlistElementOrder.BY_NAME);
 
         assertEquals(recipes.get(0).getName(), r1.getName());
         assertEquals(recipes.get(1).getName(), r2.getName());
