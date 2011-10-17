@@ -284,9 +284,10 @@ public class EnterpriseResource extends AbstractResource
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
         dto.setChefURL(e.getChefURL());
+        dto.setChefClient(e.getChefClient());
         dto.setChefValidator(e.getChefValidator());
-        dto.setChefValidatorCertificate(e.getChefValidatorCertificate());
         dto.setChefClientCertificate(e.getChefClientCertificate());
+        dto.setChefValidatorCertificate(e.getChefValidatorCertificate());
         dto.setIsReservationRestricted(e.getIsReservationRestricted());
 
         dto = addLinks(restBuilder, dto);
