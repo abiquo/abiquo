@@ -43,13 +43,14 @@ import org.hibernate.validator.constraints.Range;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 /**
- * TODO icon and category
+ * TODO category
  */
 /**
  * TODO master
@@ -504,26 +505,26 @@ public class VirtualImage extends DefaultEntityBase
         this.description = description;
     }
 
-    public final static String ID_ICON_PROPERTY = "idIcon";
+    public final static String ICON_PROPERTY = "icon";
 
-    private final static String ID_ICON_COLUMN = "idIcon";
+    private final static boolean ICON_REQUIRED = true;
 
-    private final static int ID_ICON_MIN = Integer.MIN_VALUE;
+    private final static String ICON_ID_COLUMN = "idIcon";
 
-    private final static int ID_ICON_MAX = Integer.MAX_VALUE;
+    @JoinColumn(name = ICON_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_icon")
+    private Icon icon;
 
-    @Column(name = ID_ICON_COLUMN, nullable = true)
-    @Range(min = ID_ICON_MIN, max = ID_ICON_MAX)
-    private Integer idIcon;
-
-    public Integer getIdIcon()
+    @Required(value = ICON_REQUIRED)
+    public Icon getIcon()
     {
-        return this.idIcon;
+        return icon;
     }
 
-    private void setIdIcon(final Integer idIcon)
+    public void setIcon(final Icon icon)
     {
-        this.idIcon = idIcon;
+        this.icon = icon;
     }
 
     public final static String COST_CODE_PROPERTY = "costCode";

@@ -44,7 +44,7 @@ public class Icon extends DefaultEntityBase
     // code
     public Icon()
     {
-        // Just for JPA support
+        super();
     }
 
     public Icon(final String iconPath)

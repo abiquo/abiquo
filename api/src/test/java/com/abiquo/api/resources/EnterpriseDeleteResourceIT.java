@@ -96,7 +96,7 @@ public class EnterpriseDeleteResourceIT extends AbstractJpaGeneratorIT
     public void shouldDeleteEnterpriseWhenContainsVirtualImages()
     {
         VirtualImage image = virtualImageGenerator.createUniqueInstance();
-        setup(image.getEnterprise(), image.getCategory(), image);
+        setup(image.getEnterprise(), image.getIcon(), image.getCategory(), image);
 
         String uri = resolveEnterpriseURI(image.getEnterprise().getId());
 

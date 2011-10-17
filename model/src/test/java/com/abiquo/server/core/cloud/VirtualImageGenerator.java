@@ -27,6 +27,8 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -39,11 +41,13 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     // XXX CategoryGenerator categoryGenerator;
     // TODO and iconGenerator
 
-    EnterpriseGenerator enterpriseGenerator;
+    private EnterpriseGenerator enterpriseGenerator;
 
-    RepositoryGenerator repositoryGenerator;
+    private RepositoryGenerator repositoryGenerator;
 
-    CategoryGenerator categoryGenerator;
+    private CategoryGenerator categoryGenerator;
+
+    private IconGenerator iconGenerator;
 
     public VirtualImageGenerator(final SeedGenerator seed)
     {
@@ -51,6 +55,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         enterpriseGenerator = new EnterpriseGenerator(seed);
         repositoryGenerator = new RepositoryGenerator(seed);
         categoryGenerator = new CategoryGenerator(seed);
+        iconGenerator = new IconGenerator(seed);
     }
 
     @Override
@@ -63,7 +68,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
             VirtualImage.DISK_FILE_SIZE_PROPERTY, VirtualImage.DESCRIPTION_PROPERTY,
-            VirtualImage.ID_ICON_PROPERTY, VirtualImage.ID_REPOSITORY_PROPERTY);
+            VirtualImage.ICON_PROPERTY, VirtualImage.ID_REPOSITORY_PROPERTY);
     }
 
     @Override
@@ -74,9 +79,11 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
         Category category = categoryGenerator.createUniqueInstance();
 
+        Icon icon = iconGenerator.createUniqueInstance();
+
         VirtualImage vi = new VirtualImage(enterprise);
         vi.setCategory(category);
-
+        vi.setIcon(icon);
         return vi;
 
         // return new VirtualImage(enterprise);
@@ -87,8 +94,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     {
         Category category = categoryGenerator.createUniqueInstance();
 
+        Icon icon = iconGenerator.createUniqueInstance();
         VirtualImage vi = new VirtualImage(enterprise);
         vi.setCategory(category);
+        vi.setIcon(icon);
 
         return vi;
 
@@ -146,6 +155,9 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
 
+        Icon icon = entity.getIcon();
+        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+        entitiesToPersist.add(icon);
     }
 
     public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
@@ -156,6 +168,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         Category category = entity.getCategory();
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
+
+        Icon icon = entity.getIcon();
+        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+        entitiesToPersist.add(icon);
 
     }
 

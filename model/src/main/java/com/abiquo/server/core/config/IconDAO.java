@@ -21,15 +21,22 @@
 
 package com.abiquo.server.core.config;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaIconDAO")
 public class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
+    private static final String BY_VLAN_USED_BY_ANY_VDC =
+        " SELECT vi FROM virtualimage vimage WHERE vimage.idIcon = :iconId";
+
     public IconDAO()
     {
         super(Icon.class);
@@ -74,4 +81,18 @@ public class IconDAO extends DefaultDAOBase<Integer, Icon>
         flush();
     }
 
+    public boolean iconInUseByVirtualImages(final Icon icon)
+    {
+        // TODO Auto-generated method stub
+        List<VirtualImage> vimages;
+        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
+        query.setParameter("iconId", icon.getId());
+        vimages = query.list();
+
+        if (vimages.isEmpty())
+        {
+            return false;
+        }
+        return true;
+    }
 }

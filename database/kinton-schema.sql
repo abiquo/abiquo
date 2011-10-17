@@ -1474,7 +1474,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package_list_has_ovf_package` (
   CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package_list1`
     FOREIGN KEY (`id_ovf_package_list` )
     REFERENCES `kinton`.`ovf_package_list` (`id_ovf_package_list` )
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package1`
     FOREIGN KEY (`id_ovf_package` )

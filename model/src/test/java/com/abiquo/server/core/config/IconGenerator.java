@@ -46,7 +46,6 @@ public class IconGenerator extends DefaultEntityGenerator<Icon>
     @Override
     public Icon createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
 
         Icon icon = new Icon();
         icon.setName(newString(nextSeed(), 0, 20));

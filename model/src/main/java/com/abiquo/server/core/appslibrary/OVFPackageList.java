@@ -183,6 +183,8 @@ public class OVFPackageList extends DefaultEntityBase
         if (ovfPackages == null)
         {
             ovfPackages = new ArrayList<OVFPackage>();
+            ovfPackages.add(ovfpackage);
+            ovfpackage.addToOvfPackageLists(this);
         }
         if (!ovfPackages.contains(ovfpackage))
         {

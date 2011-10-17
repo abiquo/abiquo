@@ -106,6 +106,7 @@ public class MachineServiceTest extends AbstractUnitTest
         entitiesToPersist.add(hypervisor);
         entitiesToPersist.add(vdc);
         entitiesToPersist.add(image.getCategory());
+        entitiesToPersist.add(image.getIcon());
         entitiesToPersist.add(image);
         entitiesToPersist.add(vapp);
         for (Privilege p : vm.getUser().getRole().getPrivileges())

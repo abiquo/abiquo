@@ -23,9 +23,7 @@ package com.abiquo.server.core.cloud;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -42,7 +40,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     }
 
     @Override
-    protected VirtualImageDAO createDao(EntityManager entityManager)
+    protected VirtualImageDAO createDao(final EntityManager entityManager)
     {
         return new VirtualImageDAO(entityManager);
     }
@@ -65,5 +63,4 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         return (VirtualImageGenerator) super.eg();
     }
 
-    
 }

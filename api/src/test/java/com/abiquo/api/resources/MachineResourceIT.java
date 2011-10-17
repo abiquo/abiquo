@@ -322,6 +322,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
@@ -389,6 +390,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
@@ -400,6 +402,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm2.getVirtualImage().getIcon());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(vdc);

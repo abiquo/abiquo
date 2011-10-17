@@ -22,6 +22,7 @@ package com.abiquo.abiserver.appslibrary.stub;
 
 import static java.lang.String.valueOf;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -52,6 +53,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 import com.abiquo.server.core.config.IconDto;
+import com.abiquo.server.core.config.IconsDto;
 
 public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
 {
@@ -335,15 +337,25 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         put(uri, iconDto);
     }
 
-    public List<IconHB> getIcons(final UserSession userSession, final Integer idEnterprise)
+    public List<Icon> getIcons(final UserSession userSession, final Integer idEnterprise)
     {
 
         final String uri = createIconsLink();
-        return null;
+
+        ClientResponse response = get(uri);
+
+        IconsDto icons = response.getEntity(IconsDto.class);
+        List<Icon> listIcon = new ArrayList<Icon>();
+        for (IconDto icon : icons.getCollection())
+        {
+            listIcon.add(createFlexIconObject(icon));
+        }
+
+        return listIcon;
 
     }
 
-    public static Icon createIFlexIconObject(final IconDto iconDto)
+    public static Icon createFlexIconObject(final IconDto iconDto)
     {
         Icon icon = new Icon();
         icon.setId(iconDto.getId());
