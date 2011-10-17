@@ -25,11 +25,14 @@ import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
 public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement>
 {
+
+    VirtualImageGenerator virtualImageGenerator;
 
     @Override
     protected InstanceTester<VolumeManagement> createEntityInstanceGenerator()
@@ -124,7 +127,8 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         volume.setVirtualImage(null);
         assertFalse(volume.isStateful());
 
-        volume.setVirtualImage(new VirtualImage(null));
+        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        volume.setVirtualImage(virtualImage);
         assertTrue(volume.isStateful());
     }
 }

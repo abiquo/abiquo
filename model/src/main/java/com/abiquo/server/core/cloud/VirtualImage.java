@@ -60,6 +60,7 @@ public class VirtualImage extends DefaultEntityBase
         super();
     }
 
+    @Deprecated
     public VirtualImage(final Enterprise enterprise)
     {
         super();
@@ -70,6 +71,7 @@ public class VirtualImage extends DefaultEntityBase
 
     }
 
+    @Deprecated
     public VirtualImage(final Enterprise enterprise, final DiskFormatType diskFormatType)
     {
         super();
@@ -78,6 +80,21 @@ public class VirtualImage extends DefaultEntityBase
         // setCategory(cat);
         setDiskFormatType(diskFormatType);
         setName("FIXME"); // TODO: change this.
+    }
+
+    public VirtualImage(final DiskFormatType diskFormatType, final boolean stateful,
+        final boolean treaty, final boolean shared, final String pathName, final boolean deleted,
+        final Category category, final long diskFileSize)
+    {
+        super();
+        this.diskFormatType = diskFormatType;
+        this.stateful = stateful;
+        this.treaty = treaty;
+        this.shared = shared;
+        this.pathName = pathName;
+        this.deleted = deleted;
+        this.category = category;
+        this.diskFileSize = diskFileSize;
     }
 
     private final static String ID_COLUMN = "idImage";

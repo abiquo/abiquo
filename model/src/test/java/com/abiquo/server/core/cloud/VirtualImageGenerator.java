@@ -70,20 +70,23 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     public VirtualImage createUniqueInstance()
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        Category category = categoryGenerator.createUniqueInstance();
+        Repository repository = repositoryGenerator.createUniqueInstance();
+        final String name =
+            newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
 
-        VirtualImage vi = new VirtualImage(enterprise);
-        vi.setCategory(category);
+        VirtualImage vi = createInstance(enterprise, repository, 0, 0, 0, name);
 
         return vi;
     }
 
     public VirtualImage createInstance(final Enterprise enterprise)
     {
-        Category category = categoryGenerator.createUniqueInstance();
+        Repository repository = repositoryGenerator.createUniqueInstance();
 
-        VirtualImage vi = new VirtualImage(enterprise);
-        vi.setCategory(category);
+        final String name =
+            newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
+
+        VirtualImage vi = createInstance(enterprise, repository, 0, 0, 0, name);
 
         return vi;
     }
@@ -91,7 +94,22 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
-        VirtualImage vimage = new VirtualImage(enterprise);
+        Category category = categoryGenerator.createUniqueInstance();
+        Long diskFileSize = newBigDecimal(nextSeed()).longValue();
+        final String pathName = newString(nextSeed(), 0, 20);
+
+        VirtualImage vimage =
+            new VirtualImage(DiskFormatType.RAW,
+                false,
+                false,
+                false,
+                pathName,
+                true,
+                category,
+                diskFileSize);
+
+        vimage.setEnterprise(enterprise);
+        vimage.setName(name);
 
         vimage.setCpuRequired(cpuRequired);
         vimage.setRamRequired(ramRequired);
@@ -100,14 +118,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
         String ovfid =
             newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
-
-        Long diskFileSize = newBigDecimal(nextSeed()).longValue();
-
         vimage.setOvfid(ovfid);
-        vimage.setDiskFormatType(DiskFormatType.RAW); // XXX RAW
-        vimage.setName(name);
-
-        vimage.setDiskFileSize(diskFileSize);
 
         return vimage;
     }
