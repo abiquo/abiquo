@@ -185,7 +185,9 @@ public enum APIError
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_DEFAULT_TEMPLATE_ERROR(
         "RACK-9",
-        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
+        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"), RACK_CANNOT_REMOVE_VMS(
+        "RACK-10",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -487,8 +489,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 
