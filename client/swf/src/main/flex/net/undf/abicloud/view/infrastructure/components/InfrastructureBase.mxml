@@ -299,11 +299,14 @@
             
             private function getVirtualMachine(eventInfra:Event = null):void{
             	
-                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
-                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
-                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                event.callback = setVirtualMachine;
-                dispatchEvent(event);
+                if(infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is PhysicalMachine)
+                {
+	                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+	                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+	                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+	                event.callback = setVirtualMachine;
+	                dispatchEvent(event);
+                }
             }
             
             private function setVirtualMachine(value:ArrayCollection):void{
@@ -575,7 +578,8 @@
              */
             public function checkInfrastructure(event:Event = null):void
             {
-                getRacksByDatacenter();
+                //getRacksByDatacenter();
+                getVirtualMachine();
             }
         ]]>
     </mx:Script>
