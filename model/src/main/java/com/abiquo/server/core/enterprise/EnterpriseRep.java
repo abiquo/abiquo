@@ -72,6 +72,9 @@ public class EnterpriseRep extends DefaultRepBase
     private MachineDAO machineDAO;
 
     @Autowired
+    private EnterprisePropertiesDAO enterprisePropertiesDAO;
+
+    @Autowired
     private DatacenterLimitsDAO limitsDAO;
 
     public EnterpriseRep()
@@ -115,6 +118,16 @@ public class EnterpriseRep extends DefaultRepBase
     public RoleLdap findLdapRoleByType(final String type)
     {
         return roleLdapDAO.findByType(type);
+    }
+
+    public EnterpriseProperties findPropertiesByEnterprise(final Enterprise enterprise)
+    {
+        return enterprisePropertiesDAO.findByEnterprise(enterprise);
+    }
+
+    public void updateEnterpriseProperties(final EnterpriseProperties enterpriseProperties)
+    {
+        enterprisePropertiesDAO.flush();
     }
 
     public Enterprise findById(final Integer id)

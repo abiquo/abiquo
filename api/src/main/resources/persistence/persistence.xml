@@ -37,6 +37,7 @@
         <!-- end: stateful -->
         <!-- enterprise -->
         <class>com.abiquo.server.core.enterprise.Enterprise</class>
+	<class>com.abiquo.server.core.enterprise.EnterpriseProperties</class>
         <class>com.abiquo.server.core.enterprise.Role</class>
         <class>com.abiquo.server.core.enterprise.RoleLdap</class>
         <class>com.abiquo.server.core.enterprise.Privilege</class>
