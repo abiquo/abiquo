@@ -531,7 +531,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         if (getPrivileges)
         {
-            RESTLink privilegesLink = role.searchLink("action", "privileges");
+            RESTLink privilegesLink = role.searchLink("privileges");
 
             if (privilegesLink != null)
             {
