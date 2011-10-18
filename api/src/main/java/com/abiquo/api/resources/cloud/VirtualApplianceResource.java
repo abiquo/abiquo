@@ -24,6 +24,7 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -159,17 +160,27 @@ public class VirtualApplianceResource
 
     }
 
-    // @POST
-    // @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
     /***********************************/
     /***********************************/
     /* EXPERIMENTAL, NOT AVAILABLE YET */
     /***********************************/
     /***********************************/
+    @POST
+    @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
     public void deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
     {
+        // Method[] methods = VirtualApplianceResource.class.getMethods();
+        // for (Method method : methods)
+        // {
+        // if (method.isAnnotationPresent(Approval.class))
+        // {
+        // Approval approval = method.getAnnotation(Approval.class);
+        // String role = approval.role();
+        // }
+        // }
+
         service.startVirtualAppliance(vdcId, vappId);
     }
 }

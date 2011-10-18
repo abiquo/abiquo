@@ -39,11 +39,14 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.ApprovalService;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
+import com.abiquo.api.spring.interceptors.annotations.Approval;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.EventingSupport;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
@@ -95,6 +98,8 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
+    ApprovalService approvalService;
+
     public VirtualApplianceService()
     {
 
@@ -105,8 +110,19 @@ public class VirtualApplianceService extends DefaultApiService
         this.repo = new VirtualDatacenterRep(em);
         this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-        this.vdcService = new VirtualDatacenterService(em);
         this.infrastructureService = new InfrastructureService(em);
+
+        try
+        {
+            approvalService =
+                (ApprovalService) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.api.services.ApprovalServicePremium").newInstance();
+        }
+        catch (Exception e)
+        {
+            approvalService = new ApprovalService();
+        }
+
     }
 
     /**
@@ -151,6 +167,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Approval(role = SecurityService.USERS_MANAGE_ROLES)
     public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
