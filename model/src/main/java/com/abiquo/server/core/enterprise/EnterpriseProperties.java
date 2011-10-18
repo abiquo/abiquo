@@ -73,7 +73,7 @@ public class EnterpriseProperties extends DefaultEntityBase
         this.enterprise = enterprise;
     }
 
-    public static final String KEY_COLUMN = "key";
+    public static final String KEY_COLUMN = "map_key";
 
     public static final String VALUE_COLUMN = "value";
 
