@@ -54,6 +54,9 @@ public class VirtualApplianceRep extends DefaultRepBase
     @Autowired
     private DiskStatefulConversionDAO diskStatefulConversionDAO;
 
+    @Autowired
+    private VirtualImageConversionDAO virtualImageConversionDao;
+
     public VirtualApplianceRep()
     {
 
@@ -67,6 +70,7 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
         this.vAppStatefulConversionDao = new VirtualApplianceStatefulConversionDAO(em);
         this.nodeVirtualImageStatefulConversioDao = new NodeVirtualImageStatefulConversionDAO(em);
+        this.virtualImageConversionDao = new VirtualImageConversionDAO(em);
     }
 
     public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
@@ -97,7 +101,8 @@ public class VirtualApplianceRep extends DefaultRepBase
     public Collection<NodeVirtualImageStatefulConversion> findNodeStatefulConversionsByVirtualImageConversion(
         final VirtualImageConversion virtualImageConversion)
     {
-        return nodeVirtualImageStatefulConversioDao.findByVirtualImageConversion(virtualImageConversion);
+        return nodeVirtualImageStatefulConversioDao
+            .findByVirtualImageConversion(virtualImageConversion);
     }
 
     public DiskStatefulConversion insertDiskStatefulConversion(final DiskStatefulConversion dsc)
@@ -112,5 +117,15 @@ public class VirtualApplianceRep extends DefaultRepBase
         final NodeVirtualImageStatefulConversion nvisc)
     {
         nodeVirtualImageStatefulConversioDao.flush();
+    }
+
+    public VirtualImageConversion findVirtualImageConversionById(final Integer id)
+    {
+        return virtualImageConversionDao.findById(id);
+    }
+
+    public void updateVirtualImageConversion(final VirtualImageConversion vic)
+    {
+        virtualImageConversionDao.flush();
     }
 }
