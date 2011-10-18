@@ -693,7 +693,7 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
 
-    protected String createRecipesLink(final Integer vdcId, final Integer vappId,
+    protected String createRunlistLink(final Integer vdcId, final Integer vappId,
         final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -702,7 +702,7 @@ public class AbstractAPIStub
         params.put("vm", virtualMachineId.toString());
         return resolveURI(
             apiUri,
-            "cloud/virtualdatacenters/{vdc}/virtualappliances/{vapp}/virtualmachines/{vm}/config/recipes",
+            "cloud/virtualdatacenters/{vdc}/virtualappliances/{vapp}/virtualmachines/{vm}/config/runlist",
             params);
     }
 }

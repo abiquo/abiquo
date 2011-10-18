@@ -36,10 +36,10 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.util.ChefUtils;
 import com.abiquo.model.validation.RunlistItem;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.DefaultEntityBase;
-import com.abiquo.server.core.util.chef.ChefUtils;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -218,6 +218,16 @@ public class RunlistElement extends DefaultEntityBase
             throw new IllegalArgumentException("The current runlist element is not a role");
         }
         return ChefUtils.getRoleName(name);
+    }
+
+    public Type getType()
+    {
+        return isRecipe() ? Type.RECIPE : Type.ROLE;
+    }
+
+    public static enum Type
+    {
+        RECIPE, ROLE
     }
 
     public static enum RunlistElementOrder implements Comparator<RunlistElement>

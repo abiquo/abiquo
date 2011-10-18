@@ -37,7 +37,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 
-// TODO add NodeVirtualImageDao functionalities
 @Repository
 public class VirtualMachineRep extends DefaultRepBase
 {
@@ -137,15 +136,24 @@ public class VirtualMachineRep extends DefaultRepBase
         chefDao.persist(runlistElement);
     }
 
+    public void updateRunlistElements()
+    {
+        chefDao.flush();
+    }
+
     public void deleteRunlistElement(final RunlistElement runlistElement)
     {
         chefDao.remove(runlistElement);
     }
 
-    public List<RunlistElement> findRunlistElementsByVirtualMachine(
-        final VirtualMachine virtualMachine)
+    public List<RunlistElement> findRunlistByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return chefDao.findByVirtualMachine(virtualMachine);
+    }
+
+    public void clearVirtualMachineRunlist(final VirtualMachine virtualMachine)
+    {
+        chefDao.clearVirtualMachineRunlist(virtualMachine);
     }
 
 }

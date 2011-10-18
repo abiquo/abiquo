@@ -20,17 +20,17 @@
  */
 package com.abiquo.server.core.cloud.chef;
 
-import static com.abiquo.server.core.util.chef.ChefUtils.getRecipeName;
-import static com.abiquo.server.core.util.chef.ChefUtils.getRoleName;
-import static com.abiquo.server.core.util.chef.ChefUtils.isRecipe;
-import static com.abiquo.server.core.util.chef.ChefUtils.isRole;
+import static com.abiquo.model.util.ChefUtils.getRecipeName;
+import static com.abiquo.model.util.ChefUtils.getRoleName;
+import static com.abiquo.model.util.ChefUtils.isRecipe;
+import static com.abiquo.model.util.ChefUtils.isRole;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import com.abiquo.server.core.util.chef.ChefUtils;
+import com.abiquo.model.util.ChefUtils;
 
 /**
  * Unit tests for the {@link ChefUtils} class.

@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud.chef;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
@@ -52,6 +53,17 @@ public class RunlistElementDAO extends DefaultDAOBase<Integer, RunlistElement>
         Criteria criteria = createCriteria(sameVirtualMachine(virtualmachine));
         criteria.addOrder(Order.asc(RunlistElement.PRIORITY_PROPERTY));
         return getResultList(criteria);
+    }
+
+    public void clearVirtualMachineRunlist(final VirtualMachine virtualmachine)
+    {
+        Query query =
+            getEntityManager().createQuery(
+                "delete from " + getPersistentClass().getName()
+                    + " where virtualMachine = :virtualMachine");
+
+        query.setParameter("virtualMachine", virtualmachine);
+        query.executeUpdate();
     }
 
     private static Criterion sameVirtualMachine(final VirtualMachine virtualmachine)

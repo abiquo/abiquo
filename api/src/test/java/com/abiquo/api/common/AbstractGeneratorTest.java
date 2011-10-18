@@ -161,7 +161,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "virtualimage_conversions", "node_virtual_image_stateful_conversions",
             "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
-            "network_configuration", "chef_recipe", "dhcp_service", "storage_pool", "tier",
+            "network_configuration", "chef_runlist", "dhcp_service", "storage_pool", "tier",
             "storage_device", "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter",
             "repository", "workload_fit_policy_rule", "network", "session", "user",

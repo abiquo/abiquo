@@ -23,10 +23,10 @@ package com.abiquo.server.core.cloud.chef;
 
 import java.util.List;
 
+import com.abiquo.model.util.ChefUtils;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.util.chef.ChefUtils;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 

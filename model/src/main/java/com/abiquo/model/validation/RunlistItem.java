@@ -37,7 +37,7 @@ import javax.validation.Payload;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.abiquo.server.core.util.chef.ChefUtils;
+import com.abiquo.model.util.ChefUtils;
 
 @Documented
 @Constraint(validatedBy = RunlistItem.Validator.class)

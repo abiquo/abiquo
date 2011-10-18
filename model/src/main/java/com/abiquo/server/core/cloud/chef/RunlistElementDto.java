@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "element")
-@XmlType(propOrder = {"name", "description", "selected", "order"})
+@XmlType(propOrder = {"name", "description", "priority", "selected"})
 public class RunlistElementDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
