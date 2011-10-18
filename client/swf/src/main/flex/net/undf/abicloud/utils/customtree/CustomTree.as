@@ -51,6 +51,7 @@ package net.undf.abicloud.utils.customtree
     import net.undf.abicloud.vo.infrastructure.InfrastructureElement;
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.Rack;
+    import net.undf.abicloud.vo.infrastructure.UcsRack;
 
     /**
      *  CustomTree class, to display data in a Tree format.
@@ -378,9 +379,15 @@ package net.undf.abicloud.utils.customtree
 	                physicalMachine = listOfMachines.getItemAt(i) as PhysicalMachine;
 	                //UPDATE ASSIGNEDto ELEMENT
 	                physicalMachine.assignedTo = event.branch.item as InfrastructureElement;
-	                customTreeNodeChild = new CustomTreeNode(physicalMachine, physicalMachine[super.labelField],
-	                                                         this._customTreeDataDescriptor,
-	                                                         false);
+	                if(physicalMachine.assignedTo is UcsRack){
+                        customTreeNodeChild = new CustomTreeNode(physicalMachine, physicalMachine.description,
+                                                                 this._customTreeDataDescriptor,
+                                                                 false);
+	                }else{
+		                customTreeNodeChild = new CustomTreeNode(physicalMachine, physicalMachine[super.labelField],
+		                                                         this._customTreeDataDescriptor,
+		                                                         false);
+	                }
 	                this._innerListDataProvider.addItemAt(customTreeNodeChild, position + 1 + i);
 		            if(elementMatch(physicalMachine)){
 		            	this.selectedIndex = position + 1 + i;
