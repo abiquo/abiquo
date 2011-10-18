@@ -22,7 +22,7 @@
 
 -->
 
-<mx:Form 
+<mx:VBox 
     width="100%" height="100%"
     fontSize="11"
     paddingBottom="6"
@@ -30,6 +30,7 @@
     paddingRight="6"
     paddingTop="6"
     verticalGap="1"
+    verticalAlign="middle"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*">
@@ -215,9 +216,18 @@
     <!--mx:Form id="form" width="50%"
          verticalGap="1" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" fontSize="11"-->
 
-    <mx:VBox direction="vertical"
+    <mx:Form 
     	includeInLayout="{!this._isUCS}"
-    	visible="{!this._isUCS}">
+        visible="{!this._isUCS}"
+	    width="100%" height="100%"
+	    fontSize="11"
+	    paddingBottom="6"
+	    paddingLeft="6"
+	    paddingRight="6"
+	    paddingTop="6"
+	    verticalGap="1"
+	    verticalScrollPolicy="off" horizontalScrollPolicy="off">
+
 	    <mx:FormItem 
 	        height="18"
 	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
@@ -348,10 +358,10 @@
 	            restrict="0-9"
 	            visible="{_editMode}"/>
 	    </mx:FormItem>
-     </mx:VBox>
-     <mx:FormItem 
+     </mx:Form>
+     <!--If UCS Blade not managed-->
+     <mx:Text 
      	includeInLayout="{this._isUCS}"
         visible="{this._isUCS}"
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='LABEL_NO_HYPERVISOR')"/>
-</mx:Form>
+     	text="@Resource(bundle='Infrastructure', key='LABEL_NO_HYPERVISOR')"/>
+</mx:VBox>
