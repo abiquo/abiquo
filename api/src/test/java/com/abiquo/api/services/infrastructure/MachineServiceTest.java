@@ -21,8 +21,6 @@
 
 package com.abiquo.api.services.infrastructure;
 
-import static com.abiquo.server.core.cloud.State.RUNNING;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +89,7 @@ public class MachineServiceTest extends AbstractUnitTest
         VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc);
         VirtualMachine vm =
             vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, "vm_test");
-        vm.setState(RUNNING);
+        vm.setState(State.ON);
 
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
@@ -148,6 +146,6 @@ public class MachineServiceTest extends AbstractUnitTest
             vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         org.testng.Assert.assertNull(virtualMachine.getHypervisor());
         org.testng.Assert.assertNull(virtualMachine.getDatastore());
-        org.testng.Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);
+        org.testng.Assert.assertEquals(virtualMachine.getState(), State.NOT_ALLOCATED);
     }
 }

@@ -328,8 +328,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             virtualAppHBPojo = virtualAppliance.toPojoHB();
 
-            virtualAppHBPojo.setState(StateEnum.NOT_DEPLOYED);
-            virtualAppHBPojo.setSubState(StateEnum.NOT_DEPLOYED);
+            virtualAppHBPojo.setState(StateEnum.NOT_ALLOCATED);
+            virtualAppHBPojo.setSubState(StateEnum.NOT_ALLOCATED);
 
             // Saving the data
             session.save("VirtualappHB", virtualAppHBPojo);
@@ -554,9 +554,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         switch (state)
         {
             case PAUSED:
-            case POWERED_OFF:
+            case OFF:
             case REBOOTED:
-            case RUNNING:
+            case ON:
                 return true;
         }
         return false;
@@ -896,7 +896,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
 
             currentStateAndAllow =
-                dao.checkVirtualApplianceState(virtualAppliance, StateEnum.IN_PROGRESS);
+                dao.checkVirtualApplianceState(virtualAppliance, StateEnum.LOCKED);
 
             userHB =
                 factory.getUserDAO().getUserByLoginAuth(userSession.getUser(),
@@ -981,10 +981,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
 
-                        StateEnum currentStateEnum = StateEnum.NOT_DEPLOYED;
+                        StateEnum currentStateEnum = StateEnum.ALLOCATED;
                         if (virtualAppliance.getNodes().size() > 0)
                         {
-                            currentStateEnum = StateEnum.RUNNING;
+                            currentStateEnum = StateEnum.ON;
                         }
                         State currentState = new State(currentStateEnum);
 
@@ -998,7 +998,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     else
                     {
                         // Forcing the state to IN PROGRESS for visual purposes
-                        State state = new State(StateEnum.IN_PROGRESS);
+                        State state = new State(StateEnum.LOCKED);
                         virtualAppliance.setState(state);
                         State applychangesState = new State(StateEnum.APPLY_CHANGES_NEEDED);
                         virtualAppliance.setState(state);
@@ -1227,7 +1227,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     NodeVirtualImageHB nodeVi = (NodeVirtualImageHB) nodePojo;
 
                     if (nodeVi.getVirtualMachineHB() != null
-                        && nodeVi.getVirtualMachineHB().getState() != StateEnum.NOT_DEPLOYED)
+                        && nodeVi.getVirtualMachineHB().getState() != StateEnum.NOT_ALLOCATED)
                     {
                         nodesToDelete.add(node);
                         // Delete Rasds
@@ -1283,7 +1283,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 session = checkOpenTransaction(session);
                 session.delete(nodePojo);
             }
-            else if (nodevi.getVirtualMachine().getState().toEnum() != StateEnum.NOT_DEPLOYED)
+            else if (nodevi.getVirtualMachine().getState().toEnum() != StateEnum.NOT_ALLOCATED)
             {
                 updatenodesList.add(node);
             }
@@ -1824,7 +1824,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
 
                 currentStateAndAllow =
-                    dao.checkVirtualApplianceState(virtualAppliance, StateEnum.RUNNING);
+                    dao.checkVirtualApplianceState(virtualAppliance, StateEnum.ON);
 
                 factory.endConnection();
             }
@@ -1833,7 +1833,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 VirtualApplianceDAO dao = factory.getVirtualApplianceDAO();
 
                 currentStateAndAllow =
-                    dao.checkVirtualApplianceState(virtualAppliance, StateEnum.RUNNING);
+                    dao.checkVirtualApplianceState(virtualAppliance, StateEnum.ON);
             }
 
         }
@@ -1901,8 +1901,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             {
                 // Everything went fine
                 // Setting the new State of the Virtual Appliance
-                virtualAppliance =
-                    updateStateInDB(virtualAppliance, StateEnum.NOT_DEPLOYED).getData();
+                virtualAppliance = updateStateInDB(virtualAppliance, StateEnum.ALLOCATED).getData();
                 dataResult.setData(virtualAppliance);
 
                 traceLog(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE,
@@ -1982,7 +1981,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             if (node.isNodeTypeVirtualImage())
             {
                 NodeVirtualImage nodevi = (NodeVirtualImage) node;
-                if (nodevi.getVirtualMachine().getState().toEnum() != StateEnum.NOT_DEPLOYED)
+                if (nodevi.getVirtualMachine().getState().toEnum() != StateEnum.NOT_ALLOCATED)
                 {
                     updatenodesList.add(node);
                 }
@@ -2011,9 +2010,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         VirtualApplianceDAO applianceDAO = daoFactory.getVirtualApplianceDAO();
         VirtualappHB current = applianceDAO.findByIdNamedExtended(virtualAppliance.getId());
 
-        if (current.getState() != StateEnum.IN_PROGRESS)
+        if (current.getState() != StateEnum.LOCKED)
         {
-            current.setState(StateEnum.IN_PROGRESS);
+            current.setState(StateEnum.LOCKED);
             current.setSubState(subState);
 
             applianceDAO.makePersistent(current);
@@ -2242,8 +2241,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     {
 
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
-        State inProgress = new State(StateEnum.IN_PROGRESS);
-        State notDeployed = new State(StateEnum.NOT_DEPLOYED);
+        State inProgress = new State(StateEnum.LOCKED);
+        State notDeployed = new State(StateEnum.NOT_ALLOCATED);
         // Get the user POJO from the DB
         UserHB userHB = null;
         DAOFactory factory = HibernateDAOFactory.instance();
@@ -2389,7 +2388,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             // As the event sink will update the virtual appliance state the
             // state will be in
             // progress
-            State newState = new State(StateEnum.IN_PROGRESS);
+            State newState = new State(StateEnum.LOCKED);
             virtualAppliance.setState(newState);
             dataResult.setData(virtualAppliance);
 
@@ -2598,7 +2597,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         // If virtual appliance has been started - create virtual machine for
         // the current node
-        if (virtualAppliance.getState().toEnum() == StateEnum.RUNNING
+        if (virtualAppliance.getState().toEnum() == StateEnum.ON
             || virtualAppliance.getState().toEnum() == StateEnum.APPLY_CHANGES_NEEDED)
         {
             VirtualmachineHB virtualMachineHB = createEmptyVirtualMachine(nodeVIPojo, owner);
@@ -2606,7 +2605,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             session.save(virtualMachineHB);
             // TODO Change this IF sinces it's the same code
         }
-        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
+        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_ALLOCATED)
         {
             VirtualmachineHB virtualMachineHB = createEmptyVirtualMachine(nodeVIPojo, owner);
             nodeVIPojo.setVirtualMachineHB(virtualMachineHB);
@@ -2637,7 +2636,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         HypervisorHB hyper = null;
         virtualMachineHB.setHypervisor(hyper);
         virtualMachineHB.setImage(nodeVIPojo.getVirtualImageHB());
-        virtualMachineHB.setState(StateEnum.NOT_DEPLOYED);
+        virtualMachineHB.setState(StateEnum.NOT_ALLOCATED);
         String uuid = UUID.randomUUID().toString();
         virtualMachineHB.setUuid(uuid);
         virtualMachineHB.setName(uuid);
@@ -2856,7 +2855,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             for (VirtualmachineHB vmDeployed : deployedvms)
             {
 
-                if (vmDeployed.getState() == StateEnum.IN_PROGRESS)
+                if (vmDeployed.getState() == StateEnum.LOCKED)
                 {
                     try
                     {
@@ -3002,7 +3001,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 virtualMachine.getId());
                         if (vmachineHB != null)
                         {
-                            vmachineHB.setState(StateEnum.NOT_DEPLOYED);
+                            vmachineHB.setState(StateEnum.NOT_ALLOCATED);
                             // Hypervisor == null in order to delete the relation between
                             // virtualMachine
                             // and physicalMachine
@@ -3293,7 +3292,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         NodeVirtualImageHB nodeVi = (NodeVirtualImageHB) nodePojo;
 
-                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
+                        if (virtualAppliance.getState().toEnum() == StateEnum.NOT_ALLOCATED)
                         {
                             // Before deleting logic
                             beforeDeletingNode(session, nodeVi);
@@ -3307,7 +3306,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         else
                         {
                             if (virtualAppliance.getState().toEnum() == StateEnum.APPLY_CHANGES_NEEDED
-                                && nodeVi.getVirtualMachineHB().getState() == StateEnum.NOT_DEPLOYED)
+                                && nodeVi.getVirtualMachineHB().getState() == StateEnum.NOT_ALLOCATED)
                             {
                                 // Before deleting logic
                                 beforeDeletingNode(session, nodeVi);
@@ -3380,7 +3379,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     nodesPojoList.add(newNode);
                     // Setting the ID for the new ID
                     node = newNode.toPojo();
-                    if (virtualAppliance.getState().toEnum() != StateEnum.NOT_DEPLOYED)
+                    if (virtualAppliance.getState().toEnum() != StateEnum.NOT_ALLOCATED)
                     {
                         State changesNeededState = new State(StateEnum.APPLY_CHANGES_NEEDED);
                         virtualAppliance.setState(changesNeededState);
@@ -3428,7 +3427,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 if (currentNode.isNodeTypeVirtualImage())
                 {
                     NodeVirtualImage nodevi = (NodeVirtualImage) currentNode;
-                    if (nodevi.getVirtualMachine().getState().toEnum() == StateEnum.NOT_DEPLOYED)
+                    if (nodevi.getVirtualMachine().getState().toEnum() == StateEnum.NOT_ALLOCATED)
                     {
                         // check if there is any private IP related to this node
                         IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
@@ -3724,9 +3723,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         // update the virtual machine instance from DB
                         VirtualmachineHB vmachineHB =
                             (VirtualmachineHB) session.get(VirtualmachineHB.class, vm.getId());
-                        if (vmachineHB.getState().equals(StateEnum.IN_PROGRESS))
+                        if (vmachineHB.getState().equals(StateEnum.ON))
                         {
-                            vmachineHB.setState(StateEnum.NOT_DEPLOYED);
+                            vmachineHB.setState(StateEnum.ALLOCATED);
                         }
                         session.update("VirtualmachineHB", vmachineHB);
                     }

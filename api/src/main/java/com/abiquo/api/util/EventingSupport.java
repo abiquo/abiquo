@@ -121,7 +121,7 @@ public final class EventingSupport
     public static void subscribeEvent(final VirtualMachine virtualMachine,
         final String virtualSystemMonitorAddress) throws EventingException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
 
         if (hypervisor != null)
         {
@@ -176,7 +176,7 @@ public final class EventingSupport
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
             VirtualMachine vm = node.getVirtualMachine();
-            if (vm.getState() == State.NOT_DEPLOYED)
+            if (vm.getState() == State.ALLOCATED)
             {
                 subscribeEvent(vm, virtualSystemMonitorAddress);
             }
@@ -284,7 +284,7 @@ public final class EventingSupport
     public static void subscribePullEvent(final VirtualMachine virtualMachine,
         final String virtualSystemMonitorAddress) throws EventingException
     {
-        Hypervisor hypervisor = (Hypervisor) virtualMachine.getHypervisor();
+        Hypervisor hypervisor = virtualMachine.getHypervisor();
 
         if (hypervisor != null)
         {
@@ -357,7 +357,7 @@ public final class EventingSupport
      * @param virtualSystemAddress the physical machine addres to monitor
      * @throws EventingException
      */
-    public static void unMonitorPhysicalMachine(String virtualSystemAddress,
+    public static void unMonitorPhysicalMachine(final String virtualSystemAddress,
         final String virtualSystemMonitorAddress, final String user, final String password)
         throws EventingException
     {

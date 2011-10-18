@@ -41,6 +41,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -68,6 +69,8 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+
+    public static final String VIRTUAL_APPLIANCE_STATE = "/state";
 
     @Autowired
     VirtualApplianceService service;
@@ -196,7 +199,7 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.RUNNING);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.ON);
 
     }
 
@@ -209,7 +212,7 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.POWERED_OFF);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.OFF);
 
     }
 
@@ -235,7 +238,44 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, State.REBOOTED);
+        return service.changeVirtualAppMachinesState(vdcId, vappId, State.ON);
 
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_STATE)
+    public void applyChangeState(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualApplianceStateDto stateDto, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        service.changeVirtualAppMachinesState(vdcId, vappId, State.ON);
+
+    }
+
+    @GET
+    @Path(VIRTUAL_APPLIANCE_STATE)
+    public VirtualApplianceStateDto getChangeState(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        State state = service.getVirtualApplianceState(vdcId, vappId);
+        VirtualApplianceStateDto dto =
+            virtualApplianceStateToDto(vdcId, vappId, restBuilder, state);
+        return dto;
+
+    }
+
+    private VirtualApplianceStateDto virtualApplianceStateToDto(final Integer vdcId,
+        final Integer vappId, final IRESTBuilder restBuilder, State state)
+    {
+        VirtualApplianceStateDto dto = new VirtualApplianceStateDto();
+        dto.setPower(state.name());
+        dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
+        return dto;
     }
 }

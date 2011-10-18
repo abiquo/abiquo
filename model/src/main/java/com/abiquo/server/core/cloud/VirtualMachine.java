@@ -453,7 +453,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     private final static String STATE_COLUMN = "state";
 
-    private final static State STATE_DEFAULT = State.NOT_DEPLOYED;
+    private final static State STATE_DEFAULT = State.NOT_ALLOCATED;
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)

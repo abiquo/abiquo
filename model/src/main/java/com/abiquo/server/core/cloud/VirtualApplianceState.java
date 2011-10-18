@@ -19,36 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.exception;
+package com.abiquo.server.core.cloud;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
-import com.abiquo.abiserver.pojo.infrastructure.State;
-
-public class BundleException extends RuntimeException
+public enum VirtualApplianceState
 {
-    private final String message;
-
-    private State previousState = new State(StateEnum.ALLOCATED);
-
-    public BundleException(final String message)
-    {
-        this.message = message;
-    }
-
-    public BundleException(final String message, final State previousState)
-    {
-        this(message);
-        this.previousState = previousState;
-    }
-
-    @Override
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public State getPreviousState()
-    {
-        return previousState;
-    }
+    // None of its virtual machines are in state: NOT_ALLOCATED, UNKNOWN, LOCKED
+    DEPLOYED,
+    // All of its machine are in state: NOT_ALLOCATED
+    NOT_DEPLOYED,
+    // Some of its machines are in state: UNKNOWN, LOCKED
+    NEEDS_SYNCHRONIZE
 }

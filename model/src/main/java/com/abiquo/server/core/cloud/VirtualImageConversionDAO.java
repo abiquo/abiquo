@@ -21,8 +21,11 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.NonUniqueObjectException;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -61,7 +64,22 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
         final DiskFormatType format)
     {
-        return (VirtualImageConversion) createCriteria(sameImage(image))
-            .add(sameTargetFormat(format)).add(sourceFormatNull()).uniqueResult();
+        // There can be no images
+        List<VirtualImageConversion> conversions =
+            createCriteria(sameImage(image)).add(sameTargetFormat(format)).add(sourceFormatNull())
+                .list();
+        // Are there any?
+        if (conversions != null && !conversions.isEmpty())
+        {
+            // This function should be returning the only object
+            if (conversions.size() > 1)
+            {
+                throw new NonUniqueObjectException("There is more than one conversion!",
+                    image.getId(),
+                    VirtualImageConversion.class.getSimpleName());
+            }
+            return conversions.get(0);
+        }
+        return null;
     }
 }

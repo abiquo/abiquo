@@ -90,7 +90,7 @@ public class VirtualBoxCollector extends AbstractCollector
     protected AimCollector aimcollector;
 
     @Override
-    public void connect(String user, String password) throws ConnectionException
+    public void connect(final String user, final String password) throws ConnectionException
     {
         wsmanuser = user;
         wsmanpassword = password;
@@ -105,8 +105,7 @@ public class VirtualBoxCollector extends AbstractCollector
         {
             throw new ConnectionException(MessageValues.CONN_EXCP_I, e);
         }
-        
-        
+
         try
         {
             aimcollector = new AimCollectorImpl(getIpAddress(), getAimPort());
@@ -115,7 +114,7 @@ public class VirtualBoxCollector extends AbstractCollector
         {
             throw new ConnectionException(MessageValues.CONN_EXCP_IV, e);
         }
-        
+
     }
 
     @Override
@@ -211,7 +210,7 @@ public class VirtualBoxCollector extends AbstractCollector
 
             if (state.compareTo(MachineState.Running) == 0)
             {
-                nextVMachine.setStatus(VirtualSystemStatusEnumType.RUNNING);
+                nextVMachine.setStatus(VirtualSystemStatusEnumType.ON);
             }
             else if (state.compareTo(MachineState.Paused) == 0)
             {
@@ -219,7 +218,7 @@ public class VirtualBoxCollector extends AbstractCollector
             }
             else
             {
-                nextVMachine.setStatus(VirtualSystemStatusEnumType.POWERED_OFF);
+                nextVMachine.setStatus(VirtualSystemStatusEnumType.OFF);
             }
 
             List<IMediumAttachment> mediumAttachments = machine.getMediumAttachments();
@@ -272,8 +271,11 @@ public class VirtualBoxCollector extends AbstractCollector
     private String getDatastoreFromFile(final String fileName)
     {
         int count = StringUtils.countMatches(fileName, "/");
-        if (count == 1) return "/";
-    	int indexEndDirectory = fileName.lastIndexOf('/');
+        if (count == 1)
+        {
+            return "/";
+        }
+        int indexEndDirectory = fileName.lastIndexOf('/');
         return fileName.substring(0, indexEndDirectory);
     }
 
@@ -291,7 +293,7 @@ public class VirtualBoxCollector extends AbstractCollector
         }
     }
 
-    private int getFreePortFromPortsList(String csvPorts)
+    private int getFreePortFromPortsList(final String csvPorts)
     {
         List<Integer> portList = new ArrayList<Integer>();
         try
@@ -322,7 +324,7 @@ public class VirtualBoxCollector extends AbstractCollector
         }
     }
 
-    private VirtualDiskEnumType mediumFormatToVirtualDiskEnum(String formatId)
+    private VirtualDiskEnumType mediumFormatToVirtualDiskEnum(final String formatId)
     {
         if ("raw".equals(formatId))
         {

@@ -49,7 +49,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
+import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -215,10 +215,10 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.RUNNING))
+        if (!vmService.sameState(vm, State.ON))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.ON);
 
         }
     }
@@ -246,10 +246,10 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.POWERED_OFF))
+        if (!vmService.sameState(vm, State.OFF))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.OFF);
 
         }
     }
@@ -260,8 +260,12 @@ public class VirtualMachineResource extends AbstractResource
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
-     * @param state allowed <li><b>POWERED_OFF</b></li> <li><b>RUNNING</b></li> <li><b>REBOOTED</b></li>
+     * @param state allowed
+     *            <ul>
+     *            <li><b>OFF</b></li>
+     *            <li><b>ON</b></li>
      *            <li><b>PAUSED</b></li>
+     *            </ul>
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
      */
@@ -275,7 +279,7 @@ public class VirtualMachineResource extends AbstractResource
         throws Exception
     {
         State newState = validateState(state);
-        vmService.changeVirtualMachineState(vmId, vappId, vdcId, newState);
+        vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
     }
 
     /**
@@ -298,26 +302,37 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
+        VirtualMachineStateDto stateDto =
+            virtualMachineStateToDto(vdcId, vappId, vmId, restBuilder, vm);
+        return stateDto;
+    }
+
+    private VirtualMachineStateDto virtualMachineStateToDto(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final IRESTBuilder restBuilder,
+        final VirtualMachine vm)
+    {
         VirtualMachineStateDto stateDto = new VirtualMachineStateDto();
         stateDto.setPower(vm.getState().name());
+        stateDto.addLinks(restBuilder.buildVirtualMachineStateLinks(vappId, vdcId, vmId));
         return stateDto;
     }
 
     /**
      * Validate that the state is allowed. <br>
      * 
-     * @param state<li><b>POWERED_OFF</b></li> <li><b>RUNNING</b></li> <li><b>REBOOTED</b></li> <li>
-     *            <b>PAUSED</b></li>
+     * @param state<ul>
+     *            <li><b>OFF</b></li>
+     *            <li><b>ON</b></li>
+     *            <li><b>PAUSED</b></li>
+     *            </ul>
      * @return State
      */
     private State validateState(final VirtualMachineStateDto state)
     {
-        if (!State.POWERED_OFF.name().equals(state.getPower())
-            && !State.RUNNING.name().equals(state.getPower())
-            && !State.REBOOTED.name().equals(state.getPower())
+        if (!State.ON.name().equals(state.getPower()) && !State.OFF.name().equals(state.getPower())
             && !State.PAUSED.name().equals(state.getPower()))
         {
-            throw new BadRequestException(APIError.VIRTUAL_MACHINE_INVALID_STATE);
+            throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
         return State.valueOf(state.getPower());
     }
@@ -346,9 +361,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.REBOOTED))
+        if (!vmService.sameState(vm, State.PAUSED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
         }
     }
 
@@ -383,8 +398,12 @@ public class VirtualMachineResource extends AbstractResource
 
     /**
      * Deletes the virtual machine.<br>
-     * A {@link VirtualMachine} can only be deleted if is in one allowed are UNDEPLOYED and UNKNOWN.
-     * allowed <li><b>NOT_DEPLOYED</b></li> <li><b>UNKNOWN</b></li>
+     * A {@link VirtualMachine} can only be deleted if is in one allowed are NOT_ALLOCATED and
+     * UNKNOWN. allowed
+     * <ul>
+     * <li><b>NOT_ALLOCATED</b></li>
+     * <li><b>UNKNOWN</b></li>
+     * </ul>
      * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
@@ -498,6 +517,6 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+        vmService.undeployVirtualMachine(vmId, vappId, vdcId, false);
     }
 }

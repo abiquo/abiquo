@@ -23,7 +23,22 @@ package com.abiquo.server.core.cloud;
 
 public enum State
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN, HA_IN_PROGRESS, NOT_ALLOCATED;
+    ON, OFF, PAUSED, ALLOCATED, CONFIGURED, UNKNOWN, NOT_ALLOCATED, LOCKED;
+
+    public static State fromValue(final String value)
+    {
+        return State.valueOf(value.toUpperCase());
+    }
+
+    public State travel(final StateTransition transaction)
+    {
+        if (!transaction.isValidOrigin(this))
+        {
+            throw new RuntimeException("Invalid origin " + this + " for transaction " + transaction);
+        }
+
+        return transaction.getEndState();
+    }
 
     public int id()
     {
@@ -39,14 +54,12 @@ public enum State
     {
         switch (this)
         {
-            case RUNNING:
+            case ON:
                 return "POWERUP_ACTION";
             case PAUSED:
                 return "PAUSE_ACTION";
-            case POWERED_OFF:
+            case OFF:
                 return "POWERDOWN_ACTION";
-            case REBOOTED:
-                return "RESUME_ACTION";
         }
         return null;
     }
@@ -55,14 +68,14 @@ public enum State
     {
         switch (this)
         {
-            case RUNNING:
+            case ON:
                 return "PowerUp";
             case PAUSED:
                 return "Pause";
-            case POWERED_OFF:
+            case OFF:
                 return "PowerOff";
-            case REBOOTED:
-                return "Resume";
+                // case REBOOTED:
+                // return "Resume";
         }
         return null;
     }

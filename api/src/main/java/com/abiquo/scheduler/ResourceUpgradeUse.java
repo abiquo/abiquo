@@ -114,8 +114,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
-        Integer sourceHypervisorId)
+    public void updateUseHa(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final Integer sourceHypervisorId)
     {
         updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
                                                              // hypervisor
@@ -124,7 +124,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
-    private void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine, boolean isHA)
+    private void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final boolean isHA)
     {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
@@ -143,7 +144,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 updateUsageDatastore(virtualMachine, false);
                 updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
 
-                virtualMachine.setState(State.IN_PROGRESS);
+                virtualMachine.setState(State.LOCKED);
             }
             else
             {
@@ -189,7 +190,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(State.NOT_DEPLOYED);
+            virtualMachine.setState(State.ALLOCATED);
             vmachineDao.flush();
         }
         catch (final Exception e) // HibernateException NotEnoughResourcesException
@@ -339,12 +340,12 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         final int newCpu =
-            (isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
-                .getVirtualCpusUsed() + used.getCpu());
+            isRollback ? machine.getVirtualCpusUsed() - used.getCpu() : machine
+                .getVirtualCpusUsed() + used.getCpu();
 
         final int newRam =
-            (isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
-                .getVirtualRamUsedInMb() + used.getRam());
+            isRollback ? machine.getVirtualRamUsedInMb() - used.getRam() : machine
+                .getVirtualRamUsedInMb() + used.getRam();
 
         if (used.getVirtualImage().getStateful() == 1)
         {
@@ -367,6 +368,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datacenterRepo.updateMachine(machine);
     }
 
+    @Override
     public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
     {
         machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);
@@ -404,7 +406,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         datastoreDao.flush();
     }
 
-    private void updateDatastore(Datastore datastore, Long requestSize, boolean isRollback)
+    private void updateDatastore(final Datastore datastore, final Long requestSize,
+        final boolean isRollback)
     {
         final Long actualSize = datastore.getUsedSize();
 
@@ -552,7 +555,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         return vlans_avoided_collection;
     }
 
-    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(List<VLANNetwork> vlanNetworkList)
+    public List<Integer> getPublicVLANTagsFROMVLANNetworkList(
+        final List<VLANNetwork> vlanNetworkList)
     {
         List<Integer> publicIdsList = new ArrayList<Integer>();
         for (VLANNetwork vlanNetwork : vlanNetworkList)

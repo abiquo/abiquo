@@ -40,8 +40,8 @@ public class VirtualMachineAllocatorTestService extends VirtualMachineAllocatorS
 {
 
     @Override
-    public VirtualMachine allocateVirtualMachine(Integer virtualMachineId, Integer idVirtualApp,
-        Boolean foreceEnterpriseSoftLimits)
+    public VirtualMachine allocateVirtualMachine(final Integer virtualMachineId,
+        final Integer idVirtualApp, final Boolean foreceEnterpriseSoftLimits)
     {
         VirtualMachine vmachine =
             super
@@ -51,7 +51,7 @@ public class VirtualMachineAllocatorTestService extends VirtualMachineAllocatorS
 
         vmachineDao.flush();
 
-        vmachineDao.updateVirtualMachineState(virtualMachineId, State.RUNNING);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, State.ON);
 
         return vmachineDao.findById(virtualMachineId);
     }

@@ -255,13 +255,13 @@ public class OVFModelFromVirtualAppliance
         String state = null;
         switch (virtualMachine.getState().toEnum())
         {
-            case RUNNING:
+            case ON:
                 state = AbiCloudConstants.POWERUP_ACTION;
                 break;
             case PAUSED:
                 state = AbiCloudConstants.PAUSE_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 state = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
             case REBOOTED:
@@ -1004,10 +1004,10 @@ public class OVFModelFromVirtualAppliance
         String actionState = null;
         switch (state.toEnum())
         {
-            case RUNNING:
+            case ON:
                 actionState = AbiCloudConstants.POWERUP_ACTION;
                 break;
-            case POWERED_OFF:
+            case OFF:
                 actionState = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
             case PAUSED:

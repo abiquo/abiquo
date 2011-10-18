@@ -53,8 +53,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlEnum
 public enum VirtualSystemStatusEnumType {
 
-    POWERED_OFF,
-    RUNNING,
+    OFF,
+    ON,
     PAUSED;
 
     public String value() {

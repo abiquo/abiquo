@@ -24,8 +24,6 @@
  */
 package com.abiquo.api.services.cloud;
 
-import static com.abiquo.server.core.cloud.State.NOT_DEPLOYED;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,11 +170,11 @@ public class VirtualApplianceService extends DefaultApiService
 
         try
         {
-            if (virtualAppliance.getState() == State.NOT_DEPLOYED)
+            if (virtualAppliance.getState() == State.ALLOCATED)
             {
                 allocate(virtualAppliance);
 
-                virtualAppliance.setState(State.IN_PROGRESS);
+                virtualAppliance.setState(State.ON);
                 repo.updateVirtualAppliance(virtualAppliance);
 
                 EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
@@ -199,13 +197,12 @@ public class VirtualApplianceService extends DefaultApiService
 
                 EventingSupport.subscribeToAllVA(virtualAppliance, vsm.getUri());
 
-                changeState(resource, envelop, State.RUNNING.toResourceState());
+                changeState(resource, envelop, State.ON.toResourceState());
             }
         }
         catch (Exception e)
         {
-            virtualAppliance.setState(State.NOT_DEPLOYED);
-            repo.updateVirtualAppliance(virtualAppliance);
+            // XXX
         }
     }
 
@@ -246,8 +243,8 @@ public class VirtualApplianceService extends DefaultApiService
             new VirtualAppliance(vdc.getEnterprise(),
                 vdc,
                 dto.getName(),
-                NOT_DEPLOYED,
-                NOT_DEPLOYED);
+                State.NOT_ALLOCATED,
+                State.NOT_ALLOCATED);
 
         vapp.setHighDisponibility(dto.getHighDisponibility());
         vapp.setPublicApp(dto.getPublicApp());
@@ -283,12 +280,12 @@ public class VirtualApplianceService extends DefaultApiService
         final Integer vdcId, final Integer vappId, final State state)
     {
         VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-        if (vapp.getState().equals(State.NOT_DEPLOYED))
+        if (vapp.getState().equals(State.NOT_ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (!vapp.getState().equals(State.RUNNING))
+        if (!vapp.getState().equals(State.ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
             flushErrors();
@@ -326,5 +323,31 @@ public class VirtualApplianceService extends DefaultApiService
             }
         }
         return results;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void startVirtualAppliance1(final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+
+        try
+        {
+            for (NodeVirtualImage machine : virtualAppliance.getNodes())
+            {
+                vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId, vdcId,
+                    false);
+            }
+        }
+        catch (Exception e)
+        {
+            // The virtual appliance is in an unknown state
+        }
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public State getVirtualApplianceState(final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        return virtualAppliance.getState();
     }
 }

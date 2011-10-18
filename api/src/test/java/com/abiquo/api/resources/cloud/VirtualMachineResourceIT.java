@@ -69,6 +69,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -77,7 +78,6 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.VirtualMachineStateDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.tracer.Constants;
 
@@ -674,7 +674,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
-        vm.setState(State.POWERED_OFF);
+        vm.setState(State.OFF);
 
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
@@ -710,7 +710,7 @@ public class VirtualMachineResourceIT extends TestPopulate
             get(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
                 "sysadmin");
         VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
-        assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
+        assertEquals(State.OFF.name(), vmDto.getPower());
 
     }
 
@@ -722,7 +722,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
-        vm.setState(State.POWERED_OFF);
+        vm.setState(State.OFF);
 
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
@@ -770,7 +770,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
-        vm.setState(State.RUNNING);
+        vm.setState(State.ON);
 
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
@@ -810,13 +810,13 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
-        dto.setPower(State.POWERED_OFF.name());
+        dto.setPower(State.OFF.name());
         // Check for vm state
         ClientResponse response =
             put(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), dto,
                 "sysadmin", "sysadmin");
         VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
-        assertEquals(State.POWERED_OFF.name(), vmDto.getPower());
+        assertEquals(State.OFF.name(), vmDto.getPower());
 
     }
 
@@ -827,7 +827,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
-        vm.setState(State.NOT_DEPLOYED);
+        vm.setState(State.NOT_ALLOCATED);
 
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
@@ -873,7 +873,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
-        vm.setState(State.RUNNING);
+        vm.setState(State.ON);
 
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());

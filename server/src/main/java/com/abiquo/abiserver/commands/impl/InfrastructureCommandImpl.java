@@ -1357,14 +1357,14 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
         // Update information to delete PhysicalMachine reference and update state
         vMachine.setDatastore(null);
-        vMachine.setState(StateEnum.NOT_DEPLOYED);
+        vMachine.setState(StateEnum.ALLOCATED);
         vMachine.setHypervisor(null);
 
         vmDAO.makePersistent(vMachine);
 
         VirtualappHB vApp = vmDAO.findVirtualAppFromVM(vMachine.getIdVm());
 
-        StateEnum newState = StateEnum.NOT_DEPLOYED;
+        StateEnum newState = StateEnum.ALLOCATED;
 
         Collection<NodeHB< ? >> nodes = vApp.getNodesHB();
 
@@ -1373,7 +1373,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             for (NodeHB< ? > node : nodes)
             {
                 NodeVirtualImageHB nVI = (NodeVirtualImageHB) node;
-                if (nVI.getVirtualMachineHB().getState() != StateEnum.NOT_DEPLOYED)
+                if (nVI.getVirtualMachineHB().getState() != StateEnum.ALLOCATED)
                 {
                     newState = StateEnum.APPLY_CHANGES_NEEDED;
                     break;
@@ -1671,7 +1671,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             // Generate the Virtual Machine that will be created
             VirtualmachineHB virtualMachineHB = virtualMachine.toPojoHB();
-            virtualMachineHB.setState(StateEnum.NOT_DEPLOYED);
+            virtualMachineHB.setState(StateEnum.NOT_ALLOCATED);
             virtualMachineHB.setUuid(UUID.randomUUID().toString());
 
             session.save(virtualMachineHB);
@@ -1802,7 +1802,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             final int virtualDatacenterId = vapp.getVirtualDataCenterHB().getIdVirtualDataCenter();
             final int virtualApplianceId = vapp.getIdVirtualApp();
 
-            if (virtualMachineHB.getState() != StateEnum.NOT_DEPLOYED)
+            if (virtualMachineHB.getState() != StateEnum.NOT_ALLOCATED)
             {
 
                 if (virtualMachineHB.getHypervisor() != null
@@ -1977,7 +1977,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                     basicResult =
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.RESUME_ACTION);
                     break;
-                case POWERED_OFF:
+                case OFF:
                     basicResult =
                         setVirtualMachineState(virtualMachine, AbiCloudConstants.POWERUP_ACTION);
                     break;
@@ -2006,7 +2006,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             // Decomment this to enable the state changes through eventing
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -2085,7 +2085,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -2173,7 +2173,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
                 dataResult.setMessage(basicResultPowerUP.getMessage());
                 dataResult.setSuccess(basicResultPowerUP.getSuccess());
-                State inProgressState = new State(StateEnum.IN_PROGRESS);
+                State inProgressState = new State(StateEnum.LOCKED);
                 dataResult.setData(inProgressState);
             }
         }
@@ -2251,7 +2251,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
-            State inProgressState = new State(StateEnum.IN_PROGRESS);
+            State inProgressState = new State(StateEnum.LOCKED);
             dataResult.setData(inProgressState);
 
         }
@@ -2315,19 +2315,19 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine.getId());
 
             if (virtualMachine.getState().toEnum() == virtualMachineHB.getState()
-                && virtualMachineHB.getState() != StateEnum.IN_PROGRESS)
+                && virtualMachineHB.getState() != StateEnum.LOCKED)
             {
                 // The given virtual machine is up to date, and is not in
                 // progress.
                 // We set it now to IN_PROGRESS, and return that it is allowed
                 // to manipulate it
-                virtualMachineHB.setState(StateEnum.IN_PROGRESS);
+                virtualMachineHB.setState(StateEnum.LOCKED);
 
                 session.update(virtualMachineHB);
 
                 // Generating the result
                 currentStateAndAllow.setSuccess(true);
-                currentStateAndAllow.setData(new State(StateEnum.IN_PROGRESS));
+                currentStateAndAllow.setData(new State(StateEnum.LOCKED));
             }
             else
             {

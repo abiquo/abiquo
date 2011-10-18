@@ -66,7 +66,7 @@ public class VirtualMachineServiceTest extends AbstractUnitTest
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         VirtualMachine virtualMachine = vmGenerator.createInstance(enterprise);
-        virtualMachine.setState(State.RUNNING);
+        virtualMachine.setState(State.ON);
 
         Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(enterprise, role);
@@ -90,10 +90,10 @@ public class VirtualMachineServiceTest extends AbstractUnitTest
         VirtualMachineService service = new VirtualMachineService(em);
 
         service.changeVirtualMachineState(virtualMachine.getId(), vapp.getId(), vdc1.getId(),
-            State.POWERED_OFF);
+            State.OFF);
 
         VirtualMachine vm = service.getVirtualMachine(virtualMachine.getId());
-        Assert.assertEquals(vm.getState(), State.POWERED_OFF);
+        Assert.assertEquals(vm.getState(), State.OFF);
     }
 
 }

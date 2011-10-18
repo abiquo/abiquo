@@ -28,12 +28,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 /**
- * DTO to modify state parameters of the machine.
+ * DTO to modify state parameters of the appliance.
  * 
  * @author ssedano
  */
-@XmlRootElement(name = "virtualMachineState")
-public class VirtualMachineStateDto extends SingleResourceTransportDto implements Serializable
+@XmlRootElement(name = "virtualApplianceState")
+public class VirtualApplianceStateDto extends SingleResourceTransportDto implements Serializable
 {
 
     /**
@@ -45,9 +45,9 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * Machine power state. <br>
      * Values
      * <ul>
-     * <li><b>OFF</b></li>
-     * <li><b>ON</b></li>
-     * <li><b>PAUSED</b></li>
+     * <li><b>DEPLOYED</b></li>
+     * <li><b>NOT_DEPLOYED</b></li>
+     * <li><b>NEEDS_SYNCHRONIZE</b></li>
      * </ul>
      */
     private String power;
@@ -55,11 +55,10 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
     /**
      * Machine power state.
      * 
-     * @return *
-     *         <ul>
-     *         <li><b>OFF</b></li>
-     *         <li><b>ON</b></li>
-     *         <li><b>PAUSED</b></li>
+     * @return <ul>
+     *         <li><b>DEPLOYED</b></li>
+     *         <li><b>NOT_DEPLOYED</b></li>
+     *         <li><b>NEEDS_SYNCHRONIZE</b></li>
      *         </ul>
      */
     public String getPower()
@@ -69,18 +68,17 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
 
     /**
      * Machine power state. <br>
-     * Values *
+     * Values
      * <ul>
-     * <li><b>OFF</b></li>
-     * <li><b>ON</b></li>
-     * <li><b>PAUSED</b></li>
+     * <li><b>DEPLOYED</b></li>
+     * <li><b>NOT_DEPLOYED</b></li>
+     * <li><b>NEEDS_SYNCHRONIZE</b></li>
      * </ul>
      * 
-     * @param power *
-     *            <ul>
-     *            <li><b>OFF</b></li>
-     *            <li><b>ON</b></li>
-     *            <li><b>PAUSED</b></li>
+     * @param power <ul>
+     *            <li><b>DEPLOYED</b></li>
+     *            <li><b>NOT_DEPLOYED</b></li>
+     *            <li><b>NEEDS_SYNCHRONIZE</b></li>
      *            </ul>
      *            void
      */

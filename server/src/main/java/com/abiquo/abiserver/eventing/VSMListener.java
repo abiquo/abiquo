@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
@@ -78,10 +77,10 @@ public class VSMListener implements VSMCallback
         "from com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB as vm";
 
     @Override
-    public void onEvent(VirtualSystemEvent event)
+    public void onEvent(final VirtualSystemEvent event)
     {
         try
-        {            
+        {
             updateEventOnDb(event);
         }
         catch (EventingException e)
@@ -124,15 +123,17 @@ public class VSMListener implements VSMCallback
             Query query = session.createQuery(VM_BY_UUID);
             query.setString("uuid", event.getVirtualSystemId());
             VirtualmachineHB virtualMachine = (VirtualmachineHB) query.uniqueResult();
-            
-            
-            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 - DISABLED_FOR_HA states
+
+            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 -
+            // DISABLED_FOR_HA states
             if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
             {
-                logger.trace("Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process", virtualMachine.getIdVm(), virtualMachine.getState());
+                logger
+                    .trace(
+                        "Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process",
+                        virtualMachine.getIdVm(), virtualMachine.getState());
                 return;
             }
-            
 
             // Checking if the VM is not null since the VM that we are receiving
             // the event was already deleted
@@ -256,7 +257,7 @@ public class VSMListener implements VSMCallback
      * @param Session
      * @param nviHB
      */
-    protected void onDeleteNode(Session session, NodeVirtualImageHB nviHB)
+    protected void onDeleteNode(final Session session, final NodeVirtualImageHB nviHB)
     {
         VirtualApplianceCommand vaCommand = new VirtualApplianceCommandImpl();
         vaCommand.beforeDeletingNode(session, nviHB);
@@ -287,7 +288,7 @@ public class VSMListener implements VSMCallback
             VirtualAppliance vapp = vappHB.toPojo();
             transaction.commit();
 
-            if (vapp.getState().toEnum() == StateEnum.IN_PROGRESS)
+            if (vapp.getState().toEnum() == StateEnum.LOCKED)
             {
                 Collection<com.abiquo.abiserver.pojo.virtualappliance.Node> nodes = vapp.getNodes();
                 boolean allVMrunning = true;
@@ -297,7 +298,7 @@ public class VSMListener implements VSMCallback
                     if (node.isNodeTypeVirtualImage())
                     {
                         NodeVirtualImage nodeVi = (NodeVirtualImage) node;
-                        if (nodeVi.getVirtualMachine().getState().toEnum() != StateEnum.RUNNING)
+                        if (nodeVi.getVirtualMachine().getState().toEnum() != StateEnum.LOCKED)
                         {
                             logger
                                 .debug(
@@ -321,8 +322,8 @@ public class VSMListener implements VSMCallback
                             "All the virtual machines were running, changing the state of the virtual app: {} to RUNNING",
                             virtualApplianceId);
                     vappHB = (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
-                    vappHB.setState(StateEnum.RUNNING);
-                    vappHB.setSubState(StateEnum.RUNNING);
+                    vappHB.setState(StateEnum.LOCKED);
+                    vappHB.setSubState(StateEnum.LOCKED);
                     session.update(vappHB);
                     transaction.commit();
 
@@ -359,8 +360,8 @@ public class VSMListener implements VSMCallback
 
     private boolean isBundling(final VirtualAppliance virtualAppliance)
     {
-        return (virtualAppliance.getState().toEnum() == StateEnum.IN_PROGRESS && virtualAppliance
-            .getSubState().toEnum() == StateEnum.BUNDLING);
+        return virtualAppliance.getState().toEnum() == StateEnum.LOCKED
+            && virtualAppliance.getSubState().toEnum() == StateEnum.BUNDLING;
     }
 
     /**
@@ -371,8 +372,8 @@ public class VSMListener implements VSMCallback
      * @param destinationPhysicalMachineAddress : physical machine destination address
      * @param destinationPhysicalMachineType : physical machine destination hypervisorType
      */
-    protected void onVMMovedEvent(Session session, VirtualmachineHB vm,
-        String destinationPhysicalMachineAddress, String destinationPhysicalMachineType)
+    protected void onVMMovedEvent(final Session session, final VirtualmachineHB vm,
+        final String destinationPhysicalMachineAddress, final String destinationPhysicalMachineType)
     {
         // * Implemented as a Enterprise Edition feature
 
@@ -404,11 +405,11 @@ public class VSMListener implements VSMCallback
         switch (eventType)
         {
             case POWER_OFF:
-                state = StateEnum.POWERED_OFF;
+                state = StateEnum.OFF;
                 break;
 
             case POWER_ON:
-                state = StateEnum.RUNNING;
+                state = StateEnum.ON;
                 break;
 
             case PAUSED:
@@ -416,11 +417,11 @@ public class VSMListener implements VSMCallback
                 break;
 
             case RESUMED:
-                state = StateEnum.RUNNING;
+                state = StateEnum.ON;
                 break;
 
             case DESTROYED:
-                state = StateEnum.NOT_DEPLOYED;
+                state = StateEnum.ALLOCATED;
                 break;
 
             default:

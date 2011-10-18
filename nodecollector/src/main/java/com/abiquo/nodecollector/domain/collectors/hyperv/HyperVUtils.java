@@ -192,26 +192,27 @@ public final class HyperVUtils
      */
     public static VirtualSystemStatusEnumType translateState(final int state)
     {
-        HyperVState st = null; 
+        HyperVState st = null;
         try
         {
             st = HyperVState.fromValue(state);
         }
         catch (IllegalArgumentException e)
         {
-            // Probably we got a transition state Starting (32770), Saving (32773), Saving (32773), Stopping (32774), Pausing (32776), Resuming (32777) or Unknown 
+            // Probably we got a transition state Starting (32770), Saving (32773), Saving (32773),
+            // Stopping (32774), Pausing (32776), Resuming (32777) or Unknown
             LOGGER.warn("Could not translate virtual machine state: {}", state);
             return null;
         }
-        
+
         switch (st)
         {
             case POWER_ON:
-                return VirtualSystemStatusEnumType.RUNNING;
+                return VirtualSystemStatusEnumType.ON;
             case POWER_OFF:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case SUSPENDED:
-                return VirtualSystemStatusEnumType.POWERED_OFF;
+                return VirtualSystemStatusEnumType.OFF;
             case PAUSED:
                 return VirtualSystemStatusEnumType.PAUSED;
             default:
