@@ -121,8 +121,11 @@ package net.undf.abicloud.vo.infrastructure
 
         override public function set assignedTo(iE:InfrastructureElement):void
         {
-            if (iE is Rack || iE == null || iE is UcsRack){
+            if (iE is Rack || iE == null){
                 _assignedTo = iE;
+            }else if(iE is UcsRack){
+                _assignedTo = iE;
+                _name = returnUCSFormattedName(_name);
             }else
                 throw Error("A physical machine can only be assigned to a rack");
         }

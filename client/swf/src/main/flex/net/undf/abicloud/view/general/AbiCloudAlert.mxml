@@ -150,7 +150,7 @@
 
             public static function showError(title:String, header:String, main:String,
                                              flags:uint = 0x4, responseHandler:Function = null,
-                                             allowClipboard:Boolean = false,
+                                             allowClipboard:Boolean = true,
                                              additionalObject:Object = null):void
             {
                 var customAlert:AbiCloudAlert = new AbiCloudAlert();
@@ -337,7 +337,7 @@
 
             private function onClickClipboardButton():void
             {
-                System.setClipboard(this._mainText);
+                System.setClipboard(mainText.text);
             }
 
             /**
