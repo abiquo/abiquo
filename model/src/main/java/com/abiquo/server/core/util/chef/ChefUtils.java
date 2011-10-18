@@ -38,10 +38,10 @@ import com.google.common.base.Function;
 public class ChefUtils
 {
     /** Template for recipe elements in a node run list. */
-    private static final String RECIPE_TEMPLATE = "recipe\\[(.+)\\]";
+    private static final String RECIPE_TEMPLATE = "^recipe\\[(.+)\\]$";
 
     /** Template for role elements in a node run list. */
-    private static final String ROLE_TEMPLATE = "role\\[(.+)\\]";
+    private static final String ROLE_TEMPLATE = "^role\\[(.+)\\]$";
 
     /**
      * Check if the given element of a node run list is a recipe.
@@ -159,14 +159,14 @@ public class ChefUtils
     }
 
     /**
-     * Return a list with the names of the given recipes.
+     * Return a list with the names of the given runlist elements.
      * 
-     * @param recipes The list of recipes.
-     * @return A list with the names of the given recipes.
+     * @param elements The runlist elements.
+     * @return A list with the names of the given runlist elements.
      */
-    public static List<String> getRecipeNames(final List<RunlistElement> recipes)
+    public static List<String> getElementNames(final List<RunlistElement> elements)
     {
-        return transform(recipes, new Function<RunlistElement, String>()
+        return transform(elements, new Function<RunlistElement, String>()
         {
             @Override
             public String apply(final RunlistElement input)

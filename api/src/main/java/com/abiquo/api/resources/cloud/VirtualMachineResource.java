@@ -68,7 +68,7 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
     // Chef constants to help link builders. Method implementation are premium.
-    public static final String VIRTUAL_MACHINE_RECIPES_PATH = "/config/recipes";
+    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 

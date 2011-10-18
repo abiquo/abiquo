@@ -43,7 +43,7 @@ public class RunlistElementDto extends SingleResourceTransportDto
 
     private boolean selected;
 
-    private int order;
+    private int priority;
 
     public String getName()
     {
@@ -65,14 +65,24 @@ public class RunlistElementDto extends SingleResourceTransportDto
         this.description = description;
     }
 
-    public int getOrder()
+    public boolean isSelected()
     {
-        return order;
+        return selected;
     }
 
-    public void setOrder(final int order)
+    public void setSelected(final boolean selected)
     {
-        this.order = order;
+        this.selected = selected;
+    }
+
+    public int getPriority()
+    {
+        return priority;
+    }
+
+    public void setPriority(final int priority)
+    {
+        this.priority = priority;
     }
 
 }
