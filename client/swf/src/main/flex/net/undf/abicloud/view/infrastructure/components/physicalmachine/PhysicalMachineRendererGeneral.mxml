@@ -215,134 +215,143 @@
     <!--mx:Form id="form" width="50%"
          verticalGap="1" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0" fontSize="11"-->
 
-    <mx:FormItem 
+    <mx:VBox direction="vertical"
+    	includeInLayout="{!this._isUCS}"
+    	visible="{!this._isUCS}">
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
+	        direction="horizontal">
+	
+	        <mx:Label id="cpuLabel"
+	            text="{this._isUCS ? '-':_physicalMachine.cpu.toString()}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	
+	        <mx:NumericStepper id="cpuInput"
+	            width="100" height="17"
+	            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+	            minimum="1" maximum="32" stepSize="1" includeInLayout="{_editMode}"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+	        direction="horizontal">
+	
+	        <mx:Label id="ramLabel"
+	            text="{this._isUCS ? '-':_physicalMachine.ram.toString() + ' MB'}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	
+	        <mx:NumericStepper id="ramInput"
+	            width="100" height="17"
+	            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+	            minimum="{ramUnitsSelector.selectedItem.minimum}"
+	            maximum="{ramUnitsSelector.selectedItem.maximum}"
+	            stepSize="{ramUnitsSelector.selectedItem.stepSize}"
+	            includeInLayout="{_editMode}"
+	            value="{this._physicalMachine.ram / ramUnitsSelector.selectedItem.conversion}"
+	            visible="{_editMode}"/>
+	
+	        <mx:ComboBox id="ramUnitsSelector"
+	            width="80" height="17"
+	            labelField="label" dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+	            selectedIndex="0" includeInLayout="{_editMode}"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
+	        direction="horizontal">
+	
+	        <mx:Label id="hdLabel"
+	            text="{this._isUCS ? '-':this._physicalMachineHD}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	
+	        <mx:NumericStepper id="hdInput"
+	            width="100" height="17"
+	            styleName="PhysicalMachinesRendererGeneralNumericStepper"
+	            minimum="{hdUnitsSelector.selectedItem.minimum}"
+	            maximum="{hdUnitsSelector.selectedItem.maximum}"
+	            stepSize="{hdUnitsSelector.selectedItem.stepSize}"
+	            includeInLayout="{_editMode}"
+	            value="{this._physicalMachine.hd / hdUnitsSelector.selectedItem.conversion}"
+	            visible="{_editMode}"/>
+	
+	        <mx:ComboBox id="hdUnitsSelector"
+	            width="80" height="17"
+	            labelField="label" dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
+	            selectedIndex="0" includeInLayout="{_editMode}"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_IP')">
+	
+	        <mx:Label id="ipLabel"
+	            selectable="true"
+	            text="{this._isUCS ? '-':this._hypervisor.ip}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	
+	        <mx:TextInput id="ipInput"
+	            height="17"
+	            maxChars="39" includeInLayout="{_editMode}"
+	            restrict="0-9.:A-F"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
+	        <mx:Label id="virtualSwitchNameLabel"
+	            selectable="true" text="{this._isUCS ? '-':_physicalMachine.vswitchName}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='LABEL_HYPERVISOR_TYPE')">
+	
+	        <mx:Label id="hypervisorTypeLabel"
+	            text="{this._isUCS ? '-':this._hypervisorName}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	             <!--this._hypervisors.length > 0 ? HyperVisorType.HYPERVISOR_NAMES[HyperVisor(this._hypervisors.getItemAt(0)).type.id] : ResourceManager.getInstance().getString('Common', 'LABEL_NOT_AVAILABLE')-->
+	
+	        <mx:ComboBox id="hypervisorTypeInput"
+	            height="17"
+	            dataProvider="{AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes}"
+	            labelField="name" includeInLayout="{_editMode}"
+	            change="onChangeHypervisorTypeInput()"
+	            prompt="@Resource(bundle='Infrastructure', key='COMBOBOX_PROMPT_HYPERVISOR_TYPE')"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+	
+	    <mx:FormItem 
+	        height="18"
+	        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_PORT')">
+	
+	        <mx:Label id="hypervisorPortLabel"
+	            selectable="true"
+	            text="{this._isUCS ? '-':this._hypervisor.port.toString()}"
+	            includeInLayout="{! _editMode}"
+	            visible="{! _editMode}"/>
+	
+	        <mx:TextInput id="hypervisorPortInput"
+	            height="17"
+	            maxChars="5" includeInLayout="{_editMode}"
+	            restrict="0-9"
+	            visible="{_editMode}"/>
+	    </mx:FormItem>
+     </mx:VBox>
+     <mx:FormItem 
+     	includeInLayout="{this._isUCS}"
+        visible="{this._isUCS}"
         height="18"
-        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
-        direction="horizontal">
-
-        <mx:Label id="cpuLabel"
-            text="{this._isUCS ? '-':_physicalMachine.cpu.toString()}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-
-        <mx:NumericStepper id="cpuInput"
-            width="100" height="17"
-            styleName="PhysicalMachinesRendererGeneralNumericStepper"
-            minimum="1" maximum="32" stepSize="1" includeInLayout="{_editMode}"
-            visible="{_editMode}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
-        direction="horizontal">
-
-        <mx:Label id="ramLabel"
-            text="{this._isUCS ? '-':_physicalMachine.ram.toString() + ' MB'}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-
-        <mx:NumericStepper id="ramInput"
-            width="100" height="17"
-            styleName="PhysicalMachinesRendererGeneralNumericStepper"
-            minimum="{ramUnitsSelector.selectedItem.minimum}"
-            maximum="{ramUnitsSelector.selectedItem.maximum}"
-            stepSize="{ramUnitsSelector.selectedItem.stepSize}"
-            includeInLayout="{_editMode}"
-            value="{this._physicalMachine.ram / ramUnitsSelector.selectedItem.conversion}"
-            visible="{_editMode}"/>
-
-        <mx:ComboBox id="ramUnitsSelector"
-            width="80" height="17"
-            labelField="label" dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
-            selectedIndex="0" includeInLayout="{_editMode}"
-            visible="{_editMode}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
-        direction="horizontal">
-
-        <mx:Label id="hdLabel"
-            text="{this._isUCS ? '-':this._physicalMachineHD}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-
-        <mx:NumericStepper id="hdInput"
-            width="100" height="17"
-            styleName="PhysicalMachinesRendererGeneralNumericStepper"
-            minimum="{hdUnitsSelector.selectedItem.minimum}"
-            maximum="{hdUnitsSelector.selectedItem.maximum}"
-            stepSize="{hdUnitsSelector.selectedItem.stepSize}"
-            includeInLayout="{_editMode}"
-            value="{this._physicalMachine.hd / hdUnitsSelector.selectedItem.conversion}"
-            visible="{_editMode}"/>
-
-        <mx:ComboBox id="hdUnitsSelector"
-            width="80" height="17"
-            labelField="label" dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
-            selectedIndex="0" includeInLayout="{_editMode}"
-            visible="{_editMode}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_IP')">
-
-        <mx:Label id="ipLabel"
-            selectable="true"
-            text="{this._isUCS ? '-':this._hypervisor.ip}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-
-        <mx:TextInput id="ipInput"
-            height="17"
-            maxChars="39" includeInLayout="{_editMode}"
-            restrict="0-9.:A-F"
-            visible="{_editMode}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='LABEL_SERVICE_NETWORK')">
-        <mx:Label id="virtualSwitchNameLabel"
-            selectable="true" text="{this._isUCS ? '-':_physicalMachine.vswitchName}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='LABEL_HYPERVISOR_TYPE')">
-
-        <mx:Label id="hypervisorTypeLabel"
-            text="{this._isUCS ? '-':this._hypervisorName}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-             <!--this._hypervisors.length > 0 ? HyperVisorType.HYPERVISOR_NAMES[HyperVisor(this._hypervisors.getItemAt(0)).type.id] : ResourceManager.getInstance().getString('Common', 'LABEL_NOT_AVAILABLE')-->
-
-        <mx:ComboBox id="hypervisorTypeInput"
-            height="17"
-            dataProvider="{AbiCloudModel.getInstance().infrastructureManager.hypervisorTypes}"
-            labelField="name" includeInLayout="{_editMode}"
-            change="onChangeHypervisorTypeInput()"
-            prompt="@Resource(bundle='Infrastructure', key='COMBOBOX_PROMPT_HYPERVISOR_TYPE')"
-            visible="{_editMode}"/>
-    </mx:FormItem>
-
-    <mx:FormItem 
-        height="18"
-        label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_PORT')">
-
-        <mx:Label id="hypervisorPortLabel"
-            selectable="true"
-            text="{this._isUCS ? '-':this._hypervisor.port.toString()}"
-            includeInLayout="{! _editMode}"
-            visible="{! _editMode}"/>
-
-        <mx:TextInput id="hypervisorPortInput"
-            height="17"
-            maxChars="5" includeInLayout="{_editMode}"
-            restrict="0-9"
-            visible="{_editMode}"/>
-    </mx:FormItem>
+        label="@Resource(bundle='Infrastructure', key='LABEL_NO_HYPERVISOR')"/>
 </mx:Form>
