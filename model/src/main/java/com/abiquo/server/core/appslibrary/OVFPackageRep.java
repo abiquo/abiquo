@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository
@@ -47,6 +49,9 @@ public class OVFPackageRep extends DefaultRepBase
     @Autowired
     CategoryDAO categoryDao;
 
+    @Autowired
+    IconDAO iconDao;
+
     public OVFPackageRep()
     {
 
@@ -63,6 +68,7 @@ public class OVFPackageRep extends DefaultRepBase
         listDao = new OVFPackageListDAO(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         categoryDao = new CategoryDAO(em);
+        iconDao = new IconDAO(em);
     }
 
     public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
@@ -79,6 +85,7 @@ public class OVFPackageRep extends DefaultRepBase
         {
             categoryDao.persist(ovfPackage.getCategory());
         }
+
         ovfPackage.setAppsLibrary(appsLib);
         dao.persist(ovfPackage);
         dao.flush();

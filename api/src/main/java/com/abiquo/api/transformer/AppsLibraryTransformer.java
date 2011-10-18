@@ -28,6 +28,7 @@ import javax.persistence.NoResultException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.util.IRESTBuilder;
@@ -117,6 +118,7 @@ public class AppsLibraryTransformer
     /**
      * ModelTransformer.persistenceFromTransport(OVFPackage.class, ovfPackage);
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackage createPersistenceObject(final OVFPackageDto ovfDto) throws Exception
     {
 
@@ -130,11 +132,9 @@ public class AppsLibraryTransformer
 
         Category category;
 
-        try
-        {
-            category = categoryDao.findByName(ovfDto.getName());
-        }
-        catch (NoResultException e)
+        category = categoryDao.findByName(ovfDto.getName());
+
+        if (category == null)
         {
             category = new Category(ovfDto.getName());
             category.setIsDefault(0);
@@ -144,19 +144,14 @@ public class AppsLibraryTransformer
 
         Icon icon;
 
-        try
-        {
-            icon = iconDao.findByPath(ovfDto.getIconPath());
-        }
-        catch (Exception e)
-        {
-            icon = new Icon(ovfDto.getIconPath());
-            iconDao.persist(icon);
-        }
+        icon = iconDao.findByPath(ovfDto.getIconPath());
+
         if (icon == null)
         {
             icon = new Icon(ovfDto.getIconPath());
             iconDao.persist(icon);
+            iconDao.flush();
+
         }
 
         OVFPackage pack = new OVFPackage();
