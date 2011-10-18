@@ -32,7 +32,7 @@ import com.softwarementors.bzngine.entities.test.InstanceTester;
 public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement>
 {
 
-    VirtualImageGenerator virtualImageGenerator;
+    private VirtualImageGenerator virtualImageGenerator;
 
     @Override
     protected InstanceTester<VolumeManagement> createEntityInstanceGenerator()
@@ -127,6 +127,7 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         volume.setVirtualImage(null);
         assertFalse(volume.isStateful());
 
+        virtualImageGenerator = new VirtualImageGenerator(getSeed());
         VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
         volume.setVirtualImage(virtualImage);
         assertTrue(volume.isStateful());
