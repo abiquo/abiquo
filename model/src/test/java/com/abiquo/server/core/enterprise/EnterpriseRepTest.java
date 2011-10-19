@@ -191,7 +191,7 @@ public class EnterpriseRepTest extends DefaultJpaDataAccessTestBase
     {
         Enterprise enterprise = eg().createUniqueInstance();
         VirtualImage image = virtualImageGenerator.createImageWithConversions(enterprise);
-        ds().persistAll(enterprise, image.getCategory(), image);
+        ds().persistAll(enterprise, image.getIcon(), image.getCategory(), image);
 
         int enterpriseId = enterprise.getId();
 

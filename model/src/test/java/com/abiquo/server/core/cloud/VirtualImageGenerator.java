@@ -68,7 +68,9 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.ID_MASTER_PROPERTY,
             VirtualImage.DISK_FILE_SIZE_PROPERTY, VirtualImage.DESCRIPTION_PROPERTY,
-            VirtualImage.ICON_PROPERTY, VirtualImage.ID_REPOSITORY_PROPERTY);
+            VirtualImage.ID_REPOSITORY_PROPERTY);
+
+        iconGenerator.assertAllPropertiesEqual(obj1.getIcon(), obj2.getIcon());
     }
 
     @Override

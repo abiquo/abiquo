@@ -44,7 +44,7 @@ public class Icon extends DefaultEntityBase
     // code
     public Icon()
     {
-        super();
+
     }
 
     public Icon(final String iconPath)
@@ -62,6 +62,11 @@ public class Icon extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     public final static String NAME_PROPERTY = "name";
