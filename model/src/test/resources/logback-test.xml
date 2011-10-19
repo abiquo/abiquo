@@ -5,12 +5,10 @@
             <Pattern>[%level] %msg%n</Pattern>
         </layout>
     </appender>
-    
     <logger name="com.abiquo.testng">
         <level value="INFO" />
         <appender-ref ref="STDOUT" />
     </logger>
-
     <root>
         <level value="INFO" />
     </root>

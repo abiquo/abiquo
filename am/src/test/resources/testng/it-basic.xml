@@ -3,7 +3,6 @@
     <listeners>
         <listener class-name="com.abiquo.testng.TestServerListener" />
     </listeners>
-    
     <test name="Basic integration tests">
         <packages>
             <package name="com.abiquo.appliancemanager.*" />

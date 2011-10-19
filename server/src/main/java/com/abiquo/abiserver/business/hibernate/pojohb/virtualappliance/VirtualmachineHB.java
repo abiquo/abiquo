@@ -404,7 +404,7 @@ public class VirtualmachineHB implements java.io.Serializable, IPojoHB<VirtualMa
         return password;
     }
 
-    public void setPassword(final String password)
+    public void setPassword(String password)
     {
         this.password = password;
     }

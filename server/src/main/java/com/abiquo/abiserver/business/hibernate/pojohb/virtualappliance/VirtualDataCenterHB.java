@@ -23,6 +23,7 @@ package com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
@@ -74,6 +75,8 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
     private NetworkHB network;
 
     private ResourceAllocationLimitHB limits;
+
+    private VlanNetworkHB defaultVlan;
 
     /**
      * @return the serialversionuid
@@ -155,6 +158,7 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
     /**
      * Method to create the generic pojo object.
      */
+    @Override
     public VirtualDataCenter toPojo()
     {
         VirtualDataCenter virtualDataCenter = new VirtualDataCenter();
@@ -177,6 +181,16 @@ public class VirtualDataCenterHB implements java.io.Serializable, IPojoHB<Virtua
     public void setHypervisorType(final HypervisorType hypervisorType)
     {
         this.hypervisorType = hypervisorType;
+    }
+
+    public VlanNetworkHB getDefaultVlan()
+    {
+        return defaultVlan;
+    }
+
+    public void setDefaultVlan(VlanNetworkHB defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
     }
 
 }

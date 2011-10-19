@@ -19,151 +19,112 @@
  * Boston, MA 02111-1307, USA.
  */
 
-	/* Virtual Image */
-	.VirtualImageMiniature
-	{
-		background-color:	#E5E5E5;
-		border-style:		solid;
-		border-color:		#A0A0A0;
-		border-thickness:	1;
-	}
-	
-	
-	.VirtualImageButtonEdit
-	{
-		up-skin:				Embed("/assets/virtualimage/editbutton/buttonConfig.png");
-		over-skin: 				Embed("/assets/virtualimage/editbutton/buttonConfig_over.png");
-		down-skin: 				Embed("/assets/virtualimage/editbutton/buttonConfig_down.png");
-	}
-	
-	
-	.VirtualImageButtonErase
-	{
-		up-skin:				Embed("/assets/virtualimage/erasebutton/buttonErase.png");
-		over-skin: 				Embed("/assets/virtualimage/erasebutton/buttonErase1.png");
-		down-skin: 				Embed("/assets/virtualimage/erasebutton/buttonErase2.png");
-	}
-	
-	
-	.VirtualImageButtonDownload
-	{
-		up-skin:			Embed("/assets/virtualimage/buttonDownload.png");
-		over-skin:			Embed("/assets/virtualimage/buttonDownload_down.png");
-		down-skin:			Embed("/assets/virtualimage/buttonDownload_down.png");
-	}
-	
-	.VirtualMachineMiniature
-	{
-		/**custom property**/
-		source:Embed("/assets/infrastructure/virtualMachine.png");
-		background-color:	#E5E5E5;	
-	}
-	
-	
-	.DataCenterListItemRendererForm1
-	{
-/* 		font-style:"italic";
- */		horizontal-gap:"0";
-		padding-bottom:"0";
-		padding-top:"0";
-	}
-	
-	
-	.VirtualImageIconFormCanvas
-	{
-		background-color:"#f4f4f4";
-		border-color:"#aaaaaa";
-		border-style:"solid";
-		border-thickness:"1";
-	}
+/* Virtual Image */
+.VirtualImageMiniature {
+	background-color: #E5E5E5;
+	border-style: solid;
+	border-color: #A0A0A0;
+	border-thickness: 1;
+}
 
+.VirtualImageButtonEdit {
+	up-skin: Embed("/assets/virtualimage/editbutton/buttonConfig.png");
+	over-skin: Embed("/assets/virtualimage/editbutton/buttonConfig_over.png");
+	down-skin: Embed("/assets/virtualimage/editbutton/buttonConfig_down.png");
+}
 
-	.VirtualImageOVFPackageMiniatureFileLabel1
-	{
-		font-size:"12";
-		font-weight:"bold";
+.VirtualImageButtonErase {
+	up-skin: Embed("/assets/virtualimage/erasebutton/buttonErase.png");
+	over-skin: Embed("/assets/virtualimage/erasebutton/buttonErase1.png");
+	down-skin: Embed("/assets/virtualimage/erasebutton/buttonErase2.png");
+}
 
-	}
+.VirtualImageButtonDownload {
+	up-skin: Embed("/assets/virtualimage/buttonDownload.png");
+	over-skin: Embed("/assets/virtualimage/buttonDownload_down.png");
+	down-skin: Embed("/assets/virtualimage/buttonDownload_down.png");
+}
 
+.VirtualMachineMiniature { /**custom property**/
+	source: Embed("/assets/infrastructure/virtualMachine.png");
+	background-color: #E5E5E5;
+}
 
-	.VirtualImageOVFPackageMiniatureInfoTextLabel
-	{
-		background-alpha:"0";
-		font-size:"11";
-		padding-left:"0";
+.DataCenterListItemRendererForm1 { /* 		font-style:"italic";
+ */
+	horizontal-gap: "0";
+	padding-bottom: "0";
+	padding-top: "0";
+}
 
-	}
-	.OVFPackageMiniatureProgressbar1
-	{
-		bar-color:"#fe9608";
-		border-color:"#666666";
-		font-size:"10";
-	}
+.VirtualImageIconFormCanvas {
+	background-color: "#f4f4f4";
+	border-color: "#aaaaaa";
+	border-style: "solid";
+	border-thickness: "1";
+}
 
+.VirtualImageOVFPackageMiniatureFileLabel1 {
+	font-size: "12";
+	font-weight: "bold";
+}
 
-	.VirtualImageFormBaseTextarea1
-	{
-		background-alpha:"0";
-		font-size:"12";
+.VirtualImageOVFPackageMiniatureInfoTextLabel {
+	background-alpha: "0";
+	font-size: "11";
+	padding-left: "0";
+}
 
-	}
+.OVFPackageMiniatureProgressbar1 {
+	bar-color: "#fe9608";
+	border-color: "#666666";
+	font-size: "10";
+}
 
-	.VirtualImageFormBaseProgressbar
-	{
-		bar-color:"#fe9608";
-		border-color:"#666666";
-		font-size:"10";
+.VirtualImageFormBaseTextarea1 {
+	background-alpha: "0";
+	font-size: "12";
+}
 
-	}
+.VirtualImageFormBaseProgressbar {
+	bar-color: "#fe9608";
+	border-color: "#666666";
+	font-size: "10";
+}
 
+.VirtualImageMiniatureBaseMasterImage {
+	source: Embed("/assets/virtualimage/labelMaster.png");
+}
 
-	.VirtualImageMiniatureBaseMasterImage
-	{
-		source:Embed("/assets/virtualimage/labelMaster.png");
-		
-	}
+.VirtualImageMiniatureBaseSlaveImage {
+	source: Embed("/assets/virtualimage/labelSlave.png");
+}
 
-	.VirtualImageMiniatureBaseSlaveImage
-	{
-		source:Embed("/assets/virtualimage/labelSlave.png");
+.VirtualImageMiniatureBasePublicImage {
+	source: Embed("/assets/virtualimage/publicVirtualImage.png");
+}
 
-	}
+.VirtualImageMiniatureBaseVRule {
+	stroke-color: "#a0a0a0";
+}
 
-	.VirtualImageMiniatureBasePublicImage
-	{
-		source:Embed("/assets/virtualimage/publicVirtualImage.png");
+.VirtualImageMiniatureBaseNameLabel {
+	font-weight: "bold";
+	font-size: "10";
+	padding-top: "0";
+}
 
-	}
-	
-	.VirtualImageMiniatureBaseChefImage
-    {
-        source:Embed("/assets/virtualimage/chefEnabled.png");
+.VirtualImageMiniatureBaseRAMLabel {
+	font-size: "10";
+}
 
-    }
+.VirtualImageManagementLabel1 {
+	font-size: "20";
+	horizontal-center: "0";
+	vertical-center: "-30";
+}
 
+.VirtualImageMiniatureBaseChefImage {
+    source:Embed("/assets/virtualimage/chefEnabled.png");
 
-
-	.VirtualImageMiniatureBaseVRule
-	{
-		stroke-color:"#a0a0a0";
-	}
-
-	.VirtualImageMiniatureBaseNameLabel
-	{
-		font-weight: "bold";
-		font-size: "10";
-		padding-top: "0";
-	}
-	.VirtualImageMiniatureBaseRAMLabel
-	{
-		font-size:"10";
-	}
-
-	.VirtualImageManagementLabel1
-	{
-		font-size:"20";
-		horizontal-center:"0";
-		vertical-center:"-30";
-
-	}
-
+}

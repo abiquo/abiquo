@@ -270,7 +270,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd((int) virtualMachine.getHd());
+        dto.setHd(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());

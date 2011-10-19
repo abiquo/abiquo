@@ -1,97 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	id="WebApp_ID" version="2.5">
-
-	<display-name>Abiquo API</display-name>
-
-	<!-- Spring framework context file -->
-	<!-- Default configuration, it could be omitted -->
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:springresources/applicationContext.xml</param-value>
-	</context-param>
-	
-	<session-config>
-		<session-timeout>1</session-timeout>
-	</session-config>
-
-	<resource-ref>
-		<description>DB Connection</description>
-		<res-ref-name>jdbc/abiquoDB</res-ref-name>
-		<res-type>javax.sql.DataSource</res-type>
-		<res-auth>Container</res-auth>
-	</resource-ref>
-
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+    <display-name>Abiquo API</display-name>
+    <!-- Spring framework context file -->
+    <!-- Default configuration, it could be omitted -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:springresources/applicationContext.xml</param-value>
+    </context-param>
+    <session-config>
+        <session-timeout>1</session-timeout>
+    </session-config>
+    <resource-ref>
+        <description>DB Connection</description>
+        <res-ref-name>jdbc/abiquoDB</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
     <filter>
         <filter-name>securedURLRewrite</filter-name>
         <filter-class>com.abiquo.api.web.filters.SecuredURLRewriteFilter</filter-class>
     </filter>
-    
-	<filter>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-	</filter>
-
-	<filter>
-		<filter-name>TraceFilter</filter-name>
-		<filter-class>com.abiquo.api.web.filters.TraceFilter</filter-class>
-	</filter>
-
-	<filter>
-		<filter-name>OpenSessionInView</filter-name>
-		<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
-	</filter>
-
-	<filter-mapping>
-		<filter-name>securedURLRewrite</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	
-	<filter-mapping>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>TraceFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>OpenSessionInView</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<servlet>
-		<servlet-name>ApiServlet</servlet-name>
-		<servlet-class>com.abiquo.api.util.AbiquoRestServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>ApiServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>restSdkAdmin</servlet-name>
-		<servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>restSdkAdmin</servlet-name>
-		<url-pattern>/console</url-pattern>
-	</servlet-mapping>
-
-
-	<listener>
-		<listener-class>com.abiquo.api.web.listener.LicenseContextListener</listener-class>
-	</listener>
-
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
-
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter>
+        <filter-name>TraceFilter</filter-name>
+        <filter-class>com.abiquo.api.web.filters.TraceFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>OpenSessionInView</filter-name>
+        <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>securedURLRewrite</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>TraceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>OpenSessionInView</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <servlet>
+        <servlet-name>ApiServlet</servlet-name>
+        <servlet-class>com.abiquo.api.util.AbiquoRestServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ApiServlet</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>restSdkAdmin</servlet-name>
+        <servlet-class>org.apache.wink.server.internal.servlet.AdminServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>restSdkAdmin</servlet-name>
+        <url-pattern>/console</url-pattern>
+    </servlet-mapping>
+    <listener>
+        <listener-class>com.abiquo.api.web.listener.LicenseContextListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
 </web-app>

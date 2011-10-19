@@ -1,8 +1,7 @@
-<tests abicloud_WS_location ="http://localhost:8080/abicloud_WS/" request_timeout="6000000" sleep_time="6000">
-
-  <group name="III">
-    <group name="C">
-      <test name="005"/>
+<tests abicloud_WS_location="http://localhost:8080/abicloud_WS/" request_timeout="6000000" sleep_time="6000">
+    <group name="III">
+        <group name="C">
+            <test name="005" />
+        </group>
     </group>
-   </group>
 </tests>

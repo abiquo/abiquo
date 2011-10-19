@@ -18,69 +18,51 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+.UserRenderer {
+	background-color: #F4F4F4;
+	background-alpha: 0.9;
+	border-style: solid;
+	borderThickness: 1;
+	borderColor: #cccccc;
+	padding-left: 20;
+}
 
-	.UserRenderer
-	{
-		background-color:#F4F4F4;
-		background-alpha:0.9;
-		border-style:solid;
-		borderThickness: 1;
-	    borderColor: #cccccc;
-	    padding-left: 20;
-	}
+.EnterpriseListRenderer {
 	
-	.EnterpriseListRenderer
-	{
-		
-	}
-	
+}
+
 /* 	.SecurableEntepriseList{
 		border-skin:	ClassReference(null);
 		
 	}
  */
-	.SecurableEnterpriseSelectorBaseMagnifier
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/magnifier.png");
-	}
+.SecurableEnterpriseSelectorBaseMagnifier { /**custom property**/
+	source: Embed("/assets/application/icons/magnifier.png");
+}
 
-	.UserListDragProxyUser
-	{
-		/**custom property**/
-		source:Embed("/assets/user/Usuarios.png");
-	}
+.UserListDragProxyUser { /**custom property**/
+	source: Embed("/assets/user/Usuarios.png");
+}
 
-	.UserListSeparator
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/separator.png");
-	}
+.UserListSeparator { /**custom property**/
+	source: Embed("/assets/application/icons/separator.png");
+}
 
+.UserListMagnifier { /**custom property**/
+	source: Embed("/assets/application/icons/magnifier.png");
+}
 
-	.UserListMagnifier
-	{
-		/**custom property**/
-		source:Embed("/assets/application/icons/magnifier.png");
-	}
+.UserRendererUserIcon { /**custom property**/
+	source: Embed("/assets/user/Usuarios.png");
+}
 
-	.UserRendererUserIcon
-	{
-		/**custom property**/
-		source:Embed("/assets/user/Usuarios.png");
-	}
+.UserRendererLabel1 {
+	font-size: 14;
+	font-weight: bold;
+	padding-top: 4;
+	padding-bottom: 0;
+}
 
-	.UserRendererLabel1
-	{
-		font-size: 14 ;
-		font-weight: bold;
-		padding-top: 4;
-		padding-bottom: 0;
-
-	}
-
-
-	.UserRendererVRule
-	{
-		stroke-color:"#cccccc";
-	}
+.UserRendererVRule {
+	stroke-color: "#cccccc";
+}

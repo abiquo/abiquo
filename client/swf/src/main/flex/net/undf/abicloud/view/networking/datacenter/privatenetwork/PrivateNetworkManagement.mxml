@@ -38,6 +38,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.view.networking.datacenter.privatenetwork.networktree.NetworkTreeItem;
+        	import mx.collections.ArrayCollection;
             import mx.effects.Resize;
             import mx.events.EffectEvent;
             import mx.resources.ResourceManager;
@@ -93,7 +95,10 @@
                 }
                 else if (networkTree.selectedItem is VlanNetwork)
                 {
-                    privateIPList.init(null, null, networkTree.selectedItem as VlanNetwork);
+
+                	var virtualDatacenter:VirtualDataCenter = VlanNetwork(networkTree.selectedItem).virtualDatacenter;
+                	
+                    privateIPList.init(null, virtualDatacenter, networkTree.selectedItem as VlanNetwork);
                     vlanRenderer.vlanNetwork = networkTree.selectedItem as VlanNetwork;
                     showMoreInfoContainer();
                 }
@@ -102,6 +107,24 @@
                     privateIPList.init();
                     hideMoreInfoContainer();
                 }
+            }
+            
+            private function returnParentVirtualDatacenter(value:ArrayCollection , vlanNetwork:VlanNetwork):VirtualDataCenter{
+            	var virtualdatacenter:VirtualDataCenter;
+            	if(value && NetworkTreeItem(value).virtualDatacenters){
+            		for(var i:int = 0 ; i < NetworkTreeItem(value).virtualDatacenters.length ; i++){
+            			virtualdatacenter = NetworkTreeItem(value).virtualDatacenters.getItemAt(i) as VirtualDataCenter;
+            			if(virtualdatacenter.network && virtualdatacenter.network.networks){
+            				for(var y:int = 0 ; y < virtualdatacenter.network.networks.length ; y ++){
+            					var tmpVlanNetwork:VlanNetwork = virtualdatacenter.network.networks.getItemAt(i) as VlanNetwork;
+            					if(tmpVlanNetwork.vlanNetworkId == vlanNetwork.vlanNetworkId){
+            						return virtualdatacenter;
+            					}
+            				}
+            			}
+            		}
+            	}
+            	return null;
             }
 
             private function showMoreInfoContainer():void

@@ -1065,8 +1065,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 
@@ -1838,8 +1838,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+
                             return basicResult;
                         }
                     }
@@ -2228,20 +2233,31 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
+                String errorMesssage =
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because the hypervisor could be disconnected.";
+
                 PhysicalMachine machine =
                     (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
-                    "Operation cannot be performed on " + virtualMachine.getName()
-                        + " because datacenter isn't well configured.", null, machine.getRack(),
-                    machine, userSession.getUser(), userSession.getEnterpriseName());
+                    errorMesssage, null, machine.getRack(), machine, userSession.getUser(),
+                    userSession.getEnterpriseName());
                 // Generating the result
-                dataResult.setMessage(basicResult.getMessage());
+
+                factory.beginConnection();
+                String nameVApp =
+                    factory.getVirtualApplianceDAO()
+                        .getVirtualAppByVirtualMachine(virtualMachine.getId()).getName();
+                factory.endConnection();
+
+                String errorNotificacion = nameVApp + ": " + basicResult.getMessage();
+
+                dataResult.setMessage(errorNotificacion);
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
                 return dataResult;
             }
-
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             State inProgressState = new State(StateEnum.IN_PROGRESS);
@@ -2486,7 +2502,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB)
      */
     @Override
-    public BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter)
+    public BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -2497,7 +2513,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             factory.beginConnection();
             DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
 
-            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
+            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter);
             basicResult.setSuccess(true);
             basicResult.setMessage(InfrastructureCommandImpl.resourceManager
                 .getMessage("updateUsedResourcesByDatacenter.success"));
@@ -2666,7 +2682,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         DatacenterHB dataCenter = pm.getDataCenter();
         factory.endConnection();
 
-        return updateUsedResourcesByDatacenter(dataCenter);
+        return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
     /*

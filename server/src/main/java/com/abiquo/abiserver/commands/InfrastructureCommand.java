@@ -356,7 +356,7 @@ public interface InfrastructureCommand
      * @param dataCenter the dataCenter object
      * @return the result of the operation
      */
-    public abstract BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter);
+    public abstract BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter);
 
     /**
      * This method checks the IP address parameter in the Physical Machine object.

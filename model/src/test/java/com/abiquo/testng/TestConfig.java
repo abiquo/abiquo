@@ -35,6 +35,12 @@ public class TestConfig
     /** TestNG group for default integration tests. */
     public static final String BASIC_INTEGRATION_TESTS = "it-basic";
 
+    /** TestNG group for networking unit tests. */
+    public static final String NETWORK_UNIT_TESTS = "test-network";
+
+    /** TestNG group for networking integration tests. */
+    public static final String NETWORK_INTEGRATION_TESTS = "it-network";
+
     /** TestNG group for all unit tests. */
     public static final String ALL_UNIT_TESTS = "test-all";
 
@@ -46,6 +52,12 @@ public class TestConfig
 
     /** TestNG group for default premium integration tests. */
     public static final String PREMIUM_BASIC_INTEGRATION_TESTS = "it-premium-basic";
+
+    /** TestNG group for networking premium unit tests. */
+    public static final String PREMIUM_NETWORK_UNIT_TESTS = "test-premium-network";
+
+    /** TestNG group for networking premium integration tests. */
+    public static final String PREMIUM_NETWORK_INTEGRATION_TESTS = "it-premium-network";
 
     /** TestNG group for all premium unit tests. */
     public static final String PREMIUM_ALL_UNIT_TESTS = "test-premium-all";

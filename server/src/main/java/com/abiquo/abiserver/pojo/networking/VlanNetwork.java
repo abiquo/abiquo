@@ -28,7 +28,6 @@ import java.io.Serializable;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.abiserver.pojo.user.Enterprise;
 
 /**
  * Each one of the networks in transfer object to Flex.
@@ -53,26 +52,24 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     private Integer networkId;
 
     /**
-     * If this network is the default network; The default network is the one which a new node will
-     * request an available IP.
-     */
-    private Boolean defaultNetwork;
-
-    /**
      * Name of the network.
      */
     protected String networkName;
 
     /**
-     * The tag that defines the network. 
+     * The tag that defines the network.
      */
     protected Integer vlanTag;
-    
+
     /**
      * The configuration of the VLAN
      */
     private NetworkConfiguration configuration;
-    
+
+    private Boolean defaultNetwork;
+
+    private String networkType;
+
     /**
      * @return the vlanNetworkId
      */
@@ -84,7 +81,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     /**
      * @param vlanNetworkId the vlanNetworkId to set
      */
-    public void setVlanNetworkId(Integer vlanNetworkId)
+    public void setVlanNetworkId(final Integer vlanNetworkId)
     {
         this.vlanNetworkId = vlanNetworkId;
     }
@@ -100,25 +97,9 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     /**
      * @param networkId the networkId to set
      */
-    public void setNetworkId(Integer networkId)
+    public void setNetworkId(final Integer networkId)
     {
         this.networkId = networkId;
-    }
-
-    /**
-     * @return the defaultNetwork
-     */
-    public Boolean getDefaultNetwork()
-    {
-        return defaultNetwork;
-    }
-
-    /**
-     * @param defaultNetwork the defaultNetwork to set
-     */
-    public void setDefaultNetwork(Boolean defaultNetwork)
-    {
-        this.defaultNetwork = defaultNetwork;
     }
 
     /**
@@ -132,7 +113,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     /**
      * @param networkName the networkName to set
      */
-    public void setNetworkName(String networkName)
+    public void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
     }
@@ -148,7 +129,7 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     /**
      * @param vlanTag the vlanTag to set
      */
-    public void setVlanTag(Integer vlanTag)
+    public void setVlanTag(final Integer vlanTag)
     {
         this.vlanTag = vlanTag;
     }
@@ -164,29 +145,47 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(NetworkConfiguration configuration)
+    public void setConfiguration(final NetworkConfiguration configuration)
     {
         this.configuration = configuration;
     }
 
-   
     @Override
     public VlanNetworkHB toPojoHB()
     {
         VlanNetworkHB vnetHB = new VlanNetworkHB();
-        
+
         vnetHB.setNetworkId(getNetworkId());
         vnetHB.setVlanNetworkId(getVlanNetworkId());
-        vnetHB.setDefaultNetwork(getDefaultNetwork());
         vnetHB.setNetworkName(getNetworkName());
         vnetHB.setVlanTag(getVlanTag());
-                
+
         if (getConfiguration() != null)
         {
             vnetHB.setConfiguration(getConfiguration().toPojoHB());
-        }        
-       
+        }
+
         return vnetHB;
+    }
+
+    public Boolean getDefaultNetwork()
+    {
+        return defaultNetwork;
+    }
+
+    public void setDefaultNetwork(Boolean defaultNetwork)
+    {
+        this.defaultNetwork = defaultNetwork;
+    }
+
+    public String getNetworkType()
+    {
+        return networkType;
+    }
+
+    public void setNetworkType(String networkType)
+    {
+        this.networkType = networkType;
     }
 
 }

@@ -41,6 +41,7 @@ import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -91,7 +92,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         return this.name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -114,7 +115,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         return this.hypervisorType;
     }
 
-    public void setHypervisorType(HypervisorType type)
+    public void setHypervisorType(final HypervisorType type)
     {
         this.hypervisorType = type;
     }
@@ -136,7 +137,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         return this.datacenter;
     }
 
-    public void setDatacenter(Datacenter datacenter)
+    public void setDatacenter(final Datacenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -158,7 +159,7 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         return this.enterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -181,13 +182,36 @@ public class VirtualDatacenter extends DefaultEntityWithLimits
         return this.network;
     }
 
-    public void setNetwork(Network network)
+    public void setNetwork(final Network network)
     {
         this.network = network;
     }
 
-    public VirtualDatacenter(Enterprise enterprise, Datacenter datacenter, Network network,
-        HypervisorType type, String name)
+    public final static String DEFAULT_VLAN_PROPERTY = "defaultVlan";
+
+    private final static boolean DEFAULT_VLAN_REQUIRED = false;
+
+    private final static String DEFAULT_VLAN_COLUMN = "default_vlan_network_id";
+
+    @JoinColumn(name = DEFAULT_VLAN_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {javax.persistence.CascadeType.PERSIST,
+    javax.persistence.CascadeType.REFRESH})
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_vlan")
+    private VLANNetwork defaultVlan;
+
+    @Required(value = DEFAULT_VLAN_REQUIRED)
+    public VLANNetwork getDefaultVlan()
+    {
+        return this.defaultVlan;
+    }
+
+    public void setDefaultVlan(final VLANNetwork defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
+    }
+
+    public VirtualDatacenter(final Enterprise enterprise, final Datacenter datacenter,
+        final Network network, final HypervisorType type, final String name)
     {
         super();
 

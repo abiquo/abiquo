@@ -1,67 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB"
-		table="hypervisor">
-		<id name="idHyper" type="java.lang.Integer">
-			<column name="id" />
-			<generator class="identity" />
-		</id>
-		<property name="ip" type="string">
-			<column length="39" name="ip" not-null="true" />
-		</property>
-		<property name="ipService" type="string">
-			<column length="39" name="ipService" not-null="true" />
-		</property>
-		<property name="port" type="int">
-			<column length="5" name="port" not-null="true" />
-		</property>
-		<property name="user" type="string">
-			<column length="255" name="user" not-null="true" />
-		</property>
-		<property name="password" type="string">
-			<column length="255" name="password" not-null="true" />
-		</property>
-
-		<property name="type" type="HypervisorType" not-null="true"/>
-		
-		<many-to-one
-			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
-			fetch="select" lazy="false" name="physicalMachine">
-			<column name="idPhysicalMachine" />
-		</many-to-one>
-		
-		<set inverse="false" lazy="true" name="virtualmachines" order-by="name">
-			<key>
-				<column name="idHypervisor" not-null="true" />
-			</key>
-			<one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" />
-		</set>
-	</class>
-	<!--
-		This query catch the hypervisors technologies assigned into machines
-		of a determinate DataCenter
-	-->
-	<query name="GET_HYPERTECH_FROM_DATACENTER">
-		select h.type
-		from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB as h
-		inner join h.physicalMachine as pm
-		inner join pm.dataCenter as dc
-		where dc.idDataCenter = :idDataCenter
-		group by h.type
-	</query>
-	
-	<query name="GET_VDRP">
-	SELECT vm.vdrpPort
-		FROM VirtualmachineHB vm, HypervisorHB h
-		WHERE vm.hypervisor.idHyper = :idHyper 
-		AND h.physicalMachine.idPhysicalMachine = :idPM
-	</query>
-	
-	<query name="HYPERVISOR.GET_HYPER_FROM_PHYSICALMACHINE">
-		SELECT hyp FROM com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB  hyp
-		WHERE hyp.physicalMachine.idPhysicalMachine = :pmId
-	</query>
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB" table="hypervisor">
+        <id name="idHyper" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="ip" type="string">
+            <column length="39" name="ip" not-null="true" />
+        </property>
+        <property name="ipService" type="string">
+            <column length="39" name="ipService" not-null="true" />
+        </property>
+        <property name="port" type="int">
+            <column length="5" name="port" not-null="true" />
+        </property>
+        <property name="user" type="string">
+            <column length="255" name="user" not-null="true" />
+        </property>
+        <property name="password" type="string">
+            <column length="255" name="password" not-null="true" />
+        </property>
+        <property name="type" type="HypervisorType" not-null="true" />
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" fetch="select" lazy="false" name="physicalMachine">
+            <column name="idPhysicalMachine" />
+        </many-to-one>
+        <set inverse="false" lazy="true" name="virtualmachines" order-by="name">
+            <key>
+                <column name="idHypervisor" not-null="true" />
+            </key>
+            <one-to-many class="com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB" />
+        </set>
+    </class>
+    <!--
+        This query catch the hypervisors technologies assigned into machines
+        of a determinate DataCenter
+    -->
+    <query name="GET_HYPERTECH_FROM_DATACENTER"> select h.type from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB as h inner join h.physicalMachine as pm inner join pm.dataCenter as dc where
+        dc.idDataCenter = :idDataCenter group by h.type</query>
+    <query name="GET_VDRP"> SELECT vm.vdrpPort FROM VirtualmachineHB vm, HypervisorHB h WHERE vm.hypervisor.idHyper = :idHyper AND h.physicalMachine.idPhysicalMachine = :idPM</query>
+    <query name="HYPERVISOR.GET_HYPER_FROM_PHYSICALMACHINE"> SELECT hyp FROM com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB hyp WHERE hyp.physicalMachine.idPhysicalMachine = :pmId</query>
 </hibernate-mapping>

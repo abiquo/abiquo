@@ -5,45 +5,43 @@
     </formats>
     <fileSets>
         <fileSet>
-		<directory>abicloudDefault/target/themes/abicloudDefault</directory>
-		<outputDirectory>themes/abicloudDefault</outputDirectory>
+            <directory>abicloudDefault/target/themes/abicloudDefault</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>abicloudDefault/src</directory>
-		<outputDirectory>themes/abicloudDefault</outputDirectory>
+            <directory>abicloudDefault/src</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	<fileSet>
-		<directory>abicloudDefault/src/assets/application/login</directory>
-		<outputDirectory>themes/abicloudDefault</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
-
         <fileSet>
-		<directory>themeBase/target/themes/base</directory>
-		<outputDirectory>themes/base</outputDirectory>
+            <directory>abicloudDefault/src/assets/application/login</directory>
+            <outputDirectory>themes/abicloudDefault</outputDirectory>
+            <includes>
+                <include>logo.png</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>themeBase/target/themes/base</directory>
+            <outputDirectory>themes/base</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeBase/src</directory>
-		<outputDirectory>themes/base</outputDirectory>
+            <directory>themeBase/src</directory>
+            <outputDirectory>themes/base</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	  <fileSet>
-		<directory>themeBase/src/assets/customcomponents/custompreloader</directory>
-		<outputDirectory>themes/base</outputDirectory>
+        <fileSet>
+            <directory>themeBase/src/assets/customcomponents/custompreloader</directory>
+            <outputDirectory>themes/base</outputDirectory>
             <includes>
                 <include>CustomPreloaderLogo.png</include>
             </includes>
@@ -56,104 +54,95 @@
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeBlue/target/themes/defaultBlue</directory>
-		<outputDirectory>themes/defaultBlue</outputDirectory>
+            <directory>themeBlue/target/themes/defaultBlue</directory>
+            <outputDirectory>themes/defaultBlue</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeBlue/src</directory>
-		<outputDirectory>themes/defaultBlue</outputDirectory>
+            <directory>themeBlue/src</directory>
+            <outputDirectory>themes/defaultBlue</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	<fileSet>
-		<directory>themeBlue/src/assets/application/login</directory>
-		<outputDirectory>themes/defaultBlue</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
-
         <fileSet>
-		<directory>themeFonts/target/themes/fonts</directory>
-		<outputDirectory>themes/fonts</outputDirectory>
+            <directory>themeBlue/src/assets/application/login</directory>
+            <outputDirectory>themes/defaultBlue</outputDirectory>
             <includes>
-                <include>*.*</include>
+                <include>logo.png</include>
             </includes>
         </fileSet>
-
-
         <fileSet>
-		<directory>themeGreen/target/themes/defaultGreen</directory>
-		<outputDirectory>themes/defaultGreen</outputDirectory>
+            <directory>themeFonts/target/themes/fonts</directory>
+            <outputDirectory>themes/fonts</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeGreen/src</directory>
-		<outputDirectory>themes/defaultGreen</outputDirectory>
+            <directory>themeGreen/target/themes/defaultGreen</directory>
+            <outputDirectory>themes/defaultGreen</outputDirectory>
+            <includes>
+                <include>*.*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>themeGreen/src</directory>
+            <outputDirectory>themes/defaultGreen</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	<fileSet>
-		<directory>themeGreen/src/assets/application/login</directory>
-		<outputDirectory>themes/defaultGreen</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
-
         <fileSet>
-		<directory>themeRed/target/themes/defaultRed</directory>
-		<outputDirectory>themes/defaultRed</outputDirectory>
+            <directory>themeGreen/src/assets/application/login</directory>
+            <outputDirectory>themes/defaultGreen</outputDirectory>
+            <includes>
+                <include>logo.png</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>themeRed/target/themes/defaultRed</directory>
+            <outputDirectory>themes/defaultRed</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeRed/src</directory>
-		<outputDirectory>themes/defaultRed</outputDirectory>
+            <directory>themeRed/src</directory>
+            <outputDirectory>themes/defaultRed</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	<fileSet>
-		<directory>themeRed/src/assets/application/login</directory>
-		<outputDirectory>themes/defaultRed</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
-
         <fileSet>
-		<directory>themeGrey/target/themes/defaultGrey</directory>
-		<outputDirectory>themes/defaultGrey</outputDirectory>
+            <directory>themeRed/src/assets/application/login</directory>
+            <outputDirectory>themes/defaultRed</outputDirectory>
+            <includes>
+                <include>logo.png</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>themeGrey/target/themes/defaultGrey</directory>
+            <outputDirectory>themes/defaultGrey</outputDirectory>
             <includes>
                 <include>*.*</include>
             </includes>
         </fileSet>
         <fileSet>
-		<directory>themeGrey/src</directory>
-		<outputDirectory>themes/defaultGrey</outputDirectory>
+            <directory>themeGrey/src</directory>
+            <outputDirectory>themes/defaultGrey</outputDirectory>
             <includes>
                 <include>*.lst</include>
             </includes>
         </fileSet>
-	<fileSet>
-		<directory>themeGrey/src/assets/application/login</directory>
-		<outputDirectory>themes/defaultGrey</outputDirectory>
-		<includes>
-			<include>logo.png</include>
-		</includes>
-	</fileSet>
-
+        <fileSet>
+            <directory>themeGrey/src/assets/application/login</directory>
+            <outputDirectory>themes/defaultGrey</outputDirectory>
+            <includes>
+                <include>logo.png</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

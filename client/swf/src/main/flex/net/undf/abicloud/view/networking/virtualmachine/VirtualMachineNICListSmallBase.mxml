@@ -33,6 +33,8 @@
     xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
             import mx.collections.ArrayCollection;
 
@@ -44,13 +46,29 @@
             [Bindable]
             protected var virtualMachineNICs:ArrayCollection;
 
+            //The VirtualDatacenter 
+            protected var _virtualDatacenter:VirtualDataCenter;
+
+            public function set virtualDatacenter(value:VirtualDataCenter):void
+            {
+                _virtualDatacenter = value;
+            }
+            
+            //The VirtualAppliance
+            protected var _virtualAppliance:VirtualAppliance;
+
+            public function set virtualAppliance(value:VirtualAppliance):void
+            {
+                _virtualAppliance = value;
+            }
+            
             //The VirtualMachine to list its NICs
             protected var _virtualMachine:VirtualMachine;
 
             public function set virtualMachine(value:VirtualMachine):void
             {
                 _virtualMachine = value;
-                requestVirtualMachineNICs()
+                requestVirtualMachineNICs();
             }
 
             private function onCreationComplete():void
@@ -62,11 +80,13 @@
 
             protected function requestVirtualMachineNICs():void
             {
-                if (_virtualMachine)
+                if (_virtualMachine && _virtualAppliance && _virtualDatacenter)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
+                    event.virtualDatacenter = _virtualDatacenter;
+                    event.virtualAppliance = _virtualAppliance; 
                     event.virtualMachine = _virtualMachine;
-                    event.callback = setVirtualMachineNICs;
+                    event.callback = setVirtualMachineNICs; 
                     dispatchEvent(event);
                 }
                 else

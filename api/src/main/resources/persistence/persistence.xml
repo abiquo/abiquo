@@ -1,90 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
-	version="2.0">
-	<persistence-unit name="abiquoPersistence"
-		transaction-type="RESOURCE_LOCAL">
-		<provider>org.hibernate.ejb.HibernatePersistence</provider>
-
-		<!-- infrastructure -->
- 		<class>com.abiquo.server.core.infrastructure.Datacenter</class>
-		<class>com.abiquo.server.core.infrastructure.Rack</class>
-		<class>com.abiquo.server.core.infrastructure.UcsRack</class>
-		<class>com.abiquo.server.core.infrastructure.Machine</class>
-		<class>com.abiquo.server.core.infrastructure.RemoteService</class>
-		<class>com.abiquo.server.core.infrastructure.Datastore</class>
-		<class>com.abiquo.server.core.infrastructure.Repository</class>
-		<class>com.abiquo.server.core.infrastructure.management.Rasd</class>
-		<class>com.abiquo.server.core.infrastructure.management.RasdManagement</class> 
-		<!-- end : infrastructure -->
-
-		<!-- appliance library -->
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0">
+    <persistence-unit name="abiquoPersistence" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+        <!-- infrastructure -->
+        <class>com.abiquo.server.core.infrastructure.Datacenter</class>
+        <class>com.abiquo.server.core.infrastructure.Rack</class>
+        <class>com.abiquo.server.core.infrastructure.UcsRack</class>
+        <class>com.abiquo.server.core.infrastructure.Machine</class>
+        <class>com.abiquo.server.core.infrastructure.RemoteService</class>
+        <class>com.abiquo.server.core.infrastructure.Datastore</class>
+        <class>com.abiquo.server.core.infrastructure.Repository</class>
+        <class>com.abiquo.server.core.infrastructure.management.Rasd</class>
+        <class>com.abiquo.server.core.infrastructure.management.RasdManagement</class>
+        <!-- end : infrastructure -->
+        <!-- appliance library -->
         <class>com.abiquo.server.core.appslibrary.AppsLibrary</class>
         <class>com.abiquo.server.core.appslibrary.OVFPackage</class>
         <class>com.abiquo.server.core.appslibrary.OVFPackageList</class>
         <class>com.abiquo.server.core.appslibrary.Category</class>
         <class>com.abiquo.server.core.appslibrary.Icon</class>
         <!-- end: appliance library -->
-
-		<!-- cloud infrastructure -->
-		<class>com.abiquo.server.core.cloud.VirtualDatacenter</class>
-		<class>com.abiquo.server.core.cloud.VirtualAppliance</class>
-		<class>com.abiquo.server.core.cloud.Hypervisor</class>
-		<class>com.abiquo.server.core.cloud.VirtualMachine</class>
-		<class>com.abiquo.server.core.cloud.VirtualImage</class>
-		<class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
-		<class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
-		<class>com.abiquo.server.core.cloud.chef.RunlistElement</class> 
-		<!-- end: cloud infrastructure -->
-		
-		
-           
-	
-		
-		<!-- enterprise -->
-    	<class>com.abiquo.server.core.enterprise.Enterprise</class>
-		<class>com.abiquo.server.core.enterprise.Role</class>
-		<class>com.abiquo.server.core.enterprise.RoleLdap</class>
-		<class>com.abiquo.server.core.enterprise.Privilege</class>
-		<class>com.abiquo.server.core.enterprise.User</class>
-		<class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
-		<class>com.abiquo.server.core.enterprise.Session</class>
-		<class>com.abiquo.server.core.enterprise.OneTimeTokenSession</class>
-		<!-- end: enterprise -->
-
-		<!-- networking -->
-		<class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>
-		<class>com.abiquo.server.core.infrastructure.network.Network</class>
-		<class>com.abiquo.server.core.infrastructure.network.NetworkConfiguration</class>
-		<class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
-		<class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
-		<class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
-		
-		<!-- end: networking -->
-
-		<!-- storage -->
-		<class>com.abiquo.server.core.infrastructure.storage.Tier</class>
-		<class>com.abiquo.server.core.infrastructure.storage.StorageDevice</class>
-    	<class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
-		<class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
-		<class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
-		<!-- end: storage -->
-
-		<!-- workload -->
-    	<class>com.abiquo.server.core.scheduler.EnterpriseExclusionRule</class>
-		<class>com.abiquo.server.core.scheduler.FitPolicyRule</class>
-		<class>com.abiquo.server.core.scheduler.MachineLoadRule</class>
-		<!-- end:workload -->
-		
-		<!-- configuration -->
-      	<class>com.abiquo.server.core.config.SystemProperty</class>
-      	<class>com.abiquo.server.core.tasks.Task</class>
+        <!-- cloud infrastructure -->
+        <class>com.abiquo.server.core.cloud.VirtualDatacenter</class>
+        <class>com.abiquo.server.core.cloud.VirtualAppliance</class>
+        <class>com.abiquo.server.core.cloud.Hypervisor</class>
+        <class>com.abiquo.server.core.cloud.VirtualMachine</class>
+        <class>com.abiquo.server.core.cloud.VirtualImage</class>
+        <class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
+        <class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
+	<class>com.abiquo.server.core.cloud.chef.RunlistElement</class> 
+        <!-- end: cloud infrastructure -->
+        <!-- stateful -->
+        <class>com.abiquo.server.core.cloud.stateful.DiskStatefulConversion</class>
+        <class>com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion</class>
+        <class>com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion</class>
+        <!-- end: stateful -->
+        <!-- enterprise -->
+        <class>com.abiquo.server.core.enterprise.Enterprise</class>
+        <class>com.abiquo.server.core.enterprise.Role</class>
+        <class>com.abiquo.server.core.enterprise.RoleLdap</class>
+        <class>com.abiquo.server.core.enterprise.Privilege</class>
+        <class>com.abiquo.server.core.enterprise.User</class>
+        <class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
+        <class>com.abiquo.server.core.enterprise.Session</class>
+	<class>com.abiquo.server.core.enterprise.OneTimeTokenSession</class>
+        <!-- end: enterprise -->
+        <!-- networking -->
+        <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>
+        <class>com.abiquo.server.core.infrastructure.network.Network</class>
+        <class>com.abiquo.server.core.infrastructure.network.NetworkConfiguration</class>
+        <class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
+        <class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
+        <class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
+        <!-- end: networking -->
+        <!-- storage -->
+        <class>com.abiquo.server.core.infrastructure.storage.Tier</class>
+        <class>com.abiquo.server.core.infrastructure.storage.StorageDevice</class>
+        <class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
+        <class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
+        <class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
+        <!-- end: storage -->
+        <!-- workload -->
+        <class>com.abiquo.server.core.scheduler.EnterpriseExclusionRule</class>
+        <class>com.abiquo.server.core.scheduler.FitPolicyRule</class>
+        <class>com.abiquo.server.core.scheduler.MachineLoadRule</class>
+        <!-- end:workload -->
+        <!-- configuration -->
+        <class>com.abiquo.server.core.config.SystemProperty</class>
+        <class>com.abiquo.server.core.tasks.Task</class>
         <!-- end: configuration -->
-
-		<properties>
-			<property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
-			<property name="hibernate.hbm2ddl.auto" value="verify" />
-		</properties>
-	</persistence-unit>
+        <properties>
+            <property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+            <property name="hibernate.hbm2ddl.auto" value="verify" />
+        </properties>
+    </persistence-unit>
 </persistence>

@@ -30,6 +30,7 @@
     paddingTop="10"
     verticalGap="0"
     creationComplete="onCreationComplete()"
+    show="requestUsers()"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:general="net.undf.abicloud.view.general.*"
     xmlns:user="net.undf.abicloud.view.user.components.user.*">
@@ -100,6 +101,7 @@
             public function set enterprise(value:Enterprise):void
             {
                 this._enterprise = value;
+                this._selectedUser = null;
                 //Going to first page
                 this._usersCurrentPage = 0;
                 usersPaginatorSlider.value = 1;
