@@ -31,6 +31,8 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDAO;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository
@@ -85,6 +87,7 @@ public class OVFPackageRep extends DefaultRepBase
         {
             categoryDao.persist(ovfPackage.getCategory());
         }
+
         ovfPackage.setAppsLibrary(appsLib);
         dao.persist(ovfPackage);
         dao.flush();
@@ -146,30 +149,6 @@ public class OVFPackageRep extends DefaultRepBase
         }
 
         dao.remove(ovfPackage);
-    }
-
-    public Icon findByIconPathOrCreateNew(final String iconPath)
-    {
-        if (iconPath == null)
-        {
-            return null;
-        }
-
-        Icon icon;
-
-        icon = iconDao.findByPath(iconPath);
-
-        if (icon == null)
-        {
-            icon = new Icon();
-            icon.setName("unname"); // TODO
-            icon.setPath(iconPath);
-
-            iconDao.persist(icon);
-            iconDao.flush();
-        }
-
-        return icon;
     }
 
     public void removeOVFPackageList(final OVFPackageList ovfPackageList)

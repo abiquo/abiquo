@@ -113,6 +113,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -128,6 +129,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage().getRepository());
         entitiesToSetup.add(vm2.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm2.getVirtualImage().getIcon());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());

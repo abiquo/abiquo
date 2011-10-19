@@ -22,6 +22,7 @@ package com.abiquo.abiserver.appslibrary.stub;
 
 import static java.lang.String.valueOf;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,18 +40,20 @@ import org.apache.wink.client.RestClient;
 
 import com.abiquo.abiserver.business.authentication.TokenUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.config.IconDto;
+import com.abiquo.server.core.config.IconsDto;
 
 public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
 {
@@ -310,5 +313,55 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         setAuthCookie(reso);
 
         return reso;
+    }
+
+    @Override
+    public void deleteIcon(final Integer idIcon)
+    {
+        final String uri = createIconLink(idIcon);
+
+        delete(uri);
+
+    }
+
+    public void editIcon(final IconHB icon)
+    {
+        final String uri = createIconLink(icon.getIdIcon());
+
+        IconDto iconDto = new IconDto();
+
+        iconDto.setId(icon.getIdIcon());
+        iconDto.setName(icon.getName());
+        iconDto.setPath(icon.getPath());
+
+        put(uri, iconDto);
+    }
+
+    public List<Icon> getIcons(final UserSession userSession, final Integer idEnterprise)
+    {
+
+        final String uri = createIconsLink();
+
+        ClientResponse response = get(uri);
+
+        IconsDto icons = response.getEntity(IconsDto.class);
+        List<Icon> listIcon = new ArrayList<Icon>();
+        for (IconDto icon : icons.getCollection())
+        {
+            listIcon.add(createFlexIconObject(icon));
+        }
+
+        return listIcon;
+
+    }
+
+    public static Icon createFlexIconObject(final IconDto iconDto)
+    {
+        Icon icon = new Icon();
+        icon.setId(iconDto.getId());
+        icon.setName(iconDto.getName());
+        icon.setPath(iconDto.getPath());
+
+        return icon;
     }
 }

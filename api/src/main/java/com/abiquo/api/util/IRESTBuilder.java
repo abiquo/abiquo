@@ -33,6 +33,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDto;
+import com.abiquo.server.core.config.IconDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -184,4 +185,6 @@ public interface IRESTBuilder
         IpPoolManagement ip);
 
     public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
+
+    public List<RESTLink> buildIconLinks(final IconDto icon);
 }

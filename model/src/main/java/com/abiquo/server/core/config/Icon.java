@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,7 +44,7 @@ public class Icon extends DefaultEntityBase
     // code
     public Icon()
     {
-        // Just for JPA support
+
     }
 
     public Icon(final String iconPath)
@@ -62,6 +62,11 @@ public class Icon extends DefaultEntityBase
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     public final static String NAME_PROPERTY = "name";

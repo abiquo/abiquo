@@ -392,9 +392,13 @@ public enum APIError
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
-        "This category is not erasable")
+        "This category is not erasable"),
 
-    ;
+    // ICONS
+    ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISENT_ICON("ICON-2",
+        "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
+        "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
+        "Cannot delete the icon because it is in use by some virtual image");
 
     /**
      * Internal error code
@@ -445,8 +449,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

@@ -71,6 +71,8 @@
                 <ref bean="systemPropertyResource" />
                 <ref bean="categoriesResource" />
                 <ref bean="categoryResource" />
+                <ref bean="iconsResource" />
+                <ref bean="iconResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
             </set>

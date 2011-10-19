@@ -19,17 +19,29 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import java.util.List;
 
-  public class IconTest extends DefaultEntityTestBase<Icon>
-  {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-      @Override
-      protected InstanceTester<Icon> createEntityInstanceGenerator()
-      {
-          return new IconGenerator(getSeed());
-      }
-  }
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "icons")
+public class IconsDto extends WrapperDto<IconDto>
+{
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    @XmlElement(name = "icon")
+    public List<IconDto> getCollection()
+    {
+        return collection;
+    }
+
+}

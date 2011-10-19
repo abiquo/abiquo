@@ -19,11 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.config;
 
 import java.util.List;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.config.Icon;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -45,7 +46,6 @@ public class IconGenerator extends DefaultEntityGenerator<Icon>
     @Override
     public Icon createUniqueInstance()
     {
-        // FIXME: Write here how to create the pojo
 
         Icon icon = new Icon();
         icon.setName(newString(nextSeed(), 0, 20));

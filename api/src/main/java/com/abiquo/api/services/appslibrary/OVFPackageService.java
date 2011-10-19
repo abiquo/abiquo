@@ -43,11 +43,14 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageRep;
+
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryRep;
+import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconDAO;
+
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
@@ -64,6 +67,9 @@ public class OVFPackageService extends DefaultApiService
     @Autowired
     CategoryRep catRep;
 
+    @Autowired
+    IconDAO iconDao;
+
     public OVFPackageService()
     {
 
@@ -72,6 +78,7 @@ public class OVFPackageService extends DefaultApiService
     public OVFPackageService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
+        iconDao = new IconDAO(em);
     }
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
@@ -154,7 +161,7 @@ public class OVFPackageService extends DefaultApiService
             String iconPath = descr.getIcon().get(0).getFileRef();
             // TODO start with http://
 
-            Icon icon = repo.findByIconPathOrCreateNew(iconPath);
+            Icon icon = iconDao.findByIconPathOrCreateNew(iconPath);
             pack.setIcon(icon);
         }
 

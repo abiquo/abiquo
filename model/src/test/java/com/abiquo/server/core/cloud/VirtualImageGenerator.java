@@ -29,6 +29,8 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryGenerator;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -41,11 +43,13 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     // XXX CategoryGenerator categoryGenerator;
     // TODO and iconGenerator
 
-    EnterpriseGenerator enterpriseGenerator;
+    private EnterpriseGenerator enterpriseGenerator;
 
-    RepositoryGenerator repositoryGenerator;
+    private RepositoryGenerator repositoryGenerator;
 
-    CategoryGenerator categoryGenerator;
+    private CategoryGenerator categoryGenerator;
+
+    private IconGenerator iconGenerator;
 
     public VirtualImageGenerator(final SeedGenerator seed)
     {
@@ -53,6 +57,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         enterpriseGenerator = new EnterpriseGenerator(seed);
         repositoryGenerator = new RepositoryGenerator(seed);
         categoryGenerator = new CategoryGenerator(seed);
+        iconGenerator = new IconGenerator(seed);
     }
 
     @Override
@@ -64,9 +69,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
-            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY);
+            VirtualImage.DESCRIPTION_PROPERTY);
 
         repositoryGenerator.assertAllPropertiesEqual(obj1.getRepository(), obj2.getRepository());
+        iconGenerator.assertAllPropertiesEqual(obj1.getIcon(), obj2.getIcon());
     }
 
     @Override
@@ -76,7 +82,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         Repository repository = repositoryGenerator.createUniqueInstance();
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
-
         VirtualImage vi = createInstance(enterprise, repository, 0, 0, 0, name);
 
         return vi;
@@ -85,7 +90,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     public VirtualImage createInstance(final Enterprise enterprise)
     {
         Repository repository = repositoryGenerator.createUniqueInstance();
-
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
 
@@ -98,6 +102,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
+        Icon icon = iconGenerator.createUniqueInstance();
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName = newString(nextSeed(), 0, 20);
 
@@ -113,6 +118,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
         vimage.setEnterprise(enterprise);
         vimage.setName(name);
+        vimage.setIcon(icon);
 
         vimage.setCpuRequired(cpuRequired);
         vimage.setRamRequired(ramRequired);
@@ -161,6 +167,11 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
             entitiesToPersist.add(master);
         }
+
+        Icon icon = entity.getIcon();
+        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+        entitiesToPersist.add(icon);
+
     }
 
     public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
@@ -183,6 +194,11 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
             entitiesToPersist.add(master);
         }
+
+        Icon icon = entity.getIcon();
+        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+        entitiesToPersist.add(icon);
+
     }
 
 }

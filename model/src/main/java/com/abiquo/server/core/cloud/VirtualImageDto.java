@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.config.IconDto;
 
 @XmlRootElement(name = "virtualImage")
 public class VirtualImageDto extends SingleResourceTransportDto
@@ -198,16 +199,16 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.description = description;
     }
 
-    private int idIcon;
+    private IconDto icon;
 
-    public int getIdIcon()
+    public IconDto getIcon()
     {
-        return idIcon;
+        return icon;
     }
 
-    public void setIdIcon(final int idIcon)
+    public void setIcon(final IconDto icon)
     {
-        this.idIcon = idIcon;
+        this.icon = icon;
     }
 
     private int idRepository;

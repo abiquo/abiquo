@@ -593,6 +593,21 @@ public class AbstractAPIStub
             "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}", params);
     }
 
+    protected String createIconLink(final Integer iconId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("icon", valueOf(iconId));
+
+        return resolveURI(apiUri, "admin/config/icons/{icon}", params);
+    }
+
+    protected String createIconsLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "admin/config/icons", params);
+    }
+
     protected String createUserLink(final int enterpriseId, final int userId)
     {
         return createUserLink(valueOf(enterpriseId), userId);

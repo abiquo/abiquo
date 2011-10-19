@@ -24,7 +24,6 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -38,6 +37,7 @@ import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
 import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -84,8 +84,8 @@ public class TestDataAccessManager
 {
     private static JpaEntityManagerFactoryForTesting factory;
 
-    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
-        .createList();
+    private static List<String> associationTablesInAssociationDeletionOrder =
+        ListUtils.createList();
 
     private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
         ListUtils.createList();
@@ -140,9 +140,9 @@ public class TestDataAccessManager
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
             VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
-            OVFPackageList.class, OVFPackage.class, AppsLibrary.class, Icon.class,
-            VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
-            Category.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
+            OVFPackageList.class, OVFPackage.class, AppsLibrary.class, VolumeManagement.class,
+            VirtualImageConversion.class, VirtualImage.class, Category.class, Icon.class,
+            IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
             Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
