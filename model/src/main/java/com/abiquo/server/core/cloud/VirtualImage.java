@@ -579,9 +579,6 @@ public class VirtualImage extends DefaultEntityBase
     }
 
     public void setRequirements(final int cpu, final int ram, final long hd)
-
-
-    public void setRequirements(int cpu, int ram, long hd)
     {
         setCpuRequired(cpu);
         setRamRequired(ram);
