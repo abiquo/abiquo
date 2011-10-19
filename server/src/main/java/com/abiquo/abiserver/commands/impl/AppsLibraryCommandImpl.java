@@ -751,6 +751,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                     oldVimage.setIdEnterprise(vimage.getIdEnterprise());
                     oldVimage.setShared(vimage.getShared());
                     oldVimage.setCostCode(vimage.getCostCode());
+                    oldVimage.setChefEnabled(vimage.isChefEnabled());
                     // oldVimage.setDeleted(deleted);
                     // XXX oldVimage.setMaster(master);
 
