@@ -26,11 +26,13 @@ import java.util.Collection;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
@@ -48,14 +50,6 @@ public class NodeVirtualImageStatefulConversionDAO extends
         super(NodeVirtualImageStatefulConversion.class, entityManager);
     }
 
-    public Collection<NodeVirtualImageStatefulConversion> findByVirtualImageConversion(
-        final VirtualImageConversion virtualImageConversion)
-    {
-        Criteria criteria = createCriteria();
-        criteria.add(sameVIConversion(virtualImageConversion));
-        return getResultList(criteria);
-    }
-
     public static Criterion sameVIConversion(final VirtualImageConversion vic)
     {
         Disjunction filterDisjunction = Restrictions.disjunction();
@@ -65,4 +59,48 @@ public class NodeVirtualImageStatefulConversionDAO extends
 
         return filterDisjunction;
     }
+
+    public static Criterion sameVASConversion(final VirtualApplianceStatefulConversion vasc)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions
+            .eq(NodeVirtualImageStatefulConversion.VIRTUAL_APPLIANCE_STATEFUL_CONVERSION_PROPERTY,
+                vasc));
+
+        return filterDisjunction;
+    }
+
+    public Collection<NodeVirtualImageStatefulConversion> findByVirtualImageConversion(
+        final VirtualImageConversion virtualImageConversion)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameVIConversion(virtualImageConversion));
+        return getResultList(criteria);
+    }
+
+    public Collection<NodeVirtualImageStatefulConversion> findByVirtualApplianceStatefulConversion(
+        final VirtualApplianceStatefulConversion virtualApplianceStatefulConversion)
+    {
+        Criteria criteria = createCriteria();
+        criteria.add(sameVASConversion(virtualApplianceStatefulConversion));
+        return getResultList(criteria);
+    }
+
+    private final String QUERY_BY_VIRTUAL_APPLIANCE =
+        "SELECT nvisc "
+            + "FROM com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion nvisc "
+            + "LEFT OUTER JOIN com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion vasc"
+            + "LEFT OUTER JOIN com.abiquo.server.core.cloud.VirtualAppliance vapp "
+            + "WHERE vapp.id = :idVirtualAppliance";
+
+    public Collection<NodeVirtualImageStatefulConversion> findByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+        Query query = getSession().createQuery(QUERY_BY_VIRTUAL_APPLIANCE);
+        query.setParameter("idVirtualAppliance", virtualAppliance.getId());
+
+        return query.list();
+    }
+
 }

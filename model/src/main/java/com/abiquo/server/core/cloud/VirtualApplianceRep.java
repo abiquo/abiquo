@@ -52,7 +52,7 @@ public class VirtualApplianceRep extends DefaultRepBase
     private NodeVirtualImageStatefulConversionDAO nodeVirtualImageStatefulConversioDao;
 
     @Autowired
-    private DiskStatefulConversionDAO diskStatefulConversionDAO;
+    private DiskStatefulConversionDAO diskStatefulConversionDao;
 
     @Autowired
     private VirtualImageConversionDAO virtualImageConversionDao;
@@ -107,8 +107,8 @@ public class VirtualApplianceRep extends DefaultRepBase
 
     public DiskStatefulConversion insertDiskStatefulConversion(final DiskStatefulConversion dsc)
     {
-        diskStatefulConversionDAO.persist(dsc);
-        diskStatefulConversionDAO.flush();
+        diskStatefulConversionDao.persist(dsc);
+        diskStatefulConversionDao.flush();
 
         return dsc;
     }
@@ -127,5 +127,41 @@ public class VirtualApplianceRep extends DefaultRepBase
     public void updateVirtualImageConversion(final VirtualImageConversion vic)
     {
         virtualImageConversionDao.flush();
+    }
+
+    public Collection<NodeVirtualImageStatefulConversion> findNodeVirtualImageConversionByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+        return nodeVirtualImageStatefulConversioDao.findByVirtualAppliance(virtualAppliance);
+    }
+
+    public Collection<NodeVirtualImageStatefulConversion> findNodeVirtualImageConversionByVirtualApplianceStatefulConversion(
+        final VirtualApplianceStatefulConversion virtualApplianceStategulConversion)
+    {
+
+        return nodeVirtualImageStatefulConversioDao
+            .findByVirtualApplianceStatefulConversion(virtualApplianceStategulConversion);
+    }
+
+    public void deleteDiskStatefulConversion(final DiskStatefulConversion diskStatefulConversion)
+    {
+        diskStatefulConversionDao.remove(diskStatefulConversion);
+    }
+
+    public void deleteVirtualImageConversion(final VirtualImageConversion virtualImageConversion)
+    {
+        virtualImageConversionDao.remove(virtualImageConversion);
+    }
+
+    public void deleteNodeVirtualImageStatefulConversion(
+        final NodeVirtualImageStatefulConversion nodeVirtualImageStatefulConversion)
+    {
+        nodeVirtualImageStatefulConversioDao.remove(nodeVirtualImageStatefulConversion);
+    }
+
+    public void deleteVirtualApplianceStatefulConversion(
+        final VirtualApplianceStatefulConversion virtualApplianceStatefulConversion)
+    {
+        vAppStatefulConversionDao.remove(virtualApplianceStatefulConversion);
     }
 }
