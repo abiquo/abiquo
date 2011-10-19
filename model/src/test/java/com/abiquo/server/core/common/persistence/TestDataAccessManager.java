@@ -137,7 +137,7 @@ public class TestDataAccessManager
          */
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
-            VirtualAppResources.class, VirtualAppliance.class, Runlistelement.class, VirtualMachine.class,
+            VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class, VirtualMachine.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
