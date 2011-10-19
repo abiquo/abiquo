@@ -2235,20 +2235,31 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
+                String errorMesssage =
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because the hypervisor could be disconnected.";
+
                 PhysicalMachine machine =
                     (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
-                    "Operation cannot be performed on " + virtualMachine.getName()
-                        + " because datacenter isn't well configured.", null, machine.getRack(),
-                    machine, userSession.getUser(), userSession.getEnterpriseName());
+                    errorMesssage, null, machine.getRack(), machine, userSession.getUser(),
+                    userSession.getEnterpriseName());
                 // Generating the result
-                dataResult.setMessage(basicResult.getMessage());
+
+                factory.beginConnection();
+                String nameVApp =
+                    factory.getVirtualApplianceDAO()
+                        .getVirtualAppByVirtualMachine(virtualMachine.getId()).getName();
+                factory.endConnection();
+
+                String errorNotificacion = nameVApp + ": " + basicResult.getMessage();
+
+                dataResult.setMessage(errorNotificacion);
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
                 return dataResult;
             }
-
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             State inProgressState = new State(StateEnum.IN_PROGRESS);
