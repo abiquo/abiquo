@@ -97,6 +97,10 @@
 
             public function willShow():void
             {
+                //clean virtual datacenter list
+                virtualDatacenterList.cleanVirtualDatacenterList();
+                virtualApplianceList.cleanVirtualApplianceList();
+                
                 //selectedVirtualDataCenter = null;
                 checkVirtualDatacentersAndAppliances();
 

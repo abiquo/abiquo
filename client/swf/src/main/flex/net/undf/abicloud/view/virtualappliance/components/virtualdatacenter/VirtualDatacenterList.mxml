@@ -113,6 +113,11 @@
                 
                 
             }
+            
+            public function cleanVirtualDatacenterList():void
+            {
+            	virtualDataCenterList.dataProvider = new ArrayCollection();
+            }
 
             /**
              * Called when the VirtualDatacenters have been checked
