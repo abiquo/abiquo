@@ -167,7 +167,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean STATEFUL_REQUIRED = true;
 
-    @Column(name = STATEFUL_COLUMN, nullable = false)
+    @Column(name = STATEFUL_COLUMN, columnDefinition = "int", nullable = false)
     private boolean stateful = false;
 
     @Required(value = STATEFUL_REQUIRED)
@@ -187,7 +187,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean TREATY_REQUIRED = true;
 
-    @Column(name = TREATY_COLUMN, nullable = false)
+    @Column(name = TREATY_COLUMN, columnDefinition = "int", nullable = false)
     private boolean treaty = false;
 
     @Required(value = TREATY_REQUIRED)
@@ -207,7 +207,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean SHARED_REQUIRED = true;
 
-    @Column(name = SHARED_COLUMN, nullable = false)
+    @Column(name = SHARED_COLUMN, columnDefinition = "int", nullable = false)
     private boolean shared = false;
 
     @Required(value = SHARED_REQUIRED)
@@ -371,7 +371,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean DELETED_REQUIRED = true;
 
-    @Column(name = DELETED_COLUMN, nullable = true)
+    @Column(name = DELETED_COLUMN, columnDefinition = "int", nullable = false)
     private boolean deleted = false;
 
     @Required(value = DELETED_REQUIRED)
@@ -526,11 +526,11 @@ public class VirtualImage extends DefaultEntityBase
         this.costCode = costCode;
     }
 
-    public final static String ID_REPOSITORY_PROPERTY = "repository";
+    public final static String REPOSITORY_PROPERTY = "repository";
 
-    private final static String ID_REPOSITORY_COLUMN = "idRepository";
+    private final static String REPOSITORY_ID_COLUMN = "idRepository";
 
-    @JoinColumn(name = ID_REPOSITORY_COLUMN)
+    @JoinColumn(name = REPOSITORY_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
     private Repository repository;
 

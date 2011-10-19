@@ -64,7 +64,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -185,7 +185,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
             "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
             "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register"};
+            "metering", "tasks", "alerts", "heartbeatlog", "icon", "repository", "register"};
 
         tearDown(entities);
     }

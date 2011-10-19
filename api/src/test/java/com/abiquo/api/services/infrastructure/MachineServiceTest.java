@@ -96,6 +96,7 @@ public class MachineServiceTest extends AbstractUnitTest
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
         hypervisor.getMachine().setHypervisor(hypervisor);
+        image.getRepository().setDatacenter(datacenter);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         entitiesToPersist.add(vdc.getEnterprise());
@@ -105,6 +106,7 @@ public class MachineServiceTest extends AbstractUnitTest
         entitiesToPersist.add(hypervisor.getMachine());
         entitiesToPersist.add(hypervisor);
         entitiesToPersist.add(vdc);
+        entitiesToPersist.add(image.getRepository());
         entitiesToPersist.add(image.getCategory());
         entitiesToPersist.add(image);
         entitiesToPersist.add(vapp);

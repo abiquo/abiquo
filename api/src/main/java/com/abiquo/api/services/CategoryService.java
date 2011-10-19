@@ -67,7 +67,13 @@ public class CategoryService extends DefaultApiService
 
     public Category getCategory(final Integer categoryId)
     {
-        return repo.findCategoryById(categoryId);
+        Category category = repo.findCategoryById(categoryId);
+        if (category == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
+        return category;
     }
 
     public CategoryDto addCategory(final CategoryDto categoryDto)

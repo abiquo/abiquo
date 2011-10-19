@@ -133,6 +133,13 @@ public class NodeVirtualImageDAOTest extends
         NodeVirtualImage nvi2 = nodeVImageGenerator.createInstance(vAppliance, vm2);
         NodeVirtualImage nvi3 = nodeVImageGenerator.createInstance(vAppliance2, vm3);
 
+        vm1.getVirtualImage().getRepository().setDatacenter(
+            vm1.getHypervisor().getMachine().getRack().getDatacenter());
+        vm2.getVirtualImage().getRepository().setDatacenter(
+            vm2.getHypervisor().getMachine().getRack().getDatacenter());
+        vm3.getVirtualImage().getRepository().setDatacenter(
+            vm3.getHypervisor().getMachine().getRack().getDatacenter());
+
         // ds().persistAll(enterprise, enterprise2, vm1.getUser().getRole(), vm1.getUser(),
         // vm1.getHypervisor().getMachine().getDatacenter(),
         // vm1.getHypervisor().getMachine().getRack().getDatacenter(),
@@ -173,6 +180,7 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm1.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm1.getHypervisor().getMachine());
         entitiesToSetup.add(vm1.getHypervisor());
+        entitiesToSetup.add(vm1.getVirtualImage().getRepository());
         entitiesToSetup.add(vm1.getVirtualImage().getCategory());
         entitiesToSetup.add(vm1.getVirtualImage());
         entitiesToSetup.add(vm1);
@@ -189,6 +197,7 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm2.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm2.getHypervisor().getMachine());
         entitiesToSetup.add(vm2.getHypervisor());
+        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
         entitiesToSetup.add(vm2.getVirtualImage().getCategory());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(vm2);
@@ -205,6 +214,7 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm3.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm3.getHypervisor().getMachine());
         entitiesToSetup.add(vm3.getHypervisor());
+        entitiesToSetup.add(vm3.getVirtualImage().getRepository());
         entitiesToSetup.add(vm3.getVirtualImage().getCategory());
         entitiesToSetup.add(vm3.getVirtualImage());
         entitiesToSetup.add(vm3);

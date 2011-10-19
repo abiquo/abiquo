@@ -60,7 +60,7 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
     {
         assert repository != null;
 
-        return Restrictions.eq(VirtualImage.ID_REPOSITORY_PROPERTY, repository);
+        return Restrictions.eq(VirtualImage.REPOSITORY_PROPERTY, repository);
     }
 
     private static Criterion sharedImage()
@@ -76,16 +76,16 @@ public class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.and(sameRepository(repository),
-            Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+        return Restrictions.and(sameRepository(repository), Restrictions.or(
+            sameEnterprise(enterprise), sharedImage()));
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
-            Restrictions.and(sameRepository(repository),
-                Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+            Restrictions.and(sameRepository(repository), Restrictions.or(
+                sameEnterprise(enterprise), sharedImage()));
 
         return Restrictions.and(Restrictions.eq(VirtualImage.PATH_NAME_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);

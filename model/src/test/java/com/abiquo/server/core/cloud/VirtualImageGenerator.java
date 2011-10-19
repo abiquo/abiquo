@@ -23,6 +23,8 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.config.Category;
@@ -62,8 +64,9 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
             VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
             VirtualImage.DELETED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
-            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY,
-            VirtualImage.ID_REPOSITORY_PROPERTY);
+            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.ID_ICON_PROPERTY);
+
+        repositoryGenerator.assertAllPropertiesEqual(obj1.getRepository(), obj2.getRepository());
     }
 
     @Override
@@ -139,6 +142,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
+        Repository repository = entity.getRepository();
+        repositoryGenerator.addAuxiliaryEntitiesToPersist(repository, entitiesToPersist);
+        entitiesToPersist.add(repository);
+
         Enterprise enterprise = entity.getEnterprise();
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
@@ -160,6 +167,10 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        Repository repository = entity.getRepository();
+        repositoryGenerator.addAuxiliaryEntitiesToPersist(repository, entitiesToPersist);
+        entitiesToPersist.add(repository);
 
         Category category = entity.getCategory();
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);

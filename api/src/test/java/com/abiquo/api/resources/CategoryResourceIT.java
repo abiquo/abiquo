@@ -68,8 +68,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getCategoryDoesntExist() throws ClientWebException
     {
-        ClientResponse response =
-            get(resolveCategoryURI(12345), "sysadmin", "sysadmin", MediaType.APPLICATION_XML);
+        ClientResponse response = get(resolveCategoryURI(12345));
         assertEquals(response.getStatusCode(), 404);
     }
 
