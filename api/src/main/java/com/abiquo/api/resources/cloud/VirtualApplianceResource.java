@@ -171,16 +171,6 @@ public class VirtualApplianceResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
     {
-        // Method[] methods = VirtualApplianceResource.class.getMethods();
-        // for (Method method : methods)
-        // {
-        // if (method.isAnnotationPresent(Approval.class))
-        // {
-        // Approval approval = method.getAnnotation(Approval.class);
-        // String role = approval.role();
-        // }
-        // }
-
         service.startVirtualAppliance(vdcId, vappId);
     }
 }

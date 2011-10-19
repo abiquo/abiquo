@@ -44,13 +44,13 @@ public class SecurityService
 
     public static final String PHYS_DC_ENUMERATE = DRP + "PHYS_DC_ENUMERATE";
 
-    public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
-        + "USERS_MANAGE_OTHER_ENTERPRISES";
+    public static final String USERS_MANAGE_OTHER_ENTERPRISES =
+        DRP + "USERS_MANAGE_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_ROLES = DRP + "USERS_MANAGE_ROLES";
 
-    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES = DRP
-        + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
+    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
+        DRP + "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
 
     public static final String USERS_MANAGE_SYSTEM_ROLES = DRP + "USERS_MANAGE_SYSTEM_ROLES";
 
@@ -60,14 +60,16 @@ public class SecurityService
 
     public static final String USERS_VIEW_PRIVILEGES = DRP + "USERS_VIEW_PRIVILEGES";
 
-    public static final String USERS_PROHIBIT_VDC_RESTRICTION = DRP
-        + "USERS_PROHIBIT_VDC_RESTRICTION";
+    public static final String USERS_PROHIBIT_VDC_RESTRICTION =
+        DRP + "USERS_PROHIBIT_VDC_RESTRICTION";
 
     public static final String USERS_MANAGE_LDAP_GROUP = DRP + "USERS_MANAGE_LDAP_GROUP";
 
     public static final String VDC_ENUMERATE = DRP + "VDC_ENUMERATE";
 
     public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
+
+    public static final String APPROVAL_VAPP_DEPLOY = DRP + "APPROVAL_VAPP_DEPLOY";
 
     public boolean hasPrivilege(final String privilege)
     {

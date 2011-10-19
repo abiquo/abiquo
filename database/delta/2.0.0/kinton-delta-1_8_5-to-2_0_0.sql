@@ -59,7 +59,7 @@ ALTER TABLE `kinton`.`virtualapp` ADD CONSTRAINT `virtualApp_FK6` FOREIGN KEY (`
 LOCK TABLES `kinton`.`privilege` WRITE;
 INSERT INTO `kinton`.`privilege` VALUES
  (49,'APPROVAL_MANAGE',0),
- (50,'APPROVAL_REQUIRED',0);
+ (50,'APPROVAL_VAPP_DEPLOY',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`privilege` ENABLE KEYS */;
 
@@ -67,7 +67,7 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`roles_privileges` DISABLE KEYS */;
 LOCK TABLES `kinton`.`roles_privileges` WRITE;
 INSERT INTO `kinton`.`roles_privileges` VALUES
- (1,49,0);
+ (1,49,0), (1,50,0), (3,49,0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`roles_privileges` ENABLE KEYS */;
 
