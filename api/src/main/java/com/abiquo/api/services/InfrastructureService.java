@@ -149,9 +149,9 @@ public class InfrastructureService extends DefaultApiService
         {
             rack.setVlanIdMax(Rack.VLAN_ID_MAX_DEFAULT_VALUE);
         }
-        if (rack.getVlanPerVdcExpected() == null)
+        if (rack.getVlanPerVdcReserved() == null)
         {
-            rack.setVlanPerVdcExpected(Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE);
+            rack.setVlanPerVdcReserved(Rack.VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE);
         }
         if (rack.getNrsq() == null)
         {
@@ -407,7 +407,7 @@ public class InfrastructureService extends DefaultApiService
             old.setNrsq(rack.getNrsq());
             old.setVlanIdMax(rack.getVlanIdMax());
             old.setVlanIdMin(rack.getVlanIdMin());
-            old.setVlanPerVdcExpected(rack.getVlanPerVdcExpected());
+            old.setVlanPerVdcReserved(rack.getVlanPerVdcReserved());
             old.setVlansIdAvoided(rack.getVlansIdAvoided());
         }
 
@@ -815,7 +815,7 @@ public class InfrastructureService extends DefaultApiService
     public boolean hasVlanConfig(final Rack rack)
     {
         return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
-            && rack.getVlanPerVdcExpected() != null;
+            && rack.getVlanPerVdcReserved() != null;
     }
 
     public void checkAvailableCores(final Machine machine)
