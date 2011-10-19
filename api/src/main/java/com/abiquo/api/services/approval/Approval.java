@@ -1,4 +1,4 @@
-package com.abiquo.api.spring.interceptors.annotations;
+package com.abiquo.api.services.approval;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

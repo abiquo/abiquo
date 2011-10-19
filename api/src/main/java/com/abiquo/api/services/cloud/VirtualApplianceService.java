@@ -39,13 +39,13 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.ApprovalService;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.approval.Approval;
+import com.abiquo.api.services.approval.ApprovalRestricted;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
-import com.abiquo.api.spring.interceptors.annotations.Approval;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.EventingSupport;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -69,6 +69,7 @@ import com.sun.ws.management.client.ResourceFactory;
  * 
  * @author jdevesa@abiquo.com
  */
+@ApprovalRestricted
 @Service
 @Transactional(readOnly = true)
 public class VirtualApplianceService extends DefaultApiService
@@ -98,7 +99,7 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     VirtualApplianceRep virtualApplianceRepo;
 
-    ApprovalService approvalService;
+    // ApprovalService approvalService;
 
     public VirtualApplianceService()
     {
@@ -112,16 +113,16 @@ public class VirtualApplianceService extends DefaultApiService
         this.vdcService = new VirtualDatacenterService(em);
         this.infrastructureService = new InfrastructureService(em);
 
-        try
-        {
-            approvalService =
-                (ApprovalService) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.api.services.ApprovalServicePremium").newInstance();
-        }
-        catch (Exception e)
-        {
-            approvalService = new ApprovalService();
-        }
+        // try
+        // {
+        // approvalService =
+        // (ApprovalService) Thread.currentThread().getContextClassLoader().loadClass(
+        // "com.abiquo.api.services.ApprovalServicePremium").newInstance();
+        // }
+        // catch (Exception e)
+        // {
+        // approvalService = new ApprovalService();
+        // }
 
     }
 
