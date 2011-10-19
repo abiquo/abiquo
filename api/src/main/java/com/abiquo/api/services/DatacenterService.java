@@ -42,6 +42,7 @@ import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -177,6 +178,16 @@ public class DatacenterService extends DefaultApiService
                     if (rsDto != null)
                     {
                         responseRemoteService.add(rsDto);
+                        if (rsDto.getConfigurationErrors() != null
+                            && !rsDto.getConfigurationErrors().isEmpty())
+                        {
+                            if (responseRemoteService.getConfigErrors() == null)
+                            {
+                                responseRemoteService.setConfigErrors(new ErrorsDto());
+                            }
+                            responseRemoteService.getConfigErrors().addAll(
+                                rsDto.getConfigurationErrors());
+                        }
                     }
                 }
                 else if (srtDto instanceof ErrorsDto)
@@ -195,14 +206,11 @@ public class DatacenterService extends DefaultApiService
             && !responseRemoteService.getConfigErrors().isEmpty())
         {
             // Log the event
-            tracer
-                .log(
-                    SeverityType.MAJOR,
-                    ComponentType.DATACENTER,
-                    EventType.DC_CREATE,
-                    "Datacenter '"
-                        + datacenter.getName()
-                        + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.");
+            for (ErrorDto error : responseRemoteService.getConfigErrors().getCollection())
+            {
+                tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                    "Datacenter '" + datacenter.getName() + ": " + error.getMessage());
+            }
         }
         else
         {
