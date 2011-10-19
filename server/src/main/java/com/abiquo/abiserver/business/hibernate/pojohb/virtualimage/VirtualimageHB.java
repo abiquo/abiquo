@@ -78,6 +78,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private String volumePath;
 
+    private boolean chefEnabled;
+
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -313,6 +315,16 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.costCode = costCode;
     }
 
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
+    }
+
     @Override
     public VirtualImage toPojo()
     {
@@ -366,6 +378,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         virtualImage.setOvfId(ovfId);
         virtualImage.setStateful(stateful);
         virtualImage.setDiskFileSize(diskFileSize);
+        virtualImage.setChefEnabled(chefEnabled);
         virtualImage.setCostCode(costCode);
 
         return virtualImage;
@@ -410,6 +423,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         imageBundled.setType(getType());
         imageBundled.setPathName(getPathName());
         imageBundled.setDiskFileSize(getDiskFileSize());
+        imageBundled.setChefEnabled(isChefEnabled());
         imageBundled.setCostCode(getCostCode());
 
         if (getMaster() == null)

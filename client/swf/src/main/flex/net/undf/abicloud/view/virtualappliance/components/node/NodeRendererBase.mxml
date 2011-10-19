@@ -621,19 +621,27 @@
 
 
     <!-- Node state icons -->
-    <mx:HBox id="stateIconsContainer"
-        left="5" top="3">
+    <mx:Canvas id="stateIconsContainer"
+        left="5" top="3" 
+        height="100%"
+        width="100%">
 
         <utils:SmoothImage 
 			id="nodeRenedererBase" 
             width="18" height="18"
-            horizontalCenter="0"
-            verticalCenter="0"
+            left="5" top="3"
             visible="{this._pendingStatus.length != 0}"
             creationComplete="{AbicloudUtils.getImageFromStyle(this._pendingStatus, nodeRenedererBase)}"	
             toolTip="{this._pendingStatus == 'NodeVirtualImageDeleted' ? resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_DELETED'):resourceManager.getString('VirtualAppliance','TOOL_TIP_NODE_ADDED')}"/>
 
-    </mx:HBox>
+        <utils:SmoothImage id="chefImage"
+            right="5" bottom="15"
+            creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualImageMiniatureBaseChefImage', chefImage)"            
+            toolTip="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+            visible="{this._node is NodeVirtualImage &amp;&amp; NodeVirtualImage(this._node).virtualImage.chefEnabled}"/>
+
+    </mx:Canvas>
+    
 
     <!-- More options for the NodeRenderer -->
 

@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
@@ -64,6 +65,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
+import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
@@ -527,6 +529,13 @@ public class OVFModelFromVirtualAppliance
                 rule.setMac(ip.getMac());
                 rule.setName(ip.getName());
 
+                // Configure bootstrap for the gateway-enabled NIC
+                if (ip.getConfigureGateway())
+                {
+                    addBootstrapConfiguration(ip.getVirtualDataCenter().getIdVirtualDataCenter(),
+                        ip.getVirtualApp().getIdVirtualApp(), vmHB, rule);
+                }
+
                 service.getStaticRules().add(rule);
 
                 numberOfRules++;
@@ -754,13 +763,13 @@ public class OVFModelFromVirtualAppliance
      * @throws Exception
      */
     public VirtualSystemType createVirtualSystem(final NodeVirtualImage nodeVirtualImage,
-        final String virtualApplianceName) throws Exception
+        final VirtualAppliance virtualAppliance) throws Exception
     {
         VirtualMachine virtualMachine = nodeVirtualImage.getVirtualMachine();
         VirtualImage virtualImage = nodeVirtualImage.getVirtualImage();
 
         // setting the network name the name of the virtualAppliance
-        String networkName = virtualApplianceName + "_network";
+        String networkName = virtualAppliance.getName() + "_network";
 
         // The Id of the virtualSystem is used for machine name
         String vsId = virtualMachine.getUUID(); // TODO Using the machine instance UUID as ID
@@ -809,6 +818,39 @@ public class OVFModelFromVirtualAppliance
         }
 
         return annotationSection;
+    }
+
+    private static void addBootstrapConfiguration(final Integer idVirtualdatacenter,
+        final Integer idVirtualAppliance, final VirtualmachineHB virtualMachine,
+        final IpPoolType rule) throws Exception
+    {
+        // Captured VMs may have null virtual images
+        if (virtualMachine.getImage() != null && virtualMachine.getImage().isChefEnabled())
+        {
+            // Build the bootstrap configuration URI
+            String bootstrapURITemplate =
+                "%s/cloud/virtualdatacenters/%s/virtualappliances/%s/virtualmachines/%s/config/bootstrap";
+
+            String apiLocation = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
+            if (apiLocation.endsWith("/"))
+            {
+                apiLocation = apiLocation.substring(0, apiLocation.length() - 1);
+            }
+
+            String bootstrapURI =
+                String.format(bootstrapURITemplate, apiLocation, idVirtualdatacenter,
+                    idVirtualAppliance, virtualMachine.getIdVm());
+
+            // Generate the one-time authentication token
+            DAOFactory factory = HibernateDAOFactory.instance();
+            factory.beginConnection();
+            OneTimeTokenSessionHB oneTimeToken =
+                factory.getOneTimeTokenSessionDAO().generateToken();
+            factory.endConnection();
+
+            rule.setBootstrapConfigURI(bootstrapURI);
+            rule.setBootstrapConfigAuth(oneTimeToken.getToken());
+        }
     }
 
     /**

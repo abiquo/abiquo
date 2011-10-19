@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
 
 @XmlRootElement(name = "virtualMachine")
 public class VirtualMachineDto extends SingleResourceTransportDto implements
@@ -188,6 +189,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.password = password;
     }
 
+    private RunlistElementsDto runlist;
+
+    public RunlistElementsDto getRunlist()
+    {
+        return runlist;
+    }
+
+    public void setRunlist(final RunlistElementsDto runlist)
+    {
+        this.runlist = runlist;
+    }
+
     @Override
     public int compareTo(final VirtualMachineDto vm2)
     {
@@ -208,5 +221,4 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
             return 1;
         }
     }
-
 }

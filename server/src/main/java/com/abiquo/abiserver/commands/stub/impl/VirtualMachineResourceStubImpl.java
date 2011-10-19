@@ -73,8 +73,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
+                .getId());
 
         ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
 
@@ -104,8 +104,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).post(null);
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
+                MediaType.APPLICATION_XML).post(null);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -134,8 +134,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).put(newRequirements);
+            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
+                MediaType.APPLICATION_XML).put(newRequirements);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 

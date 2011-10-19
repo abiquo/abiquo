@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.vo.infrastructure
 {
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.user.User;
     import net.undf.abicloud.vo.virtualimage.VirtualImage;
@@ -57,6 +59,8 @@ package net.undf.abicloud.vo.infrastructure
         public var vdrpIP:String;
 
         public var state:State;
+        
+        public var subState:State;
 
         public var highDisponibility:Boolean;
 
@@ -71,6 +75,8 @@ package net.undf.abicloud.vo.infrastructure
         public var datastore:Datastore;
         
         public var password:String;
+        
+        public var recipes:ArrayCollection;
 
 
         /* ------------- Constructor ------------- */
@@ -86,10 +92,12 @@ package net.undf.abicloud.vo.infrastructure
             vdrpPort = 0;
             vdrpIP = "";
             state = new State();
+            subState = new State(State.UNKNOWN);
             highDisponibility = false;
             user = new User();
             idType = 0;
             password = "";
+            recipes = new ArrayCollection();
         }
 
 

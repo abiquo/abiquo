@@ -22,6 +22,7 @@
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthGroupHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerResourceHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthServerresourceExceptionHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/OneTimeTokenSessionHB.hbm.xml"/>
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/CategoryHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/infrastructure/DatacenterHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/user/EnterpriseHB.hbm.xml" />

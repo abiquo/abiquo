@@ -56,6 +56,16 @@ public class Enterprise implements IPojo<EnterpriseHB>
      */
     private String name;
 
+    private String chefURL;
+
+    private String chefClient;
+
+    private String chefValidator;
+
+    private String chefClientCertificate;
+
+    private String chefValidatorCertificate;
+
     /** kind of reservation */
     private Boolean isReservationRestricted;
 
@@ -144,6 +154,56 @@ public class Enterprise implements IPojo<EnterpriseHB>
         this.reservedMachines = reservedMachines;
     }
 
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public String getChefClient()
+    {
+        return chefClient;
+    }
+
+    public void setChefClient(final String chefClient)
+    {
+        this.chefClient = chefClient;
+    }
+
+    public String getChefValidator()
+    {
+        return chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
+    }
+
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(final String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate;
+    }
+
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate;
+    }
+
     public Collection<PhysicalMachine> getReservedMachines()
     {
         return reservedMachines;
@@ -228,6 +288,10 @@ public class Enterprise implements IPojo<EnterpriseHB>
         }
 
         enterpriseHB.setReservedMachines(reservedMachinesHB);
+        enterpriseHB.setChefURL(getChefURL());
+        enterpriseHB.setChefValidator(getChefValidator());
+        enterpriseHB.setChefClientCertificate(getChefClientCertificate());
+        enterpriseHB.setChefValidatorCertificate(getChefValidatorCertificate());
 
         return enterpriseHB;
     }
@@ -251,6 +315,12 @@ public class Enterprise implements IPojo<EnterpriseHB>
         ral.setStorage(new Limit(dto.getStorageHard(), dto.getStorageSoft()));
 
         enterprise.setLimits(ral);
+
+        enterprise.setChefURL(dto.getChefURL());
+        enterprise.setChefClient(dto.getChefClient());
+        enterprise.setChefValidator(dto.getChefValidator());
+        enterprise.setChefClientCertificate(dto.getChefClientCertificate());
+        enterprise.setChefValidatorCertificate(dto.getChefValidatorCertificate());
 
         return enterprise;
     }
