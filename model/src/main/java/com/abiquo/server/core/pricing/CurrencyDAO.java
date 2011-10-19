@@ -52,4 +52,9 @@ public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
         return Restrictions.eq(Currency.NAME_PROPERTY, name);
     }
 
+    public boolean existAnyOtherCurrencyWithName(final Currency currency, final String name)
+    {
+        return existsAnyOtherByCriterions(currency, sameName(name));
+    }
+
 }

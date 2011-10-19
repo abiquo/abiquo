@@ -351,4 +351,9 @@ public class PricingRep extends DefaultRepBase
         return storageRep.findTierById(id);
     }
 
+    public boolean existAnyOtherCurrencyWithName(final Currency currency, final String name)
+    {
+        return currencyDao.existAnyOtherCurrencyWithName(currency, name);
+    }
+
 }
