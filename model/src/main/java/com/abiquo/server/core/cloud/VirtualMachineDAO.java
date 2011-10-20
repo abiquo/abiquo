@@ -163,7 +163,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
-    public void updateVirtualMachineState(Integer vmachineId, State state)
+    public void updateVirtualMachineState(Integer vmachineId, VirtualMachineState state)
     {
         VirtualMachine vmachine = findById(vmachineId);
 

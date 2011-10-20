@@ -124,21 +124,21 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.vdrpIp = vdrpIp;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
     /**
      * @param state
      * @deprecated this will be done through links
      */
     @Deprecated
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
 
     /** @deprecated this will be done through links */
     @Deprecated
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }

@@ -32,7 +32,7 @@ import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
@@ -66,7 +66,7 @@ public class VirtualMachineServiceTest extends AbstractUnitTest
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         VirtualMachine virtualMachine = vmGenerator.createInstance(enterprise);
-        virtualMachine.setState(State.ON);
+        virtualMachine.setState(VirtualMachineState.ON);
 
         Role role = roleGenerator.createInstance();
         User user = userGenerator.createInstance(enterprise, role);
@@ -90,10 +90,10 @@ public class VirtualMachineServiceTest extends AbstractUnitTest
         VirtualMachineService service = new VirtualMachineService(em);
 
         service.changeVirtualMachineState(virtualMachine.getId(), vapp.getId(), vdc1.getId(),
-            State.OFF);
+            VirtualMachineState.OFF);
 
         VirtualMachine vm = service.getVirtualMachine(virtualMachine.getId());
-        Assert.assertEquals(vm.getState(), State.OFF);
+        Assert.assertEquals(vm.getState(), VirtualMachineState.OFF);
     }
 
 }

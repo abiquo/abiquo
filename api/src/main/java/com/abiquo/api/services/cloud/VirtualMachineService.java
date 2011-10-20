@@ -61,9 +61,10 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.State;
-import com.abiquo.server.core.cloud.StateTransition;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -265,28 +266,28 @@ public class VirtualMachineService extends DefaultApiService
      */
     public void blockVirtualMachine(final VirtualMachine vm)
     {
-        if (vm.getState() == State.LOCKED)
+        if (vm.getState() == VirtualMachineState.LOCKED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
             flushErrors();
         }
 
-        vm.setState(State.LOCKED);
+        vm.setState(VirtualMachineState.LOCKED);
         updateVirtualMachine(vm);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public StateTransition validMachineStateChange(final VirtualMachine virtualMachine,
-        final State newState)
+    public VirtualMachineStateTransition validMachineStateChange(final VirtualMachine virtualMachine,
+        final VirtualMachineState newState)
     {
-        if (virtualMachine.getState() == State.NOT_ALLOCATED
-            || virtualMachine.getState() == State.ALLOCATED)
+        if (virtualMachine.getState() == VirtualMachineState.NOT_ALLOCATED
+            || virtualMachine.getState() == VirtualMachineState.ALLOCATED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        StateTransition validTransition =
-            StateTransition.getValidTransition(virtualMachine.getState(), newState);
+        VirtualMachineStateTransition validTransition =
+            VirtualMachineStateTransition.getValidTransition(virtualMachine.getState(), newState);
         if (validTransition == null)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
@@ -305,13 +306,13 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final State state)
+        final Integer vdcId, final VirtualMachineState state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
         // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
         // the if(!hypervisor)
-        if (State.NOT_ALLOCATED.equals(vm.getState()))
+        if (VirtualMachineState.NOT_ALLOCATED.equals(vm.getState()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
             flushErrors();
@@ -324,7 +325,7 @@ public class VirtualMachineService extends DefaultApiService
         // TODO revisar
         checkPauseAllowed(vm, state);
 
-        State old = vm.getState();
+        VirtualMachineState old = vm.getState();
 
         validMachineStateChange(vm, state);
 
@@ -361,7 +362,7 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(final VirtualMachine vm, final State old)
+    private void restoreVirtualMachineState(final VirtualMachine vm, final VirtualMachineState old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
@@ -383,8 +384,8 @@ public class VirtualMachineService extends DefaultApiService
             new VirtualAppliance(vmachine.getEnterprise(),
                 vdc,
                 "haVapp",
-                State.NOT_ALLOCATED,
-                State.NOT_ALLOCATED);
+                VirtualApplianceState.NOT_DEPLOYED,
+                VirtualApplianceState.NOT_DEPLOYED);
 
         NodeVirtualImage nvi =
             new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);
@@ -401,7 +402,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param state a valid VirtualMachine state
      * @return true if its the same state, false otherwise
      */
-    public Boolean sameState(final VirtualMachine vm, final State state)
+    public Boolean sameState(final VirtualMachine vm, final VirtualMachineState state)
     {
         String actual = vm.getState().toOVF();// OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);
@@ -417,9 +418,9 @@ public class VirtualMachineService extends DefaultApiService
         resource.put(docEnvelopeRunning);
     }
 
-    public void checkPauseAllowed(final VirtualMachine vm, final State state)
+    public void checkPauseAllowed(final VirtualMachine vm, final VirtualMachineState state)
     {
-        if (vm.getHypervisor().getType() == HypervisorType.XEN_3 && state == State.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3 && state == VirtualMachineState.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();
@@ -441,8 +442,8 @@ public class VirtualMachineService extends DefaultApiService
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
 
-        if (!virtualMachine.getState().equals(State.NOT_ALLOCATED)
-            && !virtualMachine.getState().equals(State.UNKNOWN))
+        if (!virtualMachine.getState().equals(VirtualMachineState.NOT_ALLOCATED)
+            && !virtualMachine.getState().equals(VirtualMachineState.UNKNOWN))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
@@ -478,7 +479,7 @@ public class VirtualMachineService extends DefaultApiService
         createNodeVirtualImage(virtualMachine, virtualAppliance);
 
         // At this stage the virtual machine is not associated with any hypervisor
-        virtualMachine.setState(State.NOT_ALLOCATED);
+        virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
 
         // TODO update the virtual appliance according to the rules. As the virtual appliance state
         // is the sum (pondered) of the states of its virtual machines
@@ -649,7 +650,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Apply state job");
         ApplyVirtualMachineStateOp stateJob =
             applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, StateTransition.POWERON);
+                hypervisorConnection, VirtualMachineStateTransition.POWERON);
         logger.debug("Apply state job done with id {}", stateJob.getId());
 
         // The jobs are to be rolled back
@@ -739,7 +740,7 @@ public class VirtualMachineService extends DefaultApiService
     private ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
         final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
         final VirtualMachineDescriptionBuilder vmDesc,
-        final HypervisorConnection hypervisorConnection, final StateTransition stateTransition)
+        final HypervisorConnection hypervisorConnection, final VirtualMachineStateTransition stateTransition)
     {
         ApplyVirtualMachineStateOp stateJob = new ApplyVirtualMachineStateOp();
         stateJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
@@ -863,7 +864,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * The {@link State} allowed for deploy are: <br>
+     * The {@link VirtualMachineState} allowed for deploy are: <br>
      * <ul>
      * <li>NOT_ALLOCATED</li>
      * </ul>
@@ -872,7 +873,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     private void checkVirtualMachineStateAllowsDeploy(final VirtualMachine virtualMachine)
     {
-        if (!State.NOT_ALLOCATED.equals(virtualMachine.getState()))
+        if (!VirtualMachineState.NOT_ALLOCATED.equals(virtualMachine.getState()))
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
@@ -885,7 +886,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * The {@link State} allowed for undeploy are: <br>
+     * The {@link VirtualMachineState} allowed for undeploy are: <br>
      * <ul>
      * <li>PAUSED</li>
      * <li>POWERED_OFF</li>
@@ -1009,13 +1010,13 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Apply state job");
         ApplyVirtualMachineStateOp powerOffJob =
             applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, StateTransition.POWEROFF);
+                hypervisorConnection, VirtualMachineStateTransition.POWEROFF);
         logger.debug("Apply state job done with id {}", powerOffJob.getId());
 
         logger.debug("Apply state job");
         ApplyVirtualMachineStateOp stateJob =
             applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, StateTransition.DECONFIGURE);
+                hypervisorConnection, VirtualMachineStateTransition.DECONFIGURE);
         logger.debug("Apply state job done with id {}", stateJob.getId());
 
         // The jobs are to be rolled back
@@ -1073,7 +1074,7 @@ public class VirtualMachineService extends DefaultApiService
     private void undeployInDb(final VirtualMachine virtualMachine)
     {
         logger.debug("The virtual machine state to NOT_DEPLOYED");
-        virtualMachine.setState(State.ALLOCATED);
+        virtualMachine.setState(VirtualMachineState.ALLOCATED);
         // Hypervisor == null in order to delete the relation between
         // virtualMachine
         // and physicalMachine
@@ -1180,7 +1181,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Apply state job");
         ApplyVirtualMachineStateOp stateJob =
             applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, StateTransition.RESUME);
+                hypervisorConnection, VirtualMachineStateTransition.RESUME);
         logger.debug("Apply state job done with id {}", stateJob.getId());
 
         // The jobs are to be rolled back
@@ -1269,13 +1270,13 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void applyVirtualMachineState(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final State state)
+        final Integer vdcId, final VirtualMachineState state)
     {
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
         // the if(!hypervisor)
-        if (State.NOT_ALLOCATED.equals(virtualMachine.getState()))
+        if (VirtualMachineState.NOT_ALLOCATED.equals(virtualMachine.getState()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
             flushErrors();
@@ -1284,7 +1285,7 @@ public class VirtualMachineService extends DefaultApiService
         // TODO revisar
         checkPauseAllowed(virtualMachine, state);
         // This returns the StateTransition or error
-        StateTransition validMachineStateChange = validMachineStateChange(virtualMachine, state);
+        VirtualMachineStateTransition validMachineStateChange = validMachineStateChange(virtualMachine, state);
 
         blockVirtualMachine(virtualMachine);
 

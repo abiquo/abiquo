@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -491,6 +491,6 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     public void runningVirtualMachine(final Integer virtualMachineId)
     {
-        vmachineDao.updateVirtualMachineState(virtualMachineId, State.ON);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.ON);
     }
 }

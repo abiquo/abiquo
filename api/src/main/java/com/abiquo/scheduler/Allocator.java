@@ -39,7 +39,7 @@ import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
@@ -255,7 +255,7 @@ public class Allocator implements IAllocator
     }
 
     @Override
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, final State state)
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, final VirtualMachineState state)
         throws AllocatorException, ResourceAllocationException
     {
         log.error("Community doesn't implement HA");

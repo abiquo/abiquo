@@ -44,7 +44,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
@@ -215,10 +215,10 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.ON))
+        if (!vmService.sameState(vm, VirtualMachineState.ON))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.ON);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.ON);
 
         }
     }
@@ -246,16 +246,16 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.OFF))
+        if (!vmService.sameState(vm, VirtualMachineState.OFF))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.OFF);
 
         }
     }
 
     /**
-     * Change the {@link State} the virtual machine
+     * Change the {@link VirtualMachineState} the virtual machine
      * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
@@ -278,12 +278,12 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        State newState = validateState(state);
+        VirtualMachineState newState = validateState(state);
         vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
     }
 
     /**
-     * Retrieve the {@link State} the virtual machine
+     * Retrieve the {@link VirtualMachineState} the virtual machine
      * 
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
@@ -327,14 +327,14 @@ public class VirtualMachineResource extends AbstractResource
      *            </ul>
      * @return State
      */
-    private State validateState(final VirtualMachineStateDto state)
+    private VirtualMachineState validateState(final VirtualMachineStateDto state)
     {
-        if (!State.ON.name().equals(state.getPower()) && !State.OFF.name().equals(state.getPower())
-            && !State.PAUSED.name().equals(state.getPower()))
+        if (!VirtualMachineState.ON.name().equals(state.getPower()) && !VirtualMachineState.OFF.name().equals(state.getPower())
+            && !VirtualMachineState.PAUSED.name().equals(state.getPower()))
         {
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
-        return State.valueOf(state.getPower());
+        return VirtualMachineState.valueOf(state.getPower());
     }
 
     /**
@@ -361,9 +361,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.PAUSED))
+        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
         }
     }
 
@@ -390,9 +390,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.PAUSED))
+        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
         }
     }
 

@@ -26,7 +26,7 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @XmlRootElement(name = "diskStatefulConversion")
@@ -70,14 +70,14 @@ public class DiskStatefulConversionDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

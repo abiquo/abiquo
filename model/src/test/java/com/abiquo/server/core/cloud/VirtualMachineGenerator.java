@@ -146,7 +146,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         virtualMachine.setCpu(vimage.getCpuRequired());
         virtualMachine.setRam(vimage.getRamRequired());
         virtualMachine.setHdInBytes((int) vimage.getHdRequiredInBytes());
-        virtualMachine.setState(State.ALLOCATED);
+        virtualMachine.setState(VirtualMachineState.ALLOCATED);
 
         return virtualMachine;
     }

@@ -21,12 +21,42 @@
 
 package com.abiquo.server.core.cloud;
 
+/**
+ * This class represents all of the possible states of a {@link VirtualAppliance}, which is derived
+ * form the states of its {@link VirtualMachine}.
+ * 
+ * @author ssedano
+ * @see com.abiquo.server.core.cloud.VirtualMachineState
+ */
 public enum VirtualApplianceState
 {
-    // None of its virtual machines are in state: NOT_ALLOCATED, UNKNOWN, LOCKED
+    /**
+     * All the virtual machines exists in the hypervisor and none is in the state
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN} nor
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED}.
+     */
     DEPLOYED,
-    // All of its machine are in state: NOT_ALLOCATED
+    /**
+     * No virtual machines. Or None of the virtual machines exists in the hypervisor and none is in
+     * the state {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN} nor
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED}.
+     */
     NOT_DEPLOYED,
-    // Some of its machines are in state: UNKNOWN, LOCKED
-    NEEDS_SYNCHRONIZE
+    /**
+     * Some virtual machines exists in the hypervisor and some does not and none is in the state
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN} nor
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED}.
+     */
+    NEEDS_SYNCHRONIZE,
+    /**
+     * Any of its virtual machines is in state
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED} and none is in the state
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN}
+     */
+    LOCKED,
+    /**
+     * Any of its virtual machines is in state
+     * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN}.
+     */
+    UNKNOWN
 }

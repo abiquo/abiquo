@@ -33,7 +33,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.User;
@@ -53,8 +53,8 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public VirtualApplianceStatefulConversion(final User user, final State state,
-        final State subState, final VirtualAppliance vapp)
+    public VirtualApplianceStatefulConversion(final User user, final VirtualMachineState state,
+        final VirtualMachineState subState, final VirtualAppliance vapp)
     {
         setUser(user);
         setState(state);
@@ -104,15 +104,15 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private State subState;
+    private VirtualMachineState subState;
 
     @Required(value = SUB_STATE_REQUIRED)
-    public State getSubState()
+    public VirtualMachineState getSubState()
     {
         return this.subState;
     }
 
-    private void setSubState(final State subState)
+    private void setSubState(final VirtualMachineState subState)
     {
         this.subState = subState;
     }
@@ -125,15 +125,15 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
 
     @Enumerated(value = javax.persistence.EnumType.STRING)
     @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private State state;
+    private VirtualMachineState state;
 
     @Required(value = STATE_REQUIRED)
-    public State getState()
+    public VirtualMachineState getState()
     {
         return this.state;
     }
 
-    private void setState(final State state)
+    private void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

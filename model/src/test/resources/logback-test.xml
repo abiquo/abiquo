@@ -5,6 +5,10 @@
             <Pattern>[%level] %msg%n</Pattern>
         </layout>
     </appender>
+    <logger name="org.hibernate.sql">
+        <level value="DEBUG" />
+        <appender-ref ref="STDOUT" />
+    </logger>
     <logger name="com.abiquo.testng">
         <level value="INFO" />
         <appender-ref ref="STDOUT" />

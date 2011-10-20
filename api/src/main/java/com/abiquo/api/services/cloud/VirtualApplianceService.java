@@ -49,10 +49,11 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
@@ -170,11 +171,11 @@ public class VirtualApplianceService extends DefaultApiService
 
         try
         {
-            if (virtualAppliance.getState() == State.ALLOCATED)
+            if (virtualAppliance.getState() == VirtualApplianceState.DEPLOYED)
             {
                 allocate(virtualAppliance);
 
-                virtualAppliance.setState(State.ON);
+                virtualAppliance.setState(VirtualApplianceState.DEPLOYED);
                 repo.updateVirtualAppliance(virtualAppliance);
 
                 EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
@@ -197,7 +198,7 @@ public class VirtualApplianceService extends DefaultApiService
 
                 EventingSupport.subscribeToAllVA(virtualAppliance, vsm.getUri());
 
-                changeState(resource, envelop, State.ON.toResourceState());
+                changeState(resource, envelop, VirtualMachineState.ON.toResourceState());
             }
         }
         catch (Exception e)
@@ -243,8 +244,8 @@ public class VirtualApplianceService extends DefaultApiService
             new VirtualAppliance(vdc.getEnterprise(),
                 vdc,
                 dto.getName(),
-                State.NOT_ALLOCATED,
-                State.NOT_ALLOCATED);
+                VirtualApplianceState.NOT_DEPLOYED,
+                VirtualApplianceState.NOT_DEPLOYED);
 
         vapp.setHighDisponibility(dto.getHighDisponibility());
         vapp.setPublicApp(dto.getPublicApp());
@@ -277,15 +278,15 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<VirtualMachineChangeStateResultDto> changeVirtualAppMachinesState(
-        final Integer vdcId, final Integer vappId, final State state)
+        final Integer vdcId, final Integer vappId, final VirtualMachineState state)
     {
         VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-        if (vapp.getState().equals(State.NOT_ALLOCATED))
+        if (vapp.getState().equals(VirtualMachineState.NOT_ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (!vapp.getState().equals(State.ALLOCATED))
+        if (!vapp.getState().equals(VirtualMachineState.ALLOCATED))
         {
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
             flushErrors();
@@ -345,7 +346,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public State getVirtualApplianceState(final Integer vdcId, final Integer vappId)
+    public VirtualApplianceState getVirtualApplianceState(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
         return virtualAppliance.getState();
