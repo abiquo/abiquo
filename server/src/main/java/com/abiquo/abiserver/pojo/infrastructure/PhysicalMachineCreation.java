@@ -166,7 +166,7 @@ public class PhysicalMachineCreation
             }
         }
 
-        if (dto.getVirtualSwitch() != null && dto.getVirtualSwitch().contains("/"))
+        if (dto.getVirtualSwitch() != null)
         {
             machineCreation.setResources(new ArrayList<Resource>());
             String[] vss = dto.getVirtualSwitch().split("/");
