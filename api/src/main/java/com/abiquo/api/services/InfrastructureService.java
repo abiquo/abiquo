@@ -428,6 +428,12 @@ public class InfrastructureService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public void removeRack(final Rack rack)
     {
+        removeRack(rack, false);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public void removeRack(final Rack rack, final boolean force)
+    {
 
         List<Machine> machines = getMachines(rack);
         if (machines != null)
@@ -437,7 +443,7 @@ public class InfrastructureService extends DefaultApiService
                 if (machine.getHypervisor() != null)
                 {
                     virtualMachineService.deleteNotManagedVirtualMachines(machine.getHypervisor());
-                    machineService.removeMachine(machine.getId());
+                    machineService.removeMachine(machine.getId(), force);
                 }
             }
         }

@@ -28,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -115,11 +116,12 @@ public class RackResource extends AbstractResource
     @DELETE
     public void deleteRack(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
-        @PathParam(RACK) @NotNull @Min(1) final Integer rackId)
+        @PathParam(RACK) @NotNull @Min(1) final Integer rackId,
+        @QueryParam("force") final boolean force)
     {
         // Pass the whole hierarchy ids at the service to retive the rack and remove it.
         Rack rack = service.getRack(datacenterId, rackId);
-        service.removeRack(rack);
+        service.removeRack(rack, force);
     }
 
     // Create the transfer object. ModelTransformer do the dirty work. You should only
