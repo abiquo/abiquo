@@ -32,6 +32,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -141,6 +142,7 @@ public class Currency extends DefaultEntityBase
     private int digits;
 
     @Required(value = DIGITS_REQUIRED)
+    @Min(value = 0)
     public int getDigits()
     {
         return digits;
