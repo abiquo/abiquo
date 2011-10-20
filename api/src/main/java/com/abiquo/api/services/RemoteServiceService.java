@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -227,7 +228,20 @@ public class RemoteServiceService extends DefaultApiService
                 ApplianceManagerResourceStubImpl amStub =
                     new ApplianceManagerResourceStubImpl(remoteService.getUri());
 
-                repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+                try
+                {
+                    repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+                }
+                catch (ApplianceManagerStubException amEx)
+                {
+                    remoteService.setStatus(STATUS_ERROR);
+                    APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
+                    configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
+                        .getName() + ", " + amEx.getMessage()));
+
+                    return configurationErrors;
+
+                }
 
                 if (infrastrucutreRepo.existRepositoryInOtherDatacenter(datacenter,
                     repositoryLocation))
