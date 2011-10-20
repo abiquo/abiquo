@@ -45,8 +45,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageH
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
-import com.abiquo.abiserver.commands.stub.UsersResourceStub;
-import com.abiquo.abiserver.commands.stub.impl.UsersResourceStubImpl;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
@@ -78,8 +76,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
+        .getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -142,8 +140,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
-                        .toString());
+                    String.format("Can not obtain the datacenter with id [%s]",
+                        idDatacenter.toString());
             }
 
             factory.rollbackConnection();
@@ -706,13 +704,11 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             oldVimage.setName(vimage.getName());
             oldVimage.setDescription(vimage.getDescription());
             oldVimage.setPathName(vimage.getPathName());
-            oldVimage.setTreaty(vimage.getTreaty());
             oldVimage.setStateful(vimage.getStateful());
             oldVimage.setVolumePath(vimage.getVolumePath());
             oldVimage.setIdEnterprise(vimage.getIdEnterprise());
             oldVimage.setShared(vimage.getShared());
             oldVimage.setCostCode(vimage.getCostCode());
-            // oldVimage.setDeleted(deleted);
             // XXX oldVimage.setMaster(master);
 
             factory.getVirtualImageDAO().makePersistent(oldVimage);

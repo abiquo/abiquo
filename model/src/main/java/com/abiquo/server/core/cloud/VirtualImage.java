@@ -56,46 +56,24 @@ public class VirtualImage extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualimage";
 
+    // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
+    // code
     protected VirtualImage()
     {
-        super();
+        // Just for JPA support
     }
 
-    @Deprecated
-    public VirtualImage(final Enterprise enterprise)
+    public VirtualImage(final Enterprise enterprise, final String name,
+        final DiskFormatType diskFormatType, final String pathName, final long diskFileSize,
+        final Category category)
     {
         super();
-        setEnterprise(enterprise);
-        // XXX FIXME Category cat = new Category("OTHER", 1, 0);
-        // setCategory(cat);
-        setDiskFormatType(DiskFormatType.UNKNOWN);
-
-    }
-
-    @Deprecated
-    public VirtualImage(final Enterprise enterprise, final DiskFormatType diskFormatType)
-    {
-        super();
-        setEnterprise(enterprise);
-        // Category cat = new Category("OTHER", 1, 0);
-        // setCategory(cat);
-        setDiskFormatType(diskFormatType);
-        setName("FIXME"); // TODO: change this.
-    }
-
-    public VirtualImage(final DiskFormatType diskFormatType, final boolean stateful,
-        final boolean treaty, final boolean shared, final String pathName, final boolean deleted,
-        final Category category, final long diskFileSize)
-    {
-        super();
+        this.enterprise = enterprise;
+        this.name = name;
         this.diskFormatType = diskFormatType;
-        this.stateful = stateful;
-        this.treaty = treaty;
-        this.shared = shared;
         this.pathName = pathName;
-        this.deleted = deleted;
-        this.category = category;
         this.diskFileSize = diskFileSize;
+        this.category = category;
     }
 
     private final static String ID_COLUMN = "idImage";
@@ -136,18 +114,18 @@ public class VirtualImage extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
-    final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-    final static int NAME_LENGTH_MAX = 255;
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
     private final static String NAME_COLUMN = "name";
 
     @Column(name = NAME_COLUMN, nullable = !NAME_REQUIRED, length = NAME_LENGTH_MAX)
-    private String name = "FIXME";
+    private String name;
 
     @Required(value = NAME_REQUIRED)
     @Length(min = NAME_LENGTH_MIN, max = NAME_LENGTH_MAX)
@@ -177,29 +155,9 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
-    private void setStateful(final boolean stateful)
+    public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
-    }
-
-    public final static String TREATY_PROPERTY = "treaty";
-
-    private final static String TREATY_COLUMN = "treaty";
-
-    private final static boolean TREATY_REQUIRED = true;
-
-    @Column(name = TREATY_COLUMN, columnDefinition = "int", nullable = false)
-    private boolean treaty = false;
-
-    @Required(value = TREATY_REQUIRED)
-    public boolean isTreaty()
-    {
-        return this.treaty;
-    }
-
-    private void setTreaty(final boolean treaty)
-    {
-        this.treaty = treaty;
     }
 
     public final static String SHARED_PROPERTY = "shared";
@@ -217,7 +175,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.shared;
     }
 
-    private void setShared(final boolean shared)
+    public void setShared(final boolean shared)
     {
         this.shared = shared;
     }
@@ -268,11 +226,11 @@ public class VirtualImage extends DefaultEntityBase
 
     public final static String PATH_NAME_PROPERTY = "pathName";
 
-    private final static boolean PATH_NAME_REQUIRED = false;
+    private final static boolean PATH_NAME_REQUIRED = true;
 
-    private final static int PATH_NAME_LENGTH_MIN = 0;
+    /* package */final static int PATH_NAME_LENGTH_MIN = 0;
 
-    private final static int PATH_NAME_LENGTH_MAX = 255;
+    /* package */final static int PATH_NAME_LENGTH_MAX = 255;
 
     private final static boolean PATH_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -298,9 +256,9 @@ public class VirtualImage extends DefaultEntityBase
 
     final static boolean OVFID_REQUIRED = false;
 
-    final static int OVFID_LENGTH_MIN = 0;
+    /* package */final static int OVFID_LENGTH_MIN = 0;
 
-    final static int OVFID_LENGTH_MAX = 255;
+    /* package */final static int OVFID_LENGTH_MAX = 255;
 
     final static boolean OVFID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -366,26 +324,6 @@ public class VirtualImage extends DefaultEntityBase
         this.hdRequiredInBytes = hdRequiredInBytes;
     }
 
-    public final static String DELETED_PROPERTY = "deleted";
-
-    private final static String DELETED_COLUMN = "deleted";
-
-    private final static boolean DELETED_REQUIRED = true;
-
-    @Column(name = DELETED_COLUMN, columnDefinition = "int", nullable = false)
-    private boolean deleted = false;
-
-    @Required(value = DELETED_REQUIRED)
-    public boolean isDeleted()
-    {
-        return this.deleted;
-    }
-
-    private void setDeleted(final boolean deleted)
-    {
-        this.deleted = deleted;
-    }
-
     public final static String MASTER_PROPERTY = "master";
 
     private final static boolean MASTER_REQUIRED = false;
@@ -438,7 +376,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static long DISK_FILE_SIZE_MAX = Long.MAX_VALUE;
 
-    @Column(name = DISK_FILE_SIZE_COLUMN, nullable = true)
+    @Column(name = DISK_FILE_SIZE_COLUMN, nullable = false)
     @Range(min = DISK_FILE_SIZE_MIN, max = DISK_FILE_SIZE_MAX)
     private long diskFileSize;
 
@@ -506,9 +444,9 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean COST_CODE_REQUIRED = false;
 
-    final static int COST_CODE_LENGTH_MIN = 0;
+    private final static int COST_CODE_LENGTH_MIN = 0;
 
-    final static int COST_CODE_LENGTH_MAX = 50;
+    private final static int COST_CODE_LENGTH_MAX = 50;
 
     private final static String COST_CODE_COLUMN = "cost_code";
 
@@ -529,13 +467,16 @@ public class VirtualImage extends DefaultEntityBase
 
     public final static String REPOSITORY_PROPERTY = "repository";
 
+    private final static boolean REPOSITORY_REQUIRED = false;
+
     private final static String REPOSITORY_ID_COLUMN = "idRepository";
 
     @JoinColumn(name = REPOSITORY_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_repository")
     private Repository repository;
 
-    @Required(false)
+    @Required(value = REPOSITORY_REQUIRED)
     public Repository getRepository()
     {
         return repository;

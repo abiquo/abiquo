@@ -44,11 +44,10 @@ import com.abiquo.tracer.SeverityType;
 @Service
 public class CategoryService extends DefaultApiService
 {
+    private static final Logger logger = LoggerFactory.getLogger(CategoryResource.class);
 
     @Autowired
-    CategoryRep repo;
-
-    private static final Logger logger = LoggerFactory.getLogger(CategoryResource.class);
+    private CategoryRep repo;
 
     public CategoryService()
     {
@@ -60,11 +59,13 @@ public class CategoryService extends DefaultApiService
         repo = new CategoryRep(em);
     }
 
+    @Transactional(readOnly = true)
     public Collection<Category> getCategories()
     {
         return repo.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Category getCategory(final Integer categoryId)
     {
         Category category = repo.findCategoryById(categoryId);

@@ -27,16 +27,6 @@
         <property name="cpuRequired" type="java.lang.Integer">
             <column name="cpu_required" />
         </property>
-        <property name="treaty" type="int">
-            <column name="treaty" not-null="true">
-                <comment>0-No 1-Yes</comment>
-            </column>
-        </property>
-        <property name="deleted" type="int">
-            <column name="deleted" not-null="true">
-                <comment>0-No 1-Yes</comment>
-            </column>
-        </property>
         <property name="shared" type="int">
             <column name="shared" not-null="true">
                 <comment>0-No 1-Yes</comment>

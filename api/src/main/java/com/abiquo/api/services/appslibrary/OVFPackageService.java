@@ -43,32 +43,31 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-
-import com.abiquo.server.core.config.Category;
-import com.abiquo.server.core.config.CategoryRep;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.config.Category;
+import com.abiquo.server.core.config.CategoryRep;
 import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.IconDAO;
-
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
 public class OVFPackageService extends DefaultApiService
 {
+    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
 
     @Autowired
-    OVFPackageRep repo;
+    private OVFPackageRep repo;
 
     @Autowired
-    EnterpriseRep entRepo;
+    private EnterpriseRep entRepo;
 
     @Autowired
-    CategoryRep catRep;
+    private CategoryRep catRep;
 
     @Autowired
-    IconDAO iconDao;
+    private IconDAO iconDao;
 
     public OVFPackageService()
     {
@@ -78,10 +77,10 @@ public class OVFPackageService extends DefaultApiService
     public OVFPackageService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
+        entRepo = new EnterpriseRep(em);
+        catRep = new CategoryRep(em);
         iconDao = new IconDAO(em);
     }
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
@@ -105,9 +104,7 @@ public class OVFPackageService extends DefaultApiService
     public OVFPackage addOVFPackage(final OVFPackage ovfPackage, final Integer idEnterprise)
     {
         Enterprise ent = entRepo.findById(idEnterprise);
-
-        OVFPackage ovfpackage = repo.addOVFPackage(ovfPackage, ent);
-        return ovfPackage;
+        return repo.addOVFPackage(ovfPackage, ent);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -116,7 +113,6 @@ public class OVFPackageService extends DefaultApiService
     {
         Enterprise enterprise = entRepo.findById(idEnterprise);
         return repo.modifyOVFPackage(ovfPackageId, ovfPackage, enterprise);
-
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -131,6 +127,7 @@ public class OVFPackageService extends DefaultApiService
         repo.removeOVFPackage(id);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public OVFPackage ovfPackageFromOvfDescription(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {

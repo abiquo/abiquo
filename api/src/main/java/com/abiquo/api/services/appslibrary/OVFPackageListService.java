@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -37,10 +36,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.UserService;
-import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
@@ -48,13 +44,9 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.appslibrary.OVFPackageListDAO;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
-import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 @Service
 public class OVFPackageListService extends DefaultApiService
@@ -78,14 +70,13 @@ public class OVFPackageListService extends DefaultApiService
 
     public OVFPackageListService(final EntityManager em)
     {
-
         repo = new OVFPackageRep(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         ovfPackageService = new OVFPackageService(em);
         entRepo = new EnterpriseRep(em);
-
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackageList> getOVFPackageLists()
     {
         return repo.getAllOVFPackageLists();

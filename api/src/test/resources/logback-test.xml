@@ -9,11 +9,7 @@
         <level value="INFO" />
         <appender-ref ref="STDOUT" />
     </logger>
-    <logger name="org.mortbay">
-    <level value="INFO" />
-        <appender-ref ref="STDOUT" />
-    </logger>
     <root>
-        <level value="DEBUG" />
+        <level value="OFF" />
     </root>
 </configuration>

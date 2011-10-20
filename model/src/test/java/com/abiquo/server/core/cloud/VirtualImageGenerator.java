@@ -23,8 +23,6 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.config.Category;
@@ -40,9 +38,6 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 {
-    // XXX CategoryGenerator categoryGenerator;
-    // TODO and iconGenerator
-
     private EnterpriseGenerator enterpriseGenerator;
 
     private RepositoryGenerator repositoryGenerator;
@@ -65,68 +60,63 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualImage.DISKFORMAT_TYPE_PROPERTY,
             VirtualImage.NAME_PROPERTY, VirtualImage.STATEFUL_PROPERTY,
-            VirtualImage.TREATY_PROPERTY, VirtualImage.CPU_REQUIRED_PROPERTY,
-            VirtualImage.PATH_NAME_PROPERTY, VirtualImage.OVFID_PROPERTY,
-            VirtualImage.RAM_REQUIRED_PROPERTY, VirtualImage.HD_REQUIRED_PROPERTY,
-            VirtualImage.DELETED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
+            VirtualImage.CPU_REQUIRED_PROPERTY, VirtualImage.PATH_NAME_PROPERTY,
+            VirtualImage.OVFID_PROPERTY, VirtualImage.RAM_REQUIRED_PROPERTY,
+            VirtualImage.HD_REQUIRED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
             VirtualImage.DESCRIPTION_PROPERTY);
 
-        repositoryGenerator.assertAllPropertiesEqual(obj1.getRepository(), obj2.getRepository());
-        iconGenerator.assertAllPropertiesEqual(obj1.getIcon(), obj2.getIcon());
+        categoryGenerator.assertAllPropertiesEqual(obj1.getCategory(), obj2.getCategory());
+
+        if (obj1.getRepository() != null)
+        {
+            repositoryGenerator
+                .assertAllPropertiesEqual(obj1.getRepository(), obj2.getRepository());
+        }
+        if (obj1.getIcon() != null)
+        {
+            iconGenerator.assertAllPropertiesEqual(obj1.getIcon(), obj2.getIcon());
+        }
+        if (obj1.getMaster() != null)
+        {
+            assertAllPropertiesEqual(obj1.getMaster(), obj2.getMaster());
+        }
     }
 
     @Override
     public VirtualImage createUniqueInstance()
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        Repository repository = repositoryGenerator.createUniqueInstance();
-        final String name =
-            newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
-        VirtualImage vi = createInstance(enterprise, repository, 0, 0, 0, name);
-
-        return vi;
+        return createInstance(enterprise);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise)
     {
-        Repository repository = repositoryGenerator.createUniqueInstance();
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
+        Repository repository = repositoryGenerator.createUniqueInstance();
 
-        VirtualImage vi = createInstance(enterprise, repository, 0, 0, 0, name);
-
-        return vi;
+        return createInstance(enterprise, repository, 0, 0, 0, name);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
-        Icon icon = iconGenerator.createUniqueInstance();
+
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
-        final String pathName = newString(nextSeed(), 0, 20);
+        final String pathName =
+            newString(nextSeed(), VirtualImage.PATH_NAME_LENGTH_MIN,
+                VirtualImage.PATH_NAME_LENGTH_MAX);
+        String ovfid =
+            newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
 
         VirtualImage vimage =
-            new VirtualImage(DiskFormatType.RAW,
-                false,
-                false,
-                false,
-                pathName,
-                true,
-                category,
-                diskFileSize);
+            new VirtualImage(enterprise, name, DiskFormatType.RAW, pathName, diskFileSize, category);
 
-        vimage.setEnterprise(enterprise);
-        vimage.setName(name);
-        vimage.setIcon(icon);
-
+        vimage.setRepository(repository);
         vimage.setCpuRequired(cpuRequired);
         vimage.setRamRequired(ramRequired);
         vimage.setHdRequiredInBytes(hdRequired);
-        vimage.setRepository(repository);
-
-        String ovfid =
-            newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
         vimage.setOvfid(ovfid);
 
         return vimage;
@@ -137,8 +127,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         VirtualImage image = createInstance(enterprise);
         VirtualImageConversion conversion =
             new VirtualImageConversion(image, DiskFormatType.RAW, newString(nextSeed(), 0, 255));
-
         image.addConversion(conversion);
+
         return image;
     }
 
@@ -148,10 +138,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        Repository repository = entity.getRepository();
-        repositoryGenerator.addAuxiliaryEntitiesToPersist(repository, entitiesToPersist);
-        entitiesToPersist.add(repository);
-
         Enterprise enterprise = entity.getEnterprise();
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
@@ -160,32 +146,12 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
 
-        if (entity.getMaster() != null)
+        if (entity.getRepository() != null)
         {
-            VirtualImage master = entity.getMaster();
-            // Take care of recursion here
-            addAuxiliaryEntitiesToPersist(master, entitiesToPersist);
-            entitiesToPersist.add(master);
+            Repository repository = entity.getRepository();
+            repositoryGenerator.addAuxiliaryEntitiesToPersist(repository, entitiesToPersist);
+            entitiesToPersist.add(repository);
         }
-
-        Icon icon = entity.getIcon();
-        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
-        entitiesToPersist.add(icon);
-
-    }
-
-    public void addAuxiliaryEntitiesToPersistWithOutEnterprise(final VirtualImage entity,
-        final List<Object> entitiesToPersist)
-    {
-        super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
-        Repository repository = entity.getRepository();
-        repositoryGenerator.addAuxiliaryEntitiesToPersist(repository, entitiesToPersist);
-        entitiesToPersist.add(repository);
-
-        Category category = entity.getCategory();
-        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
-        entitiesToPersist.add(category);
 
         if (entity.getMaster() != null)
         {
@@ -195,10 +161,12 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
             entitiesToPersist.add(master);
         }
 
-        Icon icon = entity.getIcon();
-        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
-        entitiesToPersist.add(icon);
-
+        if (entity.getIcon() != null)
+        {
+            Icon icon = entity.getIcon();
+            iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+            entitiesToPersist.add(icon);
+        }
     }
 
 }

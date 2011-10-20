@@ -27,15 +27,12 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 
 @Repository
-@Transactional
 public class CategoryRep extends DefaultRepBase
 {
-
     @Autowired
     private CategoryDAO categoryDAO;
 
@@ -46,9 +43,6 @@ public class CategoryRep extends DefaultRepBase
 
     public CategoryRep(final EntityManager entityManager)
     {
-        assert entityManager != null;
-        assert entityManager.isOpen();
-
         this.entityManager = entityManager;
         categoryDAO = new CategoryDAO(entityManager);
     }

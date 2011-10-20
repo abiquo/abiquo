@@ -210,7 +210,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -226,7 +225,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage().getRepository());
         entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage().getIcon());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());
@@ -304,7 +302,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -357,7 +354,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -394,8 +390,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
 
-        vm.getVirtualImage().getRepository().setDatacenter(
-            vm.getHypervisor().getMachine().getDatacenter());
+        vm.getVirtualImage().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -413,7 +409,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor().getMachine());
@@ -441,8 +436,8 @@ public class VirtualMachineResourceIT extends TestPopulate
     {
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), new Random()
-                .nextInt(1000)));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
+                new Random().nextInt(1000)));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -477,7 +472,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -487,8 +481,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -523,7 +517,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -533,8 +526,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(1000), vm
-                .getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(1000),
+                vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -568,8 +561,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
 
         Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN).accept(
-                MediaType.APPLICATION_XML);
+            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_XML);
 
         if (action.allocate)
         {
@@ -598,13 +591,13 @@ public class VirtualMachineResourceIT extends TestPopulate
 
                 if (action.targetMachineName.contains("no_resource"))
                 {
-                    Assert.assertTrue(noResources, String.format(
-                        "expected no_resource for vmId [%d]", virtualMachineId));
+                    Assert.assertTrue(noResources,
+                        String.format("expected no_resource for vmId [%d]", virtualMachineId));
                 }
                 else if (action.targetMachineName.contains("limit"))
                 {
-                    Assert.assertTrue(limit, String.format("expected limit for vmId [%d]",
-                        virtualMachineId));
+                    Assert.assertTrue(limit,
+                        String.format("expected limit for vmId [%d]", virtualMachineId));
                 }
                 else
                 {

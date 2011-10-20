@@ -545,9 +545,9 @@ public class EnterpriseService extends DefaultApiService
         return repo.findAllPrivileges();
     }
 
-    public RoleLdap getRoleLdap(final String role_ldap)
+    public RoleLdap getRoleLdap(final String roleLdap)
     {
-        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
         if (list == null || list.isEmpty())
         {
             addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
@@ -559,6 +559,28 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
         return list.get(0);
+    }
+
+    public RoleLdap getRoleLdapOrNull(final String roleLdap)
+    {
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
+        if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+
+        return list == null || list.isEmpty() ? null : list.get(0);
+    }
+
+    public Role findRoleById(final Integer id)
+    {
+        return repo.findRoleById(id);
+    }
+
+    public List<Privilege> findPrivilegesByRole(final Role role)
+    {
+        return repo.findPrivilegesByRole(role);
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)

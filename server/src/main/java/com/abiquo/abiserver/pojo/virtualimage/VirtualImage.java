@@ -53,8 +53,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private Icon icon;
 
-    private Boolean deleted;
-
     private DiskFormatType diskFormatType;
 
     private VirtualImage master;
@@ -66,8 +64,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     private String ovfId;
 
     private int stateful;
-
-    private Boolean chef;
 
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
@@ -84,7 +80,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         repository = new Repository();
         ovfId = "";
         stateful = 0;
-        deleted = false;
         shared = 0;
         costCode = "";
     }
@@ -189,26 +184,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.icon = icon;
     }
 
-    public Boolean getDeleted()
-    {
-        return deleted;
-    }
-
-    public void setDeleted(final Boolean deleted)
-    {
-        this.deleted = deleted;
-    }
-
-    public Boolean isChef()
-    {
-        return chef;
-    }
-
-    public void setChef(final Boolean isChef)
-    {
-        this.chef = isChef;
-    }
-
     public DiskFormatType getDiskFormatType()
     {
         return diskFormatType;
@@ -264,7 +239,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return diskFileSize;
     }
 
-    public void setDiskFileSize(Long diskFileSize)
+    public void setDiskFileSize(final Long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -284,7 +259,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return shared;
     }
 
-    public void setShared(int shared)
+    public void setShared(final int shared)
     {
         this.shared = shared;
     }
@@ -294,7 +269,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final String costCode)
     {
         this.costCode = costCode;
     }
@@ -329,7 +304,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         virtualImageHB.setHdRequired(hdRequired);
         virtualImageHB.setRamRequired(ramRequired);
         virtualImageHB.setCpuRequired(cpuRequired);
-        virtualImageHB.setDeleted(deleted ? 1 : 0);
         virtualImageHB.setType(diskFormatType.toEnum());
         virtualImageHB.setStateful(stateful);
         virtualImageHB.setDiskFileSize(diskFileSize);

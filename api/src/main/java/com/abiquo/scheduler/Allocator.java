@@ -157,7 +157,8 @@ public class Allocator implements IAllocator
 
     private VirtualImage getVirtualImage(final VirtualMachineRequirements increaseRequirements)
     {
-        VirtualImage vimage = new VirtualImage(null); // doesn't care about the enterprise
+        // We only need the CPU and RAM requirement fields
+        VirtualImage vimage = new VirtualImage(null, null, null, null, 0L, null);
         vimage.setCpuRequired(increaseRequirements.getCpu().intValue());
         vimage.setRamRequired(increaseRequirements.getRam().intValue());
         return vimage;
@@ -267,8 +268,8 @@ public class Allocator implements IAllocator
     protected VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
         final VirtualMachine vmachine)
     {
-        VirtualImage vimage = new VirtualImage(null); // doesn't care about enterprise
-
+        // We only need the CPU and RAM requirement fields
+        VirtualImage vimage = new VirtualImage(null, null, null, null, 0L, null);
         vimage.setCpuRequired(vmachine.getCpu());
         vimage.setRamRequired(vmachine.getRam());
 

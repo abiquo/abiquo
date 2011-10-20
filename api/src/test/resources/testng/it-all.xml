@@ -10,7 +10,8 @@
                 <include name="it-basic" />
                 <include name="it-network" />
                 <include name="it-appslibrary" />
-                <include name="it-all" />            
+                <include name="it-all" />
+                <exclude name="it-am" />    <!-- These tests require a running AM -->
             </run>
         </groups>
         <packages>

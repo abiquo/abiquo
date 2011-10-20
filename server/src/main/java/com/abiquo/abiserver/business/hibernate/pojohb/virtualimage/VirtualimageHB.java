@@ -60,10 +60,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private Integer cpuRequired;
 
-    private int treaty;
-
-    private int deleted;
-
     private int shared;
 
     private VirtualimageHB master;
@@ -78,8 +74,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private String volumePath;
 
-    private Boolean isChef;
-
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
@@ -90,16 +84,13 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     }
 
     public VirtualimageHB(final RepositoryHB repository, final CategoryHB category,
-        final String name, final String pathName, final int treaty, final int deleted,
-        final VirtualimageHB master, final int idEnterprise, final String ovfId,
-        final Long diskFileSize)
+        final String name, final String pathName, final VirtualimageHB master,
+        final int idEnterprise, final String ovfId, final Long diskFileSize)
     {
         this.repository = repository;
         this.category = category;
         this.name = name;
         this.pathName = pathName;
-        this.treaty = treaty;
-        this.deleted = deleted;
         this.shared = 0;
         this.master = master;
         this.idEnterprise = idEnterprise;
@@ -111,9 +102,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public VirtualimageHB(final RepositoryHB repository, final IconHB icon,
         final CategoryHB category, final String name, final String description,
         final String pathName, final Long hdRequired, final Integer ramRequired,
-        final Integer cpuRequired, final int treaty, final int deleted,
-        final VirtualimageHB master, final int idEnterprise, final String ovfId,
-        final Long diskFileSize, final String costCode)
+        final Integer cpuRequired, final VirtualimageHB master, final int idEnterprise,
+        final String ovfId, final Long diskFileSize, final String costCode)
     {
         this.repository = repository;
         this.icon = icon;
@@ -124,8 +114,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.hdRequired = hdRequired;
         this.ramRequired = ramRequired;
         this.cpuRequired = cpuRequired;
-        this.treaty = treaty;
-        this.deleted = deleted;
         this.shared = 0;
         this.master = master;
         this.idEnterprise = idEnterprise;
@@ -235,36 +223,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.cpuRequired = cpuRequired;
     }
 
-    public int getTreaty()
-    {
-        return treaty;
-    }
-
-    public void setTreaty(final int treaty)
-    {
-        this.treaty = treaty;
-    }
-
-    public int getDeleted()
-    {
-        return deleted;
-    }
-
-    public void setDeleted(final int deleted)
-    {
-        this.deleted = deleted;
-    }
-
-    public Boolean isChef()
-    {
-        return isChef;
-    }
-
-    public void setChef(final Boolean isChef)
-    {
-        this.isChef = isChef;
-    }
-
     public Integer getIdEnterprise()
     {
         return idEnterprise;
@@ -300,7 +258,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return diskFileSize;
     }
 
-    public void setDiskFileSize(Long diskFileSize)
+    public void setDiskFileSize(final Long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -310,7 +268,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return shared;
     }
 
-    public void setShared(int shared)
+    public void setShared(final int shared)
     {
         this.shared = shared;
     }
@@ -320,7 +278,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final String costCode)
     {
         this.costCode = costCode;
     }
@@ -344,7 +302,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     {
         virtualImage.setCategory(category.toPojo());
         virtualImage.setCpuRequired(cpuRequired);
-        virtualImage.setDeleted(deleted != 0);
         virtualImage.setDescription(description);
         virtualImage.setHdRequired(hdRequired);
 
@@ -418,7 +375,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         imageBundled.setOvfId(getOvfId());
         imageBundled.setRamRequired(getRamRequired());
         imageBundled.setRepository(getRepository());
-        imageBundled.setTreaty(getTreaty());
         imageBundled.setType(getType());
         imageBundled.setPathName(getPathName());
         imageBundled.setDiskFileSize(getDiskFileSize());
@@ -456,7 +412,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return volumePath;
     }
 
-    public void setVolumePath(String volumePath)
+    public void setVolumePath(final String volumePath)
     {
         this.volumePath = volumePath;
     }
@@ -466,7 +422,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return type;
     }
 
-    public void setType(DiskFormatType type)
+    public void setType(final DiskFormatType type)
     {
         this.type = type;
     }

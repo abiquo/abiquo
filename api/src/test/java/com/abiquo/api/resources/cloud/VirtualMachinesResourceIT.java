@@ -91,10 +91,10 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
-        vm.getVirtualImage().getRepository().setDatacenter(
-            vm.getHypervisor().getMachine().getDatacenter());
-        vm2.getVirtualImage().getRepository().setDatacenter(
-            vm2.getHypervisor().getMachine().getDatacenter());
+        vm.getVirtualImage().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
+        vm2.getVirtualImage().getRepository()
+            .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -113,7 +113,6 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getUser());
         entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage().getIcon());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -129,7 +128,6 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualImage().getRepository());
         entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage().getIcon());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());

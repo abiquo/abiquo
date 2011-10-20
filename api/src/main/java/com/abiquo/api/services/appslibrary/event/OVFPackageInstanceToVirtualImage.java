@@ -36,6 +36,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
+import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -160,27 +161,27 @@ public class OVFPackageInstanceToVirtualImage
             diskFormat = DiskFormatType.valueOf(disk.getDiskFileFormat().name().toUpperCase());
         }
 
-        VirtualImage vimage = new VirtualImage(enterprise, diskFormat);
+        Category category = categoryDao.findDefault(); // TODO find by ProductSection
+
+        VirtualImage vimage =
+            new VirtualImage(enterprise,
+                disk.getName(),
+                diskFormat,
+                disk.getDiskFilePath(),
+                disk.getDiskFileSize(),
+                category);
+
+        // TODO: Icon
+        vimage.setDescription(getDescription(disk));
+        vimage.setCpuRequired(disk.getCpu());
+        vimage.setRamRequired(getRamInMb(disk).intValue());
+        vimage.setHdRequiredInBytes(getHdInBytes(disk));
         vimage.setOvfid(disk.getOvfUrl());
-        vimage.setPathName(disk.getDiskFilePath());
         vimage.setRepository(repository);
         if (master != null)
         {
             vimage.setMaster(master);
         }
-
-        vimage.setCategory(categoryDao.findDefault()); // TODO find by ProductSection
-
-        /**
-         * TODO category and icon
-         */
-        vimage.setName(disk.getName());
-        vimage.setDescription(getDescription(disk));
-
-        vimage.setCpuRequired(disk.getCpu());
-        vimage.setRamRequired(getRamInMb(disk).intValue());
-        vimage.setHdRequiredInBytes(getHdInBytes(disk));
-        vimage.setDiskFileSize(disk.getDiskFileSize());
 
         return vimage;
     }
