@@ -38,7 +38,6 @@ DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 -- ---------------------------------------------- --
 --                  TABLE CREATION                --
 -- ---------------------------------------------- --
-
 -- PRICING --
 -- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
@@ -138,6 +137,20 @@ CREATE TABLE  `kinton`.`chef_runlist` (
   CONSTRAINT `chef_runlist_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE  `kinton`.`enterprise_properties` (
+  `idProperties` int(11) unsigned NOT NULL auto_increment,
+  `enterprise` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`idProperties`),
+  CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+CREATE TABLE  `kinton`.`enterprise_properties_map` (
+ `enterprise_properties` int(11) unsigned NOT NULL,
+  `map_key` varchar(30) NOT NULL,
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
@@ -174,10 +187,10 @@ ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
-
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)");
 
+<<<<<<< HEAD
 -- First I need to update some rows before to delete the `default_network` field
 -- UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
@@ -223,6 +236,13 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
+=======
+INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
+
+INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
+
+/*!40000 ALTER TABLE `enterprise_properties` ENABLE KEYS */;
+>>>>>>> ABICLOUDPREMIUM-2454ENTMETADATA
 
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
@@ -838,6 +858,7 @@ END;
 DELIMITER ;
 
 -- ---------------------------------------------- --
+<<<<<<< HEAD
 --                  PROCEDURES                    --
 -- ---------------------------------------------- --
 
@@ -1313,3 +1334,7 @@ CALL `kinton`.`CalculateVdcEnterpriseStats`();
 
   
 
+=======
+--                   TRIGGERS                     --
+-- ---------------------------------------------- --
+>>>>>>> ABICLOUDPREMIUM-2454ENTMETADATA
