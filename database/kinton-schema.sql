@@ -290,6 +290,50 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
 --
+-- Definition of table `kinton`.`enterprise_properties`
+--
+
+DROP TABLE IF EXISTS `kinton`.`enterprise_properties`;
+CREATE TABLE  `kinton`.`enterprise_properties` (
+  `idProperties` int(11) unsigned NOT NULL auto_increment,
+  `enterprise` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`idProperties`),
+  CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `kinton`.`enterprise_properties`
+--
+
+/*!40000 ALTER TABLE `enterprise_properties` DISABLE KEYS */;
+LOCK TABLES `enterprise_properties` WRITE;
+INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `enterprise_properties` ENABLE KEYS */;
+
+--
+-- Definition of table `kinton`.`enterprise_properties_map`
+--
+
+DROP TABLE IF EXISTS `kinton`.`enterprise_properties_map`;
+CREATE TABLE  `kinton`.`enterprise_properties_map` (
+ `enterprise_properties` int(11) unsigned NOT NULL,
+  `map_key` varchar(30) NOT NULL,
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `kinton`.`enterprise_properties_map`
+--
+
+/*!40000 ALTER TABLE `enterprise_properties_map` DISABLE KEYS */;
+LOCK TABLES `enterprise_properties_map` WRITE;
+INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `enterprise_properties_map` ENABLE KEYS */;
+
+--
 -- Definition of table `kinton`.`hypervisor`
 --
 

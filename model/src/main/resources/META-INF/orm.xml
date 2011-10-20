@@ -3,6 +3,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd ">
     <!-- enterprise -->
     <orm:entity class="com.abiquo.server.core.enterprise.Enterprise"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.EnterpriseProperties"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Privilege"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Role"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.RoleLdap"></orm:entity>
