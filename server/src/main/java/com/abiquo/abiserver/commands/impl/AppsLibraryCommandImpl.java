@@ -751,6 +751,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                     oldVimage.setIdEnterprise(vimage.getIdEnterprise());
                     oldVimage.setShared(vimage.getShared());
                     oldVimage.setCostCode(vimage.getCostCode());
+                    oldVimage.setChefEnabled(vimage.isChefEnabled());
                     // oldVimage.setDeleted(deleted);
                     // XXX oldVimage.setMaster(master);
 
@@ -850,7 +851,10 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             viOvf = codifyBundleImportedOVFid(vimage.getPathName());
         }
 
-        final Integer idEnterprise = vimage.getIdEnterprise();
+        final Integer idEnterprise =
+            (vimage.getMaster() != null) ? vimage.getMaster().getIdEnterprise() : vimage
+                .getIdEnterprise();
+
         final Integer idDatacenter = vimage.getRepository().getDatacenter().getIdDataCenter();
 
         // TODO is a bundle, also delete its conversions

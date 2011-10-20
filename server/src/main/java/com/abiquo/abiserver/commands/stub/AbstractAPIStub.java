@@ -1453,4 +1453,17 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}/fsm", params,
             queryParams);
     }
+    
+    protected String createRunlistLink(final Integer vdcId, final Integer vappId,
+        final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdc", vdcId.toString());
+        params.put("vapp", vappId.toString());
+        params.put("vm", virtualMachineId.toString());
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdc}/virtualappliances/{vapp}/virtualmachines/{vm}/config/runlist",
+            params);
+    }
 }

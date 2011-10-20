@@ -28,6 +28,8 @@
     creationComplete="onCreationComplete()"
     implements="net.undf.abicloud.view.main.IBodyComponentChildren"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    hide="onHide()"
+    show="onShow()"
     xmlns:components="net.undf.abicloud.view.infrastructure.components.*"
     xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
     xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
@@ -78,6 +80,18 @@
             
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
+            
+            private function onHide():void
+            {
+            	//Stop Background process
+            	stopBackgroundUpdates();
+            }
+            
+            private function onShow():void
+            {
+            	//Start background process
+            	startBackgroundUpdates();
+            }
 
             public function cleanView():void
             {
@@ -304,11 +318,14 @@
             
             private function getVirtualMachine(eventInfra:Event = null):void{
             	
-                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
-                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
-                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                event.callback = setVirtualMachine;
-                dispatchEvent(event);
+                if(infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is PhysicalMachine)
+                {
+	                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+	                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+	                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+	                event.callback = setVirtualMachine;
+	                dispatchEvent(event);
+                }
             }
             
             private function setVirtualMachine(value:ArrayCollection):void{
@@ -580,7 +597,8 @@
              */
             public function checkInfrastructure(event:Event = null):void
             {
-                getRacksByDatacenter();
+                //getRacksByDatacenter();
+                getVirtualMachine();
             }
         ]]>
     </mx:Script>

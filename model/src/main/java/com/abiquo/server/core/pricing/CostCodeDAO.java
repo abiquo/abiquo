@@ -75,14 +75,14 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
     }
 
     public Collection<CostCode> find(final String filter, final String orderBy, final boolean desc,
-        final int offset, final int numResults)
+        final int offset, int numResults)
     {
         Criteria criteria = createCriteria(filter, orderBy, desc);
 
         Long total = count(criteria);
 
         criteria = createCriteria(filter, orderBy, desc);
-
+        numResults = (int) (numResults != 0 ? numResults : total);
         if (numResults != 0)
         {
             criteria.setFirstResult(offset * numResults);

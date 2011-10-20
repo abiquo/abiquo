@@ -130,7 +130,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return description;
     }
 
-    public void setDescription(final String description)
+    public void setDescription(String description)
     {
         this.description = description;
     }
@@ -140,7 +140,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return email;
     }
 
-    public void setEmail(final String email)
+    public void setEmail(String email)
     {
         this.email = email;
     }
@@ -150,7 +150,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return locale;
     }
 
-    public void setLocale(final String locale)
+    public void setLocale(String locale)
     {
         this.locale = locale;
     }
@@ -180,7 +180,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return enterpriseHB;
     }
 
-    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
+    public void setEnterpriseHB(EnterpriseHB enterpriseHB)
     {
         this.enterpriseHB = enterpriseHB;
     }
@@ -190,7 +190,7 @@ public class UserHB implements java.io.Serializable, IPojoHB<User>
         return authType;
     }
 
-    public void setAuthType(final String authType)
+    public void setAuthType(String authType)
     {
         this.authType = authType;
     }

@@ -185,7 +185,9 @@ public enum APIError
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
         "There is a problem with the details of the UCS Rack"), RACK_DEFAULT_TEMPLATE_ERROR(
         "RACK-9",
-        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"),
+        "This UCS Rack has no default Service Profile Template. You must either select one from the list or add a default Service Profile Template"), RACK_CANNOT_REMOVE_VMS(
+        "RACK-10",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -400,7 +402,8 @@ public enum APIError
         "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
         "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
-        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"),
+        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
+        "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -436,7 +439,21 @@ public enum APIError
 
     // PRICING - TIER
     PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
-        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist");
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"),
+    
+    // Chef
+    CHEF_ERROR_GETTING_RECIPES("CHEF-0",
+        "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
+        "CHEF-1", "Could not get the list of available roles for the enterprise"), CHEF_ERROR_CONNECTION(
+        "CHEF-2", "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
+        "The node does not exist in the Chef Server. "
+            + "If the virtual machine is bootstraping, please wait until the process completes."), CHEF_ELEMENT_DOES_NOT_EXIST(
+        "CHEF-4", "The given runlist element does not exist in the Chef Server"), CHEF_CANNOT_UPDATE_NODE(
+        "CHEF-5", "The node could not be updated in the Chef Server. "
+            + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
+        "Could not connect to the Chef server. Please, contact the administrator."),
+
+    ;
 
     /**
      * Internal error code
@@ -487,8 +504,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

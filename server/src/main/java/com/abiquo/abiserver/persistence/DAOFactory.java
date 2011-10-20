@@ -25,6 +25,7 @@
 package com.abiquo.abiserver.persistence;
 
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.persistence.dao.authorization.OneTimeTokenSessionDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DatastoreDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
@@ -163,5 +164,7 @@ public interface DAOFactory
     public abstract UserSessionDAO getUserSessionDAO();
 
     public abstract NetworkAssigmntDAO getNetworkAssigmentDAO();
+
+    public abstract OneTimeTokenSessionDAO getOneTimeTokenSessionDAO();
 
 }

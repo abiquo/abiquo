@@ -198,7 +198,7 @@
                 //Retrieving the App version from the html file
                 AbiCloudModel.getInstance().appVersion = ExternalInterface.call("getAppShowVersion");
                 
-                AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showTokenLoader);
+                AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showRelatedFormAfterAuthenticationFail);
                 
                 //Creating the Main component
                 mainView = new Main();
@@ -286,6 +286,14 @@
             		showLoginform();
             	}
             	
+            }
+            
+            private function showRelatedFormAfterAuthenticationFail(event:Event):void
+            {
+            	if(this._isTokenUsed)
+            	{
+            		showTokenLoader(event);
+            	}
             }
             
             private function showLoginform():void{

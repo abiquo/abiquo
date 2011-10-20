@@ -192,7 +192,16 @@ public enum EventType implements Serializable
     // STORAGE DEVICE
     STORAGE_DEVICE_CREATED(2000, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         2001, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(2002,
-        "STORAGE DEVICE DELETED", "Storage device deleted");
+        "STORAGE DEVICE DELETED", "Storage device deleted"),
+    
+    // CHEF
+    CHEF_RUNLIST_ADD(1510, "CHEF_RUNLIST_ADD", "Add an element to the runlist"), CHEF_RUNLIST_DELETE(
+        1511, "CHEF_RUNLIST_DELETE", "Remove an element from the runlist"), CHEF_NODE_UPDATE(1512,
+        "CHEF_NODE_UPDATE", "Update a Chef node update"), CHEF_RUNLIST_UPDATE(1513,
+        "CHEF_RUNLIST_UPDATE", "Chef runlist update"), CHEF_CONNECTION(1513, "CHEF_SERVER_CONNECT",
+        "Chef Server connect"),
+
+    ;
 
     private final int event;
 

@@ -606,7 +606,7 @@ public class UriTestResolver
      * vappId}/virtualmachines/{vmId}/
      * 
      * @param vdcId identifier of the virtual datacenter
-     * @param vappId identifier of the virtual apliance
+     * @param vappId identifier of the virtual appliance
      * @param vmId identifier of the virtual machine
      * @return URI of the virtual appliance resource into string object
      */

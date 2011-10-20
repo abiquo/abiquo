@@ -208,7 +208,7 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " NetworkConfiguration nc, "
         + " VLANNetwork vn "
         + " join vn.enterprise ent, "
-        + " DatacenterLimits dcl"
+        + " DatacenterLimits dcl "
         // + " WHERE ip.dhcp.id = nc.dhcp.id "
         + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "

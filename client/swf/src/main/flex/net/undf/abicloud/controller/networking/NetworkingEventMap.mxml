@@ -119,12 +119,16 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="createVLAN"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.networkName, event.networkConfiguration, event.defaultNetwork]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id, 
+            event.networkName, 
+            event.networkConfiguration, 
+            event.defaultNetwork]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
                     method="handleCreateVLAN"
-                    arguments="{[resultObject, event.network]}"/>
+                    arguments="{[resultObject, event.network, event.virtualDatacenter, event.defaultNetwork]}"/>
 
                 <!-- Unblock screen -->
                 <InlineInvoker method="ScreenBlocker.unblockScreen"/>

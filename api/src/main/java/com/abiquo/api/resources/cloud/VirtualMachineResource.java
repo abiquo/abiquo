@@ -52,7 +52,6 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
-
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
@@ -64,6 +63,11 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
+
+    // Chef constants to help link builders. Method implementation are premium.
+    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
+
+    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
     @Autowired
     VirtualMachineService vmService;
@@ -129,7 +133,7 @@ public class VirtualMachineResource extends AbstractResource
 
         service.updateVirtualMachineUse(virtualApplianceId, vmachine);
 
-        return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
+        return createTransferObject(vmachine, restBuilder);
     }
 
     // TODO forceEnterpriseLimits = true
@@ -263,5 +267,42 @@ public class VirtualMachineResource extends AbstractResource
         {
             vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
         }
+    }
+
+    public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualMachineDto vmDto = createTransferObject(v, vdcId, vappId, restBuilder);
+        return vmDto;
+    }
+
+    public static VirtualMachineDto createTransferObject(final VirtualMachine v,
+        final IRESTBuilder restBuilder)
+    {
+        VirtualMachineDto dto = new VirtualMachineDto();
+
+        dto.setCpu(v.getCpu());
+        dto.setDescription(v.getDescription());
+        dto.setHd(v.getHdInBytes());
+        dto.setHighDisponibility(v.getHighDisponibility());
+        dto.setId(v.getId());
+        // dto.setIdState(v.getidState)
+        dto.setIdType(v.getIdType());
+
+        dto.setName(v.getName());
+        dto.setPassword(v.getPassword());
+        dto.setRam(v.getRam());
+        dto.setState(v.getState());
+        dto.setVdrpIP(v.getVdrpIP());
+        dto.setVdrpPort(v.getVdrpPort());
+
+        return dto;
+    }
+
+    public static VirtualMachineDto createTransferObject(final VirtualMachine v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder)
+    {
+        return createTransferObject(v, restBuilder);
+
     }
 }
