@@ -327,10 +327,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `kinton`.`enterprise_properties_map`;
 CREATE TABLE  `kinton`.`enterprise_properties_map` (
- `enterprise_properties` int(11) unsigned DEFAULT NULL,
+ `enterprise_properties` int(11) unsigned NOT NULL,
   `map_key` varchar(30) NOT NULL,
-  `value` varchar(50) default NULL,
-  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`)
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

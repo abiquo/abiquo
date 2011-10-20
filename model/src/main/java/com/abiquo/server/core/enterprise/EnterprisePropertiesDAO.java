@@ -1,7 +1,5 @@
 package com.abiquo.server.core.enterprise;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.hibernate.criterion.Criterion;
@@ -26,11 +24,7 @@ public class EnterprisePropertiesDAO extends DefaultDAOBase<Integer, EnterpriseP
 
     public EnterpriseProperties findByEnterprise(final Enterprise enterprise)
     {
-        assert enterprise != null;
-        List<EnterpriseProperties> list = findByCriterions(sameEnterprise(enterprise));
-        assert list.size() != 1;
-
-        return list.get(0);
+        return findUniqueExistingByCriterions(sameEnterprise(enterprise));
     }
 
     private Criterion sameEnterprise(final Enterprise enterprise)

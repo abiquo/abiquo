@@ -115,11 +115,6 @@ public class EnterpriseRep extends DefaultRepBase
         enterpriseDAO.flush();
     }
 
-    public RoleLdap findLdapRoleByType(final String type)
-    {
-        return roleLdapDAO.findByType(type);
-    }
-
     public EnterpriseProperties findPropertiesByEnterprise(final Enterprise enterprise)
     {
         return enterprisePropertiesDAO.findByEnterprise(enterprise);
@@ -128,6 +123,27 @@ public class EnterpriseRep extends DefaultRepBase
     public void updateEnterpriseProperties(final EnterpriseProperties enterpriseProperties)
     {
         enterprisePropertiesDAO.flush();
+    }
+
+    public void removeEnterpriseProperties(final Enterprise enterprise)
+    {
+        EnterpriseProperties ep = findPropertiesByEnterprise(enterprise);
+        removeEnterpriseProperties(ep);
+    }
+
+    public void removeEnterpriseProperties(final EnterpriseProperties ep)
+    {
+        enterprisePropertiesDAO.remove(ep);
+    }
+
+    public void createEnterprisProperties(final Enterprise enterprise)
+    {
+        enterprisePropertiesDAO.persist(new EnterpriseProperties(enterprise));
+    }
+
+    public RoleLdap findLdapRoleByType(final String type)
+    {
+        return roleLdapDAO.findByType(type);
     }
 
     public Enterprise findById(final Integer id)

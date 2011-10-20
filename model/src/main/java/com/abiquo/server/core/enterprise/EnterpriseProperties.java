@@ -33,7 +33,7 @@ public class EnterpriseProperties extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected EnterpriseProperties()
+    public EnterpriseProperties()
     {
         // Just for JPA support
     }

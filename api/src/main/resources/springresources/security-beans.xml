@@ -63,8 +63,9 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualdatacenters" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks/*" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/admin/enterprises/*/properties" method="GET" access="ENTERPRISE_ADMINISTER_ALL" />
-        <security:intercept-url pattern="/admin/enterprises/*/properties" method="PUT" access="ENTERPRISE_ADMINISTER_ALL" />
+        <!-- ENTERPRISE PROPERTIES -->
+        <security:intercept-url pattern="/admin/enterprises/*/properties" method="GET" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
+        <security:intercept-url pattern="/admin/enterprises/*/properties" method="PUT" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
