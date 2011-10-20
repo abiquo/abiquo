@@ -380,6 +380,11 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
+    //
+    HD_NON_EXISTENT_HARD_DISK("HD-1", "The requested hard disk does not exist"), HD_DISK_0_CAN_NOT_BE_DELETED(
+        "HD-2",
+        "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"),
+
     ;
 
     /**

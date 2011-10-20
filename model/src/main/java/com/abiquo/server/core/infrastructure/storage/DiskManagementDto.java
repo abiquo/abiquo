@@ -27,22 +27,34 @@ import javax.xml.bind.annotation.XmlType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "disk")
-@XmlType(propOrder = {"size"})
+@XmlType(propOrder = {"sizeInMb", "readOnly"})
 public class DiskManagementDto extends SingleResourceTransportDto
 {
     public static final String DISK_MEDIA_TYPE = "application/disk+xml";
 
     private static final long serialVersionUID = 1L;
 
-    private long sizeInMB;
+    private Long sizeInMb;
 
-    public long getSizeInMB()
+    private Boolean readOnly;
+
+    public Long getSizeInMb()
     {
-        return sizeInMB;
+        return sizeInMb;
     }
 
-    public void setSizeInMB(final long sizeInMB)
+    public void setSizeInMb(final Long sizeInMb)
     {
-        this.sizeInMB = sizeInMB;
+        this.sizeInMb = sizeInMb;
+    }
+
+    public Boolean getReadOnly()
+    {
+        return readOnly;
+    }
+
+    public void setReadOnly(final Boolean readOnly)
+    {
+        this.readOnly = readOnly;
     }
 }

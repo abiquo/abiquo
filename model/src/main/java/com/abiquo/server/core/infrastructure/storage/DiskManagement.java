@@ -57,21 +57,20 @@ public class DiskManagement extends RasdManagement
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected DiskManagement()
+    public DiskManagement()
     {
         // Just for JPA support
     }
 
     public DiskManagement(final VirtualDatacenter virtualDatacenter,
         final VirtualAppliance virtualAppliance, final VirtualMachine virtualMachine,
-        final Datastore datastore, final Long size)
+        final Long size)
     {
         super(DISCRIMINATOR);
 
         // RasdManagement properties
         Rasd rasd =
             new Rasd(UUID.randomUUID().toString(), "Disk Device", Integer.valueOf(DISCRIMINATOR));
-        rasd.setAddress(datastore.getRootPath() + "/" + datastore.getDirectory());
         rasd.setAllocationUnits(ALLOCATION_UNITS);
         rasd.setLimit(size);
         rasd.setAutomaticAllocation(0);
@@ -81,6 +80,7 @@ public class DiskManagement extends RasdManagement
         setVirtualDatacenter(virtualDatacenter);
         setVirtualAppliance(virtualAppliance);
         setVirtualMachine(virtualMachine);
+        setSizeInMb(size);
 
         // Disk properties
         setDatastore(datastore);
@@ -108,10 +108,44 @@ public class DiskManagement extends RasdManagement
         this.datastore = datastore;
     }
 
+    /**
+     * This attribute is for know if the disk can be deleted or not.
+     */
+    public Boolean getReadOnly()
+    {
+        if (this.getAttachmentOrder() == 0L)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void setReadOnly(final Boolean readOnly)
+    {
+        // do nothing. Readonly should never be set.
+    }
+
+    /**
+     * Size of the disk.
+     */
+    public Long getSizeInMb()
+    {
+        return this.getRasd().getLimit();
+    }
+
+    public void setSizeInMb(final Long sizeInMb)
+    {
+        this.getRasd().setLimit(sizeInMb);
+    }
+
     // ********************************** Others ********************************
     @Override
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
+
 }

@@ -47,7 +47,6 @@ public class StorageDevicesDto extends WrapperDto<StorageDeviceDto>
     @XmlElement(name = "device")
     public List<StorageDeviceDto> getCollection()
     {
-
         return collection;
     }
 

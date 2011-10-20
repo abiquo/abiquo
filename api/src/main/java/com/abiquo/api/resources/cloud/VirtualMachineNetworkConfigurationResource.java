@@ -59,7 +59,7 @@ import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationsDto;
 
 /**
  * <pre>
- * Resource that contains all the methods related to a Virtual Machine configuration. Exposes all
+ * Resource that contains all the methods related to a Virtual Machine Network Configuration. Exposes all
  * the methods inside the URI
  * http://{host}/api/cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappids
  * }/virtualmachines/{vmids}/network
@@ -83,6 +83,9 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
     /** Path to access to 'configurations' section. */
     public static final String CONFIGURATION_PATH = "configurations";
+
+    /** Rel object to access to 'configurations' section. */
+    public static final String CONFIGURATION = "configuration";
 
     /** Param to map the input values related to configuration. */
     public static final String CONFIGURATION_PARAM = "{" + CONFIGURATION_PATH + "}";

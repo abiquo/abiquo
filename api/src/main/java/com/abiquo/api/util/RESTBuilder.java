@@ -59,6 +59,7 @@ import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.resources.cloud.VirtualMachineNetworkConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachineResource;
+import com.abiquo.api.resources.cloud.VirtualMachineStorageConfigurationResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
@@ -87,6 +88,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -612,10 +614,13 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
-            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
         links.add(builder.buildActionLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NICS_PATH, params));
+            VirtualMachineNetworkConfigurationResource.NIC, params));
+        links.add(builder.buildActionLink(VirtualMachineStorageConfigurationResource.class,
+            VirtualMachineStorageConfigurationResource.DISKS_PATH,
+            VirtualMachineStorageConfigurationResource.DISK, params));
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
@@ -934,6 +939,28 @@ public class RESTBuilder implements IRESTBuilder
         final IpPoolManagement ip)
     {
         return null;
+    }
+
+    @Override
+    public List<RESTLink> buildDiskLinks(final DiskManagement disk)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, disk.getVirtualDatacenter()
+            .getId().toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, disk.getVirtualAppliance().getId()
+            .toString());
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
+            .toString());
+        params.put(VirtualMachineStorageConfigurationResource.DISK,
+            String.valueOf(disk.getAttachmentOrder()));
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
+            VirtualMachineStorageConfigurationResource.DISKS_PATH + "/"
+                + VirtualMachineStorageConfigurationResource.DISK_PARAM, REL_EDIT, params));
+
+        return links;
     }
 
 }

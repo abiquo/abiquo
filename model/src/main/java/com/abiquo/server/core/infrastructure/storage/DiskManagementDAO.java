@@ -21,14 +21,20 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 
 @Repository("jpaDiskManagementDAO")
-/* package */class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
+public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
 {
     public DiskManagementDAO()
     {
@@ -38,6 +44,14 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     public DiskManagementDAO(final EntityManager entityManager)
     {
         super(DiskManagement.class, entityManager);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
+    {
+        Criteria crit =
+            createCriteria(Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm));
+        return crit.list();
     }
 
 }

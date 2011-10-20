@@ -50,12 +50,17 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
 {
     @Autowired
     DhcpDAO dhcpDAO;
+
+    @Autowired
+    DiskManagementDAO diskManagementDAO;
 
     @Autowired
     IpPoolManagementDAO ipManagementDAO;
@@ -110,6 +115,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         this.dhcpDAO = new DhcpDAO(em);
         this.vmDao = new VirtualMachineDAO(em);
         this.nodeviDao = new NodeVirtualImageDAO(em);
+        this.diskManagementDAO = new DiskManagementDAO(em);
     }
 
     /**
@@ -258,6 +264,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<IpPoolManagement> findFreeIpsByVlan(final VLANNetwork vlan)
     {
         return ipManagementDAO.findFreeIpsByVlan(vlan);
+    }
+
+    public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
+    {
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm);
     }
 
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
@@ -526,6 +537,15 @@ public class VirtualDatacenterRep extends DefaultRepBase
         dhcpDAO.persist(dhcp);
     }
 
+    public void insertHardDisk(final DiskManagement createdDisk)
+    {
+        if (createdDisk.getRasd() != null)
+        {
+            rasdDAO.persist(createdDisk.getRasd());
+        }
+        diskManagementDAO.persist(createdDisk);
+    }
+
     public void insertIpManagement(final IpPoolManagement ipManagement)
     {
         if (ipManagement.getRasd() != null)
@@ -585,9 +605,24 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.privateVLANinUseByAnyVDC(vlanId);
     }
 
+    public void removeHardDisk(final DiskManagement diskToDelete)
+    {
+        if (diskToDelete.getRasd() != null)
+        {
+            rasdDAO.remove(diskToDelete.getRasd());
+        }
+
+        diskManagementDAO.remove(diskToDelete);
+    }
+
     public void update(final VirtualDatacenter vdc)
     {
         virtualDatacenterDAO.flush();
+    }
+
+    public void updateDisk(final DiskManagement disk)
+    {
+        diskManagementDAO.flush();
     }
 
     public void updateIpManagement(final IpPoolManagement ip)
