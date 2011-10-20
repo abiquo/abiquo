@@ -180,7 +180,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     @Override
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
-        final Integer vlanTag, final NetworkConfiguration configuration, final Enterprise enterprise)
+        final Integer vlanTag, final NetworkConfiguration configuration,
+        final Enterprise enterprise, final boolean unmanaged)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
@@ -194,6 +195,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setSecondaryDNS(configuration.getSecondaryDNS());
         dto.setSufixDNS(configuration.getSufixDNS());
         dto.setTag(vlanTag);
+        dto.setUnmanaged(unmanaged);
 
         if (enterprise != null)
         {

@@ -513,9 +513,13 @@ public class OVFModelFromVirtualAppliance
                 RemoteServiceDAO rmDAO = factory.getRemoteServiceDAO();
                 List<RemoteServiceHB> remo =
                     rmDAO.getRemoteServicesByType(idDataCenter, RemoteServiceType.DHCP_SERVICE);
-                service.setDhcpAddress(remo.get(0).getURI().getHost());
-                service.setDhcpPort(remo.get(0).getURI().getPort());
-                vlan.getConfiguration().setDhcpService(service);
+                if (remo.size() != 0)
+                {
+                    service.setDhcpAddress(remo.get(0).getURI().getHost());
+                    service.setDhcpPort(remo.get(0).getURI().getPort());
+                    vlan.getConfiguration().setDhcpService(service);
+                }
+
             }
 
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
