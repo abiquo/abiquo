@@ -20,6 +20,7 @@
             <column name="idDatastore" />
         </many-to-one>
         <property name="state" type="State" not-null="true" />
+        <property name="subState" type="State" not-null="false"/>
         <property name="uuid" type="string" column="UUID" />
         <property name="name" type="string" />
         <property name="description" type="string">

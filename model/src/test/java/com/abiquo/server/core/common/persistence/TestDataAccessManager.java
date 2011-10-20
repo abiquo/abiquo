@@ -34,10 +34,12 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.OneTimeTokenSession;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
@@ -140,7 +142,7 @@ public class TestDataAccessManager
          */
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
-            VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
+            VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class, VirtualMachine.class,
             AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
             VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
             NetworkConfiguration.class, VirtualDatacenterResources.class, VirtualDatacenter.class,
@@ -153,7 +155,7 @@ public class TestDataAccessManager
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class, CostCodeCurrency.class,
             PricingCostCode.class, PricingTier.class, PricingTemplate.class, CostCode.class,
-            Currency.class);
+            Currency.class, OneTimeTokenSession.class);
 
         // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
         // AppsLibrary.class,

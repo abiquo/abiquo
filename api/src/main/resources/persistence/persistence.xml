@@ -29,6 +29,7 @@
         <class>com.abiquo.server.core.cloud.VirtualImage</class>
         <class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
         <class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
+	<class>com.abiquo.server.core.cloud.chef.RunlistElement</class> 
         <!-- end: cloud infrastructure -->
         <!-- stateful -->
         <class>com.abiquo.server.core.cloud.stateful.DiskStatefulConversion</class>
@@ -43,6 +44,7 @@
         <class>com.abiquo.server.core.enterprise.User</class>
         <class>com.abiquo.server.core.enterprise.DatacenterLimits</class>
         <class>com.abiquo.server.core.enterprise.Session</class>
+	<class>com.abiquo.server.core.enterprise.OneTimeTokenSession</class>
         <!-- end: enterprise -->
         <!-- networking -->
         <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>

@@ -69,6 +69,8 @@ package net.undf.abicloud.vo.virtualimage
         public var shared:int;
         
         public var costCode:int;
+        
+        public var chefEnabled:Boolean;
 
         /* ------------- Constructor ------------- */
         public function VirtualImage()
@@ -92,6 +94,7 @@ package net.undf.abicloud.vo.virtualimage
             diskFileSize = 0;
             shared = 0;
             costCode = 0;
+            chefEnabled = false;
         }
 
     }

@@ -10,6 +10,6 @@
         <appender-ref ref="STDOUT" />
     </logger>
     <root>
-        <level value="OFF" />
+        <level value="INFO" />
     </root>
 </configuration>

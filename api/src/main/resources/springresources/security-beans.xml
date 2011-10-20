@@ -63,6 +63,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/virtualdatacenters" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks/*" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
+        <security:intercept-url pattern="/admin/enterprises/*/action/chefelements" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
@@ -321,6 +322,9 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/pause" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/poweron" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/action/poweroff" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/runlist" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/runlist" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/bootstrap" method="GET" access="ROLE_ONE_TIME" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/price" method="GET" access="ROLE_VAPP_PERFORM_ACTIONS" />
         
         <!--=================================== -->
@@ -414,5 +418,15 @@
         <property name="key" value="abiquo-auth-key" />
         <property name="cookieName" value="auth" />
         <property name="tokenValiditySeconds" value="1800" />
+    </bean>
+    <bean id="oneTimeTokenFilter"
+	class="com.abiquo.api.spring.security.onetimetoken.filter.OneTimeTokenFilter">
+	<security:custom-filter before="BASIC_PROCESSING_FILTER" />
+	<property name="authenticationManager" ref="_authenticationManager" />
+    </bean>
+    <bean id="oneTimeTokenProvider"
+	class="com.abiquo.api.spring.security.onetimetoken.provider.OneTimeTokenAuthenticationProvider">
+	<security:custom-authentication-provider />
+	<property name="oneTimeTokenDetailsService" ref="oneTimeTokenDetailsService" />
     </bean>
 </beans>

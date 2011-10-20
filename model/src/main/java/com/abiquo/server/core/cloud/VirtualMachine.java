@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -30,9 +32,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
@@ -40,6 +45,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -448,6 +454,27 @@ public class VirtualMachine extends DefaultEntityBase
         this.user = user;
     }
 
+    public final static String SUB_STATE_PROPERTY = "subState";
+
+    private final static boolean SUB_STATE_REQUIRED = false;
+
+    private final static String SUB_STATE_COLUMN = "subState";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    private VirtualMachineState subState;
+
+    @Required(value = SUB_STATE_REQUIRED)
+    public VirtualMachineState getSubState()
+    {
+        return this.subState;
+    }
+
+    public void setSubState(final VirtualMachineState subState)
+    {
+        this.subState = subState;
+    }
+
     //
     public final static String STATE_PROPERTY = "state";
 
@@ -498,6 +525,38 @@ public class VirtualMachine extends DefaultEntityBase
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
+
+    public static final String CHEF_RUNLIST_PROPERTY = "runlist";
+
+    static final String CHEF_RUNLIST_ID_COLUMN = "id";
+
+    static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = CHEF_RUNLIST_TABLE, joinColumns = {@JoinColumn(name = CHEF_RUNLIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    @OrderBy(RunlistElement.PRIORITY_PROPERTY + " ASC")
+    private List<RunlistElement> runlist = new ArrayList<RunlistElement>();
+
+    public List<RunlistElement> getRunlist()
+    {
+        if (runlist == null)
+        {
+            runlist = new ArrayList<RunlistElement>();
+        }
+        return runlist;
+    }
+
+    /* package */void addRunlistElement(final RunlistElement element)
+    {
+        this.runlist.add(element);
+    }
+
+    /* package */void removeRunlistElement(final RunlistElement element)
+    {
+        this.runlist.remove(element);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,

@@ -296,6 +296,11 @@ public class EnterpriseResource extends AbstractResource
         dto.setStorageSoft(e.getStorageSoft());
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
+        dto.setChefURL(e.getChefURL());
+        dto.setChefClient(e.getChefClient());
+        dto.setChefValidator(e.getChefValidator());
+        dto.setChefClientCertificate(e.getChefClientCertificate());
+        dto.setChefValidatorCertificate(e.getChefValidatorCertificate());
         dto.setIsReservationRestricted(e.getIsReservationRestricted());
         if (e.getPricingTemplate() != null)
         {

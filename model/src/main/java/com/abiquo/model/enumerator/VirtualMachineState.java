@@ -66,4 +66,18 @@ public enum VirtualMachineState
         }
         return null;
     }
+
+    public boolean isDeployed()
+    {
+        switch (this)
+        {
+            case RUNNING:
+            case PAUSED:
+            case POWERED_OFF:
+            case REBOOTED:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

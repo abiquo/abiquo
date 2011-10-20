@@ -442,7 +442,22 @@ public enum APIError
         "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
-        "PRICING_TIER-3", "This tier is not related to the datacenter indicated");
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
+
+    // Chef
+    CHEF_ERROR_GETTING_RECIPES("CHEF-0",
+        "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
+        "CHEF-1", "Could not get the list of available roles for the enterprise"), CHEF_ERROR_CONNECTION(
+        "CHEF-2", "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
+        "The node does not exist in the Chef Server. "
+            + "If the virtual machine is bootstraping, please wait until the process completes."), CHEF_ELEMENT_DOES_NOT_EXIST(
+        "CHEF-4", "The given runlist element does not exist in the Chef Server"), CHEF_CANNOT_UPDATE_NODE(
+        "CHEF-5", "The node could not be updated in the Chef Server. "
+            + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
+        "Could not connect to the Chef server. Please, contact the administrator."),
+
+    ;
+
     /**
      * Internal error code
      */
