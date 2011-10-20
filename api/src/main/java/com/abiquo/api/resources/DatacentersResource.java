@@ -58,7 +58,7 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 @Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Datacenters")
 public class DatacentersResource extends AbstractResource
 {
-    public static final String DATACENTERS_PATH = "admin/datacenters";
+    public static final String DATACENTERS_PATH = "admin/datacenters/";
 
     // TODO get allowed datacenters on DatacentersResourcePremium
 

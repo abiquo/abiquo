@@ -26,6 +26,15 @@ package net.undf.abicloud.vo.networking
     [Bindable]
     public class VlanNetwork
     {
+        
+        //CONST
+        public static const INTERNAL:String = "INTERNAL";
+        
+        public static const EXTERNAL:String = "EXTERNAL";
+        
+        public static const INTPUBLICERNAL:String = "PUBLIC";
+        
+        
         public var vlanNetworkId:int;
 
         public var networkId:int;
@@ -37,6 +46,8 @@ package net.undf.abicloud.vo.networking
         public var vlanTag:int;
 
         public var configuration:NetworkConfiguration;
+        
+        public var networkType:String;
 
         public function VlanNetwork()
         {

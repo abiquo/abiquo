@@ -186,7 +186,8 @@ public class DatacenterDAO extends DefaultDAOBase<Integer, Datacenter>
             + " and ipm.mac is not null "
             + " and rm.idVM is not null " /* reserved + use */
             + " and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
-            + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId";
+            + " and dc.idDataCenter = :datacenterId and vdc.idEnterprise = :enterpriseId "
+            + " and vn.networktype = 'PUBLIC' ";
 
     private static final String COUNT_VLAN_RESOURCES =
         "select count(*) from vlan_network vn, virtualdatacenter vdc, enterprise_limits_by_datacenter el "

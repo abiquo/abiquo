@@ -89,14 +89,22 @@
             }
             
             private function getNetworksByVirtualDatacenter():void{
+            	_virtualDatacenter.network.networks = new ArrayCollection();
+            	
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
             	dispatchEvent(event);
+            	
+            	//External Vlan Networks
+                event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER);
+                event.virtualDatacenter = this._virtualDatacenter;
+                event.callback = populatePrivateNetworks;
+                dispatchEvent(event);                   
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
-            	_virtualDatacenter.network.networks = networks;
+            	_virtualDatacenter.network.networks.addAll(networks);
             }
 
             private function cleanFilteringOptions():void
@@ -122,7 +130,16 @@
                 listRequest.offset = (ipPaginator.value - 1) * IP_RESULTS_PER_PAGE;
                 listRequest.filterLike = ipFilter.text;
 
-                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+                var event:NetworkingEvent;
+                
+                if(VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.EXTERNAL){
+                    event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_IPs_BY_VLAN);
+                    event.available = true;
+                }else{
+                    event = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+                }
+                
+                event.virtualDatacenter = _virtualDatacenter;
                 event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
                 event.listRequest = listRequest;
                 event.callback = setAvailablePrivateIPAddresses;
@@ -186,7 +203,11 @@
                 dispatchEvent(event);
 
                 close(); */
-                dispatchEvent(new Event("onAssignNicToVirtualMachine"));
+                if(vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                    dispatchEvent(new Event("onAssignExternalNicToVirtualMachine"));
+                }else{
+	                dispatchEvent(new Event("onAssignNicToVirtualMachine"));                	
+                }
             }
 
             public function close():void
