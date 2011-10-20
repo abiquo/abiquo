@@ -439,8 +439,10 @@ public enum APIError
 
     // PRICING - TIER
     PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
-        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist");
-
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
+        "PRICING_TIER-2",
+        "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated");
     /**
      * Internal error code
      */
