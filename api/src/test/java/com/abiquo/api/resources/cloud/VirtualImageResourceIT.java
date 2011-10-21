@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
@@ -28,13 +29,16 @@ import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.CategoryResource;
 import com.abiquo.api.resources.config.IconResource;
@@ -42,13 +46,20 @@ import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.config.Icon;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.Repository;
 
-@Test
 public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 {
+    private static final String SYSADMIN = "sysadmin";
+
     private final static String AM_BASE_URI = "http://localhost:"
         + String.valueOf(getEmbededServerPort()) + "/am";
 
@@ -56,35 +67,160 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
     private Datacenter datacenter;
 
+    private Repository repository;
+
     @BeforeMethod
     public void setUpDatacenterRepository()
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
+        repository = repositoryGenerator.createInstance(datacenter);
+
         RemoteService am =
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, datacenter);
         am.setUri(AM_BASE_URI);
 
-        setup(ent, datacenter, am);
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(repository);
+        entitiesToSetup.add(am);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+    }
+
+    @Test
+    public void testGetVirtualImageRaises409WhenNoDatacenterLimits()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        setup(virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+    }
+
+    @Test
+    public void testGetVirtualImageRaises404WhenInvalidEnterprise()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        setup(virtualImage.getCategory(), virtualImage);
+
+        String uri =
+            resolveVirtualImageURI(ent.getId() + 100, datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
+    }
+
+    @Test
+    public void testGetVirtualImageRaises404WhenInvalidDatacenter()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        setup(virtualImage.getCategory(), virtualImage);
+
+        String uri =
+            resolveVirtualImageURI(ent.getId(), datacenter.getId() + 100, virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
+    }
+
+    @Test
+    public void testGetVirtualImageRaises404WhenInvalidVirtualImage()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, virtualImage.getCategory(), virtualImage);
+
+        String uri =
+            resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId() + 100);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_VIRTUALIMAGE);
     }
 
     @Test
     public void getVirtualImage()
     {
-        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, datacenter);
-        setup(virtualImage.getCategory(), virtualImage.getRepository(), virtualImage);
-        assertNotNull(virtualImage.getId());
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
         assertVirtualImageWithLinks(virtualImage, dto);
     }
 
-    private void assertVirtualImageWithLinks(final VirtualImage vi, final VirtualImageDto dto)
+    @Test
+    public void getVirtualImageWithMaster()
     {
+        VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
+        VirtualImage slave = virtualImageGenerator.createSlaveImage(master);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        setup(limits, slave.getCategory(), master, slave);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), slave.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+        assertVirtualImageWithLinks(slave, dto);
+    }
+
+    @Test
+    public void getVirtualImageWithIcon()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        Icon icon = iconGenerator.createUniqueInstance();
+
+        virtualImage.setIcon(icon);
+        setup(limits, virtualImage.getCategory(), icon, virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+        assertVirtualImageWithLinks(virtualImage, dto);
+    }
+
+    @Test
+    public void getVirtualImageWithoutOVFId()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setOvfid(null);
+        setup(limits, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+        assertVirtualImageWithLinks(virtualImage, dto);
+    }
+
+    // Do not make public to avoid TestNG run it as another test
+    /* package */static void assertVirtualImageWithLinks(final VirtualImage vi,
+        final VirtualImageDto dto)
+    {
+        Integer idEnterprise = vi.getEnterprise().getId();
+        Integer idDatacenter = vi.getRepository().getDatacenter().getId();
+
         // Required fields
         assertNotNull(dto.getId());
         assertNotNull(dto.getName());
@@ -93,7 +229,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(dto.getDiskFileSize());
 
         // Required links
-        String edit = resolveVirtualImageURI(ent.getId(), datacenter.getId(), vi.getId());
+        String edit = resolveVirtualImageURI(idEnterprise, idDatacenter, vi.getId());
         String category = resolveCategoryURI(vi.getCategory().getId());
         assertLinkExist(dto, edit, "edit");
         assertLinkExist(dto, category, CategoryResource.CATEGORY);
@@ -108,14 +244,14 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         if (vi.getMaster() != null)
         {
             String master =
-                resolveVirtualImageURI(vi.getMaster().getEnterprise().getId(), datacenter.getId(),
-                    vi.getMaster().getId());
+                resolveVirtualImageURI(vi.getMaster().getEnterprise().getId(), idDatacenter, vi
+                    .getMaster().getId());
             assertLinkExist(dto, master, "master");
         }
 
         if (vi.getOvfid() != null)
         {
-            String amHref = amOVFPackageInstanceUrl(ent.getId(), vi.getOvfid());
+            String amHref = amOVFPackageInstanceUrl(idEnterprise, vi.getOvfid());
 
             assertLinkExist(dto, vi.getOvfid(), "ovfpackage");
             assertLinkExist(dto, amHref, "ovfpackageinstance");

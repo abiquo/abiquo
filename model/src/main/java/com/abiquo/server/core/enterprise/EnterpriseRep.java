@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -436,20 +435,4 @@ public class EnterpriseRep extends DefaultRepBase
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }
 
-    public VirtualImage findVirtualImageById(final Integer vimageId)
-    {
-        return virtualImageDAO.findById(vimageId);
-    }
-
-    public List<VirtualImage> findVirtualImageByEnterprise(final Integer enterpriseId)
-    {
-        Enterprise enterprise = enterpriseDAO.findById(enterpriseId);
-        return virtualImageDAO.findVirtualMachinesByEnterprise(enterprise);
-    }
-
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(final Enterprise enterprise,
-        final com.abiquo.server.core.infrastructure.Repository repository)
-    {
-        return virtualImageDAO.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
-    }
 }

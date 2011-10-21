@@ -54,26 +54,28 @@ public class VirtualImagesResource extends AbstractResource
     private VirtualImageService service;
 
     @Autowired
-    private InfrastructureService infService;
+    private InfrastructureService infrastructureService;
 
     @GET
     public VirtualImagesDto getVirtualImages(
-        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        final String amUri =
+            infrastructureService.getRemoteService(datacenterId,
+                RemoteServiceType.APPLIANCE_MANAGER).getUri();
+
         VirtualImagesDto reposDto = new VirtualImagesDto();
 
-        final String amUri =
-            infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
-
-        List<VirtualImage> all = service.getVirtualImages(enterpId, dcId);
+        List<VirtualImage> all = service.getVirtualImages(enterpriseId, datacenterId);
 
         if (all != null && !all.isEmpty())
         {
             for (VirtualImage vimage : all)
             {
-                reposDto.add(createTransferObject(vimage, enterpId, dcId, amUri, restBuilder));
+                reposDto.add(createTransferObject(vimage, enterpriseId, datacenterId, amUri,
+                    restBuilder));
             }
         }
 

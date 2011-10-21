@@ -59,23 +59,13 @@ import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.UcsRack;
 
-/*
- *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
- *  FOR THIS REASON IS OVER-COMMENTED AND DOESN'T HAVE JAVADOC! PLEASE DON'T COPY-PASTE ALL OF THIS
- *  COMMENTS BECAUSE IS WILL BE SO UGLY TO MAINTAIN THE CODE IN THE API!
- *
- */
-
-// Annotate it as a @Service and set the default @Transactional method attributes.
 @Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class InfrastructureService extends DefaultApiService
 {
     public static final String CHECK_RESOURCE = "check";
 
-    // Declare the Repo. It only should use ONE repo.
     @Autowired
-    InfrastructureRep repo;
+    protected InfrastructureRep repo;
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
@@ -91,7 +81,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Rack addRack(Rack rack, Integer datacenterId)
+    public Rack addRack(final Rack rack, final Integer datacenterId)
     {
         Datacenter datacenter = this.getDatacenter(datacenterId);
 
@@ -134,9 +124,9 @@ public class InfrastructureService extends DefaultApiService
         return rack;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public List<Machine> addMachines(List<Machine> machinesToCreate, Integer datacenterId,
-        Integer rackId)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public List<Machine> addMachines(final List<Machine> machinesToCreate,
+        final Integer datacenterId, final Integer rackId)
     {
         List<Machine> machinesCreated = new ArrayList<Machine>();
         for (Machine currentMachine : machinesToCreate)
@@ -147,7 +137,7 @@ public class InfrastructureService extends DefaultApiService
         return machinesCreated;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Machine addMachine(final Machine machine, final Integer datacenterId,
         final Integer rackId)
     {
@@ -227,7 +217,8 @@ public class InfrastructureService extends DefaultApiService
     }
 
     // Return a rack.
-    public Rack getRack(final Integer datacenterId, Integer rackId)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Rack getRack(final Integer datacenterId, final Integer rackId)
     {
         // Find the rack by itself and by its datacenter.
         Rack rack = repo.findRackByIds(datacenterId, rackId);
@@ -240,6 +231,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     // GET the list of Racks by Datacenter.
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<Rack> getRacksByDatacenter(final Integer datacenterId)
     {
         // get the datacenter.
@@ -247,6 +239,7 @@ public class InfrastructureService extends DefaultApiService
         return repo.findRacks(datacenter);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId)
     {
         Rack rack = getRack(datacenterId, rackId);
@@ -259,6 +252,7 @@ public class InfrastructureService extends DefaultApiService
         return rack != null && rack.getDatacenter().getId().equals(datacenterId);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public boolean isAssignedTo(final Integer datacenterId, final RemoteServiceType type)
     {
         RemoteService remoteService = null;
@@ -272,6 +266,7 @@ public class InfrastructureService extends DefaultApiService
             && remoteService.getDatacenter().getId().equals(datacenterId);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
         RemoteServiceType type = RemoteServiceType.valueOf(remoteServiceMapping.toUpperCase());
@@ -300,18 +295,21 @@ public class InfrastructureService extends DefaultApiService
         return old;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void removeRack(final Integer datacenterId, final Integer rackId)
     {
         Rack rack = getRack(datacenterId, rackId);
         repo.deleteRack(rack);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<RemoteService> getRemoteServices()
     {
         return repo.findAllRemoteServices();
     }
 
-    public List<RemoteService> getRemoteServicesByDatacenter(Integer datacenterId)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<RemoteService> getRemoteServicesByDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
         if (datacenter == null)
@@ -323,7 +321,7 @@ public class InfrastructureService extends DefaultApiService
         return repo.findRemoteServicesByDatacenter(datacenter);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public RemoteServiceDto addRemoteService(final RemoteServiceDto dto, final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
@@ -366,11 +364,13 @@ public class InfrastructureService extends DefaultApiService
         return responseDto;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public RemoteService getRemoteService(final Integer id)
     {
         return repo.findRemoteServiceById(id);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public RemoteService getRemoteService(final Integer datacenterId, final RemoteServiceType type)
     {
         Datacenter datacenter = repo.findById(datacenterId);
@@ -397,8 +397,8 @@ public class InfrastructureService extends DefaultApiService
         return remoteService;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public RemoteServiceDto modifyRemoteService(Integer id, RemoteServiceDto dto)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public RemoteServiceDto modifyRemoteService(final Integer id, final RemoteServiceDto dto)
         throws URISyntaxException
     {
         RemoteService old = getRemoteService(id);
@@ -427,8 +427,8 @@ public class InfrastructureService extends DefaultApiService
         return responseDto;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void removeRemoteService(Integer id)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void removeRemoteService(final Integer id)
     {
         RemoteService remoteService = getRemoteService(id);
 
@@ -437,7 +437,7 @@ public class InfrastructureService extends DefaultApiService
         repo.deleteRemoteService(remoteService);
     }
 
-    protected void checkRemoteServiceStatusBeforeRemoving(RemoteService remoteService)
+    protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
     {
         if (remoteService.getType() == RemoteServiceType.APPLIANCE_MANAGER)
         {
@@ -447,8 +447,8 @@ public class InfrastructureService extends DefaultApiService
                 flushErrors();
             }
         }
-        if ((remoteService.getType() == RemoteServiceType.DHCP_SERVICE)
-            || (remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR))
+        if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
+            || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
         {
             if (repo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {
@@ -458,7 +458,7 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-    public ErrorsDto checkRemoteServiceStatus(RemoteServiceType type, String url)
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
         ErrorsDto configurationErrors = new ErrorsDto();
         if (type.canBeChecked())
@@ -503,7 +503,7 @@ public class InfrastructureService extends DefaultApiService
     }
 
     // PROTECTED METHODS
-    protected void checkUniqueness(Datacenter datacenter, RemoteServiceDto remoteService)
+    protected void checkUniqueness(final Datacenter datacenter, final RemoteServiceDto remoteService)
     {
         if (remoteService.getType().checkUniqueness())
         {
@@ -532,7 +532,8 @@ public class InfrastructureService extends DefaultApiService
     /**
      * Configure the Datacenter repository based on the ''repositoryLocation'' consulted from AM.
      */
-    protected ErrorsDto createApplianceManager(Datacenter datacenter, RemoteService remoteService)
+    protected ErrorsDto createApplianceManager(final Datacenter datacenter,
+        final RemoteService remoteService)
     {
         int previousStatus = remoteService.getStatus();
 
@@ -585,7 +586,8 @@ public class InfrastructureService extends DefaultApiService
     /*
      * Get the Datacenter and check if it exists.
      */
-    public Datacenter getDatacenter(Integer datacenterId)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Datacenter getDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = repo.findById(datacenterId);
 
@@ -604,7 +606,7 @@ public class InfrastructureService extends DefaultApiService
      * use the same repository uri. Also updates the repository location (if the old isn't being
      * used).
      */
-    protected void checkModifyApplianceManager(RemoteService old, RemoteServiceDto dto)
+    protected void checkModifyApplianceManager(final RemoteService old, final RemoteServiceDto dto)
     {
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(dto.getUri());
@@ -662,12 +664,13 @@ public class InfrastructureService extends DefaultApiService
         return repo.findRepositoryByLocation(location);
     }
 
-//    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-//    public Integer getDatacenterIdByRepository(Repository repository)
-//    {
-//        return repository.getDatacenter().getId();
-//    }
+    // @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    // public Integer getDatacenterIdByRepository(Repository repository)
+    // {
+    // return repository.getDatacenter().getId();
+    // }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Repository getRepository(final Datacenter dc)
     {
         Repository rep = repo.findRepositoryByDatacenter(dc);

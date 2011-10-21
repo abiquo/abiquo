@@ -47,7 +47,6 @@ import com.abiquo.server.core.cloud.VirtualImageDto;
 @Controller
 public class VirtualImageResource extends AbstractResource
 {
-
     public final static String VIRTUAL_IMAGE = "virtualimage";
 
     public final static String VIRTUAL_IMAGE_PARAM = "{" + VIRTUAL_IMAGE + "}";
@@ -56,25 +55,23 @@ public class VirtualImageResource extends AbstractResource
     private VirtualImageService vimageService;
 
     @Autowired
-    private InfrastructureService infService;
+    private InfrastructureService infrastructureService;
 
-    /**
-     * Return the virtual image if exists.
-     */
     @GET
     public VirtualImageDto getVirtualImage(
-        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
-        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer vimageId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
+        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer virtualImageId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO check enterprise can use the datacenter
-        VirtualImage vimage = vimageService.getVirtualImage(vimageId);
+        VirtualImage vimage =
+            vimageService.getVirtualImage(enterpriseId, datacenterId, virtualImageId);
 
         final String amUri =
-            infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
+            infrastructureService.getRemoteService(datacenterId,
+                RemoteServiceType.APPLIANCE_MANAGER).getUri();
 
-        return createTransferObject(vimage, enterpId, dcId, amUri, restBuilder);
+        return createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder);
     }
 
     /**

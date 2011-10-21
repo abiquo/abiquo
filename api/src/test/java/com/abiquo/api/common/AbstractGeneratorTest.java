@@ -35,7 +35,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
-import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
@@ -44,6 +43,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.CategoryGenerator;
+import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
@@ -56,6 +56,7 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.abiquo.server.core.infrastructure.UcsRackGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
@@ -64,7 +65,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -132,6 +133,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
 
     protected IconGenerator iconGenerator = new IconGenerator(seed);
+
+    protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
 
     protected void setup(final Object... entities)
     {

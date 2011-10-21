@@ -72,7 +72,8 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-9", "Missing link to the enterprise"),
+        "ENTERPRISE-9", "Missing link to the enterprise"), ENTERPRISE_NOT_ALLOWED_DATACENTER(
+        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -277,7 +278,9 @@ public enum APIError
         "DATACENTER-REPOSITORY-NOT-CREATED",
         "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VIMAGE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
-        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"),
+        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
+        "VIMAGE-0", "The requested virtual image does not exist"),
+
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
         "Missing query parameter ip"), NC_BAD_CREDENTIALS_TO_RACK("NC-2",
@@ -449,8 +452,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

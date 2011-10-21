@@ -48,7 +48,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 {
-
     protected Enterprise ent;
 
     protected Datacenter datacenter;

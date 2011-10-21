@@ -61,29 +61,34 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     }
 
     @Override
-    public void assertAllPropertiesEqual(final VirtualImage obj1, final VirtualImage obj2)
+    public void assertAllPropertiesEqual(final VirtualImage img1, final VirtualImage img2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualImage.DISKFORMAT_TYPE_PROPERTY,
+        // Properties
+        AssertEx.assertPropertiesEqualSilent(img1, img2, VirtualImage.DISKFORMAT_TYPE_PROPERTY,
             VirtualImage.NAME_PROPERTY, VirtualImage.STATEFUL_PROPERTY,
             VirtualImage.CPU_REQUIRED_PROPERTY, VirtualImage.PATH_NAME_PROPERTY,
             VirtualImage.OVFID_PROPERTY, VirtualImage.RAM_REQUIRED_PROPERTY,
             VirtualImage.HD_REQUIRED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
-            VirtualImage.DESCRIPTION_PROPERTY);
+            VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.SHARED_PROPERTY,
+            VirtualImage.COST_CODE_PROPERTY);
 
-        categoryGenerator.assertAllPropertiesEqual(obj1.getCategory(), obj2.getCategory());
+        // Required relationships
+        enterpriseGenerator.assertAllPropertiesEqual(img1.getEnterprise(), img2.getEnterprise());
+        categoryGenerator.assertAllPropertiesEqual(img1.getCategory(), img2.getCategory());
 
-        if (obj1.getRepository() != null)
+        // Optional relationships
+        if (img1.getRepository() != null)
         {
             repositoryGenerator
-                .assertAllPropertiesEqual(obj1.getRepository(), obj2.getRepository());
+                .assertAllPropertiesEqual(img1.getRepository(), img2.getRepository());
         }
-        if (obj1.getIcon() != null)
+        if (img1.getIcon() != null)
         {
-            iconGenerator.assertAllPropertiesEqual(obj1.getIcon(), obj2.getIcon());
+            iconGenerator.assertAllPropertiesEqual(img1.getIcon(), img2.getIcon());
         }
-        if (obj1.getMaster() != null)
+        if (img1.getMaster() != null)
         {
-            assertAllPropertiesEqual(obj1.getMaster(), obj2.getMaster());
+            assertAllPropertiesEqual(img1.getMaster(), img2.getMaster());
         }
     }
 
@@ -102,18 +107,36 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     public VirtualImage createInstance(final Enterprise enterprise, final Datacenter datacenter)
     {
+        Repository repository = repositoryGenerator.createInstance(datacenter);
+        return createInstance(enterprise, repository);
+    }
+
+    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository)
+    {
+        Category category = categoryGenerator.createUniqueInstance();
+        return createInstance(enterprise, repository, category);
+    }
+
+    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
+        final Category category)
+    {
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
-        Repository repository = repositoryGenerator.createInstance(datacenter);
 
-        return createInstance(enterprise, repository, 0, 0, 0, name);
+        return createInstance(enterprise, repository, 0, 0, 0, name, category);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
+        return createInstance(enterprise, repository, 0, 0, 0, name, category);
+    }
 
+    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
+        final int cpuRequired, final int ramRequired, final long hdRequired, final String name,
+        final Category category)
+    {
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName =
             newString(nextSeed(), VirtualImage.PATH_NAME_LENGTH_MIN,
@@ -131,6 +154,14 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         vimage.setOvfid(ovfid);
 
         return vimage;
+    }
+
+    public VirtualImage createSlaveImage(final VirtualImage master)
+    {
+        VirtualImage slave =
+            createInstance(master.getEnterprise(), master.getRepository(), master.getCategory());
+        slave.setMaster(master);
+        return slave;
     }
 
     public VirtualImage createImageWithConversions(final Enterprise enterprise)

@@ -28,45 +28,49 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterDAO;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
 
 @Service
-@Transactional(readOnly = true)
-public class VirtualImageService
+public class VirtualImageService extends DefaultApiService
 {
+    @Autowired
+    private RepositoryDAO repositoryDao;
 
     @Autowired
-    RepositoryDAO repositoryDao;
+    private InfrastructureService infrastructureService;
 
     @Autowired
-    InfrastructureRep infRepo;
+    private EnterpriseService enterpriseService;
 
     @Autowired
-    EnterpriseRep enterpRep;
+    private VirtualImageDAO virtualImageDAO;
 
+    @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
     {
-        Datacenter datacenter = infRepo.findById(dcId);
+        Datacenter datacenter = infrastructureService.getDatacenter(dcId);
         return repositoryDao.findByDatacenter(datacenter);
     }
 
     /**
      * Get repository for allowed (limits defined) datacenters for the provided enterprise.
      */
+    @Transactional(readOnly = true)
     public List<Repository> getDatacenterRepositories(final Integer enterpriseId)
     {
         List<Repository> repos = new LinkedList<Repository>();
 
-        Enterprise enterprise = enterpRep.findById(enterpriseId);
-        for (DatacenterLimits dclimit : enterpRep.findLimitsByEnterprise(enterprise))
+        for (DatacenterLimits dclimit : enterpriseService.findLimitsByEnterprise(enterpriseId))
         {
             repos.add(getDatacenterRepository(dclimit.getDatacenter().getId()));
         }
@@ -74,17 +78,62 @@ public class VirtualImageService
         return repos;
     }
 
-    public VirtualImage getVirtualImage(final Integer vimageId)
+    @Transactional(readOnly = true)
+    public VirtualImage getVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualImageId)
     {
-        return enterpRep.findVirtualImageById(vimageId);
+        // Validate the existance of the datacenter and the enterprise
+        enterpriseService.getEnterprise(enterpriseId);
+        infrastructureService.getDatacenter(datacenterId);
+
+        // Check that the enterprise can use the datacenter
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        VirtualImage virtualImage = virtualImageDAO.findById(virtualImageId);
+        if (virtualImage == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALIMAGE);
+            flushErrors();
+        }
+
+        return virtualImage;
     }
 
-    public List<VirtualImage> getVirtualImages(final Integer enterpriseId, final Integer dcId)
+    @Transactional(readOnly = true)
+    public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
+        final Integer datacenterId)
     {
-        Enterprise enterprise = enterpRep.findById(enterpriseId);
-        Datacenter datacenter = infRepo.findById(dcId);
-        Repository repository = infRepo.findRepositoryByDatacenter(datacenter);
+        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
 
-        return enterpRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+        Repository repository = infrastructureService.getRepository(datacenter);
+
+        return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findVirtualImageByEnterprise(final Enterprise enterprise)
+    {
+        return virtualImageDAO.findVirtualMachinesByEnterprise(enterprise);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
+        final Enterprise enterprise, final Repository repository)
+    {
+        return virtualImageDAO.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        DatacenterLimits limits =
+            enterpriseService.findLimitsByEnterpriseAndDatacenter(enterpriseId, datacenterId);
+        if (limits == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
     }
 }

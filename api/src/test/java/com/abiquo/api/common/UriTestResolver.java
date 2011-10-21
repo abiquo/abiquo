@@ -713,10 +713,24 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    /**
-     * Creates something like
-     * http://example.com/admin/enterprises/{enterpriseId}/datacenterrepositories/{datacenterId}/
-     */
+    public static String resolveVirtualImagesURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        return resolveURI(template, values);
+    }
+
     public static String resolveVirtualImageURI(final Integer enterpriseId,
         final Integer datacenterId, final Integer virtualImageId)
     {
