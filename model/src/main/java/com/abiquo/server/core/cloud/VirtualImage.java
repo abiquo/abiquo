@@ -162,7 +162,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
-    private void setStateful(final Integer stateful)
+    public void setStateful(final Integer stateful)
     {
         this.stateful = stateful;
     }
@@ -397,7 +397,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.idMaster;
     }
 
-    private void setIdMaster(final Integer idMaster)
+    public void setIdMaster(final Integer idMaster)
     {
         this.idMaster = idMaster;
     }
@@ -492,7 +492,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.description;
     }
 
-    private void setDescription(final String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -514,7 +514,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.idIcon;
     }
 
-    private void setIdIcon(final Integer idIcon)
+    public void setIdIcon(final Integer idIcon)
     {
         this.idIcon = idIcon;
     }

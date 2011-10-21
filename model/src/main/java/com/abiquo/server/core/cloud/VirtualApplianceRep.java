@@ -57,6 +57,9 @@ public class VirtualApplianceRep extends DefaultRepBase
     @Autowired
     private VirtualImageConversionDAO virtualImageConversionDao;
 
+    @Autowired
+    private VirtualImageDAO virtualImageDao;
+
     public VirtualApplianceRep()
     {
 
@@ -163,5 +166,25 @@ public class VirtualApplianceRep extends DefaultRepBase
         final VirtualApplianceStatefulConversion virtualApplianceStatefulConversion)
     {
         vAppStatefulConversionDao.remove(virtualApplianceStatefulConversion);
+    }
+
+    public void updateNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDao.flush();
+    }
+
+    public void deleteVirtualAppliance(final VirtualAppliance virtualAppliance)
+    {
+        virtualApplianceDao.remove(virtualAppliance);
+    }
+
+    public void updateVirtualImage(final VirtualImage virtualImage)
+    {
+        virtualImageDao.flush();
+    }
+
+    public void deleteVirtualImage(final VirtualImage virtualImage)
+    {
+        virtualImageDao.remove(virtualImage);
     }
 }
