@@ -31,6 +31,8 @@ import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -46,6 +48,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     private IconGenerator iconGenerator;
 
+    private DatacenterGenerator datacenterGenerator;
+
     public VirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
@@ -53,6 +57,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         repositoryGenerator = new RepositoryGenerator(seed);
         categoryGenerator = new CategoryGenerator(seed);
         iconGenerator = new IconGenerator(seed);
+        datacenterGenerator = new DatacenterGenerator(seed);
     }
 
     @Override
@@ -91,9 +96,15 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
 
     public VirtualImage createInstance(final Enterprise enterprise)
     {
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        return createInstance(enterprise, datacenter);
+    }
+
+    public VirtualImage createInstance(final Enterprise enterprise, final Datacenter datacenter)
+    {
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
-        Repository repository = repositoryGenerator.createUniqueInstance();
+        Repository repository = repositoryGenerator.createInstance(datacenter);
 
         return createInstance(enterprise, repository, 0, 0, 0, name);
     }

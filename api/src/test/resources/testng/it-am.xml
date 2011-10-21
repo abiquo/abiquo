@@ -6,7 +6,7 @@
 	</listeners>
 	<test name="AppsLibrary integration tests">
 		<classes>
-			<class name="com.abiquo.api.resources.appslibrary.VirtualImageResourceIT"></class>
+			<class name="com.abiquo.api.resources.appslibrary.ApplianceManagerResourceIT"></class>
 		</classes>
 	</test>
 </suite>

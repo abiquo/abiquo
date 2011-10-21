@@ -75,6 +75,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDto;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.IconDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -701,7 +702,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId, final VirtualImage master, final Category category)
+        final Integer vimageId, final VirtualImage master, final Category category, final Icon icon)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
@@ -726,6 +727,12 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
         links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
+
+        if (icon != null)
+        {
+            params.put(IconResource.ICON, category.getId().toString());
+            links.add(builder.buildRestLink(IconResource.class, IconResource.ICON, params));
+        }
 
         // TODO: How to build a link for an imported one??
 

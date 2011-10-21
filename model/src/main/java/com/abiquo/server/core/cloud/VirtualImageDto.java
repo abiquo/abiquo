@@ -22,16 +22,40 @@
 package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.config.IconDto;
 
 @XmlRootElement(name = "virtualImage")
+@XmlType(propOrder = {"id", "name", "description", "pathName", "diskFormatType", "diskFileSize",
+"cpuRequired", "ramRequired", "hdRequired", "shared", "stateful", "costCode"})
 public class VirtualImageDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
 
     private Integer id;
+
+    private String diskFormatType;
+
+    private String name;
+
+    private boolean stateful;
+
+    private int cpuRequired;
+
+    private String pathName;
+
+    private int ramRequired;
+
+    private long hdRequired;
+
+    private long diskFileSize;
+
+    private String description;
+
+    private boolean shared;
+
+    private String costCode;
 
     public Integer getId()
     {
@@ -43,19 +67,15 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private int idFormat;
-
-    public int getIdFormat()
+    public String getDiskFormatType()
     {
-        return idFormat;
+        return diskFormatType;
     }
 
-    public void setIdFormat(final int idFormat)
+    public void setDiskFormatType(final String diskFormatType)
     {
-        this.idFormat = idFormat;
+        this.diskFormatType = diskFormatType;
     }
-
-    private String name;
 
     public String getName()
     {
@@ -67,31 +87,15 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    private int stateful;
-
-    public int getStateful()
+    public boolean isStateful()
     {
         return stateful;
     }
 
-    public void setStateful(final int stateful)
+    public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
-
-    private int treaty;
-
-    public int getTreaty()
-    {
-        return treaty;
-    }
-
-    public void setTreaty(final int treaty)
-    {
-        this.treaty = treaty;
-    }
-
-    private int cpuRequired;
 
     public int getCpuRequired()
     {
@@ -103,8 +107,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.cpuRequired = cpuRequired;
     }
 
-    private String pathName;
-
     public String getPathName()
     {
         return pathName;
@@ -114,20 +116,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
     {
         this.pathName = pathName;
     }
-
-    private String ovfid;
-
-    public String getOvfid()
-    {
-        return ovfid;
-    }
-
-    public void setOvfid(final String ovfid)
-    {
-        this.ovfid = ovfid;
-    }
-
-    private int ramRequired;
 
     public int getRamRequired()
     {
@@ -139,8 +127,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.ramRequired = ramRequired;
     }
 
-    private long hdRequired;
-
     public long getHdRequired()
     {
         return hdRequired;
@@ -150,32 +136,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
     {
         this.hdRequired = hdRequired;
     }
-
-    private int deleted;
-
-    public int getDeleted()
-    {
-        return deleted;
-    }
-
-    public void setDeleted(final int deleted)
-    {
-        this.deleted = deleted;
-    }
-
-    private int idCategory;
-
-    public int getIdCategory()
-    {
-        return idCategory;
-    }
-
-    public void setIdCategory(final int idCategory)
-    {
-        this.idCategory = idCategory;
-    }
-
-    private long diskFileSize;
 
     public long getDiskFileSize()
     {
@@ -187,8 +147,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.diskFileSize = diskFileSize;
     }
 
-    private String description;
-
     public String getDescription()
     {
         return description;
@@ -199,28 +157,24 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.description = description;
     }
 
-    private IconDto icon;
-
-    public IconDto getIcon()
+    public boolean isShared()
     {
-        return icon;
+        return shared;
     }
 
-    public void setIcon(final IconDto icon)
+    public void setShared(final boolean shared)
     {
-        this.icon = icon;
+        this.shared = shared;
     }
 
-    private int idRepository;
-
-    public int getIdRepository()
+    public String getCostCode()
     {
-        return idRepository;
+        return costCode;
     }
 
-    public void setIdRepository(final int idRepository)
+    public void setCostCode(final String costCode)
     {
-        this.idRepository = idRepository;
+        this.costCode = costCode;
     }
 
 }
