@@ -25,6 +25,7 @@ import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;
 
+import com.abiquo.api.spring.security.AbiquoUserDetailsService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.model.enumerator.Privileges;
 
@@ -56,11 +57,11 @@ public class MockAuthentication implements Authentication
         Privileges[] authorityStrings = SecurityService.getAllPrivileges();
         GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
 
-        int i = 0;
-        for (Privileges authString : authorityStrings)
+        for (int i = 0; i < authorityStrings.length; i++)
         {
-            authorities[i] = new GrantedAuthorityImpl(authString.name());
-            i++;
+            authorities[i] =
+                new GrantedAuthorityImpl(AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
+                    + authorityStrings[i].name());
         }
 
         return authorities;
