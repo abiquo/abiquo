@@ -730,7 +730,7 @@ public class RESTBuilder implements IRESTBuilder
 
         if (icon != null)
         {
-            params.put(IconResource.ICON, category.getId().toString());
+            params.put(IconResource.ICON, icon.getId().toString());
             links.add(builder.buildRestLink(IconResource.class, IconResource.ICON, params));
         }
 
