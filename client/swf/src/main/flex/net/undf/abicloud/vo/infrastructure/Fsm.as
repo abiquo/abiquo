@@ -28,7 +28,9 @@ package net.undf.abicloud.vo.infrastructure
     {
 
         public static const FINISH:String = "nop";
-        
+
+        public static const NONE:String = "none";
+                
         //fsm name
         public var dn:String;
 

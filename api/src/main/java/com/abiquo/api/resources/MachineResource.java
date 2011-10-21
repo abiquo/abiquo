@@ -85,7 +85,15 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_LS = "logicServer";
 
+    public static final String MACHINE_ACTION_LED_OFF = "action/ledOff";
+
+    public static final String MACHINE_ACTION_LED_OFF_REL = "ledOff";
+
     public static final String MACHINE_ACTION_LS__REL = "logicServer";
+
+    public static final String MACHINE_LOCATOR_LED = "led";
+
+    public static final String MACHINE_LOCATOR_LED_REL = "led";
 
     @Autowired
     MachineService service;

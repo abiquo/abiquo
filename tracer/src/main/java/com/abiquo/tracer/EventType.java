@@ -155,7 +155,18 @@ public enum EventType implements Serializable
     //ALLOCATION RULES
     ALLOCATION_RULES_ADDED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"),
     ALLOCATION_RULES_REMOVED(1501, "ALLOCATION_RULE_REMOVED", "Allocation rule removed"),
-    ;
+
+    // UCS
+    UCS_COMMUNICATION(
+        1700,
+        "UCS COMMUNICATION PROBLEM",
+        "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
+        1701, "UCS BLADE ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
+        1702, "Blade disassociation with a Service Profile in UCS",
+        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
+        "SERVICE PROFILE DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1705,
+        "UCS BLADE POWER OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        "UCS BLADE POWER ON", "Blade powered on in UCS");
 
     private final int event;
 
