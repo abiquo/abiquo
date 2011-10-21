@@ -266,6 +266,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
+    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
+        final Integer diskOrder)
+    {
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskOrder);
+    }
+
     public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
     {
         return diskManagementDAO.findHardDisksByVirtualMachine(vm);

@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -36,6 +37,10 @@ import com.abiquo.server.core.infrastructure.management.RasdManagement;
 @Repository("jpaDiskManagementDAO")
 public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
 {
+    public static final String GET_DISK_INTO_VIRTUALMACHINE =
+        " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
+            + " AND disk.rasd.generation = :diskOrder ";
+
     public DiskManagementDAO()
     {
         super(DiskManagement.class);
@@ -52,6 +57,23 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
         Criteria crit =
             createCriteria(Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm));
         return crit.list();
+    }
+
+    /**
+     * Returns the unique object from a virtual machine.
+     * 
+     * @param vm virtual machine that has the disk
+     * @param diskOrder sequence order inside the virtual machine of the disk
+     * @return the found {@link DiskManagement}
+     */
+    public DiskManagement findHardDisksByVirtualMachine(final VirtualMachine vm,
+        final Integer diskOrder)
+    {
+        Query finalQuery = getSession().createQuery(GET_DISK_INTO_VIRTUALMACHINE);
+        finalQuery.setParameter("idVm", vm.getId());
+        finalQuery.setParameter("diskOrder", Long.valueOf(diskOrder));
+
+        return (DiskManagement) finalQuery.uniqueResult();
     }
 
 }

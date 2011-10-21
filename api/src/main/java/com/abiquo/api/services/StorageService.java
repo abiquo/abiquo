@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
  * 
  * @author jdevesa
  */
+@Service
 public class StorageService extends DefaultApiService
 {
     @Autowired
@@ -135,15 +137,7 @@ public class StorageService extends DefaultApiService
         }
         else
         {
-            List<DiskManagement> listOfHardDisks = vdcRepo.findHardDisksByVirtualMachine(vm);
-            DiskManagement targetDisk = null;
-            for (DiskManagement currentDisk : listOfHardDisks)
-            {
-                if (currentDisk.getAttachmentOrder() == diskOrder)
-                {
-                    return currentDisk;
-                }
-            }
+            DiskManagement targetDisk = vdcRepo.findHardDiskByVirtualMachine(vm, diskOrder);
             if (targetDisk == null)
             {
                 addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);

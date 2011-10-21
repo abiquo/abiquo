@@ -28,8 +28,6 @@ import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.infrastructure.Datastore;
-import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -42,14 +40,11 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
 
     private NodeVirtualImageGenerator nviGenerator;
 
-    private DatastoreGenerator dsGenerator;
-
     public DiskManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vappGenerator = new VirtualApplianceGenerator(seed);
-        dsGenerator = new DatastoreGenerator(seed);
         nviGenerator = new NodeVirtualImageGenerator(seed);
     }
 
@@ -70,7 +65,6 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
         return new DiskManagement(vapp.getVirtualDatacenter(),
             vapp,
             nvi.getVirtualMachine(),
-            dsGenerator.createUniqueInstance(),
             10000L);
 
     }
@@ -80,11 +74,6 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
-        Datastore ds = entity.getDatastore();
-        dsGenerator.addAuxiliaryEntitiesToPersist(ds, entitiesToPersist);
-        entitiesToPersist.add(ds);
-
         rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
