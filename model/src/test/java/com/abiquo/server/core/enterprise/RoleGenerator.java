@@ -21,7 +21,6 @@
 
 package com.abiquo.server.core.enterprise;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -35,28 +34,6 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
     PrivilegeGenerator privilegeGenerator;
 
     EnterpriseGenerator enterpriseGenerator;
-
-    public static enum Permissions
-    {
-
-        ENTERPRISE_ENUMERATE, ENTERPRISE_ADMINISTER_ALL, ENTERPRISE_RESOURCE_SUMMARY_ENT, PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_RESOURCE_USAGE, PHYS_DC_MANAGE, PHYS_DC_RETRIEVE_DETAILS,
-
-        PHYS_DC_ALLOW_MODIFY_SERVERS, PHYS_DC_ALLOW_MODIFY_NETWORK, PHYS_DC_ALLOW_MODIFY_STORAGE, PHYS_DC_ALLOW_MODIFY_ALLOCATION, VDC_ENUMERATE, VDC_MANAGE, VDC_MANAGE_VAPP,
-
-        VDC_MANAGE_NETWORK, VDC_MANAGE_STORAGE, VAPP_CUSTOMISE_SETTINGS, VAPP_DEPLOY_UNDEPLOY, VAPP_ASSIGN_NETWORK, VAPP_ASSIGN_VOLUME, VAPP_PERFORM_ACTIONS, VAPP_CREATE_STATEFUL,
-
-        VAPP_CREATE_INSTANCE, APPLIB_VIEW, APPLIB_ALLOW_MODIFY, APPLIB_UPLOAD_IMAGE, APPLIB_MANAGE_REPOSITORY, APPLIB_DOWNLOAD_IMAGE, APPLIB_MANAGE_CATEGORIES, USERS_VIEW,
-
-        USERS_MANAGE_ENTERPRISE, USERS_MANAGE_USERS, USERS_MANAGE_OTHER_ENTERPRISES, USERS_PROHIBIT_VDC_RESTRICTION, USERS_VIEW_PRIVILEGES, USERS_MANAGE_ROLES, USERS_MANAGE_ROLES_OTHER_ENTERPRISES,
-
-        USERS_MANAGE_SYSTEM_ROLES, USERS_MANAGE_LDAP_GROUP, USERS_ENUMERATE_CONNECTED, USERS_DEFINE_AS_MANAGER, SYSCONFIG_VIEW, SYSCONFIG_ALLOW_MODIFY, EVENTLOG_VIEW_ENTERPRISE, EVENTLOG_VIEW_ALL,
-
-        APPLIB_VM_COST_CODE, USERS_MANAGE_ENTERPRISE_BRANDING, SYSCONFIG_SHOW_REPORTS, PRICING_VIEW, PRICING_MANAGE
-    }
-
-    public static final String PRICING_VIEW = "PRICING_VIEW";
-
-    public static final String PRICING_MANAGE = "PRICING_MANAGE";
 
     public RoleGenerator(final SeedGenerator seed)
     {
@@ -98,7 +75,6 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public Role createInstanceSysAdmin(final String name)
     {
-
         Privilege p1 = new Privilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
         Privilege p3 = new Privilege(Privileges.USERS_VIEW);
         Privilege p4 = new Privilege(Privileges.USERS_VIEW_PRIVILEGES);
@@ -213,78 +189,5 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
             entitiesToPersist.add(privilege);
         }
 
-    }
-
-    private Privilege[] createPrivileges(final List<String> strings)
-    {
-        Privilege[] created = new Privilege[strings.size()];
-        for (int i = 0; i < strings.size(); i++)
-        {
-            created[i] = new Privilege(strings.get(i));
-        }
-        return created;
-    }
-
-    public static List<String> getAllPrivileges()
-    {
-        return getAllPrivileges("");
-    }
-
-    public static List<String> getAllPrivileges(final String prefix)
-    {
-        List<String> privileges = new ArrayList<String>();
-
-        privileges.add(prefix + Permissions.ENTERPRISE_ENUMERATE);
-        privileges.add(prefix + Permissions.ENTERPRISE_ADMINISTER_ALL);
-        privileges.add(prefix + Permissions.ENTERPRISE_RESOURCE_SUMMARY_ENT);
-        privileges.add(prefix + Permissions.PHYS_DC_ENUMERATE);
-        privileges.add(prefix + Permissions.PHYS_DC_RETRIEVE_RESOURCE_USAGE);
-        privileges.add(prefix + Permissions.PHYS_DC_MANAGE);
-        privileges.add(prefix + Permissions.PHYS_DC_RETRIEVE_DETAILS);
-        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_SERVERS);
-        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_NETWORK);
-        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_STORAGE);
-        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_ALLOCATION);
-        privileges.add(prefix + Permissions.VDC_ENUMERATE);
-        privileges.add(prefix + Permissions.VDC_MANAGE);
-        privileges.add(prefix + Permissions.VDC_MANAGE_VAPP);
-        privileges.add(prefix + Permissions.VDC_MANAGE_NETWORK);
-        privileges.add(prefix + Permissions.VDC_MANAGE_STORAGE);
-        privileges.add(prefix + Permissions.VAPP_CUSTOMISE_SETTINGS);
-        privileges.add(prefix + Permissions.VAPP_DEPLOY_UNDEPLOY);
-        privileges.add(prefix + Permissions.VAPP_ASSIGN_NETWORK);
-        privileges.add(prefix + Permissions.VAPP_ASSIGN_VOLUME);
-        privileges.add(prefix + Permissions.VAPP_PERFORM_ACTIONS);
-        privileges.add(prefix + Permissions.VAPP_CREATE_STATEFUL);
-        privileges.add(prefix + Permissions.VAPP_CREATE_INSTANCE);
-        privileges.add(prefix + Permissions.APPLIB_VIEW);
-        privileges.add(prefix + Permissions.APPLIB_ALLOW_MODIFY);
-        privileges.add(prefix + Permissions.APPLIB_UPLOAD_IMAGE);
-        privileges.add(prefix + Permissions.APPLIB_MANAGE_REPOSITORY);
-        privileges.add(prefix + Permissions.APPLIB_DOWNLOAD_IMAGE);
-        privileges.add(prefix + Permissions.APPLIB_MANAGE_CATEGORIES);
-        privileges.add(prefix + Permissions.USERS_VIEW);
-        privileges.add(prefix + Permissions.USERS_MANAGE_ENTERPRISE);
-        privileges.add(prefix + Permissions.USERS_MANAGE_USERS);
-        privileges.add(prefix + Permissions.USERS_MANAGE_OTHER_ENTERPRISES);
-        privileges.add(prefix + Permissions.USERS_PROHIBIT_VDC_RESTRICTION);
-        privileges.add(prefix + Permissions.USERS_VIEW_PRIVILEGES);
-        privileges.add(prefix + Permissions.USERS_MANAGE_ROLES);
-        privileges.add(prefix + Permissions.USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
-        privileges.add(prefix + Permissions.USERS_MANAGE_SYSTEM_ROLES);
-        privileges.add(prefix + Permissions.USERS_MANAGE_LDAP_GROUP);
-        privileges.add(prefix + Permissions.USERS_ENUMERATE_CONNECTED);
-        privileges.add(prefix + Permissions.USERS_DEFINE_AS_MANAGER);
-        privileges.add(prefix + Permissions.SYSCONFIG_VIEW);
-        privileges.add(prefix + Permissions.SYSCONFIG_ALLOW_MODIFY);
-        privileges.add(prefix + Permissions.EVENTLOG_VIEW_ENTERPRISE);
-        privileges.add(prefix + Permissions.EVENTLOG_VIEW_ALL);
-        privileges.add(prefix + Permissions.APPLIB_VM_COST_CODE);
-        privileges.add(prefix + Permissions.USERS_MANAGE_ENTERPRISE_BRANDING);
-        privileges.add(prefix + Permissions.SYSCONFIG_SHOW_REPORTS);
-        privileges.add(prefix + Permissions.PRICING_VIEW);
-        privileges.add(prefix + Permissions.PRICING_MANAGE);
-
-        return privileges;
     }
 }

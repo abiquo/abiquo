@@ -92,7 +92,7 @@ public class RoleResource extends AbstractResource
     {
         User currentUser = userService.getCurrentUser();
         Role role = null;
-      
+
         if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
             && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
@@ -111,8 +111,8 @@ public class RoleResource extends AbstractResource
         else
         {
             role = service.getRole(roleId);
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return createTransferObject(role, restBuilder);
@@ -143,8 +143,8 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return addPrivilegeLinks(restBuilder, role.getPrivileges());
@@ -175,8 +175,8 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
-                .getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
+                role.getPrivileges());
         }
 
         return PrivilegesResource.createAdminTransferObjects(role.getPrivileges(), restBuilder);
