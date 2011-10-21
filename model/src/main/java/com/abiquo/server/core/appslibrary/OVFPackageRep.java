@@ -29,10 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
-import com.abiquo.server.core.config.Category;
-import com.abiquo.server.core.config.CategoryDAO;
-import com.abiquo.server.core.config.Icon;
-import com.abiquo.server.core.config.IconDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Repository

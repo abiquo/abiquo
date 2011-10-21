@@ -25,10 +25,6 @@ import java.util.List;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.config.Category;
-import com.abiquo.server.core.config.CategoryGenerator;
-import com.abiquo.server.core.config.Icon;
-import com.abiquo.server.core.config.IconGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 

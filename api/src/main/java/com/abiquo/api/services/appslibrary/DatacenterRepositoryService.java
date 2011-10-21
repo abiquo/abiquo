@@ -45,7 +45,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;

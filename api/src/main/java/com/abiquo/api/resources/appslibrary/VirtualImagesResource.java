@@ -40,8 +40,8 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImagesDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImagesDto;
 
 @Parent(DatacenterRepositoryResource.class)
 @Path(VirtualImagesResource.VIRTUAL_IMAGES_PATH)

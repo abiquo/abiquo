@@ -34,10 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
-import com.abiquo.server.core.config.Category;
-import com.abiquo.server.core.config.CategoryDAO;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -56,7 +55,7 @@ public class OVFPackageInstanceToVirtualImage
         .getLogger(OVFPackageInstanceToVirtualImage.class);
 
     @Autowired
-    private VirtualImageDAO vimageDao;
+    private AppsLibraryRep appslibraryRep;
 
     @Autowired
     private EnterpriseRep entRepo;
@@ -77,7 +76,7 @@ public class OVFPackageInstanceToVirtualImage
                 try
                 {
                     VirtualImage vi = imageFromDisk(disk, repo);
-                    vimageDao.persist(vi);
+                    appslibraryRep.insertVirtualImage(vi);
 
                     addedvimages.add(vi);
                     logger.info("Inserted virtual image [{}]", vi.getPathName());
@@ -97,7 +96,7 @@ public class OVFPackageInstanceToVirtualImage
                 try
                 {
                     VirtualImage vi = imageFromDisk(disk, repo);
-                    vimageDao.persist(vi);
+                    appslibraryRep.insertVirtualImage(vi);
                     addedvimages.add(vi);
                     logger.info("Inserted bundle virtual image [{}]", vi.getPathName());
                 }
@@ -127,7 +126,8 @@ public class OVFPackageInstanceToVirtualImage
 
             if (enterprise != null)
             {
-                if (!vimageDao.existWithSamePath(enterprise, repository, disk.getDiskFilePath()))
+                if (!appslibraryRep.existImageWithSamePath(enterprise, repository,
+                    disk.getDiskFilePath()))
                 {
                     notInsertedDisks.add(disk);
                 }
@@ -136,9 +136,6 @@ public class OVFPackageInstanceToVirtualImage
 
         return notInsertedDisks;
     }
-
-    @Autowired
-    private CategoryDAO categoryDao;
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     protected VirtualImage imageFromDisk(final OVFPackageInstanceDto disk,
@@ -152,7 +149,8 @@ public class OVFPackageInstanceToVirtualImage
         if (disk.getMasterDiskFilePath() != null)
         {
             master =
-                vimageDao.findVirtualImageByPath(enterprise, repository, disk.getDiskFilePath());
+                appslibraryRep.findVirtualImageByPath(enterprise, repository,
+                    disk.getDiskFilePath());
 
             diskFormat = master.getDiskFormatType();
         }
@@ -161,7 +159,7 @@ public class OVFPackageInstanceToVirtualImage
             diskFormat = DiskFormatType.valueOf(disk.getDiskFileFormat().name().toUpperCase());
         }
 
-        Category category = categoryDao.findDefault(); // TODO find by ProductSection
+        Category category = appslibraryRep.getDefaultCategory(); // TODO find by ProductSection
 
         VirtualImage vimage =
             new VirtualImage(enterprise,

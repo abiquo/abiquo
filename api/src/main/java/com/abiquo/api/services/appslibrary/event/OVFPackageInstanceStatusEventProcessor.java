@@ -38,7 +38,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;

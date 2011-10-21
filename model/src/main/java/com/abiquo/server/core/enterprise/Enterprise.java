@@ -40,7 +40,7 @@ import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;

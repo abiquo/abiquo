@@ -32,8 +32,8 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -53,7 +53,7 @@ public class VirtualImageService extends DefaultApiService
     private EnterpriseService enterpriseService;
 
     @Autowired
-    private VirtualImageDAO virtualImageDAO;
+    private AppsLibraryRep appsLibraryRep;
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
@@ -89,7 +89,7 @@ public class VirtualImageService extends DefaultApiService
         // Check that the enterprise can use the datacenter
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
-        VirtualImage virtualImage = virtualImageDAO.findById(virtualImageId);
+        VirtualImage virtualImage = appsLibraryRep.findVirtualImageById(virtualImageId);
         if (virtualImage == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALIMAGE);
@@ -115,14 +115,14 @@ public class VirtualImageService extends DefaultApiService
     @Transactional(readOnly = true)
     public List<VirtualImage> findVirtualImageByEnterprise(final Enterprise enterprise)
     {
-        return virtualImageDAO.findVirtualMachinesByEnterprise(enterprise);
+        return appsLibraryRep.findVirtualImagesByEnterprise(enterprise);
     }
 
     @Transactional(readOnly = true)
     public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
         final Enterprise enterprise, final Repository repository)
     {
-        return virtualImageDAO.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+        return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
     }
 
     private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,

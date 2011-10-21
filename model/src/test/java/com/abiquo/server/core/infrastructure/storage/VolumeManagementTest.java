@@ -24,8 +24,8 @@ package com.abiquo.server.core.infrastructure.storage;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 

@@ -39,8 +39,8 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageDto;
 
 @Parent(VirtualImagesResource.class)
 @Path(VirtualImageResource.VIRTUAL_IMAGE_PARAM)

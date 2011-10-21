@@ -35,15 +35,15 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
+import com.abiquo.server.core.appslibrary.IconGenerator;
 import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
-import com.abiquo.server.core.config.CategoryGenerator;
-import com.abiquo.server.core.config.IconGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;

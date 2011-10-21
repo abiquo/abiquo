@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.User.AuthType;
@@ -50,9 +49,6 @@ public class EnterpriseRep extends DefaultRepBase
 
     @Autowired
     private EnterpriseDAO enterpriseDAO;
-
-    @Autowired
-    private VirtualImageDAO virtualImageDAO;
 
     @Autowired
     private PrivilegeDAO privilegeDAO;
@@ -84,7 +80,6 @@ public class EnterpriseRep extends DefaultRepBase
 
         this.entityManager = entityManager;
         this.enterpriseDAO = new EnterpriseDAO(entityManager);
-        virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);

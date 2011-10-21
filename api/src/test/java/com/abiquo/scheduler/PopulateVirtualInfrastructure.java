@@ -29,6 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.State;
@@ -37,9 +40,6 @@ import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
@@ -84,7 +84,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     RepositoryDAO repoDao;
 
     @Autowired
-    VirtualImageDAO vimageDao;
+    private AppsLibraryRep appslibraryRep;
 
     @Autowired
     VirtualMachineDAO vmachineDao;
@@ -125,7 +125,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * <li>e1.vdc1.va1.vm1:vi1,vnic1,vlan1 (VirtualMachine)
      * <ul>
      */
-    public void createVirtualInfrastructure(String declar)
+    public void createVirtualInfrastructure(final String declar)
     {
         // also vlan assertTrue(declar.startsWith("e") );
 
@@ -216,7 +216,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * @param enterprise, e1:1 (enterprise isReservationRestricted=1)
      * @return
      */
-    private Enterprise createEnterprise(String enter)
+    private Enterprise createEnterprise(final String enter)
     {
         Enterprise enterprise = enterRep.findByName(enter);
 
@@ -252,7 +252,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         return enterprise;
     }
 
-    public void allowAllDatacentersByDefault(Enterprise enterprise)
+    public void allowAllDatacentersByDefault(final Enterprise enterprise)
     {
         for (Datacenter dc : dcRep.findAll())
         {
@@ -265,7 +265,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
      */
-    private VirtualImage createVirtualImage(String enterStr, String vimageDec)
+    private VirtualImage createVirtualImage(final String enterStr, final String vimageDec)
     {
         Enterprise enterprise = enterRep.findByName(enterStr);
 
@@ -299,7 +299,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         VirtualImage vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        vimageDao.persist(vimage);
+        appslibraryRep.insertVirtualImage(vimage);
 
         return vimage;
     }
@@ -307,7 +307,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vdcDeclaration, vdc1:d1,HTYPE (VirtualDatacenter)
      */
-    private VirtualDatacenter createVirtualDatacenter(String enter, String vdcDeclaration)
+    private VirtualDatacenter createVirtualDatacenter(final String enter,
+        final String vdcDeclaration)
     {
         Enterprise enterprise = enterRep.findByName(enter);
 
@@ -339,7 +340,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         return vdc;
     }
 
-    private VirtualAppliance createVirtualAppliance(String enterName, String vdcName, String vappDec)
+    private VirtualAppliance createVirtualAppliance(final String enterName, final String vdcName,
+        final String vappDec)
     {
 
         // XXX unused enterName to check vdc !!!
@@ -356,8 +358,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vmachineStr, vm1:vi1,vnic1,vlan1 (VirtualMachine)
      */
-    private VirtualMachine createVirtualMachine(String enterStr, String vdcStr, String vappStr,
-        String vmachineStr)
+    private VirtualMachine createVirtualMachine(final String enterStr, final String vdcStr,
+        final String vappStr, final String vmachineStr)
     {
         // TODO unused enterStr, vdcStr
         Enterprise enterprise = enterRep.findByName(enterStr);
@@ -389,7 +391,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = vimageDao.findByName(virtualimageName);
+        VirtualImage vimage = appslibraryRep.findVirtualImageByName(virtualimageName);
         assertNotNull("vimage not found " + virtualimageName, vimage);
 
         VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);
@@ -410,7 +412,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * @param vlanNetworkName
      * @return
      */
-    private void createVlanNetwork(String declar)
+    private void createVlanNetwork(final String declar)
     {
         assertTrue("Expected vlan declaration " + declar, declar.startsWith(DEC_VLAN));
 
@@ -464,7 +466,8 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
      * 
      * @param declar
      */
-    private void createIpMan(String vnicName, String vlanName, VirtualDatacenter vdc)
+    private void createIpMan(final String vnicName, final String vlanName,
+        final VirtualDatacenter vdc)
     {
         VLANNetwork vlanNetwork = vdcRep.findVlanByName(vlanName);
 
@@ -476,7 +479,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     }
 
-    public void removeVirtualMachine(Integer virtualMachineId)
+    public void removeVirtualMachine(final Integer virtualMachineId)
     {
 
         VirtualMachine vm = vdcRep.findVirtualMachineById(virtualMachineId);
@@ -486,7 +489,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         // XXX can not update XXX vdcRep.deleteVirtualMachine(vm);
     }
 
-    public void runningVirtualMachine(Integer virtualMachineId)
+    public void runningVirtualMachine(final Integer virtualMachineId)
     {
         vmachineDao.updateVirtualMachineState(virtualMachineId, State.RUNNING);
     }

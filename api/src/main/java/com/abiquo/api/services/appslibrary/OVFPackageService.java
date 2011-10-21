@@ -43,12 +43,11 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
-import com.abiquo.server.core.config.Category;
-import com.abiquo.server.core.config.CategoryRep;
-import com.abiquo.server.core.config.Icon;
-import com.abiquo.server.core.config.IconDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
@@ -64,10 +63,7 @@ public class OVFPackageService extends DefaultApiService
     private EnterpriseRep entRepo;
 
     @Autowired
-    private CategoryRep catRep;
-
-    @Autowired
-    private IconDAO iconDao;
+    private AppsLibraryRep appslibraryRep;
 
     public OVFPackageService()
     {
@@ -78,8 +74,7 @@ public class OVFPackageService extends DefaultApiService
     {
         repo = new OVFPackageRep(em);
         entRepo = new EnterpriseRep(em);
-        catRep = new CategoryRep(em);
-        iconDao = new IconDAO(em);
+        appslibraryRep = new AppsLibraryRep(em);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -158,14 +153,14 @@ public class OVFPackageService extends DefaultApiService
             String iconPath = descr.getIcon().get(0).getFileRef();
             // TODO start with http://
 
-            Icon icon = iconDao.findByIconPathOrCreateNew(iconPath);
+            Icon icon = appslibraryRep.findByIconPathOrCreateNew(iconPath);
             pack.setIcon(icon);
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());
         pack.setType(format);
 
-        Category category = catRep.findByCategoryNameOrCreateNew(descr.getOVFCategories());
+        Category category = appslibraryRep.findByCategoryNameOrCreateNew(descr.getOVFCategories());
         pack.setCategory(category);
 
         Long diskSizeL = null;
