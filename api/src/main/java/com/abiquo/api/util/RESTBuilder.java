@@ -72,6 +72,7 @@ import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
+import com.abiquo.server.core.enterprise.EnterprisePropertiesDto;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.RoleDto;
 import com.abiquo.server.core.enterprise.RoleLdapDto;
@@ -385,6 +386,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
+    }
+
+    public List<RESTLink> buildEnterprisePropertiesLinks(final Integer enterpriseId,
+        final EnterprisePropertiesDto enterpriseProperties)
+    {
+        return null;
     }
 
     @Override
