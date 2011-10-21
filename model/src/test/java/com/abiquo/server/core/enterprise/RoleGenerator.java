@@ -131,7 +131,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
-    public Role createInstanceBlocked(final Privilege[] privileges)
+    public Role createInstanceBlocked(final Privilege... privileges)
     {
         Role role = createInstanceBlocked();
         for (Privilege p : privileges)
@@ -141,7 +141,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
-    public Role createInstance(final Privilege[] privileges)
+    public Role createInstance(final Privilege... privileges)
     {
         Role role = createInstance();
         for (Privilege p : privileges)
@@ -151,7 +151,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return role;
     }
 
-    public Role createInstance(final String name, final Privilege[] privileges)
+    public Role createInstance(final String name, final Privilege... privileges)
     {
         Role role = createInstance(name);
         for (Privilege p : privileges)
