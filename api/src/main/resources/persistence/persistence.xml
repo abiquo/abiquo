@@ -38,6 +38,7 @@
         <!-- end: stateful -->
         <!-- enterprise -->
         <class>com.abiquo.server.core.enterprise.Enterprise</class>
+	<class>com.abiquo.server.core.enterprise.EnterpriseProperties</class>
         <class>com.abiquo.server.core.enterprise.Role</class>
         <class>com.abiquo.server.core.enterprise.RoleLdap</class>
         <class>com.abiquo.server.core.enterprise.Privilege</class>
@@ -69,18 +70,18 @@
         <class>com.abiquo.server.core.config.SystemProperty</class>
         <class>com.abiquo.server.core.tasks.Task</class>
         <!-- end: configuration --> 
-		<!-- pricing -->
-		<class>com.abiquo.server.core.pricing.PricingTemplate</class>
-		<class>com.abiquo.server.core.pricing.CostCode</class>
-		<class>com.abiquo.server.core.pricing.Currency</class>
+	<!-- pricing -->
+	<class>com.abiquo.server.core.pricing.PricingTemplate</class>
+	<class>com.abiquo.server.core.pricing.CostCode</class>
+	<class>com.abiquo.server.core.pricing.Currency</class>
         <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
         <class>com.abiquo.server.core.pricing.PricingCostCode</class>
         <class>com.abiquo.server.core.pricing.PricingTier</class>
 		<!-- end:pricing-->
 		
-  	<properties>
-			<property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
-			<property name="hibernate.hbm2ddl.auto" value="verify" />
-		</properties>
-	</persistence-unit>
+	<properties>
+		<property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+		<property name="hibernate.hbm2ddl.auto" value="verify" />
+	</properties>
+</persistence-unit>
 </persistence>

@@ -73,6 +73,9 @@ public class EnterpriseRep extends DefaultRepBase
     private MachineDAO machineDAO;
 
     @Autowired
+    private EnterprisePropertiesDAO enterprisePropertiesDAO;
+
+    @Autowired
     private DatacenterLimitsDAO limitsDAO;
 
     @Autowired
@@ -115,6 +118,32 @@ public class EnterpriseRep extends DefaultRepBase
         assert !enterpriseDAO.existsAnyOtherWithName(enterprise, enterprise.getName()) : BUG_UPDATE_NAME_MUST_BE_UNIQUE;
 
         enterpriseDAO.flush();
+    }
+
+    public EnterpriseProperties findPropertiesByEnterprise(final Enterprise enterprise)
+    {
+        return enterprisePropertiesDAO.findByEnterprise(enterprise);
+    }
+
+    public void updateEnterpriseProperties(final EnterpriseProperties enterpriseProperties)
+    {
+        enterprisePropertiesDAO.flush();
+    }
+
+    public void removeEnterpriseProperties(final Enterprise enterprise)
+    {
+        EnterpriseProperties ep = findPropertiesByEnterprise(enterprise);
+        removeEnterpriseProperties(ep);
+    }
+
+    public void removeEnterpriseProperties(final EnterpriseProperties ep)
+    {
+        enterprisePropertiesDAO.remove(ep);
+    }
+
+    public void createEnterprisProperties(final Enterprise enterprise)
+    {
+        enterprisePropertiesDAO.persist(new EnterpriseProperties(enterprise));
     }
 
     public RoleLdap findLdapRoleByType(final String type)

@@ -125,12 +125,14 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_user_createUser:SystemProperty;
 		public var client_wiki_user_createRole:SystemProperty;
 		
-		public var client_wiki_pricing_createCurrency:SystemProperty;
-		
 		public var client_wiki_config_general:SystemProperty;
 		public var client_wiki_config_heartbeat:SystemProperty;
 		public var client_wiki_config_registration:SystemProperty;	
-		public var client_wiki_config_licence:SystemProperty;		
+		public var client_wiki_config_licence:SystemProperty;	
+		
+		public var client_wiki_pricing_createTemplate:SystemProperty;
+		public var client_wiki_pricing_createCostCode:SystemProperty;	
+		public var client_wiki_pricing_createCurrency:SystemProperty;
 		
 
 		private var propertiesIndex:Array;
