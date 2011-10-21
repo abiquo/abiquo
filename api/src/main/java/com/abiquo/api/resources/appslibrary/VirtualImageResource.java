@@ -39,10 +39,8 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualImageDto;
-import com.abiquo.server.core.config.Category;
 
 @Parent(VirtualImagesResource.class)
 @Path(VirtualImageResource.VIRTUAL_IMAGE_PARAM)
@@ -86,36 +84,47 @@ public class VirtualImageResource extends AbstractResource
         final Integer enterpId, final Integer dcId, final String amUri, final IRESTBuilder builder)
         throws Exception
     {
-        VirtualImageDto dto =
-            ModelTransformer.transportFromPersistence(VirtualImageDto.class, vimage);
+        VirtualImageDto dto = new VirtualImageDto();
+        dto.setId(vimage.getId());
+        dto.setCpuRequired(vimage.getCpuRequired());
+        dto.setDescription(vimage.getDescription());
+        dto.setDiskFileSize(vimage.getDiskFileSize());
+        dto.setHdRequired(vimage.getHdRequiredInBytes());
+        dto.setName(vimage.getName());
+        dto.setPathName(vimage.getPathName());
+        dto.setRamRequired(vimage.getRamRequired());
+        dto.setStateful(vimage.isStateful());
+        dto.setShared(vimage.isShared());
+        dto.setDiskFormatType(vimage.getDiskFormatType().name());
+        dto.setCostCode(vimage.getCostCode());
 
-        dto =
-            addLinks(builder, dto, enterpId, dcId, vimage.getId(), amUri, vimage.getMaster(),
-                vimage.getCategory());
-
-        return dto;
+        return addLinks(builder, dto, enterpId, dcId, vimage, amUri);
     }
 
     private static VirtualImageDto addLinks(final IRESTBuilder builder, final VirtualImageDto dto,
-        final Integer enterpriseId, final Integer dcId, final Integer vimageId, final String amUri,
-        final VirtualImage master, final Category category)
+        final Integer enterpriseId, final Integer dcId, final VirtualImage vimage,
+        final String amUri)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimageId, master, category));
-        addApplianceManagerLinks(dto, amUri, vimageId, dto.getOvfid());
-
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage.getId(),
+            vimage.getMaster(), vimage.getCategory(), vimage.getIcon()));
+        addApplianceManagerLinks(dto, amUri, enterpriseId, vimage.getOvfid());
         return dto;
     }
 
     private static void addApplianceManagerLinks(final VirtualImageDto dto, final String amUri,
         final Integer enterpriseId, final String ovfid)
     {
-        ApplianceManagerResourceStub am = new ApplianceManagerResourceStub(amUri);
-        Resource resource = am.ovfPackage(enterpriseId.toString(), ovfid);
-        String href = resource.getUriBuilder().build(new Object[] {}).toString();
+        if (ovfid != null)
+        {
+            ApplianceManagerResourceStub am = new ApplianceManagerResourceStub(amUri);
+            Resource resource = am.ovfPackage(enterpriseId.toString(), ovfid);
+            String href = resource.getUriBuilder().build(new Object[] {}).toString();
 
-        dto.addLink(new RESTLink("ovfpackageinstance", href));
-        dto.addLink(new RESTLink("ovfpackagestatus", href + "?format=status"));
-        dto.addLink(new RESTLink("ovfdocument", href + "?format=envelope"));
-        dto.addLink(new RESTLink("imagefile", href + "?format=diskFile"));
+            dto.addLink(new RESTLink("ovfpackage", ovfid));
+            dto.addLink(new RESTLink("ovfpackageinstance", href));
+            dto.addLink(new RESTLink("ovfpackagestatus", href + "?format=status"));
+            dto.addLink(new RESTLink("ovfdocument", href + "?format=envelope"));
+            dto.addLink(new RESTLink("imagefile", href + "?format=diskFile"));
+        }
     }
 }

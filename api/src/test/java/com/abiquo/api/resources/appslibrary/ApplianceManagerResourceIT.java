@@ -25,7 +25,6 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestConfig.getParameter;
 import static org.testng.Assert.assertEquals;
@@ -35,11 +34,8 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -61,11 +57,9 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
-import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -74,9 +68,9 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
-public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
+public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 {
-    private final static Logger LOG = LoggerFactory.getLogger(VirtualImageResourceIT.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ApplianceManagerResourceIT.class);
 
     private final static String AM_BASE_URI = "http://localhost:"
         + String.valueOf(getEmbededServerPort()) + "/am";
@@ -84,6 +78,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     // to add the am properly
     @Autowired
     private InfrastructureService service;
+
+    @Autowired
+    VirtualImageService vimageService;
 
     private ApplianceManagerResourceStubImpl amclient;
 
@@ -109,8 +106,6 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     private Enterprise ent;
 
     private Datacenter datacenter;
-
-    private VirtualImage virtualImage;
 
     @BeforeMethod
     public void setUpDatacenterRepository()
@@ -262,69 +257,28 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         }
 
         List<VirtualImage> images = vimageService.getVirtualImages(enterpriseId, datacenterId);
-        virtualImage = assertVirtualImageExist(images, DEFAULT_OVF);
-    }
-
-    /**
-     * TODO fix test
-     * java.lang.IllegalArgumentException: variable 'virtualimage' was not supplied a value
-    at com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI(UriTestResolver.java:734)
-    at com.abiquo.api.resources.appslibrary.VirtualImageResourceIT.testGetVirtualImage(VirtualImageResourceIT.java:276)
-     * */
-    @Test(enabled=false)
-    private void getVirtualImage()
-    {
-        // TODO: Change this to create the VI in the DB when we have the category, icon and other
-        // mandatory objects in the model.
-        createOVFandWaitUntilVirtualImageCreated();
-        assertNotNull(virtualImage);
-
-        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
-        ClientResponse response = get(uri);
-        assertEquals(response.getStatusCode(), 200);
-
-        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
-        String href = amOVFPackageInstanceUrl(ent.getId(), dto.getOvfid());
-
-        assertLinkExist(dto, href, "ovfpackageinstance");
-        assertLinkExist(dto, href + "?format=status", "ovfpackagestatus");
-        assertLinkExist(dto, href + "?format=envelope", "ovfdocument");
-        assertLinkExist(dto, href + "?format=diskFile", "imagefile");
+        assertVirtualImageExist(images, DEFAULT_OVF);
     }
 
     // TODO: Make test for VirtualImage with master. Test link existance
 
-    private static VirtualImage assertVirtualImageExist(final List<VirtualImage> vimages,
+    private static void assertVirtualImageExist(final List<VirtualImage> vimages,
         final String ovfurl)
     {
         for (VirtualImage vimage : vimages)
         {
             if (vimage.getOvfid().equalsIgnoreCase(ovfurl))
             {
-                return vimage;
+                return;
             }
         }
 
         fail("virtual image not found " + ovfurl);
-        return null;
     }
-
-    @Autowired
-    VirtualImageService vimageService;
 
     private static String amEnterpriseRepositoryUrl(final Integer enterpriseId)
     {
         return String.format("%s/erepos/%s", AM_BASE_URI, enterpriseId.toString());
-    }
-
-    private static String amOVFPackageInstanceUrl(final Integer enterpriseId, final String ovf)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("erepo", enterpriseId.toString());
-        params.put("ovf", ovf);
-
-        // Must use the URI resolver in the AM in order to encode the ovf parameter
-        return URIResolver.resolveURI(AM_BASE_URI, "erepos/{erepo}/ovfs/{ovf}", params);
     }
 
 }

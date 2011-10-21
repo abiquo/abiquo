@@ -33,6 +33,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.config.Category;
 import com.abiquo.server.core.config.CategoryDto;
+import com.abiquo.server.core.config.Icon;
 import com.abiquo.server.core.config.IconDto;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -110,7 +111,7 @@ public interface IRESTBuilder
         final Integer dcId, final Integer repoId);
 
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId, VirtualImage master, Category category);
+        final Integer vimageId, final VirtualImage master, final Category category, final Icon icon);
 
     /*
      * Premium methods
