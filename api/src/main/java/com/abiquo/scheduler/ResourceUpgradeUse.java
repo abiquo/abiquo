@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -144,7 +144,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 updateUsageDatastore(virtualMachine, false);
                 updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
 
-                virtualMachine.setState(State.IN_PROGRESS);
+                virtualMachine.setState(VirtualMachineState.IN_PROGRESS);
             }
             else
             {
@@ -190,7 +190,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(State.NOT_DEPLOYED);
+            virtualMachine.setState(VirtualMachineState.NOT_DEPLOYED);
             vmachineDao.flush();
         }
         catch (final Exception e) // HibernateException NotEnoughResourcesException

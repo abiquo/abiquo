@@ -42,7 +42,7 @@ import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -141,7 +141,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -652,7 +652,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -766,7 +766,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -1008,7 +1008,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(repo.findById(vdcId).getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();

@@ -40,10 +40,10 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -206,27 +206,27 @@ public class VirtualMachineService extends DefaultApiService
      */
     public void blockVirtualMachine(final VirtualMachine vm)
     {
-        if (vm.getState() == State.IN_PROGRESS)
+        if (vm.getState() == VirtualMachineState.IN_PROGRESS)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_ALREADY_IN_PROGRESS);
             flushErrors();
         }
 
-        vm.setState(State.IN_PROGRESS);
+        vm.setState(VirtualMachineState.IN_PROGRESS);
         updateVirtualMachine(vm);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void validMachineStateChange(State oldState, State newState)
+    public void validMachineStateChange(VirtualMachineState oldState, VirtualMachineState newState)
     {
-        if (oldState == State.NOT_DEPLOYED)
+        if (oldState == VirtualMachineState.NOT_DEPLOYED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (((oldState == State.POWERED_OFF) && (newState != State.RUNNING))
-            || ((oldState == State.PAUSED) && (newState != State.REBOOTED))
-            || ((oldState == State.RUNNING) && (newState == State.REBOOTED)))
+        if (((oldState == VirtualMachineState.POWERED_OFF) && (newState != VirtualMachineState.RUNNING))
+            || ((oldState == VirtualMachineState.PAUSED) && (newState != VirtualMachineState.REBOOTED))
+            || ((oldState == VirtualMachineState.RUNNING) && (newState == VirtualMachineState.REBOOTED)))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
             flushErrors();
@@ -242,13 +242,13 @@ public class VirtualMachineService extends DefaultApiService
      * @throws Exception
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, State state)
+    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, VirtualMachineState state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
         checkPauseAllowed(vm, state);
 
-        State old = vm.getState();
+        VirtualMachineState old = vm.getState();
 
         validMachineStateChange(old, state);
 
@@ -285,7 +285,7 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(VirtualMachine vm, State old)
+    private void restoreVirtualMachineState(VirtualMachine vm, VirtualMachineState old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
@@ -307,8 +307,8 @@ public class VirtualMachineService extends DefaultApiService
             new VirtualAppliance(vmachine.getEnterprise(),
                 vdc,
                 "haVapp",
-                com.abiquo.server.core.cloud.State.NOT_DEPLOYED,
-                com.abiquo.server.core.cloud.State.NOT_DEPLOYED);
+                com.abiquo.model.enumerator.VirtualMachineState.NOT_DEPLOYED,
+                com.abiquo.model.enumerator.VirtualMachineState.NOT_DEPLOYED);
 
         NodeVirtualImage nvi =
             new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);
@@ -325,7 +325,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param state a valid VirtualMachine state
      * @return true if its the same state, false otherwise
      */
-    public Boolean sameState(final VirtualMachine vm, final State state)
+    public Boolean sameState(final VirtualMachine vm, final VirtualMachineState state)
     {
         String actual = vm.getState().toOVF();// OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);
@@ -341,9 +341,9 @@ public class VirtualMachineService extends DefaultApiService
         resource.put(docEnvelopeRunning);
     }
 
-    public void checkPauseAllowed(VirtualMachine vm, State state)
+    public void checkPauseAllowed(VirtualMachine vm, VirtualMachineState state)
     {
-        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == State.PAUSED)
+        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == VirtualMachineState.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();

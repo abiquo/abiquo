@@ -71,8 +71,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     public AuthenticationManagerApi()
     {
@@ -521,8 +521,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
-                    userHB.getPassword())
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
+                    .getPassword())
                     + userHB.getAuthType();
 
             if (!signature.equals(tokenSignature))
@@ -622,14 +622,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         userHB.setSurname(userDto.getSurname());
         userHB.setUser(userDto.getNick());
         userHB.setAuthType(userDto.getAuthType());
-        EnterpriseHB enterpriseHB = getEnterpriseDAO().findById(userDto.getIdEnterprise());
+        EnterpriseHB enterpriseHB =
+            getEnterpriseDAO().findById(userDto.getIdFromLink("enterprise"));
 
-        RoleHB roleHB = getRoleDAO().findById(userDto.getIdRole());
+        RoleHB roleHB = getRoleDAO().findById(userDto.getIdFromLink("role"));
 
         userHB.setEnterpriseHB(enterpriseHB);
         userHB.setRoleHB(roleHB);
 
         return userHB;
     }
-
 }
