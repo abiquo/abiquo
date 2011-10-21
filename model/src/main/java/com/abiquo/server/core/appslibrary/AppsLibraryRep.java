@@ -205,14 +205,14 @@ public class AppsLibraryRep extends DefaultRepBase
 
     public List<VirtualImage> findVirtualImagesByEnterprise(final Enterprise enterprise)
     {
-        return virtualImageDAO.findVirtualImagesByEnterprise(enterprise);
+        return virtualImageDAO.findByEnterprise(enterprise);
     }
 
     public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
         final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return virtualImageDAO.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+        return virtualImageDAO.findByEnterpriseAndRepository(enterprise, repository);
     }
 
     public boolean existImageWithSamePath(final Enterprise enterprise,
@@ -224,6 +224,6 @@ public class AppsLibraryRep extends DefaultRepBase
     public VirtualImage findVirtualImageByPath(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
-        return virtualImageDAO.findVirtualImageByPath(enterprise, repository, path);
+        return virtualImageDAO.findByPath(enterprise, repository, path);
     }
 }

@@ -21,25 +21,37 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageDAO;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, VirtualImage>
 {
+    private EnterpriseGenerator enterpriseGenerator;
+
+    private RepositoryGenerator repositoryGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        enterpriseGenerator = new EnterpriseGenerator(getSeed());
+        repositoryGenerator = new RepositoryGenerator(getSeed());
     }
 
     @Override
@@ -66,5 +78,96 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         return (VirtualImageGenerator) super.eg();
     }
 
-    // TODO: Add tests here!!
+    @Test
+    public void testFindVirtualImagesByEnterprise()
+    {
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        VirtualImage vi = eg().createInstance(ent);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findByEnterprise(ent);
+
+        assertEquals(images.size(), 1);
+    }
+
+    @Test
+    public void testFindVirtualImagesByEnterpriseAndRepository()
+    {
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        Repository repo = repositoryGenerator.createUniqueInstance();
+        VirtualImage vi = eg().createInstance(ent, repo);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findByEnterpriseAndRepository(ent, repo);
+
+        assertEquals(images.size(), 1);
+    }
+
+    @Test
+    public void testFindVirtualImageByName()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualImage image = dao.findByName(vi.getName());
+        assertNotNull(image);
+
+        image = dao.findByName("UNEXISTING");
+        assertNull(image);
+    }
+
+    @Test
+    public void testFindVirtualImageByPath()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualImage image =
+            dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPathName());
+        assertNotNull(image);
+
+        try
+        {
+            dao.findByPath(vi.getEnterprise(), vi.getRepository(), "UNEXISTING");
+            fail("findByPath should have failed");
+        }
+        catch (NoResultException ex)
+        {
+            // Test succeeds
+        }
+    }
+
+    @Test
+    public void testExistsWithSamePath()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        boolean exists =
+            dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), vi.getPathName());
+        assertTrue(exists);
+
+        exists = dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), "UNEXISTING");
+        assertFalse(exists);
+    }
 }

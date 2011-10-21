@@ -49,6 +49,50 @@ import com.abiquo.server.core.enterprise.Enterprise;
         super(VirtualImage.class, entityManager);
     }
 
+    public List<VirtualImage> findByEnterprise(final Enterprise enterprise)
+    {
+        Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualImage> result = getResultList(criteria);
+        return result;
+    }
+
+    public List<VirtualImage> findByEnterpriseAndRepository(
+        final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository)
+    {
+        Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualImage> result = getResultList(criteria);
+        return result;
+    }
+
+    public VirtualImage findByName(final String name)
+    {
+        return findUniqueByProperty(VirtualImage.NAME_PROPERTY, name);
+    }
+
+    public VirtualImage findByPath(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
+    {
+        Criteria criteria =
+            createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+
+        return getSingleResult(criteria);
+    }
+
+    public boolean existWithSamePath(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
+    {
+        Criteria criteria =
+            createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualImage> result = getResultList(criteria);
+
+        return CollectionUtils.isEmpty(result) ? false : true;
+    }
+
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
         assert enterprise != null;
@@ -90,49 +134,5 @@ import com.abiquo.server.core.enterprise.Enterprise;
 
         return Restrictions.and(Restrictions.eq(VirtualImage.PATH_NAME_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
-    }
-
-    public List<VirtualImage> findVirtualImagesByEnterprise(final Enterprise enterprise)
-    {
-        Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
-    }
-
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
-        final Enterprise enterprise,
-        final com.abiquo.server.core.infrastructure.Repository repository)
-    {
-        Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
-    }
-
-    public VirtualImage findByName(final String name)
-    {
-        return findUniqueByProperty(VirtualImage.NAME_PROPERTY, name);
-    }
-
-    public VirtualImage findVirtualImageByPath(final Enterprise enterprise,
-        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
-    {
-        Criteria criteria =
-            createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-
-        return getSingleResult(criteria);
-    }
-
-    public boolean existWithSamePath(final Enterprise enterprise,
-        final com.abiquo.server.core.infrastructure.Repository repository, final String path)
-    {
-        Criteria criteria =
-            createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
-        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-
-        return CollectionUtils.isEmpty(result) ? false : true;
     }
 }

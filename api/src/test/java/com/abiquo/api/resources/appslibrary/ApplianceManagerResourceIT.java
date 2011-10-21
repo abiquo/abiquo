@@ -25,6 +25,7 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestConfig.getParameter;
 import static org.testng.Assert.assertEquals;
@@ -52,14 +53,16 @@ import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageDto;
+import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -78,9 +81,6 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     // to add the am properly
     @Autowired
     private InfrastructureService service;
-
-    @Autowired
-    VirtualImageService vimageService;
 
     private ApplianceManagerResourceStubImpl amclient;
 
@@ -112,8 +112,9 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
-        setup(ent, datacenter);
+        setup(ent, datacenter, limits);
 
         amclient = new ApplianceManagerResourceStubImpl(AM_BASE_URI);
 
@@ -208,7 +209,6 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createOVFandWaitUntilVirtualImageCreated()
     {
-        final Integer datacenterId = datacenter.getId();
         final Integer enterpriseId = ent.getId();
         amclient.createOVFPackageInstance(enterpriseId.toString(), DEFAULT_OVF);
 
@@ -256,18 +256,20 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
             e.printStackTrace();
         }
 
-        List<VirtualImage> images = vimageService.getVirtualImages(enterpriseId, datacenterId);
-        assertVirtualImageExist(images, DEFAULT_OVF);
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+
+        assertVirtualImageExist(dto.getCollection(), DEFAULT_OVF);
     }
 
-    // TODO: Make test for VirtualImage with master. Test link existance
-
-    private static void assertVirtualImageExist(final List<VirtualImage> vimages,
+    private static void assertVirtualImageExist(final List<VirtualImageDto> vimages,
         final String ovfurl)
     {
-        for (VirtualImage vimage : vimages)
+        for (VirtualImageDto dto : vimages)
         {
-            if (vimage.getOvfid().equalsIgnoreCase(ovfurl))
+            RESTLink ovfpackage = dto.searchLink("ovfpackage");
+            if (ovfpackage.getHref().equalsIgnoreCase(ovfurl))
             {
                 return;
             }
