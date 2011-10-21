@@ -2,6 +2,7 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -19,7 +20,7 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Approval.TIME_REQUESTED_PROPERTY,
             Approval.TOKEN_PROPERTY, Approval.TIME_RESPONSE_PROPERTY, Approval.REASON_PROPERTY,
-            Approval.STATUS_PROPERTY, Approval.APPROVAL_TYPE_PROPERTY);
+            Approval.STATUS_PROPERTY, Approval.APPROVAL_TYPE_PROPERTY, Approval.REQUEST_PROPERTY);
     }
 
     @Override
@@ -31,7 +32,15 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
         Date timeRequested = newDateTime(nextSeed()).toDate();
         Date timeResponse = newDateTime(nextSeed()).toDate();
 
-        return new Approval(token, approvalType, approvalState, timeRequested, timeResponse);
+        byte[] request = new byte[5];
+        new Random().nextBytes(request);
+
+        return new Approval(token,
+            approvalType,
+            approvalState,
+            timeRequested,
+            timeResponse,
+            request);
     }
 
     @Override

@@ -28,6 +28,7 @@ CREATE TABLE `kinton`.`approval` (
   `timeRequested` timestamp NOT NULL ,
   `timeResponse` timestamp NULL ,
   `reason` text DEFAULT NULL ,
+  `request` longblob NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idApproval`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;

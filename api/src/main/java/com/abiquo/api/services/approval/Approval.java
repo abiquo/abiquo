@@ -11,5 +11,5 @@ public @interface Approval
 {
     public boolean required() default true;
 
-    public String role();
+    public String[] roles();
 }

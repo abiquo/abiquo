@@ -168,7 +168,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    @Approval(role = SecurityService.APPROVAL_VAPP_DEPLOY)
+    @Approval(roles = SecurityService.APPROVAL_VAPP_DEPLOY)
     public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);

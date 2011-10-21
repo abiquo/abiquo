@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
@@ -30,13 +31,14 @@ public class Approval extends DefaultEntityBase
     }
 
     public Approval(final String token, final ApprovalType type, final ApprovalState state,
-        final Date timeRequested, final Date timeResponse)
+        final Date timeRequested, final Date timeResponse, final byte[] request)
     {
         setToken(token);
         setApprovalType(type);
         setStatus(state);
         setTimeRequested(timeRequested);
         setTimeResponse(timeResponse);
+        setRequest(request);
     }
 
     private final static String ID_COLUMN = "idApproval";
@@ -182,5 +184,26 @@ public class Approval extends DefaultEntityBase
     public void setApprovalType(final ApprovalType approvalType)
     {
         this.approvalType = approvalType;
+    }
+
+    public final static String REQUEST_PROPERTY = "request";
+
+    private final static boolean REQUEST_REQUIRED = false;
+
+    private final static String REQUEST_COLUMN = "request";
+
+    @Column(name = REQUEST_COLUMN, nullable = !REQUEST_REQUIRED)
+    @Lob
+    private byte[] request;
+
+    @Required(value = REQUEST_REQUIRED)
+    public byte[] getRequest()
+    {
+        return this.request;
+    }
+
+    public void setRequest(final byte[] request)
+    {
+        this.request = request;
     }
 }
