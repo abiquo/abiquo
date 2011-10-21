@@ -109,6 +109,7 @@ public class OVFPackageListsResource extends AbstractResource
     {
         OVFPackageList opl = service.addOVFPackageList(ovfindexURL, idEnterprise);
 
-        return transformer.createTransferObject(opl, restBuilder);
+        OVFPackageListDto dto = transformer.createTransferObject(opl, restBuilder);
+        return dto;
     }
 }

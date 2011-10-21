@@ -107,9 +107,12 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         entitiesToPersist.add(category);
 
-        Icon icon = entity.getIcon();
-        iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
-        entitiesToPersist.add(icon);
+        if (entity.getIcon() != null)
+        {
+            Icon icon = entity.getIcon();
+            iconGenerator.addAuxiliaryEntitiesToPersist(icon, entitiesToPersist);
+            entitiesToPersist.add(icon);
+        }
 
     }
 }

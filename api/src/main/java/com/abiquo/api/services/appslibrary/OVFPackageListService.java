@@ -49,6 +49,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
+@Transactional
 public class OVFPackageListService extends DefaultApiService
 {
     @Autowired
@@ -110,7 +111,7 @@ public class OVFPackageListService extends DefaultApiService
             ovfPackageService.addOVFPackage(ovfPackage, idEnterprise);
         }
 
-        repo.persistList(ovfPackageList);
+        repo.updateList(ovfPackageList);
 
         return ovfPackageList;
     }
