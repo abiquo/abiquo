@@ -1,15 +1,15 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="NODECOLLECTOR basic unit tests" verbose="1">
-    <!-- 
-    <listeners>
+    <!--
+        <listeners>
         <listener class-name="com.abiquo.testng.TestServerListener" />
-    </listeners>
+        </listeners>
     -->
     <test name="Basic unit tests">
-        <!-- 
-        <packages>
+        <!--
+            <packages>
             <package name="com.abiquo.nodecollector.resource.test.*" />
-        </packages>
+            </packages>
         -->
     </test>
 </suite>

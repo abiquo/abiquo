@@ -69,6 +69,8 @@ public class SecurityService
 
     public static final String ENTERPRISE_ENUMERATE = DRP + "ENTERPRISE_ENUMERATE";
 
+    public static final String ROLE_PHYS_DC_ENUMERATE = "ROLE_PHYS_DC_ENUMERATE";
+
     public boolean hasPrivilege(final String privilege)
     {
         return AuthorityUtils.userHasAuthority(privilege);

@@ -26,6 +26,7 @@ import java.io.Serializable;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 
 /**
@@ -43,7 +44,9 @@ public class DatacenterLimit implements Serializable, IPojo<DatacenterLimitHB>
 
     private ResourceAllocationLimit limits;
 
-    public void setLimits(ResourceAllocationLimit limits)
+    private VlanNetwork defaultVlan;
+
+    public void setLimits(final ResourceAllocationLimit limits)
     {
         this.limits = limits;
     }
@@ -53,7 +56,7 @@ public class DatacenterLimit implements Serializable, IPojo<DatacenterLimitHB>
         return limits;
     }
 
-    public void setDatacenter(DataCenter datacenter)
+    public void setDatacenter(final DataCenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -63,7 +66,7 @@ public class DatacenterLimit implements Serializable, IPojo<DatacenterLimitHB>
         return datacenter;
     }
 
-    public void setIdEnterprise(Integer idEnterprise)
+    public void setIdEnterprise(final Integer idEnterprise)
     {
         this.idEnterprise = idEnterprise;
     }
@@ -73,7 +76,7 @@ public class DatacenterLimit implements Serializable, IPojo<DatacenterLimitHB>
         return idEnterprise;
     }
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -91,7 +94,22 @@ public class DatacenterLimit implements Serializable, IPojo<DatacenterLimitHB>
         dcLimitHB.setLimits(limits.toPojoHB());
         dcLimitHB.setDatacenter(datacenter.toPojoHB());
 
+        if (defaultVlan != null)
+        {
+            dcLimitHB.setDefaultVlan(defaultVlan.toPojoHB());
+        }
+
         return dcLimitHB;
+    }
+
+    public VlanNetwork getDefaultVlan()
+    {
+        return defaultVlan;
+    }
+
+    public void setDefaultVlan(final VlanNetwork defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
     }
 
 }

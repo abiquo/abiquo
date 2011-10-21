@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ws="http://jax-ws.dev.java.net/spring/core" xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ws="http://jax-ws.dev.java.net/spring/core" xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                             http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd">
     <bean id="deployer" class="com.abiquo.virtualfactory.virtualappliance.impl.VirtualapplianceresourceDeployer">
@@ -8,8 +7,7 @@
         <property name="virtualApplianceModel" ref="virtualappliancefactorybean" />
         <property name="virtualSystemFactory" ref="virtualsystemfactorybean" />
     </bean>
-    <bean id="hypervisorManager" class="com.abiquo.virtualfactory.plugin.HypervisorManager"
-        init-method="loadPlugins">
+    <bean id="hypervisorManager" class="com.abiquo.virtualfactory.plugin.HypervisorManager" init-method="loadPlugins">
         <property name="pluginClasses">
             <list>
                 <value>com.abiquo.virtualfactory.hypervisor.impl.KVMHypervisor</value>
@@ -23,10 +21,8 @@
     </bean>
     <bean id="ovfconverterbean" class="com.abiquo.virtualfactory.model.ovf.OVFModelToVirtualAppliance" />
     <!-- factories -->
-    <bean id="virtualappliancefactorybean" class="com.abiquo.virtualfactory.model.VirtualApplianceModel"
-        factory-method="getModel" />
-    <bean id="virtualsystemfactorybean" class="com.abiquo.virtualfactory.model.VirtualSystemModel"
-        factory-method="getModel">
+    <bean id="virtualappliancefactorybean" class="com.abiquo.virtualfactory.model.VirtualApplianceModel" factory-method="getModel" />
+    <bean id="virtualsystemfactorybean" class="com.abiquo.virtualfactory.model.VirtualSystemModel" factory-method="getModel">
         <property name="hypervisors" ref="hypervisorManager" />
     </bean>
 </beans>

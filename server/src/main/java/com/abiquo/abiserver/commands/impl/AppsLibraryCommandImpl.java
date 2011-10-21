@@ -75,8 +75,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
+        .getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -139,8 +139,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
-                        .toString());
+                    String.format("Can not obtain the datacenter with id [%s]",
+                        idDatacenter.toString());
             }
 
             factory.rollbackConnection();
@@ -161,8 +161,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
         catch (AppsLibraryCommandException e)
         {
-            logger.warn("{}",e);
-            
+            logger.warn("{}", e);
+
             repository.setRepositoryCapacityMb(0l);
             repository.setRepositoryEnterpriseUsedMb(0l);
             repository.setRepositoryRemainingMb(0l);
@@ -210,7 +210,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             final String cause =
                 String.format("Can not obtain the repository usage info "
                     + "of the Datacenter [%s] for the Enterprise [%s]. "
-                    + "NFS could be bussy (check it later).", idDatacenter, idEnterprise);
+                    + "NFS could be busy (check it later).", idDatacenter, idEnterprise);
 
             final String detail = e.getMessage();
 
@@ -286,7 +286,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 throw new AppsLibraryCommandException(cause);
             }
 
-            
             if (category.getIsDefault() > 0)
             {
                 factory.rollbackConnection();
@@ -1303,9 +1302,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
-        final String nameOVFPackageList, Integer idOVFPackageName, Integer idEnterprise,
-        Integer idRepository) throws AppsLibraryCommandException
+    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final UserSession userSession,
+        final String nameOVFPackageList, final Integer idOVFPackageName,
+        final Integer idEnterprise, final Integer idRepository) throws AppsLibraryCommandException
     {
         final String ovfIds =
             getOVFPackageInstanceUrl(userSession, idEnterprise, nameOVFPackageList,
@@ -1319,9 +1318,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
-        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException
+    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(
+        final UserSession userSession, final String idsOvfInstance, final Integer idEnterprise,
+        final Integer idRepository) throws AppsLibraryCommandException
     {
 
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);

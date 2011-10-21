@@ -98,7 +98,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         return isReservationRestricted;
     }
 
-    public void setIsReservationRestricted(Boolean isReservationRestricted)
+    public void setIsReservationRestricted(final Boolean isReservationRestricted)
     {
         this.isReservationRestricted = isReservationRestricted;
     }
@@ -119,7 +119,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         this.limits = limits;
     }
 
-    public void setReservedMachines(Collection<PhysicalmachineHB> reservedMachines)
+    public void setReservedMachines(final Collection<PhysicalmachineHB> reservedMachines)
     {
         this.reservedMachines = reservedMachines;
     }
@@ -129,7 +129,7 @@ public class EnterpriseHB implements java.io.Serializable, IPojoHB<Enterprise>
         return reservedMachines;
     }
 
-    public void setDcLimits(Set<DatacenterLimitHB> dcLimits)
+    public void setDcLimits(final Set<DatacenterLimitHB> dcLimits)
     {
         this.dcLimits = dcLimits;
     }

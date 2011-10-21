@@ -34,27 +34,26 @@ import java.io.InputStreamReader;
 import org.apache.wink.client.Resource;
 import org.testng.annotations.Test;
 
-
 public class WorkspaceIT extends AbstractJpaGeneratorIT
 {
-    @Test
+    @Test(enabled = false)
     public void showWorkspace() throws Exception
     {
         Resource resource = client.resource(API_URI);
 
         String serviceDocument = prettyPrint(resource);
 
-        assertEquals(true, serviceDocument.contains("collection href=\"" + resolveDatacentersURI()
-            + "\""));
+        assertEquals(true,
+            serviceDocument.contains("collection href=\"" + resolveDatacentersURI() + "\""));
 
-        assertEquals(true, serviceDocument.contains("collection href=\"" + resolveEnterprisesURI()
-            + "\""));
+        assertEquals(true,
+            serviceDocument.contains("collection href=\"" + resolveEnterprisesURI() + "\""));
 
-        assertEquals(true, serviceDocument
-            .contains("collection href=\"" + resolveRolesURI() + "\""));
+        assertEquals(true,
+            serviceDocument.contains("collection href=\"" + resolveRolesURI() + "\""));
     }
 
-    protected String prettyPrint(Resource resource) throws IOException
+    protected String prettyPrint(final Resource resource) throws IOException
     {
         InputStream stream = resource.get(InputStream.class);
         BufferedReader r = new BufferedReader(new InputStreamReader(stream));

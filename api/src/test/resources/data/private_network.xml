@@ -1,39 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-    <enterprise idEnterprise="1" name="entreprise_1" ramSoft="1" cpuSoft="2" hdSoft="3"
-        ramHard="4" cpuHard="5" hdHard="6" repositorySoft="0" repositoryHard="0" vlanSoft="0"
-        vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" version_c="0" />
-    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1"
-        version_c="0" />
+    <enterprise idEnterprise="1" name="entreprise_1" ramSoft="1" cpuSoft="2" hdSoft="3" ramHard="4" cpuHard="5" hdHard="6" repositorySoft="0" repositoryHard="0" vlanSoft="0" vlanHard="0"
+        storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" version_c="0" />
+    <datacenter idDataCenter="1" name="datacenter_1" situation="situation_datacenter_1" version_c="0" />
     <network network_id="1" uuid="36f9c17c-0a14-434b-b7c9-dc750f4942d4" version_c="0" />
     <network network_id="2" uuid="56f9a17b-0a14-434b-b7c9-dc750f4942d2" version_c="0" />
     <network network_id="3" uuid="10b88459-ed08-4579-aaf1-7ef6f3ab9cbd" version_c="0" />
-    <virtualdatacenter idVirtualDataCenter="1" idEnterprise="1" name="test_vdc"
-        idDataCenter="1" hypervisorType="VBOX" networktypeID="1" version_c="0" idHypervisorType="1"
-        hdHard="0" hdSoft="0" ramHard="0" ramSoft="0" cpuHard="0" cpuSoft="0" vlanSoft="0" vlanHard="0"
-        storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
-    <virtualdatacenter idVirtualDataCenter="2" idEnterprise="1" name="test_vdc"
-        idDataCenter="1" hypervisorType="VBOX" networktypeID="2" version_c="0" idHypervisorType="1"
-        hdHard="0" hdSoft="0" ramHard="0" ramSoft="0" cpuHard="0" cpuSoft="0" vlanSoft="0" vlanHard="0"
-        storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
-    <network_configuration network_configuration_id="1" gateway="10.60.1.1"
-        network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0"
-        secondary_dns="0.0.0.0" sufix_dns="0" fence_mode="-" version_c="0" />
-    <network_configuration network_configuration_id="2" gateway="10.60.1.1"
-        network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0"
-        secondary_dns="0.0.0.0" sufix_dns="0" fence_mode="-" version_c="0" />
-    <network_configuration network_configuration_id="3" gateway="10.60.1.1"
-        network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0"
-        secondary_dns="0.0.0.0" sufix_dns="0" fence_mode="-" version_c="0" />
-    <network_configuration network_configuration_id="4" gateway="10.60.1.1"
-        network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0"
-        secondary_dns="0.0.0.0" sufix_dns="0" fence_mode="-" version_c="0" />
-    <vlan_network vlan_network_id="1" network_id="1" network_name="nw_1" vlan_tag="1"
-        default_network="1" network_configuration_id="1" version_c="0" />
-    <vlan_network vlan_network_id="2" network_id="1" network_name="nw_2" vlan_tag="2"
-        default_network="0" network_configuration_id="2" version_c="0" />
-    <vlan_network vlan_network_id="3" network_id="1" network_name="nw_3" vlan_tag="1"
-        default_network="0" network_configuration_id="3" version_c="0" />
-    <vlan_network vlan_network_id="4" network_id="3" network_name="nw_3" vlan_tag="1"
-        default_network="0" network_configuration_id="4" version_c="0" />
+    <virtualdatacenter idVirtualDataCenter="1" idEnterprise="1" name="test_vdc" idDataCenter="1" hypervisorType="VBOX" networktypeID="1" version_c="0" idHypervisorType="1" hdHard="0"
+        hdSoft="0" ramHard="0" ramSoft="0" cpuHard="0" cpuSoft="0" vlanSoft="0" vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <virtualdatacenter idVirtualDataCenter="2" idEnterprise="1" name="test_vdc" idDataCenter="1" hypervisorType="VBOX" networktypeID="2" version_c="0" idHypervisorType="1" hdHard="0"
+        hdSoft="0" ramHard="0" ramSoft="0" cpuHard="0" cpuSoft="0" vlanSoft="0" vlanHard="0" storageSoft="0" storageHard="0" publicIpSoft="0" publicIpHard="0" />
+    <network_configuration network_configuration_id="1" gateway="10.60.1.1" network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0" secondary_dns="0.0.0.0"
+        sufix_dns="0" fence_mode="-" version_c="0" />
+    <network_configuration network_configuration_id="2" gateway="10.60.1.1" network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0" secondary_dns="0.0.0.0"
+        sufix_dns="0" fence_mode="-" version_c="0" />
+    <network_configuration network_configuration_id="3" gateway="10.60.1.1" network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0" secondary_dns="0.0.0.0"
+        sufix_dns="0" fence_mode="-" version_c="0" />
+    <network_configuration network_configuration_id="4" gateway="10.60.1.1" network_address="10.60.1.203" mask="24" netmask="255.255.255.0" primary_dns="0.0.0.0" secondary_dns="0.0.0.0"
+        sufix_dns="0" fence_mode="-" version_c="0" />
+    <vlan_network vlan_network_id="1" network_id="1" network_name="nw_1" vlan_tag="1" default_network="1" network_configuration_id="1" version_c="0" />
+    <vlan_network vlan_network_id="2" network_id="1" network_name="nw_2" vlan_tag="2" default_network="0" network_configuration_id="2" version_c="0" />
+    <vlan_network vlan_network_id="3" network_id="1" network_name="nw_3" vlan_tag="1" default_network="0" network_configuration_id="3" version_c="0" />
+    <vlan_network vlan_network_id="4" network_id="3" network_name="nw_3" vlan_tag="1" default_network="0" network_configuration_id="4" version_c="0" />
 </dataset>
