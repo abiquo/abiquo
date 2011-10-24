@@ -110,7 +110,7 @@
                                                                                    
                 //Listening for udpates in racks list
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureManager.RACKS_UPDATED,
-                                                                                   checkInfrastructure);
+                                                                                   getRacksByDatacenter);
 
                 //Listening for editions in any infrastructure element
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
@@ -141,7 +141,7 @@
                 AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureManager.INFRASTRUCTURE_UPDATED,
                                                                                       onInfrastructureUpdated);
                 AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureManager.RACKS_UPDATED,
-                                                                                      checkInfrastructure);
+                                                                                      getRacksByDatacenter);
                 AbiCloudModel.getInstance().infrastructureManager.removeEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
                                                                                       infrastructureElementEditedHandler);
 
@@ -201,7 +201,7 @@
             }
             
             
-            protected function getRacksByDatacenter():void{
+            protected function getRacksByDatacenter(infraEvent:Event = null):void{
             	var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_RACKS_BY_DATACENTER);
                 event.dataCenter = this._dataCenter;
                 if(physicalServersFilter.text.length != 0){
