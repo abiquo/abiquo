@@ -49,7 +49,6 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
-@Transactional
 public class OVFPackageListService extends DefaultApiService
 {
     @Autowired
