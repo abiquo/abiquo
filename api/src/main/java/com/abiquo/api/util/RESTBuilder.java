@@ -599,7 +599,6 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildSystemPropertyLinks(final SystemPropertyDto systemProperty)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-
         Map<String, String> params = new HashMap<String, String>();
         params.put(SystemPropertyResource.SYSTEM_PROPERTY, systemProperty.getId().toString());
 
@@ -613,7 +612,6 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildIconLinks(final IconDto icon)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-
         Map<String, String> params = new HashMap<String, String>();
         params.put(IconResource.ICON, icon.getId().toString());
 

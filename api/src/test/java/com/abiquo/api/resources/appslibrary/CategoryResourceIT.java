@@ -21,8 +21,8 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.Assert.assertLinkExist;
-import static com.abiquo.api.common.UriTestResolver.resolveCategoriesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static org.testng.Assert.assertEquals;
 
@@ -31,15 +31,13 @@ import org.apache.wink.client.ClientWebException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 
 public class CategoryResourceIT extends AbstractJpaGeneratorIT
 {
-
-    private static final String SYSADMIN = "sysadmin";
-
     protected Category category;
 
     @Override
@@ -59,8 +57,10 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 200);
 
         CategoryDto catDto = response.getEntity(CategoryDto.class);
-        assertEquals(catDto.getName(), category.getName());
 
+        assertEquals(catDto.getName(), category.getName());
+        assertEquals(catDto.isDefaultCategory(), category.isDefaultCategory());
+        assertEquals(catDto.isErasable(), category.isErasable());
         assertLinkExist(catDto, resolveCategoryURI(category.getId()), "edit");
     }
 
@@ -68,7 +68,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     public void getCategoryDoesntExist() throws ClientWebException
     {
         ClientResponse response = get(resolveCategoryURI(12345));
-        assertEquals(response.getStatusCode(), 404);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
 
     @Test
@@ -78,47 +78,27 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
         setup(cat1);
 
         String categoryURI = resolveCategoryURI(cat1.getId());
-
         ClientResponse response = get(categoryURI);
-
         CategoryDto dto = response.getEntity(CategoryDto.class);
         dto.setName("Name_modified");
 
         response = put(categoryURI, dto);
         assertEquals(response.getStatusCode(), 200);
-
         CategoryDto modifiedDto = response.getEntity(CategoryDto.class);
 
-        assertEquals("Name_modified", modifiedDto.getName());
+        assertEquals(modifiedDto.getName(), "Name_modified");
     }
 
     @Test
     public void deleteCategory() throws Exception
     {
+        String categoryURL = resolveCategoryURI(category.getId());
 
-        Category cat1 = categoryGenerator.createUniqueInstance();
-
-        CategoryDto dto = createCategoryDto(cat1);
-
-        String categoriesURI = resolveCategoriesURI();
-
-        ClientResponse response = post(categoriesURI, dto);
-        Integer id = response.getEntity(CategoryDto.class).getId();
-
-        response = delete(resolveCategoryURI(id));
+        ClientResponse response = delete(categoryURL);
         assertEquals(response.getStatusCode(), 204);
 
-    }
-
-    // ********************* Helper methods ************************
-    private CategoryDto createCategoryDto(final Category category)
-    {
-        CategoryDto dto = new CategoryDto();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        dto.setErasable(category.isErasable());
-        dto.setDefaultCategory(category.isDefaultCategory());
-        return dto;
+        response = get(categoryURL);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
 
 }

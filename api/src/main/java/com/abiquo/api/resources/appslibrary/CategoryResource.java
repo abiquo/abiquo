@@ -51,12 +51,12 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 @Controller
 public class CategoryResource extends AbstractResource
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryResource.class);
+
     // Define the static variables that represent the URI and the PARAM.
     public static final String CATEGORY = "category";
 
     public static final String CATEGORY_PARAM = "{" + CATEGORY + "}";
-
-    private static final Logger logger = LoggerFactory.getLogger(CategoryResource.class);
 
     @Autowired
     private CategoryService service;
@@ -66,9 +66,6 @@ public class CategoryResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         Category category = service.getCategory(categoryId);
-
-        logger.info(String.format("Getting category id %s", categoryId));
-
         return createTransferObject(category, restBuilder);
     }
 
@@ -79,14 +76,10 @@ public class CategoryResource extends AbstractResource
         @PathParam(CATEGORY) @NotNull @Min(1) final Integer categoryId,
         final CategoryDto categoryDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-
-        logger.info("Updating category with id " + categoryId);
+        LOGGER.info("Updating category with id {}", categoryId);
 
         Category category = createPersistenceObject(categoryDto);
-
         category = service.modifyCategory(category, categoryId);
-
-        logger.info("Category with id " + categoryId + " updated successfully");
 
         return createTransferObject(category, restBuilder);
     }
@@ -94,8 +87,7 @@ public class CategoryResource extends AbstractResource
     @DELETE
     public void deleteCategory(@PathParam(CATEGORY) final Integer categoryId)
     {
-        logger.info(String.format("Deleting category id %s", categoryId));
-
+        LOGGER.info("Deleting category with id {}", categoryId);
         service.removeCategory(categoryId);
     }
 
@@ -106,7 +98,7 @@ public class CategoryResource extends AbstractResource
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDefaultCategory(category.isDefaultCategory());
-        dto.setErasable(dto.isErasable());
+        dto.setErasable(category.isErasable());
 
         // Add the links.
         dto.addLinks(restBuilder.buildCategoryLinks(dto));

@@ -42,11 +42,6 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         super(Category.class, entityManager);
     }
 
-    private Criterion isDefault()
-    {
-        return Restrictions.eq(Category.DEFAULT_PROPERTY, true);
-    }
-
     public Category findDefault()
     {
         return getSingleResult(createCriteria(isDefault()));
@@ -57,14 +52,19 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return findUniqueByProperty(Category.NAME_PROPERTY, categoryName);
     }
 
-    boolean existCategoryWithSameName(final String name)
+    public boolean existCategoryWithSameName(final String name)
     {
-        return existsAnyByCriterions(equalName(name));
+        return existsAnyByCriterions(equalsName(name));
     }
 
-    private static Criterion equalName(final String name)
+    private static Criterion equalsName(final String name)
     {
         return Restrictions.eq(Category.NAME_PROPERTY, name);
+    }
+
+    private Criterion isDefault()
+    {
+        return Restrictions.eq(Category.DEFAULT_PROPERTY, true);
     }
 
 }

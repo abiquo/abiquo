@@ -49,6 +49,13 @@ public class CategoryGenerator extends DefaultEntityGenerator<Category>
         return new Category(name);
     }
 
+    public Category createDefaultInstance()
+    {
+        Category category = createUniqueInstance();
+        category.setDefaultCategory(true);
+        return category;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final Category entity,
         final List<Object> entitiesToPersist)

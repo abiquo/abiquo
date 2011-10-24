@@ -21,10 +21,10 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.resources.appslibrary.IconResource.createTransferObject;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static com.abiquo.api.resources.appslibrary.IconResource.createTransferObject;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -45,10 +45,9 @@ import com.abiquo.server.core.appslibrary.IconsDto;
 
 @Path(IconsResource.ICONS_PATH)
 @Controller
-@Workspace(workspaceTitle = "Virtual Images Icons", collectionTitle = "Icons")
+@Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Icons")
 public class IconsResource extends AbstractResource
 {
-
     public static final String ICONS_PATH = "config/icons";
 
     public static final String PATH = "path";
@@ -70,14 +69,15 @@ public class IconsResource extends AbstractResource
             Icon icon = service.getIconByPath(path);
             icons.add(icon);
         }
+
         IconsDto iconsDto = new IconsDto();
         for (Icon icon : icons)
         {
             IconDto icondto = createTransferObject(icon, restBuilder);
             iconsDto.add(icondto);
         }
-        return iconsDto;
 
+        return iconsDto;
     }
 
     @POST
@@ -85,6 +85,5 @@ public class IconsResource extends AbstractResource
     {
         Icon icon = service.addIcon(iconDto, restBuilder);
         return createTransferObject(icon, restBuilder);
-
     }
 }

@@ -31,8 +31,8 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 @Repository("jpaIconDAO")
 /* package */class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
-    private static final String BY_VLAN_USED_BY_ANY_VDC =
-        " SELECT vi FROM virtualimage vimage WHERE vimage.idIcon = :iconId";
+    private static final String VIRTUALIMAGES_BY_ICON =
+        "FROM com.abiquo.server.core.appslibrary.VirtualImage WHERE icon = :icon";
 
     public IconDAO()
     {
@@ -51,8 +51,8 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
     public boolean iconInUseByVirtualImages(final Icon icon)
     {
-        Query query = getSession().createSQLQuery(BY_VLAN_USED_BY_ANY_VDC);
-        query.setParameter("iconId", icon.getId());
+        Query query = getSession().createQuery(VIRTUALIMAGES_BY_ICON);
+        query.setParameter("icon", icon);
         return !query.list().isEmpty();
     }
 }

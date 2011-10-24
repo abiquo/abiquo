@@ -46,9 +46,12 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 
 @Path(CategoriesResource.CATEGORIES_PATH)
 @Controller
-@Workspace(workspaceTitle = "Abiquo administration workspace", collectionTitle = "Categories")
+@Workspace(workspaceTitle = "Abiquo configuration workspace", collectionTitle = "Categories")
 public class CategoriesResource extends AbstractResource
 {
+    /** The logger. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoriesResource.class);
+
     public static final String CATEGORIES_PATH = "config/categories";
 
     // TODO get allowed categories
@@ -56,13 +59,11 @@ public class CategoriesResource extends AbstractResource
     @Autowired
     private CategoryService service;
 
-    /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CategoriesResource.class);
-
     @GET
     public CategoriesDto getCategory(@Context final IRESTBuilder restBuilder) throws Exception
     {
         Collection<Category> all = service.getCategories();
+
         CategoriesDto categories = new CategoriesDto();
         for (Category c : all)
         {
@@ -78,12 +79,11 @@ public class CategoriesResource extends AbstractResource
     {
         Category category = createPersistenceObject(categoryDto);
 
-        LOGGER.info("Adding category");
+        LOGGER.info("Adding new category: {}", category.getName());
 
         Category cat = service.addCategory(category);
 
         return createTransferObject(cat, builder);
-
     }
 
 }

@@ -43,7 +43,6 @@ import com.abiquo.server.core.appslibrary.IconDto;
 @Path(IconResource.ICON_PARAM)
 public class IconResource extends AbstractResource
 {
-
     public static final String ICON = "icon";
 
     public static final String ICON_PARAM = "{" + ICON + "}";
@@ -89,7 +88,6 @@ public class IconResource extends AbstractResource
     private static IconDto addLinks(final IconDto icon, final IRESTBuilder builder)
     {
         icon.setLinks(builder.buildIconLinks(icon));
-
         return icon;
     }
 }

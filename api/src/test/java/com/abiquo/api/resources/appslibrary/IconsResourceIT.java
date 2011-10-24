@@ -21,14 +21,13 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertLinkExist;
+import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconsURI;
-import static com.abiquo.testng.TestConfig.ALL_INTEGRATION_TESTS;
-import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
@@ -38,10 +37,7 @@ import com.abiquo.server.core.appslibrary.IconsDto;
 
 public class IconsResourceIT extends AbstractJpaGeneratorIT
 {
-
-    private String validURI;
-
-    @Test(groups = {ALL_INTEGRATION_TESTS})
+    @Test
     public void addIcon()
     {
         IconDto iconDto = new IconDto();
@@ -49,18 +45,23 @@ public class IconsResourceIT extends AbstractJpaGeneratorIT
         iconDto.setPath("http://newPath.com/newlogo.jpg");
 
         ClientResponse response = post(resolveIconsURI(), iconDto);
+        assertEquals(response.getStatusCode(), 201);
 
         IconDto result = response.getEntity(IconDto.class);
+
+        assertNotNull(iconDto);
+        assertEquals(result.getName(), "newName");
         assertEquals(result.getPath(), "http://newPath.com/newlogo.jpg");
+        assertLinkExist(result, resolveIconURI(result.getId()), "edit");
     }
 
-    @Test(groups = {BASIC_INTEGRATION_TESTS})
+    @Test
     public void findIconByPath()
     {
         Icon icon = iconGenerator.createUniqueInstance();
         setup(icon);
 
-        validURI = resolveIconsURI();// + "?path=" + icon.getPath();
+        String validURI = resolveIconsURI();// + "?path=" + icon.getPath();
 
         // StringBuilder URI = new StringBuilder(validURI + "?path=" + icon.getPath());
 
@@ -72,12 +73,5 @@ public class IconsResourceIT extends AbstractJpaGeneratorIT
         {
             assertEquals(iconDto.getId(), icon.getId());
         }
-    }
-
-    @AfterMethod
-    @Test(groups = {BASIC_INTEGRATION_TESTS})
-    public void tearDown()
-    {
-        super.tearDown();
     }
 }

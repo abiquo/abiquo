@@ -21,12 +21,14 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.IconDAO;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
@@ -34,11 +36,14 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
 {
+    private VirtualImageGenerator virtualImageGenerator;
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        virtualImageGenerator = new VirtualImageGenerator(getSeed());
     }
 
     @Override
@@ -65,4 +70,49 @@ public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
         return (IconGenerator) super.eg();
     }
 
+    @Test
+    public void testFindByPath()
+    {
+        Icon icon = eg().createUniqueInstance();
+        ds().persistAll(icon);
+
+        IconDAO dao = createDaoForRollbackTransaction();
+
+        Icon result = dao.findByPath(icon.getPath());
+        assertNotNull(result);
+        assertEquals(result.getName(), icon.getName());
+        assertEquals(result.getPath(), icon.getPath());
+
+        result = dao.findByPath(icon.getName() + "UNEXISTING");
+        assertNull(result);
+    }
+
+    @Test
+    public void testIconNotInUseByVirtualImages()
+    {
+        Icon icon = eg().createUniqueInstance();
+        ds().persistAll(icon);
+
+        IconDAO dao = createDaoForRollbackTransaction();
+
+        boolean result = dao.iconInUseByVirtualImages(icon);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIconInUseByVirtualImages()
+    {
+        Icon icon = eg().createUniqueInstance();
+        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        virtualImage.setIcon(icon);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, virtualImage);
+
+        IconDAO dao = createDaoForRollbackTransaction();
+
+        boolean result = dao.iconInUseByVirtualImages(icon);
+        assertTrue(result);
+    }
 }

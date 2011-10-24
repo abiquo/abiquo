@@ -25,15 +25,12 @@ import java.util.Collection;
 
 import javax.persistence.EntityManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
@@ -44,8 +41,6 @@ import com.abiquo.tracer.SeverityType;
 @Service
 public class CategoryService extends DefaultApiService
 {
-    private static final Logger logger = LoggerFactory.getLogger(CategoryResource.class);
-
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
@@ -96,7 +91,6 @@ public class CategoryService extends DefaultApiService
         appslibraryRep.insertCategory(category);
 
         return category;
-
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -114,8 +108,6 @@ public class CategoryService extends DefaultApiService
 
         validate(old);
         appslibraryRep.updateCategory(old);
-
-        logger.debug("Updating category :" + category.getName());
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_MODIFIED,
             "Category " + category.getName() + " updated ");
@@ -139,11 +131,9 @@ public class CategoryService extends DefaultApiService
             flushErrors();
         }
 
-        appslibraryRep.deleteCategory(category);
-
-        logger.debug("Removing category :" + category.getName());
-
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_DELETED,
-            "Category " + category.getName() + " removed ");
+            "Removing category " + category.getName());
+
+        appslibraryRep.deleteCategory(category);
     }
 }

@@ -22,8 +22,10 @@
 package com.abiquo.server.core.appslibrary;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -32,7 +34,6 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class CategoryDAOTest extends DefaultDAOTestBase<CategoryDAO, Category>
 {
-
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -62,6 +63,60 @@ public class CategoryDAOTest extends DefaultDAOTestBase<CategoryDAO, Category>
     public CategoryGenerator eg()
     {
         return (CategoryGenerator) super.eg();
+    }
+
+    @Test
+    public void testFindDefault()
+    {
+        Category category = eg().createDefaultInstance();
+        ds().persistAll(category);
+
+        CategoryDAO dao = createDaoForRollbackTransaction();
+        Category defaultCategory = dao.findDefault();
+
+        assertNotNull(defaultCategory);
+        assertTrue(defaultCategory.isDefaultCategory());
+        assertEquals(defaultCategory.getName(), category.getName());
+    }
+
+    @Test(expectedExceptions = NoResultException.class)
+    public void testGetUnexistingDefault()
+    {
+        Category category = eg().createUniqueInstance();
+        ds().persistAll(category);
+
+        CategoryDAO dao = createDaoForRollbackTransaction();
+        dao.findDefault();
+    }
+
+    @Test
+    public void testFindByName()
+    {
+        Category category = eg().createUniqueInstance();
+        ds().persistAll(category);
+
+        CategoryDAO dao = createDaoForRollbackTransaction();
+
+        Category result = dao.findByName(category.getName());
+        assertNotNull(result);
+        assertEquals(result.getName(), category.getName());
+
+        result = dao.findByName(category.getName() + "UNEXISTING");
+        assertNull(result);
+    }
+
+    @Test
+    public void testExistCategoryWithSameName()
+    {
+        Category category = eg().createUniqueInstance();
+        ds().persistAll(category);
+
+        CategoryDAO dao = createDaoForRollbackTransaction();
+        boolean result = dao.existCategoryWithSameName(category.getName());
+        assertTrue(result);
+
+        result = dao.existCategoryWithSameName(category.getName() + "UNEXISTING");
+        assertFalse(result);
     }
 
 }

@@ -23,8 +23,8 @@ package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoriesURI;
-import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
@@ -38,8 +38,6 @@ import com.abiquo.server.core.appslibrary.CategoryDto;
 
 public class CategoriesResourceIT extends AbstractJpaGeneratorIT
 {
-    private static final String SYSADMIN = "sysadmin";
-
     protected Category category;
 
     @Override
@@ -61,17 +59,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response = get(categoriesURI);
 
         CategoriesDto dtos = response.getEntity(CategoriesDto.class);
-
         assertEquals(dtos.getCollection().size(), 3);
-
-        String categoryURI = resolveCategoryURI(c1.getId());
-        response = get(categoryURI);
-        assertEquals(response.getStatusCode(), 200);
-
-        categoryURI = resolveCategoryURI(c2.getId());
-        response = get(categoryURI);
-        assertEquals(response.getStatusCode(), 200);
-
     }
 
     @Test
@@ -89,7 +77,8 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         // Ensure all the fields are the same than before but with an id assigned
         dto = response.getEntity(CategoryDto.class);
 
-        assertEquals(cat1.getName(), dto.getName());
+        assertNotNull(dto.getId());
+        assertEquals(dto.getName(), cat1.getName());
     }
 
     @Test
@@ -100,7 +89,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
         String href = resolveCategoriesURI();
         ClientResponse response = post(href, cat);
 
-        assertErrors(response, 409, APIError.CATEGORY_DUPLICATED_NAME.getCode());
+        assertErrors(response, 409, APIError.CATEGORY_DUPLICATED_NAME);
     }
 
     // ********************* Helper methods ************************
