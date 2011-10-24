@@ -293,7 +293,8 @@ public class Allocator implements IAllocator
     }
 
     /**
-     * Check the current allowed Enterprise resource utilization is not exceeded.
+     * Check the current allowed Enterprise resource utilization is not exceeded. Overloaded method
+     * because en case of deploying VM is not necessary check VLAN limits.
      * 
      * @param vapp, the target virtual appliance.
      * @param required, the required resources.
@@ -312,7 +313,23 @@ public class Allocator implements IAllocator
         throws LimitExceededException
     {
 
-        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force);
+        checkLimist(vapp, required, force, true);
+
+    }
+
+    /**
+     * @param vapp
+     * @param required
+     * @param force
+     * @param checkVLAN
+     * @throws LimitExceededException
+     */
+    protected void checkLimist(final VirtualAppliance vapp,
+        final VirtualMachineRequirements required, final Boolean force, final Boolean checkVLAN)
+        throws LimitExceededException
+    {
+
+        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN, false);
 
     }
 

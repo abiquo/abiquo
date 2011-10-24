@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
-import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.DVPortgroupConfigInfo;
 import com.vmware.vim25.DVPortgroupConfigSpec;
 import com.vmware.vim25.DistributedVirtualPortgroupPortgroupType;
@@ -47,10 +46,11 @@ import com.vmware.vim25.VMwareDVSPortgroupPolicy;
 import com.vmware.vim25.VimPortType;
 import com.vmware.vim25.VirtualDeviceConfigSpec;
 import com.vmware.vim25.VirtualDeviceConfigSpecOperation;
+import com.vmware.vim25.VirtualE1000;
+import com.vmware.vim25.VirtualEthernetCard;
 import com.vmware.vim25.VirtualEthernetCardDistributedVirtualPortBackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachineConnectionState;
-import com.vmware.vim25.VirtualVmxnet3;
 import com.vmware.vim25.VmwareDistributedVirtualSwitchVlanIdSpec;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.DistributedVirtualSwitch;
@@ -79,7 +79,7 @@ public class DistrubutedPortGroupActions
      * 
      * @param serviceInstance serviceInstance connection to a VDC.
      */
-    public DistrubutedPortGroupActions(ServiceInstance serviceInstance)
+    public DistrubutedPortGroupActions(final ServiceInstance serviceInstance)
     {
         this.serviceInstance = serviceInstance;
     }
@@ -94,8 +94,8 @@ public class DistrubutedPortGroupActions
      * @throws VirtualMachineException
      * @throws Exception
      */
-    public String createPortGroupInDVS(String dvsName, String networkName, Integer vlanTag)
-        throws VirtualMachineException
+    public String createPortGroupInDVS(final String dvsName, final String networkName,
+        final Integer vlanTag) throws VirtualMachineException
     {
         String portGroupName = networkName + "_" + vlanTag;
 
@@ -174,7 +174,7 @@ public class DistrubutedPortGroupActions
      * @throws VirtualMachineException
      * @throws Exception
      */
-    public DistributedVirtualPortgroup getPortGroup(String dvsName, String portGroupName)
+    public DistributedVirtualPortgroup getPortGroup(final String dvsName, final String portGroupName)
         throws VirtualMachineException
     {
         try
@@ -228,7 +228,7 @@ public class DistrubutedPortGroupActions
      * @throws VirtualMachineException
      * @throws Exception
      */
-    public void deletePortGroup(DistributedVirtualPortgroup portGroup)
+    public void deletePortGroup(final DistributedVirtualPortgroup portGroup)
         throws VirtualMachineException
     {
         try
@@ -255,8 +255,8 @@ public class DistrubutedPortGroupActions
      * @param macAddress mac address of the NIC
      * @throws VirtualMachineException encapsulate any exception
      */
-    public void attachVirtualMachineNICToPortGroup(String nameVM, String portGroupName,
-        String macAddress) throws VirtualMachineException
+    public void attachVirtualMachineNICToPortGroup(final String nameVM, final String portGroupName,
+        final String macAddress) throws VirtualMachineException
     {
         Folder fold = serviceInstance.getRootFolder();
 
@@ -273,7 +273,7 @@ public class DistrubutedPortGroupActions
                 // retrieve the virtual machine while the vcenter refreshes the state.
                 vm = (VirtualMachine) navigator.searchManagedEntity("VirtualMachine", nameVM);
             }
-            while (vm == null);
+            while (vm == null || vm.getConfig() == null);
 
             state = vm.getRuntime().connectionState;
 
@@ -306,11 +306,12 @@ public class DistrubutedPortGroupActions
                 new VirtualEthernetCardDistributedVirtualPortBackingInfo();
             nicBacking.setPort(switchConnection);
 
-            // Define the
-            VirtualVmxnet3 virtualNICSpec = new VirtualVmxnet3();
+            // Define the NIC driver
+            VirtualEthernetCard virtualNICSpec = new VirtualE1000();
             virtualNICSpec.setAddressType("manual");
             virtualNICSpec.setMacAddress(macAddress);
             virtualNICSpec.setBacking(nicBacking);
+            virtualNICSpec.setKey(4);
 
             VirtualDeviceConfigSpec nicSpec = new VirtualDeviceConfigSpec();
             nicSpec.setOperation(VirtualDeviceConfigSpecOperation.add);
@@ -333,8 +334,8 @@ public class DistrubutedPortGroupActions
             {
                 String message =
                     "Could not associate virtual machine with name '" + nameVM
-                        + "' to port group '" + portGroupName + "'";
-                throw new VirtualMachineException(message);
+                        + "' to port group '" + portGroupName + "'.";
+                throw new VirtualMachineException(message + "vSphere exception: ");
             }
 
         }

@@ -155,7 +155,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param login credentials.
      * @return BasicAuthSecurityHandler ready to be placed in the chain.
      */
-    private BasicAuthSecurityHandler createAuthenticationToken(Login login)
+    private BasicAuthSecurityHandler createAuthenticationToken(final Login login)
     {
         BasicAuthSecurityHandler basicAuthHandler = new BasicAuthSecurityHandler();
         basicAuthHandler.setUserName(login.getUser());
@@ -170,7 +170,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param login credentials.
      * @return Md5 hash of the credentials.
      */
-    private String createMd5encodedPassword(Login login)
+    private String createMd5encodedPassword(final Login login)
     {
         Md5PasswordEncoder encoder = new Md5PasswordEncoder();
         String passwordHash = encoder.encodePassword(login.getPassword(), null);
@@ -183,7 +183,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB DB user.
      * @return UserSession logged user.
      */
-    private UserSession createUserSession(UserHB userHB)
+    private UserSession createUserSession(final UserHB userHB)
     {
         UserSession userSession = new UserSession();
         userSession.setUser(userHB.getUser());
@@ -211,7 +211,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB
      * @param dataResult void
      */
-    private void deleteOldSessions(UserHB userHB, DataResult<LoginResult> dataResult)
+    private void deleteOldSessions(final UserHB userHB, final DataResult<LoginResult> dataResult)
     {
         // Looking for all existing active sessions of this user, ordered by when were
         getUserSessionDAO().deleteUserSessionsOlderThan(userHB.getName(), new Date());
@@ -224,7 +224,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @see com.abiquo.abiserver.business.authentication.IAuthenticationManager#doLogin(com.abiquo.abiserver.pojo.authentication.Login)
      */
     @Override
-    public DataResult<LoginResult> doLogin(Login login)
+    public DataResult<LoginResult> doLogin(final Login login)
 
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
@@ -278,7 +278,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param basicAuthHandler handler.
      * @return DataResult<UserDto>
      */
-    private DataResult<UserDto> apiLoginCall(Login login, BasicAuthSecurityHandler basicAuthHandler)
+    private DataResult<UserDto> apiLoginCall(final Login login,
+        final BasicAuthSecurityHandler basicAuthHandler)
     {
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.handlers(basicAuthHandler);
@@ -288,7 +289,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         return dataResultDto;
     }
 
-    private DataResult<LoginResult> login(Login login, UserDto userDto) throws Exception
+    private DataResult<LoginResult> login(final Login login, final UserDto userDto)
+        throws Exception
     {
         DataResult<LoginResult> dataResult;
         UserHB userHB;
@@ -338,7 +340,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * 
      * @param sessionToCheck current session void.
      */
-    private void extendSession(UserSession sessionToCheck)
+    private void extendSession(final UserSession sessionToCheck)
     {
         // The session is valid updating the expire Date
         int sessionTimeout = abiConfig.getSessionTimeout();
@@ -383,7 +385,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param dataResult
      * @param loginResult void
      */
-    private void generate(DataResult<LoginResult> dataResult, LoginResult loginResult)
+    private void generate(final DataResult<LoginResult> dataResult, final LoginResult loginResult)
     {
         // Generating the DataResult
         dataResult.setSuccess(true);
@@ -399,7 +401,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userSession logged user.
      * @return LoginResult pojo containing the data to login.
      */
-    private LoginResult generateLoginResult(UserHB userHB, UserSession userSession)
+    private LoginResult generateLoginResult(final UserHB userHB, final UserSession userSession)
     {
         // Generating the login result, with the user who has logged in and his session
         LoginResult loginResult = new LoginResult();
@@ -473,7 +475,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @return DB user.
      * @throws Exception UserHB.
      */
-    private UserHB getUserToPersistSession(Login login, UserDto userDto) throws Exception
+    private UserHB getUserToPersistSession(final Login login, final UserDto userDto)
+        throws Exception
     {
         // Get the user from the appropiate source
         UserHB userHB = null;
@@ -526,6 +529,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 return null;
             }
+            userHB.setEnterpriseHB(getFactory().getEnterpriseDAO().findById(
+                userHB.getEnterpriseHB().getIdEnterprise()));
         }
 
         return userHB;
@@ -547,7 +552,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB user.
      * @return DataResult<LoginResult>
      */
-    public DataResult<LoginResult> persistLogin(UserHB userHB)
+    public DataResult<LoginResult> persistLogin(final UserHB userHB)
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
         getFactory().beginConnection();
@@ -603,7 +608,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userDto user dto returned from the API.
      * @return db user, representation of an Hibernate pojo user.
      */
-    private UserHB userDtoToUserHB(UserDto userDto)
+    private UserHB userDtoToUserHB(final UserDto userDto)
     {
         UserHB userHB = new UserHB();
         userHB.setActive(userDto.isActive() ? 1 : 0);

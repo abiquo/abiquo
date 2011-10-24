@@ -77,6 +77,11 @@ public class RasdManagement extends DefaultEntityBase
         return this.id;
     }
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
     public final static String VIRTUAL_APPLIANCE_PROPERTY = "virtualAppliance";
 
     private final static boolean VIRTUAL_APPLIANCE_REQUIRED = false;
@@ -166,7 +171,7 @@ public class RasdManagement extends DefaultEntityBase
         return this.idResourceType;
     }
 
-    protected void setIdResourceType(final String idResourceType)
+    public void setIdResourceType(final String idResourceType)
     {
         this.idResourceType = idResourceType;
     }
@@ -188,7 +193,7 @@ public class RasdManagement extends DefaultEntityBase
         return this.rasd;
     }
 
-    protected void setRasd(final Rasd rasd)
+    public void setRasd(final Rasd rasd)
     {
         this.rasd = rasd;
     }

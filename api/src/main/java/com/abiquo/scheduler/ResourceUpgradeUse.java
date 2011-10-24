@@ -233,7 +233,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         final String vswitch = haPhysicalTarget.getVirtualSwitch();
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         log.debug("Update the vswitch to {}", vswitch);
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
@@ -268,7 +268,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             netAssignDao.findByVirtualDatacenter(virtualDatacenter);
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {
@@ -280,7 +280,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             if (vlanNetwork.getTag() == null)
             {
                 List<VLANNetwork> publicVLANs =
-                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter(), null);
                 List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
@@ -318,7 +318,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {

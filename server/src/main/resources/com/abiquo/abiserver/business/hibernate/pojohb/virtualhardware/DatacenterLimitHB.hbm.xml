@@ -2,9 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton"
-        name="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB"
-        table="enterprise_limits_by_datacenter">
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB" table="enterprise_limits_by_datacenter">
         <id name="idDatacenterLimit" type="java.lang.Integer">
             <column name="idDatacenterLimit" />
             <generator class="identity" />
@@ -18,51 +16,42 @@
             lazy="false" name="datacenter"> <column name="idDataCenter"
             not-null="true" /> </key-many-to-one> </composite-id>
         -->
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB"
-            lazy="false" fetch="select" name="enterprise">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" lazy="false" fetch="select" name="enterprise">
             <column name="idEnterprise" />
         </many-to-one>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
-            lazy="false" fetch="select" name="datacenter">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" lazy="false" fetch="select" name="datacenter">
             <column name="idDataCenter" />
         </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB" lazy="false" fetch="select" name="defaultVlan">
+            <column name="default_vlan_network_id" />
+        </many-to-one>
         <!-- Limits -->
-        <component name="limits"
-            class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
-            <component name="cpu"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+        <component name="limits" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationLimitHB">
+            <component name="cpu" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="cpuHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="cpuSoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="ram"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+            <component name="ram" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="ramHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="ramSoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="hd"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+            <component name="hd" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="hdHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="hdSoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="storage"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+            <component name="storage" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="storageHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="storageSoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="repository"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
-                <property name="hard" column="repositoryHard" type="java.lang.Long"
-                    not-null="true" />
-                <property name="soft" column="repositorySoft" type="java.lang.Long"
-                    not-null="true" />
+            <component name="repository" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+                <property name="hard" column="repositoryHard" type="java.lang.Long" not-null="true" />
+                <property name="soft" column="repositorySoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="vlan"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+            <component name="vlan" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="vlanHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="vlanSoft" type="java.lang.Long" not-null="true" />
             </component>
-            <component name="publicIP"
-                class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
+            <component name="publicIP" class="com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.LimitHB">
                 <property name="hard" column="publicIPHard" type="java.lang.Long" not-null="true" />
                 <property name="soft" column="publicIPSoft" type="java.lang.Long" not-null="true" />
             </component>

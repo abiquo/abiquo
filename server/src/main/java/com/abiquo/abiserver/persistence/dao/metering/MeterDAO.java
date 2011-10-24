@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAO;
 
@@ -69,5 +69,5 @@ public interface MeterDAO extends DAO<MeterHB, Long>
      * @return List of matching entries if "performedby" is a key. Null otherwise.
      */
     public List<MeterHB> findAllByFilter(HashMap<String, String> filter,
-        List<String> performedbyList, Integer numrows, RoleHB role) throws PersistenceException;
+        List<String> performedbyList, Integer numrows, UserHB user) throws PersistenceException;
 }
