@@ -392,7 +392,9 @@ public enum APIError
         "CHEF-4", "The given runlist element does not exist in the Chef Server"), CHEF_CANNOT_UPDATE_NODE(
         "CHEF-5", "The node could not be updated in the Chef Server. "
             + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
-        "Could not connect to the Chef server. Please, contact the administrator."),
+        "Could not connect to the Chef server. Please, contact the administrator."), CHEF_INVALID_ENTERPRISE_DATA(
+        "CHEF-6", "Could not connect to the Chef server with the given Validator and Admin data. "
+            + "Please verify the credentials"),
 
     ;
 
