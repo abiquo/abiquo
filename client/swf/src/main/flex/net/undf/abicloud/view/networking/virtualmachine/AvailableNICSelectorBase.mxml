@@ -94,7 +94,7 @@
 
                privateNICSelector.close();
             }
-
+            
             public function init(virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance, virtualMachine:VirtualMachine):void
             {
                 toggledContainer.selectedIndex = 0;

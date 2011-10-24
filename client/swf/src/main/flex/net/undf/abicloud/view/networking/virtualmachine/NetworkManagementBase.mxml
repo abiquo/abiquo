@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
@@ -330,6 +331,11 @@
             private function returnMac(object:Object, column:DataGridColumn):String{
             	return AbicloudUtils.formatMac(object.mac);
             }
+            
+            private function returnIp(obj:IPPoolManagement,column:DataGridColumn):String
+            {
+            	return obj.ip ? obj.ip:'-';
+            }
            
         ]]>
     </mx:Script>
@@ -365,6 +371,7 @@
                         labelFunction="nicOrderLabelFunction"
                         headerText="# NIC"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
+                    	labelFunction="returnIp"
                         dataField="ip"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
                     	labelFunction="returnMac"
