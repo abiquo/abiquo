@@ -65,7 +65,8 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
         return new DiskManagement(vapp.getVirtualDatacenter(),
             vapp,
             nvi.getVirtualMachine(),
-            10000L);
+            10000L,
+            0);
 
     }
 

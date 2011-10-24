@@ -25,14 +25,11 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
 
 @Repository("jpaDiskManagementDAO")
 public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
@@ -40,6 +37,10 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
     public static final String GET_DISK_INTO_VIRTUALMACHINE =
         " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
             + " AND disk.rasd.generation = :diskOrder ";
+
+    public static final String GET_DISKS_INTO_VIRTUALMACHINE =
+        " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
+            + " ORDER BY disk.rasd.generation";
 
     public DiskManagementDAO()
     {
@@ -51,12 +52,19 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
         super(DiskManagement.class, entityManager);
     }
 
+    /**
+     * Returns the list of disk by a virtual machine.
+     * 
+     * @param vm virtual machine object.
+     * @return the list of disks.
+     */
     @SuppressWarnings("unchecked")
     public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
     {
-        Criteria crit =
-            createCriteria(Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm));
-        return crit.list();
+        Query finalQuery = getSession().createQuery(GET_DISKS_INTO_VIRTUALMACHINE);
+        finalQuery.setParameter("idVm", vm.getId());
+
+        return finalQuery.list();
     }
 
     /**

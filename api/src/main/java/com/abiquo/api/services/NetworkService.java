@@ -97,7 +97,8 @@ public class NetworkService extends DefaultApiService
     }
 
     /**
-     * Auxiliar constructor for test purposes. Haters gonna hate bzengine.
+     * Auxiliar constructor for test purposes. Haters gonna hate 'bzengine'. And his creator as
+     * well...
      * 
      * @param em {@link EntityManager} instance with active transaction.
      */

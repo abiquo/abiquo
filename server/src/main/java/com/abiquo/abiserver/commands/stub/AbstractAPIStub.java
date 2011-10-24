@@ -739,6 +739,35 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createVirtualMachineDisksLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks",
+            params);
+    }
+
+    protected String createVirtualMachineDiskLink(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskOrder)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vappid", vappId.toString());
+        params.put("vmid", vmId.toString());
+        params.put("diskOrder", diskOrder.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/{diskOrder}",
+            params);
+    }
+
     protected String createMachineLink(final PhysicalMachine machine)
     {
         Integer rackId = null;

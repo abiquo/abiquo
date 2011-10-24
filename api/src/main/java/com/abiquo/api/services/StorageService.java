@@ -6,6 +6,8 @@ package com.abiquo.api.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -35,6 +37,23 @@ public class StorageService extends DefaultApiService
     @Autowired
     protected UserService userService;
 
+    /** Default constructor. */
+    public StorageService()
+    {
+
+    }
+
+    /**
+     * Auxiliar constructor for test purposes. Haters gonna hate 'bzengine'. And his creator as
+     * well...
+     * 
+     * @param em {@link EntityManager} instance with active transaction.
+     */
+    public StorageService(final EntityManager em)
+    {
+        vdcRepo = new VirtualDatacenterRep(em);
+    }
+
     /**
      * Create a new Hard Disk inside a Virtual Machine.
      * 
@@ -53,8 +72,8 @@ public class StorageService extends DefaultApiService
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // create the new disk from the diskSize
-        DiskManagement createdDisk = new DiskManagement(vdc, vapp, vm, diskSizeInMb);
-        createdDisk.setAttachmentOrder(vdcRepo.findHardDisksByVirtualMachine(vm).size() + 1);
+        Integer diskOrder = vdcRepo.findHardDisksByVirtualMachine(vm).size() + 1;
+        DiskManagement createdDisk = new DiskManagement(vdc, vapp, vm, diskSizeInMb, diskOrder);
         validate(createdDisk);
 
         vdcRepo.insertHardDisk(createdDisk);
@@ -133,7 +152,9 @@ public class StorageService extends DefaultApiService
         // disk order 0 always will be the readOnly image disk
         if (diskOrder.equals(0))
         {
-            return buildDefaultHardDisk(vdc, vapp, vm);
+            VirtualImage vi = vm.getVirtualImage();
+            DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+            return diskRO;
         }
         else
         {
@@ -168,7 +189,9 @@ public class StorageService extends DefaultApiService
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
         // Insert the first hard disk, based on its virtual image
-        disks.add(buildDefaultHardDisk(vdc, vapp, vm));
+        VirtualImage vi = vm.getVirtualImage();
+        DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+        disks.add(diskRO);
 
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
 
@@ -227,24 +250,6 @@ public class StorageService extends DefaultApiService
         }
         return vm;
 
-    }
-
-    /**
-     * The first disk to retrieve will be the one that corresponds to Virtual Image's disk and will
-     * be read-only. This function builds it from the Virtual Machine
-     * 
-     * @param vm
-     * @return
-     */
-    private DiskManagement buildDefaultHardDisk(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm)
-    {
-        VirtualImage vi = vm.getVirtualImage();
-        DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize());
-        diskRO.setReadOnly(Boolean.TRUE);
-        diskRO.setAttachmentOrder(0L);
-
-        return diskRO;
     }
 
 }

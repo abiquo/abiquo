@@ -64,7 +64,7 @@ public class DiskManagement extends RasdManagement
 
     public DiskManagement(final VirtualDatacenter virtualDatacenter,
         final VirtualAppliance virtualAppliance, final VirtualMachine virtualMachine,
-        final Long size)
+        final Long size, final Integer attachmentOrder)
     {
         super(DISCRIMINATOR);
 
@@ -80,6 +80,7 @@ public class DiskManagement extends RasdManagement
         setVirtualDatacenter(virtualDatacenter);
         setVirtualAppliance(virtualAppliance);
         setVirtualMachine(virtualMachine);
+        setAttachmentOrder(attachmentOrder);
         setSizeInMb(size);
 
         // Disk properties

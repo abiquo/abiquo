@@ -1,20 +1,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="API all unit tests" verbose="1">
+<suite name="API storage unit tests" verbose="1">
     <listeners>
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
     </listeners>
-    <test name="All unit tests">
+    <test name="Storage unit tests">
         <groups>
             <run>
-                <include name="test-basic" />
-                <include name="test-network" />
                 <include name="test-storage" />
-                <include name="test-all" />
             </run>
         </groups>
         <packages>
             <package name="com.abiquo.api.*" />
-            <package name="com.abiquo.scheduler.*" />
         </packages>
     </test>
 </suite>

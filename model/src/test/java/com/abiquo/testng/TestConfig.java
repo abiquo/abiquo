@@ -38,6 +38,9 @@ public class TestConfig
     /** TestNG group for networking unit tests. */
     public static final String NETWORK_UNIT_TESTS = "test-network";
 
+    /** TestNG group for storage unit tests. */
+    public static final String STORAGE_UNIT_TESTS = "test-storage";
+
     /** TestNG group for networking integration tests. */
     public static final String NETWORK_INTEGRATION_TESTS = "it-network";
 
