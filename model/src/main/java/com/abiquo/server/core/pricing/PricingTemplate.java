@@ -100,7 +100,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String NAME_PROPERTY = "name";
 
-    private final static boolean NAME_REQUIRED = false;
+    private final static boolean NAME_REQUIRED = true;
 
     private final static int NAME_LENGTH_MIN = 0;
 
@@ -156,11 +156,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String HD_GB_PROPERTY = "hdGB";
 
+    private final static boolean HD_GB_REQUIRED = true;
+
     private final static String HD_GB_COLUMN = "hdGB";
 
     @Column(name = HD_GB_COLUMN, nullable = false)
     private BigDecimal hdGB;
 
+    @Required(value = HD_GB_REQUIRED)
     public BigDecimal getHdGB()
     {
         return this.hdGB;
@@ -173,11 +176,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String STANDING_CHARGE_PERIOD_PROPERTY = "standingChargePeriod";
 
+    private final static boolean STANDING_CHARGE_PERIOD_REQUIRED = true;
+
     private final static String STANDING_CHARGE_PERIOD_COLUMN = "standingChargePeriod";
 
     @Column(name = STANDING_CHARGE_PERIOD_COLUMN, nullable = false)
     private BigDecimal standingChargePeriod;
 
+    @Required(value = STANDING_CHARGE_PERIOD_REQUIRED)
     public BigDecimal getStandingChargePeriod()
     {
         return this.standingChargePeriod;
@@ -190,11 +196,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String VLAN_PROPERTY = "vlan";
 
+    private final static boolean VLAN_REQUIRED = true;
+
     private final static String VLAN_COLUMN = "vlan";
 
     @Column(name = VLAN_COLUMN, nullable = false)
     private BigDecimal vlan;
 
+    @Required(value = VLAN_REQUIRED)
     public BigDecimal getVlan()
     {
         return this.vlan;
@@ -225,11 +234,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String MINIMUM_CHARGE_PERIOD_PROPERTY = "minimumChargePeriod";
 
+    private final static boolean MINIMUM_CHARGE_PERIOD_REQUIRED = true;
+
     private final static String MINIMUM_CHARGE_PERIOD_COLUMN = "minimumChargePeriod";
 
     @Column(name = MINIMUM_CHARGE_PERIOD_COLUMN, nullable = false)
     private BigDecimal minimumChargePeriod;
 
+    @Required(value = MINIMUM_CHARGE_PERIOD_REQUIRED)
     public BigDecimal getMinimumChargePeriod()
     {
         return this.minimumChargePeriod;
@@ -270,6 +282,7 @@ public class PricingTemplate extends DefaultEntityBase
     @Enumerated(value = javax.persistence.EnumType.ORDINAL)
     private PricingPeriod minimumCharge;
 
+    @Required(value = MINIMUM_CHARGE_REQUIRED)
     public PricingPeriod getMinimumCharge()
     {
         return this.minimumCharge;
@@ -304,11 +317,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String PUBLIC_IP_PROPERTY = "publicIp";
 
+    private final static boolean PUBLIC_IP_REQUIRED = true;
+
     private final static String PUBLIC_IP_COLUMN = "publicIp";
 
     @Column(name = PUBLIC_IP_COLUMN, nullable = false)
     private BigDecimal publicIp;
 
+    @Required(value = PUBLIC_IP_REQUIRED)
     public BigDecimal getPublicIp()
     {
         return publicIp;
@@ -321,11 +337,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String V_CPU_PROPERTY = "vcpu";
 
+    private final static boolean V_CPU_REQUIRED = true;
+
     private final static String V_CPU_COLUMN = "vcpu";
 
     @Column(name = V_CPU_COLUMN, nullable = false)
     private BigDecimal vcpu;
 
+    @Required(value = V_CPU_REQUIRED)
     public BigDecimal getVcpu()
     {
         return vcpu;
@@ -338,11 +357,14 @@ public class PricingTemplate extends DefaultEntityBase
 
     public final static String MEMORY_MB_PROPERTY = "memoryMB";
 
+    private final static boolean MEMORY_MB_REQUIRED = true;
+
     private final static String MEMORY_MB_COLUMN = "memoryMB";
 
     @Column(name = MEMORY_MB_COLUMN, nullable = false)
     private BigDecimal memoryMB;
 
+    @Required(value = MEMORY_MB_REQUIRED)
     public BigDecimal getMemoryMB()
     {
         return memoryMB;
