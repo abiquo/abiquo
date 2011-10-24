@@ -1,6 +1,5 @@
 package com.abiquo.api.services.cloud;
 
-import static com.abiquo.testng.TestConfig.NETWORK_UNIT_TESTS;
 import static com.abiquo.testng.TestConfig.STORAGE_UNIT_TESTS;
 import static org.testng.Assert.assertEquals;
 
@@ -47,6 +46,41 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     protected VirtualDatacenter vdc;
 
     protected VirtualMachine vm;
+
+    @BeforeMethod(groups = {STORAGE_UNIT_TESTS})
+    public void setUpVirtualMachine()
+    {
+        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Role r = roleGenerator.createInstance();
+        User u = userGenerator.createInstance(e, r, "basicUser", "basicUser");
+        setup(e, r, u);
+
+        vdc = vdcGenerator.createInstance(e);
+        vapp = vappGenerator.createInstance(vdc);
+        vapp.setState(State.NOT_DEPLOYED);
+        vapp.setState(State.NOT_DEPLOYED);
+        vm = vmGenerator.createInstance(e);
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
+
+        // Set the correct properties to virtualmachine
+        vm.getHypervisor().getMachine().setDatacenter(vdc.getDatacenter());
+        vm.getHypervisor().getMachine().getRack().setDatacenter(vdc.getDatacenter());
+        vm.setUser(u);
+
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage(), vm.getHypervisor()
+            .getMachine().getRack(), vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
+
+        SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
+    }
+
+    @Override
+    @AfterMethod(groups = {STORAGE_UNIT_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
+    }
 
     /**
      * Check the creation works.
@@ -551,38 +585,4 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         commitActiveTransaction(em);
     }
 
-    @BeforeMethod(groups = {STORAGE_UNIT_TESTS})
-    public void setUpVirtualMachine()
-    {
-        Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstance();
-        User u = userGenerator.createInstance(e, r, "basicUser", "basicUser");
-        setup(e, r, u);
-
-        vdc = vdcGenerator.createInstance(e);
-        vapp = vappGenerator.createInstance(vdc);
-        vapp.setState(State.NOT_DEPLOYED);
-        vapp.setState(State.NOT_DEPLOYED);
-        vm = vmGenerator.createInstance(e);
-        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-
-        DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
-
-        // Set the correct properties to virtualmachine
-        vm.getHypervisor().getMachine().setDatacenter(vdc.getDatacenter());
-        vm.getHypervisor().getMachine().getRack().setDatacenter(vdc.getDatacenter());
-        vm.setUser(u);
-
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage(), vm.getHypervisor()
-            .getMachine().getRack(), vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
-
-        SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
-    }
-
-    @Override
-    @AfterMethod(groups = {NETWORK_UNIT_TESTS})
-    public void tearDown()
-    {
-        super.tearDown();
-    }
 }

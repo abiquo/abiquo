@@ -37,6 +37,8 @@ public class StorageService extends DefaultApiService
     @Autowired
     protected UserService userService;
 
+    private static long MEGABYTE = 1048576;
+
     /** Default constructor. */
     public StorageService()
     {
@@ -179,7 +181,8 @@ public class StorageService extends DefaultApiService
         if (diskOrder.equals(0))
         {
             VirtualImage vi = vm.getVirtualImage();
-            DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+            DiskManagement diskRO =
+                new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
             return diskRO;
         }
         else
@@ -216,7 +219,8 @@ public class StorageService extends DefaultApiService
 
         // Insert the first hard disk, based on its virtual image
         VirtualImage vi = vm.getVirtualImage();
-        DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+        DiskManagement diskRO =
+            new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
         disks.add(diskRO);
 
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
