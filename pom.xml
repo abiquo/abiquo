@@ -34,8 +34,8 @@
     <!-- Aggregations. Common modules -->
     <modules>
         <module>database</module>
-        <module>vsm</module>
         <module>model</module>
+        <module>vsm</module>
         <module>am</module>
         <module>server</module>
         <module>client</module>

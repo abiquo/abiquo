@@ -18,42 +18,37 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
+ 
 package net.undf.abicloud.vo.infrastructure
 {
-
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.Fsm")]
-    [Bindable]
-    public class Fsm
-    {
-
-        public static const FINISH:String = "nop";
-
-        public static const NONE:String = "none";
-                
-        //fsm name
-        public var dn:String;
-
-	    //FINISH
-	    public var status:String;
+	import mx.collections.ArrayCollection;
 	
-	    //0-100
-	    public var progress:String;
-	
-	    //current task
-	    public var description:String;
-	
-	    //if error != empty -> show error
-	    public var error:String;
+	[Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.ucs.BladeLocatorLed")]
+	public class BladeLocatorLed
+	{
+		//Public attributes
+		
+		public var dn:String;
+        
+        public var adminStatus:String;
+
+        public var color:String;
+
+        public var bladeDn:String;
+	    //Constants  
 	    
-        public function Fsm()
-        {
-        	dn = "";
-	        status = "";
-	        progress = "";
-	        description = "";
-	        error = "";
-        }
+	    public static const ON:String = "on";
+	    
+	    public static const OFF:String = "off";  
+		  
+		public function BladeLocatorLed()
+		{
+			dn = "";        
+	        adminStatus = "";	
+	        color = "";	
+	        bladeDn = "";
+		}
 
-    }
+	}
 }

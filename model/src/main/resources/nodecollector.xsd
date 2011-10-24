@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="http://abiquo.com/server/core/infrastructure/nodecollector"
-    xmlns:nc="http://abiquo.com/server/core/infrastructure/nodecollector" 
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0" attributeFormDefault="qualified"
-    elementFormDefault="qualified">
+<xs:schema targetNamespace="http://abiquo.com/server/core/infrastructure/nodecollector" xmlns:nc="http://abiquo.com/server/core/infrastructure/nodecollector" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0" attributeFormDefault="qualified" elementFormDefault="qualified">
     <!-- -->
     <!-- Definition of all the elements that -->
     <!-- will be serializated in the -->
@@ -14,21 +11,21 @@
     <xs:element name="VirtualSystem" type="nc:VirtualSystemDto" />
     <xs:element name="VirtualSystemCollection" type="nc:VirtualSystemCollectionDto" />
     <xs:element name="Hypervisor" type="nc:HypervisorEnumTypeDto" />
+    <xs:element name="LogicServerPolicy" type="nc:LogicServerPolicyDto" />
     <xs:element name="LogicServer" type="nc:LogicServerDto" />
     <xs:element name="LogicServers" type="nc:LogicServersDto" />
+    <xs:element name="BladeLocatorLed" type="nc:BladeLocatorLedDto" />
     <xs:element name="Organization" type="nc:OrganizationDto" />
     <xs:element name="Organizations" type="nc:OrganizationsDto" />
     <xs:element name="Fsm" type="nc:FsmDto" />
     <xs:element name="Fsms" type="nc:FsmsDto" />
-    
-    <!--                                      -->
+    <!-- -->
     <!-- Definition of the main complex types -->
     <!-- defined as Data Transfer Objects -->
     <!-- -->
     <xs:complexType name="HostDto">
         <xs:annotation>
-            <xs:documentation> The object contains the current needed values of the physical machine
-                capabilities to retrieve
+            <xs:documentation> The object contains the current needed values of the physical machine capabilities to retrieve
             </xs:documentation>
         </xs:annotation>
         <xs:complexContent>
@@ -49,8 +46,7 @@
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="host" type="nc:HostDto" nillable="false" minOccurs="0"
-                maxOccurs="unbounded" />
+            <xs:element name="host" type="nc:HostDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="VirtualSystemDto">
@@ -59,16 +55,14 @@
                 <xs:sequence>
                     <xs:element name="uuid" type="xs:string" nillable="false" />
                     <xs:element name="vport" type="xs:long" nillable="false" />
-                    <xs:element name="status" type="nc:VirtualSystemStatusEnumType"
-                        nillable="false" />
+                    <xs:element name="status" type="nc:VirtualSystemStatusEnumType" nillable="false" />
                 </xs:sequence>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
     <xs:complexType name="VirtualSystemCollectionDto">
         <xs:sequence>
-            <xs:element name="virtualSystems" type="nc:VirtualSystemDto" nillable="true"
-                minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="virtualSystems" type="nc:VirtualSystemDto" nillable="true" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
     <xs:simpleType name="HypervisorEnumTypeDto">
@@ -95,34 +89,30 @@
         </xs:restriction>
     </xs:simpleType>
     <xs:complexType name="LogicServerDto">
-		<xs:annotation>
-			<xs:documentation>
-				The object contains the current needed values of the Logic Server
-				capabilities to retrieve
-			</xs:documentation>
-		</xs:annotation>
-		<xs:sequence>
-			<xs:element name="name" type="xs:string" nillable="false" />
-			<xs:element name="associated" type="xs:string" nillable="false" />
-			<xs:element name="associatedTo" type="xs:string" nillable="true" />
-			<xs:element name="description" type="xs:string" nillable="true" />
-		</xs:sequence>
-    </xs:complexType>
-	<xs:complexType name="LogicServersDto">
         <xs:annotation>
-            <xs:documentation>
-                Wrapper class to get a list of Logic Servers.
+            <xs:documentation> The object contains the current needed values of the Logic Server capabilities to retrieve
             </xs:documentation>
         </xs:annotation>
-            <xs:sequence>
-                <xs:element name="logicServer" type="nc:LogicServerDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
-            </xs:sequence>
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" nillable="false" />
+            <xs:element name="associated" type="xs:string" nillable="false" />
+            <xs:element name="associatedTo" type="xs:string" nillable="true" />
+            <xs:element name="description" type="xs:string" nillable="true" />
+            <xs:element name="policies" type="nc:LogicServerPolicyDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LogicServersDto">
+        <xs:annotation>
+            <xs:documentation> Wrapper class to get a list of Logic Servers.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="logicServer" type="nc:LogicServerDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
     </xs:complexType>
     <xs:complexType name="OrganizationDto">
         <xs:annotation>
-            <xs:documentation>
-                The object contains the current needed values of the Organization
-                capabilities to retrieve
+            <xs:documentation> The object contains the current needed values of the Organization capabilities to retrieve
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
@@ -135,19 +125,16 @@
     </xs:complexType>
     <xs:complexType name="OrganizationsDto">
         <xs:annotation>
-            <xs:documentation>
-                Wrapper class to get a list of Organizations.
+            <xs:documentation> Wrapper class to get a list of Organizations.
             </xs:documentation>
         </xs:annotation>
-            <xs:sequence>
-                <xs:element name="organizations" type="nc:OrganizationDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
-            </xs:sequence>
+        <xs:sequence>
+            <xs:element name="organizations" type="nc:OrganizationDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
     </xs:complexType>
     <xs:complexType name="FsmDto">
         <xs:annotation>
-            <xs:documentation>
-                The object contains the current needed values of the State Machine in UCS
-                capabilities to retrieve
+            <xs:documentation> The object contains the current needed values of the State Machine in UCS capabilities to retrieve
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
@@ -160,35 +147,54 @@
     </xs:complexType>
     <xs:complexType name="FsmsDto">
         <xs:annotation>
-            <xs:documentation>
-                Wrapper class to get a list of Fsm.
+            <xs:documentation> Wrapper class to get a list of Fsm.
             </xs:documentation>
         </xs:annotation>
-            <xs:sequence>
-                <xs:element name="fsms" type="nc:FsmDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
-            </xs:sequence>
+        <xs:sequence>
+            <xs:element name="fsms" type="nc:FsmDto" nillable="false" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
     </xs:complexType>
-    <!--                                      -->
-    <!--  Complex helper types                -->
-    <!--                                      -->
+    <xs:complexType name="LogicServerPolicyDto">
+        <xs:annotation>
+            <xs:documentation> The object contains the current needed values of the Logic Server Policies capabilities to retrieve
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="dn" type="xs:string" nillable="false" />
+            <xs:element name="name" type="xs:string" nillable="false" />
+            <xs:element name="priority" type="xs:string" nillable="true" />
+            <xs:element name="description" type="xs:string" nillable="true" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="BladeLocatorLedDto">
+        <xs:annotation>
+            <xs:documentation> The object contains the current needed values of the Logic Server Locator LED capabilities to retrieve
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="dn" type="xs:string" />
+            <xs:element name="adminStatus" type="xs:string" />
+            <xs:element name="color" type="xs:string" />
+            <xs:element name="bladeDn" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType><!-- -->
+    <!-- Complex helper types -->
+    <!-- -->
     <xs:complexType name="ComputerSystemType" abstract="true">
         <xs:annotation>
-            <xs:documentation> Class computer system POJO contains all the shared capabilities for
-                physical and virtual systems
+            <xs:documentation> Class computer system POJO contains all the shared capabilities for physical and virtual systems
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
             <xs:element name="name" type="xs:string" nillable="false" />
             <xs:element name="cpu" type="xs:long" nillable="false" />
             <xs:element name="ram" type="xs:long" nillable="false" />
-            <xs:element name="resources" type="nc:ResourceType" nillable="true"
-                minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="resources" type="nc:ResourceType" nillable="true" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="ResourceType">
         <xs:annotation>
-            <xs:documentation> This class represents a resource allocated in a computer system,
-                whatever is virtual or physical.
+            <xs:documentation> This class represents a resource allocated in a computer system, whatever is virtual or physical.
             </xs:documentation>
         </xs:annotation>
         <xs:sequence>
@@ -259,40 +265,35 @@
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized">
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#streamOptimized">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="VMDK_STREAM_OPTIMIZED" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat">
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="VMDK_FLAT" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse">
+            <xs:enumeration value="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_sparse">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="VMDK_MONOLITHIC_SPARSE" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat">
+            <xs:enumeration value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="VHD_FLAT" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse">
+            <xs:enumeration value="http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="VHD_SPARSE" />
@@ -320,8 +321,7 @@
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
-            <xs:enumeration
-                value="http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse">
+            <xs:enumeration value="http://people.gnome.org/~markmc/qcow-image-format.html#monolithic_sparse">
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="QCOW2_SPARSE" />

@@ -29,6 +29,7 @@ import com.abiquo.abiserver.commands.stub.MachineResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
@@ -116,6 +117,26 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      */
     @Override
     public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#bladeLocatorLEDoff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    /**
+     * @see com.abiquo.abiserver.commands.stub.MachineResourceStub#getBladeLocatorLed(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
+     */
+    @Override
+    public DataResult<BladeLocatorLed> getBladeLocatorLed(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;

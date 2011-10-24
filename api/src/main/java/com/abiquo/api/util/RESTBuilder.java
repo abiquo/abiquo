@@ -264,6 +264,12 @@ public class RESTBuilder implements IRESTBuilder
                 params));
             links.add(builder.buildActionLink(MachineResource.class,
                 MachineResource.MACHINE_ACTION_LS, MachineResource.MACHINE_ACTION_LS__REL, params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_ACTION_LED_OFF, MachineResource.MACHINE_ACTION_LED_OFF_REL,
+                params));
+            links.add(builder.buildActionLink(MachineResource.class,
+                MachineResource.MACHINE_LOCATOR_LED, MachineResource.MACHINE_LOCATOR_LED_REL,
+                params));
         }
 
         return links;

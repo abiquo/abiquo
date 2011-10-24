@@ -24,6 +24,7 @@ package com.abiquo.abiserver.commands.stub;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.ucs.BladeLocatorLed;
 import com.abiquo.abiserver.pojo.ucs.LogicServer;
 
 public interface MachineResourceStub
@@ -65,5 +66,18 @@ public interface MachineResourceStub
     public DataResult<LogicServer> getBladeLogicServer(final PhysicalMachine machine);
 
     public BasicResult deletePhysicalMachine(PhysicalMachine machine);
+    
+    /**
+     * Light the LED. off.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public BasicResult bladeLocatorLEDoff(final PhysicalMachine machine);
 
+    /**
+     * Retrieve the LED. off.
+     * 
+     * @param PhysicalMachine machine.
+     */
+    public DataResult<BladeLocatorLed> getBladeLocatorLed(PhysicalMachine machine);
 }

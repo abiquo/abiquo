@@ -83,7 +83,10 @@ public enum ComponentType implements Serializable
     COSTCODE(16777216, "Cost Code"),
 
     // STORAGE DEVICES
-    STORAGE_DEVICE(33554432, "Storage device");
+    STORAGE_DEVICE(33554432, "Storage device"),
+    
+    // Abiquo's UCS
+    UCS(10485776, "UCS");
 
     private final int component;
 
