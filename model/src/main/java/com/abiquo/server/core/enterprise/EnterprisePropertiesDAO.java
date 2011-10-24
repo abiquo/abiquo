@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.pricing;
+package com.abiquo.server.core.enterprise;
 
 import javax.persistence.EntityManager;
 
@@ -29,32 +29,27 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaCurrencyDAO")
-public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
+@Repository("jpaEnterprisePropertiesDAO")
+public class EnterprisePropertiesDAO extends DefaultDAOBase<Integer, EnterpriseProperties>
 {
-    public CurrencyDAO()
+
+    public EnterprisePropertiesDAO()
     {
-        super(Currency.class);
+        super(EnterpriseProperties.class);
     }
 
-    public CurrencyDAO(final EntityManager entityManager)
+    public EnterprisePropertiesDAO(final EntityManager entityManager)
     {
-        super(Currency.class, entityManager);
+        super(EnterpriseProperties.class, entityManager);
     }
 
-    public boolean existAnyOtherCurrencyWithName(final String name)
+    public EnterpriseProperties findByEnterprise(final Enterprise enterprise)
     {
-        return existsAnyByCriterions(sameName(name));
+        return findUniqueExistingByCriterions(sameEnterprise(enterprise));
     }
 
-    public static Criterion sameName(final String name)
+    private Criterion sameEnterprise(final Enterprise enterprise)
     {
-        return Restrictions.eq(Currency.NAME_PROPERTY, name);
+        return Restrictions.eq(EnterpriseProperties.ENTERPRISE_PROPERTY, enterprise);
     }
-
-    public boolean existAnyOtherCurrencyWithName(final Currency currency, final String name)
-    {
-        return existsAnyOtherByCriterions(currency, sameName(name));
-    }
-
 }

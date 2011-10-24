@@ -403,7 +403,8 @@ public enum APIError
         "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
         "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
-        "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"),
+        "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
+        "PRICINGTEMPLATE-7", "Missing link to the currency"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -439,8 +440,11 @@ public enum APIError
 
     // PRICING - TIER
     PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
-        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"),
-    
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
+        "PRICING_TIER-2",
+        "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
+
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(

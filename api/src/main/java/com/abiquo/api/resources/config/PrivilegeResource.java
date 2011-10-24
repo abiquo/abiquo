@@ -34,6 +34,7 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
 import com.abiquo.server.core.enterprise.User;
@@ -60,8 +61,8 @@ public class PrivilegeResource extends AbstractResource
     public PrivilegeDto getPrivilege(@PathParam(PRIVILEGE) final Integer privilegeId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
-            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getRole().getPrivileges() != null)
@@ -78,7 +79,7 @@ public class PrivilegeResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW_PRIVILEGES);
+                securityService.requirePrivilege(Privileges.USERS_VIEW_PRIVILEGES);
             }
 
         }

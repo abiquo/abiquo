@@ -374,6 +374,8 @@
 
     <mx:Label id="headerLabel"
         left="70" top="36"
+        maxWidth="350"
+        truncateToFit="true"
         text="{_headerText}" styleName="AbiCloudAlertSubtitle"/>
 
 
