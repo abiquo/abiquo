@@ -28,12 +28,7 @@
 
 package com.abiquo.server.core.infrastructure;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * The object contains the current needed values of the blade locator led.
@@ -55,25 +50,15 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
  * &lt;/complexType>
  * </pre>
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "BladeLocatorLedDto", propOrder = {"dn", "adminStatus", "color", "bladeDn"})
-public class BladeLocatorLedDto extends SingleResourceTransportDto
+@XmlRootElement(name = "bladeLocatorLed")
+public class BladeLocatorLedDto
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -3474189332137578386L;
-
-    @XmlElement(required = true)
     protected String dn;
 
-    @XmlElement(required = true)
     protected String adminStatus;
 
-    @XmlElement(required = true)
     protected String color;
 
-    @XmlElement(required = true)
     protected String bladeDn;
 
     /**
