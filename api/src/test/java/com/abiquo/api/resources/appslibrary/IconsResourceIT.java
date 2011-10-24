@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconsURI;
@@ -30,6 +31,7 @@ import static org.testng.Assert.assertNotNull;
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
@@ -53,6 +55,21 @@ public class IconsResourceIT extends AbstractJpaGeneratorIT
         assertEquals(result.getName(), "newName");
         assertEquals(result.getPath(), "http://newPath.com/newlogo.jpg");
         assertLinkExist(result, resolveIconURI(result.getId()), "edit");
+    }
+
+    @Test
+    public void addIconRaises409WhenDuplicatedPath()
+    {
+        IconDto iconDto = new IconDto();
+        iconDto.setName("newName");
+        iconDto.setPath("http://newPath.com/newlogo.jpg");
+
+        ClientResponse response = post(resolveIconsURI(), iconDto);
+        assertEquals(response.getStatusCode(), 201);
+
+        iconDto.setName("Another Icon");
+        response = post(resolveIconsURI(), iconDto);
+        assertError(response, 409, APIError.ICON_DUPLICATED_PATH);
     }
 
     @Test

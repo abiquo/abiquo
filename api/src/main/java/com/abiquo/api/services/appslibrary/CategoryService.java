@@ -77,12 +77,8 @@ public class CategoryService extends DefaultApiService
     {
         validate(category);
 
-        // there is one default category already created by the system
-        // so user cannot manage this property currently
-        category.setDefaultCategory(false);
-
         // Check if there is a category with the same name
-        if (appslibraryRep.existAnyOtherCategoryWithName(category.getName()))
+        if (appslibraryRep.existAnyWithName(category.getName()))
         {
             addConflictErrors(APIError.CATEGORY_DUPLICATED_NAME);
             flushErrors();
@@ -100,6 +96,13 @@ public class CategoryService extends DefaultApiService
         if (old == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
+
+        // Check if there is a category (different than the current one) with the new name
+        if (appslibraryRep.existAnyOtherWithName(old, category.getName()))
+        {
+            addConflictErrors(APIError.CATEGORY_DUPLICATED_NAME);
             flushErrors();
         }
 

@@ -27,6 +27,9 @@ import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.Test;
 
@@ -34,6 +37,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 
 public class IconResourceIT extends AbstractJpaGeneratorIT
 {
@@ -57,7 +61,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void getUnexistingIcon()
+    public void getIconRaises404WhenNotFound()
     {
         ClientResponse response = get(resolveIconURI(12345));
         assertError(response, 404, APIError.NON_EXISENT_ICON);
@@ -85,6 +89,22 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void updateIconRaises404WhenNotFound()
+    {
+        Icon icon = iconGenerator.createUniqueInstance();
+        setup(icon);
+
+        IconDto iconDto = new IconDto();
+        iconDto.setId(icon.getId());
+        iconDto.setName("newName");
+        iconDto.setPath("http://newPath.com/image.jpg");
+
+        String validURI = resolveIconURI(icon.getId() + 10);
+        ClientResponse response = put(validURI, iconDto);
+        assertError(response, 404, APIError.NON_EXISENT_ICON);
+    }
+
+    @Test
     public void deleteIcon()
     {
         Icon icon = iconGenerator.createUniqueInstance();
@@ -96,6 +116,32 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
 
         response = get(validURI);
         assertError(response, 404, APIError.NON_EXISENT_ICON);
+    }
+
+    @Test
+    public void deleteIconRaises404WhenNotFound()
+    {
+        String validURI = resolveIconURI(12345);
+        ClientResponse response = delete(validURI);
+        assertError(response, 404, APIError.NON_EXISENT_ICON);
+    }
+
+    @Test
+    public void deleteIconRaises409WhenInUseInVirtualImages()
+    {
+        Icon icon = iconGenerator.createUniqueInstance();
+        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        virtualImage.setIcon(icon);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+        entitiesToPersist.add(virtualImage);
+
+        setup(entitiesToPersist.toArray());
+
+        String validURI = resolveIconURI(icon.getId());
+        ClientResponse response = delete(validURI);
+        assertError(response, 409, APIError.ICON_IN_USE_BY_VIRTUAL_IMAGES);
     }
 
 }

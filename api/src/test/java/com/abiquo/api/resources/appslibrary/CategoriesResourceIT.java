@@ -63,7 +63,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void postCategoryTest() throws Exception
+    public void postCategory() throws Exception
     {
         Category cat1 = categoryGenerator.createUniqueInstance();
         CategoryDto dto = createCategoryDto(cat1);
@@ -82,7 +82,7 @@ public class CategoriesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void postWithDuplicatedNameTest()
+    public void postCategoryRaises409WhenDuplicatedName()
     {
         CategoryDto cat = createCategoryDto(category);
 

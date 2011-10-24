@@ -19,18 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.appslibrary;
 
-  import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class IconTest extends DefaultEntityTestBase<Icon>
-  {
+public class IconTest extends DefaultEntityTestBase<Icon>
+{
 
-      @Override
-      protected InstanceTester<Icon> createEntityInstanceGenerator()
-      {
-          return new IconGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<Icon> createEntityInstanceGenerator()
+    {
+        return new IconGenerator(getSeed());
+    }
+}

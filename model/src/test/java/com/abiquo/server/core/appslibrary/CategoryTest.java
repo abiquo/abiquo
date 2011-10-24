@@ -19,18 +19,45 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.appslibrary;
 
-  import com.abiquo.server.core.appslibrary.Category;
+import org.testng.annotations.Test;
+
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class CategoryTest extends DefaultEntityTestBase<Category>
-  {
+public class CategoryTest extends DefaultEntityTestBase<Category>
+{
 
-      @Override
-      protected InstanceTester<Category> createEntityInstanceGenerator()
-      {
-          return new CategoryGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<Category> createEntityInstanceGenerator()
+    {
+        return new CategoryGenerator(getSeed());
+    }
+
+    @Test
+    public void testSetErasable()
+    {
+        Category category = new Category("Test");
+        category.setErasable(true);
+        assertTrue(category.isErasable());
+
+        category.setErasable(false);
+        assertFalse(category.isErasable());
+    }
+
+    @Test
+    public void testSetErasableSuceedsWhenDefaultCategoryAndNotErasable()
+    {
+        Category category = Category.defaultCategory("Test");
+        category.setErasable(false); // This should work
+        assertFalse(category.isErasable());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testSetErasableFailsWhenDefaultCategoryAndErasable()
+    {
+        Category category = Category.defaultCategory("Test");
+        category.setErasable(true); // This should fail
+    }
+}

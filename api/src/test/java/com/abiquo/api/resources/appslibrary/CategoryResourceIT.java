@@ -65,7 +65,7 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void getCategoryDoesntExist() throws ClientWebException
+    public void getCategoryRaises404WhenNotFound() throws ClientWebException
     {
         ClientResponse response = get(resolveCategoryURI(12345));
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
@@ -74,10 +74,10 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void modifyCategory() throws Exception
     {
-        Category cat1 = categoryGenerator.createUniqueInstance();
-        setup(cat1);
+        Category cat = categoryGenerator.createUniqueInstance();
+        setup(cat);
 
-        String categoryURI = resolveCategoryURI(cat1.getId());
+        String categoryURI = resolveCategoryURI(cat.getId());
         ClientResponse response = get(categoryURI);
         CategoryDto dto = response.getEntity(CategoryDto.class);
         dto.setName("Name_modified");
@@ -90,6 +90,36 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void modifyCategoryRaises404WhenNotFound() throws Exception
+    {
+        Category cat = categoryGenerator.createUniqueInstance();
+        setup(cat);
+
+        String categoryURI = resolveCategoryURI(cat.getId());
+        ClientResponse response = get(categoryURI);
+        CategoryDto dto = response.getEntity(CategoryDto.class);
+        dto.setName("Name_modified");
+
+        response = put(resolveCategoryURI(cat.getId() + 10), dto);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+    }
+
+    @Test
+    public void modifyCategoryRaises409WhenDuplicatedName() throws Exception
+    {
+        Category cat = categoryGenerator.createUniqueInstance();
+        setup(cat);
+
+        String categoryURI = resolveCategoryURI(cat.getId());
+        ClientResponse response = get(categoryURI);
+        CategoryDto dto = response.getEntity(CategoryDto.class);
+        dto.setName(category.getName()); // Duplicated name
+
+        response = put(categoryURI, dto);
+        assertError(response, 409, APIError.CATEGORY_DUPLICATED_NAME);
+    }
+
+    @Test
     public void deleteCategory() throws Exception
     {
         String categoryURL = resolveCategoryURI(category.getId());
@@ -99,6 +129,26 @@ public class CategoryResourceIT extends AbstractJpaGeneratorIT
 
         response = get(categoryURL);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+    }
+
+    @Test
+    public void deleteCategoryRaises404WhenNotFound() throws Exception
+    {
+        String categoryURL = resolveCategoryURI(category.getId() + 10);
+        ClientResponse response = delete(categoryURL);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+    }
+
+    @Test
+    public void deleteCategoryRaises409WhenNotErasable() throws Exception
+    {
+        Category cat = categoryGenerator.createUniqueInstance();
+        cat.setErasable(false);
+        setup(cat);
+
+        String categoryURL = resolveCategoryURI(cat.getId());
+        ClientResponse response = delete(categoryURL);
+        assertError(response, 409, APIError.CATEGORY_NOT_ERASABLE);
     }
 
 }

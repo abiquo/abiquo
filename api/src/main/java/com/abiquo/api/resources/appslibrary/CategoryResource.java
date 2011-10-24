@@ -111,7 +111,6 @@ public class CategoryResource extends AbstractResource
     {
         Category category = new Category(dto.getName());
         category.setId(dto.getId());
-        category.setDefaultCategory(dto.isDefaultCategory());
         category.setErasable(dto.isErasable());
         return category;
     }

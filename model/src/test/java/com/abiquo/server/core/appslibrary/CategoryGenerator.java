@@ -51,9 +51,8 @@ public class CategoryGenerator extends DefaultEntityGenerator<Category>
 
     public Category createDefaultInstance()
     {
-        Category category = createUniqueInstance();
-        category.setDefaultCategory(true);
-        return category;
+        String name = newString(nextSeed(), Category.NAME_LENGTH_MIN, Category.NAME_LENGTH_MAX);
+        return Category.defaultCategory(name);
     }
 
     @Override

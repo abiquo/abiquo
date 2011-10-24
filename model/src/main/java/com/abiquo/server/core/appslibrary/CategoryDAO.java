@@ -52,9 +52,14 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return findUniqueByProperty(Category.NAME_PROPERTY, categoryName);
     }
 
-    public boolean existCategoryWithSameName(final String name)
+    public boolean existsAnyWithName(final String name)
     {
         return existsAnyByCriterions(equalsName(name));
+    }
+
+    public boolean existsAnyOtherWithName(final Category category, final String name)
+    {
+        return existsAnyOtherByCriterions(category, equalsName(name));
     }
 
     private static Criterion equalsName(final String name)

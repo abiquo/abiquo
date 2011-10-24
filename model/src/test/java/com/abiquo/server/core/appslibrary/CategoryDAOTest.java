@@ -112,10 +112,10 @@ public class CategoryDAOTest extends DefaultDAOTestBase<CategoryDAO, Category>
         ds().persistAll(category);
 
         CategoryDAO dao = createDaoForRollbackTransaction();
-        boolean result = dao.existCategoryWithSameName(category.getName());
+        boolean result = dao.existsAnyWithName(category.getName());
         assertTrue(result);
 
-        result = dao.existCategoryWithSameName(category.getName() + "UNEXISTING");
+        result = dao.existsAnyWithName(category.getName() + "UNEXISTING");
         assertFalse(result);
     }
 

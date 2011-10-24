@@ -110,9 +110,14 @@ public class AppsLibraryRep extends DefaultRepBase
         return cat;
     }
 
-    public boolean existAnyOtherCategoryWithName(final String name)
+    public boolean existAnyWithName(final String name)
     {
-        return categoryDAO.existCategoryWithSameName(name);
+        return categoryDAO.existsAnyWithName(name);
+    }
+
+    public boolean existAnyOtherWithName(final Category category, final String name)
+    {
+        return categoryDAO.existsAnyOtherWithName(category, name);
     }
 
     // Icon

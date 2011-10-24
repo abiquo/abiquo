@@ -30,6 +30,7 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
+import com.google.common.annotations.VisibleForTesting;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -115,9 +116,11 @@ public class Category extends DefaultEntityBase
         return this.defaultCategory;
     }
 
-    public void setDefaultCategory(final boolean defaultCategory)
+    // Should never be set. Default category is always present in DB
+    private void setDefaultCategory(final boolean defaultCategory)
     {
         this.defaultCategory = defaultCategory;
+        this.erasable = false;
     }
 
     public final static String ERASABLE_PROPERTY = "erasable";
@@ -135,9 +138,23 @@ public class Category extends DefaultEntityBase
         return this.erasable;
     }
 
+    // The default category should never be made erasable
     public void setErasable(final boolean erasable)
     {
+        if (erasable && this.defaultCategory)
+        {
+            throw new IllegalStateException("Default category cannot be made erasable");
+        }
         this.erasable = erasable;
+    }
+
+    // This is made package protected ONLY to be used by the generator fortesting purposes
+    @VisibleForTesting
+    /* package */static Category defaultCategory(final String name)
+    {
+        Category category = new Category(name);
+        category.setDefaultCategory(true);
+        return category;
     }
 
 }
