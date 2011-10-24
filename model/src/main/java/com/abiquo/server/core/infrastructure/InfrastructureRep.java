@@ -695,7 +695,6 @@ public class InfrastructureRep extends DefaultRepBase
     }
 
     /**
-<<<<<<< HEAD
      * Return all machines in a rack that are empty of VM.
      * 
      * @param rackId rack.
@@ -744,8 +743,7 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
     }
-=======
-     * Return all the public VLANs by Datacenter.
+     /** Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}

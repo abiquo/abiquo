@@ -131,8 +131,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/*" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/fsm" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/logicServers/*" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- MACHINES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />

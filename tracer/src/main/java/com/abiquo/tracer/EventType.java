@@ -158,19 +158,7 @@ public enum EventType implements Serializable
     // HA Engine Events
     MACHINE_DISABLED_BY_HA(1400, "MACHINE_DISABLED_BY_HA", "Machine disabled by HA engine."), VAPP_BLOCKED_BY_HA(
         1401, "VAPP_BLOCKED_BY_HA", "Virtual appliance block by HA engine"), VM_MOVING_BY_HA(1402,
-        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"), 
-        
-    // UCS
-    UCS_COMMUNICATION(
-        1700,
-        "UCS COMMUNICATION PROBLEM",
-        "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
-        1701, "UCS BLADE ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
-        1702, "Blade disassociation with a Service Profile in UCS",
-        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
-        "SERVICE PROFILE DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
-        "UCS BLADE POWER OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
-        "UCS BLADE POWER ON", "Blade powered on in UCS");
+        "VAPP_MOVING_BY_HA", "Virtual machine being moved by HA engine"),
 
     // ALLOCATION RULES
     ALLOCATION_RULES_APPLIED(1500, "ALLOCATION_RULES_APPLIED", "Allocation rules applied"), ALLOCATION_RULES_REMOVED(
@@ -179,7 +167,19 @@ public enum EventType implements Serializable
     // STORAGE DEVICE
     STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
-        "STORAGE DEVICE DELETED", "Storage device deleted");
+        "STORAGE DEVICE DELETED", "Storage device deleted"),
+
+    // UCS
+    UCS_COMMUNICATION(
+        1700,
+        "UCS_COMMUNICATION_PROBLEM",
+        "There is a problem accessing to UCS. Might be due to several causes. Check that UCS is working, reacheable, and the credentials"), UCS_ASSOCIATE(
+        1701, "UCS_BLADE_ASSOCIATION", "Blade association with a Service Profile in UCS"), UCS_DISSOCIATE(
+        1702, "Blade disassociation with a Service Profile in UCS",
+        "Blade disassociation with a Service Profile in UCS"), UCS_DELETED(1703,
+        "SERVICE_PROFILE_DELETED", "Service Profile deletion in UCS"), UCS_BLADE_POWEROFF(1704,
+        "UCS_BLADE_POWER_OFF", "Blade powered off in UCS"), UCS_BLADE_POWERON(1705,
+        "UCS_BLADE_POWER_ON", "Blade powered on in UCS");
 
     private final int event;
 
