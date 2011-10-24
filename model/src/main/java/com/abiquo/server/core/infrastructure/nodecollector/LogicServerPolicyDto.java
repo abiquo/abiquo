@@ -21,8 +21,13 @@
 
 package com.abiquo.server.core.infrastructure.nodecollector;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "LogicServerPolicyDto", propOrder = {"dn", "name", "priority", "description"})
 public class LogicServerPolicyDto
 {
     @XmlElement(required = true)

@@ -80,6 +80,9 @@ public class ObjectFactory
     private final static QName _Fsms_QNAME =
         new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "Fsms");
 
+    private final static QName _BladeLocatorLed_QNAME =
+        new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "BladeLocatorLed");
+
     private final static QName _LogicServerPolicy_QNAME =
         new QName("http://abiquo.com/server/core/infrastructure/nodecollector", "LogicServerPolicy");
 
@@ -177,6 +180,22 @@ public class ObjectFactory
     public FsmsDto createFsmsDto()
     {
         return new FsmsDto();
+    }
+
+    /**
+     * Create an instance of {@link BladeLocatorLedDto }
+     */
+    public BladeLocatorLedDto createBladeLocatorLedDto()
+    {
+        return new BladeLocatorLedDto();
+    }
+
+    /**
+     * Create an instance of {@link LogicServerPolicyDto }
+     */
+    public LogicServerPolicyDto createLogicServerPolicyDto()
+    {
+        return new LogicServerPolicyDto();
     }
 
     /**
@@ -309,6 +328,18 @@ public class ObjectFactory
     {
         return new JAXBElement<LogicServerPolicyDto>(_LogicServerPolicy_QNAME,
             LogicServerPolicyDto.class,
+            null,
+            value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link BladeLocatorLedDto }{@code >}
+     */
+    @XmlElementDecl(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", name = "BladeLocatorLed")
+    public JAXBElement<BladeLocatorLedDto> createBladeLocatorLed(final BladeLocatorLedDto value)
+    {
+        return new JAXBElement<BladeLocatorLedDto>(_BladeLocatorLed_QNAME,
+            BladeLocatorLedDto.class,
             null,
             value);
     }

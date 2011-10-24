@@ -1074,7 +1074,7 @@ public class AbstractAPIStub
             "admin/datacenters/{datacenter}/racks/{rack}/logicServers/delete", params, queryParams);
     }
 
-    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+    protected String createMachineBladeLedOnLink(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -1137,5 +1137,16 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/ledOff", params);
+    }
+
+    protected String createMachineBladeLedLink(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/led", params);
     }
 }

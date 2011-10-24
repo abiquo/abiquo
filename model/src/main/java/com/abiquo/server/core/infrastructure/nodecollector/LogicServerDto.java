@@ -36,6 +36,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlType;
 
@@ -163,6 +165,8 @@ public class LogicServerDto
      * Objects of the following type(s) are allowed in the list {@link JAXBElement }{@code <}
      * {@link ConfigSet }{@code >} {@link String }
      */
+    @XmlElements({@XmlElement(name = "policy", type = LogicServerPolicyDto.class)})
+    @XmlElementWrapper(name = "policies")
     public List<LogicServerPolicyDto> getContent()
     {
         if (content == null)
