@@ -733,7 +733,7 @@
                     width="100" height="20"
                     enabled="{this._isEditable}"
                     change="validateForm()"
-                    minimum="1" maximum="32" stepSize="1"/>
+                    minimum="1" maximum="1024" stepSize="1"/>
             </mx:FormItem>
 
             <mx:FormItem 
