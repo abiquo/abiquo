@@ -118,6 +118,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -3455,19 +3456,29 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
-            netMan.setRasd(null);
-            netMan.setVirtualMachine(null);
-            netMan.setVirtualApp(null);
-            netMan.setConfigureGateway(Boolean.FALSE);
 
-            if (rasd.getResourceSubType() != null
-                && rasd.getResourceSubType().equalsIgnoreCase("2"))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
+                .equals(NetworkType.UNMANAGED.name()))
             {
-                netMan.setMac(null);
-                netMan.setVirtualDataCenter(null);
-                netMan.setName(null);
+                session.delete(netMan);
             }
-            session.saveOrUpdate(netMan);
+            else
+            {
+                netMan.setRasd(null);
+                netMan.setVirtualMachine(null);
+                netMan.setVirtualApp(null);
+                netMan.setConfigureGateway(Boolean.FALSE);
+
+                if (rasd.getResourceSubType() != null
+                    && rasd.getResourceSubType().equalsIgnoreCase("2"))
+                {
+                    netMan.setMac(null);
+                    netMan.setVirtualDataCenter(null);
+                    netMan.setName(null);
+                }
+                session.saveOrUpdate(netMan);
+            }
+
         }
     }
 

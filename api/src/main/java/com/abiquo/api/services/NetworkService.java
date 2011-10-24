@@ -681,21 +681,29 @@ public class NetworkService extends DefaultApiService
                         flushErrors();
                     }
                     repo.deleteRasd(ip.getRasd());
-                    // this is the object to release.
-                    ip.setVirtualAppliance(null);
-                    ip.setVirtualMachine(null);
-                    if (ip.isExternalIp())
-                    {
-                        // set virtual datacenter as null when release an external IP.
-                        ip.setVirtualDatacenter(null);
-                        ip.setName(null);
-                        ip.setMac(null);
-                    }
                     Boolean privateIp = ip.isPrivateIp(); // set the private value before to set the
-                    Boolean publicIp = ip.isPublicIp();
                     // RASD to null;
-                    ip.setRasd(null);
-                    repo.updateIpManagement(ip);
+                    Boolean publicIp = ip.isPublicIp();
+                    if (ip.isUnmanagedIp())
+                    {
+                        repo.deleteIpPoolManagement(ip);
+                    }
+                    else
+                    {
+                        // this is the object to release.
+                        ip.setVirtualAppliance(null);
+                        ip.setVirtualMachine(null);
+                        if (ip.isExternalIp())
+                        {
+                            // set virtual datacenter as null when release an external IP.
+                            ip.setVirtualDatacenter(null);
+                            ip.setName(null);
+                            ip.setMac(null);
+                        }
+
+                        ip.setRasd(null);
+                        repo.updateIpManagement(ip);
+                    }
 
                     found = Boolean.TRUE;
 

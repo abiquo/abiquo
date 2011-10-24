@@ -599,4 +599,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
         vlanDAO.flush();
     }
 
+    public void deleteIpPoolManagement(final IpPoolManagement ip)
+    {
+        ipManagementDAO.remove(ip);
+    }
+
 }
