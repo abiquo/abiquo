@@ -845,4 +845,115 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- VirtualApplianceEvent.GET_HARD_DISKS_BY_VIRTUAL_MACHINE ____________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.GET_HARD_DISKS_BY_VIRTUAL_MACHINE}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.storageService}"
+            method="getDisksByVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDataCenter.id, 
+            event.virtualAppliance.id,
+            event.virtualMachine.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{VirtualApplianceResultHandler}"
+                    method="getDisksByVirtualMachineHandler"
+                    arguments="{[resultObject , event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+            
+        </RemoteObjectInvoker>
+    </EventHandlers>
+    
+    <!-- VirtualApplianceEvent.DELETE_HARD_DISK ____________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.DELETE_HARD_DISK}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.storageService}"
+            method="deleteDiskFromVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDataCenter.id, 
+            event.virtualAppliance.id,
+            event.virtualMachine.id,
+            event.diskOrder]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{VirtualApplianceResultHandler}"
+                    method="deleteDiskFromVirtualMachineHandler"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+            
+        </RemoteObjectInvoker>
+    </EventHandlers>
+    
+    <!-- VirtualApplianceEvent.CREATE_HARD_DISK ____________________________________ -->
+    <EventHandlers type="{VirtualApplianceEvent.CREATE_HARD_DISK}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.storageService}"
+            method="createDiskIntoVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDataCenter.id, 
+            event.virtualAppliance.id,
+            event.virtualMachine.id,
+            event.diskOrder]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{VirtualApplianceResultHandler}"
+                    method="createDiskIntoVirtualMachineHandler"
+                    arguments="{[resultObject]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+            
+        </RemoteObjectInvoker>
+    </EventHandlers>
+    
 </EventMap>

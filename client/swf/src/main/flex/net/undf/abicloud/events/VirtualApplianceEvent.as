@@ -109,6 +109,15 @@ package net.undf.abicloud.events
 	   public static const VIRTUAL_MACHINE_CHANGE_STATE:String = "virtualMachineChangeStateVirtualApplianceEvent";
 	   
 	   public static const GET_VIRTUAL_APPLIANCE_LOGS:String = "getVirtualApplianceLogsVirtualEvent";
+	   
+	   //VIRTUAL MACHINE STORAGE
+        public static const GET_HARD_DISKS_BY_VIRTUAL_MACHINE:String = "getHardDisksByVirtualMachineEvent";
+        
+        public static const DELETE_HARD_DISK:String = "deleteHardDiskVirtualApplianceEvent";
+        
+        public static const HARD_DISKS_UPDATED:String = "hardDisksUpdatedVirtualApplianceEvent";
+        
+        public static const CREATE_HARD_DISK:String = "createHardDiskVirtualApplianceEvent";
 
         /* ------------- Public atributes ------------- */
         public var virtualAppliance:VirtualAppliance;
@@ -132,6 +141,8 @@ package net.undf.abicloud.events
         public var virtualMachine:VirtualMachine;
         
         public var callback:Function;
+        
+        public var diskOrder:Number;
 
 
         /* ------------- Constructor ------------- */

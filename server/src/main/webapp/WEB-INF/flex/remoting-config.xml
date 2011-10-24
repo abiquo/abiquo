@@ -147,4 +147,14 @@
             <channel ref="my-amf" />
         </channels>
     </destination>
+	<!-- ******** Storage Services ******** -->
+    <destination id="storageService">
+        <properties>
+            <source>com.abiquo.abiserver.services.flex.StorageService</source>
+            <scope>application</scope>
+        </properties>
+        <channels>
+            <channel ref="my-amf" />
+        </channels>
+    </destination>
 </service>
