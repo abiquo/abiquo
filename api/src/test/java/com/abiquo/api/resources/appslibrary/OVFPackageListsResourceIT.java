@@ -32,6 +32,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
@@ -42,6 +43,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 
+@Listeners( {com.abiquo.testng.TestServerAndOVFListener.class})
 public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 {
 
@@ -118,7 +120,7 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 
         validURI = resolveOVFPackageListsURI(ent.getId());
 
-        String xmlindexURI = "http://abiquo-repository.abiquo.com/ovfindex.xml";
+        String xmlindexURI = "http://localhost:7979/testovf/ovfindex.xml";
 
         ClientResponse response =
             client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
