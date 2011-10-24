@@ -45,12 +45,6 @@
             <artifactId>am</artifactId>
             <version>${project.version}</version>
             <classifier>client</classifier>
-	    <exclusions>
-		<exclusion>
-		    <groupId>com.google.collections</groupId>
-		    <artifactId>google-collections</artifactId>
-		</exclusion>
-	    </exclusions>
         </dependency>
         <dependency>
             <groupId>com.abiquo.abicloud</groupId>
