@@ -104,5 +104,10 @@
         destination="systemPropertiesService"
         channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
+    
+    <mx:RemoteObject id="storageService"
+        destination="storageService"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        showBusyCursor="false"/>
         
 </EventMap>
