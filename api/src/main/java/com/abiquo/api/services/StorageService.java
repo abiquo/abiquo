@@ -52,6 +52,7 @@ public class StorageService extends DefaultApiService
     public StorageService(final EntityManager em)
     {
         vdcRepo = new VirtualDatacenterRep(em);
+        userService = new UserService(em);
     }
 
     /**
@@ -70,6 +71,24 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        // The user has the role for manage This. But... is the user from the same enterprise
+        // than Virtual Datacenter?
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
+
+        // check input parameters
+        if (diskSizeInMb == null || diskSizeInMb < 1L)
+        {
+            addValidationErrors(APIError.HD_INVALID_DISK_SIZE);
+            flushErrors();
+        }
+
+        // Check if the machine is in the correct state to perform the action.
+        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
 
         // create the new disk from the diskSize
         Integer diskOrder = vdcRepo.findHardDisksByVirtualMachine(vm).size() + 1;
@@ -111,6 +130,13 @@ public class StorageService extends DefaultApiService
         if (!vm.getState().equals(State.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
+
+        // Be sure the disk exists.
+        if (vdcRepo.findHardDiskByVirtualMachine(vm, diskOrder) == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
 

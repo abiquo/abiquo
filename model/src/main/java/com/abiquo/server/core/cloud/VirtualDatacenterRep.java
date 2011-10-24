@@ -613,12 +613,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public void removeHardDisk(final DiskManagement diskToDelete)
     {
-        if (diskToDelete.getRasd() != null)
-        {
-            rasdDAO.remove(diskToDelete.getRasd());
-        }
-
+        Rasd rasd = diskToDelete.getRasd();
         diskManagementDAO.remove(diskToDelete);
+        rasdDAO.remove(rasd);
+        diskManagementDAO.flush();
+
     }
 
     public void update(final VirtualDatacenter vdc)

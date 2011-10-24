@@ -383,7 +383,8 @@ public enum APIError
     //
     HD_NON_EXISTENT_HARD_DISK("HD-1", "The requested hard disk does not exist"), HD_DISK_0_CAN_NOT_BE_DELETED(
         "HD-2",
-        "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"),
+        "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"), HD_INVALID_DISK_SIZE(
+        "HD-3", "Invalid disk size."),
 
     ;
 
