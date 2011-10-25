@@ -31,4 +31,9 @@ public class ApprovalDAO extends DefaultDAOBase<Integer, Approval>
     {
         return findUniqueByProperty(Approval.TOKEN_PROPERTY, token);
     }
+
+    public Approval findByRequest(final byte[] request)
+    {
+        return findUniqueByProperty(Approval.REQUEST_PROPERTY, request);
+    }
 }

@@ -35,6 +35,14 @@ public class ConfigService
 
     public static final String VLAN_PER_VDC = "abiquo.server.networking.vlanPerVdc";
 
+    public static final String MAIL_SERVER = "abiquo.server.mail.server";
+
+    public static final String MAIL_USER = "abiquo.server.mail.user";
+
+    public static final String MAIL_PASSWORD = "abiquo.server.mail.password";
+
+    public static final String API_LOCATION = "abiquo.server.api.location";
+
     public static String getSystemProperty(final String property)
     {
         return System.getProperty(property);
@@ -62,4 +70,28 @@ public class ConfigService
         return getSystemProperty(VLAN_PER_VDC, "0");
 
     }
+
+    public static String getMailServer()
+    {
+        return getSystemProperty(MAIL_SERVER);
+
+    }
+
+    public static String getMailUser()
+    {
+        return getSystemProperty(MAIL_USER);
+
+    }
+
+    public static String getMailPassword()
+    {
+        return getSystemProperty(MAIL_PASSWORD);
+
+    }
+
+    public String getApiLocation()
+    {
+        return getSystemProperty(API_LOCATION);
+    }
+
 }

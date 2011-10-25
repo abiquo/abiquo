@@ -25,12 +25,13 @@ public class ApprovalRep extends DefaultRepBase
 
     public ApprovalRep(final EntityManager entityManager)
     {
-        assert entityManager != null;
-        assert entityManager.isOpen();
+        assert entityManager != null : "EntityManager cannot be null (ApprovalRep Constructor)";
+        assert entityManager.isOpen() : "Fail in Constructor ApprovalRep";
 
         this.entityManager = entityManager;
 
         approvalDAO = new ApprovalDAO(entityManager);
+        approvalManagerDAO = new ApprovalManagerDAO(entityManager);
     }
 
     public Approval findApprovalById(final Integer approvalId)
@@ -41,6 +42,11 @@ public class ApprovalRep extends DefaultRepBase
     public Approval findApprovalByToken(final String token)
     {
         return approvalDAO.findByToken(token);
+    }
+
+    public Approval findApprovalByRequest(final byte[] request)
+    {
+        return approvalDAO.findByRequest(request);
     }
 
     public List<Approval> findAll()

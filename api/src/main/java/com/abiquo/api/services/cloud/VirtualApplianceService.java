@@ -43,7 +43,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.approval.Approval;
+import com.abiquo.api.services.approval.ApprovalRequired;
 import com.abiquo.api.services.approval.ApprovalRestricted;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.spring.security.SecurityService;
@@ -168,7 +168,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    @Approval(roles = SecurityService.APPROVAL_VAPP_DEPLOY)
+    @ApprovalRequired(roles = SecurityService.APPROVAL_VAPP_DEPLOY)
     public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);

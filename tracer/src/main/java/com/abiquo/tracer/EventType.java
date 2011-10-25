@@ -164,12 +164,15 @@ public enum EventType implements Serializable
         "STORAGE DEVICE DELETED", "Storage device deleted"),
 
     // APPROVAL
-    APROVAL_CREATED(1700, "APPROVAL CREATED", "Approval created"), APPROVAL_MODIFIED(1701,
+    APPROVAL_CREATED(1700, "APPROVAL CREATED", "Approval created"), APPROVAL_MODIFIED(1701,
         "APPROVAL MODIFIED", "Approval modified"), APPROVAL_DELETED(1702, "APPROVAL DELETED",
         "Approval deleted"), APPROVAL_MANAGER(1703, "APPROVAL MANAGER CREATED",
         "Approval manager created"), APPROVAL_MANAGER_MODIFIED(1704, "APPROVAL MANAGER MODIFIED",
         "approval manager modified"), APPROVAL_MANAGER_DELETED(1705, "APPROVAL MANAGER DELETED",
-        "Approval manager deleted");
+        "Approval manager deleted"),
+
+    // MAIL
+    MAIL_SENT(1800, "MAIL SENT", "Mail sent");
 
     private final int event;
 

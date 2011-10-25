@@ -188,7 +188,7 @@ public class Approval extends DefaultEntityBase
 
     public final static String REQUEST_PROPERTY = "request";
 
-    private final static boolean REQUEST_REQUIRED = false;
+    private final static boolean REQUEST_REQUIRED = true;
 
     private final static String REQUEST_COLUMN = "request";
 

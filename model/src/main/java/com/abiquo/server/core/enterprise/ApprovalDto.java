@@ -98,4 +98,15 @@ public class ApprovalDto extends SingleResourceTransportDto
         this.approvalType = approvalType;
     }
 
+    private byte[] request;
+
+    public void setRequest(final byte[] request)
+    {
+        this.request = request;
+    }
+
+    public byte[] getRequest()
+    {
+        return request;
+    }
 }

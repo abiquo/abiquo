@@ -70,6 +70,7 @@
         <!-- end: configuration -->
         <!-- approval -->
         <class>com.abiquo.server.core.enterprise.Approval</class>
+        <class>com.abiquo.server.core.enterprise.ApprovalManager</class>
         <!-- end : approval -->
         <properties>
             <property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />

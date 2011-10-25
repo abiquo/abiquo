@@ -77,7 +77,10 @@ public enum ComponentType implements Serializable
     STORAGE_DEVICE(5242888, "Storage device"),
 
     // APPROVAL
-    APPROVAL(8388608, "Approval");
+    APPROVAL(8388608, "Approval"),
+
+    // MAIL
+    MAIL(16777216, "Mail");
 
     private final int component;
 

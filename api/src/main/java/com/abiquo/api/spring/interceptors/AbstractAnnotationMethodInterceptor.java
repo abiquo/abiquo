@@ -40,7 +40,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
     {
         super();
         this.append = true;
-        this.advisor = new AnnotationMethodAdvisor(classAnnotationType, methodAnnotationType);
+        this.advisor = new AnnotationMethodAdvisor(classAnnotationType, methodAnnotationType, this);
     }
 
     protected AbstractAnnotationMethodInterceptor(
@@ -49,7 +49,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
     {
         super();
         this.append = append;
-        this.advisor = new AnnotationMethodAdvisor(classAnnotationType, methodAnnotationType);
+        this.advisor = new AnnotationMethodAdvisor(classAnnotationType, methodAnnotationType, this);
     }
 
     @Override
@@ -114,19 +114,23 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
         }
     }
 
-    private class AnnotationMethodAdvisor extends AbstractPointcutAdvisor implements
+    private static class AnnotationMethodAdvisor extends AbstractPointcutAdvisor implements
         MethodInterceptor
     {
         private static final long serialVersionUID = 1L;
 
         private AnnotationMatchingPointcut pointcut;
 
+        private AbstractAnnotationMethodInterceptor targetInterceptor;
+
         public AnnotationMethodAdvisor(final Class< ? extends Annotation> classAnnotationType,
-            final Class< ? extends Annotation> methodAnnotationType)
+            final Class< ? extends Annotation> methodAnnotationType,
+            final AbstractAnnotationMethodInterceptor targetInterceptor)
         {
             super();
             this.pointcut =
                 new AnnotationMatchingPointcut(classAnnotationType, methodAnnotationType);
+            this.targetInterceptor = targetInterceptor;
         }
 
         @Override
@@ -146,7 +150,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
         {
             Object ret = null;
 
-            preIntercept(invocation);
+            targetInterceptor.preIntercept(invocation);
 
             try
             {
@@ -157,7 +161,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
                 throw ex.getTargetException();
             }
 
-            postIntercept(invocation);
+            targetInterceptor.postIntercept(invocation);
 
             return ret;
         }
@@ -169,7 +173,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
      * @param invocation The invocation object.
      * @throws Exception If something fails. Method invocation will be aborted.
      */
-    protected void preIntercept(final MethodInvocation invocation) throws Exception
+    public void preIntercept(final MethodInvocation invocation) throws Exception
     {
 
     }
@@ -180,7 +184,7 @@ public abstract class AbstractAnnotationMethodInterceptor extends ProxyConfig im
      * @param invocation The invocation object.
      * @throws Exception If something fails.
      */
-    protected void postIntercept(final MethodInvocation invocation) throws Exception
+    public void postIntercept(final MethodInvocation invocation) throws Exception
     {
 
     }

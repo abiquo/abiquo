@@ -78,6 +78,7 @@
     <orm:entity class="com.abiquo.server.core.tasks.Task" />
     <!-- end: tasks -->
     <!-- approval -->
+    <orm:entity class="com.abiquo.server.core.enterprise.Approval"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.ApprovalManager"></orm:entity>
     <!-- end : approval -->
 </orm:entity-mappings>

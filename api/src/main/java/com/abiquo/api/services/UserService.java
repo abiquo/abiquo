@@ -54,14 +54,13 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-@Transactional(readOnly = true)
 public class UserService extends DefaultApiService
 {
 
@@ -88,6 +87,7 @@ public class UserService extends DefaultApiService
      * 
      * @see SecurityContextHolder
      */
+    @Transactional(readOnly = true)
     public User getCurrentUser()
     {
         if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof AbiquoUserDetails)
@@ -109,12 +109,14 @@ public class UserService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = true)
     public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
         final String order, final boolean desc)
     {
         return getUsersByEnterprise(enterpriseId, filter, order, desc, false, 0, 25);
     }
 
+    @Transactional(readOnly = true)
     public Collection<User> getUsersByEnterprise(final String enterpriseId, final String filter,
         String order, final boolean desc, final boolean connected, final Integer page,
         final Integer numResults)
@@ -170,6 +172,7 @@ public class UserService extends DefaultApiService
         return addUser(dto, enterpriseId, role);
     }
 
+    @Transactional(readOnly = true)
     public User addUser(final UserDto dto, final Integer enterpriseId, final Role role)
     {
         Enterprise enterprise = findEnterprise(enterpriseId);
@@ -177,8 +180,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), dto.getPassword(), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -209,17 +212,14 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_CREATE,
-            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
-                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
-                + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "User "
+            + user.getName() + " has been created [Enterprise: " + enterprise.getName() + " Name: "
+            + user.getName() + " Surname: " + user.getSurname() + " Role: " + user.getRole() + "]");
 
         return user;
     }
 
+    @Transactional(readOnly = true)
     public User getUser(final Integer id)
     {
         User user = repo.findUserById(id);
@@ -347,17 +347,15 @@ public class UserService extends DefaultApiService
 
         updateUser(old);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_MODIFY,
-            "User " + old.getName() + " has been modified [Enterprise: "
-                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
-                + old.getSurname() + " Role: " + old.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "User "
+            + old.getName() + " has been modified [Enterprise: " + old.getEnterprise().getName()
+            + " Name: " + old.getName() + " Surname: " + old.getSurname() + " Role: "
+            + old.getRole() + "]");
 
         return old;
     }
 
+    @Transactional(readOnly = true)
     public User updateUser(final User user)
     {
         repo.updateUser(user);
@@ -392,15 +390,13 @@ public class UserService extends DefaultApiService
 
         repo.removeUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_DELETE,
-            "User " + user.getName() + " has been deleted [Enterprise: "
-                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
-                + user.getSurname() + " Role: " + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "User "
+            + user.getName() + " has been deleted [Enterprise: " + user.getEnterprise().getName()
+            + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
+            + user.getRole() + "]");
     }
 
+    @Transactional(readOnly = true)
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
     {
         User user = getUser(userId);
@@ -408,6 +404,7 @@ public class UserService extends DefaultApiService
         return user != null && user.getEnterprise().getId().equals(enterpriseId);
     }
 
+    @Transactional(readOnly = true)
     private Enterprise findEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = repo.findById(enterpriseId);
@@ -419,6 +416,7 @@ public class UserService extends DefaultApiService
         return enterprise;
     }
 
+    @Transactional(readOnly = true)
     public User findUserByEnterprise(final Integer userId, final Enterprise enterprise)
     {
         User user = repo.findUserByEnterprise(userId, enterprise);
@@ -430,11 +428,13 @@ public class UserService extends DefaultApiService
         return user;
     }
 
+    @Transactional(readOnly = true)
     private Role findRole(final UserDto dto)
     {
         return repo.findRoleById(getRoleId(dto));
     }
 
+    @Transactional(readOnly = true)
     private Integer getRoleId(final UserDto user)
     {
         RESTLink role = user.searchLink(RoleResource.ROLE);
@@ -459,6 +459,7 @@ public class UserService extends DefaultApiService
         return roleId;
     }
 
+    @Transactional(readOnly = true)
     private Integer getEnterpriseID(final UserDto user)
     {
         RESTLink ent = user.searchLink(EnterpriseResource.ENTERPRISE);
@@ -472,6 +473,7 @@ public class UserService extends DefaultApiService
         return entId;
     }
 
+    @Transactional(readOnly = true)
     public void checkEnterpriseAdminCredentials(final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -488,6 +490,7 @@ public class UserService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = true)
     public String enterpriseWithBlockedRoles(final Enterprise enterprise)
     {
         Collection<User> users = repo.findUsersByEnterprise(enterprise);
@@ -501,6 +504,7 @@ public class UserService extends DefaultApiService
         return "";
     }
 
+    @Transactional(readOnly = true)
     private void checkUserCredentialsForSelfUser(final User selfUser, final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -519,6 +523,7 @@ public class UserService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = true)
     public void checkCurrentEnterprise(final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -537,6 +542,7 @@ public class UserService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = true)
     public void checkCurrentEnterpriseForPostMethods(final Enterprise enterprise)
     {
         User user = getCurrentUser();
@@ -549,6 +555,7 @@ public class UserService extends DefaultApiService
         }
     }
 
+    @Transactional(readOnly = true)
     private Boolean emailIsValid(final String email)
     {
         if (email != null && !email.isEmpty())

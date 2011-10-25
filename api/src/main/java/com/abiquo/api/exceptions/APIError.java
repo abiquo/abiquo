@@ -330,7 +330,11 @@ public enum APIError
         "APPROVAL-2", "The approval request does not exist"), APPROVAL_DETELE_ERROR("APPROVAL-3",
         "An unexpected error occured and the approval request could not be deleted"), APPROVAL_UPDATE_ERROR(
         "APPROVAL-4", "An unexpected error occured and the approval request could not be updated"), APPROVAL_CREATE_ERROR(
-        "APPROVAL-5", "An unexpected error occured and the approval request could not be created")
+        "APPROVAL-5", "An unexpected error occured and the approval request could not be created"),
+
+    // MAIL
+    BAD_JNDI("MAIL-1", "Bad JNDI Error"), BAD_INTERNET_ADDRESS("MAIL-2",
+        "Bad Internet Address error"),
 
     ;
 
