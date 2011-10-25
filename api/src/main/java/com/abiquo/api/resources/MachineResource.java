@@ -81,17 +81,17 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
-    public static final String MACHINE_ACTION_LED_ON = "action/ledOn";
+    public static final String MACHINE_ACTION_LED_ON = "action/ledon";
 
-    public static final String MACHINE_ACTION_LED_ON_REL = "ledOn";
+    public static final String MACHINE_ACTION_LED_ON_REL = "ledon";
 
-    public static final String MACHINE_ACTION_LS = "logicServer";
+    public static final String MACHINE_ACTION_LS = "logicserver";
 
-    public static final String MACHINE_ACTION_LED_OFF = "action/ledOff";
+    public static final String MACHINE_ACTION_LED_OFF = "action/ledoff";
 
-    public static final String MACHINE_ACTION_LED_OFF_REL = "ledOff";
+    public static final String MACHINE_ACTION_LED_OFF_REL = "ledoff";
 
-    public static final String MACHINE_ACTION_LS__REL = "logicServer";
+    public static final String MACHINE_ACTION_LS__REL = "logicserver";
 
     public static final String MACHINE_LOCATOR_LED = "led";
 

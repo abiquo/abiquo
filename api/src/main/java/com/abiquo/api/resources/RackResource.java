@@ -59,32 +59,32 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_PARAM = "{" + RACK + "}";
 
-    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE = "logicServers/associate";
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE = "logicservers/associate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE = "logicServers/dissociate";
+    public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE = "logicservers/dissociate";
 
-    public static final String RACK_ACTION_LOGICSERVERS = "logicServers";
+    public static final String RACK_ACTION_LOGICSERVERS = "logicservers";
 
-    public static final String RACK_ACTION_LOGICSERVERS_DELETE = "logicServers/delete";
+    public static final String RACK_ACTION_LOGICSERVERS_DELETE = "logicservers/delete";
 
-    public static final String RACK_ACTION_LOGICSERVERS_CLONE = "logicServers/clone";
+    public static final String RACK_ACTION_LOGICSERVERS_CLONE = "logicservers/clone";
 
     public static final String RACK_ACTION_ORGANIZATIONS = "organizations";
 
     public static final String RACK_ACTION_FSM = "fsm";
 
-    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lsTemplates";
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lssemplates";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
-        "logicServers/assocTemplate";
+        "logicservers/assoctemplate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicServers/assocClone";
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicservers/assocslone";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
 
     public static final String RACK_ACTION_LOGICSERVERS_DISSOCIATE_REL = "ls-dissociate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_REL = "logicServers";
+    public static final String RACK_ACTION_LOGICSERVERS_REL = "logicservers";
 
     public static final String RACK_ACTION_LOGICSERVERS_DELETE_REL = "ls-delete";
 
@@ -97,9 +97,9 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_FSM_REL = "fsm";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
-        "ls-associateTemplate";
+        "ls-associatesemplate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateClone";
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateslone";
 
     // Define its service. It should only have ONE
     @Autowired
