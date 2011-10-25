@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.am.services.notify.AMNotifierFactory;
+import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 /**
  * Application Lifecycle Listener implementation class ContextListener
@@ -44,6 +45,8 @@ public class ContextListener implements ServletContextListener
 
         logger.info("Initializing the context [" + sce.getServletContext().getServletContextName()
             + "] ...");
+
+        OVFSerializer.getInstance().setValidateXML(false);
 
         // TODO check the AMProducer can be created
 
