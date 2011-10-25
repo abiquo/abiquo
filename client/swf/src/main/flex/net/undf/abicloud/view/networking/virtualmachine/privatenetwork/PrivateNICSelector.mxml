@@ -213,7 +213,7 @@
                 dispatchEvent(event);
 
                 close(); */
-                if(vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                if(vlanNetwork.networkType == VlanNetwork.EXTERNAL || vlanNetwork.networkType == VlanNetwork.UNMANAGED){
                     dispatchEvent(new Event("onAssignExternalNicToVirtualMachine"));
                 }else{
                     dispatchEvent(new Event("onAssignNicToVirtualMachine"));                    
