@@ -87,6 +87,7 @@ public class NetworkingService
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
         VLANNetworkDto vlandto = new VLANNetworkDto();
+        vlandto.setDefaultNetwork(defaultNetwork);
         vlandto.setName(vlanName);
         vlandto.setAddress(configuration.getNetworkAddress());
         vlandto.setGateway(configuration.getGateway());
@@ -501,8 +502,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)
