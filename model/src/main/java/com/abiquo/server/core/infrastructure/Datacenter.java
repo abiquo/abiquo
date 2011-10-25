@@ -62,7 +62,7 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected Datacenter()
+    public Datacenter()
     {
         // Just for JPA support
     }
@@ -78,6 +78,11 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     public Integer getId()
     {
         return this.id;
+    }
+
+    public void setId(final Integer id)
+    {
+        this.id = id;
     }
 
     // ******************************* Properties *******************************
@@ -178,22 +183,15 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
     }
 
     public Machine createMachine(final String name, final String description, final int ramInMb,
-        final int realRamInMb, final int currentRamInUseInMb, final long hardDiskInMb,
-        final long realHardDiskInMb, final long currentHardDiskInUse, final int realCpuThreads,
-        final int realCpuCores, final int virtualCpusPerThread, final int currentCpusInUse,
-        final MachineState state, final String virtualSwitch)
+        final int currentRamInUseInMb, final int realCpuThreads, final int virtualCpusPerThread,
+        final int currentCpusInUse, final MachineState state, final String virtualSwitch)
     {
         return new Machine(this,
             name,
             description,
             ramInMb,
-            realRamInMb,
             currentRamInUseInMb,
-            hardDiskInMb,
-            realHardDiskInMb,
-            currentHardDiskInUse,
             realCpuThreads,
-            realCpuCores,
             virtualCpusPerThread,
             currentCpusInUse,
             state,

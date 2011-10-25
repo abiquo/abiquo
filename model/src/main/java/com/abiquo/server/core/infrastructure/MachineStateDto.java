@@ -19,16 +19,30 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
+package com.abiquo.server.core.infrastructure;
 
-public enum FitPolicy
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.enumerator.MachineState;
+import com.abiquo.model.transport.SingleResourceTransportDto;
+
+@XmlRootElement(name = "MachineState")
+public class MachineStateDto extends SingleResourceTransportDto
 {
-    /**
-     * Choose the machine that is under greater load
-     */
-    PROGRESSIVE,
-    /**
-     * Choose the machine that is under lesser load
-     */
-    PERFORMANCE;
+    private static final long serialVersionUID = -1283420076908929678L;
+
+    private MachineState state;
+
+    @XmlElement(name = "state")
+    public MachineState getState()
+    {
+        return state;
+    }
+
+    public void setState(final MachineState state)
+    {
+        this.state = state;
+    }
+
 }

@@ -19,16 +19,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
+package com.abiquo.abiserver.commands.stub;
 
-public enum FitPolicy
+import java.util.ArrayList;
+
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+
+public interface DatacentersResourceStub
 {
-    /**
-     * Choose the machine that is under greater load
-     */
-    PROGRESSIVE,
-    /**
-     * Choose the machine that is under lesser load
-     */
-    PERFORMANCE;
+    public DataResult<DataCenter> createDatacenter(DataCenter datacenter);
+
+    public DataResult<ArrayList<DataCenter>> getDatacenters();
+
+    public DataResult<DataCenter> modifyDatacenter(DataCenter datacenter);
+
+    public DataResult<DataCenter> deleteDatacenter(DataCenter datacenter);
+
+    public DataResult<DataCenter> getDatacenter(Integer datacenterId);
+
+    public BasicResult updateUsedResources(Integer datacenterId);
 }
