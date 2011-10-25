@@ -192,17 +192,19 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         this.networkType = networkType;
     }
 
-    public static VlanNetwork create(final VLANNetworkDto dto)
+    public static VlanNetwork create(final VLANNetworkDto dto, final Integer networkId,
+        final Boolean defaultNetwork)
     {
         VlanNetwork vlan = new VlanNetwork();
 
-        vlan.setDefaultNetwork(dto.getDefaultNetwork());
+        vlan.setDefaultNetwork(defaultNetwork);
 
         NetworkConfiguration conf = new NetworkConfiguration();
         conf.setGateway(dto.getGateway());
         conf.setMask(dto.getMask());
         conf.setPrimaryDNS(dto.getPrimaryDNS());
         conf.setSecondaryDNS(dto.getSecondaryDNS());
+        conf.setNetworkAddress(dto.getAddress());
         conf.setSufixDNS(dto.getSufixDNS());
 
         vlan.setConfiguration(conf);
@@ -210,8 +212,8 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         vlan.setNetworkType(dto.getType().toString());
         vlan.setVlanNetworkId(dto.getId());
         vlan.setVlanTag(dto.getTag());
+        vlan.setNetworkId(networkId);
 
         return vlan;
     }
-
 }

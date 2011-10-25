@@ -196,7 +196,8 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
 
         virtualDatacenter.setLimits(ResourceAllocationLimit.create(dto));
         virtualDatacenter.setNetwork(network);
-        virtualDatacenter.setDefaultVlan(VlanNetwork.create(dto.getVlan()));
+        virtualDatacenter.setDefaultVlan(VlanNetwork.create(dto.getVlan(), network.getNetworkId(),
+            true));
 
         return virtualDatacenter;
     }
