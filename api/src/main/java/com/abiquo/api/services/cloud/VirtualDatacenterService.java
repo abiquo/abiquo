@@ -135,6 +135,12 @@ public class VirtualDatacenterService extends DefaultApiService
         }
     }
 
+    public Collection<VirtualDatacenter> getVirtualDatacentersByDatacenter(
+        final Datacenter datacenter)
+    {
+        return repo.findByDatacenter(datacenter);
+    }
+
     public VirtualDatacenter getVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = repo.findById(id);

@@ -644,7 +644,7 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="getPhysicalMachinesByRack"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.rackId, event.filters]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.dataCenter.id, event.rackId, event.filters]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"

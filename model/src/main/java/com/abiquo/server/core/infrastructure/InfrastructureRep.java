@@ -210,10 +210,15 @@ public class InfrastructureRep extends DefaultRepBase
 
     public List<Rack> findRacks(final Datacenter datacenter)
     {
+        return findRacks(datacenter, null);
+    }
+
+    public List<Rack> findRacks(final Datacenter datacenter, final String filter)
+    {
         assert datacenter != null;
         assert this.dao.isManaged(datacenter);
 
-        return this.rackDao.findRacks(datacenter);
+        return this.rackDao.findRacks(datacenter, filter);
     }
 
     public List<Machine> findMachines(final Datacenter datacenter)
@@ -226,10 +231,15 @@ public class InfrastructureRep extends DefaultRepBase
 
     public List<Machine> findRackMachines(final Rack rack)
     {
+        return findRackMachines(rack, null);
+    }
+
+    public List<Machine> findRackMachines(final Rack rack, final String filter)
+    {
         assert rack != null;
         assert this.rackDao.isManaged(rack);
 
-        return this.machineDao.findRackMachines(rack);
+        return this.machineDao.findRackMachines(rack, filter);
     }
 
     public Set<HypervisorType> findHypervisors(final Datacenter datacenter)
@@ -263,6 +273,11 @@ public class InfrastructureRep extends DefaultRepBase
         final Datacenter datacenter)
     {
         return datacenterLimitDao.findByEnterpriseAndDatacenter(enterprise, datacenter);
+    }
+
+    public Collection<DatacenterLimits> findDatacenterLimits(final Enterprise enterprise)
+    {
+        return datacenterLimitDao.findByEnterprise(enterprise);
     }
 
     public boolean existsAnyRackWithName(final Datacenter datacenter, final String name)
@@ -370,6 +385,11 @@ public class InfrastructureRep extends DefaultRepBase
         return this.machineDao.findByIds(datacenterId, rackId, machineId);
     }
 
+    public Machine findMachineByIp(final Integer datacenterId, final String ip)
+    {
+        return this.machineDao.findByIp(datacenterId, ip);
+    }
+
     public void insertMachine(final Machine machine)
     {
         assert machine != null;
@@ -466,6 +486,15 @@ public class InfrastructureRep extends DefaultRepBase
         assert !existAnyOtherDatastoreWithDirectory(datastore, datastore.getDirectory()) : "ASSERT - datastore duplicated directory";
 
         datastoreDao.flush();
+    }
+
+    public void deleteDatastore(final Datastore datastore)
+    {
+        assert datastore != null;
+        assert this.datastoreDao.isManaged(datastore);
+
+        this.datastoreDao.remove(datastore);
+        this.datastoreDao.flush();
     }
 
     public boolean existAnyDatastoreWithName(final String name)
@@ -675,7 +704,13 @@ public class InfrastructureRep extends DefaultRepBase
      */
     public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
     {
-        return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter);
+        return findAllUcsRacksByDatacenter(datacenter, null);
+    }
+
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter,
+        final String filter)
+    {
+        return this.ucsRackDao.findAllUcsRacksByDatacenter(datacenter, filter);
     }
 
     /**
@@ -686,7 +721,13 @@ public class InfrastructureRep extends DefaultRepBase
      */
     public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
     {
-        return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId);
+        return findAllNotManagedRacksByDatacenter(datacenterId, null);
+    }
+
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId,
+        final String filter)
+    {
+        return this.rackDao.findAllNotManagedRacksByDatacenter(datacenterId, filter);
     }
 
     public boolean existAnyHypervisorWithIpInDatacenter(final String ip, final Integer datacenterId)

@@ -35,7 +35,7 @@ import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -53,6 +53,9 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -70,10 +73,10 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    InfrastructureService infrastructureService;
+    protected OVFGeneratorService ovfService;
 
     @Autowired
-    protected OVFGeneratorService ovfService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     UserService userService;
@@ -88,7 +91,7 @@ public class VirtualMachineService extends DefaultApiService
         this.repo = new VirtualMachineRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.infrastructureService = new InfrastructureService(em);
+        this.remoteServiceService = new RemoteServiceService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -114,12 +117,12 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findVirtualMachinesByVirtualAppliance(vapp.getId());
     }
 
-    public VirtualMachine findByUUID(String uuid)
+    public VirtualMachine findByUUID(final String uuid)
     {
         return repo.findByUUID(uuid);
     }
 
-    public VirtualMachine findByName(String name)
+    public VirtualMachine findByName(final String name)
     {
         return repo.findByName(name);
     }
@@ -137,6 +140,11 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         return vm;
+    }
+
+    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -199,6 +207,20 @@ public class VirtualMachineService extends DefaultApiService
         repo.deleteNotManagedVirtualMachines(hypervisor);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
+    {
+        this.deleteNotManagedVirtualMachines(hypervisor);
+
+        if (trace)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
+                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
+                "Virtual Machines not managed by host from '" + hypervisor.getIp()
+                    + "' have been deleted");
+        }
+    }
+
     /**
      * Block the virtual by changing its state to IN_PROGRESS
      * 
@@ -217,16 +239,17 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void validMachineStateChange(VirtualMachineState oldState, VirtualMachineState newState)
+    public void validMachineStateChange(final VirtualMachineState oldState,
+        final VirtualMachineState newState)
     {
         if (oldState == VirtualMachineState.NOT_DEPLOYED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (((oldState == VirtualMachineState.POWERED_OFF) && (newState != VirtualMachineState.RUNNING))
-            || ((oldState == VirtualMachineState.PAUSED) && (newState != VirtualMachineState.REBOOTED))
-            || ((oldState == VirtualMachineState.RUNNING) && (newState == VirtualMachineState.REBOOTED)))
+        if (oldState == VirtualMachineState.POWERED_OFF && newState != VirtualMachineState.RUNNING
+            || oldState == VirtualMachineState.PAUSED && newState != VirtualMachineState.REBOOTED
+            || oldState == VirtualMachineState.RUNNING && newState == VirtualMachineState.REBOOTED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
             flushErrors();
@@ -242,7 +265,8 @@ public class VirtualMachineService extends DefaultApiService
      * @throws Exception
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void changeVirtualMachineState(Integer vmId, Integer vappId, Integer vdcId, VirtualMachineState state)
+    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final VirtualMachineState state)
     {
         VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
 
@@ -264,7 +288,7 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                infrastructureService.getRemoteService(datacenterId,
+                remoteServiceService.getRemoteService(datacenterId,
                     RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
@@ -285,14 +309,14 @@ public class VirtualMachineService extends DefaultApiService
 
     }
 
-    private void restoreVirtualMachineState(VirtualMachine vm, VirtualMachineState old)
+    private void restoreVirtualMachineState(final VirtualMachine vm, final VirtualMachineState old)
     {
         vm.setState(old);
         updateVirtualMachine(vm);
     }
 
     @Deprecated
-    private VirtualAppliance contanerVirtualAppliance(VirtualMachine vmachine)
+    private VirtualAppliance contanerVirtualAppliance(final VirtualMachine vmachine)
     {
 
         VirtualDatacenter vdc =
@@ -341,12 +365,14 @@ public class VirtualMachineService extends DefaultApiService
         resource.put(docEnvelopeRunning);
     }
 
-    public void checkPauseAllowed(VirtualMachine vm, VirtualMachineState state)
+    public void checkPauseAllowed(final VirtualMachine vm, final VirtualMachineState state)
     {
-        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == VirtualMachineState.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3
+            && state == VirtualMachineState.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();
         }
     }
+
 }

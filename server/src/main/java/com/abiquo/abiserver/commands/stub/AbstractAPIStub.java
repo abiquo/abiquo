@@ -123,8 +123,8 @@ public class AbstractAPIStub
      */
     protected ClientResponse get(final String uri, final MediaType mediaType)
     {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).accept(mediaType).get();
     }
 
     protected ClientResponse getWithMediaType(final String uri, final String accept,
@@ -797,6 +797,142 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createMachineLinkVms(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+
+        return resolveURI(
+            apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/virtualmachines",
+            params);
+    }
+
+    protected String createMachineLinkCheckState(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String hypervisor, final String user,
+        final String password, final Integer port)
+    {
+        boolean includeMachineId = false;
+        if (machineId != null && machineId != 0)
+        {
+            includeMachineId = true;
+        }
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        if (includeMachineId)
+        {
+            params.put("machine", machineId.toString());
+        }
+        params.put("ip", ip);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        if (includeMachineId)
+        {
+            uri += "{machine}/";
+        }
+        uri +=
+            "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createMachineLinkCheckIpmi(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final String ip, final String user, final String password,
+        final Integer port)
+    {
+        boolean includeMachineId = false;
+        if (machineId != null && machineId != 0)
+        {
+            includeMachineId = true;
+        }
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        if (includeMachineId)
+        {
+            params.put("machine", machineId.toString());
+        }
+        params.put("ip", ip);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        if (includeMachineId)
+        {
+            uri += "{machine}/";
+        }
+        uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createDatacenterLinkgetMachineInfo(final Integer datacenterId,
+        final String ip, final String user, final String password, final String hypervisor,
+        final Integer port)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("ip", ip);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+
+        String uri = "admin/datacenters/{datacenter}/";
+        uri +=
+            "action/discover?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createDatacenterLinkgetHypervisor(final Integer datacenterId, final String ip)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("ip", ip);
+
+        String uri = "admin/datacenters/{datacenter}/action/hypervisor?ip={ip}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
+    protected String createMachinesLinkMultiplePost(final Integer datacenterId,
+        final Integer rackId, final String ipFrom, final String ipTo, final String hypervisor,
+        final String user, final String password, final Integer port, final String vSwitch)
+    {
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("ipFrom", ipFrom);
+        params.put("ipTo", ipTo);
+        params.put("hypervisor", hypervisor);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("port", port.toString());
+        params.put("vSwitch", vSwitch);
+
+        String uri =
+            "admin/datacenters/{datacenter}/racks/{rack}/machines"
+                + "?ipFrom={ipFrom}&ipTo={ipTo}&hypervisor={hypervisor}&user={user}"
+                + "&password={password}&port={port}&vSwitch={vSwitch}";
+
+        return resolveURI(apiUri, uri, params);
+    }
+
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
         return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");
@@ -813,12 +949,27 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createDatacenterLinkUsedResources(final Integer datacenterId)
+    {
+        return createDatacenterLink(datacenterId) + "action/updateUsedResources";
+    }
+
+    protected String createDatacenterLink()
+    {
+        return createDatacenterLink(null);
+    }
+
     protected String createDatacenterLink(final Integer datacenterId)
     {
+        String uri = "admin/datacenters";
         Map<String, String> params = new HashMap<String, String>();
-        params.put("datacenter", datacenterId.toString());
+        if (datacenterId != null)
+        {
+            params.put("datacenter", datacenterId.toString());
+            uri += "/{datacenter}";
+        }
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}", params);
+        return resolveURI(apiUri, uri, params);
     }
 
     protected String createPrivateNetworksLink(final Integer vdcId)
@@ -955,10 +1106,22 @@ public class AbstractAPIStub
 
     protected String createRacksLink(final Integer datacenterId)
     {
+        return createRacksLink(datacenterId, null);
+    }
+
+    protected String createRacksLink(final Integer datacenterId, final Integer rackId)
+    {
         Map<String, String> params = new HashMap<String, String>();
+        String uri = "admin/datacenters/{datacenter}/racks";
         params.put("datacenter", datacenterId.toString());
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks", params);
+        if (rackId != null)
+        {
+            uri += "/{rack}";
+            params.put("rack", rackId.toString());
+        }
+
+        return resolveURI(apiUri, uri, params);
     }
 
     protected String createMachinesLink(final Rack rack)

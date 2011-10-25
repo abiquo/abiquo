@@ -109,6 +109,17 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         return findVirtualDatacentersByCriterions(restrictions);
     }
 
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        Collection<Criterion> restrictions = new ArrayList<Criterion>();
+        if (datacenter != null)
+        {
+            restrictions.add(sameDatacenter(datacenter));
+        }
+
+        return findVirtualDatacentersByCriterions(restrictions);
+    }
+
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
         final Datacenter datacenter)
     {

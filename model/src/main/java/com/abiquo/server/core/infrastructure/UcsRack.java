@@ -48,14 +48,14 @@ public class UcsRack extends Rack
     }
 
     /* package */UcsRack(final String name, final Datacenter datacenter, final Integer vlanIdMin,
-        final Integer vlanIdMax, final Integer vlanPerVdcExpected, final Integer nrsq,
+        final Integer vlanIdMax, final Integer vlanPerVdcReserved, final Integer nrsq,
         final String ip, final Integer port, final String user, final String password)
     {
         setDatacenter(datacenter);
         setName(name);
         setVlanIdMin(vlanIdMin);
         setVlanIdMax(vlanIdMax);
-        setVlanPerVdcExpected(vlanPerVdcExpected);
+        setVlanPerVdcReserved(vlanPerVdcReserved);
         setNrsq(nrsq);
         setIp(ip);
         setPort(port);
@@ -84,7 +84,7 @@ public class UcsRack extends Rack
         return this.port;
     }
 
-    public void setPort(Integer port)
+    public void setPort(final Integer port)
     {
         this.port = port;
     }
@@ -113,7 +113,7 @@ public class UcsRack extends Rack
         return this.ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -141,7 +141,7 @@ public class UcsRack extends Rack
         return this.password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -169,7 +169,7 @@ public class UcsRack extends Rack
         return this.user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
