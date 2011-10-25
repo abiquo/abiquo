@@ -184,7 +184,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.treaty;
     }
 
-    private void setTreaty(final Integer treaty)
+    public void setTreaty(final Integer treaty)
     {
         this.treaty = treaty;
     }
@@ -209,7 +209,7 @@ public class VirtualImage extends DefaultEntityBase
         return this.treaty;
     }
 
-    private void setShared(final Integer shared)
+    public void setShared(final Integer shared)
     {
         this.shared = shared;
     }
