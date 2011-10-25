@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
             import mx.binding.utils.ChangeWatcher;
             import net.undf.abicloud.vo.infrastructure.State;
@@ -315,6 +316,17 @@
         width="350" height="400"
         selectable="false" dataProvider="{this._nodeListDP}"
         itemRenderer="net.undf.abicloud.view.virtualappliance.components.virtualappliance.bundle.NodeListRenderer"/>
+    
+    <mx:HBox 
+        verticalAlign="middle"
+        paddingLeft="15">
+        <mx:Image
+            id="alertIcon"
+            creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
+        <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance','LABEL_HARD_DISKS_WARNING')"
+            styleName="DataCenterCreationWarning"/>
+    </mx:HBox>
+
 
    	<!--ABICLOUDPREMIUM-652 -> Not used anymore-->
    <!-- <mx:CheckBox id="updateVirtualApplianceWithBundlesCheckbox"
