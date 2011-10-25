@@ -269,8 +269,9 @@ public enum APIError
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_OVF_PACKAGE_LIST(
         "OVF-PACKAGE-1", "The requested OVF package list does not exist"), OVF_PACKAGE_CANNOT_TRANSFORM(
-        "OVF-PACKAGE-2", "Cannot return the OVFPackage"),
-
+        "OVF-PACKAGE-2", "Cannot return the OVFPackage"), INVALID_OVF_INDEX_XML("OVF-PACKAGE-3",
+        "Can not find the RepositorySpace"), NON_EXISTENT_REPOSITORY_SPACE("OVF-PACKAGE-4",
+        "The requested RepositorySpace does not exist"),
     // VIRTUAL IMAGE
     VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
         "Virtual image can not be added due invalid allocation units"), VIMAGE_SYNCH_DC_REPO(
@@ -398,7 +399,7 @@ public enum APIError
         "This category is not erasable"),
 
     // ICONS
-    ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISENT_ICON("ICON-2",
+    ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image");
@@ -452,8 +453,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

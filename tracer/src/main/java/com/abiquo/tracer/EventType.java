@@ -172,7 +172,12 @@ public enum EventType implements Serializable
     // CATEGORY
     CATEGORY_CREATED(1700, "CATEGORY CREATED", "Category created"), CATEGORY_MODIFIED(1701,
         "CATEGORY MODIFIED", "Category modified"), CATEGORY_DELETED(1702, "CATEGORY DELETED",
-        "Category deleted");
+        "Category deleted"),
+
+    // OVF PACKAGES LISTS
+    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), OVF_PACKAGES_LIST_DELETED(
+        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), OVF_PACKAGES_LIST_MODIFIED(
+        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified");
 
     private final int event;
 
@@ -224,8 +229,8 @@ public enum EventType implements Serializable
         System.out.println("|| Action performed || Description || ");
         for (EventType error : events)
         {
-            System.out.println(String.format("| %s | %s |", error.name(),
-                error.getLongDescription()));
+            System.out.println(String.format("| %s | %s |", error.name(), error
+                .getLongDescription()));
         }
     }
 }

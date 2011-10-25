@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.appslibrary;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -47,10 +51,16 @@ import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 public class OVFPackageListService extends DefaultApiService
 {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageListService.class);
+
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
 
@@ -146,13 +156,12 @@ public class OVFPackageListService extends DefaultApiService
     {
         OVFPackageList oldList = repo.getOVFPackageList(idList);
 
-        final String listUrl = oldList.getUrl();
-        if (listUrl == null)
+        if (oldList == null)
         {
-            // it can not be updated
-            return oldList;
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
         }
-
+        final String listUrl = oldList.getUrl();
         repo.updateList(oldList);
 
         OVFPackageList newList = obtainOVFPackageListFromRepositorySpaceLocation(listUrl);
@@ -164,7 +173,11 @@ public class OVFPackageListService extends DefaultApiService
     {
 
         Enterprise ent = entRepo.findById(idEnterprise);
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent); // TODO remove
+        if (ent == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
 
         List<OVFPackageList> ovfPackageList = new ArrayList<OVFPackageList>();
         ovfPackageList = repo.getOVFPackageListsByEnterprise(idEnterprise);
@@ -177,6 +190,12 @@ public class OVFPackageListService extends DefaultApiService
     {
         OVFPackageList old = repo.getOVFPackageList(ovfPackageListId);
 
+        if (old == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
+
         // TODO - Apply changes and compare etags
         old.setName(ovfPackageList.getName());
         old.setOvfPackages(ovfPackageList.getOvfPackages());
@@ -186,6 +205,8 @@ public class OVFPackageListService extends DefaultApiService
         old.setAppsLibrary(appsLib);
         repo.updateList(old);
 
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_MODIFIED,
+            "OVFPackage list " + ovfPackageList.getName() + " updated");
         return old;
     }
 
@@ -193,7 +214,18 @@ public class OVFPackageListService extends DefaultApiService
     public void removeOVFPackageList(final Integer id)
     {
         OVFPackageList ovfPackageList = repo.getOVFPackageList(id);
+
+        if (ovfPackageList == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
+
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_DELETED,
+            "Removing ovf package list " + ovfPackageList.getName());
+
         repo.removeOVFPackageList(ovfPackageList);
+
     }
 
     private OVFPackageList obtainOVFPackageListFromRepositorySpaceLocation(String repositorySpaceURL)
@@ -212,7 +244,7 @@ public class OVFPackageListService extends DefaultApiService
 
         OVFPackageList list = new OVFPackageList();
 
-        RepositorySpace repo;
+        RepositorySpace repo = null;
 
         try
         {
@@ -220,11 +252,28 @@ public class OVFPackageListService extends DefaultApiService
         }
         catch (XMLException e)
         {
-            // TODO
             final String cause =
                 String.format("Can not find the RepositorySpace at [%s]", repositorySpaceURL);
-            final Response response = Response.status(Status.NOT_FOUND).entity(cause).build();
-            throw new WebApplicationException(response);
+            LOGGER.debug(cause);
+            addValidationErrors(APIError.INVALID_OVF_INDEX_XML);
+            flushErrors();
+        }
+        catch (MalformedURLException e)
+        {
+            final String cause =
+                String.format("Invalid repository space identifier : [%s]", repositorySpaceURL);
+            LOGGER.debug(cause);
+            addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
+            flushErrors();
+        }
+
+        catch (IOException e)
+        {
+            final String cause =
+                String.format("Can not open a connection to : [%s]", repositorySpaceURL);
+            LOGGER.debug(cause);
+            addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
+            flushErrors();
         }
 
         final String baseRepositorySpaceURL =
@@ -232,18 +281,12 @@ public class OVFPackageListService extends DefaultApiService
 
         for (OVFDescription description : repo.getOVFDescription())
         {
-            try
-            {
-                OVFPackage pack =
-                    ovfPackageService.ovfPackageFromOvfDescription(description,
-                        baseRepositorySpaceURL);
 
-                list.getOvfPackages().add(pack);
-            }
-            catch (Exception e)
-            {
-                // TODO can not add the ovfpackage
-            }
+            OVFPackage pack =
+                ovfPackageService.ovfPackageFromOvfDescription(description, baseRepositorySpaceURL);
+
+            list.getOvfPackages().add(pack);
+
         }
 
         list.setName(repo.getRepositoryName());

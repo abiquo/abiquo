@@ -64,7 +64,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     public void getIconRaises404WhenNotFound()
     {
         ClientResponse response = get(resolveIconURI(12345));
-        assertError(response, 404, APIError.NON_EXISENT_ICON);
+        assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
 
         String validURI = resolveIconURI(icon.getId() + 10);
         ClientResponse response = put(validURI, iconDto);
-        assertError(response, 404, APIError.NON_EXISENT_ICON);
+        assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 204);
 
         response = get(validURI);
-        assertError(response, 404, APIError.NON_EXISENT_ICON);
+        assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     {
         String validURI = resolveIconURI(12345);
         ClientResponse response = delete(validURI);
-        assertError(response, 404, APIError.NON_EXISENT_ICON);
+        assertError(response, 404, APIError.NON_EXISTENT_ICON);
     }
 
     @Test

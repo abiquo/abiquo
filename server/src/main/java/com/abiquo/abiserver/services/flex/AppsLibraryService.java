@@ -246,28 +246,8 @@ public class AppsLibraryService
 
     public BasicResult editIcon(final UserSession userSession, final Icon icon)
     {
-        BasicResult result = new BasicResult();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.editIcon(userSession, icon.toPojoHB());
-
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+            AppsLibraryStub.class).editIcon(userSession, icon);
     }
 
     public BasicResult deleteIcon(final UserSession userSession, final Integer idIcon)

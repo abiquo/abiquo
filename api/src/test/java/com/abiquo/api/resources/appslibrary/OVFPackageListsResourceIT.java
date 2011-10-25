@@ -23,6 +23,7 @@ package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListsURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
+import static com.abiquo.api.common.Assert.assertError;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -35,6 +36,7 @@ import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.OVFPackage;
@@ -43,7 +45,6 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 
-@Listeners( {com.abiquo.testng.TestServerAndOVFListener.class})
 public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 {
 
@@ -84,6 +85,14 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+    }
+
+    @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void getOVFPackagesListsByNonExistentEnterpriseRises404() throws Exception
+    {
+        validURI = resolveOVFPackageListsURI(2);
+        ClientResponse response = get(validURI);
+        assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
@@ -131,5 +140,45 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         OVFPackageListDto entityPost = response.getEntity(OVFPackageListDto.class);
         assertNotNull(entityPost);
         assertEquals(entityPost.getName(), "Abiquo Official Repository");
+    }
+
+    @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void createOVFPackageListwithBadURLRises404()
+    {
+
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
+        app.setEnterprise(ent);
+        setup(ent, app);
+
+        validURI = resolveOVFPackageListsURI(ent.getId());
+
+        String badURL = "http://localhost:7979/testovf/nonexistent/ovfindex.xml";
+
+        ClientResponse response =
+            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
+                MediaType.TEXT_PLAIN).post(badURL);
+
+        assertError(response, 404, APIError.NON_EXISTENT_REPOSITORY_SPACE);
+    }
+
+    @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void createOVFPackageListBadFormatXMLrises400()
+    {
+
+        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
+        app.setEnterprise(ent);
+        setup(ent, app);
+
+        validURI = resolveOVFPackageListsURI(ent.getId());
+
+        String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
+
+        ClientResponse response =
+            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
+                MediaType.TEXT_PLAIN).post(xmlindexURI);
+
+        assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);
     }
 }

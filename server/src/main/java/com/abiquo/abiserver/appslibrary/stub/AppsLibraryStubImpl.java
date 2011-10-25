@@ -46,6 +46,8 @@ import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -324,17 +326,33 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     }
 
-    public void editIcon(final IconHB icon)
+    @Override
+    public BasicResult editIcon(final UserSession userSession, final Icon icon)
     {
-        final String uri = createIconLink(icon.getIdIcon());
+        DataResult<Icon> result = new DataResult<Icon>();
+
+        final String uri = createIconLink(icon.getId());
 
         IconDto iconDto = new IconDto();
 
-        iconDto.setId(icon.getIdIcon());
+        iconDto.setId(icon.getId());
         iconDto.setName(icon.getName());
         iconDto.setPath(icon.getPath());
 
-        put(uri, iconDto);
+        ClientResponse response = put(uri, iconDto);
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
+        }
+        else
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setMessage(response.getMessage());
+        }
+        return result;
+
     }
 
     public List<Icon> getIcons(final UserSession userSession, final Integer idEnterprise)
@@ -358,10 +376,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static Icon createFlexIconObject(final IconDto iconDto)
     {
         Icon icon = new Icon();
-        icon.setId(iconDto.getId());
         icon.setName(iconDto.getName());
         icon.setPath(iconDto.getPath());
-
+        icon.setId(iconDto.getId());
         return icon;
     }
 }

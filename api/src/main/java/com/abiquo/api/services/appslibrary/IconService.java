@@ -65,7 +65,7 @@ public class IconService extends DefaultApiService
         Icon icon = appslibraryRep.findIconByPath(path);
         if (icon == null)
         {
-            addNotFoundErrors(APIError.NON_EXISENT_ICON);
+            addNotFoundErrors(APIError.NON_EXISTENT_ICON);
             flushErrors();
         }
         return icon;
@@ -77,7 +77,7 @@ public class IconService extends DefaultApiService
         Icon icon = appslibraryRep.findIconById(iconId);
         if (icon == null)
         {
-            addNotFoundErrors(APIError.NON_EXISENT_ICON);
+            addNotFoundErrors(APIError.NON_EXISTENT_ICON);
             flushErrors();
         }
         return icon;

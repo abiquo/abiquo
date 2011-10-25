@@ -21,7 +21,6 @@
 
 package com.abiquo.testng;
 
-import static com.abiquo.testng.TestConfig.DEFAULT_SERVER_PORT;
 import static com.abiquo.testng.TestConfig.getParameter;
 
 import org.mortbay.jetty.Handler;
@@ -30,11 +29,15 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ISuite;
+import org.testng.ISuiteListener;
 
-public class TestServerAndOVFListener extends TestServerListener
+public class TestServerAndOVFListener implements ISuiteListener
 {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TestServerAndOVFListener.class);
 
     /** remote repository file server configuration */
     protected Server rsServer;
@@ -47,35 +50,16 @@ public class TestServerAndOVFListener extends TestServerListener
     @Override
     public void onStart(final ISuite suite)
     {
-        LOGGER.info(getParameter(WEBAPP_DIR));
-
-        int port = Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
-        server = new Server(port);
-
-        WebAppContext webappapi = new WebAppContext();
-        webappapi.setContextPath(getParameter(WEBAPP_CONTEXT));
-        webappapi.setWar(getParameter(WEBAPP_DIR));
-        webappapi.setServer(server);
-
-        server.setHandlers(new WebAppContext[] {webappapi});
-
         try
         {
-            server.start();
-            LOGGER.info("Test server started.");
-
             startRemoteServiceServer();
+            LOGGER.info("Test server for ovfindex started.");
 
         }
         catch (Exception ex)
         {
-            throw new RuntimeException("Could not start test server", ex);
+            throw new RuntimeException("Could not start test server for ovfindex", ex);
         }
-    }
-
-    public void onFinish(final ISuite suite)
-    {
-        super.onFinish(suite);
     }
 
     private void startRemoteServiceServer() throws Exception
@@ -92,6 +76,25 @@ public class TestServerAndOVFListener extends TestServerListener
         handlers.setHandlers(new Handler[] {resource_handler, new DefaultHandler()});
         rsServer.setHandler(handlers);
         rsServer.start();
+    }
+
+    @Override
+    public void onFinish(final ISuite suite)
+    {
+        LOGGER.info("Stopping test server...");
+
+        try
+        {
+            if (rsServer != null)
+            {
+                rsServer.stop();
+            }
+            LOGGER.info("Test server for ovfindex stoped.");
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException("Could not stop test server for ovfindex", ex);
+        }
     }
 
 }

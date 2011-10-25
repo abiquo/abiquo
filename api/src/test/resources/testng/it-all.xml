@@ -3,6 +3,7 @@
     <listeners>
         <listener class-name="com.abiquo.testng.TestDatabaseListener" />
         <listener class-name="com.abiquo.testng.TestServerListener" />
+        <listener class-name="com.abiquo.testng.TestServerAndOVFListener" />
     </listeners>
     <test name="All integration tests">
         <groups>

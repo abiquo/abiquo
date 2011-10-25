@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
@@ -31,9 +32,11 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
@@ -175,6 +178,19 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
             assertEquals(result.getName(), "newName");
         }
 
+    }
+
+    @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void modifyNonExistentOVFPackageListRises404()
+    {
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        setup(enterprise);
+
+        OVFPackageListDto list = new OVFPackageListDto();
+        ClientResponse response =
+            put(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), 2), list);
+
+        assertError(response, 404, APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
