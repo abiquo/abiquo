@@ -33,10 +33,10 @@ public class HardLimitExceededException extends LimitExceededException
 
     private static final long serialVersionUID = -83588483436562648L;
 
-    public HardLimitExceededException(Object entity, long required, long actual, LimitHB limit,
-        LimitResource resource)
+    public HardLimitExceededException(final Object entity, final long required, final long actual,
+        final LimitHB limit, final LimitResource resource, final boolean editLimits)
     {
-        super(entity, required, actual, limit, resource);
+        super(entity, required, actual, limit, resource, editLimits);
     }
 
 }

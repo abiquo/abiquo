@@ -501,7 +501,6 @@ public class PopulateModelTest
         netConfDAO.makePersistent(netConf);
 
         VlanNetworkHB vlanHB = new VlanNetworkHB();
-        vlanHB.setDefaultNetwork(Boolean.TRUE);
         vlanHB.setNetworkName("Test VLAN");
         vlanHB.setConfiguration(netConf);
         vlanNetworkDAO.makePersistent(vlanHB);

@@ -27,12 +27,18 @@ import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.NetworkResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.user.User;
 import com.abiquo.abiserver.pojo.user.UserListOptions;
+import com.abiquo.abiserver.pojo.virtualhardware.DatacenterLimit;
 
 /**
  * This class defines all services related to Users management
@@ -44,6 +50,9 @@ public class UserService
 {
 
     private UserCommand userCommand;
+
+    /** The stub used to connect to the API. */
+    private NetworkResourceStub networkStub;
 
     public UserService()
     {
@@ -58,6 +67,7 @@ public class UserService
         {
             userCommand = new UserCommandImpl();
         }
+        networkStub = new NetworkResourceStubImpl();
     }
 
     protected UserCommand proxyCommand(final UserSession userSession)
@@ -238,7 +248,32 @@ public class UserService
         UserCommand command = proxyCommand(userSession);
         try
         {
-            return command.editEnterprise(userSession, enterprise);
+            BasicResult res = command.editEnterprise(userSession, enterprise);
+
+            if (enterprise.getDcLimits().size() != 0)
+            {
+                // now edit the vlan
+                VlanNetwork defaultvlan =
+                    enterprise.getDcLimits().iterator().next().getDefaultVlan();
+
+                for (DatacenterLimit dl : enterprise.getDcLimits())
+                {
+                    Integer datacenterId = dl.getDatacenter().getId();
+                    if (defaultvlan == null)
+                    {
+                        proxyStub(userSession)
+                            .setInternalVlansAsDefaultInEnterpriseByDatacenterLimit(
+                                enterprise.getId(), datacenterId);
+                    }
+                    else
+                    {
+                        proxyStub(userSession)
+                            .setExternalVlanAsDefaultInEnterpriseByDatacenterLimit(
+                                enterprise.getId(), datacenterId, defaultvlan.getNetworkId());
+                    }
+                }
+            }
+            return res;
         }
         catch (UserSessionException e)
         {
@@ -273,7 +308,22 @@ public class UserService
         UserCommand command = proxyCommand(userSession);
         try
         {
-            return command.getEnterprise(userSession, enterpriseId);
+            DataResult<Enterprise> dataResult = command.getEnterprise(userSession, enterpriseId);
+
+            Enterprise ent = dataResult.getData();
+
+            for (DatacenterLimit dl : ent.getDcLimits())
+            {
+                Integer datacenterId = dl.getDatacenter().getId();
+                @SuppressWarnings("unchecked")
+                DataResult<VlanNetwork> defaultVlan =
+                    (DataResult<VlanNetwork>) proxyStub(userSession)
+                        .getExternalVlanAsDefaultInEnterpriseByDatacenterLimit(ent.getId(),
+                            datacenterId);
+                dl.setDefaultVlan(defaultVlan.getData());
+            }
+
+            return dataResult;
         }
         catch (UserSessionException e)
         {
@@ -354,6 +404,11 @@ public class UserService
         {
             return e.getResult();
         }
+    }
+
+    protected NetworkResourceStub proxyStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, networkStub, NetworkResourceStub.class);
     }
 
     /**

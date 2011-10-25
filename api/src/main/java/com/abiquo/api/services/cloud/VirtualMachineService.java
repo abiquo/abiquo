@@ -41,8 +41,8 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.api.services.IpAddressService;
 import com.abiquo.api.services.MachineService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -64,6 +64,7 @@ import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -93,6 +94,9 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualMachineRep repo;
 
     @Autowired
+    protected VirtualDatacenterRep vdcRepo;
+
+    @Autowired
     protected VirtualApplianceService vappService;
 
     @Autowired
@@ -120,7 +124,7 @@ public class VirtualMachineService extends DefaultApiService
     protected MachineService machineService;
 
     @Autowired
-    protected IpAddressService ipService;
+    protected NetworkService ipService;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -133,6 +137,7 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachineService(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
+        this.vdcRepo = new VirtualDatacenterRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
         this.infrastructureService = new InfrastructureService(em);
@@ -807,7 +812,7 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         List<IpPoolManagement> ipPoolManagementByMachine =
-            ipService.getListIpPoolManagementByMachine(virtualMachine);
+            vdcRepo.findIpsByVirtualMachine(virtualMachine);
 
         for (IpPoolManagement i : ipPoolManagementByMachine)
         {

@@ -31,6 +31,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
@@ -48,8 +49,10 @@ import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
+import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
@@ -90,8 +93,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildOVFPackageLinks(Integer datacenterId, OVFPackageDto ovfPackage);
 
-    public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenterDto vdc,
-        Integer datacenterId, Integer enterpriseId);
+    public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenter vdc, Integer datacenterId,
+        Integer enterpriseId);
 
     public List<RESTLink> buildVirtualApplianceLinks(VirtualApplianceDto vapp, Integer vdcId,
         Integer enterpriseId);
@@ -99,7 +102,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildPrivateNetworkLinks(Integer virtualDatacenterId,
         VLANNetworkDto network);
 
-    public List<RESTLink> buildIPAddressLink(Integer vlanId, IpPoolManagementDto ip);
+    public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
+        final VLANNetwork network);
 
     /*
      * Premium methods
@@ -155,4 +159,28 @@ public interface IRESTBuilder
         Integer vdcId);
 
     public List<RESTLink> buildVirtualMachineStateLinks(Integer vappId, Integer vdcId, Integer vmId);
+
+    public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
+
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip);
+
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, IpPoolManagement ip);
+
+    public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
+        final Integer vappId, final Integer vmId, VMNetworkConfiguration config);
+
+    public List<RESTLink> buildNICLinks(IpPoolManagement ip);
+
+    public List<RESTLink> buildExternalNetworkLinks(Integer enterpriseId, VLANNetworkDto dto);
+
+    public List<RESTLink> buildExternalNetworkByDatacenterLinks(Integer enterpriseId,
+        Integer limitId, VLANNetwork network);
+
+    public List<RESTLink> buildExternalNetworksByDatacenterLinks(Integer enterpriseId,
+        Integer limitId);
+
+    public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
+        IpPoolManagement ip);
+
+    public List<RESTLink> buildDiskLinks(DiskManagement disk);
 }

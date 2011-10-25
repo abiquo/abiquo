@@ -79,19 +79,17 @@ import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
@@ -124,8 +122,6 @@ public class OVFGeneratorService
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
 
     public final static QName HA_DISK = new QName("ha");
-
-    // /////////// InfrastructureWS
 
     public EnvelopeType changeMachineState(final VirtualMachine virtualMachine,
         final String machineState) throws Exception
@@ -577,7 +573,8 @@ public class OVFGeneratorService
         for (VLANNetwork vlan : listOfVLANidentifiers)
         {
             Integer numberOfRules = 0;
-            Collection<IpPoolManagement> ips = vdcRepo.findIpsByVLAN(vlan.getId(), 0, -1);
+            Collection<IpPoolManagement> ips =
+                vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
 
             RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
             URI uri = new URI(dhcpRemoteService.getUri());
@@ -1048,7 +1045,7 @@ public class OVFGeneratorService
 
     }
 
-    private String getRepositoryManagerAddress(NodeVirtualImage nvi)
+    private String getRepositoryManagerAddress(final NodeVirtualImage nvi)
     {
         VirtualMachine vmachine = vmRepo.findVirtualMachineById(nvi.getVirtualMachine().getId());
 

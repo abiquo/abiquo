@@ -58,6 +58,7 @@
         <class>com.abiquo.server.core.infrastructure.storage.StoragePool</class>
         <class>com.abiquo.server.core.infrastructure.storage.VolumeManagement</class>
         <class>com.abiquo.server.core.infrastructure.storage.InitiatorMapping</class>
+        <class>com.abiquo.server.core.infrastructure.storage.DiskManagement</class>
         <!-- end: storage -->
         <!-- workload -->
         <class>com.abiquo.server.core.scheduler.EnterpriseExclusionRule</class>

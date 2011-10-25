@@ -21,11 +21,22 @@
 
 package net.undf.abicloud.vo.networking
 {
+	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+	
 
     [RemoteClass(alias="com.abiquo.abiserver.pojo.networking.VlanNetwork")]
     [Bindable]
     public class VlanNetwork
     {
+        
+        //CONST
+        public static const INTERNAL:String = "INTERNAL";
+        
+        public static const EXTERNAL:String = "EXTERNAL";
+        
+        public static const PUBLIC:String = "PUBLIC";
+        
+        
         public var vlanNetworkId:int;
 
         public var networkId:int;
@@ -37,6 +48,10 @@ package net.undf.abicloud.vo.networking
         public var vlanTag:int;
 
         public var configuration:NetworkConfiguration;
+        
+        public var networkType:String;
+        
+        public var virtualDatacenter:VirtualDataCenter;
 
         public function VlanNetwork()
         {

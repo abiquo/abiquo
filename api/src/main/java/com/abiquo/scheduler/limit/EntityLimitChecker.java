@@ -120,11 +120,19 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final boolean force) throws LimitExceededException
     {
 
-        checkLimits(entity, required, force, true);
+        checkLimits(entity, required, force, true, true);
     }
 
     public void checkLimits(final T entity, final VirtualMachineRequirements required,
         final boolean force, final Boolean checkVLAN) throws LimitExceededException
+    {
+
+        checkLimits(entity, required, force, checkVLAN, false);
+    }
+
+    public void checkLimits(final T entity, final VirtualMachineRequirements required,
+        final boolean force, final Boolean checkVLAN, final Boolean checkIPs)
+        throws LimitExceededException
     {
         if (allNoLimits(entity))
         {
@@ -134,7 +142,8 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
         final DefaultEntityCurrentUsed actualAllocated = getCurrentUsed(entity);
 
         Map<LimitResource, LimitStatus> entityResourceStatus =
-            getResourcesLimit(entity, actualAllocated, required, checkVLAN);
+
+        getResourcesLimit(entity, actualAllocated, required, checkVLAN, checkIPs);
 
         entityResourceStatus = getFilterResourcesStatus(entityResourceStatus);
 
@@ -146,7 +155,7 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private Map<LimitResource, LimitStatus> getResourcesLimit(final T limits,
         final DefaultEntityCurrentUsed actualAllocated, final VirtualMachineRequirements required,
-        final Boolean checkVLAN)
+        final Boolean checkVLAN, final Boolean checkIPs)
     {
 
         Map<LimitResource, LimitStatus> limitStatus =
@@ -164,14 +173,19 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
 
         }
 
+        if (checkIPs)
+        {
+            int actualAndRequiredIPs =
+                (int) (actualAllocated.getPublicIp() + required.getPublicIP());
+            limitStatus.put(LimitResource.PUBLICIP,
+                limits.checkPublicIpStatus(actualAndRequiredIPs));
+
+        }
         limitStatus.put(LimitResource.CPU, limits.checkCpuStatus(actualAndRequiredCpu));
         limitStatus.put(LimitResource.RAM, limits.checkRamStatus(actualAndRequiredRam));
         limitStatus.put(LimitResource.HD, limits.checkHdStatus(actualAndRequiredHd));
         limitStatus.put(LimitResource.STORAGE, limits.checkStorageStatus(actualAndRequiredStorage));
 
-        /**
-         * TODO vlan and public ip is not checked there
-         **/
         return limitStatus;
     }
 
@@ -180,12 +194,12 @@ public abstract class EntityLimitChecker<T extends DefaultEntityWithLimits>
      */
     private boolean allNoLimits(final T limit)
     {
-        return (limit.getCpuCountLimits().isNoLimit() //
+        return limit.getCpuCountLimits().isNoLimit() //
             && limit.getRamLimitsInMb().isNoLimit() //
             && limit.getHdLimitsInMb().isNoLimit() //
             && (limit.getVlansLimits() == null || limit.getVlansLimits().isNoLimit()) //
             && (limit.getStorageLimits() == null || limit.getStorageLimits().isNoLimit()) //
-        && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit()));
+            && (limit.getPublicIPLimits() == null || limit.getPublicIPLimits().isNoLimit());
     }
 
     /**
