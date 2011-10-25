@@ -29,6 +29,7 @@ import java.util.Collection;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Workspace;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -53,9 +55,28 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private DatacenterService service;
 
+    @Autowired
+    private SecurityService securityService;
+
     @GET
-    public DatacentersDto getDatacenters(@Context IRESTBuilder restBuilder) throws Exception
+    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
+        @QueryParam("pricing") final Integer pricingId) throws Exception
     {
+        if (pricingId != null)
+        {
+            if (!securityService.hasPrivilege(SecurityService.PRICING_VIEW))
+            {
+                securityService.requirePrivilege(SecurityService.PRICING_VIEW);
+            }
+        }
+        else
+        {
+            if (!securityService.hasPrivilege(SecurityService.PHYS_DC_ENUMERATE))
+            {
+                securityService.requirePrivilege(SecurityService.PHYS_DC_ENUMERATE);
+            }
+        }
+
         Collection<Datacenter> all = service.getDatacenters();
         DatacentersDto datacenters = new DatacentersDto();
         for (Datacenter d : all)
@@ -67,8 +88,8 @@ public class DatacentersResource extends AbstractResource
     }
 
     @POST
-    public DatacenterDto postDatacenter(DatacenterDto datacenter, @Context IRESTBuilder builder)
-        throws Exception
+    public DatacenterDto postDatacenter(final DatacenterDto datacenter,
+        @Context final IRESTBuilder builder) throws Exception
     {
         DatacenterDto response = service.addDatacenter(datacenter);
         addLinks(builder, response);
