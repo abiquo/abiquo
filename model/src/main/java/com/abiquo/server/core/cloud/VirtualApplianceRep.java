@@ -187,4 +187,17 @@ public class VirtualApplianceRep extends DefaultRepBase
     {
         virtualImageDao.remove(virtualImage);
     }
+
+    public VirtualImage findVirtualImage(final Integer id)
+    {
+        return virtualImageDao.findById(id);
+    }
+
+    public VirtualImage insertVirtualImage(final VirtualImage vi)
+    {
+        virtualImageDao.persist(vi);
+        virtualImageDao.flush();
+
+        return vi;
+    }
 }
