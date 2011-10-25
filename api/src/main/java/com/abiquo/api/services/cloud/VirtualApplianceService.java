@@ -49,7 +49,6 @@ import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
@@ -59,6 +58,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.sun.ws.management.client.Resource;
@@ -244,7 +244,6 @@ public class VirtualApplianceService extends DefaultApiService
             new VirtualAppliance(vdc.getEnterprise(),
                 vdc,
                 dto.getName(),
-                VirtualApplianceState.NOT_DEPLOYED,
                 VirtualApplianceState.NOT_DEPLOYED);
 
         vapp.setHighDisponibility(dto.getHighDisponibility());

@@ -61,8 +61,6 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualMachineState;
-import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -70,6 +68,8 @@ import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -277,8 +277,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachineStateTransition validMachineStateChange(final VirtualMachine virtualMachine,
-        final VirtualMachineState newState)
+    public VirtualMachineStateTransition validMachineStateChange(
+        final VirtualMachine virtualMachine, final VirtualMachineState newState)
     {
         if (virtualMachine.getState() == VirtualMachineState.NOT_ALLOCATED
             || virtualMachine.getState() == VirtualMachineState.ALLOCATED)
@@ -384,7 +384,6 @@ public class VirtualMachineService extends DefaultApiService
             new VirtualAppliance(vmachine.getEnterprise(),
                 vdc,
                 "haVapp",
-                VirtualApplianceState.NOT_DEPLOYED,
                 VirtualApplianceState.NOT_DEPLOYED);
 
         NodeVirtualImage nvi =
@@ -420,7 +419,8 @@ public class VirtualMachineService extends DefaultApiService
 
     public void checkPauseAllowed(final VirtualMachine vm, final VirtualMachineState state)
     {
-        if (vm.getHypervisor().getType() == HypervisorType.XEN_3 && state == VirtualMachineState.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3
+            && state == VirtualMachineState.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();
@@ -740,7 +740,8 @@ public class VirtualMachineService extends DefaultApiService
     private ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
         final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
         final VirtualMachineDescriptionBuilder vmDesc,
-        final HypervisorConnection hypervisorConnection, final VirtualMachineStateTransition stateTransition)
+        final HypervisorConnection hypervisorConnection,
+        final VirtualMachineStateTransition stateTransition)
     {
         ApplyVirtualMachineStateOp stateJob = new ApplyVirtualMachineStateOp();
         stateJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
@@ -1285,7 +1286,8 @@ public class VirtualMachineService extends DefaultApiService
         // TODO revisar
         checkPauseAllowed(virtualMachine, state);
         // This returns the StateTransition or error
-        VirtualMachineStateTransition validMachineStateChange = validMachineStateChange(virtualMachine, state);
+        VirtualMachineStateTransition validMachineStateChange =
+            validMachineStateChange(virtualMachine, state);
 
         blockVirtualMachine(virtualMachine);
 
