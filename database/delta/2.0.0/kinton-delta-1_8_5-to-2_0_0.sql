@@ -38,6 +38,7 @@ DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 -- ---------------------------------------------- --
 --                  TABLE CREATION                --
 -- ---------------------------------------------- --
+
 -- PRICING --
 -- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
@@ -137,6 +138,7 @@ CREATE TABLE  `kinton`.`chef_runlist` (
   CONSTRAINT `chef_runlist_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `kinton`.`enterprise_properties`;
 CREATE TABLE  `kinton`.`enterprise_properties` (
   `idProperties` int(11) unsigned NOT NULL auto_increment,
   `enterprise` int(11) unsigned DEFAULT NULL,
@@ -144,6 +146,7 @@ CREATE TABLE  `kinton`.`enterprise_properties` (
   CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `kinton`.`enterprise_properties_map`;
 CREATE TABLE  `kinton`.`enterprise_properties_map` (
  `enterprise_properties` int(11) unsigned NOT NULL,
   `map_key` varchar(30) NOT NULL,
@@ -187,10 +190,10 @@ ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
+
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)");
 
-<<<<<<< HEAD
 -- First I need to update some rows before to delete the `default_network` field
 -- UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
@@ -236,13 +239,13 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
-=======
+/*!40000 ALTER TABLE `kinton`.`enterprise_properties` DISABLE KEYS */;
 INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
+/*!40000 ALTER TABLE `kinton`.`enterprise_properties` ENABLE KEYS */;
 
+/*!40000 ALTER TABLE `kinton`.`enterprise_properties` DISABLE KEYS */;
 INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
-
-/*!40000 ALTER TABLE `enterprise_properties` ENABLE KEYS */;
->>>>>>> ABICLOUDPREMIUM-2454ENTMETADATA
+/*!40000 ALTER TABLE `kinton`.`enterprise_properties` ENABLE KEYS */;
 
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
@@ -858,7 +861,6 @@ END;
 DELIMITER ;
 
 -- ---------------------------------------------- --
-<<<<<<< HEAD
 --                  PROCEDURES                    --
 -- ---------------------------------------------- --
 
@@ -1330,11 +1332,3 @@ CALL `kinton`.`CalculateCloudUsageStats`();
 CALL `kinton`.`CalculateEnterpriseResourcesStats`();
 CALL `kinton`.`CalculateVdcEnterpriseStats`();
 
-  
-
-  
-
-=======
---                   TRIGGERS                     --
--- ---------------------------------------------- --
->>>>>>> ABICLOUDPREMIUM-2454ENTMETADATA
