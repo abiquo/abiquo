@@ -24,6 +24,8 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.springframework.util.StringUtils;
+
 import com.abiquo.model.validation.IscsiPath;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 
@@ -168,6 +170,15 @@ public enum APIError
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"),
 
+    // VIRTUAL CONVERSION
+    NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
+        "The requested stateful conversion does not exist"), INVALID_VASC_STATE("VASC-1",
+        "Invalid expected state"),
+
+    // NODE VIRTUAL IMAGE STATEFUL CONVERSION
+    NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
+        "The requested node virtual image stateful conversion does not exist"),
+
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
@@ -280,7 +291,8 @@ public enum APIError
         "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VIMAGE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
-        "VIMAGE-0", "The requested virtual image does not exist"),
+        "VIMAGE-0", "The requested virtual image does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
+        "Provided virtual image is not a bundle", "Provided [%s] is not a bundle"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -383,7 +395,8 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume"),
+        "Cannot resize a generic Iscsi volume"), NON_EXISTENT_VOLUME_MAPPING("VOL-19",
+        "The requested initiator mapping does not exist"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -414,12 +427,24 @@ public enum APIError
      */
     String message;
 
+    /**
+     * Message with patter to format
+     */
+    String message2format;
+
     String cause;
 
     private APIError(final String code, final String message)
     {
         this.code = code;
         this.message = message;
+    }
+
+    private APIError(final String code, final String message, final String message2format)
+    {
+        this.code = code;
+        this.message = message;
+        this.message2format = message2format;
     }
 
     public String getCode()
@@ -435,6 +460,15 @@ public enum APIError
     public void addCause(final String cause)
     {
         this.cause = cause;
+    }
+
+    public APIError formatMessage(final Object... args)
+    {
+        if (StringUtils.hasText(this.message2format))
+        {
+            this.message = String.format(this.message2format, args);
+        }
+        return this;
     }
 
     public static void main(final String[] args)
@@ -453,8 +487,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 
