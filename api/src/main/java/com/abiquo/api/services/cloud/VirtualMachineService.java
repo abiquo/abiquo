@@ -77,6 +77,8 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -126,6 +128,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected NetworkService ipService;
 
+    @Autowired
+    protected StorageRep storageRep;
+
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
@@ -141,6 +146,7 @@ public class VirtualMachineService extends DefaultApiService
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
         this.infrastructureService = new InfrastructureService(em);
+        this.storageRep = new StorageRep(em);
         vdcService = new VirtualDatacenterService(em);
     }
 
@@ -735,11 +741,29 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine
      * @param vmDesc void
      */
-    protected void auxDiscsDefinition(final VirtualMachine virtualMachine,
+    protected void secondaryScsiDefinition(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         // PREMIUM
         logger.debug("auxDiscsDefinition community implementation");
+    }
+
+    /**
+     * Add the secondary hard disks.
+     * 
+     * @param virtualMachine virtual machine object.
+     * @param vmDesc definition to send.
+     */
+    protected void secondaryHardDisksDefinition(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder vmDesc)
+    {
+        List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
+
+        Integer sequence = 1;
+        for (DiskManagement imHard : hardDisks)
+        {
+            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence);
+        }
     }
 
     private ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
@@ -1261,8 +1285,14 @@ public class VirtualMachineService extends DefaultApiService
         vnicDefinitionConfiguration(virtualMachine, vmDesc);
         logger.debug("Network configuration done!");
 
-        logger.debug("Configure secondary hd");
-        auxDiscsDefinition(virtualMachine, vmDesc);
+        logger.debug("Configure secondary iSCSI volumes");
+        secondaryScsiDefinition(virtualMachine, vmDesc);
+        logger.debug("Configure secondary iSCSI done!");
+
+        logger.debug("Configure secondary Hard Disks");
+        secondaryHardDisksDefinition(virtualMachine, vmDesc);
+        logger.debug("Configure secondary Hard Disks done!");
+
         return vmDesc;
     }
 
