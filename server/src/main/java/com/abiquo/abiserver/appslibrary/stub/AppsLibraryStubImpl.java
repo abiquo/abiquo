@@ -20,34 +20,23 @@
  */
 package com.abiquo.abiserver.appslibrary.stub;
 
-import static java.lang.String.valueOf;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Cookie;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.abiserver.business.authentication.TokenUtils;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
-import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
@@ -68,61 +57,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     private static final Logger logger = LoggerFactory.getLogger(AppsLibraryStubImpl.class);
 
-    private RestClient client;
-
     public static final String OVF_PACKAGE_LISTS_PATH = "appslib/ovfpackagelists";
 
     public static final String ENTERPRISES_PATH = "admin/enterprises";
 
-    public String baseUri;
-
-    final String user;
-
-    final String password;
-
-    final String authType;
-
     public static final String OVF_PACKAGE_PATH = "appslib/ovfpackages";
-
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
-
-    public AppsLibraryStubImpl(final UserSession session)
-    {
-        client = new RestClient();
-        baseUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
-
-        DAOFactory factory = HibernateDAOFactory.instance();
-        factory.beginConnection();
-        UserHB user =
-            factory.getUserDAO().getUserByLoginAuth(session.getUser(), session.getAuthType());
-        factory.endConnection();
-
-        this.user = user.getUser();
-        this.password = user.getPassword();
-        this.authType = user.getAuthType();
-    }
-
-    private void setAuthCookie(final Resource resource)
-    {
-        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
-        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
-        String authType = this.authType;
-        String[] tokens;
-        if (authType != null)
-        {
-            tokens = new String[] {user, valueOf(tokenExpiration), signature, authType};
-        }
-        else
-        {
-            tokens = new String[] {user, valueOf(tokenExpiration), signature};
-        }
-        String cookieValue = StringUtils.join(tokens, ":");
-
-        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
-
-        resource.cookie(new Cookie("auth", cookieValue));
-    }
 
     @Override
     public DataResult<Icon> createIcon(final Integer idEnterprise, final IconDto icon)
@@ -146,44 +85,20 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    public Resource createResourceOVFPackageLists(final Integer idEnterprise)
-    {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_LISTS_PATH;
-        Resource reso = client.resource(baseUri + "/" + path);
-
-        setAuthCookie(reso);
-
-        return reso;
-    }
-
-    public Resource createResourceOVFPackageList(final Integer idEnterprise,
-        final Integer idOvfpackageList)
-    {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_LISTS_PATH
-                + '/' + String.valueOf(idOvfpackageList);
-
-        Resource reso = client.resource(baseUri + "/" + path);
-
-        setAuthCookie(reso);
-
-        return reso;
-    }
-
     @Override
     public DataResult<OVFPackageList> createOVFPackageList(final Integer idEnterprise,
         final String ovfpackageListURL)
     {
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        Resource resource = createResourceOVFPackageLists(idEnterprise);
+        String uri = createOVFPackageListsLink(idEnterprise.toString());
+
+        // Resource resource = createResourceOVFPackageLists(idEnterprise);
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource.contentType(MediaType.TEXT_PLAIN).accept(MediaType.APPLICATION_XML).post(
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
                 ovfpackageListURL);
-
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -312,6 +227,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     private DataResult<OVFPackageList> addDefaultOVFPackageList(final Integer idEnterprise)
     {
+        String defaultRepositorySpace =
+            AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
         if (defaultRepositorySpace == null || defaultRepositorySpace.isEmpty())
         {
             logger.debug("There aren't any default repository space defined");
@@ -330,8 +247,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     // XXX not used on the AppsLibraryCommand
     private OVFPackageListsDto getOVFPackageLists(final Integer idEnterprise)
     {
-        Resource resource = createResourceOVFPackageLists(idEnterprise);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        String uri = createOVFPackageListsLink(idEnterprise.toString());
+        ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -368,9 +286,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     private OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise, final Integer idList)
     {
-        Resource resource = createResourceOVFPackageList(idEnterprise, idList);
+
+        String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
+                null);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -406,8 +326,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final Integer idOvfPackageList =
             getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
 
-        Resource resource = createResourceOVFPackages(idEnterprise, idOvfPackageList);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        String uri = createOVFPackageLink(idEnterprise.toString(), idOvfPackageList.toString());
+        ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
 
@@ -417,20 +337,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
 
         return response.getEntity(OVFPackagesDto.class);
-    }
-
-    public Resource createResourceOVFPackages(final Integer idEnterprise,
-        final Integer idOvfpackageList)
-    {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH + '/'
-                + String.valueOf(idOvfpackageList);
-
-        Resource reso = client.resource(baseUri + "/" + path);
-
-        setAuthCookie(reso);
-
-        return reso;
     }
 
     @Override

@@ -199,8 +199,9 @@ public class OVFPackageService extends DefaultApiService
         }
         catch (Exception e)
         {
-            // TODO logger can not obtain ....
-            return null;
+            LOGGER.debug("Cannot retrieve the size of OvfPackage with id " + ovfid
+                + " setting size 0");
+            return 0L;
         }
         finally
         {

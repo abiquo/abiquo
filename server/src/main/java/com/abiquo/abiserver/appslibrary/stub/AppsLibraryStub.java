@@ -22,14 +22,11 @@ package com.abiquo.abiserver.appslibrary.stub;
 
 import java.util.List;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public interface AppsLibraryStub

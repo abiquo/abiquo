@@ -601,6 +601,16 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackagelists", params);
     }
 
+    protected String createOVFPackageLink(final String enterpriseId, final String ovfPackageListId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageListId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}", params);
+    }
+
     protected String createIconLink(final Integer iconId)
     {
         Map<String, String> params = new HashMap<String, String>();
