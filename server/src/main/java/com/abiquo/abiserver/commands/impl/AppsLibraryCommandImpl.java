@@ -62,7 +62,6 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 import com.abiquo.server.core.infrastructure.Repository;
 
@@ -76,9 +75,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      */
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
-
-    private final static String defaultRepositorySpace =
-        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -942,7 +938,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
         OVFPackageList packageList;
         AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
                 AppsLibraryStub.class);
 
         try
@@ -1033,7 +1029,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         OVFPackagesDto packageList;
 
         AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
+            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
                 AppsLibraryStub.class);
         try
         {

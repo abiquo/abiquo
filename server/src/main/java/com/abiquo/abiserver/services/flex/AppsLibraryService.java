@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
+import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
@@ -59,12 +60,15 @@ public class AppsLibraryService
     /**
      * The Stub we will use to connect to API
      */
-    private AppsLibraryStub appslibrary;
+
+    private AppsLibraryStub appsLibraryStub;
 
     public AppsLibraryService()
     {
+        appsLibraryStub = new AppsLibraryStubImpl();
         try
         {
+
             appsLibraryCommand =
                 (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
                     "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
@@ -686,6 +690,6 @@ public class AppsLibraryService
 
     protected AppsLibraryStub proxyStub(final UserSession userSession)
     {
-        return APIStubFactory.getInstance(userSession, appslibrary, AppsLibraryStub.class);
+        return APIStubFactory.getInstance(userSession, appsLibraryStub, AppsLibraryStub.class);
     }
 }
