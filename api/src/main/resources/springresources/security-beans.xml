@@ -398,7 +398,7 @@
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         
         <!-- PRICING-TIER -->
-        <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="POST" access="ROLE_PRICING_MANAGE" />
+        <!--  <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="POST" access="ROLE_PRICING_MANAGE" /> -->
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="OPTIONS" access="ROLE_AUTHENTICATED" />
