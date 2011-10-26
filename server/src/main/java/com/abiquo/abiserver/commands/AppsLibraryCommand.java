@@ -60,17 +60,6 @@ public interface AppsLibraryCommand
     List<CategoryHB> getCategories(UserSession userSession, Integer idEnterprise)
         throws AppsLibraryCommandException;
 
-    /** Icon */
-    IconHB createIcon(UserSession userSession, Integer idEnterprise, IconHB icon)
-        throws AppsLibraryCommandException;
-
-    Void editIcon(UserSession userSession, IconHB icon) throws AppsLibraryCommandException;
-
-    Void deleteIcon(UserSession userSession, Integer idIcon) throws AppsLibraryCommandException;
-
-    List<IconHB> getIcons(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
-
     /** Virtual images */
 
     /**
@@ -93,22 +82,6 @@ public interface AppsLibraryCommand
 
     Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
         throws AppsLibraryCommandException;
-
-    /** List. */
-    List<String> getOVFPackageListName(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
-
-    OVFPackageListDto getOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOVFPackageList) throws AppsLibraryCommandException;
-
-    OVFPackageListDto createOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String ovfpackageListURL) throws AppsLibraryCommandException;
-
-    OVFPackageListDto refreshOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOvfpackageList) throws AppsLibraryCommandException;
-
-    Void deleteOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOvfpackageList) throws AppsLibraryCommandException;
 
     /** DC specific status. */
     OVFPackageInstanceStatusListDto getOVFPackageListStatus(UserSession userSession,
@@ -139,11 +112,11 @@ public interface AppsLibraryCommand
      */
     OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
         String idOVFPackageName, final Integer nameOVFPackageList, Integer idEnterprise,
-        Integer idRepository)
-        throws AppsLibraryCommandException;
-    
+        Integer idRepository) throws AppsLibraryCommandException;
+
     /**
      * Refresh the current status of a {@link OVFPackage} in the DB.
+     * 
      * @param userSession Data from the current user.
      * @param idsOvfInstance Name of the item to refresh.
      * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.

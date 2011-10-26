@@ -25,26 +25,33 @@ import java.util.List;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public interface AppsLibraryStub
 {
 
-    List<String> getOVFPackageListName(final Integer idEnterprise);
+    public DataResult<List<String>> getOVFPackageListName(final Integer idEnterprise);
 
-    OVFPackageListDto getOVFPackageList(final Integer idEnterprise, final String nameOVFPackageList);
+    DataResult<OVFPackageList> getOVFPackageList(final Integer idEnterprise,
+        final String nameOVFPackageList);
 
-    OVFPackageListDto createOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> createOVFPackageList(final Integer idEnterprise,
         final String ovfpackageListURL);
 
-    OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> refreshOVFPackageList(final Integer idEnterprise,
         final String nameOvfpackageList);
 
-    void deleteOVFPackageList(final Integer idEnterprise, final String nameOvfpackageList);
+    public BasicResult deleteOVFPackageList(final Integer idEnterprise,
+        final String nameOvfpackageList);
 
-    void deleteIcon(final Integer idIcon);
+    public BasicResult deleteIcon(final Integer idIcon);
+
+    public DataResult<Icon> createIcon(final Integer idEnterprise, final IconDto icon);
 
     /**
      * Recupera la
@@ -55,6 +62,8 @@ public interface AppsLibraryStub
      */
     public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
 
-    public BasicResult editIcon(final UserSession userSession, final Icon icon);
+    public BasicResult editIcon(final Icon icon);
+
+    public DataResult<List<Icon>> getIcons(final Integer idEnterprise);
 
 }

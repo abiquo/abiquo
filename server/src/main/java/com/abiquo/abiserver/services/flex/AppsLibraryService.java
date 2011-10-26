@@ -25,11 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
-import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
@@ -50,12 +48,18 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
+import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 
 public class AppsLibraryService
 {
     private AppsLibraryCommand appsLibraryCommand;
+
+    /**
+     * The Stub we will use to connect to API
+     */
+    private AppsLibraryStub appslibrary;
 
     public AppsLibraryService()
     {
@@ -219,96 +223,27 @@ public class AppsLibraryService
     public DataResult<Icon> createIcon(final UserSession userSession, final Integer idEnterprise,
         final Icon icon)
     {
-        DataResult<Icon> result = new DataResult<Icon>();
+        IconDto dto = new IconDto();
+        dto.setName(icon.getName());
+        dto.setPath(icon.getPath());
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            IconHB iconHb = proxyService.createIcon(userSession, idEnterprise, icon.toPojoHB());
-
-            result.setData(iconHb.toPojo());
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).createIcon(idEnterprise, dto);
     }
 
     public BasicResult editIcon(final UserSession userSession, final Icon icon)
     {
-        return APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-            AppsLibraryStub.class).editIcon(userSession, icon);
+        return proxyStub(userSession).editIcon(icon);
     }
 
     public BasicResult deleteIcon(final UserSession userSession, final Integer idIcon)
     {
-        BasicResult result = new BasicResult();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.deleteIcon(userSession, idIcon);
-
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).deleteIcon(idIcon);
     }
 
     public DataResult<List<Icon>> getIcons(final UserSession userSession, final Integer idEnterprise)
     {
-        DataResult<List<Icon>> result = new DataResult<List<Icon>>();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-
-            List<IconHB> iconsHb = proxyService.getIcons(userSession, idEnterprise);
-            List<Icon> icons = new LinkedList<Icon>();
-
-            for (IconHB iHb : iconsHb)
-            {
-                icons.add(iHb.toPojo());
-
-            }
-
-            result.setData(icons);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).getIcons(idEnterprise);
     }
 
     /** Virtual images */
@@ -448,99 +383,20 @@ public class AppsLibraryService
         final Integer idEnterprise)
     {
 
-        DataResult<List<String>> result = new DataResult<List<String>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-
-            List<String> packagListNames =
-                proxyService.getOVFPackageListName(userSession, idEnterprise);
-
-            result.setData(packagListNames);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).getOVFPackageListName(idEnterprise);
     }
 
     public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOVFPackageList)
     {
-
-        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-                AppsLibraryStub.class);
-        try
-        {
-
-            OVFPackageListDto packagListsDto =
-                proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
-
-            result.setData(transform(packagListsDto));
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).getOVFPackageList(idEnterprise, nameOVFPackageList);
     }
 
     public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String ovfpackageListURL)
     {
 
-        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-                AppsLibraryStub.class);
-        OVFPackageListDto packagListsDto =
-            proxy.createOVFPackageList(idEnterprise, ovfpackageListURL);
-        try
-        {
-
-            OVFPackageList packagList = transform(packagListsDto);
-            packagList.setUrl(ovfpackageListURL); // XXX
-
-            result.setData(packagList);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).createOVFPackageList(idEnterprise, ovfpackageListURL);
 
     }
 
@@ -548,56 +404,13 @@ public class AppsLibraryService
         final Integer idEnterprise, final String nameOvfpackageList)
     {
 
-        DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-                AppsLibraryStub.class);
-        OVFPackageListDto packagListsDto =
-            proxy.refreshOVFPackageList(idEnterprise, nameOvfpackageList);
-        try
-        {
-
-            result.setData(transform(packagListsDto));
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).refreshOVFPackageList(idEnterprise, nameOvfpackageList);
     }
 
     public BasicResult deleteOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
-        BasicResult result = new BasicResult();
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-                AppsLibraryStub.class);
-        try
-        {
-            proxy.deleteOVFPackageList(idEnterprise, nameOvfpackageList);
-
-            result.setSuccess(true);
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).deleteOVFPackageList(idEnterprise, nameOvfpackageList);
     }
 
     /** DC specific status. */
@@ -869,5 +682,10 @@ public class AppsLibraryService
         }
 
         return result;
+    }
+
+    protected AppsLibraryStub proxyStub(final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, appslibrary, AppsLibraryStub.class);
     }
 }

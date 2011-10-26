@@ -51,6 +51,8 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
@@ -59,7 +61,6 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
@@ -76,8 +77,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
 
-    private final static String defaultRepositorySpace = AbiConfigManager.getInstance()
-        .getAbiConfig().getDefaultRepositorySpace();
+    private final static String defaultRepositorySpace =
+        AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
 
     @Override
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
@@ -140,8 +141,8 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             catch (final PersistenceException e1)
             {
                 cause =
-                    String.format("Can not obtain the datacenter with id [%s]",
-                        idDatacenter.toString());
+                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
+                        .toString());
             }
 
             factory.rollbackConnection();
@@ -370,147 +371,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
 
         return categories;
-    }
-
-    /**
-     * Icon
-     * 
-     * @throws AppsLibraryCommandException
-     */
-    @Override
-    public IconHB createIcon(final UserSession userSession, final Integer idEnterprise, IconHB icon)
-        throws AppsLibraryCommandException
-    {
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            // Since client does not support Integer null values, force here a null value to perform
-            // a create instead of an update
-            icon.setIdIcon(null);
-            icon = factory.getIconDAO().makePersistent(icon);
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = String.format("Can not create the Icon [%s]", icon.getName());
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return icon;
-    }
-
-    @Override
-    public Void editIcon(final UserSession userSession, final IconHB icon)
-        throws AppsLibraryCommandException
-    {
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            final IconHB storedIcon = factory.getIconDAO().findById(icon.getIdIcon());
-            if (storedIcon == null)
-            {
-                factory.rollbackConnection();
-
-                final String cause =
-                    String.format("There is any icon with provided id [%s]", icon.getIdIcon());
-                throw new AppsLibraryCommandException(cause);
-            }
-
-            storedIcon.setName(icon.getName());
-            storedIcon.setPath(icon.getPath());
-
-            factory.getIconDAO().makePersistent(storedIcon);
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = String.format("Can not edit the Icon [%s]", icon.getName());
-            throw new AppsLibraryCommandException(cause, e);
-        }
-        return null;
-    }
-
-    @Override
-    public Void deleteIcon(final UserSession userSession, final Integer idIcon)
-        throws AppsLibraryCommandException
-    {
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            // Checking if this icon is being used by a VirtualImage
-            final Collection<VirtualimageHB> viCurrentIcon =
-                factory.getVirtualImageDAO().findByIcon(idIcon);
-
-            if (viCurrentIcon != null && viCurrentIcon.size() > 0)
-            {
-                factory.rollbackConnection();
-
-                final String cause =
-                    "The current icon is being used on some Virtual Images, it can not be deleted";
-                throw new AppsLibraryCommandException(cause);
-            }
-
-            final IconHB icon = factory.getIconDAO().findById(idIcon);
-
-            if (icon == null)
-            {
-                factory.rollbackConnection();
-
-                final String cause =
-                    String.format("There is any icon with provided id [%s]", idIcon);
-                throw new AppsLibraryCommandException(cause);
-            }
-
-            factory.getIconDAO().makeTransient(icon);
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = String.format("Can not delete the Icon [id %s]", idIcon);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return null;
-    }
-
-    @Override
-    public List<IconHB> getIcons(final UserSession userSession, final Integer idEnterprise)
-        throws AppsLibraryCommandException
-    {
-        List<IconHB> icons;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            icons = factory.getIconDAO().findAll();
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = "Can not obtain the icon list";
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return icons;
     }
 
     /** Virtual images */
@@ -957,202 +817,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         return vapps;
     }
 
-    /** List. */
-    @Override
-    public List<String> getOVFPackageListName(final UserSession userSession,
-        final Integer idEnterprise) throws AppsLibraryCommandException
-    {
-        List<String> packageNameList;
-
-        AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-        try
-        {
-            packageNameList = appsLibClient.getOVFPackageListName(idEnterprise);
-        }
-        catch (final WebApplicationException e)
-        {
-            final String remoteCause = (String) e.getResponse().getEntity();
-            final String cause = "Can not obtain the list of OVFPackageList names.\n" + remoteCause;
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        if (packageNameList == null || packageNameList.size() == 0)
-        {
-            final String listName = addDefaultOVFPackageList(userSession, idEnterprise);
-
-            packageNameList = new LinkedList<String>();
-            packageNameList.add(listName);
-        }
-
-        return packageNameList;
-    }
-
-    private String addDefaultOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise)
-    {
-        if (defaultRepositorySpace == null || defaultRepositorySpace.isEmpty())
-        {
-            logger.debug("There aren't any default repository space defined");
-            return null;
-        }
-        else
-        {
-            try
-            {
-                AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-                logger.debug("Adding default repository space at [{}]", defaultRepositorySpace);
-
-                final OVFPackageListDto listDto =
-                    appsLibClient.createOVFPackageList(idEnterprise, defaultRepositorySpace);
-
-                return listDto.getName();
-            }
-            catch (final WebApplicationException e)
-            {
-                final String cause =
-                    String.format("Can not create the default OVFPackageList at [%s]",
-                        defaultRepositorySpace);
-                logger.error(cause); // TODO tracer
-
-                return null;
-            }
-        }
-    }
-
-    @Override
-    public OVFPackageListDto getOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOVFPackageList)
-        throws AppsLibraryCommandException
-    {
-        OVFPackageListDto packageList;
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
-                AppsLibraryStub.class);
-
-        try
-        {
-
-            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
-        }
-        catch (final WebApplicationException e)
-        {
-            final String remoteCause = (String) e.getResponse().getEntity();
-            final String cause =
-                String.format("Can not obtain the OVFPackageList [%s]\n%s", nameOVFPackageList,
-                    remoteCause);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return packageList;
-    }
-
-    @Override
-    public OVFPackageListDto createOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String ovfpackageListURL)
-        throws AppsLibraryCommandException
-    {
-        OVFPackageListDto packageList;
-
-        try
-        {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-            packageList = appsLibClient.createOVFPackageList(idEnterprise, ovfpackageListURL);
-        }
-        catch (final WebApplicationException e)
-        {
-            String cause =
-                String.format("Can not create the OVFPackageList [%s]", ovfpackageListURL);
-
-            try
-            {
-                final String reason = (String) e.getResponse().getEntity();
-                if (reason != null)
-                {
-                    cause = cause + "\nCaused by: " + reason;
-                }
-            }
-            catch (final Exception e2)
-            {
-
-            }
-
-            throw new AppsLibraryCommandException(cause, e);
-        }
-        catch (final Exception e)
-        {
-            String cause =
-                String.format("Can not create the OVFPackageList [%s]", ovfpackageListURL);
-
-            try
-            {
-                final String reason = e.getMessage();
-                if (reason != null)
-                {
-                    cause = cause + "\nCaused by: " + reason;
-                }
-            }
-            catch (final Exception e2)
-            {
-
-            }
-
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return packageList;
-    }
-
-    @Override
-    public OVFPackageListDto refreshOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOvfpackageList)
-        throws AppsLibraryCommandException
-    {
-        OVFPackageListDto packageList;
-
-        try
-        {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-            packageList = appsLibClient.refreshOVFPackageList(idEnterprise, nameOvfpackageList);
-        }
-        catch (final WebApplicationException e)
-        {
-            final String remoteCause = (String) e.getResponse().getEntity();
-            final String cause =
-                String.format("Can not refresh the OVFPackageList [%s].\n", nameOvfpackageList,
-                    remoteCause);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return packageList;
-    }
-
-    @Override
-    public Void deleteOVFPackageList(final UserSession userSession, final Integer idEnterprise,
-        final String nameOvfpackageList) throws AppsLibraryCommandException
-    {
-        try
-        {
-            AppsLibraryStub appsLibClient = new AppsLibraryStubImpl(userSession);
-
-            appsLibClient.deleteOVFPackageList(idEnterprise, nameOvfpackageList);
-        }
-        catch (final WebApplicationException e)
-        {
-            final String remoteCause = (String) e.getResponse().getEntity();
-            final String cause =
-                String.format("Can not delete the OVFPackageList [%s].\n", nameOvfpackageList,
-                    remoteCause);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return null;
-    }
-
     /** DC specific status. */
 
     @Override
@@ -1276,14 +940,14 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     {
         final List<String> ovfIds = new LinkedList<String>();
 
-        OVFPackageListDto packageList;
+        OVFPackageList packageList;
         AppsLibraryStub proxy =
             APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(userSession),
                 AppsLibraryStub.class);
 
         try
         {
-            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList);
+            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList).getData();
         }
         catch (final WebApplicationException e)
         {
@@ -1292,7 +956,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause, e);
         }
 
-        for (final OVFPackageDto ovfPackage : packageList.getOvfPackages())
+        for (OVFPackage ovfPackage : packageList.getOvfpackages())
         {
             ovfIds.add(ovfPackage.getUrl());
         }
@@ -1392,4 +1056,5 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
 
         return null;
     }
+
 }
