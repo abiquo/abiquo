@@ -263,6 +263,7 @@
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
                     costInput.text = "";
+                    chefEnabledCombobox.selected = false;
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -663,7 +664,7 @@
 
 
         <mx:Form id="virtualImageFormContainer"
-            paddingTop="3">
+            paddingTop="3" paddingBottom="{this._virtualImage ? 0:30}">
             <mx:Label 
                 fontWeight="bold"
                 text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP1')"
