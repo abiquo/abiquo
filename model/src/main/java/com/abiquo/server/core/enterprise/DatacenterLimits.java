@@ -30,12 +30,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
@@ -56,6 +58,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -78,7 +81,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
         return this.datacenter;
     }
 
-    private void setDatacenter(Datacenter value)
+    private void setDatacenter(final Datacenter value)
     {
         this.datacenter = value;
     }
@@ -96,7 +99,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
     @JoinColumn(name = ENTERPRISE_ID_COLUMN)
     private Enterprise enterprise;
 
-    public void setEnterprise(Enterprise enterprise)
+    public void setEnterprise(final Enterprise enterprise)
     {
         this.enterprise = enterprise;
     }
@@ -108,7 +111,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
     }
 
     // ************************** Mandatory constructors ***********************
-    public DatacenterLimits(Enterprise ent, Datacenter dc)
+    public DatacenterLimits(final Enterprise ent, final Datacenter dc)
     {
         setEnterprise(ent);
         setDatacenter(dc);
@@ -121,10 +124,11 @@ public class DatacenterLimits extends DefaultEntityWithLimits
     }
 
     // *************************** Mandatory constructors ***********************
-    public DatacenterLimits(Enterprise ent, Datacenter dc, int ramSoftLimitInMb,
-        int cpuCountSoftLimit, long hdSoftLimitInMb, int ramHardLimitInMb, int cpuCountHardLimit,
-        long hdHardLimitInMb, long storageSoftLimitInMb, long storageHardLimitInMb,
-        long publicIPsoft, long publicIPHard, long vlanHard, long vlanSoft)
+    public DatacenterLimits(final Enterprise ent, final Datacenter dc, final int ramSoftLimitInMb,
+        final int cpuCountSoftLimit, final long hdSoftLimitInMb, final int ramHardLimitInMb,
+        final int cpuCountHardLimit, final long hdHardLimitInMb, final long storageSoftLimitInMb,
+        final long storageHardLimitInMb, final long publicIPsoft, final long publicIPHard,
+        final long vlanHard, final long vlanSoft)
     {
         setEnterprise(ent);
         setDatacenter(dc);
@@ -132,8 +136,8 @@ public class DatacenterLimits extends DefaultEntityWithLimits
         setHdLimitsInMb(new Limit(hdSoftLimitInMb, hdHardLimitInMb));
         setCpuCountLimits(new Limit((long) cpuCountSoftLimit, (long) cpuCountHardLimit));
         setStorageLimits(new Limit(storageSoftLimitInMb, storageHardLimitInMb));
-        setPublicIPLimits(new Limit((long) publicIPsoft, (long) publicIPHard));
-        setVlansLimits(new Limit((long) vlanHard, (long) vlanSoft));
+        setPublicIPLimits(new Limit(publicIPsoft, publicIPHard));
+        setVlansLimits(new Limit(vlanHard, vlanSoft));
         setRepositoryLimits(new Limit(0L, 0L));
     }
 
@@ -157,7 +161,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
         return this.repositorySoft;
     }
 
-    private void setRepositorySoft(long repositorySoft)
+    private void setRepositorySoft(final long repositorySoft)
     {
         this.repositorySoft = repositorySoft;
     }
@@ -182,9 +186,31 @@ public class DatacenterLimits extends DefaultEntityWithLimits
         return this.repositoryHard;
     }
 
-    private void setRepositoryHard(long repositoryHard)
+    private void setRepositoryHard(final long repositoryHard)
     {
         this.repositoryHard = repositoryHard;
+    }
+
+    public final static String DEFAULT_VLAN_PROPERTY = "defaultVlan";
+
+    private final static boolean DEFAULT_VLAN_REQUIRED = false;
+
+    private final static String DEFAULT_VLAN_COLUMN = "default_vlan_network_id";
+
+    @JoinColumn(name = DEFAULT_VLAN_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_vlan")
+    private VLANNetwork defaultVlan;
+
+    @Required(value = DEFAULT_VLAN_REQUIRED)
+    public VLANNetwork getDefaultVlan()
+    {
+        return this.defaultVlan;
+    }
+
+    public void setDefaultVlan(final VLANNetwork defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
     }
 
     @LimitRange(type = "repository")
@@ -193,7 +219,7 @@ public class DatacenterLimits extends DefaultEntityWithLimits
         return new Limit(repositorySoft, repositoryHard);
     }
 
-    public void setRepositoryLimits(Limit limit)
+    public void setRepositoryLimits(final Limit limit)
     {
         setRepositorySoft(limit.soft);
         setRepositoryHard(limit.hard);

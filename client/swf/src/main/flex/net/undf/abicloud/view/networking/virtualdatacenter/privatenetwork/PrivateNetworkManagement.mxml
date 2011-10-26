@@ -91,6 +91,8 @@
 
                 vlanFormEdit = new PrivateVLANFormEdit();
                 vlanFormEdit.addEventListener("vlanFormEditClose", closeVLANFormEdit);
+                
+                AbiCloudModel.getInstance().networkingManager.addEventListener("vlanUpdated", getNetworksByVirtualDatacenter);
             }
 
             private function onCreationComplete():void
@@ -113,17 +115,42 @@
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
             }
             
-            private function getNetworksByVirtualDatacenter():void{
+            private function getNetworksByVirtualDatacenter(networkEvent:Event = null):void{
+            	if(_virtualDatacenter && _virtualDatacenter.network){
+	            	_virtualDatacenter.network.networks = new ArrayCollection();            		
+            	}
+            	//Private Vlan Networks
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
             	if(this._virtualDatacenter){
 	            	dispatchEvent(event);            		
             	}
+            	
+            	//External Vlan Networks
+                event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER);
+                event.virtualDatacenter = this._virtualDatacenter;
+                event.callback = populatePrivateNetworks;
+                if(this._virtualDatacenter){
+                    dispatchEvent(event);                   
+                }
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
-            	_virtualDatacenter.network.networks = networks;
+            	_virtualDatacenter.network.networks.addAll(networks);
+            	setDefaultNetwork(this._virtualDatacenter.defaultVlan,networks);
+            }
+            
+            private function setDefaultNetwork(vlan:VlanNetwork, networks:ArrayCollection):void{
+            	var testedVlan:VlanNetwork;
+            	for(var i:int = 0 ; i < networks.length ; i++){
+            		testedVlan = VlanNetwork(networks.getItemAt(i)) as VlanNetwork;
+            		if(vlan.vlanNetworkId == testedVlan.vlanNetworkId){
+            			testedVlan.defaultNetwork = true;
+            		}else{
+            			testedVlan.defaultNetwork = false;
+            		}
+            	}
             }
 
             private function onClickAllVLANLabel():void
@@ -173,7 +200,7 @@
                                       true);
                 PopUpManager.centerPopUp(vlanFormEdit);
 
-                vlanFormEdit.init(_virtualDatacenter.network, _selectedVLAN);
+                vlanFormEdit.init(_virtualDatacenter, _selectedVLAN);
             }
 
             private function closeVLANFormEdit(event:Event = null):void
@@ -194,6 +221,17 @@
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
                                             Alert.OK);
                 }
+                else if (_selectedVLAN.networkType == VlanNetwork.EXTERNAL)
+                {
+                    //The external VLAN cannot be deleted
+                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                    "ALERT_TITLE_LABEL"),
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_VLAN_DELETE_HEADER")+" '"+_selectedVLAN.networkName+"'",
+                                            ResourceManager.getInstance().getString("Networking",
+                                                                                    "ALERT_UNABLE_DELETE_EXTERNAL_VLAN_TEXT"),
+                                            Alert.OK);
+                }
                 else
                 {
                     //Asking user to confirm VLAN deletion
@@ -212,6 +250,7 @@
                 if (closeEvent.detail == Alert.YES)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.DELETE_VLAN);
+                    event.virtualDatacenter = _virtualDatacenter;
                     event.network = _virtualDatacenter.network;
                     event.vlanNetwork = _selectedVLAN;
                     dispatchEvent(event);

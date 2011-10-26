@@ -40,9 +40,13 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
@@ -66,7 +70,7 @@ public class MachineService extends DefaultApiService
     protected VsmServiceStub vsm;
 
     @Autowired
-    private InfrastructureService infrastructureService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     protected VirtualMachineService virtualMachineService;
@@ -84,15 +88,20 @@ public class MachineService extends DefaultApiService
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VsmServiceStub();
-        infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
+        remoteServiceService = new RemoteServiceService(em);
     }
 
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
+        return getMachinesByRack(rackId, null);
+    }
+
+    public List<Machine> getMachinesByRack(final Integer rackId, final String filter)
+    {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);
+        List<Machine> machines = repo.findRackMachines(rack, filter);
 
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created
@@ -144,6 +153,7 @@ public class MachineService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
+        throws Exception
     {
         Machine old = getMachine(machineId);
 
@@ -152,17 +162,11 @@ public class MachineService extends DefaultApiService
         old.setState(machineDto.getState());
 
         old.setVirtualRamInMb(machineDto.getVirtualRamInMb());
-        old.setRealRamInMb(machineDto.getRealRamInMb());
         old.setVirtualRamUsedInMb(machineDto.getVirtualRamUsedInMb());
 
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
-        old.setRealCpuCores(machineDto.getRealCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
-
-        old.setVirtualHardDiskInBytes(machineDto.getVirtualHardDiskInMb());
-        old.setRealHardDiskInBytes(machineDto.getRealHardDiskInMb());
-        old.setVirtualHardDiskUsedInBytes(machineDto.getVirtualHardDiskUsedInMb());
 
         isValidMachine(old);
 
@@ -198,9 +202,15 @@ public class MachineService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeMachine(final Integer id)
     {
+        removeMachine(id, true);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeMachine(final Integer id, final boolean force)
+    {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
-            infrastructureService.getRemoteService(machine.getDatacenter().getId(),
+            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();
@@ -215,16 +225,58 @@ public class MachineService extends DefaultApiService
 
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
-        for (VirtualMachine vm : virtualMachines)
-        {
-            vm.setState(VirtualMachineState.NOT_ALLOCATED);
-            vm.setDatastore(null);
-            vm.setHypervisor(null);
 
-            virtualMachineService.updateVirtualMachine(vm);
+        if (virtualMachines != null && !virtualMachines.isEmpty())
+        {
+            for (VirtualMachine vm : virtualMachines)
+            {
+                VirtualAppliance vapp =
+                    virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
+
+                VirtualApplianceState newState = VirtualApplianceState.NOT_DEPLOYED;
+                for (NodeVirtualImage node : vapp.getNodes())
+                {
+                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_ALLOCATED)
+                    {
+                        if (!force)
+                        {
+                            addConflictErrors(APIError.RACK_CANNOT_REMOVE_VMS);
+                            flushErrors();
+                        }
+                        else
+                        {
+                            newState = VirtualApplianceState.NEEDS_SYNCHRONIZE;
+                            break;
+                        }
+                    }
+                }
+
+                vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                vm.setDatastore(null);
+                vm.setHypervisor(null);
+
+                vapp.setState(newState);
+                virtualDatacenterRep.updateVirtualAppliance(vapp);
+                virtualMachineService.updateVirtualMachine(vm);
+            }
+        }
+
+        deleteMachineLoadRulesFromMachine(machine);
+
+        if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+        {
+            for (Datastore d : machine.getDatastores())
+            {
+                repo.deleteDatastore(d);
+            }
         }
 
         repo.deleteMachine(machine);
+    }
+
+    protected void deleteMachineLoadRulesFromMachine(final Machine machine)
+    {
+        // PREMIUM
     }
 
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId,

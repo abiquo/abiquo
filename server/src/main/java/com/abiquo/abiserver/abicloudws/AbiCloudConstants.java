@@ -47,7 +47,7 @@ public class AbiCloudConstants
 
     /** Datastore QNAME */
     public final static QName DATASTORE_QNAME = new QName("targetDatastore");
-    
+
     public final static QName HA_DISK = new QName("ha");
 
     // PowerUp action

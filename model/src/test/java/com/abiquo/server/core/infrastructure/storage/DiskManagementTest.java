@@ -19,9 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.model.enumerator;
+package com.abiquo.server.core.infrastructure.storage;
 
-public enum VirtualMachineState
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
+
+public class DiskManagementTest extends DefaultEntityTestBase<DiskManagement>
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
+
+    @Override
+    protected InstanceTester<DiskManagement> createEntityInstanceGenerator()
+    {
+        return new DiskManagementGenerator(getSeed());
+    }
+
 }

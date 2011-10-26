@@ -70,10 +70,15 @@ public enum EventType implements Serializable
         305, "RACK_DELETE", "Rack Deleted"), RACK_NRSQ_EXCEEDED(306, "NRSQ_EXCEEDED",
         "NRSQ excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE", "Physical Machine created"), MACHINE_MODIFY(
         308, "MACHINE_MODIFY", "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
-        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
-        311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
-        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL",
+        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIVE_VMS(
+        311, "MACHINE_RETRIVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIVED_VMS(
+        312, "MACHINE_CREATED_RETRIVED_VMS",
+        "Created Virtual Machines discovered from physical machine"), MACHINE_DELETE_VMS_NOTMANAGED(
+        313, "MACHINE_DELETE_VMS_NOTMANAGED", "Not managed Virtual Machines deleted"), REMOTE_SERVICES_CREATE(
+        314, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(315,
+        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
+        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
         "Retrieve Rack"),
 
     // Storage system-related events
@@ -126,7 +131,13 @@ public enum EventType implements Serializable
         "RELEASED_QUARANTINE", "IP Address released from its quarantine"), PRIVATE_IP_ASSIGN(809,
         "PRIVATE_IP_ASSIGN", "Private IP assigned"), PRIVATE_IP_UNASSIGN(810,
         "PRIVATE_IP_UNASSIGN", "Private IP unassigned"), PUBLIC_IP_ASSIGN(811, "PUBLIC_IP_ASSIGN",
-        "Public IP assigned"), PUBLIC_IP_UNASSIGN(812, "PUBLIC_IP_UNASSIGN", "Public IP unassigned"),
+        "Public IP assigned"), PUBLIC_IP_UNASSIGN(812, "PUBLIC_IP_UNASSIGN", "Public IP unassigned"), NETWORK_CONFIGURATION_UPDATED(
+        813, "NETWORK_CONFIGURATION_UPDATED", "Virtual Machine's network configuration updated"), EXTERNAL_IP_ASSIGN(
+        814, "EXTERNAL_IP_ASSIGN", "External IP assigned"), EXTERNAL_IP_UNASSIGN(815,
+        "EXTERNAL_IP_UNASSIGN", "External IP unassigned"), NIC_REORDER_VIRTUAL_MACHINE(816,
+        "NIC_REORDER_VIRTUAL_MACHINE", "Virtual Machine's NICs reordered"), VLAN_DEFAULT(817,
+        "VLAN_DEFAULT", "Vlan as default one"), VLAN_DEFAULT_ENTERPRISE(818,
+        "VLAN_DEFAULT_ENTERPRISE", "Default VLAN by enterprise changed"),
 
     // API events
     API_REQUEST(900, "API_REQUEST", "Functionallity executed by API request"), API_RESPONSE(901,

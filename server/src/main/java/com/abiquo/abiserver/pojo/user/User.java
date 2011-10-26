@@ -21,7 +21,9 @@
 
 package com.abiquo.abiserver.pojo.user;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Transformer;
@@ -62,6 +64,8 @@ public class User implements IPojo<UserHB>
 
     private Integer[] availableVirtualDatacenters;
 
+    private Date creationDate;
+
     private AuthType authType;
 
     public AuthType getAuthType()
@@ -69,7 +73,7 @@ public class User implements IPojo<UserHB>
         return authType;
     }
 
-    public void setAuthType(AuthType authType)
+    public void setAuthType(final AuthType authType)
     {
         this.authType = authType;
     }
@@ -194,6 +198,16 @@ public class User implements IPojo<UserHB>
         this.enterprise = enterprise;
     }
 
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
     /**
      * Method to create the hibernate pojo object
      * 
@@ -217,6 +231,7 @@ public class User implements IPojo<UserHB>
         userHB.setPassword(pass);
         userHB.setActive(active ? 1 : 0);
         userHB.setAuthType(authType.name());
+        userHB.setCreationDate(creationDate);
         if (enterprise != null)
         {
             userHB.setEnterpriseHB(enterprise.toPojoHB());
@@ -245,7 +260,7 @@ public class User implements IPojo<UserHB>
         user.setLocale(dto.getLocale());
         user.setPass(dto.getPassword());
         user.setActive(dto.isActive());
-	user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
+        user.setAuthType(StringUtils.isBlank(dto.getAuthType()) ? AuthType.ABIQUO : AuthType
             .valueOf(dto.getAuthType()));
         if (!StringUtils.isEmpty(dto.getAvailableVirtualDatacenters()))
         {
@@ -266,6 +281,8 @@ public class User implements IPojo<UserHB>
         {
             user.setAvailableVirtualDatacenters(new Integer[] {});
         }
+
+        user.setCreationDate(Calendar.getInstance().getTime());
 
         return user;
     }

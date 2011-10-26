@@ -39,11 +39,11 @@ import com.abiquo.api.services.stub.VsmServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -146,6 +146,7 @@ public class MachineServiceTest extends AbstractUnitTest
             vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         org.testng.Assert.assertNull(virtualMachine.getHypervisor());
         org.testng.Assert.assertNull(virtualMachine.getDatastore());
-        org.testng.Assert.assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_ALLOCATED);
+        org.testng.Assert
+            .assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_ALLOCATED);
     }
 }

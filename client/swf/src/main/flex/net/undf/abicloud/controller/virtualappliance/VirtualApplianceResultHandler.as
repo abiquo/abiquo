@@ -651,5 +651,48 @@ package net.undf.abicloud.controller.virtualappliance
             }
         }
         
+        public function getDisksByVirtualMachineHandler(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returning the list of hard disks retrieved
+                var hardDisks:ArrayCollection = DataResult(result).data as ArrayCollection;
+                callback(hardDisks);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function deleteDiskFromVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
+        public function createDiskIntoVirtualMachineHandler(result:BasicResult):void
+        {
+            if (result.success)
+            {
+                var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.HARD_DISKS_UPDATED);
+                AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
     }
 }

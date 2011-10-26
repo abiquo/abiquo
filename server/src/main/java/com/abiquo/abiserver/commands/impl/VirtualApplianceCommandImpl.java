@@ -58,7 +58,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.LogHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
@@ -375,27 +374,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
     }
 
-    /**
-     * FIXME in order to check the private VLAN limits when creating a virtual datacenter
-     */
-    private NetworkCommand instantiateNetworkCommand()
-    {
-        NetworkCommand netComm;
-        try
-        {
-            netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
-                    .newInstance();
-        }
-        catch (Exception e)
-        {
-            netComm = new NetworkCommandImpl();
-        }
-
-        return netComm;
-    }
-
     /*
      * (non-Javadoc)
      * @see
@@ -409,31 +387,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter, final String networkName,
         final NetworkConfigurationHB configuration)
     {
-        // Check the private VLAN limits.
-        VirtualDataCenterHB vdc = virtualDataCenter.toPojoHB();
-        EnterpriseHB enter = vdc.getEnterpriseHB();
-
-        DAOFactory daoF = HibernateDAOFactory.instance();
-
-        try
-        {
-            daoF.beginConnection();
-
-            instantiateNetworkCommand().checkPrivateVlan(vdc, vdc.getIdDataCenter(), enter,
-                userSession);
-        }
-        catch (Exception e)
-        {
-            DataResult<VirtualDataCenter> result = new DataResult<VirtualDataCenter>();
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-
-            return result;
-        }
-        finally
-        {
-            daoF.endConnection();
-        }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
@@ -1086,7 +1039,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
                         originalVirtualApplianceState, originalVirtualApplianceSubState, userHB,
                         ComponentType.VIRTUAL_APPLIANCE, cause, "startVirtualAppliance", nl); // ,
-                                                                                              // BasicResult..CLOUD_LIMT_EXCEEDED
+                // BasicResult..CLOUD_LIMT_EXCEEDED
 
                 String message =
                     String.format("%s\n%s", "The virtual appliance can not be deployed. "
@@ -1364,27 +1317,28 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter)
     {
 
-        Session session = HibernateUtil.getSession();
-        Transaction tx = session.beginTransaction();
-
-        try
-        {
-            VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
-            checkLimits(vdcHb, userSession);
-        }
-        catch (HardLimitExceededException e)
-        {
-            BasicResult basicResult = new BasicResult();
-            basicResult.setSuccess(false);
-            basicResult.setMessage(resourceManager
-                .getMessage("editVirtualDataCenter.limitExceeded"));
-
-            return basicResult;
-        }
-        finally
-        {
-            tx.commit();
-        }
+        // Checked en api
+        // Session session = HibernateUtil.getSession();
+        // Transaction tx = session.beginTransaction();
+        //
+        // try
+        // {
+        // VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
+        // checkLimits(vdcHb, userSession);
+        // }
+        // catch (HardLimitExceededException e)
+        // {
+        // BasicResult basicResult = new BasicResult();
+        // basicResult.setSuccess(false);
+        // basicResult.setMessage(resourceManager
+        // .getMessage("editVirtualDataCenter.limitExceeded"));
+        //
+        // return basicResult;
+        // }
+        // finally
+        // {
+        // tx.commit();
+        // }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
@@ -1867,10 +1821,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 }
                 else
                 {
+                    String messageError =
+                        "Operation cannot be performed on "
+                            + virtualAppliance.getName()
+                            + " because one of the virtual machines could be deployed on a disconnected hypervisor.";
+
                     traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                         EventType.VAPP_POWEROFF, userSession, null, virtualAppliance
-                            .getVirtualDataCenter().getName(), basicResult.getMessage(),
-                        virtualAppliance, null, null, null, null);
+                            .getVirtualDataCenter().getName(), messageError, virtualAppliance,
+                        null, null, null, null);
+
                     virtualAppliance =
                         updateOnlyStateInDB(virtualAppliance, oldState.toEnum()).getData();
                     dataResult.setData(virtualAppliance);
@@ -3429,7 +3389,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     NodeVirtualImage nodevi = (NodeVirtualImage) currentNode;
                     if (nodevi.getVirtualMachine().getState().toEnum() == StateEnum.NOT_ALLOCATED)
                     {
-                        // check if there is any private IP related to this node
+                        // check if there is any private IP associated to this node
                         IpPoolManagementDAO ipPoolDAO = factory.getIpPoolManagementDAO();
                         List<IpPoolManagementHB> listPools =
                             ipPoolDAO.getPrivateNICsByVirtualMachine(nodevi.getVirtualMachine()
@@ -3438,10 +3398,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         if (listPools.size() == 0)
                         {
                             VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-                            VirtualDataCenterHB vdcHB =
-                                vdcDAO.getVirtualDatacenterFromVirtualAppliance(vappId);
-                            netcommand.assignDefaultNICResource(user, vdcHB.getNetwork()
-                                .getNetworkId(), nodevi.getVirtualMachine().getId());
+                            netcommand.assignDefaultNICResource(user, nodevi.getVirtualMachine()
+                                .getId());
                         }
 
                     }
@@ -3507,6 +3465,13 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             netMan.setVirtualApp(null);
             netMan.setConfigureGateway(Boolean.FALSE);
 
+            if (rasd.getResourceSubType() != null
+                && rasd.getResourceSubType().equalsIgnoreCase("2"))
+            {
+                netMan.setMac(null);
+                netMan.setVirtualDataCenter(null);
+                netMan.setName(null);
+            }
             session.saveOrUpdate(netMan);
         }
     }

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.Assert;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -38,7 +39,6 @@ import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDAO;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
 import com.abiquo.server.core.scheduler.MachineLoadRuleDAO;
@@ -74,7 +74,7 @@ public class PopulateRules extends PopulateConstants
      * <li>rule.load.d1:100,100
      * </ul>
      */
-    public void createRule(String rule)
+    public void createRule(final String rule)
     {
         String[] frg = rule.split(DELIMITER_ENTITIES);
 
@@ -110,7 +110,7 @@ public class PopulateRules extends PopulateConstants
         }
     }
 
-    private void createAffinity(String e1, String e2)
+    private void createAffinity(final String e1, final String e2)
     {
         assertNotSame(e1, e2);
 
@@ -124,7 +124,7 @@ public class PopulateRules extends PopulateConstants
         exclusionDao.persist(exclusionRule);
     }
 
-    private void createReserved(String enterprise, String machine)
+    private void createReserved(final String enterprise, final String machine)
     {
         Enterprise enterp = enterRep.findByName(enterprise);
         assertNotNull("Enterprise not found " + enterprise, enterp);
@@ -140,7 +140,7 @@ public class PopulateRules extends PopulateConstants
     /**
      * fit.d1:PERFORM/PROGRESS // fit.default:PROGRESS
      */
-    private void createFit(String datacenterName, String fitPolicy)
+    private void createFit(final String datacenterName, final String fitPolicy)
     {
         FitPolicyRule fitrule;
 
@@ -162,7 +162,7 @@ public class PopulateRules extends PopulateConstants
         fitDao.persist(fitrule);
     }
 
-    private void createLoad(String entity, int cpu, int ram)
+    private void createLoad(final String entity, final int cpu, final int ram)
     {
         MachineLoadRule mlr;
 

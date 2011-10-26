@@ -19,30 +19,42 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.transformer;
+package com.abiquo.server.core.infrastructure.storage;
 
-import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
-import static org.testng.Assert.assertEquals;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-import org.testng.annotations.Test;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
-
-@Test(groups = ALL_UNIT_TESTS)
-public class ModelTransformerTest
+@XmlRootElement(name = "disk")
+@XmlType(propOrder = {"sizeInMb", "readOnly"})
+public class DiskManagementDto extends SingleResourceTransportDto
 {
+    public static final String DISK_MEDIA_TYPE = "application/disk+xml";
 
-    @Test
-    public void transformPersistence() throws Exception
+    private static final long serialVersionUID = 1L;
+
+    private Long sizeInMb;
+
+    private Boolean readOnly;
+
+    public Long getSizeInMb()
     {
-        Datacenter obj = new Datacenter("test", "situation test");
-
-        DatacenterDto dto = ModelTransformer.transportFromPersistence(DatacenterDto.class, obj);
-
-        assertEquals(obj.getId(), dto.getId());
-        assertEquals(obj.getName(), dto.getName());
-        assertEquals(obj.getLocation(), dto.getLocation());
+        return sizeInMb;
     }
 
+    public void setSizeInMb(final Long sizeInMb)
+    {
+        this.sizeInMb = sizeInMb;
+    }
+
+    public Boolean getReadOnly()
+    {
+        return readOnly;
+    }
+
+    public void setReadOnly(final Boolean readOnly)
+    {
+        this.readOnly = readOnly;
+    }
 }

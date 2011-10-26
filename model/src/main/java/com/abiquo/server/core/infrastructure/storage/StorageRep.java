@@ -30,11 +30,12 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import com.abiquo.server.core.cloud.VirtualMachine;
+
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -49,28 +50,31 @@ import com.abiquo.server.core.util.FilterOptions;
 public class StorageRep extends DefaultRepBase
 {
     @Autowired
-    private TierDAO tierDAO;
-
-    @Autowired
     private StorageDeviceDAO deviceDAO;
 
     @Autowired
-    private StoragePoolDAO poolDAO;
-
-    @Autowired
-    private VolumeManagementDAO volumeDAO;
+    private DiskManagementDAO diskManagementDAO;
 
     @Autowired
     private DiskStatefulConversionDAO diskStatefulConversionDAO;
 
     @Autowired
+    private InitiatorMappingDAO initiatorMappingDAO;
+
+    @Autowired
     private NodeVirtualImageDAO nodeVirtualImageDAO;
+
+    @Autowired
+    private StoragePoolDAO poolDAO;
 
     @Autowired
     private RasdDAO rasdDAO;
 
     @Autowired
-    private InitiatorMappingDAO initiatorMappingDAO;
+    private TierDAO tierDAO;
+
+    @Autowired
+    private VolumeManagementDAO volumeDAO;
 
     public StorageRep()
     {
@@ -88,6 +92,13 @@ public class StorageRep extends DefaultRepBase
         this.volumeDAO = new VolumeManagementDAO(entityManager);
         this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
         this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
+        this.diskManagementDAO = new DiskManagementDAO(entityManager);
+    }
+
+    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
+        final String initiatorIqn)
+    {
+        return initiatorMappingDAO.findByVolumeAndInitiator(idVolumeManagement, initiatorIqn);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -101,9 +112,20 @@ public class StorageRep extends DefaultRepBase
         return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
-    public Tier findTierById(final Integer datacenterId, final Integer tierId)
+    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
+        final Integer diskOrder)
     {
-        return tierDAO.getTierById(datacenterId, tierId);
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskOrder);
+    }
+
+    public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
+    {
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm);
+    }
+
+    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualImage virtualImage)
+    {
+        return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
     }
 
     public StoragePool findPoolById(final Integer deviceId, final String poolId)
@@ -111,25 +133,9 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolById(deviceId, poolId);
     }
 
-    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
-        final String initiatorIqn)
-    {
-        return initiatorMappingDAO.findByVolumeAndInitiator(idVolumeManagement, initiatorIqn);
-    }
-
     public StoragePool findPoolByName(final Integer deviceId, final String name)
     {
         return poolDAO.findPoolByName(deviceId, name);
-    }
-
-    public VolumeManagement findVolumeById(final Integer volumeId)
-    {
-        return volumeDAO.findById(volumeId);
-    }
-    
-    public VolumeManagement findVolumeByRasd(final Rasd rasd)
-    {
-        return volumeDAO.getVolumeByRasd(rasd);
     }
 
     public List<StoragePool> findPoolsByTier(final Tier tier)
@@ -137,56 +143,19 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolsByTier(tier);
     }
 
-    public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId)
+    public Tier findTierById(final Integer datacenterId, final Integer tierId)
     {
-        return deviceDAO.getDevicesByDatacenter(datacenterId);
+        return tierDAO.getTierById(datacenterId, tierId);
     }
 
-    public List<StoragePool> getPoolsByDevice(final Integer deviceId)
+    public VolumeManagement findVolumeById(final Integer volumeId)
     {
-        return poolDAO.getPoolsByStorageDevice(deviceId);
+        return volumeDAO.findById(volumeId);
     }
 
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final FilterOptions filterOptions) throws Exception
+    public VolumeManagement findVolumeByRasd(final Rasd rasd)
     {
-        return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
-    }
-
-    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
-    {
-        return volumeDAO.getVolumesByVirtualDatacenter(vdc);
-    }
-
-    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer volumeId)
-    {
-        return volumeDAO.getVolumeByVirtualDatacenter(vdc, volumeId);
-    }
-
-    public List<VolumeManagement> getVolumesByPool(final StoragePool pool)
-    {
-        return volumeDAO.getVolumesByPool(pool);
-    }
-
-    public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
-    {
-        return volumeDAO.getVolumesFromEnterprise(idEnterprise);
-    }
-    
-    public VolumeManagement getVolumeFromImage(final Integer idImage)
-    {
-        return volumeDAO.getVolumeFromImage(idImage);
-    }
-
-    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
-    {
-        return volumeDAO.getStatefulCandidates(vdc);
-    }
-
-    public List<Tier> getTiersByDatacenter(final Integer datacenterId)
-    {
-        return tierDAO.getTiersByDatacenter(datacenterId);
+        return volumeDAO.getVolumeByRasd(rasd);
     }
 
     public List<VolumeManagement> findVolumesByEnterprise(final Integer id,
@@ -201,22 +170,66 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByPool(pool, filters);
     }
 
+    public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId)
+    {
+        return deviceDAO.getDevicesByDatacenter(datacenterId);
+    }
+
     public DiskStatefulConversion getDiskStatefulConversionByVolume(final VolumeManagement volume)
     {
         return diskStatefulConversionDAO.getByVolume(volume.getId());
     }
 
-    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualImage virtualImage)
+    public List<StoragePool> getPoolsByDevice(final Integer deviceId)
     {
-        return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
+        return poolDAO.getPoolsByStorageDevice(deviceId);
     }
 
-    public Tier insertTier(final Tier tier)
+    public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
     {
-        tierDAO.persist(tier);
-        tierDAO.flush();
+        return volumeDAO.getStatefulCandidates(vdc);
+    }
 
-        return tier;
+    public List<Tier> getTiersByDatacenter(final Integer datacenterId)
+    {
+        return tierDAO.getTiersByDatacenter(datacenterId);
+    }
+
+    public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer volumeId)
+    {
+        return volumeDAO.getVolumeByVirtualDatacenter(vdc, volumeId);
+    }
+
+    public VolumeManagement getVolumeFromImage(final Integer idImage)
+    {
+        return volumeDAO.getVolumeFromImage(idImage);
+    }
+
+    public List<VolumeManagement> getVolumesByEnterprise(final int idEnterprise)
+    {
+        return volumeDAO.getVolumesFromEnterprise(idEnterprise);
+    }
+
+    public List<VolumeManagement> getVolumesByPool(final StoragePool pool)
+    {
+        return volumeDAO.getVolumesByPool(pool);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getVolumesByVirtualDatacenter(vdc);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
+        final FilterOptions filterOptions) throws Exception
+    {
+        return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
+    {
+        return volumeDAO.getVolumesByVirtualMachine(vm);
     }
 
     public StorageDevice insertDevice(final StorageDevice sd)
@@ -227,12 +240,34 @@ public class StorageRep extends DefaultRepBase
         return sd;
     }
 
+    public void insertHardDisk(final DiskManagement createdDisk)
+    {
+        if (createdDisk.getRasd() != null)
+        {
+            rasdDAO.persist(createdDisk.getRasd());
+        }
+        diskManagementDAO.persist(createdDisk);
+    }
+
+    public void insertInitiatorMapping(final InitiatorMapping imapping)
+    {
+        initiatorMappingDAO.persist(imapping);
+    }
+
     public StoragePool insertPool(final StoragePool sp)
     {
         poolDAO.persist(sp);
         poolDAO.flush();
 
         return sp;
+    }
+
+    public Tier insertTier(final Tier tier)
+    {
+        tierDAO.persist(tier);
+        tierDAO.flush();
+
+        return tier;
     }
 
     public VolumeManagement insertVolume(final VolumeManagement volume)
@@ -248,6 +283,15 @@ public class StorageRep extends DefaultRepBase
     {
         deviceDAO.remove(sd);
         deviceDAO.flush();
+    }
+
+    public void removeHardDisk(final DiskManagement diskToDelete)
+    {
+        Rasd rasd = diskToDelete.getRasd();
+        diskManagementDAO.remove(diskToDelete);
+        rasdDAO.remove(rasd);
+        diskManagementDAO.flush();
+
     }
 
     public void removePool(final StoragePool sp)
@@ -269,28 +313,18 @@ public class StorageRep extends DefaultRepBase
         deviceDAO.flush();
     }
 
-    public void updateTier(final Tier tier)
-    {
-        tierDAO.flush();
-    }
-
     public void updatePool(final StoragePool pool)
     {
         poolDAO.flush();
     }
 
+    public void updateTier(final Tier tier)
+    {
+        tierDAO.flush();
+    }
+
     public void updateVolume(final VolumeManagement volume)
     {
         volumeDAO.flush();
-    }
-    
-    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
-    {
-        return volumeDAO.getVolumesByVirtualMachine(vm);
-    }
-
-    public void insertInitiatorMapping(InitiatorMapping imapping)
-    {
-        initiatorMappingDAO.persist(imapping);
     }
 }

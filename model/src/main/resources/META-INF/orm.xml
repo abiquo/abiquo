@@ -48,6 +48,7 @@
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.StorageDevice"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.StoragePool"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.VolumeManagement"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.storage.DiskManagement"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.storage.InitiatorMapping"></orm:entity>
     <!-- end: storage -->
     <!-- stateful -->

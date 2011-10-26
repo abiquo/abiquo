@@ -55,6 +55,8 @@
                 <ref bean="virtualApplianceResource" />
                 <ref bean="virtualMachinesResource" />
                 <ref bean="virtualMachineResource" />
+                <ref bean="virtualMachineNetworkConfigurationResource" />
+                <ref bean="virtualMachineStorageConfigurationResource" />
                 <!-- AM as REST Resource -->
                 <ref bean="AMResource" />
                 <ref bean="enterpriseRepositoryResource" />

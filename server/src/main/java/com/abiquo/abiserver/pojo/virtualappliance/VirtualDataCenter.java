@@ -25,6 +25,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDa
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.networking.Network;
+import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -73,6 +74,8 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
     private Network network;
 
     private ResourceAllocationLimit limits;
+
+    private VlanNetwork defaultVlan;
 
     /**
      * variable which corresponds with column 'networktypeID'
@@ -193,8 +196,20 @@ public class VirtualDataCenter implements IPojo<VirtualDataCenterHB>
 
         virtualDatacenter.setLimits(ResourceAllocationLimit.create(dto));
         virtualDatacenter.setNetwork(network);
+        virtualDatacenter.setDefaultVlan(VlanNetwork.create(dto.getVlan(), network.getNetworkId(),
+            true));
 
         return virtualDatacenter;
+    }
+
+    public VlanNetwork getDefaultVlan()
+    {
+        return defaultVlan;
+    }
+
+    public void setDefaultVlan(final VlanNetwork defaultVlan)
+    {
+        this.defaultVlan = defaultVlan;
     }
 
 }

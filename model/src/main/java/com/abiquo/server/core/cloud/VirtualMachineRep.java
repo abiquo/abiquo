@@ -39,6 +39,10 @@ import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 @Repository
 public class VirtualMachineRep extends DefaultRepBase
 {
+
+    /* package: test only */static final String BUG_INSERT_NAME_MUST_BE_UNIQUE =
+        "ASSERT- insert: virtual machine name must be unique";
+
     @Autowired
     private VirtualMachineDAO dao;
 
@@ -155,5 +159,15 @@ public class VirtualMachineRep extends DefaultRepBase
     {
 
         return this.imageDao.findById(id);
+    }
+
+    public void insert(final VirtualMachine virtualMachine)
+    {
+        assert virtualMachine != null;
+        assert !this.dao.isManaged(virtualMachine);
+        assert !this.dao.existsAnyWithName(virtualMachine.getName()) : BUG_INSERT_NAME_MUST_BE_UNIQUE;
+
+        this.dao.persist(virtualMachine);
+        this.dao.flush();
     }
 }

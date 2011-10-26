@@ -36,72 +36,76 @@
 
     <mx:RemoteObject id="mainService"
         destination="mainService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="infrastructureService"
         destination="infrastructureService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="datastoreService"
         destination="datastoreService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="loginService"
         destination="loginService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet :
-					 																						              AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="userService"
         destination="userService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="virtualApplianceService"
         destination="virtualApplianceService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="appsLibraryService"
         destination="appsLibraryService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="nonBlockingService"
         destination="nonBlockingService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="networkingService"
         destination="networkingService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="applianceManagerService"
         destination="applianceManagerService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="meteringService"
         destination="meterService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="configurationService"
         destination="configurationService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
 
     <mx:RemoteObject id="remoteServicesService"
         destination="remoteServicesService"
-        channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
         
     <mx:RemoteObject id="systemPropertiesService"
         destination="systemPropertiesService"
+        channelSet="{AbiCloudModel.getInstance().configurationManager.config.USE_SECURE_CHANNEL_LOGIN == 1 ? AbiCloudModel.getInstance().configurationManager.secureChannelSet : AbiCloudModel.getInstance().configurationManager.channelSet}"
+        showBusyCursor="false"/>
+    
+    <mx:RemoteObject id="storageService"
+        destination="storageService"
         channelSet="{AbiCloudModel.getInstance().configurationManager.channelSet}"
         showBusyCursor="false"/>
         

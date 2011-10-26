@@ -212,7 +212,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         final String vswitch = haPhysicalTarget.getVirtualSwitch();
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         log.debug("Update the vswitch to {}", vswitch);
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
@@ -247,7 +247,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             netAssignDao.findByVirtualDatacenter(virtualDatacenter);
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {
@@ -259,7 +259,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             if (vlanNetwork.getTag() == null)
             {
                 List<VLANNetwork> publicVLANs =
-                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter());
+                    vlanNetworkDao.findPublicVLANNetworksByDatacenter(rack.getDatacenter(), null);
                 List<Integer> vlanTagsUsed = vlanNetworkDao.getVLANTagsUsedInRack(rack);
                 vlanTagsUsed.addAll(getPublicVLANTagsFROMVLANNetworkList(publicVLANs));
 
@@ -297,7 +297,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     {
 
         List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findByVirtualMachine(virtualMachine);
+            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {
@@ -352,18 +352,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             used.setHdInBytes(0l); // stateful virtual images doesn't use the datastores
         }
 
-        final Long newHd =
-            isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
-
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
-        machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
-
-        machine.setRealCpuCores(machine.getVirtualCpuCores());
-        machine.setRealHardDiskInBytes(machine.getVirtualHardDiskInBytes());
-        machine.setRealRamInMb(machine.getVirtualRamInMb());
 
         datacenterRepo.updateMachine(machine);
     }
