@@ -63,13 +63,23 @@ public @interface BigDec
         @Override
         public boolean isValid(final BigDecimal value, final ConstraintValidatorContext context)
         {
-            boolean valid = value.toString().length() < 15;
 
-            if (!valid)
+            if (!bigDec.required() && value == null)
             {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(bigDec.message())
-                    .addConstraintViolation();
+                return true;
+            }
+
+            boolean valid = false;
+
+            if (value != null)
+            {
+                valid = value.toString().length() < 15;
+                if (!valid)
+                {
+                    context.disableDefaultConstraintViolation();
+                    context.buildConstraintViolationWithTemplate(bigDec.message())
+                        .addConstraintViolation();
+                }
             }
             return valid;
         }

@@ -37,11 +37,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.model.enumerator.PricingPeriod;
+import com.abiquo.model.validation.BigDec;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -104,7 +107,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 20;
+    private final static int NAME_LENGTH_MAX = 256;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -132,7 +135,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MIN = 0;
 
-    private final static int DESCRIPTION_LENGTH_MAX = 500;
+    private final static int DESCRIPTION_LENGTH_MAX = 1000;
 
     private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -164,6 +167,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal hdGB;
 
     @Required(value = HD_GB_REQUIRED)
+    @BigDec
     public BigDecimal getHdGB()
     {
         return this.hdGB;
@@ -184,6 +188,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal standingChargePeriod;
 
     @Required(value = STANDING_CHARGE_PERIOD_REQUIRED)
+    @BigDec
     public BigDecimal getStandingChargePeriod()
     {
         return this.standingChargePeriod;
@@ -204,6 +209,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal vlan;
 
     @Required(value = VLAN_REQUIRED)
+    @BigDec
     public BigDecimal getVlan()
     {
         return this.vlan;
@@ -222,6 +228,7 @@ public class PricingTemplate extends DefaultEntityBase
     @Column(name = CHARGING_PERIOD_COLUMN, nullable = !CHARGING_PERIOD_REQUIRED)
     private PricingPeriod chargingPeriod;
 
+    @Required(value = CHARGING_PERIOD_REQUIRED)
     public PricingPeriod getChargingPeriod()
     {
         return chargingPeriod;
@@ -242,6 +249,9 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal minimumChargePeriod;
 
     @Required(value = MINIMUM_CHARGE_PERIOD_REQUIRED)
+    @Min(value = 0)
+    @Max(value = 6)
+    @BigDec
     public BigDecimal getMinimumChargePeriod()
     {
         return this.minimumChargePeriod;
@@ -325,6 +335,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal publicIp;
 
     @Required(value = PUBLIC_IP_REQUIRED)
+    @BigDec
     public BigDecimal getPublicIp()
     {
         return publicIp;
@@ -345,6 +356,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal vcpu;
 
     @Required(value = V_CPU_REQUIRED)
+    @BigDec
     public BigDecimal getVcpu()
     {
         return vcpu;
@@ -365,6 +377,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal memoryMB;
 
     @Required(value = MEMORY_MB_REQUIRED)
+    @BigDec
     public BigDecimal getMemoryMB()
     {
         return memoryMB;

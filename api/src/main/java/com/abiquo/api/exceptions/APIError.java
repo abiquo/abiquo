@@ -333,7 +333,8 @@ public enum APIError
         "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
         "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
-        "PRICINGTEMPLATE-7", "Missing link to the currency"),
+        "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
+        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
