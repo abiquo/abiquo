@@ -34,6 +34,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.validation.BigDec;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.Required;
 
@@ -79,6 +80,7 @@ public class CostCodeCurrency extends DefaultEntityBase
     @Column(name = PRICE_COLUMN, nullable = true)
     private BigDecimal price;
 
+    @BigDec
     public BigDecimal getPrice()
     {
         return price;
