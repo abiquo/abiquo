@@ -68,7 +68,6 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
-import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -156,7 +155,9 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_PATH, params));
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -640,6 +641,7 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineResource.VIRTUAL_MACHINE_STATE, "state", params));
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY, "deploy", params));
+        links.add(builder.buildRestLink(VirtualMachineResource.class, "edit", params));
 
         return links;
     }
@@ -870,6 +872,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
     {
         // TODO Auto-generated method stub
@@ -930,7 +933,7 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineResource.VIRTUAL_MACHINE_STATE, REL_EDIT, params));
         return links;
     }
-    
+
     @Override
     public List<RESTLink> buildNICLinks(final IpPoolManagement ip)
     {

@@ -36,7 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -153,15 +153,22 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
     private static final String SUM_VM_RESOURCES =
         "select sum(vm.cpu), sum(vm.ram), sum(vm.hd) from virtualmachine vm, hypervisor hy, physicalmachine pm "
-            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and pm.idState != 7" // not HA_DISABLED
+            + " where hy.id = vm.idHypervisor and pm.idPhysicalMachine = hy.idPhysicalMachine "// and
+                                                                                               // pm.idState
+                                                                                               // !=
+                                                                                               // 7"
+                                                                                               // //
+                                                                                               // not
+                                                                                               // HA_DISABLED
             + " and vm.idEnterprise = :enterpriseId and STRCMP(vm.state, :not_deployed) != 0";
 
     public DefaultEntityCurrentUsed getEnterpriseResourceUsage(final int enterpriseId)
     {
         Object[] vmResources =
-            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES).setParameter("enterpriseId",
-                enterpriseId).setParameter("not_deployed",
-                VirtualMachineState.NOT_DEPLOYED.toString()).uniqueResult();
+            (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
+                .setParameter("enterpriseId", enterpriseId)
+                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.toString())
+                .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();
         Long ram = vmResources[1] == null ? 0 : ((BigDecimal) vmResources[1]).longValue();

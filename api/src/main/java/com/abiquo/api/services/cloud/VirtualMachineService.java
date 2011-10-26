@@ -43,6 +43,7 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.NetworkService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.ovf.OVFGeneratorService;
@@ -73,6 +74,7 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -102,10 +104,10 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualApplianceService vappService;
 
     @Autowired
-    protected InfrastructureService infrastructureService;
+    protected OVFGeneratorService ovfService;
 
     @Autowired
-    protected OVFGeneratorService ovfService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     UserService userService;
@@ -131,6 +133,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected StorageRep storageRep;
 
+    @Autowired
+    protected InfrastructureRep infRep;
+
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
@@ -145,9 +150,10 @@ public class VirtualMachineService extends DefaultApiService
         this.vdcRepo = new VirtualDatacenterRep(em);
         this.vappService = new VirtualApplianceService(em);
         this.userService = new UserService(em);
-        this.infrastructureService = new InfrastructureService(em);
+        this.infRep = new InfrastructureRep(em);
         this.storageRep = new StorageRep(em);
         vdcService = new VirtualDatacenterService(em);
+        this.ovfService = new OVFGeneratorService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -205,6 +211,11 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
         return vm;
+    }
+
+    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        repo.insert(virtualMachine);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -268,6 +279,20 @@ public class VirtualMachineService extends DefaultApiService
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         repo.deleteNotManagedVirtualMachines(hypervisor);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
+    {
+        this.deleteNotManagedVirtualMachines(hypervisor);
+
+        if (trace)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
+                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
+                "Virtual Machines not managed by host from '" + hypervisor.getIp()
+                    + "' have been deleted");
+        }
     }
 
     /**
@@ -352,7 +377,7 @@ public class VirtualMachineService extends DefaultApiService
             Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
 
             RemoteService vf =
-                infrastructureService.getRemoteService(datacenterId,
+                remoteServiceService.getRemoteService(datacenterId,
                     RemoteServiceType.VIRTUAL_FACTORY);
 
             long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
@@ -624,9 +649,20 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Registering the machine VSM");
         // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
-        RemoteService vsmRS =
-            infrastructureService.getRemoteService(virtualDatacenter.getDatacenter().getId(),
+        List<RemoteService> services =
+            infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+        RemoteService vsmRS = null;
+        if (!services.isEmpty())
+        {
+            // Only one remote service of each type by datacenter.
+            vsmRS = services.get(0);
+        }
+        else
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+            flushErrors();
+        }
         machineService.getVsm().monitor(vsmRS.getUri(), virtualMachine.getHypervisor().getIp(),
             virtualMachine.getHypervisor().getPort(),
             virtualMachine.getHypervisor().getType().name(),
@@ -822,10 +858,20 @@ public class VirtualMachineService extends DefaultApiService
                 + virtualMachine.getDatastore().getDirectory();
 
         // Repository Manager address
-        RemoteService repositoryManager =
-            infrastructureService.getRemoteService(idDatacenter,
+        List<RemoteService> services =
+            infRep.findRemoteServiceWithTypeInDatacenter(infRep.findById(idDatacenter),
                 RemoteServiceType.APPLIANCE_MANAGER);
-
+        RemoteService repositoryManager = null;
+        if (!services.isEmpty())
+        {
+            // Only one remote service of each type by datacenter.
+            repositoryManager = services.get(0);
+        }
+        else
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+            flushErrors();
+        }
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(virtualMachine.getVirtualImage()
             .getDiskFormatType().name()), virtualMachine.getVirtualImage().getDiskFileSize(),
             virtualMachine.getVirtualImage().getRepository().getUrl(), virtualMachine
@@ -875,8 +921,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Checking remote services for virtual datacenter {}", vdcId);
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
         ErrorsDto rsErrors =
-            infrastructureService.checkRemoteServiceStatusByDatacenter(virtualDatacenter
-                .getDatacenter().getId());
+            checkRemoteServiceStatusByDatacenter(virtualDatacenter.getDatacenter().getId());
         if (!rsErrors.isEmpty())
         {
             logger.error("Some errors found while cheking remote services");
@@ -1181,9 +1226,20 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Registering the machine VSM");
         // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
-        RemoteService vsmRS =
-            infrastructureService.getRemoteService(virtualDatacenter.getDatacenter().getId(),
+        List<RemoteService> services =
+            infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+        RemoteService vsmRS = null;
+        if (!services.isEmpty())
+        {
+            // Only one remote service of each type by datacenter.
+            vsmRS = services.get(0);
+        }
+        else
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+            flushErrors();
+        }
         machineService.getVsm().shutdownMonitor(vsmRS.getUri(),
             virtualMachine.getHypervisor().getIp(), virtualMachine.getHypervisor().getPort());
         logger.debug("Machine registered!");
@@ -1393,6 +1449,28 @@ public class VirtualMachineService extends DefaultApiService
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
             "The enqueuing in Tarantino was OK.");
+    }
 
+    /**
+     * Checks one by one all {@link RemoteService} associated with the @{link Datacenter}.
+     * 
+     * @param datacenterId
+     * @return ErrorsDto
+     */
+    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Integer datacenterId)
+    {
+
+        List<RemoteService> remoteServicesByDatacenter =
+            infRep.findRemoteServicesByDatacenter(infRep.findById(datacenterId));
+
+        ErrorsDto errors = new ErrorsDto();
+        for (RemoteService r : remoteServicesByDatacenter)
+        {
+            ErrorsDto checkRemoteServiceStatus =
+                InfrastructureService.checkRemoteServiceStatus(r.getType(), r.getUri());
+            errors.addAll(checkRemoteServiceStatus);
+        }
+
+        return errors;
     }
 }

@@ -1821,10 +1821,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 }
                 else
                 {
+                    String messageError =
+                        "Operation cannot be performed on "
+                            + virtualAppliance.getName()
+                            + " because one of the virtual machines could be deployed on a disconnected hypervisor.";
+
                     traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                         EventType.VAPP_POWEROFF, userSession, null, virtualAppliance
-                            .getVirtualDataCenter().getName(), basicResult.getMessage(),
-                        virtualAppliance, null, null, null, null);
+                            .getVirtualDataCenter().getName(), messageError, virtualAppliance,
+                        null, null, null, null);
+
                     virtualAppliance =
                         updateOnlyStateInDB(virtualAppliance, oldState.toEnum()).getData();
                     dataResult.setData(virtualAppliance);

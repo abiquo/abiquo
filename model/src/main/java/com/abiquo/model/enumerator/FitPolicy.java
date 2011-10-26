@@ -21,7 +21,14 @@
 
 package com.abiquo.model.enumerator;
 
-public enum VirtualMachineState
+public enum FitPolicy
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
+    /**
+     * Choose the machine that is under greater load
+     */
+    PROGRESSIVE,
+    /**
+     * Choose the machine that is under lesser load
+     */
+    PERFORMANCE;
 }

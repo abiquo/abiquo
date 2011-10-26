@@ -601,7 +601,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 // subscription.
                 if (virtualAppliance.getNodes().size() > 0)
                 {
-                    virtualAppliance.setState(new State(StateEnum.ALLOCATED));
+                    virtualAppliance.setState(new State(StateEnum.NOT_DEPLOYED));
                     startVirtualAppliance(virtualAppliance);
                 }
                 virtualAppliance.setNodes(nodesOld);
@@ -747,7 +747,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
                 return result;
             }
         }

@@ -23,10 +23,13 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.util.StringUtils;
+
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualMachine")
-public class VirtualMachineDto extends SingleResourceTransportDto
+public class VirtualMachineDto extends SingleResourceTransportDto implements
+    Comparable<VirtualMachineDto>
 {
     private Integer id;
 
@@ -124,20 +127,25 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.vdrpIp = vdrpIp;
     }
 
+    private int idState;
+
+    public int getIdState()
+    {
+        return idState;
+    }
+
+    public void setIdState(final int idState)
+    {
+        this.idState = idState;
+    }
+
     private VirtualMachineState state;
 
-    /**
-     * @param state
-     * @deprecated this will be done through links
-     */
-    @Deprecated
     public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
 
-    /** @deprecated this will be done through links */
-    @Deprecated
     public VirtualMachineState getState()
     {
         return state;
@@ -177,6 +185,27 @@ public class VirtualMachineDto extends SingleResourceTransportDto
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    @Override
+    public int compareTo(final VirtualMachineDto vm2)
+    {
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return this.getName().compareTo(vm2.getName());
+        }
+        else if (!StringUtils.hasText(this.getName()) && !StringUtils.hasText(vm2.getName()))
+        {
+            return 0;
+        }
+        else if (!StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
 }

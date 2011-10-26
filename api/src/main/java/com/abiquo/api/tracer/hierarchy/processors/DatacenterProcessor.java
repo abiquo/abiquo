@@ -52,7 +52,7 @@ public class DatacenterProcessor extends AbstractHierarchyProcessor<Datacenter>
     protected String getResourceName(final String resourceId)
     {
         Datacenter datacenter = dao.findById(Integer.valueOf(resourceId));
-        return datacenter.getName();
+        return datacenter != null ? datacenter.getName() : null;
     }
 
 }

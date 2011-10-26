@@ -145,7 +145,7 @@
             	var testedVlan:VlanNetwork;
             	for(var i:int = 0 ; i < networks.length ; i++){
             		testedVlan = VlanNetwork(networks.getItemAt(i)) as VlanNetwork;
-            		if(vlan.networkId == testedVlan.networkId){
+            		if(vlan.vlanNetworkId == testedVlan.vlanNetworkId){
             			testedVlan.defaultNetwork = true;
             		}else{
             			testedVlan.defaultNetwork = false;

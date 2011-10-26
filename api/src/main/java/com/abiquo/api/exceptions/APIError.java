@@ -62,7 +62,9 @@ public enum APIError
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
-        "The current enterprise can't use this datacenter"),
+        "The current enterprise can't use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
+        "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -160,7 +162,9 @@ public enum APIError
         "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
-        "VLAN-44", "The requested IP object does not exist"),
+        "VLAN-44", "The requested IP object does not exist"), VLANS_ASSIGNED_TO_ANOTHER_VIRTUAL_DATACENTER(
+        "VLAN-45",
+        "Cannot change enterprise because this network is used as default by Virtual Datacenter"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
@@ -174,7 +178,8 @@ public enum APIError
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
-        "There is a problem with the details of the UCS Rack"),
+        "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -185,8 +190,10 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_IQN_MISSING(
-        "MACHINE-8", "The IQN of the target Physical Machine is not set"),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
+        "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
+        "Invalid ip range"), MACHINE_IQN_MISSING(
+        "MACHINE-10", "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(

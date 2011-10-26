@@ -176,6 +176,16 @@ public abstract class SingleResourceTransportDto implements Serializable
         searchLink(rel).setHref(href);
     }
 
+    public Integer getIdFromLink(final String rel)
+    {
+        String href = this.searchLink(rel).getHref();
+        // Maybe URIs don't have a trailing slash
+        String id =
+            href.substring(href.lastIndexOf("/") + 1, href.endsWith("/") ? href.length() - 1 : href
+                .length());
+        return Integer.valueOf(id);
+    }
+
     public static enum LinkOrder implements Comparator<RESTLink>
     {
         BY_REL

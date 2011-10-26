@@ -134,6 +134,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return nvi;
     }
 
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
+    }
+
     public boolean containsResources(final VirtualDatacenter virtualDatacenter,
         final String idResource)
     {
@@ -648,6 +653,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void updateVlan(final VLANNetwork vlan)
     {
         vlanDAO.flush();
+    }
+
+    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
+    {
+        return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
     }
 
 }

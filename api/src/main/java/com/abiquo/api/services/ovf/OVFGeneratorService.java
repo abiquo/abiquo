@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
@@ -108,6 +109,18 @@ public class OVFGeneratorService
 
     @Autowired
     VirtualMachineRep vmRepo;
+
+    public OVFGeneratorService()
+    {
+
+    }
+
+    public OVFGeneratorService(final EntityManager em)
+    {
+        vdcRepo = new VirtualDatacenterRep(em);
+        datacenterRepo = new InfrastructureRep(em);
+        vmRepo = new VirtualMachineRep(em);
+    }
 
     private final static Logger logger = LoggerFactory.getLogger(OVFGeneratorService.class);
 

@@ -233,12 +233,10 @@ public class PopulateInfrastructureModelTest
 
         machine.setCpu(cpu);
         machine.setRam(ram);
-        machine.setHd(hd);
 
         machine.setCpuRatio(1); // XXX
 
         machine.setCpuUsed(0);
-        machine.setHdUsed(0);
         machine.setRamUsed(0);
 
         machine.setRack(rack);
