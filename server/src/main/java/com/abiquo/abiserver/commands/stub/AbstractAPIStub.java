@@ -137,8 +137,8 @@ public class AbstractAPIStub
      */
     protected ClientResponse get(final String uri, final MediaType mediaType)
     {
-        UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword(), mediaType).get();
+        UserHB user = getCurrentUser();
+        return resource(uri, user.getUser(), user.getPassword(), mediaType).accept(mediaType).get();
     }
 
     protected ClientResponse getWithMediaType(final String uri, final String accept,

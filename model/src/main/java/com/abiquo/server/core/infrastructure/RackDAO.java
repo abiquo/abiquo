@@ -36,6 +36,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
@@ -246,12 +247,12 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     private final static String HQL_EMPTY_OFF_MACHINES_IN_RACK = "select h.machine "
         + "from Hypervisor h " + "where h.machine.rack.id = :rackId " + "and h.machine.state = "
-        + Machine.State.HALTED_FOR_SAVE.ordinal();
+        + MachineState.HALTED_FOR_SAVE.ordinal();
 
     private final static String HQL_EMPTY_ON_MACHINES_IN_RACK = "select h.machine "
         + "from Hypervisor h inner join h.machine m where m.rack.id = :rackId and h not in "
         + "(select vm.hypervisor from VirtualMachine vm) " + "and h.machine.state = "
-        + Machine.State.MANAGED.ordinal();
+        + MachineState.MANAGED.ordinal();
 
     /**
      * Return all machines in a rack that are empty of VM and powered off.

@@ -34,8 +34,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.UserService;
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.check.IMachineCheck;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
@@ -221,12 +221,12 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarded machine [{}] : Not Enough Resources [{}]", targetMachine
-                        .getName(), e);
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                        targetMachine.getName(), e);
 
                     errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(), e
-                            .getMessage());
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
                     targetMachine = null;
                 }
             }

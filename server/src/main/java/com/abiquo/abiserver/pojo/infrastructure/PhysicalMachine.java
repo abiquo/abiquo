@@ -463,7 +463,6 @@ public class PhysicalMachine extends InfrastructureElement implements IPojo<Phys
         }
         h.setId(dto.getId());
         h.setName(dto.getName());
-
         this.setHypervisor(h);
 
         if (dto.getDatastores() != null && !dto.getDatastores().getCollection().isEmpty())

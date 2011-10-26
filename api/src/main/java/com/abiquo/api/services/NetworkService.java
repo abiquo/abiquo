@@ -153,8 +153,9 @@ public class NetworkService extends DefaultApiService
 
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -444,8 +445,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -919,10 +920,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -935,8 +936,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());

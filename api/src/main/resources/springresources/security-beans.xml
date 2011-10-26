@@ -162,6 +162,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/ledon" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/logicserver" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/poweroff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- PUBLIC NETWORKS -->
         <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network" method="POST" access="ROLE_PHYS_DC_MANAGE" />
@@ -174,8 +176,6 @@
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- DATASTORES -->
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
@@ -332,7 +332,6 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/runlist" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/config/bootstrap" method="GET" access="ROLE_ONE_TIME" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/price" method="GET" access="ROLE_VAPP_PERFORM_ACTIONS" />
-        
         <!--=================================== -->
         <!--============= CONFIG ============== -->
         <!--=================================== -->
@@ -376,7 +375,7 @@
         <security:intercept-url pattern="/config/costcodes/*" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/costcodes/*" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
-          <!-- COST CODE- CURRENCY -->
+        <!-- COST CODE- CURRENCY -->
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="POST" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies" method="DELETE" access="ROLE_PRICING_MANAGE" />
@@ -386,19 +385,17 @@
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/costcodes/*/currencies/*" method="PUT" access="ROLE_PRICING_MANAGE" />
-        
         <!-- PRICING- COST CODE -->
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes" method="POST" access="ROLE_PRICING_MANAGE" />
-         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes" method="PUT" access="ROLE_PRICING_MANAGE" />
+        <security:intercept-url pattern="/config/pricingtemplates/*/costcodes" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes/*" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/pricingtemplates/*/costcodes/*" method="PUT" access="ROLE_PRICING_MANAGE" />
-        
         <!-- PRICING-TIER -->
-        <!--  <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="POST" access="ROLE_PRICING_MANAGE" /> -->
+        <!-- <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="POST" access="ROLE_PRICING_MANAGE" /> -->
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="PUT" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="GET" access="ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -406,7 +403,6 @@
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers/*" method="DELETE" access="ROLE_PRICING_MANAGE" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/pricingtemplates/*/tiers/*" method="PUT" access="ROLE_PRICING_MANAGE" />
-        
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->
@@ -425,14 +421,12 @@
         <property name="cookieName" value="auth" />
         <property name="tokenValiditySeconds" value="1800" />
     </bean>
-    <bean id="oneTimeTokenFilter"
-	class="com.abiquo.api.spring.security.onetimetoken.filter.OneTimeTokenFilter">
-	<security:custom-filter before="BASIC_PROCESSING_FILTER" />
-	<property name="authenticationManager" ref="_authenticationManager" />
+    <bean id="oneTimeTokenFilter" class="com.abiquo.api.spring.security.onetimetoken.filter.OneTimeTokenFilter">
+        <security:custom-filter before="BASIC_PROCESSING_FILTER" />
+        <property name="authenticationManager" ref="_authenticationManager" />
     </bean>
-    <bean id="oneTimeTokenProvider"
-	class="com.abiquo.api.spring.security.onetimetoken.provider.OneTimeTokenAuthenticationProvider">
-	<security:custom-authentication-provider />
-	<property name="oneTimeTokenDetailsService" ref="oneTimeTokenDetailsService" />
+    <bean id="oneTimeTokenProvider" class="com.abiquo.api.spring.security.onetimetoken.provider.OneTimeTokenAuthenticationProvider">
+        <security:custom-authentication-provider />
+        <property name="oneTimeTokenDetailsService" ref="oneTimeTokenDetailsService" />
     </bean>
 </beans>

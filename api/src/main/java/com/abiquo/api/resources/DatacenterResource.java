@@ -84,10 +84,10 @@ public class DatacenterResource extends AbstractResource
     DatacenterService service;
 
     @Autowired
-    NetworkService netService;
+    InfrastructureService infraService;
 
     @Autowired
-    InfrastructureService infraService;
+    NetworkService netService;
 
     @Context
     UriInfo uriInfo;

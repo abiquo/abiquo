@@ -50,6 +50,7 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.server.core.util.network.IPAddress;
 
 public class MachinesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -227,6 +228,52 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         ErrorsDto errors = response.getEntity(ErrorsDto.class);
         assertError(response, Status.NOT_FOUND.getStatusCode(),
             APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
+    }
+
+    /**
+     * Create multiple physical machines in the same time.
+     * 
+     * @throws Exception
+     */
+    // @Test
+    // TODO SCG Post for multiple machines must use a machine dto, not query params
+    void createMultipleMachines() throws Exception
+    {
+        MachineDto m = getValidMachine();
+        DatastoreDto dto = new DatastoreDto();
+        dto.setName("datastoreName");
+        dto.setRootPath("/");
+        dto.setDirectory("var/lib/virt");
+        dto.setEnabled(Boolean.TRUE);
+        m.getDatastores().getCollection().add(dto);
+
+        MachineDto m2 = getValidMachine();
+        IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
+        m2.setName(m2.getName() + "-two");
+        m2.setIp(nextIP.toString());
+        m2.setIpService(nextIP.toString());
+        DatastoreDto dto2 = new DatastoreDto();
+        dto2.setName("datastoreNameTwo");
+        dto2.setRootPath("/another-root");
+        dto2.setDirectory("var/lib/virt2");
+        dto2.setEnabled(Boolean.TRUE);
+        m2.getDatastores().add(dto2);
+
+        MachinesDto machinesDto = new MachinesDto();
+        machinesDto.add(m);
+        machinesDto.add(m2);
+
+        Resource resource = client.resource(machinesURI);
+        ClientResponse response =
+            resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)
+                .accept(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE).post(machinesDto);
+
+        // Assert both are created
+        assertEquals(response.getStatusCode(), 201);
+        MachinesDto machines = response.getEntity(MachinesDto.class);
+        assertNotNull(machines);
+        assertEquals(machines.getCollection().size(), 2);
+
     }
 
     /**

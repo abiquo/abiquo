@@ -41,10 +41,10 @@ import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -239,16 +239,17 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void validMachineStateChange(final VirtualMachineState oldState, final VirtualMachineState newState)
+    public void validMachineStateChange(final VirtualMachineState oldState,
+        final VirtualMachineState newState)
     {
         if (oldState == VirtualMachineState.NOT_DEPLOYED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
-        if (((oldState == VirtualMachineState.POWERED_OFF) && (newState != VirtualMachineState.RUNNING))
-            || ((oldState == VirtualMachineState.PAUSED) && (newState != VirtualMachineState.REBOOTED))
-            || ((oldState == VirtualMachineState.RUNNING) && (newState == VirtualMachineState.REBOOTED)))
+        if (oldState == VirtualMachineState.POWERED_OFF && newState != VirtualMachineState.RUNNING
+            || oldState == VirtualMachineState.PAUSED && newState != VirtualMachineState.REBOOTED
+            || oldState == VirtualMachineState.RUNNING && newState == VirtualMachineState.REBOOTED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
             flushErrors();
@@ -263,9 +264,9 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
-
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void changeVirtualMachineState(final Integer vmId, final Integer vappId, final Integer vdcId, final VirtualMachineState state)
+    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final VirtualMachineState state)
     {
         // VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         // Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
@@ -369,7 +370,8 @@ public class VirtualMachineService extends DefaultApiService
 
     public void checkPauseAllowed(final VirtualMachine vm, final VirtualMachineState state)
     {
-        if ((vm.getHypervisor().getType() == (HypervisorType.XEN_3)) && state == VirtualMachineState.PAUSED)
+        if (vm.getHypervisor().getType() == HypervisorType.XEN_3
+            && state == VirtualMachineState.PAUSED)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_PAUSE_UNSUPPORTED);
             flushErrors();

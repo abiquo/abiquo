@@ -397,11 +397,6 @@ public class Machine extends DefaultEntityBase
         this.virtualCpusPerCore = virtualCpusPerCore;
     }
 
-    public enum State
-    {
-        STOPPED, PROVISIONED, NOT_MANAGED, MANAGED, HALTED, UNLICENSED, HA_IN_PROGRESS, DISABLED_FOR_HA, HALTED_FOR_SAVE;
-    }
-
     public final static String STATE_PROPERTY = "state";
 
     private final static boolean STATE_REQUIRED = true;
