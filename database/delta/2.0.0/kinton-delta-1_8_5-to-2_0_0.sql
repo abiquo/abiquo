@@ -8,9 +8,6 @@
 -- 5th -> SQL Procedures
 
 
--- [ABICLOUDPREMIUM-2057]
-UPDATE kinton.metering SET actionperformed="VAPP_INSTANCE" WHERE actionperformed="VAPP_BUNDLE";
-
 -- ---------------------------------------------- --
 --                 TABLE DROP                     --
 -- ---------------------------------------------- --
@@ -157,6 +154,10 @@ CREATE TABLE  `kinton`.`enterprise_properties_map` (
 -- ---------------------------------------------- --
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
+
+-- [ABICLOUDPREMIUM-2057]
+UPDATE kinton.metering SET actionperformed="VAPP_INSTANCE" WHERE actionperformed="VAPP_BUNDLE";
+
 alter table repository modify URL varchar(255);
 -- [UCS]
 ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
@@ -246,6 +247,7 @@ INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
 /*!40000 ALTER TABLE `kinton`.`enterprise_properties` DISABLE KEYS */;
 INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
 /*!40000 ALTER TABLE `kinton`.`enterprise_properties` ENABLE KEYS */;
+
 
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
