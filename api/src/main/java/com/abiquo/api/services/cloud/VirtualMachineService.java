@@ -794,11 +794,15 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
+        String datastore =
+            virtualMachine.getDatastore().getRootPath()
+                + virtualMachine.getDatastore().getDirectory();
 
         Integer sequence = 1;
         for (DiskManagement imHard : hardDisks)
         {
-            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence);
+            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence, datastore);
+            sequence++;
         }
     }
 
