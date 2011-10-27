@@ -69,13 +69,13 @@ public class DatacentersResource extends AbstractResource
                 securityService.requirePrivilege(SecurityService.PRICING_VIEW);
             }
         }
-        else
-        {
-            if (!securityService.hasPrivilege(SecurityService.PHYS_DC_ENUMERATE))
-            {
-                securityService.requirePrivilege(SecurityService.PHYS_DC_ENUMERATE);
-            }
-        }
+        // else
+        // {
+        // if (!securityService.hasPrivilege(SecurityService.PHYS_DC_ENUMERATE))
+        // {
+        // securityService.requirePrivilege(SecurityService.PHYS_DC_ENUMERATE);
+        // }
+        // }
 
         Collection<Datacenter> all = service.getDatacenters();
         DatacentersDto datacenters = new DatacentersDto();

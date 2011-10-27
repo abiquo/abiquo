@@ -84,13 +84,13 @@ public class PricingTemplateGenerator extends DefaultEntityGenerator<PricingTemp
 
     public PricingTemplate createInstance(final String name, final Currency currency)
     {
-        BigDecimal seed = newBigDecimal();
+        BigDecimal seed = newBigDecimal(12);
 
         final BigDecimal hdGb = seed;
         final BigDecimal standingChargePeriod = seed;
         final BigDecimal vlan = seed;
         final PricingPeriod chargingPeriod = PricingPeriod.DAY;
-        final BigDecimal minimumChargePeriod = seed;
+        final BigDecimal minimumChargePeriod = newBigDecimal(3);
         final boolean showChangesBefore = true;
         final PricingPeriod minimumCharge = PricingPeriod.WEEK;
         final BigDecimal publicIp = seed;
