@@ -5,11 +5,15 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
@@ -31,7 +35,7 @@ public class Approval extends DefaultEntityBase
     }
 
     public Approval(final String token, final ApprovalType type, final ApprovalState state,
-        final Date timeRequested, final Date timeResponse, final byte[] request)
+        final Date timeRequested, final Date timeResponse, final byte[] request, final User user)
     {
         setToken(token);
         setApprovalType(type);
@@ -39,6 +43,7 @@ public class Approval extends DefaultEntityBase
         setTimeRequested(timeRequested);
         setTimeResponse(timeResponse);
         setRequest(request);
+        setUser(user);
     }
 
     private final static String ID_COLUMN = "idApproval";
@@ -205,5 +210,27 @@ public class Approval extends DefaultEntityBase
     public void setRequest(final byte[] request)
     {
         this.request = request;
+    }
+
+    public final static String USER_PROPERTY = "user";
+
+    private final static boolean USER_REQUIRED = true;
+
+    private final static String USER_ID_COLUMN = "idUser";
+
+    @JoinColumn(name = USER_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_user")
+    private User user;
+
+    @Required(value = USER_REQUIRED)
+    public User getUser()
+    {
+        return this.user;
+    }
+
+    public void setUser(final User user)
+    {
+        this.user = user;
     }
 }

@@ -31,6 +31,12 @@ public class Limit implements Serializable
 
     public final Long hard;
 
+    protected Limit()
+    {
+        this.soft = 0L;
+        this.hard = 0L;
+    }
+
     public Limit(final Long soft, final Long hard)
     {
         this.soft = soft;

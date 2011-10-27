@@ -293,7 +293,7 @@
         <!--============= APPROVAL PROCESS ============== -->
         <!--============================================= -->
         <!-- APPROVAL REQUESTS -->
-        <security:intercept-url pattern="/approvals" method="GET" access="ROLE_AUTHENTICATED,ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals" method="GET" access="ROLE_APPROVAL_MANAGE" />
         <security:intercept-url pattern="/approvals" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/approvals/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
         <security:intercept-url pattern="/approvals/*" method="PUT" access="ROLE_APPROVAL_MANAGE" />
@@ -307,18 +307,14 @@
         <security:intercept-url pattern="/approvals/denied" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/approvals/denied/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
         <security:intercept-url pattern="/approvals/denied/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        
         <!-- MANAGERS -->
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="GET" access="ROLE_AUTHENTICATED,ROLE_APPROVAL_MANAGE" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager" method="POST" access="ROLE_APPROVAL_MANAGE" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="PUT" access="ROLE_APPROVAL_MANAGE" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="DELETE" access="ROLE_APPROVAL_MANAGE" />
-        <security:intercept-url pattern="/admin/enterprises/*/approvalsmanager/*" method="OPTIONS" access="ROLE_APPROVAL_MANAGE" />
-        
-        
-
+        <security:intercept-url pattern="/approvals/managers/" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/managers/" method="POST" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/managers/" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/approvals/managers/*/*" method="GET" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/managers/*/*" method="PUT" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/managers/*/*" method="DELETE" access="ROLE_APPROVAL_MANAGE" />
+        <security:intercept-url pattern="/approvals/managers/*/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->

@@ -85,13 +85,12 @@ public class ApprovalRep extends DefaultRepBase
 
     }
 
-    public ApprovalManager findApprovalManagerById(final Integer approvalManagerId)
+    public ApprovalManager findApprovalManager(final Integer userId, final Integer managerId)
     {
-        assert approvalManagerId != null;
-        return approvalManagerDAO.findById(approvalManagerId);
+        return approvalManagerDAO.findApprovalManager(userId, managerId);
     }
 
-    public void deleteApprovalManager(final ApprovalManager appm)
+    public void removeApprovalManager(final ApprovalManager appm)
     {
         approvalManagerDAO.remove(appm);
         approvalManagerDAO.flush();
@@ -102,5 +101,15 @@ public class ApprovalRep extends DefaultRepBase
     {
         assert aprovalmanager != null;
         approvalManagerDAO.flush();
+    }
+
+    public List<Integer> findManagersByUserId(final Integer userId)
+    {
+        return approvalManagerDAO.findManagersByUserId(userId);
+    }
+
+    public List<Integer> findUsersByManagerId(final Integer managerId)
+    {
+        return approvalManagerDAO.findUsersByManagerId(managerId);
     }
 }

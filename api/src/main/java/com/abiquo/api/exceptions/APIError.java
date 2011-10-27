@@ -326,11 +326,14 @@ public enum APIError
         "RULE-6", "The load balance type indicated is null or invalid"),
 
     // APPROVAL
-    NON_EXISTENT_APPM("APPROVAL-1", "The requested approval manager does not exist"), NON_EXISTENT_APPROVAL(
+    NON_EXISTENT_APPROVAL_MANAGER("APPROVAL-1", "The requested approval manager does not exist"), NON_EXISTENT_APPROVAL(
         "APPROVAL-2", "The approval request does not exist"), APPROVAL_DETELE_ERROR("APPROVAL-3",
         "An unexpected error occured and the approval request could not be deleted"), APPROVAL_UPDATE_ERROR(
         "APPROVAL-4", "An unexpected error occured and the approval request could not be updated"), APPROVAL_CREATE_ERROR(
-        "APPROVAL-5", "An unexpected error occured and the approval request could not be created"),
+        "APPROVAL-5", "An unexpected error occured and the approval request could not be created"), APPROVAL_REQUEST_NOT_PENDING(
+        "APPROVAL-6", "The approval request has already been approved or denied"), APPROVAL_MANAGER_CREATE_ERROR(
+        "APPROVAL-7", "An unexpected error occured and the approval manager could not be created"), APPROVAL_MANAGER_DETELE_ERROR(
+        "APPROVAL-3", "An unexpected error occured and the approval manager could not be deleted"),
 
     // MAIL
     BAD_JNDI("MAIL-1", "Bad JNDI Error"), BAD_INTERNET_ADDRESS("MAIL-2",

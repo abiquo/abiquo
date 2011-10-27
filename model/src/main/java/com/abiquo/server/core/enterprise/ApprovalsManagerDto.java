@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-@XmlRootElement(name = "approvalsmanager")
+@XmlRootElement(name = "approvalmanagers")
 public class ApprovalsManagerDto extends WrapperDto<ApprovalManagerDto>
 {
     private static final long serialVersionUID = 6167943072099251524L;

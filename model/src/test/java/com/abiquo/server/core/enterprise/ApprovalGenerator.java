@@ -10,9 +10,13 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
 {
+    UserGenerator userGenerator;
+
     public ApprovalGenerator(final SeedGenerator seed)
     {
         super(seed);
+
+        userGenerator = new UserGenerator(seed);
     }
 
     @Override
@@ -31,6 +35,7 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
         ApprovalState approvalState = newEnum(ApprovalState.class, nextSeed());
         Date timeRequested = newDateTime(nextSeed()).toDate();
         Date timeResponse = newDateTime(nextSeed()).toDate();
+        User user = userGenerator.createUniqueInstance();
 
         byte[] request = new byte[5];
         new Random().nextBytes(request);
@@ -40,7 +45,8 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
             approvalState,
             timeRequested,
             timeResponse,
-            request);
+            request,
+            user);
     }
 
     @Override
@@ -48,6 +54,10 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        User user = entity.getUser();
+        userGenerator.addAuxiliaryEntitiesToPersist(user, entitiesToPersist);
+        entitiesToPersist.add(user);
     }
 
 }

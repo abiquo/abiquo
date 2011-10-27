@@ -7,29 +7,29 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "approvalmanager")
 public class ApprovalManagerDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private Integer idUser;
 
-    public Integer getId()
+    private Integer idManager;
+
+    public Integer getUserId()
     {
-        return id;
+        return idUser;
     }
 
-    public void setId(final Integer id)
+    public void setUserId(final Integer idUser)
     {
-        this.id = id;
+        this.idUser = idUser;
     }
 
-    private String approvalMail;
-
-    public String getApprovalMail()
+    public void setManagerId(final Integer idManager)
     {
-        return approvalMail;
+        this.idManager = idManager;
     }
 
-    public void setApprovalMail(final String approvalMail)
+    public Integer getManagerId()
     {
-        this.approvalMail = approvalMail;
+        return idManager;
     }
-
 }

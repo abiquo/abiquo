@@ -1812,8 +1812,11 @@ CREATE TABLE `kinton`.`approval` (
   `timeResponse` timestamp NULL ,
   `reason` text DEFAULT NULL ,
   `request` longblob NOT NULL ,
+  `idUser` int(10) UNSIGNED,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idApproval`)
+  PRIMARY KEY (`idApproval`),
+  KEY `idUser_FK4` (`idUser`),
+  CONSTRAINT `idUser_FK4` FOREIGN KEY (`idUser`) REFERENCES `user` (`idUser`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
@@ -1821,12 +1824,10 @@ CREATE TABLE `kinton`.`approval` (
 --
 DROP TABLE IF EXISTS `kinton`.`approval_manager`;
 CREATE TABLE `kinton`.`approval_manager` (
-  `idApprovalManager` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `idEnterprise` int(10) UNSIGNED,
-  `idUser` int(10) UNSIGNED,
-  `approvalMail` varchar(255) NOT NULL ,
+  `idUser` int(10) UNSIGNED NOT NULL,
+  `idUserManager` int(10) UNSIGNED NOT NULL,
   `version_c` int(11) default 0,
-  PRIMARY KEY (`idApprovalManager`)
+  PRIMARY KEY (`idUser`, `idUserManager`)
   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 

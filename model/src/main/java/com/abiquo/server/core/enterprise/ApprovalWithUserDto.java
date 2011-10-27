@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "approval")
-public class ApprovalDto extends SingleResourceTransportDto
+public class ApprovalWithUserDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 6985079950355525566L;
 
@@ -27,7 +27,7 @@ public class ApprovalDto extends SingleResourceTransportDto
 
     private byte[] request;
 
-    private Integer user;
+    private User user;
 
     public Integer getId()
     {
@@ -109,12 +109,12 @@ public class ApprovalDto extends SingleResourceTransportDto
         return request;
     }
 
-    public void setUser(final Integer userId)
+    public void setUser(final User user)
     {
-        this.user = userId;
+        this.user = user;
     }
 
-    public Integer getUser()
+    public User getUser()
     {
         return user;
     }
