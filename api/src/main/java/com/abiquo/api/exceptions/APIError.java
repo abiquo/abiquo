@@ -447,11 +447,21 @@ public enum APIError
 
         });
 
+        System.out.println("\n ************ Wiki errors ************** \n");
+
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
             System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
                 error.name()));
+        }
+
+        System.out.println("\n ************ Flex client labels ************** \n");
+
+        // Outputs all errors for the Chef client
+        for (APIError error : errors)
+        {
+            System.out.println(String.format("%s=%s", error.code, error.message));
         }
     }
 
