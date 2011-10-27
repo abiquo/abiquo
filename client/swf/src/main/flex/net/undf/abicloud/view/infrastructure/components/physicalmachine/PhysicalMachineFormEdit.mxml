@@ -79,8 +79,6 @@
                 cpuInput.value = this.physicalMachine.cpu;
                 ramUnitsSelector.selectedIndex = 0;
                 ramInput.value = this.physicalMachine.ram / ramUnitsSelector.selectedItem.conversion;
-                hdUnitsSelector.selectedIndex = 3;
-                hdInput.value = this.physicalMachine.hd / hdUnitsSelector.selectedItem.conversion;
                 vswitchNameInput.text = this.physicalMachine.vswitchName;
                 datastoreManagement.physicalMachine = this.physicalMachine;
 
@@ -156,7 +154,6 @@
                 pm.description = descriptionInput.text;
                 pm.cpu = cpuInput.value;
                 pm.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
-                pm.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
                 pm.vswitchName = vswitchNameInput.text;
 
                 var hypervisor:HyperVisor = ObjectUtil.copy(this.physicalMachine.hypervisor) as HyperVisor;                
