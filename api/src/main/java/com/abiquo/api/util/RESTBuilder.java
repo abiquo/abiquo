@@ -62,6 +62,7 @@ import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -298,6 +299,14 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(RemoteServiceResource.REMOTE_SERVICE, remoteService.getType().toString()
             .toLowerCase().replace("_",""));
+
+        if (remoteService.getType().canBeChecked())
+        {
+            links
+                .add(builder.buildRestLink(RemoteServiceResource.class,
+                    RemoteServiceResource.CHECK_RESOURCE, InfrastructureService.CHECK_RESOURCE,
+                    params));
+        }
 
         links.add(builder.buildRestLink(RemoteServiceResource.class, REL_EDIT, params));
         return links;
