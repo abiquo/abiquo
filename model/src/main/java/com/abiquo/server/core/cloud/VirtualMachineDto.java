@@ -139,17 +139,17 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.idState = idState;
     }
 
-    private VirtualMachineState state;
-
-    public void setState(final VirtualMachineState state)
-    {
-        this.state = state;
-    }
-
-    public VirtualMachineState getState()
-    {
-        return state;
-    }
+    // private VirtualMachineState state;
+    //
+    // public void setState(final VirtualMachineState state)
+    // {
+    // this.state = state;
+    // }
+    //
+    // public VirtualMachineState getState()
+    // {
+    // return state;
+    // }
 
     private int highDisponibility;
 
@@ -185,6 +185,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    private String uuid;
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
     }
 
     @Override

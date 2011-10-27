@@ -27,35 +27,35 @@ package net.undf.abicloud.vo.infrastructure
     public class State
     {
 
-        public static const RUNNING:int = 1;
+        public static const RUNNING:int = 1; // ON (VM)
 
-        public static const PAUSED:int = 2;
+        public static const PAUSED:int = 2; // PAUSED (VM)
 
-        public static const POWERED_OFF:int = 3;
+        public static const POWERED_OFF:int = 3; // OFF (VM)
 
-        public static const REBOOTED:int = 4;
+        public static const REBOOTED:int = 4; // ON (VM)
 
-        public static const NOT_DEPLOYED:int = 5;
+        public static const NOT_DEPLOYED:int = 5; // NOT_DEPLOYED (VAPP) NOT_ALLOCATED (VM)
 
-        public static const IN_PROGRESS:int = 6;
+        public static const IN_PROGRESS:int = 6; // LOCKED (VAPP) (VM)
 
-        public static const APPLY_CHANGES_NEEDED:int = 7;
+        public static const APPLY_CHANGES_NEEDED:int = 7; // NEEDS_SYNC (VAPP)
 
-        public static const UPDATING_NODES:int = 8;
+        public static const UPDATING_NODES:int = 8; // LOCKED (VAPP)
 
-        public static const FAILED:int = 9;
+        public static const FAILED:int = 9; // GONE
 
-        public static const COPYING:int = 10;
+        public static const COPYING:int = 10; // LOCKED (VAPP)
 
-        public static const MOVING:int = 11;
+        public static const MOVING:int = 11; // LOCKED (VAPP)
 
-        public static const CHECKING:int = 12;
+        public static const CHECKING:int = 12; // LOCKED (VM)
 
-        public static const BUNDLING:int = 13;
+        public static const BUNDLING:int = 13; // LOCKED (VM)
 
-        public static const STATEFUL:int = 14;
+        public static const STATEFUL:int = 14; // GONE
         
-        public static const UNKNOWN:int = 15;
+        public static const UNKNOWN:int = 15; // UNKNOWN (VAPP) (VM)
         
 
         public var id:int;

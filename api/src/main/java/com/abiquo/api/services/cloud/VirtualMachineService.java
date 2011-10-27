@@ -497,6 +497,9 @@ public class VirtualMachineService extends DefaultApiService
         final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
         final Integer vappId)
     {
+        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
+        virtualMachine.setEnterprise(enterprise);
+
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
         // We need the VirtualImage
@@ -504,11 +507,10 @@ public class VirtualMachineService extends DefaultApiService
         virtualMachine.setVirtualImage(virtualImage);
 
         // We need the Enterprise
-        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        virtualMachine.setEnterprise(enterprise);
 
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualMachine.getVirtualImage(), virtualMachine);
+        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(),
+            virtualMachine.getVirtualImage(), virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual image is VirtualImageNode
@@ -569,12 +571,13 @@ public class VirtualMachineService extends DefaultApiService
      * Prepares the virtual image, in premium it sets the conversion. Attachs the conversion if
      * premium to the {@link VirtualMachine}.
      * 
+     * @param virtualDatacenter from where we retrieve the hypervisor type.
      * @param virtualImage to prepare.
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
-    public void attachVirtualImageConversion(final VirtualImage virtualImage,
-        final VirtualMachine virtualMachine)
+    public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
+        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
         logger.debug("attachVirtualImageConversion community edition");
@@ -713,7 +716,7 @@ public class VirtualMachineService extends DefaultApiService
             producer.openChannel();
             producer.publish(deployTask);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
 
             logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -1111,7 +1114,7 @@ public class VirtualMachineService extends DefaultApiService
             producer.openChannel();
             producer.publish(deployTask);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
 
             logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -1286,7 +1289,7 @@ public class VirtualMachineService extends DefaultApiService
             producer.openChannel();
             producer.publish(deployTask);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
 
             logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -1420,7 +1423,7 @@ public class VirtualMachineService extends DefaultApiService
             producer.openChannel();
             producer.publish(deployTask);
         }
-        catch (IOException e)
+        catch (Exception e)
         {
 
             logger.error("Error enqueuing the change state task dto to Tarantino with error: "

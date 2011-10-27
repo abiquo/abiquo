@@ -48,12 +48,12 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
 
     private static Criterion sameImage(final VirtualImage image)
     {
-        return Restrictions.eq("imageId", image.getId());
+        return Restrictions.eq("image", image);
     }
 
     private static Criterion sameTargetFormat(final DiskFormatType format)
     {
-        return Restrictions.eq("targetType", format.name());
+        return Restrictions.eq("targetType", format);
     }
 
     private static Criterion sourceFormatNull()

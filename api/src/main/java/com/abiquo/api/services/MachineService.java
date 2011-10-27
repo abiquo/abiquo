@@ -245,7 +245,7 @@ public class MachineService extends DefaultApiService
                         }
                         else
                         {
-                            newState = VirtualApplianceState.NEEDS_SYNCHRONIZE;
+                            newState = VirtualApplianceState.NEEDS_SYNC;
                             break;
                         }
                     }

@@ -47,7 +47,7 @@ public enum VirtualApplianceState
      * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN} nor
      * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED}.
      */
-    NEEDS_SYNCHRONIZE,
+    NEEDS_SYNC,
     /**
      * Any of its virtual machines is in state
      * {@link com.abiquo.server.core.cloud.VirtualMachineState#LOCKED} and none is in the state
@@ -58,5 +58,20 @@ public enum VirtualApplianceState
      * Any of its virtual machines is in state
      * {@link com.abiquo.server.core.cloud.VirtualMachineState#UNKNOWN}.
      */
-    UNKNOWN
+    UNKNOWN;
+
+    // This should erased but enums does not work with
+    // formula this bug https://hibernate.onjira.com/browse/HHH-6347
+
+    public VirtualApplianceState getSafeNullValueOf(final String value)
+    {
+        for (VirtualApplianceState a : VirtualApplianceState.values())
+        {
+            if (a.name().equals(value))
+            {
+                return a;
+            }
+        }
+        return null;
+    }
 }
