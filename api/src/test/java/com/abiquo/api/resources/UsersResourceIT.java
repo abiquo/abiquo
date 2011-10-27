@@ -185,7 +185,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
+        Role entRole = roleGenerator.createInstanceEnterpriseAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
@@ -229,7 +229,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
+        Role entRole = roleGenerator.createInstanceEnterpriseAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
