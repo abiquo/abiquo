@@ -750,6 +750,11 @@ public class AbstractAPIStub
                 queryParams.put("page", new String[] {offset.toString()});
                 queryParams.put("numResults", new String[] {numResults.toString()});
             }
+            else if (numResults == 0 && offset == 0)
+            {
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
