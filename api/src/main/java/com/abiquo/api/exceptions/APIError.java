@@ -393,8 +393,11 @@ public enum APIError
         "CHEF-5", "The node could not be updated in the Chef Server. "
             + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
         "Could not connect to the Chef server. Please, contact the administrator."), CHEF_INVALID_ENTERPRISE_DATA(
-        "CHEF-6", "Could not connect to the Chef server with the given Validator and Admin data. "
-            + "Please verify the credentials"),
+        "CHEF-7", "Could not connect to the Chef server with the given Validator and Admin data. "
+            + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
+        "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
+        "The virtual machine can not use Chef. "
+            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"),
 
     ;
 
