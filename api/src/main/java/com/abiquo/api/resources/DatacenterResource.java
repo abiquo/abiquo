@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -50,6 +52,8 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
@@ -64,14 +68,23 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES = "enterprises";
+
     public static final String ENTERPRISES_PATH = "action/enterprises";
 
     public static final String ENTERPRISES_REL = "enterprises";
+
+    public static final String UPDATE_RESOURCES = "updateUsedResources";
+
+    public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
 
     public static final String NETWORK = "network";
 
     @Autowired
     DatacenterService service;
+
+    @Autowired
+    InfrastructureService infraService;
 
     @Autowired
     NetworkService netService;
@@ -89,15 +102,14 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    public DatacenterDto modifyDatacenter(final DatacenterDto datacenter,
+    public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        Datacenter d = service.getDatacenter(datacenterId);
+        Datacenter datacenter = createPersistenceObject(datacenterDto);
+        datacenter = service.modifyDatacenter(datacenterId, datacenter);
 
-        d = service.modifyDatacenter(datacenterId, datacenter);
-
-        return createTransferObject(d, restBuilder);
+        return createTransferObject(datacenter, restBuilder);
     }
 
     @GET
@@ -149,11 +161,28 @@ public class DatacenterResource extends AbstractResource
     }
 
     // FIXME: Not allowed right now
-    // @DELETE
-    // public void deleteDatacenter(@PathParam(DATACENTER) Integer datacenterId)
-    // {
-    // service.removeDatacenter(datacenterId);
-    // }
+    @DELETE
+    public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        service.removeDatacenter(datacenterId);
+    }
+
+    @PUT
+    @Path(UPDATE_RESOURCES_PATH)
+    public void updateUsedResources(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Rack> racks = service.getRacks(datacenter);
+        for (Rack rack : racks)
+        {
+            List<Machine> machines = infraService.getMachines(rack);
+            for (Machine machine : machines)
+            {
+                infraService.updateUsedResourcesByMachine(machine);
+            }
+        }
+
+    }
 
     public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
@@ -171,6 +200,7 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
+    // Create the persistence object.
     public static Datacenter createPersistenceObject(final DatacenterDto datacenter)
         throws Exception
     {
@@ -211,4 +241,5 @@ public class DatacenterResource extends AbstractResource
             + numElem));
         return links;
     }
+
 }

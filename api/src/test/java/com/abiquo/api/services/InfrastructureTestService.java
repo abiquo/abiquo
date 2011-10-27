@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.infrastructure.RemoteService;
 
 /**
  * Mock class to simulate the remote services service to avoid connecting to the target remote
@@ -41,6 +42,13 @@ public class InfrastructureTestService extends InfrastructureService
         // During tests the target remote service may not be up and running
         // Do not return errors to simulate a normal behavior
         return new ErrorsDto();
+    }
+
+    @Override
+    public void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
+    {
+        // During tests the target remote service may not be up and running
+        // Do not return errors to simulate a normal behavior
     }
 
 }

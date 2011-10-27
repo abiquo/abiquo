@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -41,7 +42,7 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
         super(UcsRack.class);
     }
 
-    public UcsRackDAO(EntityManager entityManager)
+    public UcsRackDAO(final EntityManager entityManager)
     {
         super(UcsRack.class, entityManager);
     }
@@ -52,9 +53,21 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
      * @param datacenterId id.
      * @return List<UcsRack> with all {@links UcsRack} associated to the given {@link Datacenter}.
      */
-    public List<UcsRack> findAllUcsRacksByDatacenter(Datacenter datacenter)
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter)
+    {
+        return findAllUcsRacksByDatacenter(datacenter, null);
+    }
+
+    public List<UcsRack> findAllUcsRacksByDatacenter(final Datacenter datacenter,
+        final String filter)
     {
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
+
+        if (filter != null && !filter.isEmpty())
+        {
+            criteria.add(filterBy(filter));
+        }
+
         criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
 
         return criteria.list();
@@ -66,14 +79,23 @@ public class UcsRackDAO extends DefaultDAOBase<Integer, UcsRack>
      * @param datacenterId {@link Datacenter}.
      * @return Criterion
      */
-    private Criterion sameDatacenter(Datacenter datacenterId)
+    private Criterion sameDatacenter(final Datacenter datacenterId)
     {
         return Restrictions.eq(UcsRack.DATACENTER_PROPERTY, datacenterId);
     }
 
-    public boolean existAnyOtherWithIP(String ip)
+    public boolean existAnyOtherWithIP(final String ip)
     {
         return existsAnyByCriterions(Restrictions.eq(UcsRack.IP_PROPERTY, ip));
+    }
+
+    public Criterion filterBy(final String filter)
+    {
+        Disjunction filterDisjunction = Restrictions.disjunction();
+
+        filterDisjunction.add(Restrictions.like(UcsRack.NAME_PROPERTY, '%' + filter + '%'));
+
+        return filterDisjunction;
     }
 
 }

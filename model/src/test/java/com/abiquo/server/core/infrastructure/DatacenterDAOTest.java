@@ -39,6 +39,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
 
     private EnterpriseGenerator enterpriseGenerator;
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -48,7 +49,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
     }
 
     @Override
-    protected DatacenterDAO createDao(EntityManager arg0)
+    protected DatacenterDAO createDao(final EntityManager arg0)
     {
         return new DatacenterDAO(arg0);
     }
@@ -115,7 +116,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
         ds().persistAll(datacenter, enterprise);
 
         DatacenterDAO dao = createDaoWithNoTransaction();
-     
+
         DefaultEntityCurrentUsed expectedUsed = new DefaultEntityCurrentUsed(0, 0, 0);
         DefaultEntityCurrentUsed currentUsed =
             dao.getCurrentResourcesAllocated(datacenter.getId(), enterprise.getId());

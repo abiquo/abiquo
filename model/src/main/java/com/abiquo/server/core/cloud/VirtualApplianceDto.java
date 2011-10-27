@@ -23,6 +23,7 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualAppliance")
@@ -100,26 +101,26 @@ public class VirtualApplianceDto extends SingleResourceTransportDto
         this.error = error;
     }
 
-    private State subState;
+    private VirtualMachineState subState;
 
-    public State getSubState()
+    public VirtualMachineState getSubState()
     {
         return subState;
     }
 
-    public void setSubState(State subState)
+    public void setSubState(VirtualMachineState subState)
     {
         this.subState = subState;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
 
-    public void setState(State state)
+    public void setState(VirtualMachineState state)
     {
         this.state = state;
     }

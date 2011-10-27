@@ -28,18 +28,19 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
+import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
 import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.ProductSectionType;
+import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Icon;
 import org.dmtf.schemas.ovf.envelope._1.RASDType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualHardwareSectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemCollectionType;
 import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
-import org.dmtf.schemas.ovf.envelope._1.ProductSectionType.Icon;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.ResourceType;
 import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 
@@ -74,7 +75,7 @@ public class OVFPackageInstanceFromOVFEnvelope
      * @throws RepositoryException, if the envelope do not contain the required info to get
      *             VirtualDisk information.
      **/
-    public static OVFPackageInstanceDto getDiskInfo(String ovfId, EnvelopeType envelope)
+    public static OVFPackageInstanceDto getDiskInfo(final String ovfId, final EnvelopeType envelope)
     // TODO String userID, String category
         throws AMException
     {
@@ -100,6 +101,12 @@ public class OVFPackageInstanceFromOVFEnvelope
             if (product.getInfo() != null && product.getInfo().getValue() != null)
             {
                 description = product.getInfo().getValue();
+            }
+
+            String categoryName = null;
+            if (product.getOtherAttributes().containsKey(new QName("CategoryName")))
+            {
+                categoryName = product.getOtherAttributes().get(new QName("CategoryName"));
             }
 
             String iconPath = getIconPath(product, fileIdToFileType, ovfId);
@@ -191,6 +198,7 @@ public class OVFPackageInstanceFromOVFEnvelope
 
                     diskInfo.setIconPath(iconPath);
                     diskInfo.setDescription(description);
+                    diskInfo.setCategoryName(categoryName);
                     // XXX diskInfo.setSO(value);
 
                     if (!requiredByVSs.containsKey(vssName))
@@ -278,9 +286,10 @@ public class OVFPackageInstanceFromOVFEnvelope
     /**
      * TODO TBD
      **/
-    private static OVFPackageInstanceDto getDiskInfo(VirtualSystemType vsystem,
-        Map<String, VirtualDiskDescType> diskDescByName, Map<String, List<String>> diskIdToVSs)
-        throws IdAlreadyExistsException, RequiredAttributeException, SectionNotPresentException
+    private static OVFPackageInstanceDto getDiskInfo(final VirtualSystemType vsystem,
+        final Map<String, VirtualDiskDescType> diskDescByName,
+        final Map<String, List<String>> diskIdToVSs) throws IdAlreadyExistsException,
+        RequiredAttributeException, SectionNotPresentException
     {
         OVFPackageInstanceDto dReq = new OVFPackageInstanceDto();
         VirtualHardwareSectionType hardwareSectionType;
@@ -441,7 +450,7 @@ public class OVFPackageInstanceFromOVFEnvelope
      * Decode CimStrings (on the OVF namespce) on the Disk RASD's HostResource attribute to delete
      * the ''ovf://disk/'' prefix
      **/
-    private static String getVirtualSystemDiskId(List<CimString> cimStrs)
+    private static String getVirtualSystemDiskId(final List<CimString> cimStrs)
     {
         String cimStringVal = "";
         for (CimString cimString : cimStrs)
