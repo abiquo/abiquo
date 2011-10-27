@@ -359,6 +359,14 @@ public class Enterprise extends DefaultEntityWithLimits
     }
 
     // ********************************** Others ********************************
+
+    public boolean isChefEnabled()
+    {
+        return getChefURL() != null && getChefClient() != null
+            && getChefClientCertificate() != null && getChefValidator() != null
+            && getChefValidatorCertificate() != null;
+    }
+
     @Override
     public String toString()
     {

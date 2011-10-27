@@ -558,6 +558,13 @@ public class VirtualMachine extends DefaultEntityBase
         this.runlist.remove(element);
     }
 
+    /* ******************* Helper methods ******************* */
+
+    public boolean isChefEnabled()
+    {
+        return getVirtualImage().isChefEnabled() && getEnterprise().isChefEnabled();
+    }
+
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
         final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,
         final Integer typeId)
