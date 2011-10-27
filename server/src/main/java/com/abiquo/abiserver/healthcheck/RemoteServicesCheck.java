@@ -75,7 +75,7 @@ public class RemoteServicesCheck
         List<RemoteServiceHB> remoteServices = null;
         try
         {
-            factory.beginConnection();
+            factory.beginConnection(true);
             remoteServices = rsDAO.findAll();
             factory.endConnection();
         }
@@ -102,15 +102,16 @@ public class RemoteServicesCheck
                 {
                     if (remoteService.getRemoteServiceType().canBeChecked())
                     {
-                        rsCommand.checkRemoteService(systemSession, remoteService
-                            .getIdRemoteService());
+                        rsCommand.checkRemoteService(systemSession,
+                            remoteService.getIdRemoteService());
                     }
                 }
                 catch (InfrastructureCommandException ex)
                 {
-                    LOGGER.error("An error occured while checking remote service: "
-                        + remoteService.getRemoteServiceType() + " for datacenter "
-                        + remoteService.getIdDataCenter(), ex);
+                    LOGGER.error(
+                        "An error occured while checking remote service: "
+                            + remoteService.getRemoteServiceType() + " for datacenter "
+                            + remoteService.getIdDataCenter(), ex);
 
                     TracerFactory.getTracer().log(
                         SeverityType.CRITICAL,

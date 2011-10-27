@@ -234,7 +234,7 @@ public class PopulateModelTest
      * @param a list of configured machines.
      * @throws PersistenceException
      */
-    public void initDBPhysicalMachines(List<PhysicalmachineHB> machines)
+    public void initDBPhysicalMachines(final List<PhysicalmachineHB> machines)
         throws PersistenceException
     {
         for (PhysicalmachineHB pm : machines)
@@ -250,8 +250,8 @@ public class PopulateModelTest
      * 
      * @throws PersistenceException
      */
-    protected PhysicalmachineHB createPhysicalMachine(PhysicalmachineHB machine, RackHB rack,
-        HypervisorType htype) throws PersistenceException
+    protected PhysicalmachineHB createPhysicalMachine(final PhysicalmachineHB machine,
+        final RackHB rack, final HypervisorType htype) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         PhysicalMachineDAO pmDAO = factorytest.getPhysicalMachineDAO();
@@ -279,7 +279,8 @@ public class PopulateModelTest
     }
 
     /** PhysicalMachine Factory construction XXX is not stored on DB. */
-    public PhysicalmachineHB definePhysical(String name, int cpu, int ram, long hd, int cpuRatio)
+    public PhysicalmachineHB definePhysical(final String name, final int cpu, final int ram,
+        final long hd, final int cpuRatio)
     {
         PhysicalmachineHB mach = new PhysicalmachineHB();
 
@@ -287,13 +288,11 @@ public class PopulateModelTest
         mach.setDescription("test");
 
         mach.setCpu(cpu);
-        mach.setHd(hd);
         mach.setRam(ram);
 
         mach.setCpuRatio(cpuRatio);
 
         mach.setCpuUsed(0);
-        mach.setHdUsed(0);
         mach.setRamUsed(0);
 
         return mach;
@@ -311,8 +310,8 @@ public class PopulateModelTest
      * @return a reference to the newly created VirtualimageHB persistent object
      * @throws PersistenceException
      */
-    public VirtualimageHB createVirtualImage(String name, int cpu, int ram, long hd)
-        throws PersistenceException
+    public VirtualimageHB createVirtualImage(final String name, final int cpu, final int ram,
+        final long hd) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         VirtualImageDAO daoVI = factorytest.getVirtualImageDAO();
@@ -407,7 +406,7 @@ public class PopulateModelTest
      * 
      * @throws PersistenceException
      */
-    private RackHB createRack(DatacenterHB dc) throws PersistenceException
+    private RackHB createRack(final DatacenterHB dc) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         RackDAO daoRack = factorytest.getRackDAO();
@@ -431,7 +430,7 @@ public class PopulateModelTest
      * 
      * @throws PersistenceException
      */
-    private HypervisorHB createHypervisor(HypervisorType hType) throws PersistenceException
+    private HypervisorHB createHypervisor(final HypervisorType hType) throws PersistenceException
     {
         // Crudable<HypervisorHB, Integer> daoHyper =
         // new GenericHibernateDAO<HypervisorHB, Integer>(HypervisorHB.class);
@@ -456,8 +455,8 @@ public class PopulateModelTest
      * 
      * @throws PersistenceException
      */
-    private VirtualDataCenterHB createVirtualDataCenter(DatacenterHB dc, EnterpriseHB enterprise,
-        HypervisorType htype) throws PersistenceException
+    private VirtualDataCenterHB createVirtualDataCenter(final DatacenterHB dc,
+        final EnterpriseHB enterprise, final HypervisorType htype) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         VirtualDataCenterDAO daoVdc = factorytest.getVirtualDataCenterDAO();
@@ -500,7 +499,6 @@ public class PopulateModelTest
         netConfDAO.makePersistent(netConf);
 
         VlanNetworkHB vlanHB = new VlanNetworkHB();
-        vlanHB.setDefaultNetwork(Boolean.TRUE);
         vlanHB.setNetworkName("Test VLAN");
         vlanHB.setConfiguration(netConf);
         vlanNetworkDAO.makePersistent(vlanHB);
@@ -521,8 +519,8 @@ public class PopulateModelTest
      * 
      * @throws PersistenceException
      */
-    private VirtualappHB createVirtualApp(VirtualDataCenterHB vdc, EnterpriseHB enterprise,
-        StateEnum state) throws PersistenceException
+    private VirtualappHB createVirtualApp(final VirtualDataCenterHB vdc,
+        final EnterpriseHB enterprise, final StateEnum state) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         VirtualApplianceDAO daoApp = factorytest.getVirtualApplianceDAO();
@@ -644,8 +642,7 @@ public class PopulateModelTest
         {
             log.debug("PhysicalMachine name:" + pm.getName() + " dc:"
                 + pm.getRack().getDatacenter().getName() + "\t cpu:" + pm.getCpu() + "("
-                + pm.getCpuUsed() + ")" + "\t ram:" + pm.getRam() + "(" + pm.getRamUsed() + ")"
-                + "\t hd:" + pm.getHd() + "(" + pm.getHdUsed() + ")");
+                + pm.getCpuUsed() + ")" + "\t ram:" + pm.getRam() + "(" + pm.getRamUsed() + ")");
         }
 
         factorytest.endConnection();
@@ -741,7 +738,7 @@ public class PopulateModelTest
      * Save the virtual machine, create and save a node virtual image with the virtual image /
      * machine relation.
      */
-    public void createVirtualImageNode(VirtualimageHB vImage, VirtualMachine vMachine)
+    public void createVirtualImageNode(final VirtualimageHB vImage, final VirtualMachine vMachine)
         throws PersistenceException
     {
         VirtualmachineHB vMachineHb = vMachine.toPojoHB();
@@ -756,7 +753,7 @@ public class PopulateModelTest
      * fails caused by ''Batch update returned unexpected row count from update [0]; actual row
      * count: 0; expected: 1'' TODO fix
      */
-    private VirtualmachineHB createVirtualMachine(VirtualmachineHB vMachine)
+    private VirtualmachineHB createVirtualMachine(final VirtualmachineHB vMachine)
         throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
@@ -780,8 +777,8 @@ public class PopulateModelTest
     /**
      * TODO VirtualmachineHB vMachine (can be null)
      */
-    private NodeVirtualImageHB createNodeVirtualImage(VirtualimageHB vImage,
-        VirtualmachineHB vMachine) throws PersistenceException
+    private NodeVirtualImageHB createNodeVirtualImage(final VirtualimageHB vImage,
+        final VirtualmachineHB vMachine) throws PersistenceException
     {
         factorytest = HibernateDAOFactory.instance();
         NodeVirtualImageDAO daoNVI = factorytest.getNodeVirtualImageDAO();
@@ -900,7 +897,7 @@ public class PopulateModelTest
      * @param session
      * @throws PersistenceException
      */
-    private void createRASD10(Session session) throws PersistenceException
+    private void createRASD10(final Session session) throws PersistenceException
     {
         session.beginTransaction();
 
@@ -918,8 +915,8 @@ public class PopulateModelTest
         rasdHBs.add(rasd);
     }
 
-    private <T extends ResourceManagementHB> void createRasdManagement(Session session,
-        int[] resourceTypes, Class<T> cl) throws PersistenceException
+    private <T extends ResourceManagementHB> void createRasdManagement(final Session session,
+        final int[] resourceTypes, final Class<T> cl) throws PersistenceException
     {
 
         VirtualappHB virtualAppHB =
@@ -991,16 +988,16 @@ public class PopulateModelTest
      * @param resourceType
      * @return
      */
-    private static ArrayList<ResourceAllocationSettingData> getRasds(Session session,
-        int resourceType)
+    private static ArrayList<ResourceAllocationSettingData> getRasds(final Session session,
+        final int resourceType)
     {
 
         Disjunction disjunction = Restrictions.disjunction();
         disjunction.add(Restrictions.eq("resourceType", resourceType));
 
         ArrayList<ResourceAllocationSettingData> rasds =
-            (ArrayList<ResourceAllocationSettingData>) session.createCriteria(
-                ResourceAllocationSettingData.class).add(disjunction).list();
+            (ArrayList<ResourceAllocationSettingData>) session
+                .createCriteria(ResourceAllocationSettingData.class).add(disjunction).list();
 
         if (rasds == null)
         {

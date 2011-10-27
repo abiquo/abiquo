@@ -67,6 +67,9 @@ public class VirtualDisk
     /** The image format **/
     private String format;
 
+    /** All the format uri (before convertDiskFormat overwrite to libvirt conventions) */
+    private String formatUri;
+
     /**
      * In case of HA create/delete operation a new custom parameter is set on the Disk Element to
      * indicate do not execute any operation to copy/remove the disk from the target datastore.
@@ -101,6 +104,7 @@ public class VirtualDisk
         this.targetDatastore = targetDatastore;
         this.fileRef = fileRef;
         this.format = convertDiskFormat(format);
+        this.formatUri = format;
     }
 
     /**
@@ -123,6 +127,12 @@ public class VirtualDisk
         this.targetDatastore = targetDatastore;
         this.fileRef = fileRef;
         this.format = convertDiskFormat(format);
+        this.formatUri = format;
+    }
+
+    public String getFormatUri()
+    {
+        return formatUri;
     }
 
     public int getSequence()
@@ -212,9 +222,20 @@ public class VirtualDisk
             repository = location.substring(1, indexFinRepository);
             imagePath = location.substring(indexFinRepository + 1, location.length());
 
-            int indexRepositoryPath = location.indexOf(":"); // This is not valid for imported Hyper-V machines : repository == "null" in this case
+            int indexRepositoryPath = location.indexOf(":"); // This is not valid for imported
+                                                             // Hyper-V machines : repository ==
+                                                             // "null" in this case
 
-            if (indexRepositoryPath != -1 && repository.length() > indexRepositoryPath) // FIXES call when using an imported VMachine -> Windows unit i.e. C:\ is detected
+            if (indexRepositoryPath != -1 && repository.length() > indexRepositoryPath) // FIXES
+                                                                                        // call when
+                                                                                        // using an
+                                                                                        // imported
+                                                                                        // VMachine
+                                                                                        // ->
+                                                                                        // Windows
+                                                                                        // unit i.e.
+                                                                                        // C:\ is
+                                                                                        // detected
             {
                 repository = repository.substring(indexRepositoryPath, repository.length());
                 logger.debug("Using imagePath [{}] at repository [{}]", imagePath, repository);

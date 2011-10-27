@@ -53,4 +53,6 @@ public interface UsersResourceStub
     public DataResult<Boolean> checkRolePrivilege(final Integer idRole, final String namePrivilege);
 
     public DataResult<UserListResult> getOnlyUsers(UserListOptions userListOptions);
+
+    public BasicResult checkRoleAccess(final Integer idRole);
 }

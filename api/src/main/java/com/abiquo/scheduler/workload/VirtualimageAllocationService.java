@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.fit.AllocationFitMax;
 import com.abiquo.scheduler.fit.AllocationFitMin;
 import com.abiquo.scheduler.fit.IAllocationFit;
@@ -44,13 +45,13 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -211,8 +212,9 @@ public class VirtualimageAllocationService
      *             target.
      */
     public Machine findBestTarget(final VirtualImage vimage, final FitPolicy fitPolicy,
-        final Integer idVirtualAppliance, String datastoreUuid, Integer originalHypervisorId,
-        Integer rackId) throws ResourceAllocationException
+        final Integer idVirtualAppliance, final String datastoreUuid,
+        final Integer originalHypervisorId, final Integer rackId)
+        throws ResourceAllocationException
     {
 
         final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
@@ -278,12 +280,12 @@ public class VirtualimageAllocationService
 
         final Long numberOfDeployedVLAN =
             datacenterRepo.getNumberOfDeployedVlanNetworksByRack(idRack);
-        final Integer vlanPerSwitch = (rack.getVlanIdMax() - rack.getVlanIdMin()) + 1;
+        final Integer vlanPerSwitch = rack.getVlanIdMax() - rack.getVlanIdMin() + 1;
 
         log.debug("The number of deployed VLAN for the rack: {}, is: {}", idRack,
             numberOfDeployedVLAN);
 
-        final int second_operator = Math.round((vlanPerSwitch * rack.getNrsq()) / 100);
+        final int second_operator = Math.round(vlanPerSwitch * rack.getNrsq() / 100);
         final int vlan_soft_limit = vlanPerSwitch - second_operator;
 
         if (numberOfDeployedVLAN.intValue() >= vlan_soft_limit)
@@ -343,8 +345,20 @@ public class VirtualimageAllocationService
 
             // BYTE to MB
             Long imageRequiredMb = image.getHdRequiredInBytes() / (1024 * 1024);
-            Long machineAllowedMb = machine.getVirtualHardDiskInBytes() / (1024 * 1024);
-            Long machineUsedMb = machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
+
+            Long machineAllowedMb = 0L;
+            Long machineUsedMb = 0L;
+            if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+            {
+                for (Datastore d : machine.getDatastores())
+                {
+                    machineAllowedMb += d.getSize() / (1024 * 1024);
+                    machineUsedMb += d.getUsedSize() / (1024 * 1024);
+                }
+            }
+
+            // machine.getVirtualHardDiskInBytes() / (1024 * 1024);
+            // machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
 
             final boolean passHD = pass(machineUsedMb, imageRequiredMb, machineAllowedMb, 100);
 
@@ -371,7 +385,7 @@ public class VirtualimageAllocationService
             ruleFinder.initializeMachineLoadRuleCache(firstPassCandidates);
 
         physicalMachineFit =
-            (fitPolicy == FitPolicy.PROGRESSIVE) ? new AllocationFitMax() : new AllocationFitMin();
+            fitPolicy == FitPolicy.PROGRESSIVE ? new AllocationFitMax() : new AllocationFitMin();
 
         Machine bestTarget = null;
         long bestFitTarget = NO_FIT;
@@ -477,7 +491,7 @@ public class VirtualimageAllocationService
         Map<Machine, List<MachineLoadRule>> machineRulesMap =
             ruleFinder.initializeMachineLoadRuleCache(Collections.singletonList(machine));
 
-        boolean pass = false;
+        boolean pass = true;
 
         if (machineRulesMap != null) // community impl --> rules == null (so always pass)
         {

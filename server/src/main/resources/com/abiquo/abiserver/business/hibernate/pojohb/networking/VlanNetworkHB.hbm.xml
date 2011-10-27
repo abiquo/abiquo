@@ -10,9 +10,6 @@
         <property name="networkId" type="java.lang.Integer">
             <column name="network_id" />
         </property>
-        <property name="defaultNetwork" type="boolean">
-            <column name="default_network" />
-        </property>
         <property name="networkName" type="string">
             <column length="40" name="network_name" />
         </property>

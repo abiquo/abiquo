@@ -105,6 +105,9 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
+            
+            [Bindable]
+            protected var _isEditable:Boolean;
 			
             private function onCreationComplete():void
             {
@@ -201,8 +204,16 @@
                 this._virtualImage = virtualImage;
                 this.applianceManager = applianceManager;
 
+                this._isEditable = true;
                 if (this._virtualImage)
                 {
+                    //Check if the user can modify a shared image
+	                if(this._virtualImage.shared){
+		                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.ENTERPRISE_ADMINISTER_ALL)){
+		                    this._isEditable = false;
+		                }
+	                }
+                    
                     //Editing an existing Virtual Image
                     titleText = ResourceManager.getInstance().getString("VirtualImage",
                                                                         "POPUP_TITLE_VIRTUALIMAGE_EDIT");
@@ -657,6 +668,7 @@
                 required="true">
                 <mx:TextInput id="nameInput"
                     height="20"
+                    editable="{this._isEditable}"
                     maxChars="155"
                     change="validateForm()"/>
             </mx:FormItem>
@@ -666,6 +678,7 @@
                 required="true">
                 <mx:TextArea id="descriptionInput"
                     height="20"
+                    editable="{this._isEditable}"
                     maxChars="255"
                     change="validateForm()"/>
             </mx:FormItem>
@@ -708,6 +721,7 @@
                 required="true">
                 <mx:ComboBox id="categoryInput"
                     height="18"
+                    enabled="{this._isEditable}"
                     labelField="name"
                     dataProvider="{categoriesList}"
                     change="validateForm()"
@@ -717,8 +731,9 @@
             <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
                 <mx:NumericStepper id="cpuInput"
                     width="100" height="20"
+                    enabled="{this._isEditable}"
                     change="validateForm()"
-                    minimum="1" maximum="32" stepSize="1"/>
+                    minimum="1" maximum="1024" stepSize="1"/>
             </mx:FormItem>
 
             <mx:FormItem 
@@ -726,6 +741,7 @@
                 direction="horizontal">
                 <mx:NumericStepper id="ramInput"
                     width="100" height="20"
+                    enabled="{this._isEditable}"
                     minimum="0"
                     change="validateForm()"
                     maximum="{ramUnitsSelector.selectedItem.maximum}"
@@ -734,6 +750,7 @@
                 <mx:ComboBox id="ramUnitsSelector"
                     width="80" height="18"
                     labelField="label"
+                    enabled="{this._isEditable}"
                     change="validateForm()"
                     dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                     selectedIndex="0"/>
@@ -745,6 +762,7 @@
                 <mx:NumericStepper id="hdInput"
                     width="100" height="20"
                     change="validateForm()"
+                    enabled="{this._isEditable}"
                     minimum="0" maximum="{hdUnitsSelector.selectedItem.maximum}"
                     stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
 
@@ -752,6 +770,7 @@
                     width="80" height="18"
                     labelField="label"
                     change="validateForm()"
+                    enabled="{this._isEditable}"
                     dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
                     selectedIndex="3"/>
             </mx:FormItem>
@@ -768,6 +787,7 @@
                     width="100%" height="85"
                     dataProvider="{virtualImageManager.icons}"
                     change="validateForm()"
+                    selectable="{this._isEditable}"
                     itemRenderer="net.undf.abicloud.view.virtualimage.components.icon.IconListItemRenderer"/>
 
                 <mx:HBox 
@@ -776,11 +796,12 @@
                     verticalAlign="middle">
                     <mx:Button id="addIconButton"
                         styleName="AddButton"
+                        enabled="{this._isEditable}"
                         toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
                         click="addIcon()"/>
 
                     <mx:Button id="deleteIconButton"
-                        enabled="{iconsList.selectedIndex > -1}"
+                        enabled="{iconsList.selectedIndex > -1 &amp;&amp; this._isEditable}"
                         styleName="RemoveButton"
                         toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
                         click="askIconDeletion()"/>
@@ -789,7 +810,7 @@
                         width="100%" height="6"/>
 
                     <mx:Button id="editIconButton"
-                        enabled="{iconsList.selectedIndex > -1}"
+                        enabled="{iconsList.selectedIndex > -1  &amp;&amp; this._isEditable}"
                         styleName="ConfigurationButton"
                         toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
                         click="editIcon()"/>

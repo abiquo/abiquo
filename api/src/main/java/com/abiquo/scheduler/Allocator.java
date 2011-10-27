@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.UserService;
+import com.abiquo.model.enumerator.FitPolicy;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.check.IMachineCheck;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
@@ -39,7 +41,6 @@ import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
@@ -51,7 +52,6 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.abiquo.server.core.scheduler.FitPolicyRuleDAO;
 
 /**
@@ -217,12 +217,12 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
-                        targetMachine.getName(), e);
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]", targetMachine
+                        .getName(), e);
 
                     errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(),
-                            e.getMessage());
+                        String.format("Machine : %s error: %s", targetMachine.getName(), e
+                            .getMessage());
                     targetMachine = null;
                 }
             }
@@ -248,15 +248,15 @@ public class Allocator implements IAllocator
             throw new NotEnoughResourcesException(cause);
         }
 
-        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
-            targetMachine.getName(), vmachine.getName());
+        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]", targetMachine
+            .getName(), vmachine.getName());
 
         return vmachine;
     }
 
     @Override
-    public VirtualMachine allocateHAVirtualMachine(final Integer vmId, State state)
-        throws AllocatorException, ResourceAllocationException
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId,
+        final VirtualMachineState state) throws AllocatorException, ResourceAllocationException
     {
         log.error("Community doesn't implement HA");
         return null;
@@ -286,7 +286,8 @@ public class Allocator implements IAllocator
     }
 
     /**
-     * Check the current allowed Enterprise resource utilization is not exceeded.
+     * Check the current allowed Enterprise resource utilization is not exceeded. Overloaded method
+     * because en case of deploying VM is not necessary check VLAN limits.
      * 
      * @param vapp, the target virtual appliance.
      * @param required, the required resources.
@@ -305,7 +306,23 @@ public class Allocator implements IAllocator
         throws LimitExceededException
     {
 
-        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force);
+        checkLimist(vapp, required, force, true);
+
+    }
+
+    /**
+     * @param vapp
+     * @param required
+     * @param force
+     * @param checkVLAN
+     * @throws LimitExceededException
+     */
+    protected void checkLimist(final VirtualAppliance vapp,
+        final VirtualMachineRequirements required, final Boolean force, final Boolean checkVLAN)
+        throws LimitExceededException
+    {
+
+        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN, false);
 
     }
 

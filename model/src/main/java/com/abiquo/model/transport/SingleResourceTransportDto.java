@@ -106,6 +106,28 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
+    public List<RESTLink> searchLinks(final String rel)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        if (getLinks() == null)
+        {
+            setLinks(new ArrayList<RESTLink>());
+        }
+
+        for (RESTLink link : getLinks())
+        {
+            if (link.getRel() != null)
+            {
+                if (link.getRel().equals(rel))
+                {
+                    links.add(link);
+                }
+            }
+        }
+        return links;
+    }
+
     public RESTLink searchLink(final String rel, final String title)
     {
         if (getLinks() == null)
@@ -143,6 +165,16 @@ public abstract class SingleResourceTransportDto implements Serializable
     public void modifyLink(final String rel, final String href)
     {
         searchLink(rel).setHref(href);
+    }
+
+    public Integer getIdFromLink(final String rel)
+    {
+        String href = this.searchLink(rel).getHref();
+        // Maybe URIs don't have a trailing slash
+        String id =
+            href.substring(href.lastIndexOf("/") + 1,
+                href.endsWith("/") ? href.length() - 1 : href.length());
+        return Integer.valueOf(id);
     }
 
 }

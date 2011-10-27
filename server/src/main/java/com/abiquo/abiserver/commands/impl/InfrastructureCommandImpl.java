@@ -23,7 +23,6 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,7 +31,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,13 +46,11 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorH
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.DatacenterLimitHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
@@ -74,11 +70,8 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DatastoreDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
-import com.abiquo.abiserver.persistence.dao.infrastructure.RackDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
-import com.abiquo.abiserver.persistence.dao.workload.FitPolicyRuleDAO;
-import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -91,10 +84,8 @@ import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
-import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -124,6 +115,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
     protected static ResourceManager resourceManager =
         new ResourceManager(InfrastructureCommandImpl.class);
+
+    public static ResourceManager getResourceManager()
+    {
+        return resourceManager;
+    }
 
     private IInfrastructureWS infrastructureWS;
 
@@ -249,49 +245,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     }
 
     @Override
-    public ArrayList<RackHB> getRacksByDatacenter(final UserSession userSession,
-        final Integer datacenterId, final String filters)
-    {
-        ArrayList<RackHB> racks = new ArrayList<RackHB>();
-
-        factory.beginConnection();
-
-        DataCenterDAO dcDAO = factory.getDataCenterDAO();
-        racks = dcDAO.getRacks(datacenterId, filters);
-
-        factory.endConnection();
-        return racks;
-    }
-
-    /**
-     * Gets the physical machine list by rack
-     * 
-     * @param rackId the rack identifier
-     * @return the list of physical machine
-     * @throws PersistenceException
-     * @throws InfrastructureCommandException
-     * @see com.abiquo.abiserver.commands.InfrastructureCommand#getPhysicalMachinesByRack(java.lang.Integer)
-     */
-    @Override
-    public List<PhysicalMachine> getPhysicalMachinesByRack(final UserSession userSession,
-        final Integer rackId, final String filters)
-    {
-        factory.beginConnection();
-
-        PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
-        List<PhysicalmachineHB> availablePms = pmDAO.getPhysicalMachineByRack(rackId, filters);
-        List<PhysicalMachine> result = new ArrayList<PhysicalMachine>();
-        for (PhysicalmachineHB singleResult : availablePms)
-        {
-            result.add(singleResult.toPojo());
-        }
-
-        factory.endConnection();
-
-        return result;
-    }
-
-    @Override
     public List<VirtualmachineHB> getVirtualMachinesByPhysicalMachine(
         final UserSession userSession, final Integer physicalMachineId)
     {
@@ -361,9 +314,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         physicalmachineHB, enterpriseId);
             }
 
-            if ((numberOfVM.equals(new Long(0)))
-                && ((physicalmachineHB.getIdEnterprise() == null) || (physicalmachineHB
-                    .getIdEnterprise() == 0)))
+            if (numberOfVM.equals(new Long(0))
+                && (physicalmachineHB.getIdEnterprise() == null || physicalmachineHB
+                    .getIdEnterprise() == 0))
             {
                 infrastructures.add(physicalmachineHB.toPojo());
             }
@@ -375,653 +328,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         dataResult.setData(infrastructures);
 
         return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#getDataCenters(com.abiquo.abiserver.pojo
-     * .authentication.UserSession)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public DataResult<ArrayList<DataCenter>> getDataCenters(final UserSession userSession)
-    {
-
-        DataResult<ArrayList<DataCenter>> dataResult = new DataResult<ArrayList<DataCenter>>();
-
-        Session session = HibernateUtil.getSession();
-        Transaction transaction = null;
-
-        try
-        {
-            transaction = session.beginTransaction();
-
-            ArrayList<DataCenter> dataCentersPojo = new ArrayList<DataCenter>();
-            ArrayList<DatacenterHB> dataCenters =
-                (ArrayList<DatacenterHB>) HibernateUtil.getSession()
-                    .createCriteria(DatacenterHB.class).addOrder(Order.asc("name")).list();
-            for (DatacenterHB datacenterHB : dataCenters)
-            {
-                DataCenter dataCenter = datacenterHB.toPojo();
-                dataCentersPojo.add(dataCenter);
-            }
-
-            dataResult.setData(dataCentersPojo);
-            dataResult.setSuccess(true);
-            dataResult.setMessage(InfrastructureCommandImpl.resourceManager
-                .getMessage("getDataCenters.success"));
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "getDataCenters", e);
-        }
-
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#getAllowedDataCenters(com.abiquo.abiserver
-     * .pojo.authentication.UserSession)
-     */
-    @Override
-    public DataResult<ArrayList<DataCenter>> getAllowedDataCenters(final UserSession userSession)
-    {
-        return getDataCenters(userSession);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#createDataCenter(com.abiquo.abiserver
-     * .pojo.authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.DataCenter)
-     */
-    @Override
-    public DataResult<DataCenter> createDataCenter(final UserSession userSession,
-        final DataCenter dataCenter)
-    {
-        DataResult<DataCenter> dataResult;
-        dataResult = new DataResult<DataCenter>();
-        dataResult.setSuccess(true);
-
-        Session session = null;
-        Transaction transaction = null;
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            try
-            {
-                if (dataCenter.getName() != null && dataCenter.getName().trim().length() == 0)
-                {
-
-                    dataResult.setSuccess(false);
-                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                        "createDataCenter_noname");
-                    // Log the event
-                    traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                        userSession, dataCenter, null, "Datacenter  without name", null, null,
-                        null, null, userSession.getEnterpriseName());
-
-                    return dataResult;
-                }
-            }
-            catch (Exception e)
-            {
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                    "createDataCenter_noname", e);
-                // Log the event
-                traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                    userSession, dataCenter, null, e.getMessage(), null, null, null, null,
-                    userSession.getEnterpriseName());
-
-            }
-
-            // Checks for existing DataCenters with the same name
-            try
-            {
-                if (checkExistingDataCenterNames(dataCenter.getName()))
-                {
-                    dataResult.setSuccess(false);
-                    // dataResult.setMessage("Another datacenter with the name '"
-                    // + dataCenter.getName()
-                    // + "' already exists. Please choose a different name.");
-
-                    errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                        "createDataCenter_existingname");
-
-                    // Log the event
-                    traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                        userSession, dataCenter, null, "Another datacenter with the name '"
-                            + dataCenter.getName()
-                            + "' already exists. Please choose a different name.", null, null,
-                        null, null, userSession.getEnterpriseName());
-
-                    return dataResult;
-                }
-            }
-            catch (PersistenceException e1)
-            {
-                throw new HibernateException(e1.getMessage(), e1);
-            }
-
-            NetworkHB network = new NetworkHB();
-            network.setUuid(UUID.randomUUID().toString());
-            session.save(network);
-
-            DatacenterHB datacenterPojo = dataCenter.toPojoHB();
-            datacenterPojo.setIdDataCenter(null); // Force a creation operation
-            datacenterPojo.setNetwork(network);
-            final Integer idDatacenter = (Integer) session.save(datacenterPojo);
-
-            // Creating remote Services
-
-            ArrayList<RemoteService> remoteServices = dataCenter.getRemoteServices();
-            ArrayList<RemoteService> updatedRemoteServices = new ArrayList<RemoteService>();
-
-            if (remoteServices == null)
-            {
-                updatedRemoteServices = new ArrayList<RemoteService>();
-            }
-
-            boolean errorsInRemoteService = false;
-
-            transaction.commit();
-
-            for (RemoteService remoteService : remoteServices)
-            {
-                RemoteServiceHB remoteServiceHB = remoteService.toPojoHB();
-                remoteServiceHB.setIdDataCenter(idDatacenter);
-                remoteService.setIdDataCenter(idDatacenter);
-
-                if (!validateRemoteService(remoteServiceHB))
-                {
-                    errorsInRemoteService = true;
-
-                    traceLog(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                        userSession, dataCenter, null, remoteServiceHB.getRemoteServiceType()
-                            .getName() + " was not properly configured", null, null, null, null,
-                        null);
-                }
-                else
-                {
-                    DataResult<RemoteService> savedRS =
-                        rsCommand.addRemoteService(userSession, remoteServiceHB.toPojo());
-
-                    updatedRemoteServices.add(savedRS.getData());
-
-                    if (!savedRS.getSuccess())
-                    {
-                        errorsInRemoteService = true;
-                    }
-                }
-            }
-
-            dataCenter.setRemoteServices(updatedRemoteServices);
-            dataCenter.setId(idDatacenter);
-            dataResult.setData(dataCenter);
-
-            if (errorsInRemoteService)
-            {
-                dataResult.setSuccess(false);
-                dataResult
-                    .setMessage("Datacenter '"
-                        + dataCenter.getName()
-                        + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.");
-
-                // Log the event
-                traceLog(
-                    SeverityType.MAJOR,
-                    ComponentType.DATACENTER,
-                    EventType.DC_CREATE,
-                    userSession,
-                    dataCenter,
-                    null,
-                    "Datacenter '"
-                        + dataCenter.getName()
-                        + "' has been created but some Remote Services had configuration errors. Please check the events to fix the problems.",
-                    null, null, null, null, null);
-            }
-            else
-            {
-                // Log the event
-                traceLog(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
-                    userSession, dataCenter, null, "Datacenter '" + dataCenter.getName()
-                        + "' has been created in " + dataCenter.getSituation(), null, null, null,
-                    null, null);
-            }
-
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "createDataCenter", e);
-
-            // Log the event
-            traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_CREATE,
-                userSession, dataCenter, null, e.getMessage(), null, null, null, null, null);
-        }
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#editDataCenter(com.abiquo.abiserver.pojo
-     * .authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.DataCenter)
-     */
-    @Override
-    public BasicResult editDataCenter(final UserSession userSession, final DataCenter dataCenter)
-    {
-        BasicResult basicResult;
-        basicResult = new BasicResult();
-        basicResult.setSuccess(true);
-
-        Session session = null;
-        Transaction transaction = null;
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            DatacenterHB datacenterPojo =
-                (DatacenterHB) session.get(DatacenterHB.class, dataCenter.getId());
-
-            // Auxiliar Datacenter object, used to keep a copy of the object
-            // before the modification
-            DataCenter datacenterAux = datacenterPojo.toPojo();
-
-            datacenterPojo.setName(dataCenter.getName());
-            datacenterPojo.setSituation(dataCenter.getSituation());
-
-            session.update(datacenterPojo);
-
-            transaction.commit();
-
-            // Log the event
-            traceLog(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY, userSession,
-                datacenterAux, null, "Datacenter '" + datacenterAux.getName()
-                    + "' has been modified [Name: " + dataCenter.getName() + ", Situation: "
-                    + dataCenter.getSituation() + "]", null, null, null, null, null);
-
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "editDataCenter", e);
-
-            DatacenterHB datacenterPojo =
-                (DatacenterHB) session.get(DatacenterHB.class, dataCenter.getId());
-
-            traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_MODIFY,
-                userSession, datacenterPojo.toPojo(), null, e.getMessage(), null, null, null, null,
-                null);
-        }
-
-        return basicResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#deleteDataCenter(com.abiquo.abiserver
-     * .pojo.authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.DataCenter)
-     */
-    @Override
-    public BasicResult deleteDataCenter(final UserSession userSession, final DataCenter dataCenter)
-    {
-
-        BasicResult basicResult;
-        basicResult = new BasicResult();
-
-        DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
-        RackDAO rackDAO = factory.getRackDAO();
-        PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
-        MachineLoadRuleDAO machineLoadRuleDAO = factory.getMachineLoadRuleDAO();
-        FitPolicyRuleDAO fitPolicyRuleDAO = factory.getFitPolicyRuleDAO();
-
-        try
-        {
-            factory.beginConnection();
-            DatacenterHB datacenterPojo = datacenterDAO.findById(dataCenter.getId());
-
-            // only delete the datacenter if it doesn't have any virtual
-            // datacenter and any storage device associated
-            if (datacenterDAO.getNumberVirtualDatacentersByDatacenter(datacenterPojo
-                .getIdDataCenter()) == 0)
-            {
-                if (datacenterDAO.getNumberStorageDevicesByDatacenter(datacenterPojo
-                    .getIdDataCenter()) == 0)
-                {
-                    // Delete datacenter allocation rules
-                    fitPolicyRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
-                    machineLoadRuleDAO.deleteRulesForDatacenter(dataCenter.getId());
-
-                    for (RackHB currentRack : datacenterPojo.getRacks())
-                    {
-                        for (PhysicalmachineHB pmToDelete : currentRack.getPhysicalmachines())
-                        {
-                            deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-
-                            pmDAO.makeTransient(pmToDelete);
-                        }
-
-                        // Once all physical machines are deleted, delete the rack
-                        rackDAO.makeTransient(currentRack);
-                    }
-
-                    datacenterPojo.setEntLimits(new HashSet<DatacenterLimitHB>());
-
-                    datacenterDAO.makeTransient(datacenterPojo);
-
-                    // make the changes persistent
-                    factory.endConnection();
-
-                    traceLog(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
-                        userSession, dataCenter, null, null, null, null, null, null, null);
-
-                    basicResult.setSuccess(true);
-
-                }
-                else
-                {
-                    traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                        userSession, dataCenter, null, "there are storage devices associated",
-                        null, null, null, null, null);
-
-                    // This exception will be catch if you try to delete
-                    // PhysicalDatacenters with
-                    // AssociatedDatacenters
-                    factory.rollbackConnection();
-
-                    errorManager.reportError(InfrastructureCommandImpl.resourceManager,
-                        basicResult, "deleteDataCenterConstraintSD");
-                }
-            }
-            else
-            {
-                traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    userSession, dataCenter, null, "there are virtual datacenters associated",
-                    null, null, null, null, null);
-
-                // This exception will be catch if you try to delete
-                // PhysicalDatacenters with
-                // AssociatedDatacenters
-                factory.rollbackConnection();
-
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                    "deleteDataCenterConstraint");
-
-            }
-
-        }
-        catch (Exception e)
-        {
-            factory.rollbackConnection();
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "deleteDataCenter", e);
-
-            traceLog(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                userSession, dataCenter, null, e.getMessage(), null, null, null, null, null);
-
-        }
-
-        return basicResult;
-    }
-
-    /* ______________________________ RACKS _______________________________ */
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#createRack(com.abiquo.abiserver.pojo.
-     * authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.Rack)
-     */
-    @Override
-    public DataResult<Rack> createRack(final UserSession userSession, final Rack rack)
-    {
-        DataResult<Rack> dataResult;
-        dataResult = new DataResult<Rack>();
-        dataResult.setSuccess(true);
-
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            if (rack.getName() != null && rack.getName().trim().length() == 0)
-            {
-
-                dataResult.setSuccess(false);
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                    "createRack_noname");
-                // Log the event
-                traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
-                    userSession, null, null, "Rack without name", null, rack, null, null, null);
-                return dataResult;
-            }
-        }
-        catch (Exception e)
-        {
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "_noname", e);
-            // Log the event
-            traceLog(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                null, null, e.getMessage(), null, rack, null, null, null);
-        }
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            VlanNetworkParameters vlanNetParameters = rack.getVlanNetworkParameters();
-            if (vlanNetParameters == null)
-            {
-                vlanNetParameters = new VlanNetworkParameters(2, 4094, "", 80, 8);
-                rack.setVlanNetworkParameters(vlanNetParameters);
-            }
-
-            RackHB rackHB = rack.toPojoHB();
-            session.save(rackHB);
-
-            rack.setId(rackHB.getIdRack());
-            dataResult.setData(rack);
-
-            transaction.commit();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                rack.getDataCenter(), null, "Rack '" + rack.getName() + "' has been created", null,
-                rack, null, null, null);
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "createRack", e);
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_CREATE, userSession,
-                rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
-
-        }
-
-        return dataResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.abiquo.abiserver.commands.InfrastructureCommand#deleteRack(com.abiquo.abiserver.pojo.
-     * authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.Rack)
-     */
-    @Override
-    public BasicResult deleteRack(final UserSession userSession, final Rack rack)
-    {
-        BasicResult basicResult;
-        basicResult = new BasicResult();
-
-        PhysicalMachineDAO physicalmachineDAO = factory.getPhysicalMachineDAO();
-        RackDAO rackDAO = factory.getRackDAO();
-        DatastoreDAO datastoreDAO = factory.getDatastoreDAO();
-
-        try
-        {
-            factory.beginConnection();
-
-            RackHB rackHB = rackDAO.findById(rack.getId());
-
-            // Delete rack allocation rules
-            MachineLoadRuleDAO ruleDAO = factory.getMachineLoadRuleDAO();
-            ruleDAO.deleteRulesForRack(rack.getId());
-
-            for (PhysicalmachineHB pmToDelete : rackHB.getPhysicalmachines())
-            {
-                if (physicalmachineDAO.getNumberOfDeployedVirtualMachines(pmToDelete) == 0)
-                {
-                    // VMs not managed must be deleted too
-                    deleteNotManagedVMachines(pmToDelete.getIdPhysicalMachine());
-                    
-                    deletePhysicalMachineFromDatabase(pmToDelete.getIdPhysicalMachine(), userSession);
-                }
-                else
-                {
-                    basicResult.setSuccess(false);
-
-                    errorManager.reportError(resourceManager, basicResult,
-                        "deleterack_deployedmachines");
-
-                    factory.rollbackConnection();
-
-                    return basicResult;
-
-                }
-            }
-
-            // once the physical machines are deleted, delete the rack
-            rackDAO.makeTransient(rackHB);
-
-            basicResult.setSuccess(true);
-
-            factory.endConnection();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, userSession,
-                rack.getDataCenter(), null, null, null, rack, null, null, null);
-
-        }
-        catch (Exception e)
-        {
-            factory.rollbackConnection();
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "deleteRack", e);
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_DELETE, userSession,
-                rack.getDataCenter(), null, e.getMessage(), null, rack, null, null, null);
-        }
-
-        return basicResult;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @seecom.abiquo.abiserver.commands.InfrastructureCommand#editRack(com.abiquo.abiserver.pojo.
-     * authentication.UserSession, com.abiquo.abiserver.pojo.infrastructure.Rack)
-     */
-    @Override
-    public BasicResult editRack(final UserSession userSession, final Rack rack)
-    {
-
-        BasicResult basicResult;
-        basicResult = new BasicResult();
-        basicResult.setSuccess(true);
-
-        Session session = null;
-        Transaction transaction = null;
-
-        try
-        {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            RackHB rackPojo =
-                (RackHB) session.get(
-                    com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
-                    rack.getId());
-
-            // Auxiliar rack object, used to keep a copy of the object before
-            // the modification
-            Rack rackAux = rackPojo.toPojo();
-
-            rackPojo.setName(rack.getName());
-            rackPojo.setShortDescription(rack.getShortDescription());
-            rackPojo.setLargeDescription(rack.getLargeDescription());
-
-            VlanNetworkParameters vlanNetworkParameters = rack.getVlanNetworkParameters();
-            rackPojo.setVlan_id_max(vlanNetworkParameters.getVlan_id_max());
-            rackPojo.setVlan_id_min(vlanNetworkParameters.getVlan_id_min());
-            rackPojo.setVlan_per_vdc_expected(vlanNetworkParameters.getVlan_per_vdc_expected());
-            rackPojo.setNRSQ(vlanNetworkParameters.getNRSQ());
-            rackPojo.setVlans_id_avoided(vlanNetworkParameters.getVlans_id_avoided());
-
-            rackPojo.setHaEnabled(rack.getHaEnabled());
-
-            session.update(rackPojo);
-
-            transaction.commit();
-
-            traceLog(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackAux.getDataCenter(), null,
-                "Rack '" + rackAux.getName() + "' has been modified [Name: " + rack.getName()
-                    + ", Short description: " + rack.getShortDescription()
-                    + ", Large description: " + rack.getLargeDescription() + "]", null, rackAux,
-                null, null, null);
-        }
-        catch (HibernateException e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, basicResult,
-                "editRack", e);
-
-            RackHB rackPojo =
-                (RackHB) session.get(
-                    com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB.class,
-                    rack.getId());
-
-            traceLog(SeverityType.CRITICAL, ComponentType.RACK, EventType.RACK_MODIFY, userSession,
-                rackPojo.toPojo().getDataCenter(), null, e.getMessage(), null, rackPojo.toPojo(),
-                null, null, null);
-        }
-        return basicResult;
     }
 
     /*
@@ -1066,8 +372,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 "createPhysicalMachine_noname", e);
             // Log the event
             traceLog(SeverityType.MINOR, ComponentType.MACHINE, EventType.MACHINE_CREATE,
-                userSession, pm.getDataCenter(), null, e.getMessage(), null, (Rack) pm
-                    .getAssignedTo(), pm, null, null);
+                userSession, pm.getDataCenter(), null, e.getMessage(), null,
+                (Rack) pm.getAssignedTo(), pm, null, null);
 
         }
 
@@ -1433,9 +739,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setDescription(pm.getDescription());
             physicalMachineHb.setCpu(pm.getCpu());
             physicalMachineHb.setRam(pm.getRam());
-            physicalMachineHb.setHd(pm.getHd());
-            physicalMachineHb.setRealCpu(pm.getRealCpu());
-            physicalMachineHb.setRealRam(pm.getRealRam());
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
@@ -1472,7 +775,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachineAux.getDataCenter(), null, "Physical machine '"
                     + physicalMachineAux.getName() + "' has been modified [Name: "
                     + physicalMachineHb.getName() + ", " + +physicalMachineHb.getCpu() + "CPUs, "
-                    + physicalMachineHb.getRam() + " RAM, " + physicalMachineHb.getHd() + " HD, "
+                    + physicalMachineHb.getRam() + " RAM, "
                     + physicalMachineHb.getHypervisor().getType().getValue() + " hypervisor]",
                 null, (Rack) physicalMachineAux.getAssignedTo(), physicalMachineAux, null, null);
         }
@@ -1839,8 +1142,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+
                             return basicResult;
                         }
                     }
@@ -2229,20 +1537,31 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
+                String errorMesssage =
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because the hypervisor could be disconnected.";
+
                 PhysicalMachine machine =
                     (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
-                    "Operation cannot be performed on " + virtualMachine.getName()
-                        + " because datacenter isn't well configured.", null, machine.getRack(),
-                    machine, userSession.getUser(), userSession.getEnterpriseName());
+                    errorMesssage, null, machine.getRack(), machine, userSession.getUser(),
+                    userSession.getEnterpriseName());
                 // Generating the result
-                dataResult.setMessage(basicResult.getMessage());
+
+                factory.beginConnection();
+                String nameVApp =
+                    factory.getVirtualApplianceDAO()
+                        .getVirtualAppByVirtualMachine(virtualMachine.getId()).getName();
+                factory.endConnection();
+
+                String errorNotificacion = nameVApp + ": " + basicResult.getMessage();
+
+                dataResult.setMessage(errorNotificacion);
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
                 return dataResult;
             }
-
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             State inProgressState = new State(StateEnum.IN_PROGRESS);
@@ -2487,7 +1806,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB)
      */
     @Override
-    public BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter)
+    public BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -2498,7 +1817,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             factory.beginConnection();
             DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
 
-            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
+            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter);
             basicResult.setSuccess(true);
             basicResult.setMessage(InfrastructureCommandImpl.resourceManager
                 .getMessage("updateUsedResourcesByDatacenter.success"));
@@ -2664,7 +1983,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         DatacenterHB dataCenter = pm.getDataCenter();
         factory.endConnection();
 
-        return updateUsedResourcesByDatacenter(dataCenter);
+        return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
     /*

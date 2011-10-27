@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.persistence.EntityManager;
@@ -35,6 +36,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
 
@@ -113,6 +115,79 @@ public class RoleService extends DefaultApiService
             enterprise = findEnterprise(enterpriseId);
         }
         return enterpriseRep.findRolesByEnterprise(enterprise, filter, order, desc, 0, 25);
+    }
+
+    public Collection<Role> getRolesWithEqualsOrLessPrivileges(final Role role,
+        final Collection<Role> roles)
+    {
+        Collection<Role> result = new ArrayList<Role>();
+
+        if (role.getPrivileges() != null && !role.getPrivileges().isEmpty() && roles != null
+            && !roles.isEmpty())
+        {
+            for (Role r : roles)
+            {
+                if (r.getPrivileges() != null && !r.getPrivileges().isEmpty())
+                {
+                    if (hasSameOrLessPrivileges(role.getPrivileges(), r.getPrivileges()))
+                    {
+                        result.add(r);
+                    }
+                }
+                else
+                {
+                    result.add(r);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public boolean hasSameOrLessPrivileges(final Collection<Privilege> original,
+        final Collection<Privilege> toCompare)
+    {
+        boolean hasSameOrLessPrivileges = true;
+        if (original != null && !original.isEmpty() && toCompare != null && !toCompare.isEmpty())
+        {
+            if (original.size() >= toCompare.size())
+            {
+
+                for (Privilege tcp : toCompare)
+                {
+                    boolean hasThisPrivilege = false;
+                    for (Privilege p : original)
+                    {
+                        if (tcp.getName().equals(p.getName()))
+                        {
+                            hasThisPrivilege = true;
+                            break;
+                        }
+                    }
+                    if (!hasThisPrivilege)
+                    {
+                        hasSameOrLessPrivileges = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                hasSameOrLessPrivileges = false;
+            }
+        }
+
+        return hasSameOrLessPrivileges;
+    }
+
+    public void checkHasSameOrLessPrivileges(final Collection<Privilege> original,
+        final Collection<Privilege> toCompare)
+    {
+        if (!hasSameOrLessPrivileges(original, toCompare))
+        {
+            addConflictErrors(APIError.HAS_NOT_ENOUGH_PRIVILEGE);
+            flushErrors();
+        }
     }
 
 }

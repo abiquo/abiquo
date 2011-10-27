@@ -22,6 +22,7 @@
 package com.abiquo.server.core.enterprise;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -347,6 +348,19 @@ public class User extends DefaultEntityBase
         this.availableVirtualDatacenters = availableVirtualDatacenters;
     }
 
+    @Column(nullable = false)
+    private Date creationDate;
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
     /**
      * THIS CONSTRUCTOR FORCES THE TYPE, AND THEREFORE THE AUTHENTICATION MODE TO <b>ABIQUO</b>.
      * THAT MEANS THAT THIS USER CAN ONLY AUTHENTICATE TO DB. Constructor.
@@ -391,8 +405,9 @@ public class User extends DefaultEntityBase
      * @param locale Language preferred for communications with Abiquo.
      * @param authType Which system this user signed up.
      */
-    public User(Enterprise enterprise, Role role, String name, String surname, String email,
-        String nick, String password, String locale, AuthType authType)
+    public User(final Enterprise enterprise, final Role role, final String name,
+        final String surname, final String email, final String nick, final String password,
+        final String locale, final AuthType authType)
     {
         setEnterprise(enterprise);
         setRole(role);
@@ -439,7 +454,7 @@ public class User extends DefaultEntityBase
      * 
      * @param authType {@link com.abiquo.server.core.enterprise.User.AuthType} value.
      */
-    private void setAuthType(AuthType authType)
+    private void setAuthType(final AuthType authType)
     {
         this.authType = authType;
     }

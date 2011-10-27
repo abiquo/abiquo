@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
         	import mx.managers.DragManager;
@@ -61,6 +62,8 @@
             //The VirtualDatacenter where the VirtualMachine is
             [Bindable]
             protected var _virtualDatacenter:VirtualDataCenter;
+            
+            private var _virtualAppliance:VirtualAppliance;
 
             //Flag indicating if changes can be made to the VirtualMachine network configuration
             [Bindable]
@@ -74,6 +77,9 @@
             private var availableNICSelector:AvailableNICSelector;
 
             private var virtualMachineGateway:IPAddress;
+            
+            //Use to detect if the gateway has changed
+            private var _previousGateway:IPAddress;
 
             [Bindable]
             private var availableGateways:ArrayCollection = new ArrayCollection();
@@ -81,7 +87,11 @@
             //To order dragged object
             public var newIndex:int;
             
+            public var oldIndex:int;
+            
             public var itemMoved:Object;
+            
+            private var _showGatewayChange:Boolean;
 
             override protected function createChildren():void
             {
@@ -105,10 +115,12 @@
              * Initializes this component to manage the Network of a Virtual Machine
              */
             public function init(node:NodeVirtualImage, isEditionAllowed:Boolean,
-                                 virtualDatacenter:VirtualDataCenter):void
+                                 virtualDatacenter:VirtualDataCenter,
+                                 virtualAppliance:VirtualAppliance):void
             {
                 _virtualMachine = node.virtualMachine;
                 _virtualDatacenter = virtualDatacenter;
+                _virtualAppliance = virtualAppliance;
                 _isEditionAllowed = isEditionAllowed;
 
                 if (_virtualMachine)
@@ -123,6 +135,8 @@
                 if (_virtualMachine)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NICs_BY_VIRTUAL_MACHINE);
+                    event.virtualDatacenter = _virtualDatacenter;
+                    event.virtualAppliance = _virtualAppliance;
                     event.virtualMachine = _virtualMachine;
                     event.callback = setVirtualMachineNICs;
                     dispatchEvent(event);
@@ -137,6 +151,7 @@
             private function onVirtualMachineNICsChanged(event:NetworkingEvent):void
             {
                 getVirtualMachineNICs();
+                this._showGatewayChange = true;
                 getVirtualMachineGateway();
             }
 
@@ -146,7 +161,7 @@
                                       true);
                 PopUpManager.centerPopUp(availableNICSelector);
 
-                availableNICSelector.init(_virtualDatacenter, _virtualMachine);
+                availableNICSelector.init(_virtualDatacenter, _virtualAppliance, _virtualMachine);
             }
 
             private function closeAvailableNICSelector(event:Event = null):void
@@ -185,7 +200,9 @@
                 if (closeEvent.detail == Alert.YES)
                 {
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE);
-                    event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
+                    event.virtualDatacenter = _virtualDatacenter;
+                    event.virtualAppliance = _virtualAppliance;
+                    event.orderInList = virtualMachineNICsDataGrid.selectedIndex;
                     event.virtualMachine = _virtualMachine;
                     dispatchEvent(event);
                 }
@@ -193,7 +210,7 @@
 
             private function nicOrderLabelFunction(item:Object, column:DataGridColumn):String
             {
-                return (virtualMachineNICs.getItemIndex(item) + 1).toString();
+                return (virtualMachineNICs.getItemIndex(item)).toString();
             }
 
             ////////////////////////
@@ -201,6 +218,8 @@
             protected function getVirtualMachineGateway():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_VIRTUAL_MACHINE_GATEWAY);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.callback = setVirtualMachineGateway;
                 dispatchEvent(event);
@@ -208,7 +227,23 @@
 
             protected function setVirtualMachineGateway(gateway:IPAddress):void
             {
+                //Save the previous gateway
+                this._previousGateway = virtualMachineGateway;
                 virtualMachineGateway = gateway;
+                
+                //Check if we display the message
+                if(this._showGatewayChange)
+                {
+                    if(this._previousGateway && this._previousGateway.ip != virtualMachineGateway.ip)
+                    {
+                        AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("InfrastructurePremium",
+                                                                                    "ALERT_SUCCESS_TITLE_LABEL"),
+                                              ResourceManager.getInstance().getString("VirtualAppliancePremium",
+                                                                                       "ALERT_PUBLIC_IP_AS_GATEWAY_HEADER"),
+                                               ResourceManager.getInstance().getString("VirtualAppliancePremium",
+                                                                                       "ALERT_PUBLIC_IP_AS_GATEWAY_TEXT"));        
+                    }
+                }
 
                 getAvailableGateways();
             }
@@ -216,6 +251,8 @@
             protected function getAvailableGateways():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_GATEWAYS_FOR_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.callback = setAvailableGateways;
                 dispatchEvent(event);
@@ -226,7 +263,9 @@
                 availableGateways = list;
                 virtualMachineGatewayInput.dataProvider = availableGateways;
                 virtualMachineGatewayInput.selectedIndex = -1;
-
+                
+                this._showGatewayChange = false;
+                
                 if (virtualMachineGateway)
                 {
                     var length:int = availableGateways.length;
@@ -239,11 +278,15 @@
                         }
                     }
                 }
+                
+                
             }
 
             protected function assignGatewayToVirtualMachine():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.gateway = virtualMachineGatewayInput.selectedIndex > -1 ? virtualMachineGatewayInput.selectedItem as IPAddress : null;
                 dispatchEvent(event);
@@ -252,6 +295,8 @@
             protected function unassignGatewayFromVirtualMachine():void
             {
                 var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_GATEWAY_VIRTUAL_MACHINE);
+                event.virtualDatacenter = _virtualDatacenter;
+                event.virtualAppliance = _virtualAppliance;
                 event.virtualMachine = _virtualMachine;
                 event.gateway = null;
                 dispatchEvent(event);
@@ -273,22 +318,25 @@
             		}            		
             	}
             	
-            	reorderNicIntoVM(newIndex,IPPoolManagement(itemMoved).idManagement);
+            	reorderNicIntoVM(oldIndex,newIndex,IPPoolManagement(itemMoved).idManagement);
 
             	
             	//
             		
             }
             
-            protected function reorderNicIntoVM(newIndex:int ,ipPoolManagement:int ):void{
+            protected function reorderNicIntoVM(oldIndex:int, newIndex:int ,ipPoolManagement:int ):void{
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REORDER_NIC_INTO_VIRTUAL_MACHINE);
+            	event.virtualDatacenter = _virtualDatacenter;
+            	event.virtualAppliance = _virtualAppliance;
+            	event.virtualMachine = _virtualMachine;
+                event.oldOrder = oldIndex;
                 event.newOrder = newIndex;
-                event.ipPoolManagementId = ipPoolManagement;
                 dispatchEvent(event);
             }
             
             private function onDragStart(event:DragEvent):void{
-            	
+            
             }
             
             private function onDragStop(event:DragEvent):void{
@@ -298,7 +346,10 @@
              private function onMouseDownUsersDataGrid():void
             {
                 if (virtualMachineNICsDataGrid.selectedIndex > -1)
+                {
                     itemMoved = virtualMachineNICsDataGrid.selectedItem;
+                    oldIndex = virtualMachineNICsDataGrid.selectedIndex;
+                }
             }
             
           
