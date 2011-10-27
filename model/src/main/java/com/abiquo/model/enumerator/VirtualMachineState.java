@@ -23,5 +23,47 @@ package com.abiquo.model.enumerator;
 
 public enum VirtualMachineState
 {
-    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL;
+    RUNNING, PAUSED, POWERED_OFF, REBOOTED, NOT_DEPLOYED, IN_PROGRESS, APPLY_CHANGES_NEEDED, UPDATING_NODES, FAILED, COPYING, MOVING, CHECKING, BUNDLING, STATEFUL, UNKNOWN, HA_IN_PROGRESS;
+
+    public int id()
+    {
+        return ordinal() + 1;
+    }
+
+    public static VirtualMachineState fromId(final int id)
+    {
+        return VirtualMachineState.values()[id - 1];
+    }
+
+    public String toOVF()
+    {
+        switch (this)
+        {
+            case RUNNING:
+                return "POWERUP_ACTION";
+            case PAUSED:
+                return "PAUSE_ACTION";
+            case POWERED_OFF:
+                return "POWERDOWN_ACTION";
+            case REBOOTED:
+                return "RESUME_ACTION";
+        }
+        return null;
+    }
+
+    public String toResourceState()
+    {
+        switch (this)
+        {
+            case RUNNING:
+                return "PowerUp";
+            case PAUSED:
+                return "Pause";
+            case POWERED_OFF:
+                return "PowerOff";
+            case REBOOTED:
+                return "Resume";
+        }
+        return null;
+    }
 }

@@ -484,6 +484,11 @@
                     var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_CONFIGURATION_REQUESTED);
                     nodeRendererEvent.nodeRenderer = this;
                     dispatchEvent(nodeRendererEvent);
+                    
+                    //Dispatching event to inform that this NodeRenderer has been selected by the user
+                    nodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_SELECTED);
+                    nodeRendererEvent.nodeRenderer = this;
+                    dispatchEvent(nodeRendererEvent);
                 }
             }
 

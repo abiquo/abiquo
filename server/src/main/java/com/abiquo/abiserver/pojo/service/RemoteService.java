@@ -306,6 +306,12 @@ public class RemoteService implements IPojo<RemoteServiceHB>
         }
     }
 
+    public boolean checkUri()
+    {
+        fixProtocol(this.protocol);
+        return !this.protocol.isEmpty() && !this.domainName.isEmpty() && this.port != null;
+    }
+
     public static RemoteService create(final RemoteServiceDto dto, final int datacenterId)
     {
         RemoteService remoteService = new RemoteService();

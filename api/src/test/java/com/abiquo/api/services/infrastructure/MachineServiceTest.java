@@ -21,7 +21,7 @@
 
 package com.abiquo.api.services.infrastructure;
 
-import static com.abiquo.server.core.cloud.State.RUNNING;
+import static com.abiquo.model.enumerator.VirtualMachineState.RUNNING;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +39,9 @@ import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
@@ -148,6 +148,6 @@ public class MachineServiceTest extends AbstractUnitTest
             vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
         org.testng.Assert.assertNull(virtualMachine.getHypervisor());
         org.testng.Assert.assertNull(virtualMachine.getDatastore());
-        org.testng.Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);
+        org.testng.Assert.assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_DEPLOYED);
     }
 }

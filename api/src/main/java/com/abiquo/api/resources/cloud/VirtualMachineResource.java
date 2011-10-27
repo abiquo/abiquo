@@ -41,8 +41,8 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -178,10 +178,10 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.RUNNING))
+        if (!vmService.sameState(vm, VirtualMachineState.RUNNING))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.RUNNING);
 
         }
     }
@@ -206,9 +206,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.POWERED_OFF))
+        if (!vmService.sameState(vm, VirtualMachineState.POWERED_OFF))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.POWERED_OFF);
         }
     }
 
@@ -232,9 +232,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.REBOOTED))
+        if (!vmService.sameState(vm, VirtualMachineState.REBOOTED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.REBOOTED);
         }
     }
 
@@ -258,9 +258,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.PAUSED))
+        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
         }
     }
 }
