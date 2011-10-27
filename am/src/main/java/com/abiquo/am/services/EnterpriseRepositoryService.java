@@ -53,7 +53,8 @@ import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.api.service.DefaultApiService;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
@@ -129,9 +130,9 @@ public class EnterpriseRepositoryService extends DefaultApiService
             return;
         }
 
-        OVFPackageInstanceStatusType status = getOVFStatus(ovfId);
+        OVFPackageInstanceStateDto state = getOVFStatus(ovfId);
 
-        if (status == OVFPackageInstanceStatusType.NOT_DOWNLOAD)
+        if (state.getStatus() == OVFStatusEnumType.NOT_DOWNLOAD)
         {
             // already deleted
             return;
@@ -315,7 +316,7 @@ public class EnterpriseRepositoryService extends DefaultApiService
         return EnterpriseRepositoryFileSystem.getUsedMb(enterpriseRepositoryPath);
     }
 
-    public OVFPackageInstanceStatusType getOVFStatus(final String ovfId)
+    public OVFPackageInstanceStateDto getOVFStatus(final String ovfId)
     {
         return OVFPackageInstanceFileSystem.getOVFStatus(enterpriseRepositoryPath, ovfId);
     }

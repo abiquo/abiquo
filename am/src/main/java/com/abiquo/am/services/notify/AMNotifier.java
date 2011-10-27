@@ -27,7 +27,7 @@ import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.OVFPackageInstanceFileSystem;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMProducer;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
@@ -50,9 +50,9 @@ public class AMNotifier extends AMProducer// BasicProducer<AMConfiguration,
      * @throws EventException
      */
     public void setOVFStatus(final String erId, final String ovfId,
-        OVFPackageInstanceStatusType status) throws EventException
+        OVFStatusEnumType status) throws EventException
     {
-        assert status != OVFPackageInstanceStatusType.ERROR;
+        assert status != OVFStatusEnumType.ERROR;
 
         final String enterpriseRepositoryPath =
             EnterpriseRepositoryService.getRepo(erId).getEnterpriseRepositoryPath();
@@ -79,15 +79,15 @@ public class AMNotifier extends AMProducer// BasicProducer<AMConfiguration,
         final String enterpriseRepositoryPath =
             EnterpriseRepositoryService.getRepo(erId).getEnterpriseRepositoryPath();
         OVFPackageInstanceFileSystem.createOVFStatusMarks(enterpriseRepositoryPath, ovfId,
-            OVFPackageInstanceStatusType.ERROR, errorMessage);
+            OVFStatusEnumType.ERROR, errorMessage);
 
-        notifyOVFStatusEvent(erId, ovfId, OVFPackageInstanceStatusType.ERROR, errorMessage);
+        notifyOVFStatusEvent(erId, ovfId, OVFStatusEnumType.ERROR, errorMessage);
     }
 
     private void notifyOVFStatusEvent(final String erId, final String ovfId,
-        final OVFPackageInstanceStatusType status, final String errorMsg) throws EventException
+        final OVFStatusEnumType status, final String errorMsg) throws EventException
     {
-        assert status != OVFPackageInstanceStatusType.ERROR || errorMsg != null;
+        assert status != OVFStatusEnumType.ERROR || errorMsg != null;
 
         OVFPackageInstanceStatusEvent event = new OVFPackageInstanceStatusEvent();
         event.setOvfId(ovfId);

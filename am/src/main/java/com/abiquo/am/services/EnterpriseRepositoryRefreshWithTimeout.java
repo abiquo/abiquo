@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.services.util.BundleImageFileFilter;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getOVFStatus;
 
@@ -126,10 +126,10 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
 
                 String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
 
-                OVFPackageInstanceStatusType ovfStatus =
-                    getOVFStatus(enterpriseRepositoryPath, ovfId);
+                OVFStatusEnumType ovfStatus =
+                    getOVFStatus(enterpriseRepositoryPath, ovfId).getStatus();
 
-                if (cleanDeploys && ovfStatus == OVFPackageInstanceStatusType.DOWNLOADING)
+                if (cleanDeploys && ovfStatus == OVFStatusEnumType.DOWNLOADING)
                 {
                     try
                     {
@@ -140,7 +140,7 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
                         LOG.error("Can not delete the interrupted download [{}], \n{}", ovfId, e);
                     }
                 }
-                else if (ovfStatus == OVFPackageInstanceStatusType.DOWNLOAD)
+                else if (ovfStatus == OVFStatusEnumType.DOWNLOAD)
                 {
                     ovfids.add(ovfId);
 

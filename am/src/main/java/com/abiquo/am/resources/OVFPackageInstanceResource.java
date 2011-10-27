@@ -55,8 +55,8 @@ import com.abiquo.am.services.OVFPackageInstanceService;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 @Parent(OVFPackageInstancesResource.class)
 @Path(OVFPackageInstanceResource.OVFPI_PATH)
@@ -91,10 +91,10 @@ public class OVFPackageInstanceResource extends AbstractResource
     {
         final String ovfId = ovfUrl(ovfIdIn);
 
-        OVFPackageInstanceStatusDto status =
+        OVFPackageInstanceStateDto status =
             service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
 
-        switch (status.getOvfPackageStatus())
+        switch (status.getStatus())
         {
             case NOT_DOWNLOAD:
                 return Response.status(Status.NOT_FOUND).build();
@@ -103,7 +103,7 @@ public class OVFPackageInstanceResource extends AbstractResource
                 return Response.status(Status.CREATED).build(); // TODO location(arg0);
 
             case DOWNLOADING:
-                final String progress = String.valueOf(status.getProgress());
+                final String progress = String.valueOf(status.getDownloadingProgress());
                 return Response.status(Status.ACCEPTED).header(HEADER_PROGRESS, progress).build();
 
             case ERROR:
@@ -113,7 +113,7 @@ public class OVFPackageInstanceResource extends AbstractResource
                 // XXX deleted
             default:
                 return Response.status(Status.NOT_FOUND)
-                    .entity("UNKNOW STATUS:" + status.getOvfPackageStatus().name()).build();
+                    .entity("UNKNOW STATUS:" + status.getStatus().name()).build();
         }
     }
 
@@ -171,7 +171,7 @@ public class OVFPackageInstanceResource extends AbstractResource
      */
     private Response evalStatus(String idEnterprise, String ovfId)
     {
-        OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
+        OVFPackageInstanceStateDto ovfPackageInstanceStatus =
             getOVFPackageInstanceStatus(idEnterprise, ovfId);
 
         if (ovfPackageInstanceStatus == null)
@@ -182,26 +182,26 @@ public class OVFPackageInstanceResource extends AbstractResource
         {
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFPackageInstanceStatusType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
+        if (OVFStatusEnumType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
+            .getStatus()))
         {
-            ovfPackageInstanceStatus.setProgress(0d);
+            ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFPackageInstanceStatusType.ERROR.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
+        if (OVFStatusEnumType.ERROR.equals(ovfPackageInstanceStatus
+            .getStatus()))
         {
-            ovfPackageInstanceStatus.setProgress(0d);
-            return Response.ok(ovfPackageInstanceStatus).build();
-        }
-
-        if (OVFPackageInstanceStatusType.DOWNLOADING.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
-        {
+            ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
 
-        ovfPackageInstanceStatus.setProgress(100d);
+        if (OVFStatusEnumType.DOWNLOADING.equals(ovfPackageInstanceStatus
+            .getStatus()))
+        {
+            return Response.ok(ovfPackageInstanceStatus).build();
+        }
+
+        ovfPackageInstanceStatus.setDownloadingProgress(100d);
         return Response.ok(ovfPackageInstanceStatus).build();
     }
 
@@ -264,7 +264,7 @@ public class OVFPackageInstanceResource extends AbstractResource
      * NOT EXPOSED *
      */
     // @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
-    private OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(String idEnterprise,
+    private OVFPackageInstanceStateDto getOVFPackageInstanceStatus(String idEnterprise,
         String ovfId)
     {
         return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);

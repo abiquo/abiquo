@@ -46,9 +46,9 @@ import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
@@ -258,13 +258,13 @@ public class AppsLibraryRecovery
             ApplianceManagerResourceStubImpl amStub =
                 new ApplianceManagerResourceStubImpl(amLocation);
 
-            OVFPackageInstanceStatusListDto list =
+            OVFPackageInstancesStateDto list =
                 amStub.getOVFPackagInstanceStatusList(String.valueOf(idEnterprise));
             // amClient.getOVFPackagInstances(amLocation, String.valueOf(idEnterprise));
 
-            for (OVFPackageInstanceStatusDto status : list.getOvfPackageInstancesStatus())
+            for (OVFPackageInstanceStateDto status : list.getCollection())
             {
-                if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.DOWNLOAD)
+                if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
                 {
                     ovfids.add(status.getOvfId());
                 }

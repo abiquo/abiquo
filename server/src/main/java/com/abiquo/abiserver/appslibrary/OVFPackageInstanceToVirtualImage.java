@@ -173,7 +173,7 @@ public class OVFPackageInstanceToVirtualImage
         }
         else
         {
-            category = findCategoryOnOVFPackage(disk.getOvfUrl(), session);
+            category = findCategoryOnOVFPackage(disk.getOvfId(), session);
 
             if (category == null)
             {
@@ -225,7 +225,7 @@ public class OVFPackageInstanceToVirtualImage
         String iconPath = disk.getIconPath();
         if (iconPath == null)
         {
-            iconPath = findIconOnOVFPackage(disk.getOvfUrl(), session);
+            iconPath = findIconOnOVFPackage(disk.getOvfId(), session);
         }
 
         if (iconPath != null)
@@ -234,7 +234,7 @@ public class OVFPackageInstanceToVirtualImage
             vimage.setIcon(icon);
         }
 
-        vimage.setOvfId(disk.getOvfUrl());
+        vimage.setOvfId(disk.getOvfId());
 
         DiskFormatType diskFormat;
 
@@ -264,7 +264,7 @@ public class OVFPackageInstanceToVirtualImage
 
         vimage.setType(diskFormat);
 
-        vimage.setDiskFileSize(disk.getDiskFileSize());
+        vimage.setDiskFileSize(disk.getDiskSizeMb());
 
         // XXX daoF.endConnection();
         // TODO transaction.commit();

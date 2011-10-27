@@ -24,31 +24,39 @@ package com.abiquo.appliancemanager.transport;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+
 /**
- * Each Datacenter has one repository for each enterprise using it.
- * 
- * @author destevez
+ * Each {@link Enterprise} have a ''folder'' in the {@link DatacenterRepositoryDto}
  */
 @XmlRootElement
-@XmlType(name = "EnterpriseRepository")
-public class EnterpriseRepositoryDto
+@XmlType(name = "enterpriseRepository")
+public class EnterpriseRepositoryDto extends RepositoryConfigurationDto
 {
+    private static final long serialVersionUID = -346581740339075827L;
 
-    /**
-     * Enterprise Identifier
-     */
+    /** Same as {@link Enterprise} identifier. */
     private Integer id;
 
     /**
-     * Enterprise Name
+     * Capacity of the {@link DatacenterRepositoryDto}, shared by all the EnterpriseRepositories.
+     * TODO consider move to {@link RepositoryConfigurationDto}
      */
-    private String name;
-
     private long repositoryCapacityMb;
 
-    private long repositoryEnterpriseUsedMb;
-
+    /**
+     * Remaining free space in the {@link DatacenterRepositoryDto}, shared by all the
+     * EnterpriseRepositories.TODO consider move to {@link RepositoryConfigurationDto}
+     */
     private long repositoryRemainingMb;
+
+    /**
+     * Used space in the enterprise folder of the datacenter repository.
+     * <p>
+     * TODO instances of shared waste space in the original enterprise repository
+     */
+    private long repositoryEnterpriseUsedMb;
 
     public Integer getId()
     {
@@ -58,16 +66,6 @@ public class EnterpriseRepositoryDto
     public void setId(Integer id)
     {
         this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
     }
 
     public long getRepositoryCapacityMb()

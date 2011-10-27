@@ -30,8 +30,8 @@ import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.infrastructure.Repository;
 
@@ -82,7 +82,7 @@ public interface AppsLibraryCommand
         throws AppsLibraryCommandException;
 
     /** DC specific status. */
-    OVFPackageInstanceStatusListDto getOVFPackageListStatus(UserSession userSession,
+    OVFPackageInstancesStateDto getOVFPackageListStatus(UserSession userSession,
         String nameOVFPackageList, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException;
 
@@ -90,11 +90,11 @@ public interface AppsLibraryCommand
     Void startDownloadOVFPackage(UserSession userSession, List<String> idsOvfpackage,
         Integer idEnterprise, Integer idRepository) throws AppsLibraryCommandException;
 
-    OVFPackageInstanceStatusListDto refreshOVFPackageStatus(UserSession userSession,
+    OVFPackageInstancesStateDto refreshOVFPackageStatus(UserSession userSession,
         List<String> idsOvfpackage, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException;
 
-    OVFPackageInstanceStatusDto cancelDownloadOVFPackage(UserSession userSession,
+    OVFPackageInstanceStateDto cancelDownloadOVFPackage(UserSession userSession,
         String idOvfpackage, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException;
 
@@ -105,10 +105,10 @@ public interface AppsLibraryCommand
      * @param idOVFPackageName Name of the item to refresh.
      * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
      * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return {@link OVFPackageInstanceStatusDto } queried.
+     * @return {@link OVFPackageInstanceStateDto } queried.
      * @throws AppsLibraryCommandException .
      */
-    OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
+    OVFPackageInstanceStateDto getOVFPackageInstanceStatus(UserSession userSession,
         String idOVFPackageName, final Integer nameOVFPackageList, Integer idEnterprise,
         Integer idRepository) throws AppsLibraryCommandException;
 
@@ -119,10 +119,10 @@ public interface AppsLibraryCommand
      * @param idsOvfInstance Name of the item to refresh.
      * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
      * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return {@link OVFPackageInstanceStatusDto } queried.
+     * @return {@link OVFPackageInstanceStateDto } queried.
      * @throws AppsLibraryCommandException .
      */
-    OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
+    OVFPackageInstanceStateDto refreshOVFPackageInstanceStatus(UserSession userSession,
         String idsOvfInstance, Integer idEnterprise, Integer idRepository)
         throws AppsLibraryCommandException;
 }

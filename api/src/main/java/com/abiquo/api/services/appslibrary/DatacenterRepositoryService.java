@@ -41,9 +41,9 @@ import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualImag
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -159,12 +159,12 @@ public class DatacenterRepositoryService extends DefaultApiService
 
         try
         {
-            OVFPackageInstanceStatusListDto list =
+            OVFPackageInstancesStateDto list =
                 amStub.getOVFPackagInstanceStatusList(idEnterprise.toString());
 
-            for (OVFPackageInstanceStatusDto status : list.getOvfPackageInstancesStatus())
+            for (OVFPackageInstanceStateDto status : list.getCollection())
             {
-                if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.DOWNLOAD)
+                if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
                 {
                     ovfids.add(status.getOvfId());
                 }

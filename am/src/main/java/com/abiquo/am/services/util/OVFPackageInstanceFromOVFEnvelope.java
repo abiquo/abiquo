@@ -44,8 +44,8 @@ import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
-import com.abiquo.appliancemanager.transport.OVFPackageDiskFormat;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -171,14 +171,13 @@ public class OVFPackageInstanceFromOVFEnvelope
                 {
                     diskInfo = new OVFPackageInstanceDto();
                     diskInfo.setName(vssName);
-                    diskInfo.setOvfUrl(ovfId);
+                    diskInfo.setOvfId(ovfId);
 
                     DiskFormat diskFormat = DiskFormat.fromValue(format);
-                    OVFPackageDiskFormat ovfDiskFormat =
-                        OVFPackageDiskFormat.valueOf(diskFormat.name());
+                    DiskFormatType ovfDiskFormat = DiskFormatType.valueOf(diskFormat.name());
 
                     diskInfo.setDiskFileFormat(ovfDiskFormat);
-                    diskInfo.setDiskFileSize(fileSize);
+                    diskInfo.setDiskSizeMb(fileSize);
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space

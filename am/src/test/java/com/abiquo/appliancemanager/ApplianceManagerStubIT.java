@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -115,7 +115,7 @@ public class ApplianceManagerStubIT
         testUtils = new ApplianceManagerStubTestUtils(stub);
 
         // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
 
         // The OVF is not on the available list
         final Integer prevSize = testUtils.ovfAvailable(ovfId, false);
@@ -135,7 +135,7 @@ public class ApplianceManagerStubIT
         Assert.assertEquals((prevSize.intValue() + 1), actualSize.intValue());
 
         // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
     }
 
     @Test(enabled = false)
@@ -145,7 +145,7 @@ public class ApplianceManagerStubIT
         testUtils = new ApplianceManagerStubTestUtils(stub);
 
         // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
 
         // The OVF is not on the available list
         final Integer prevSize = testUtils.ovfAvailable(ovfId, false);
@@ -168,7 +168,7 @@ public class ApplianceManagerStubIT
         Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
 
         // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
     }
 
     @Test(enabled = false)
@@ -178,7 +178,7 @@ public class ApplianceManagerStubIT
         testDeploy();
 
         // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
 
         // The OVF is on the available list
         final Integer prevSize = testUtils.ovfAvailable(ovfId, true);
@@ -193,7 +193,7 @@ public class ApplianceManagerStubIT
         Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
 
         // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFPackageInstanceStatusType.DOWNLOAD);
+        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
     }
 
     @Test(enabled = false)
@@ -203,7 +203,7 @@ public class ApplianceManagerStubIT
         testUtils = new ApplianceManagerStubTestUtils(stub);
 
         // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfIdInvalid, OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+        testUtils.ovfStatus(ovfIdInvalid, OVFStatusEnumType.NOT_DOWNLOAD);
 
         // The OVF is not on the available list
         final Integer prevSize = testUtils.ovfAvailable(ovfIdInvalid, false);
@@ -228,7 +228,7 @@ public class ApplianceManagerStubIT
         Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
 
         // The OVF is ERROR
-        testUtils.ovfStatus(ovfIdInvalid, OVFPackageInstanceStatusType.ERROR);
+        testUtils.ovfStatus(ovfIdInvalid, OVFStatusEnumType.ERROR);
     }
 
     @Test(enabled = false)

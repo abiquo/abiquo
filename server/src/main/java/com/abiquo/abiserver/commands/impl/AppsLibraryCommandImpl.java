@@ -56,9 +56,9 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -850,7 +850,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     }
 
     @Override
-    public OVFPackageInstanceStatusDto cancelDownloadOVFPackage(final UserSession userSession,
+    public OVFPackageInstanceStateDto cancelDownloadOVFPackage(final UserSession userSession,
         final String idOvfpackage, final Integer idEnterprise, final Integer idRepository)
         throws AppsLibraryCommandException
     {
@@ -874,26 +874,26 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause, e);
         }
 
-        final OVFPackageInstanceStatusDto status = new OVFPackageInstanceStatusDto();
+        final OVFPackageInstanceStateDto status = new OVFPackageInstanceStateDto();
         status.setOvfId(idOvfpackage);
-        status.setOvfPackageStatus(OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+        status.setStatus(OVFStatusEnumType.NOT_DOWNLOAD);
 
         return status;
     }
 
     @Override
-    public OVFPackageInstanceStatusListDto refreshOVFPackageStatus(final UserSession userSession,
+    public OVFPackageInstancesStateDto refreshOVFPackageStatus(final UserSession userSession,
         final List<String> idsOvfpackage, final Integer idEnterprise, final Integer idRepository)
         throws AppsLibraryCommandException
     {
-        final OVFPackageInstanceStatusListDto statusList = new OVFPackageInstanceStatusListDto();
+        final OVFPackageInstancesStateDto statusList = new OVFPackageInstancesStateDto();
 
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
         final String idEnterpriseSt = String.valueOf(idEnterprise);
 
         for (final String ovfId : idsOvfpackage)
         {
-            OVFPackageInstanceStatusDto status;
+            OVFPackageInstanceStateDto status;
             try
             {
                 ApplianceManagerResourceStubImpl amStub =
@@ -907,20 +907,20 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                 final String errorCause =
                     String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
 
-                status = new OVFPackageInstanceStatusDto();
+                status = new OVFPackageInstanceStateDto();
                 status.setOvfId(ovfId);
-                status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
+                status.setStatus(OVFStatusEnumType.ERROR);
                 status.setErrorCause(errorCause);
             }
 
-            statusList.getOvfPackageInstancesStatus().add(status);
+            statusList.getCollection().add(status);
         }
 
         return statusList;
     }
 
     @Override
-    public OVFPackageInstanceStatusListDto getOVFPackageListStatus(final UserSession userSession,
+    public OVFPackageInstancesStateDto getOVFPackageListStatus(final UserSession userSession,
         final String nameOVFPackageList, final Integer idEnterprise, final Integer idRepository)
         throws AppsLibraryCommandException
     {
@@ -965,7 +965,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final UserSession userSession,
+    public OVFPackageInstanceStateDto getOVFPackageInstanceStatus(final UserSession userSession,
         final String nameOVFPackageList, final Integer idOVFPackageName,
         final Integer idEnterprise, final Integer idRepository) throws AppsLibraryCommandException
     {
@@ -981,7 +981,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(
+    public OVFPackageInstanceStateDto refreshOVFPackageInstanceStatus(
         final UserSession userSession, final String idsOvfInstance, final Integer idEnterprise,
         final Integer idRepository) throws AppsLibraryCommandException
     {
@@ -989,7 +989,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
         final String idEnterpriseSt = String.valueOf(idEnterprise);
 
-        OVFPackageInstanceStatusDto status;
+        OVFPackageInstanceStateDto status;
         try
         {
             ApplianceManagerResourceStubImpl amStub =
@@ -1002,9 +1002,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             final String errorCause =
                 String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
 
-            status = new OVFPackageInstanceStatusDto();
+            status = new OVFPackageInstanceStateDto();
             status.setOvfId(idsOvfInstance);
-            status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
+            status.setStatus(OVFStatusEnumType.ERROR);
             status.setErrorCause(errorCause);
         }
         return status;

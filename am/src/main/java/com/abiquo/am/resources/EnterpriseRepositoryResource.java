@@ -62,13 +62,12 @@ public class EnterpriseRepositoryResource extends AbstractResource
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 
         repo.setId(Integer.valueOf(idEnterprise));
-        repo.setName("Repository :" + REPOSITORY_LOCATION);
-        
+        repo.setRepositoryLocation(REPOSITORY_LOCATION);
         repo.setRepositoryCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
         repo.setRepositoryRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
+
         repo.setRepositoryEnterpriseUsedMb(erepo.getUsedMb());
 
         return repo;
     }
-
 }

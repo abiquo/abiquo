@@ -46,8 +46,8 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -70,8 +70,8 @@ public class AppsLibraryService
         {
 
             appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -430,7 +430,7 @@ public class AppsLibraryService
         try
         {
 
-            OVFPackageInstanceStatusListDto statusListDto =
+            OVFPackageInstancesStateDto statusListDto =
                 proxyService.getOVFPackageListStatus(userSession, nameOVFPackageList, idEnterprise,
                     idRepository);
 
@@ -495,7 +495,7 @@ public class AppsLibraryService
         AppsLibraryCommand proxyService = proxyService(userSession);
         try
         {
-            OVFPackageInstanceStatusDto statusDto =
+            OVFPackageInstanceStateDto statusDto =
                 proxyService.cancelDownloadOVFPackage(userSession, idOvfpackage, idEnterprise,
                     idRepository);
 
@@ -530,7 +530,7 @@ public class AppsLibraryService
         AppsLibraryCommand proxyService = proxyService(userSession);
         try
         {
-            OVFPackageInstanceStatusListDto statusListDto =
+            OVFPackageInstancesStateDto statusListDto =
                 proxyService.refreshOVFPackageStatus(userSession, idsOvfpackage, idEnterprise,
                     idRepository);
 
@@ -598,29 +598,29 @@ public class AppsLibraryService
         return list;
     }
 
-    protected OVFPackageInstanceStatus transform(final OVFPackageInstanceStatusDto statusDto)
+    protected OVFPackageInstanceStatus transform(final OVFPackageInstanceStateDto statusDto)
     {
         OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
 
-        status.setStatus(statusDto.getOvfPackageStatus().name());
+        status.setStatus(statusDto.getStatus().name());
         status.setUrl(statusDto.getOvfId());
 
         status.setError(statusDto.getErrorCause());
 
-        if (statusDto.getProgress() != null)
+        if (statusDto.getDownloadingProgress() != null)
         {
-            status.setProgress(statusDto.getProgress().floatValue());
+            status.setProgress(statusDto.getDownloadingProgress().floatValue());
         }
 
         return status;
     }
 
     protected List<OVFPackageInstanceStatus> transform(
-        final OVFPackageInstanceStatusListDto statusListDto)
+        final OVFPackageInstancesStateDto statusListDto)
     {
         List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
 
-        for (OVFPackageInstanceStatusDto statusDto : statusListDto.getOvfPackageInstancesStatus())
+        for (OVFPackageInstanceStateDto statusDto : statusListDto.getCollection())
         {
             statusList.add(transform(statusDto));
         }
@@ -661,7 +661,7 @@ public class AppsLibraryService
         AppsLibraryCommand proxyService = proxyService(userSession);
         try
         {
-            OVFPackageInstanceStatusDto statusListDto =
+            OVFPackageInstanceStateDto statusListDto =
                 proxyService.refreshOVFPackageInstanceStatus(userSession, idsOvfpackage,
                     idEnterprise, idRepository);
 
