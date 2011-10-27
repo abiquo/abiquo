@@ -38,7 +38,6 @@ import com.abiquo.api.services.cloud.HypervisorService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -81,8 +80,8 @@ public class VirtualMachinesResource extends AbstractResource
         {
             for (VirtualMachine v : all)
             {
-                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(), vapp
-                    .getId(), restBuilder));
+                vappsDto.add(createCloudTransferObject(v, vapp.getVirtualDatacenter().getId(),
+                    vapp.getId(), restBuilder));
             }
         }
 
@@ -138,7 +137,8 @@ public class VirtualMachinesResource extends AbstractResource
     {
         VirtualMachineDto vmDto =
             VirtualMachineResource.createTransferObject(v, vdcId, vappId, restBuilder);
-        vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId()));
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId(),
+            v.isChefEnabled()));
         return vmDto;
     }
 
@@ -156,8 +156,9 @@ public class VirtualMachinesResource extends AbstractResource
 
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
-            machine == null ? null : machine.getId(), enterprise == null ? null : enterprise
-                .getId(), user == null ? null : user.getId()));
+            machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
+            vm.isChefEnabled()));
 
         return vmDto;
     }
