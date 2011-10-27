@@ -32,15 +32,15 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.apache.wink.server.handlers.MessageContext;
-import org.apache.wink.server.internal.contexts.RequestImpl;
 import org.apache.wink.server.internal.handlers.CheckLocationHeaderHandler;
 import org.apache.wink.server.internal.handlers.SearchResult;
 import org.apache.wink.server.utils.LinkBuilders;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.api.util.AbiquoLinkBuildersFactory;
+import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.WrapperDto;
 import com.google.common.collect.Iterables;
@@ -49,7 +49,8 @@ public class RESTHandler extends CheckLocationHeaderHandler
 {
     protected Class REST_BUILDER_INTERFACE = IRESTBuilder.class;
 
-    public void handleRequest(MessageContext context)
+    @Override
+    public void handleRequest(final MessageContext context)
     {
         LinkBuilders builder = new AbiquoLinkBuildersFactory(context);
         context.getAttributes().remove(LinkBuilders.class.getName());
@@ -83,9 +84,32 @@ public class RESTHandler extends CheckLocationHeaderHandler
 
     @SuppressWarnings("unchecked")
     @Override
-    public void handleResponse(MessageContext context) throws Throwable
+    public void handleResponse(final MessageContext context) throws Throwable
     {
+        // If the entity is the appropriate we return a 202
         if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
+            && context.getResponseEntity() != null
+            && context.getResponseEntity() instanceof AcceptedRequestDto)
+        {
+            context.setResponseStatusCode(HttpServletResponse.SC_ACCEPTED);
+            Object entity = ((AcceptedRequestDto) context.getResponseEntity()).getEntity();
+
+            if (entity instanceof SingleResourceTransportDto)
+            {
+                SingleResourceTransportDto resource = (SingleResourceTransportDto) entity;
+
+                ResponseBuilder builder = new ResponseBuilderImpl();
+                if (!(entity instanceof WrapperDto))
+                {
+                    builder.location(new URI(resource.getEditLink().getHref()));
+                }
+                builder.entity(resource);
+                builder.status(HttpServletResponse.SC_ACCEPTED);
+
+                context.setResponseEntity(builder.build());
+            }
+        }
+        else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
             && RequestMethod.valueOf(context.getRequest().getMethod()) == RequestMethod.POST)
         {
             context.setResponseStatusCode(HttpServletResponse.SC_CREATED);
@@ -106,12 +130,11 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 context.setResponseEntity(builder.build());
             }
         }
-
         super.handleRequest(context);
     }
 
     @SuppressWarnings("unchecked")
-    protected void createRESTBuilder(MessageContext context, LinkBuilders linksProcessor)
+    protected void createRESTBuilder(final MessageContext context, final LinkBuilders linksProcessor)
     {
         ServletContext servletContext = context.getAttribute(ServletContext.class);
         Map<String, IRESTBuilder> beans =
