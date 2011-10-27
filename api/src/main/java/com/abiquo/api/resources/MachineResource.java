@@ -133,7 +133,7 @@ public class MachineResource extends AbstractResource
     }
 
     @GET
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
+    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
@@ -186,7 +186,7 @@ public class MachineResource extends AbstractResource
     }
 
     @DELETE
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
+    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH)
     public void deleteVirtualMachinesNotManaged(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,

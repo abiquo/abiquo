@@ -202,7 +202,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
         links.add(builder.buildActionLink(MachineResource.class,
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
+            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         if (managedRack)
@@ -911,6 +911,27 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         final IpPoolManagement ip)
     {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 
