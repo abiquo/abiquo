@@ -1280,12 +1280,19 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             if (dcId.equals(datacenterId))
             {
                 String uriNIC = createVirtualMachineNICsLink(vdcId, vappId, vmId);
-
-                String uriIp =
-                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanNetworkId
-                        + "/ips/" + idManagement;
                 RESTLink externalIPlink = new RESTLink();
-                externalIPlink.setRel("externalip");
+                String uriIp =
+                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanNetworkId;
+                if (idManagement != 0)
+                {
+                    uriIp = uriIp + "/ips/" + idManagement;
+                    externalIPlink.setRel("externalip");
+                }
+                else
+                {
+                    externalIPlink.setRel("unmanagedip");
+                }
+
                 externalIPlink.setHref(uriIp);
 
                 LinksDto linkDto = new LinksDto();
