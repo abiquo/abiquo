@@ -39,7 +39,7 @@ package net.undf.abicloud.view.main
 		[Bindable]
 		public static var APPLY_CHANGES_NEEDED:*;
 		[Bindable]
-		public static var POWERED_OFF:*;
+		public static var OFF:*;
 		[Bindable]
 		public static var NOT_DEPLOYED:*;
 		[Bindable]
@@ -63,7 +63,7 @@ package net.undf.abicloud.view.main
 				RUNNING = getImage("MainStateRUNNING");			
 				PAUSED = getImage("MainStatePAUSED");			
 				APPLY_CHANGES_NEEDED = getImage("MainStateAPPLYCHANGESNEEDED");			
-				POWERED_OFF = getImage("MainStatePOWEREDOFF");			
+				OFF = getImage("MainStatePOWEREDOFF");			
 				NOT_DEPLOYED = getImage("MainStateNOTDEPLOYED");			
 				STOPPED = getImage("MainStateSTOPPED");			
 				DISABLED = getImage("MainStateDISABLED");			

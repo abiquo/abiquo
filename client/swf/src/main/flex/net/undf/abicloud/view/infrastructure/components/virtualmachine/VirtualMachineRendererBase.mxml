@@ -161,7 +161,7 @@
             	
             	if(this._virtualMachine){
 	            	//Must be running or paused in a first step
-	            	if(this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED){
+	            	if(this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED){
 	            		//Then must have a valid VNC IP
 	            		if(this._virtualMachine.vdrpIP){
 	            			_vncIconEnable = true;
@@ -208,7 +208,7 @@
              */
             private function onClickPowerOnOffButton():void
             {
-                if (_virtualMachine.state.id == State.RUNNING || _virtualMachine.state.id == State.PAUSED)
+                if (_virtualMachine.state.description == State.ON || _virtualMachine.state.description == State.PAUSED)
                 {
                     //The Virtual Machine is running. Asking user for confirmation
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
@@ -270,12 +270,12 @@
                 {
                     var event:InfrastructureEvent;
 
-                    if (_virtualMachine.state.id == State.PAUSED)
+                    if (_virtualMachine.state.description == State.PAUSED)
                     {
                         //The virtual machine is paused. We proceed to resume it
                         event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
                     }
-                    else if (_virtualMachine.state.id == State.RUNNING)
+                    else if (_virtualMachine.state.description == State.ON)
                     {
                         //The virtual machine is running. We procced to pause it
                         event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE);
@@ -406,7 +406,7 @@
              */
             private function onClickEdit():void
             {
-                if (this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED && this._virtualMachine.state.id != State.IN_PROGRESS)
+                if (this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED && this._virtualMachine.state.description != State.LOCKED)
                 {
                     this._editMode = true;
 
@@ -437,7 +437,7 @@
                 //Announcing that a virtual machine has been edited
                 var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
                 infrastructureEvent.infrastructureElement = virtualMachineEdited;
-                if (this._virtualMachine.state.id != State.IN_PROGRESS)
+                if (this._virtualMachine.state.description != State.LOCKED)
                     dispatchEvent(infrastructureEvent);
 
                 //Turning off edit mode
@@ -498,20 +498,20 @@
 			styleName="VirtualMachineRendererBaseVBox1"
             >
             <utils:SmoothImage id="startImage"
-                source="{(_virtualMachine.state.id == State.RUNNING) ? StyleManager.getStyleDeclaration('.VirtualMachineStateRunning').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
+                source="{(_virtualMachine.state.description == State.ON) ? StyleManager.getStyleDeclaration('.VirtualMachineStateRunning').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
 
             <utils:SmoothImage id="pauseImage"
-                source="{(_virtualMachine.state.id == State.PAUSED) ? StyleManager.getStyleDeclaration('.VirtualMachineStatePaused').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
+                source="{(_virtualMachine.state.description == State.PAUSED) ? StyleManager.getStyleDeclaration('.VirtualMachineStatePaused').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"/>
 
             <utils:SmoothImage id="stopImage"
-                source="{(_virtualMachine.state.id == State.POWERED_OFF || _virtualMachine.state.id == State.NOT_DEPLOYED) ? StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"
-                visible="{_virtualMachine.state.id == State.UNKNOWN ? false:true}"
-	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN ? false:true}"/>
+                source="{(_virtualMachine.state.description == State.OFF || _virtualMachine.state.description == State.NOT_ALLOCATED) ? StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'):StyleManager.getStyleDeclaration('.VirtualMachineStateDisabled').getStyle('source')}"
+                visible="{_virtualMachine.state.description == State.UNKNOWN ? false:true}"
+	            includeInLayout="{_virtualMachine.state.description == State.UNKNOWN ? false:true}"/>
 	
             <utils:SmoothImage id="unknow_Image"
-	            source="{(_virtualMachine.state.id == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
-	            visible="{_virtualMachine.state.id == State.UNKNOWN}"
-	            includeInLayout="{_virtualMachine.state.id == State.UNKNOWN}"
+	            source="{(_virtualMachine.state.description == State.UNKNOWN) ? CommonAssets.unknownIcon:null}"
+	            visible="{_virtualMachine.state.description == State.UNKNOWN}"
+	            includeInLayout="{_virtualMachine.state.description == State.UNKNOWN}"
 	            toolTip="@Resource(bundle='Main', key='LABEL_VM_UNKNOWN')"/>	        
 
         
@@ -556,7 +556,7 @@
                 verticalCenter="0"
 				creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineLoadingBigIcon',busyIcon)"                
                 toolTip="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
-                visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"
+                visible="{this._virtualMachine.state.description == State.LOCKED}"
                 buttonMode="true"
                 useHandCursor="true"
                 mouseChildren="false"
@@ -665,17 +665,17 @@
                             direction="horizontal">
 
                             <mx:Label id="cpuLabel"
-                                includeInLayout="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"
+                                includeInLayout="{! this._editMode || this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED}"
                                 text="{_virtualMachine.cpu.toString()}"
-                                visible="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"/>
+                                visible="{! this._editMode || this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED}"/>
 
                             <!-- CPU IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
                             <mx:NumericStepper id="cpuInput"
                                 width="75" height="17"
                                 fontSize="10"
                                 minimum="1" maximum="1024" stepSize="1"
-                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
-                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"/>
                         </mx:FormItem>
 
                         <mx:FormItem 
@@ -684,9 +684,9 @@
                             direction="horizontal">
 
                             <mx:Label id="ramLabel"
-                                includeInLayout="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"
+                                includeInLayout="{! this._editMode || this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED}"
                                 text="{_virtualMachine.ram.toString() + ' MB'}"
-                                visible="{! this._editMode || this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.PAUSED}"/>
+                                visible="{! this._editMode || this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED}"/>
 
                             <!-- RAM IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
                             <mx:NumericStepper id="ramInput"
@@ -695,17 +695,17 @@
                                 minimum="0"
                                 maximum="{ramUnitsSelector.selectedItem.maximum}"
                                 stepSize="{ramUnitsSelector.selectedItem.stepSize}"
-                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"
                                 value="{this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion}"
-                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"/>
 
                             <mx:ComboBox id="ramUnitsSelector"
                                 width="80" height="17"
                                 labelField="label"
                                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                                 selectedIndex="0"
-                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
-                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
+                                includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"
+                                visible="{this._editMode &amp;&amp; this._virtualMachine.state.description != State.ON &amp;&amp; this._virtualMachine.state.description != State.PAUSED}"/>
                         </mx:FormItem>
 
                         <mx:FormItem 
@@ -802,13 +802,13 @@
         verticalAlign="middle"
         verticalGap="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
-        enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.id != State.IN_PROGRESS &amp;&amp; (! this._editMode)}">
+        enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.description != State.LOCKED &amp;&amp; (! this._editMode)}">
 
         <mx:Button id="powerOnOffButton"
             width="57" height="47"
             styleName="StandardPowerButton"
-            enabled="{this._virtualMachine.state.id == State.RUNNING || this._virtualMachine.state.id == State.POWERED_OFF}"
-            selected="{_virtualMachine.state.id == State.RUNNING}"
+            enabled="{this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.OFF}"
+            selected="{_virtualMachine.state.description == State.ON}"
             click="onClickPowerOnOffButton()"
             useHandCursor="true"
             mouseChildren="false"
@@ -817,8 +817,8 @@
         <mx:Button id="pauseButton"
             width="57" height="47"
             styleName="StandardPauseButton"
-            enabled="{_virtualMachine.state.id == State.PAUSED || _virtualMachine.state.id == State.RUNNING}"
-            selected="{_virtualMachine.state.id == State.PAUSED}"
+            enabled="{_virtualMachine.state.description == State.PAUSED || _virtualMachine.state.description == State.ON}"
+            selected="{_virtualMachine.state.description == State.PAUSED}"
             click="onClickPauseButton()"
             useHandCursor="true"
             mouseChildren="false"
@@ -827,7 +827,7 @@
         <mx:Button id="rebootButton"
             width="57" height="47"
             styleName="StandardRebootButton"
-            enabled="{_virtualMachine.state.id == State.RUNNING}"
+            enabled="{_virtualMachine.state.description == State.ON}"
             click="onClickRebootButton()"
             useHandCursor="true"
             mouseChildren="false"

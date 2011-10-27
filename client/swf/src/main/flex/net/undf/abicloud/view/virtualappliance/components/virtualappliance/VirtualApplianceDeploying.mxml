@@ -85,7 +85,7 @@
 
                 //Checking that we have a valid VirtualAppliance, and that its
                 //Nodes list is retrieved
-                if (this._virtualAppliance && this._virtualAppliance.state.id == State.IN_PROGRESS && this._virtualAppliance.nodes)
+                if (this._virtualAppliance && this._virtualAppliance.state.description == State.LOCKED && this._virtualAppliance.nodes)
                 {
                     //Checking Nodes' state
                     var length:int = this._virtualAppliance.nodes.length;
@@ -102,7 +102,7 @@
                                 var virtualMachine:VirtualMachine = NodeVirtualImage(node).virtualMachine;
                                 if (virtualMachine == null)
                                     this._nodesNotDeployed++;
-                                else if (virtualMachine.state.id == State.RUNNING)
+                                else if (virtualMachine.state.description == State.ON)
                                     this._nodesRunning++;
                                 else
                                     this._nodesStopped++;
@@ -186,8 +186,8 @@
 
             <mx:HBox 
                 horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
+                includeInLayout="{this._virtualAppliance.state.description != State.LOCKED}"
+                visible="{this._virtualAppliance.state.description != State.LOCKED}">
                 <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NOT_DEPLOYED') + ': '}"/>
                 <mx:Label 
                     fontSize="12"
@@ -196,13 +196,13 @@
 
             <mx:HRule 
                 width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
+                includeInLayout="{this._virtualAppliance.state.description != State.LOCKED}"
+                visible="{this._virtualAppliance.state.description != State.LOCKED}"/>
 
             <mx:HBox 
                 horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
+                includeInLayout="{this._virtualAppliance.state.description != State.LOCKED}"
+                visible="{this._virtualAppliance.state.description != State.LOCKED}">
                 <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_STOPPED') + ': '}"/>
                 <mx:Label 
                     fontSize="12"
@@ -211,13 +211,13 @@
 
             <mx:HRule 
                 width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
+                includeInLayout="{this._virtualAppliance.state.description != State.LOCKED}"
+                visible="{this._virtualAppliance.state.description != State.LOCKED}"/>
 
             <mx:HBox 
                 horizontalGap="0"
-                includeInLayout="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}">
+                includeInLayout="{this._virtualAppliance.state.description != State.LOCKED}"
+                visible="{this._virtualAppliance.state.description != State.LOCKED}">
                 <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_RUNNING') + ': '}"/>
                 <mx:Label 
                     fontSize="12"
@@ -226,8 +226,8 @@
 
             <mx:HBox 
                 width="100%"
-                includeInLayout="{this._virtualAppliance.subState.id == State.UPDATING_NODES}"
-                visible="{this._virtualAppliance.subState.id == State.UPDATING_NODES}">
+                includeInLayout="{this._virtualAppliance.state.description == State.LOCKED}"
+                visible="{this._virtualAppliance.state.description == State.LOCKED}">
                 <mx:Label text="@Resource(bundle='VirtualAppliance', key='LABEL_UPDATING_NODES')"/>
             </mx:HBox>
 
@@ -249,7 +249,7 @@
             barColor="#FE9608"
             trackHeight="14"
             minWidth="0" indeterminate="true" mode="event"
-            visible="{this._virtualAppliance.subState.id != State.UPDATING_NODES}"/>
+            visible="{this._virtualAppliance.state.description != State.LOCKED}"/>
 
         <mx:ProgressBar id="indeterminateDeployProgressBar"
             width="100%"
@@ -258,7 +258,7 @@
             indeterminateMoveInterval="30"
             trackHeight="14"
             minWidth="0" label="" labelPlacement="center" indeterminate="true"
-            visible="{this._virtualAppliance.subState.id == State.UPDATING_NODES}"/>
+            visible="{this._virtualAppliance.state.description == State.LOCKED}"/>
     </mx:Canvas>
 
 

@@ -44,7 +44,7 @@ package net.undf.abicloud.view.virtualappliance.components.virtualappliance.bund
             this.node = node;
             this.selectedToBundle = false;
             if (node && node is NodeVirtualImage)
-                this.canBundle = NodeVirtualImage(node).virtualMachine != null && NodeVirtualImage(node).virtualMachine.state.id != State.NOT_DEPLOYED;
+                this.canBundle = NodeVirtualImage(node).virtualMachine != null && NodeVirtualImage(node).virtualMachine.state.description != State.NOT_ALLOCATED;
         }
 
     }

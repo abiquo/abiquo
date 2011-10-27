@@ -249,7 +249,6 @@ package net.undf.abicloud.business.managers
                 vaToUpdate.name = vaNewValues.name;
                 vaToUpdate.nodeConnections = vaNewValues.nodeConnections;
                 vaToUpdate.state = vaNewValues.state;
-                vaToUpdate.subState = vaNewValues.subState;
                 vaToUpdate.virtualDataCenter = vaNewValues.virtualDataCenter;
                 vaToUpdate.nodes = vaNewValues.nodes;
 
@@ -336,7 +335,7 @@ package net.undf.abicloud.business.managers
 
 
         /**
-         * Changes a Virtual Appliances state to State.IN_PROGRESS
+         * Changes a Virtual Appliances state to State.LOCKED
          */
         public function setVirtualApplianceInProgress(virtualAppliance:VirtualAppliance):void
         {
@@ -346,8 +345,7 @@ package net.undf.abicloud.business.managers
 	
 	            if (vaToUpdate)
 	            {
-	                vaToUpdate.state = new State(State.IN_PROGRESS);
-	                vaToUpdate.subState = new State(State.IN_PROGRESS);
+	                vaToUpdate.state = new State(State.LOCKED);
 	            }            	
             }
         }
@@ -358,8 +356,7 @@ package net.undf.abicloud.business.managers
 
             if (vaToUpdate)
             {
-                vaToUpdate.state = new State(State.POWERED_OFF);
-                vaToUpdate.subState = new State(State.POWERED_OFF);
+                vaToUpdate.state = new State(State.OFF);
             }
         }
 
@@ -369,7 +366,7 @@ package net.undf.abicloud.business.managers
 
             if (vaToUpdate)
             {
-                vaToUpdate.state = new State(State.APPLY_CHANGES_NEEDED);
+                vaToUpdate.state = new State(State.NEEDS_SYNC);
             }
         }
 

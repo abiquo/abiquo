@@ -989,9 +989,9 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
 
 
@@ -1018,9 +1018,9 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
 
 
@@ -1047,9 +1047,9 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
 
 
@@ -1075,9 +1075,9 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual machine to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.IN_PROGRESS)]}"/>
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
 
     </EventHandlers>
 

@@ -273,7 +273,6 @@ package net.undf.abicloud.controller.virtualappliance
                 {
                     //Need to revert the virtual appliance state and subState
                     _virtualAppliance.state = VirtualAppliance(DataResult(result).data).state;
-                    _virtualAppliance.subState = VirtualAppliance(DataResult(result).data).subState;
                     //Soft limits exceeded, but we can still force operation. Asking user...
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_ERROR_TITLE_LABEL"),
@@ -329,7 +328,7 @@ package net.undf.abicloud.controller.virtualappliance
                     else
                     {
                         //We try to make a local change to not block user
-                        if (_virtualAppliance.state.id == State.IN_PROGRESS)
+                        if (_virtualAppliance.state.description == State.LOCKED)
                             //The VirtualAppliance was APPLY_CHANGES_NEEDED. We leave as it was
                             AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceApplyChangesNeeded(_virtualAppliance);
                     }

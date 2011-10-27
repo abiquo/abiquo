@@ -339,10 +339,10 @@
             }
             
             private function compareVirtualImageState(virtualImg1:VirtualMachine, virtualImg2:VirtualMachine):int{
-            	var virtualMachineState1:Number = virtualImg1.state.id;
-            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	var virtualMachineState1:String = virtualImg1.state.description;
+            	var virtualMachineState2:String = virtualImg2.state.description;
             	
-            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
         ]]>
     </mx:Script>

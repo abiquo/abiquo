@@ -48,14 +48,14 @@
     </mx:Script>
     <utils:SmoothImage 
         width="14" height="14"
-        includeInLayout="{this._virtualMachine.state.id != State.IN_PROGRESS}"
-        source="{(this._virtualMachine.state.id == State.RUNNING) ? StyleManager.getStyleDeclaration('.VirtualMachineStateRunning').getStyle('source') : 
-   								((this._virtualMachine.state.id == State.PAUSED) ? StyleManager.getStyleDeclaration('.VirtualMachineStatePaused').getStyle('source') : StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'))}"
-        visible="{this._virtualMachine.state.id != State.IN_PROGRESS}"/>
+        includeInLayout="{this._virtualMachine.state.description != State.LOCKED}"
+        source="{(this._virtualMachine.state.description == State.ON) ? StyleManager.getStyleDeclaration('.VirtualMachineStateRunning').getStyle('source') : 
+   								((this._virtualMachine.state.description == State.PAUSED) ? StyleManager.getStyleDeclaration('.VirtualMachineStatePaused').getStyle('source') : StyleManager.getStyleDeclaration('.VirtualMachineStateStopped').getStyle('source'))}"
+        visible="{this._virtualMachine.state.description != State.LOCKED}"/>
 
     <mx:SWFLoader 
         width="14" height="14"
-        includeInLayout="{this._virtualMachine.state.id == State.IN_PROGRESS}"
+        includeInLayout="{this._virtualMachine.state.description == State.LOCKED}"
         source="{StyleManager.getStyleDeclaration('.VirtualMachineLoadingIcon').getStyle('source')}"
-        visible="{this._virtualMachine.state.id == State.IN_PROGRESS}"/>
+        visible="{this._virtualMachine.state.description == State.LOCKED}"/>
 </mx:HBox>
