@@ -190,12 +190,13 @@ public class MachineService extends DefaultApiService
         repo.insertMachine(machine);
 
         // Part 2: Insert the hypervisor into database.
-        if (repo.existAnyHypervisorWithIp(machineDto.getIp()))
+        if (repo.existAnyHypervisorWithIpInDatacenter(machineDto.getIp(), datacenter.getId()))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
         }
 
-        if (repo.existAnyHypervisorWithIpService(machineDto.getIpService()))
+        if (repo.existAnyHypervisorWithIpServiceInDatacenter(machineDto.getIpService(),
+            datacenter.getId()))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
         }

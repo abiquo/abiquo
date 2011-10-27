@@ -295,12 +295,14 @@ public class InfrastructureService extends DefaultApiService
         validate(machine);
 
         // Part 2: Insert the and machine into database.
-        if (repo.existAnyHypervisorWithIp(machine.getHypervisor().getIp()))
+        if (repo
+            .existAnyHypervisorWithIpInDatacenter(machine.getHypervisor().getIp(), datacenterId))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
         }
 
-        if (repo.existAnyHypervisorWithIpService(machine.getHypervisor().getIpService()))
+        if (repo.existAnyHypervisorWithIpServiceInDatacenter(
+            machine.getHypervisor().getIpService(), datacenterId))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
         }
@@ -455,7 +457,6 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (machine.getHypervisor() != null)
                 {
-                    virtualMachineService.deleteNotManagedVirtualMachines(machine.getHypervisor());
                     machineService.removeMachine(machine.getId(), force);
                 }
             }
