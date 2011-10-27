@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <!-- -->
     <!-- POM RELATIONSHIPS -->
     <!-- -->
@@ -29,6 +28,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>nodecollector</artifactId>
+            <version>${project.version}</version>
+            <classifier>client</classifier>
         </dependency>
         <dependency>
             <groupId>com.abiquo.abicloud</groupId>
@@ -197,7 +202,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.8.5</version>
-            <scope>test</scope>
+            <!-- <scope>test</scope> -->
         </dependency>
         <!-- END: TEST DEPENDENCIES -->
         <!-- OTHER DEPENDENCIES -->

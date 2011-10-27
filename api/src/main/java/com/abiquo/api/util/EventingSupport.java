@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.api.exceptions.EventingException;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.vsm.client.VSMClient;
@@ -176,7 +176,7 @@ public final class EventingSupport
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
             VirtualMachine vm = node.getVirtualMachine();
-            if (vm.getState() == State.NOT_DEPLOYED)
+            if (vm.getState() == VirtualMachineState.NOT_DEPLOYED)
             {
                 subscribeEvent(vm, virtualSystemMonitorAddress);
             }

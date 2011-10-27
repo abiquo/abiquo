@@ -354,7 +354,7 @@ public class InfrastructureWS implements IInfrastructureWS
 
         EnvelopeType envelope =
             OVFModelFactory.createOVFModelFromVirtualAppliance().changeMachineState(virtualMachine,
-                machineState, null);
+                machineState, additionalRasds);
 
         Document doc = ovfSerializer.bindToDocument(envelope, false); // TODO not namespaceaware
 

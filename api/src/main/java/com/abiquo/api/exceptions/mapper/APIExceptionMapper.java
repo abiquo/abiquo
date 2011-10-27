@@ -38,6 +38,7 @@ import com.abiquo.api.exceptions.ForbiddenException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.exceptions.ServiceUnavailableException;
+import com.abiquo.api.exceptions.UnsupportedMediaException;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -49,10 +50,10 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
     private static final Logger logger = LoggerFactory.getLogger(APIExceptionMapper.class);
 
     @Override
-    public Response toResponse(APIException exception)
+    public Response toResponse(final APIException exception)
     {
         ErrorsDto errors = new ErrorsDto();
-        APIException ext = (APIException) exception;
+        APIException ext = exception;
         for (CommonError error : ext.getErrors())
         {
             errors.add(createError(error));
@@ -64,7 +65,7 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         return builder.build();
     }
 
-    private ErrorDto createError(CommonError error)
+    private ErrorDto createError(final CommonError error)
     {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setCode(error.getCode());
@@ -72,7 +73,8 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
         return errorDto;
     }
 
-    private Status defineStatus(APIException exception, ErrorsDto dto)
+    private Status defineStatus(final APIException exception, final ErrorsDto dto)
+
     {
         if (exception instanceof ForbiddenException)
         {
@@ -123,6 +125,16 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
                 "Unexpected exception that throws a 500 error code in API:\n" + dto.toString(),
                 exception);
             return Status.INTERNAL_SERVER_ERROR;
+        }
+        if (exception instanceof UnsupportedMediaException)
+        {
+            if (logger.isTraceEnabled())
+            {
+                logger.trace(
+                    "API Response " + Status.UNSUPPORTED_MEDIA_TYPE.name() + "\n" + dto.toString(),
+                    exception);
+            }
+            return Status.UNSUPPORTED_MEDIA_TYPE;
         }
         else
         {

@@ -263,14 +263,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 params);
     }
 
-    private VirtualMachineDto createTransferObject(VirtualMachine virtualMachine)
+    private VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd((int) virtualMachine.getHd());
+        dto.setHd(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());

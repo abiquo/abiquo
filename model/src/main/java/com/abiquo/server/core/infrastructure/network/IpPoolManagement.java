@@ -53,14 +53,17 @@ public class IpPoolManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "10";
 
-    private static final String DEFAULT_RESOURCE_NAME = "MAC Address";
+    public static final String DEFAULT_RESOURCE_NAME = "MAC Address";
 
-    private static final String DEFAULT_RESOURCE_DESCRIPTION =
+    public static final String DEFAULT_RESOURCE_DESCRIPTION =
         "MAC Address asociated to private Network";
+
+    public static final String DEFAULT_RESOURCE_PUBLIC_IP_DESCRIPTION =
+        "MAC Address asociated to public Network";
 
     public static enum Type
     {
-        PRIVATE, PUBLIC; // 0 = private, 1 = public
+        PRIVATE, PUBLIC, EXTERNAL; // 0 = private, 1 = public, 2 = external
     }
 
     public static final String TABLE_NAME = "ip_pool_management";
@@ -82,7 +85,7 @@ public class IpPoolManagement extends RasdManagement
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected IpPoolManagement()
+    public IpPoolManagement()
     {
         // Just for JPA support
     }
@@ -108,12 +111,14 @@ public class IpPoolManagement extends RasdManagement
 
         // IpManagement properties
         setType(type);
+
         setDhcp(dhcp);
         setMac(mac);
         setName(name);
         setIp(ip);
         setVlanNetwork(vlan);
         setNetworkName(networkName);
+        setAvailable(Boolean.TRUE);
     }
 
     public final static String NAME_PROPERTY = "name";
@@ -189,10 +194,15 @@ public class IpPoolManagement extends RasdManagement
         return this.mac;
     }
 
-    private void setMac(final String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
-        getRasd().setAddress(mac);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setAddress(mac);
+        }
     }
 
     public final static String CONFIGURATION_GATEWAY_PROPERTY = "configureGateway";
@@ -202,17 +212,17 @@ public class IpPoolManagement extends RasdManagement
     private final static boolean CONFIGURATION_GATEWAY_REQUIRED = true;
 
     @Column(name = CONFIGURATION_GATEWAY_COLUMN, nullable = false)
-    private boolean configurareGateway;
+    private boolean configureGateway;
 
     @Required(value = CONFIGURATION_GATEWAY_REQUIRED)
     public boolean getConfigureGateway()
     {
-        return this.configurareGateway;
+        return this.configureGateway;
     }
 
     public void setConfigureGateway(final boolean configurareGateway)
     {
-        this.configurareGateway = configurareGateway;
+        this.configureGateway = configurareGateway;
     }
 
     public final static String QUARANTINE_PROPERTY = "quarantine";
@@ -233,6 +243,26 @@ public class IpPoolManagement extends RasdManagement
     public void setQuarantine(final boolean quarantine)
     {
         this.quarantine = quarantine;
+    }
+
+    public final static String AVAILABLE_PROPERTY = "available";
+
+    private final static String AVAILABLE_COLUMN = "available";
+
+    private final static boolean AVAILABLE_REQUIRED = false;
+
+    @Column(name = AVAILABLE_COLUMN, nullable = false)
+    private boolean available;
+
+    @Required(value = AVAILABLE_REQUIRED)
+    public boolean getAvailable()
+    {
+        return this.available;
+    }
+
+    public void setAvailable(final boolean available)
+    {
+        this.available = available;
     }
 
     public final static String IP_PROPERTY = "ip";
@@ -258,7 +288,7 @@ public class IpPoolManagement extends RasdManagement
         return this.ip;
     }
 
-    private void setIp(final String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -308,10 +338,15 @@ public class IpPoolManagement extends RasdManagement
         return this.networkName;
     }
 
-    private void setNetworkName(final String networkName)
+    public void setNetworkName(final String networkName)
     {
         this.networkName = networkName;
-        getRasd().setParent(networkName);
+        // When we perform the persistenceFromTransport(Dto.class) the rasd is null
+        // and it raises an exception without this property.
+        if (getRasd() != null)
+        {
+            getRasd().setParent(networkName);
+        }
     }
 
     // ********************************** Helper methods ********************************
@@ -325,7 +360,6 @@ public class IpPoolManagement extends RasdManagement
     public void setType(final Type type)
     {
         getRasd().setResourceSubType(String.valueOf(type.ordinal()));
-        getRasd().setConfigurationName(String.valueOf(type.ordinal()));
     }
 
     public boolean isPrivateIp()
@@ -335,7 +369,12 @@ public class IpPoolManagement extends RasdManagement
 
     public boolean isPublicIp()
     {
-        return !isPrivateIp();
+        return getType() == Type.PUBLIC;
+    }
+
+    public boolean isExternalIp()
+    {
+        return getType() == Type.EXTERNAL;
     }
 
     // ********************************** Others ********************************
@@ -350,7 +389,7 @@ public class IpPoolManagement extends RasdManagement
      */
     public static enum OrderByEnum
     {
-        IP, QUARANTINE, MAC, LEASE, VLAN, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE;
+        IP, QUARANTINE, MAC, LEASE, VLAN, VIRTUALDATACENTER, VIRTUALMACHINE, VIRTUALAPPLIANCE, ENTERPRISENAME;
 
         public static OrderByEnum fromValue(final String orderBy)
         {
@@ -365,4 +404,5 @@ public class IpPoolManagement extends RasdManagement
             return null;
         }
     }
+
 }

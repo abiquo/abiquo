@@ -210,7 +210,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             final String cause =
                 String.format("Can not obtain the repository usage info "
                     + "of the Datacenter [%s] for the Enterprise [%s]. "
-                    + "NFS could be bussy (check it later).", idDatacenter, idEnterprise);
+                    + "NFS could be busy (check it later).", idDatacenter, idEnterprise);
 
             final String detail = e.getMessage();
 
@@ -792,7 +792,10 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             viOvf = codifyBundleImportedOVFid(vimage.getPathName());
         }
 
-        final Integer idEnterprise = vimage.getIdEnterprise();
+        final Integer idEnterprise =
+            (vimage.getMaster() != null) ? vimage.getMaster().getIdEnterprise() : vimage
+                .getIdEnterprise();
+
         final Integer idDatacenter = vimage.getRepository().getDatacenter().getIdDataCenter();
 
         // TODO is a bundle, also delete its conversions
@@ -1302,9 +1305,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
-        final String nameOVFPackageList, Integer idOVFPackageName, Integer idEnterprise,
-        Integer idRepository) throws AppsLibraryCommandException
+    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final UserSession userSession,
+        final String nameOVFPackageList, final Integer idOVFPackageName,
+        final Integer idEnterprise, final Integer idRepository) throws AppsLibraryCommandException
     {
         final String ovfIds =
             getOVFPackageInstanceUrl(userSession, idEnterprise, nameOVFPackageList,
@@ -1318,9 +1321,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      *      java.lang.String, java.lang.Integer, java.lang.Integer)
      */
     @Override
-    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
-        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException
+    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(
+        final UserSession userSession, final String idsOvfInstance, final Integer idEnterprise,
+        final Integer idRepository) throws AppsLibraryCommandException
     {
 
         final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);

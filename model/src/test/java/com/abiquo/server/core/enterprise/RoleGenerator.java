@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.enterprise;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,28 +35,23 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     EnterpriseGenerator enterpriseGenerator;
 
-    public static final String ENTRPRISE_ADMINISTER_ALL = "ENTERPRISE_ADMINISTER_ALL";
+    public static enum Permissions
+    {
 
-    public static final String USERS_MANAGE_OTHER_ENTERPRISES = "USERS_MANAGE_OTHER_ENTERPRISES";
+        ENTERPRISE_ENUMERATE, ENTERPRISE_ADMINISTER_ALL, ENTERPRISE_RESOURCE_SUMMARY_ENT, PHYS_DC_ENUMERATE, PHYS_DC_RETRIEVE_RESOURCE_USAGE, PHYS_DC_MANAGE, PHYS_DC_RETRIEVE_DETAILS,
 
-    public static final String USERS_VIEW = "USERS_VIEW";
+        PHYS_DC_ALLOW_MODIFY_SERVERS, PHYS_DC_ALLOW_MODIFY_NETWORK, PHYS_DC_ALLOW_MODIFY_STORAGE, PHYS_DC_ALLOW_MODIFY_ALLOCATION, VDC_ENUMERATE, VDC_MANAGE, VDC_MANAGE_VAPP,
 
-    public static final String USERS_VIEW_PRIVILEGES = "USERS_VIEW_PRIVILEGES";
+        VDC_MANAGE_NETWORK, VDC_MANAGE_STORAGE, VAPP_CUSTOMISE_SETTINGS, VAPP_DEPLOY_UNDEPLOY, VAPP_ASSIGN_NETWORK, VAPP_ASSIGN_VOLUME, VAPP_PERFORM_ACTIONS, VAPP_CREATE_STATEFUL,
 
-    public static final String USERS_MANAGE_LDAP_GROUP = "USERS_MANAGE_LDAP_GROUP";
+        VAPP_CREATE_INSTANCE, APPLIB_VIEW, APPLIB_ALLOW_MODIFY, APPLIB_UPLOAD_IMAGE, APPLIB_MANAGE_REPOSITORY, APPLIB_DOWNLOAD_IMAGE, APPLIB_MANAGE_CATEGORIES, USERS_VIEW,
 
-    public static final String USERS_MANAGE_USERS = "USERS_MANAGE_USERS";
+        USERS_MANAGE_ENTERPRISE, USERS_MANAGE_USERS, USERS_MANAGE_OTHER_ENTERPRISES, USERS_PROHIBIT_VDC_RESTRICTION, USERS_VIEW_PRIVILEGES, USERS_MANAGE_ROLES, USERS_MANAGE_ROLES_OTHER_ENTERPRISES,
 
-    public static final String USERS_MANAGE_ROLES = "USERS_MANAGE_ROLES";
+        USERS_MANAGE_SYSTEM_ROLES, USERS_MANAGE_LDAP_GROUP, USERS_ENUMERATE_CONNECTED, USERS_DEFINE_AS_MANAGER, SYSCONFIG_VIEW, SYSCONFIG_ALLOW_MODIFY, EVENTLOG_VIEW_ENTERPRISE, EVENTLOG_VIEW_ALL,
 
-    public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES =
-        "USERS_MANAGE_ROLES_OTHER_ENTERPRISES";
-
-    public static final String USERS_MANAGE_SYSTEM_ROLES = "USERS_MANAGE_SYSTEM_ROLES";
-
-    public static final String USERS_PROHIBIT_VDC_RESTRICTION = "USERS_PROHIBIT_VDC_RESTRICTION";
-
-    public static final String VDC_ENUMERATE = "VDC_ENUMERATE";
+        APPLIB_VM_COST_CODE, USERS_MANAGE_ENTERPRISE_BRANDING, SYSCONFIG_SHOW_REPORTS
+    }
 
     public static final String PRICING_VIEW = "PRICING_VIEW";
 
@@ -85,45 +81,30 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
 
     public Role createInstanceSysAdmin()
     {
-        Privilege p1 = new Privilege(USERS_MANAGE_OTHER_ENTERPRISES);
-        Privilege p3 = new Privilege(USERS_VIEW);
-        Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
-        Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
-        Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
-        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
-        Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
-        Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
-        Privilege p11 = new Privilege(VDC_ENUMERATE);
-        Privilege p12 = new Privilege(USERS_MANAGE_ROLES);
-        Privilege p13 = new Privilege(PRICING_VIEW);
-        Privilege p14 = new Privilege(PRICING_MANAGE);
-        return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+        // Privilege p13 = new Privilege(PRICING_VIEW);
+        // Privilege p14 = new Privilege(PRICING_MANAGE);
+        // return createInstance(p1, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
+
+        List<String> privileges = getAllPrivileges();
+        return createInstance(createPrivileges(privileges));
+
     }
 
     public Role createInstanceSysAdmin(final String name)
     {
-        Privilege p1 = new Privilege(USERS_MANAGE_OTHER_ENTERPRISES);
-        Privilege p3 = new Privilege(USERS_VIEW);
-        Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
-        Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        Privilege p6 = new Privilege(USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
-        Privilege p7 = new Privilege(USERS_MANAGE_SYSTEM_ROLES);
-        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
-        Privilege p9 = new Privilege(USERS_MANAGE_LDAP_GROUP);
-        Privilege p10 = new Privilege(ENTRPRISE_ADMINISTER_ALL);
-        Privilege p11 = new Privilege(VDC_ENUMERATE);
-        return createInstance(name, p1, p3, p4, p5, p6, p7, p8, p9, p10, p11);
+        List<String> privileges = getAllPrivileges();
+        return createInstance(name, createPrivileges(privileges));
     }
 
     public Role createInstanceEnterprisAdmin()
     {
-        Privilege p3 = new Privilege(USERS_VIEW);
-        Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
-        Privilege p5 = new Privilege(USERS_MANAGE_USERS);
-        Privilege p8 = new Privilege(USERS_PROHIBIT_VDC_RESTRICTION);
-        Privilege p11 = new Privilege(VDC_ENUMERATE);
-        return createInstance(p3, p4, p5, p8, p11);
+        List<String> privileges = new ArrayList<String>();
+        privileges.add(Permissions.USERS_VIEW.toString());
+        privileges.add(Permissions.USERS_VIEW_PRIVILEGES.toString());
+        privileges.add(Permissions.USERS_MANAGE_USERS.toString());
+        privileges.add(Permissions.USERS_PROHIBIT_VDC_RESTRICTION.toString());
+        privileges.add(Permissions.VDC_ENUMERATE.toString());
+        return createInstance(createPrivileges(privileges));
     }
 
     public Role createInstance(final Enterprise enterprise)
@@ -217,5 +198,76 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
             entitiesToPersist.add(privilege);
         }
 
+    }
+
+    private Privilege[] createPrivileges(final List<String> strings)
+    {
+        Privilege[] created = new Privilege[strings.size()];
+        for (int i = 0; i < strings.size(); i++)
+        {
+            created[i] = new Privilege(strings.get(i));
+        }
+        return created;
+    }
+
+    public static List<String> getAllPrivileges()
+    {
+        return getAllPrivileges("");
+    }
+
+    public static List<String> getAllPrivileges(final String prefix)
+    {
+        List<String> privileges = new ArrayList<String>();
+
+        privileges.add(prefix + Permissions.ENTERPRISE_ENUMERATE);
+        privileges.add(prefix + Permissions.ENTERPRISE_ADMINISTER_ALL);
+        privileges.add(prefix + Permissions.ENTERPRISE_RESOURCE_SUMMARY_ENT);
+        privileges.add(prefix + Permissions.PHYS_DC_ENUMERATE);
+        privileges.add(prefix + Permissions.PHYS_DC_RETRIEVE_RESOURCE_USAGE);
+        privileges.add(prefix + Permissions.PHYS_DC_MANAGE);
+        privileges.add(prefix + Permissions.PHYS_DC_RETRIEVE_DETAILS);
+        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_SERVERS);
+        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_NETWORK);
+        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_STORAGE);
+        privileges.add(prefix + Permissions.PHYS_DC_ALLOW_MODIFY_ALLOCATION);
+        privileges.add(prefix + Permissions.VDC_ENUMERATE);
+        privileges.add(prefix + Permissions.VDC_MANAGE);
+        privileges.add(prefix + Permissions.VDC_MANAGE_VAPP);
+        privileges.add(prefix + Permissions.VDC_MANAGE_NETWORK);
+        privileges.add(prefix + Permissions.VDC_MANAGE_STORAGE);
+        privileges.add(prefix + Permissions.VAPP_CUSTOMISE_SETTINGS);
+        privileges.add(prefix + Permissions.VAPP_DEPLOY_UNDEPLOY);
+        privileges.add(prefix + Permissions.VAPP_ASSIGN_NETWORK);
+        privileges.add(prefix + Permissions.VAPP_ASSIGN_VOLUME);
+        privileges.add(prefix + Permissions.VAPP_PERFORM_ACTIONS);
+        privileges.add(prefix + Permissions.VAPP_CREATE_STATEFUL);
+        privileges.add(prefix + Permissions.VAPP_CREATE_INSTANCE);
+        privileges.add(prefix + Permissions.APPLIB_VIEW);
+        privileges.add(prefix + Permissions.APPLIB_ALLOW_MODIFY);
+        privileges.add(prefix + Permissions.APPLIB_UPLOAD_IMAGE);
+        privileges.add(prefix + Permissions.APPLIB_MANAGE_REPOSITORY);
+        privileges.add(prefix + Permissions.APPLIB_DOWNLOAD_IMAGE);
+        privileges.add(prefix + Permissions.APPLIB_MANAGE_CATEGORIES);
+        privileges.add(prefix + Permissions.USERS_VIEW);
+        privileges.add(prefix + Permissions.USERS_MANAGE_ENTERPRISE);
+        privileges.add(prefix + Permissions.USERS_MANAGE_USERS);
+        privileges.add(prefix + Permissions.USERS_MANAGE_OTHER_ENTERPRISES);
+        privileges.add(prefix + Permissions.USERS_PROHIBIT_VDC_RESTRICTION);
+        privileges.add(prefix + Permissions.USERS_VIEW_PRIVILEGES);
+        privileges.add(prefix + Permissions.USERS_MANAGE_ROLES);
+        privileges.add(prefix + Permissions.USERS_MANAGE_ROLES_OTHER_ENTERPRISES);
+        privileges.add(prefix + Permissions.USERS_MANAGE_SYSTEM_ROLES);
+        privileges.add(prefix + Permissions.USERS_MANAGE_LDAP_GROUP);
+        privileges.add(prefix + Permissions.USERS_ENUMERATE_CONNECTED);
+        privileges.add(prefix + Permissions.USERS_DEFINE_AS_MANAGER);
+        privileges.add(prefix + Permissions.SYSCONFIG_VIEW);
+        privileges.add(prefix + Permissions.SYSCONFIG_ALLOW_MODIFY);
+        privileges.add(prefix + Permissions.EVENTLOG_VIEW_ENTERPRISE);
+        privileges.add(prefix + Permissions.EVENTLOG_VIEW_ALL);
+        privileges.add(prefix + Permissions.APPLIB_VM_COST_CODE);
+        privileges.add(prefix + Permissions.USERS_MANAGE_ENTERPRISE_BRANDING);
+        privileges.add(prefix + Permissions.SYSCONFIG_SHOW_REPORTS);
+
+        return privileges;
     }
 }

@@ -635,7 +635,21 @@ package net.undf.abicloud.controller.virtualappliance
                 super.handleResultInBackground(result);
             }
         }
-
-
+        
+        public function handleGetVirtualApplianceLogs(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returning the list of logs retrieved
+                var logs:ArrayCollection = DataResult(result).data as ArrayCollection;
+                callback(logs);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
     }
 }

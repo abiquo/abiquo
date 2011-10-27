@@ -24,9 +24,7 @@ package com.abiquo.abiserver.persistence.dao.networking;
 import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.DAO;
 
 /**
@@ -38,6 +36,7 @@ import com.abiquo.abiserver.persistence.DAO;
  */
 public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
 {
+<<<<<<< HEAD
     // Publish all the needed extra functions //
 
     // TODO TBD
@@ -116,6 +115,8 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      * @throws PersistenceException encapsulates any database access exception.
      */
     Integer getNumberNetworkPoolByVLAN(Integer vlanId, String ipLike) throws PersistenceException;
+=======
+>>>>>>> stable
 
     /**
      * Return the list of {@link IpPoolManagementHB} assigned to a virtual machine.
@@ -126,13 +127,5 @@ public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
      */
     List<IpPoolManagementHB> getPrivateNICsByVirtualMachine(Integer virtualMachineId)
         throws PersistenceException;
-
-    /**
-     * From an IpPoolIdentifier, get its VLAN.
-     * 
-     * @param idManagement identifier of the ipPool
-     * @return an {@link VlanNetworkHB} object.
-     */
-    VlanNetworkHB getVlanByIpPoolManagement(Integer idManagement) throws PersistenceException;
 
 }

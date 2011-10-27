@@ -57,8 +57,6 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, RasdManagement.ID_RESOURCE_TYPE_PROPERTY);
 
-        rasdGenerator.assertAllPropertiesEqual(obj1.getRasd(), obj2.getRasd());
-
         if (obj1.getVirtualDatacenter() != null || obj2.getVirtualDatacenter() != null)
         {
             vdcGenerator.assertAllPropertiesEqual(obj1.getVirtualDatacenter(),
@@ -109,8 +107,11 @@ public class RasdManagementGenerator extends DefaultEntityGenerator<RasdManageme
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
         Rasd rasd = entity.getRasd();
-        rasdGenerator.addAuxiliaryEntitiesToPersist(rasd, entitiesToPersist);
-        entitiesToPersist.add(rasd);
+        if (rasd != null)
+        {
+            rasdGenerator.addAuxiliaryEntitiesToPersist(rasd, entitiesToPersist);
+            entitiesToPersist.add(rasd);
+        }
 
         VirtualDatacenter vdc = entity.getVirtualDatacenter();
         if (vdc != null)

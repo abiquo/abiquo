@@ -126,6 +126,10 @@ public class RolesResource extends AbstractResource
         // Can get all roles
         if (all != null && !all.isEmpty())
         {
+            all =
+                service.getRolesWithEqualsOrLessPrivileges(userService.getCurrentUser().getRole(),
+                    all);
+
             for (Role r : all)
             {
                 roles.add(createTransferObject(r, restBuilder));

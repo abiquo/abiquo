@@ -21,15 +21,11 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.networking;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
-import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 
 /**
  * Represents an vlan structure.
@@ -49,12 +45,6 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
     private Integer networkId;
 
     /**
-     * If this network is the default network; The default network is the one which a new node will
-     * request an available IP.
-     */
-    private Boolean defaultNetwork;
-
-    /**
      * The enterprise to which the Vlan is reserved for
      */
     private EnterpriseHB enterpriseHB;
@@ -70,7 +60,7 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
     /**
      * @param vlanNetworkId the vlanNetworkId to set
      */
-    public void setVlanNetworkId(Integer vlanNetworkId)
+    public void setVlanNetworkId(final Integer vlanNetworkId)
     {
         this.vlanNetworkId = vlanNetworkId;
     }
@@ -86,25 +76,9 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
     /**
      * @param networkId the networkId to set
      */
-    public void setNetworkId(Integer networkId)
+    public void setNetworkId(final Integer networkId)
     {
         this.networkId = networkId;
-    }
-
-    /**
-     * @return the defaultNetwork
-     */
-    public Boolean getDefaultNetwork()
-    {
-        return defaultNetwork;
-    }
-
-    /**
-     * @param defaultNetwork the defaultNetwork to set
-     */
-    public void setDefaultNetwork(Boolean defaultNetwork)
-    {
-        this.defaultNetwork = defaultNetwork;
     }
 
     /**
@@ -118,7 +92,7 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
     /**
      * @param enterpriseHB the enterpriseHB to set
      */
-    public void setEnterpriseHB(EnterpriseHB enterpriseHB)
+    public void setEnterpriseHB(final EnterpriseHB enterpriseHB)
     {
         this.enterpriseHB = enterpriseHB;
     }
@@ -132,7 +106,6 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         vnet.setNetworkName(getNetworkName());
         vnet.setVlanNetworkId(getVlanNetworkId());
         vnet.setVlanTag(getVlanTag());
-        vnet.setDefaultNetwork(getDefaultNetwork());
 
         if (getConfiguration() != null)
         {

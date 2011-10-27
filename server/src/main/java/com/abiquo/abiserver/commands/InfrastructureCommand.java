@@ -26,7 +26,6 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
@@ -39,7 +38,6 @@ import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.infrastructure.InfrastructureElement;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
-import com.abiquo.abiserver.pojo.infrastructure.Rack;
 import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -59,30 +57,6 @@ public interface InfrastructureCommand
     @Deprecated
     public abstract DataResult<ArrayList<InfrastructureElement>> getInfrastructureByDataCenter(
         final DataCenter dataCenter);
-
-    /**
-     * Return all the racks registered into a datacenter. It can filter the rack by name, the
-     * datacenter by name and if an enterprise is associated to any physical machine, the enterprise
-     * by name.
-     * 
-     * @param userSession user who performs the action.
-     * @param datacenterId identifier of the datacenter.
-     * @param filters String value to filter the search.
-     * @return the list of the Racks.
-     */
-    public ArrayList<RackHB> getRacksByDatacenter(final UserSession userSession,
-        final Integer datacenterId, final String filters) throws InfrastructureCommandException;
-
-    /**
-     * Gets the physical machine list by rack
-     * 
-     * @param rackId the rack identifier
-     * @return the list of physical machine
-     * @throws PersistenceException
-     * @throws InfrastructureCommandException
-     */
-    public abstract List<PhysicalMachine> getPhysicalMachinesByRack(final UserSession userSession,
-        final Integer rackId, final String filters) throws InfrastructureCommandException;
 
     /**
      * Gets the list of filtered virtual machines deployed in a single physical machine
@@ -118,66 +92,6 @@ public interface InfrastructureCommand
     public abstract DataResult<ArrayList<PhysicalMachine>> getAvailablePhysicalMachinesByRack(
         Integer rackId, Integer enterpriseId) throws PersistenceException,
         InfrastructureCommandException;
-
-    /**
-     * Returns all data centers contained in the data base
-     * 
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public abstract DataResult<ArrayList<DataCenter>> getDataCenters(final UserSession userSession);
-
-    public abstract DataResult<ArrayList<DataCenter>> getAllowedDataCenters(
-        final UserSession userSession);
-
-    /**
-     * Creates a new data center in the data base
-     * 
-     * @param dataCenter
-     * @return the Data Center created in DDBB
-     */
-    public abstract DataResult<DataCenter> createDataCenter(final UserSession userSession,
-        final DataCenter dataCenter);
-
-    /**
-     * Edits dataCenter's information in the data base
-     * 
-     * @param dataCenter
-     * @return
-     */
-    public abstract BasicResult editDataCenter(final UserSession userSession,
-        final DataCenter dataCenter);
-
-    /**
-     * Deletes the selected data center from the data base
-     * 
-     * @param dataCenter
-     * @return
-     */
-    public abstract BasicResult deleteDataCenter(final UserSession userSession,
-        final DataCenter dataCenter);
-
-    /**
-     * Creates a new rack in the data base
-     */
-    public abstract DataResult<Rack> createRack(final UserSession userSession, final Rack rack);
-
-    /**
-     * Deletes the rack from the data base
-     * 
-     * @param userSession The current user session
-     * @param rack
-     * @return
-     */
-    public abstract BasicResult deleteRack(final UserSession userSession, final Rack rack);
-
-    /**
-     * Edits rack's information in the data base
-     * 
-     * @param rack
-     * @return
-     */
-    public abstract BasicResult editRack(final UserSession userSession, final Rack rack);
 
     /*
      * ______________________________ PHYSICAL MACHINES _______________________________
@@ -356,7 +270,7 @@ public interface InfrastructureCommand
      * @param dataCenter the dataCenter object
      * @return the result of the operation
      */
-    public abstract BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter);
+    public abstract BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter);
 
     /**
      * This method checks the IP address parameter in the Physical Machine object.
@@ -436,4 +350,5 @@ public interface InfrastructureCommand
      */
     public DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
         final UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
+
 }

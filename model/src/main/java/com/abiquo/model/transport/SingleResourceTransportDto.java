@@ -23,14 +23,11 @@ package com.abiquo.model.transport;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.util.CompositeComparator;
 
 public abstract class SingleResourceTransportDto implements Serializable
 {
@@ -41,14 +38,8 @@ public abstract class SingleResourceTransportDto implements Serializable
     protected List<RESTLink> links;
 
     @XmlElement(name = "link")
-    @SuppressWarnings("unchecked")
     public List<RESTLink> getLinks()
     {
-        if (links != null)
-        {
-            Collections
-                .sort(links, CompositeComparator.build(LinkOrder.BY_REL, LinkOrder.BY_TITLE));
-        }
         return links;
     }
 
@@ -115,6 +106,28 @@ public abstract class SingleResourceTransportDto implements Serializable
         return null;
     }
 
+    public List<RESTLink> searchLinks(final String rel)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        if (getLinks() == null)
+        {
+            setLinks(new ArrayList<RESTLink>());
+        }
+
+        for (RESTLink link : getLinks())
+        {
+            if (link.getRel() != null)
+            {
+                if (link.getRel().equals(rel))
+                {
+                    links.add(link);
+                }
+            }
+        }
+        return links;
+    }
+
     public RESTLink searchLink(final String rel, final String title)
     {
         if (getLinks() == null)
@@ -154,35 +167,14 @@ public abstract class SingleResourceTransportDto implements Serializable
         searchLink(rel).setHref(href);
     }
 
-    public static enum LinkOrder implements Comparator<RESTLink>
+    public Integer getIdFromLink(final String rel)
     {
-        BY_REL
-        {
-            @Override
-            public int compare(final RESTLink link0, final RESTLink link1)
-            {
-                if (link0.getRel() == null || link1.getRel() == null)
-                {
-                    return 0;
-                }
-
-                return String.CASE_INSENSITIVE_ORDER.compare(link0.getRel(), link1.getRel());
-            }
-        },
-
-        BY_TITLE
-        {
-            @Override
-            public int compare(final RESTLink link0, final RESTLink link1)
-            {
-                if (link0.getTitle() == null || link1.getTitle() == null)
-                {
-                    return 0;
-                }
-
-                return String.CASE_INSENSITIVE_ORDER.compare(link0.getTitle(), link1.getTitle());
-            }
-        }
+        String href = this.searchLink(rel).getHref();
+        // Maybe URIs don't have a trailing slash
+        String id =
+            href.substring(href.lastIndexOf("/") + 1,
+                href.endsWith("/") ? href.length() - 1 : href.length());
+        return Integer.valueOf(id);
     }
 
 }

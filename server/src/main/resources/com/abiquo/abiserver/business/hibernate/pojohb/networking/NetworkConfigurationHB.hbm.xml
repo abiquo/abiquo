@@ -2,9 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 17-oct-2008 18:40:49 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton"
-        name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB"
-        table="network_configuration" lazy="false">
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB" table="network_configuration" lazy="false">
         <id name="networkConfigurationId" type="java.lang.Integer">
             <column name="network_configuration_id" />
             <generator class="identity" />
@@ -33,8 +31,7 @@
         <property name="fenceMode" type="string">
             <column length="20" name="fence_mode" />
         </property>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB"
-            lazy="false" fetch="select" name="dhcpService">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB" lazy="false" fetch="select" name="dhcpService">
             <column name="dhcp_service_id" />
         </many-to-one>
     </class>

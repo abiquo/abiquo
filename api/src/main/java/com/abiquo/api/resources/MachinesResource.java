@@ -25,16 +25,18 @@ import static com.abiquo.api.resources.MachineResource.createTransferObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -44,9 +46,11 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
-import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.MachineService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
@@ -70,8 +74,9 @@ public class MachinesResource extends AbstractResource
 
     @GET
     public MachinesDto getMachines(
-        @PathParam(DatacenterResource.DATACENTER) @Min(1) Integer datacenterId,
-        @PathParam(RackResource.RACK) @Min(1) Integer rackId, @Context IRESTBuilder restBuilder)
+        @PathParam(DatacenterResource.DATACENTER) @Min(1) final Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(1) final Integer rackId,
+        @QueryParam("filter") final String filter, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
         if (!infrastructureService.isAssignedTo(datacenterId, rackId))
@@ -79,7 +84,7 @@ public class MachinesResource extends AbstractResource
             throw new NotFoundException(APIError.NOT_ASSIGNED_RACK_DATACENTER);
         }
 
-        List<Machine> all = machineService.getMachinesByRack(rackId);
+        List<Machine> all = machineService.getMachinesByRack(rackId, filter);
 
         return transformMachinesDto(restBuilder, all);
     }
@@ -87,10 +92,11 @@ public class MachinesResource extends AbstractResource
     @POST
     @Consumes(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
     @Produces(SINGLE_MACHINE_MIME_TYPE + "," + MediaType.APPLICATION_XML)
-    public MachineDto postMachines(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
-        @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachineDto machine,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public MachineDto postMachine(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachineDto machine,
+        @Context final IRESTBuilder restBuilder) throws Exception
+
     {
         Machine mToCreate = MachineResource.createPersistenceObject(machine);
         Machine m = infrastructureService.addMachine(mToCreate, datacenterId, rackId);
@@ -102,21 +108,40 @@ public class MachinesResource extends AbstractResource
     @POST
     @Consumes(MULTIPLE_MACHINES_MIME_TYPE)
     @Produces(MULTIPLE_MACHINES_MIME_TYPE)
+    @SuppressWarnings("unchecked")
     public MachinesDto postMultipleMachines(
-        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) Integer datacenterId,
-        @PathParam(RackResource.RACK) @Min(0) Integer rackId, MachinesDto machines,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
+        @PathParam(RackResource.RACK) @Min(0) final Integer rackId,
+        @QueryParam("ipFrom") @NotNull final String ipFrom,
+        @QueryParam("ipTo") @NotNull final String ipTo,
+        @QueryParam("hypervisor") @NotNull final String hypervisor,
+        @QueryParam("user") @NotNull final String user,
+        @QueryParam("password") @NotNull final String password,
+        @QueryParam("port") @NotNull final Integer port,
+        @QueryParam("vSwitch") @NotNull final String vSwitch,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        List<Machine> machinesToCreate = MachineResource.createPersistenceObjects(machines);
-        List<Machine> machinesCreated =
-            infrastructureService.addMachines(machinesToCreate, datacenterId, rackId);
-        MachinesDto transfer = MachineResource.createTransferObjects(machinesCreated, restBuilder);
 
-        return transfer;
+        Map<String, Object> map =
+            infrastructureService.addMachines(datacenterId, rackId, ipFrom, ipTo, hypervisor, user,
+                password, port, vSwitch);
+
+        List<Machine> machines = (List<Machine>) map.get("machines");
+        MachinesDto machinesDto = MachineResource.createTransferObjects(machines, restBuilder);
+
+        if (map.get("errors") != null)
+        {
+            Set<CommonError> errors = (Set<CommonError>) map.get("errors");
+            ErrorsDto errorsDto = new ErrorsDto(errors);
+            machinesDto.setErrors(errorsDto);
+        }
+
+        return machinesDto;
     }
 
-    public static MachinesDto transformMachinesDto(IRESTBuilder restBuilder,
-        Collection<Machine> machines) throws Exception
+    public static MachinesDto transformMachinesDto(final IRESTBuilder restBuilder,
+        final Collection<Machine> machines) throws Exception
+
     {
         MachinesDto machinesDto = new MachinesDto();
 

@@ -83,6 +83,11 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     private Boolean quarantine;
 
     /**
+     * If the IP is available (only external).
+     */
+    private Boolean available;
+
+    /**
      * @return the ip
      */
     public String getIp()
@@ -93,7 +98,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param ip the ip to set
      */
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -109,7 +114,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param mac the mac to set
      */
-    public void setMac(String mac)
+    public void setMac(final String mac)
     {
         this.mac = mac;
     }
@@ -125,7 +130,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param name the name to set
      */
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -141,7 +146,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param configureGateway the configureGateway to set
      */
-    public void setConfigureGateway(Boolean configureGateway)
+    public void setConfigureGateway(final Boolean configureGateway)
     {
         this.configureGateway = configureGateway;
     }
@@ -165,7 +170,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param dhcpServiceId the dhcpServiceId to set
      */
-    public void setDhcpServiceId(Integer dhcpServiceId)
+    public void setDhcpServiceId(final Integer dhcpServiceId)
     {
         this.dhcpServiceId = dhcpServiceId;
     }
@@ -181,7 +186,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param vlanNetworkName the vlanNetworkName to set
      */
-    public void setVlanNetworkName(String vlanNetworkName)
+    public void setVlanNetworkName(final String vlanNetworkName)
     {
         this.vlanNetworkName = vlanNetworkName;
     }
@@ -189,7 +194,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param vlanNetworkId the vlanNetworkId to set
      */
-    public void setVlanNetworkId(Integer vlanNetworkId)
+    public void setVlanNetworkId(final Integer vlanNetworkId)
     {
         this.vlanNetworkId = vlanNetworkId;
     }
@@ -205,7 +210,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     /**
      * @param quarantine the quarantine to set
      */
-    public void setQuarantine(Boolean quarantine)
+    public void setQuarantine(final Boolean quarantine)
     {
         this.quarantine = quarantine;
     }
@@ -256,7 +261,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         return ipPool;
     }
 
-    private String setMacAddress(String mac2)
+    private String setMacAddress(final String mac2)
     {
         if (mac2 != null)
         {
@@ -280,6 +285,16 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         {
             return null;
         }
+    }
+
+    public Boolean getAvailable()
+    {
+        return available;
+    }
+
+    public void setAvailable(final Boolean available)
+    {
+        this.available = available;
     }
 
 }

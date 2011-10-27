@@ -53,6 +53,7 @@ import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.abiquo.server.core.infrastructure.UcsRackGenerator;
+import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
@@ -92,6 +93,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         new VirtualApplianceGenerator(seed);
 
     protected RasdManagementGenerator rasdManagementGenerator = new RasdManagementGenerator(seed);
+
+    protected RasdGenerator rasdGenerator = new RasdGenerator(seed);
 
     protected VolumeManagementGenerator volumeManagementGenerator =
         new VolumeManagementGenerator(seed);

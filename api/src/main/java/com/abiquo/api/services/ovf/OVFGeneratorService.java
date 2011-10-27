@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -79,7 +80,6 @@ import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -157,7 +157,7 @@ public class OVFGeneratorService
      * @param virtualMachine
      * @param machineState
      * @return an OVFEnvelope with the information contained on the virtualMachine
-     * @throws Exception, if the virtualMachine can not be represented as an OVF document.
+     * @throws Exception , if the virtualMachine can not be represented as an OVF document.
      */
     public EnvelopeType constructEnvelopeType(final VirtualMachine virtualMachine,
         final String machineState) throws Exception
@@ -175,7 +175,8 @@ public class OVFGeneratorService
         {
             // The Id of the virtualSystem is used for machine name
             VirtualSystemType virtualSystem =
-                OVFEnvelopeUtils.createVirtualSystem(instanceId, machineName, null);// TODO null
+                OVFEnvelopeUtils.createVirtualSystem(instanceId, machineName, null);// TODO
+                                                                                    // null
 
             DiskSectionType diskSectionEnvelope = createEnvelopeDisk(virtualImage);
 
@@ -189,7 +190,8 @@ public class OVFGeneratorService
                 createAnnotationMachineStateAndRDPPort(machineState,
                     String.valueOf(virtualMachine.getVdrpPort()));
 
-            // creating Virtual hardware section (containing hypervisor information)
+            // creating Virtual hardware section (containing hypervisor
+            // information)
             VirtualHardwareSectionType hardwareSection = createVirtualHardware(virtualMachine);
 
             // Setting the RAM and CPU from machine
@@ -208,7 +210,8 @@ public class OVFGeneratorService
             // Setting the virtual system as envelope content
             OVFEnvelopeUtils.addVirtualSystem(envelope, virtualSystem);
         }
-        catch (Exception e) // RequiredAttributeException(vs creation) and SectionException
+        catch (Exception e) // RequiredAttributeException(vs creation) and
+                            // SectionException
         {
 
             String msg =
@@ -263,7 +266,8 @@ public class OVFGeneratorService
         // from the image
         String diskfileId = image.getName() + "." + image.getId();
         String diskId = String.valueOf(image.getId());
-        Long capacity = image.getHdRequiredInBytes();// TODO set capacity !!! (using fileId? )
+        Long capacity = image.getHdRequiredInBytes();// TODO set capacity !!!
+                                                     // (using fileId? )
 
         DiskFormat format = DiskFormat.fromValue(image.getDiskFormatType().uri);
 
@@ -492,7 +496,8 @@ public class OVFGeneratorService
         // Using the name as the virtual System Id
         String vscId = String.valueOf(virtualAppliance.getId());
         VirtualSystemCollectionType virtualSystemCollection =
-            OVFEnvelopeUtils.createVirtualSystemCollection(vscId, null, null); // TODO info and name
+            OVFEnvelopeUtils.createVirtualSystemCollection(vscId, null, null); // TODO info
+                                                                               // and name
 
         // Creating the references element
         ReferencesType references = new ReferencesType();
@@ -516,7 +521,7 @@ public class OVFGeneratorService
         {
             NodeVirtualImage nodeVirtualImage = node;
 
-            State vmState = nodeVirtualImage.getVirtualMachine().getState();
+            VirtualMachineState vmState = nodeVirtualImage.getVirtualMachine().getState();
 
             // Creates the virtual system inside the virtual system collection
             VirtualSystemType virtualSystem =
@@ -575,7 +580,8 @@ public class OVFGeneratorService
         for (VLANNetwork vlan : listOfVLANidentifiers)
         {
             Integer numberOfRules = 0;
-            Collection<IpPoolManagement> ips = vdcRepo.findIpsByVLAN(vlan.getId(), 0, -1);
+            Collection<IpPoolManagement> ips =
+                vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
 
             RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
             URI uri = new URI(dhcpRemoteService.getUri());
@@ -584,7 +590,8 @@ public class OVFGeneratorService
             dhcp.setDhcpAddress(uri.getHost());
             dhcp.setDhcpPort(uri.getPort());
 
-            // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
+            // Pass all the IpPoolManagement to IpPoolType if the virtual
+            // machine is assigned.
             for (IpPoolManagement ip : ips)
             {
                 if (ip.getVirtualMachine() != null)
@@ -859,9 +866,11 @@ public class OVFGeneratorService
         CIMResourceAllocationSettingDataUtils.addHostResourceToRASD(cimDisk,
             OVFVirtualHadwareSectionUtils.OVF_DISK_URI + diskId);
 
-        // All the above resource will be refactored to follow the CIM Resource Allocation model
+        // All the above resource will be refactored to follow the CIM Resource
+        // Allocation model
         // So far we will receive iscsi resources - This information is now here
-        // ResourceAllocationSettingData related to networking is taken care of in the for loop that
+        // ResourceAllocationSettingData related to networking is taken care of
+        // in the for loop that
         // follows ...
         Collection<Rasd> rasdList =
             getResourceAllocationSettingDataList(virtualMachine, getPhysicalMachineIqn(node));
@@ -1035,7 +1044,8 @@ public class OVFGeneratorService
     private void insertRepositoryManager(final FileType virtualDiskImageFile,
         final NodeVirtualImage nvi)
     {
-        // XenServer virtual factory plugin needs to know the RepositoryManager address
+        // XenServer virtual factory plugin needs to know the RepositoryManager
+        // address
         String repositoryManagerAddress = getRepositoryManagerAddress(nvi);
 
         if (repositoryManagerAddress != null)
@@ -1113,4 +1123,5 @@ public class OVFGeneratorService
 
         return rasdOut;
     }
+
 }

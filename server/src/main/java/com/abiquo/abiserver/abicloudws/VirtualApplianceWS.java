@@ -58,7 +58,6 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
-import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionException;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
@@ -145,6 +144,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#startVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance)
      */
+    @Override
     public BasicResult startVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws Exception
     {
@@ -225,6 +225,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @deprecated
      * @throws Exception
      */
+
+    @Deprecated
     BasicResult forceCreateVirtualAppliance(final VirtualAppliance virtualAppliance,
         final boolean mustChangeState) throws Exception
     {
@@ -365,6 +367,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#shutdownVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance, boolean)
      */
+    @Override
     public BasicResult shutdownVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws Exception
     {
@@ -402,7 +405,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
                 return result;
             }
 
@@ -425,7 +428,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         return result;
     }
 
-    public BasicResult removeNodes(List<Node> nodesToDelete) throws PersistenceException,
+    @Override
+    public BasicResult removeNodes(final List<Node> nodesToDelete) throws PersistenceException,
         JAXBException, ParserConfigurationException, SOAPException, IOException, FaultException,
         DatatypeConfigurationException, VirtualFactoryHealthException
     {
@@ -463,6 +467,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#deleteVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance)
      */
+    @Override
     public BasicResult deleteVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws Exception
     {
@@ -565,6 +570,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#editVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance)
      */
+    @Override
     public BasicResult editVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws Exception
     {
@@ -621,6 +627,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#checkVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance, boolean)
      */
+    @Override
     public Boolean checkVirtualAppliance(final VirtualAppliance virtualAppliance) throws Exception
     {
         logger.info("Checking the Virtual Appliance health in community version is not done");
@@ -628,6 +635,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         return true;
     }
 
+    @Override
     public Boolean checkRemovedNodes(final VirtualAppliance virtualAppliance)
         throws VirtualFactoryHealthException
     {
@@ -666,6 +674,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @param virtualAppliance the virtual appliance to be refreshed
      * @return a basicResult with the resulting operation
      */
+    @Override
     public BasicResult forceRefreshVirtualApplianceState(final VirtualAppliance virtualAppliance)
     {
         logger.info("Refreshing the virtual appliance state: {}", virtualAppliance.getId());
@@ -691,6 +700,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * 
      * @param virtualAppliance
      */
+    @Override
     public void rollbackEventSubscription(final VirtualAppliance virtualAppliance)
     {
         EventingSupport.unsubscribeToAllVA(virtualAppliance);
@@ -701,6 +711,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @see com.abiquo.abiserver.abicloudws.IVirtualApplianceWS#bundleVirtualAppliance
      * (com.abiquo.abiserver .pojo.virtualappliance.VirtualAppliance)
      */
+    @Override
     public BasicResult bundleVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws Exception
     {
@@ -738,7 +749,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
                 return result;
             }
         }
@@ -763,7 +774,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @throws VirtualApplianceFaultException The encapsulated exception.
      */
     private void encapsulateAndRethrowFault(final VirtualAppliance va, final FaultException ex,
-        final EventType event, String message) throws VirtualApplianceFaultException
+        final EventType event, final String message) throws VirtualApplianceFaultException
     {
         String exceptionMessage = null;
         try
@@ -805,8 +816,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         }
 
         String logMessage =
-            (message == null) ? exceptionMessage : message + "(Caused by: " + exceptionMessage
-                + ")";
+            message == null ? exceptionMessage : message + "(Caused by: " + exceptionMessage + ")";
 
         // Log to tracer the original message
         traceLog(va, event, logMessage);

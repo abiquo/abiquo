@@ -21,8 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
-import java.util.List;
-
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -36,18 +36,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
@@ -58,8 +56,6 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
-
-    public static final String VIRTUAL_MACHINE_ACTION_GET_IPS = "/action/ips";
 
     public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
 
@@ -79,7 +75,7 @@ public class VirtualMachineResource extends AbstractResource
     UserService userService;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService networkService;
 
     /**
      * Return the virtual appliance if exists.
@@ -92,9 +88,9 @@ public class VirtualMachineResource extends AbstractResource
      */
     @GET
     public VirtualMachineDto getVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
@@ -102,31 +98,11 @@ public class VirtualMachineResource extends AbstractResource
         return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
 
-    @GET
-    @Path(VirtualMachineResource.VIRTUAL_MACHINE_ACTION_GET_IPS)
-    public IpsPoolManagementDto getIPsByVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-
-        List<IpPoolManagement> all = ipService.getListIpPoolManagementByMachine(vm);
-        IpsPoolManagementDto ips = new IpsPoolManagementDto();
-        for (IpPoolManagement ip : all)
-        {
-            ips.add(IpAddressesResource.createTransferObject(ip, restBuilder));
-        }
-
-        return ips;
-    }
-
     @PUT
     public VirtualMachineDto updateVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachine vm = vmService.updateVirtualMachine(vdcId, vappId, vmId, dto);
@@ -137,8 +113,8 @@ public class VirtualMachineResource extends AbstractResource
     @PUT
     @Path("action/allocate")
     public synchronized VirtualMachineDto allocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer virtualApplianceId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer virtualMachineId,
         final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
@@ -202,10 +178,10 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, State.RUNNING))
+        if (!vmService.sameState(vm, VirtualMachineState.RUNNING))
         {
 
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.RUNNING);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.RUNNING);
 
         }
     }
@@ -230,9 +206,12 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.POWERED_OFF))
+        if (!vmService.sameState(vm, VirtualMachineState.POWERED_OFF))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.POWERED_OFF);
+
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId,
+                VirtualMachineState.POWERED_OFF);
+
         }
     }
 
@@ -256,9 +235,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.REBOOTED))
+        if (!vmService.sameState(vm, VirtualMachineState.REBOOTED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.REBOOTED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.REBOOTED);
         }
     }
 
@@ -282,9 +261,9 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
 
-        if (!vmService.sameState(vm, State.PAUSED))
+        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
         {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, State.PAUSED);
+            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
         }
     }
 }

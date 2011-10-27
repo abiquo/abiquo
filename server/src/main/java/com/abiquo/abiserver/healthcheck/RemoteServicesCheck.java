@@ -75,7 +75,7 @@ public class RemoteServicesCheck
         List<RemoteServiceHB> remoteServices = null;
         try
         {
-            factory.beginConnection();
+            factory.beginConnection(true);
             remoteServices = rsDAO.findAll();
             factory.endConnection();
         }

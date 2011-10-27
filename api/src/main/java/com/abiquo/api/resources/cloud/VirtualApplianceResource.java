@@ -33,13 +33,16 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.services.IpAddressService;
+import com.abiquo.api.services.NetworkService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -60,11 +63,22 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+
     @Autowired
     VirtualApplianceService service;
 
     @Autowired
-    IpAddressService ipService;
+    NetworkService netService;
+
+    @Autowired
+    UserService userService;
 
     /**
      * Return the virtual appliance if exists.
@@ -107,7 +121,7 @@ public class VirtualApplianceResource
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
 
         // Get the list of ipPoolManagements objects
-        List<IpPoolManagement> all = ipService.getListIpPoolManagementByVirtualApp(vapp);
+        List<IpPoolManagement> all = netService.getListIpPoolManagementByVirtualApp(vapp);
         IpsPoolManagementDto ips = new IpsPoolManagementDto();
         for (IpPoolManagement ip : all)
         {
@@ -184,6 +198,59 @@ public class VirtualApplianceResource
     {
         String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
         return virtualAppliancePrice;
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_POWERON)
+    public List<VirtualMachineChangeStateResultDto> powerOnVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.RUNNING);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_POWEROFF)
+    public List<VirtualMachineChangeStateResultDto> powerOffVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service
+            .changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.POWERED_OFF);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_PAUSE)
+    public List<VirtualMachineChangeStateResultDto> pauseVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.PAUSED);
+
+    }
+
+    @PUT
+    @Path(VIRTUAL_APPLIANCE_ACTION_RESUME)
+    public List<VirtualMachineChangeStateResultDto> resumeVirtualApp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
+        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.REBOOTED);
+
     }
 
 }

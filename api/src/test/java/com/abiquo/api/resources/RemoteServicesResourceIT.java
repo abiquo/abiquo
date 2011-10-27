@@ -73,9 +73,8 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         Resource resource = client.resource(uri);
 
         RemoteServiceDto dto = new RemoteServiceDto();
-        dto.setType(RemoteServiceType.NODE_COLLECTOR);
+        dto.setType(RemoteServiceType.DHCP_SERVICE);
         dto.setUri("http://localhost:8080/fooooo");
-        dto.setStatus(1);
 
         ClientResponse response =
             resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
@@ -86,7 +85,6 @@ public class RemoteServicesResourceIT extends AbstractJpaGeneratorIT
         RemoteServiceDto entityPost = response.getEntity(RemoteServiceDto.class);
         assertNotNull(entityPost);
         assertEquals(dto.getUri(), entityPost.getUri());
-        assertEquals(dto.getStatus(), dto.getStatus());
 
         assertNull(entityPost.getConfigurationErrors());
     }
