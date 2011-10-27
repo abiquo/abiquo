@@ -23,9 +23,11 @@ package com.abiquo.appliancemanager.client;
 import java.io.File;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
@@ -202,6 +204,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
             resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
         checkResponse(response);
+        
     }
 
     public String preBundleOVFPackage(final String idEnterprise, final String name)

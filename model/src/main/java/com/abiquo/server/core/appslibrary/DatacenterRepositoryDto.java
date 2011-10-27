@@ -26,10 +26,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.cloud.State;
 
-@XmlRootElement(name = "DatacenterRepository")
+@XmlRootElement(name = "datacenterRepository")
 public class DatacenterRepositoryDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 6344939071248048966L;
+
     private Integer id;
+
+    private String name;
+
+    private String error;
+
+    private String repositoryLocation;
+
+    private long repositoryRemainingMb;
+
+    private long repositoryCapacityMb;
 
     public Integer getId()
     {
@@ -40,12 +52,6 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
     {
         this.id = id;
     }
-
-    private String name;
-
-    private String error;
-
-    private String repositoryLocation;
 
     public String getName()
     {
@@ -75,6 +81,26 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
     public void setRepositoryLocation(String repositoryLocation)
     {
         this.repositoryLocation = repositoryLocation;
+    }
+
+    public long getRepositoryRemainingMb()
+    {
+        return repositoryRemainingMb;
+    }
+
+    public void setRepositoryRemainingMb(long repositoryRemainingMb)
+    {
+        this.repositoryRemainingMb = repositoryRemainingMb;
+    }
+
+    public long getRepositoryCapacityMb()
+    {
+        return repositoryCapacityMb;
+    }
+
+    public void setRepositoryCapacityMb(long repositoryCapacityMb)
+    {
+        this.repositoryCapacityMb = repositoryCapacityMb;
     }
 
 }

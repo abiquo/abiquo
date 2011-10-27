@@ -38,9 +38,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -52,7 +52,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
-public class OVFPackageService extends DefaultApiService
+public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClient
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
 
@@ -84,7 +84,7 @@ public class OVFPackageService extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public OVFPackage getOVFPackage(final Integer id, final IRESTBuilder restBuilder)
+    public OVFPackage getOVFPackage(final Integer id)
     {
         OVFPackage ovfpackage = repo.getOVFPackage(id);
         if (ovfpackage == null)
@@ -121,6 +121,51 @@ public class OVFPackageService extends DefaultApiService
         }
         repo.removeOVFPackage(id);
     }
+
+    /** #################### ApplianceManager communications #################### */
+    /** #################### */
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public OVFPackageInstanceStateDto getOVFPackageState(final Integer id,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        // TODO enterprise Vs datacenter validation
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        return amClient.getCurrentOVFPackageInstanceStatus(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public void installOVFPackage(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
+    {
+        // TODO enterprise Vs datacenter validation
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        // checks the repository is writable
+        amClient.getRepository(String.valueOf(enterpriseId), true);
+
+        amClient.createOVFPackageInstance(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public void uninstallOVFPackage(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
+    {
+        // TODO enterprise Vs datacenter validation
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        amClient.delete(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    /** #################### ovfindex.xml #################### */
+    /** #################### */
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public OVFPackage ovfPackageFromOvfDescription(final OVFDescription descr,

@@ -27,9 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -40,9 +37,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
@@ -56,7 +56,7 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class OVFPackageListService extends DefaultApiService
+public class OVFPackageListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageListService.class);
@@ -73,11 +73,11 @@ public class OVFPackageListService extends DefaultApiService
     @Autowired
     protected OVFPackageService ovfPackageService;
 
+    
     public OVFPackageListService()
     {
-
     }
-
+    
     public OVFPackageListService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
@@ -149,6 +149,40 @@ public class OVFPackageListService extends DefaultApiService
         }
         Hibernate.initialize(ovfPackageList.getOvfPackages());
         return ovfPackageList;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackageInstancesStateDto getOVFPackageListInstanceStatus(final Integer id,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        final OVFPackageList ovfPackageList = getOVFPackageList(id);
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        final OVFPackageInstancesStateDto stateList = new OVFPackageInstancesStateDto();
+
+        for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
+        {
+            try
+            {
+                stateList.add(amClient.getCurrentOVFPackageInstanceStatus(
+                    String.valueOf(enterpriseId), ovfPack.getUrl()));
+            }
+            catch (Exception e)
+            {
+                OVFPackageInstanceStateDto error = new OVFPackageInstanceStateDto();
+                error.setOvfId(ovfPack.getUrl());
+                error.setStatus(OVFStatusEnumType.ERROR);
+                error.setErrorCause(e.toString());
+
+                stateList.add(error);
+
+                LOGGER.error("Can not obtain the status of the list.{}", e);
+            }
+        }
+
+        // TODO check no content
+
+        return stateList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -294,4 +328,5 @@ public class OVFPackageListService extends DefaultApiService
 
         return list;
     }
+
 }

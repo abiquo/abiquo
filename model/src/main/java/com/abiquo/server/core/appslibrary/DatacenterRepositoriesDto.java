@@ -31,6 +31,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "datacenterRepositories")
 public class DatacenterRepositoriesDto extends WrapperDto<DatacenterRepositoryDto>
 {
+    private static final long serialVersionUID = 1810037128474030040L;
+
     @XmlElement(name = "datacenterRepository")
     public List<DatacenterRepositoryDto> getCollection()
     {

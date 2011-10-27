@@ -29,43 +29,38 @@ import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.DatacenterRepositoryResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualImageResourceStubImpl;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
+import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
-import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
-import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 
 public class AppsLibraryService
 {
     private AppsLibraryCommand appsLibraryCommand;
 
-    /**
-     * The Stub we will use to connect to API
-     */
+    private final static boolean REPOSITORY_SYNCHRONIZE = true;
 
-    private AppsLibraryStub appsLibraryStub;
+    private final static boolean REPOSITORY_INCLUDE_USAGE = true;
 
     public AppsLibraryService()
     {
-        appsLibraryStub = new AppsLibraryStubImpl();
         try
         {
 
@@ -80,6 +75,158 @@ public class AppsLibraryService
         }
     }
 
+    public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
+        final Integer idDatacenter, final Integer idEnterprise) // TODO idEnterpise is not used
+    {
+        DatacenterRepositoryResourceStub dcRepoStub =
+            APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
+                DatacenterRepositoryResourceStub.class);
+
+        // refresh content and get
+        return dcRepoStub.getRepository(idDatacenter, idEnterprise, REPOSITORY_SYNCHRONIZE,
+            REPOSITORY_INCLUDE_USAGE);
+    }
+
+    /** Virtual images */
+
+    /**
+     * @param idRepo, if 0, indicate stateful images
+     * @param idCategory, if 0 indicate return all the categories
+     */
+    public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
+        final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
+        final Integer idCategory, final Integer idHypervisorType)
+    {
+        final VirtualImageResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
+                VirtualImageResourceStub.class);
+
+        // idRepo == 0 --> stateful
+        final Integer datacenterId = idRepo == 0 ? null : getDatacenterIdByRepository(idRepo);
+        // idCategory == 0 indicate return all the categories
+        final Integer categoryId = idCategory == 0 ? null : idCategory;
+
+        return vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise,
+            datacenterId, categoryId, idHypervisorType);
+    }
+
+    /**
+     * @param idRepo, if 0, indicate stateful images
+     * @param idCategory, if 0 indicate return all the categories
+     */
+    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
+        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
+    {
+        final VirtualImageResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
+                VirtualImageResourceStub.class);
+
+        // idRepo == 0 --> stateful
+        final Integer datacenterId = idRepo == 0 ? null : getDatacenterIdByRepository(idRepo);
+        // idCategory == 0 indicate return all the categories
+        final Integer categoryId = idCategory == 0 ? null : idCategory;
+
+        return vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryId);
+    }
+
+    /** List. */
+    public DataResult<List<String>> getOVFPackageListName(final UserSession userSession,
+        final Integer idEnterprise)
+    {
+
+        return proxyStub(userSession).getOVFPackageListName(idEnterprise);
+    }
+
+    public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOVFPackageList)
+    {
+        return proxyStub(userSession).getOVFPackageList(idEnterprise, nameOVFPackageList);
+    }
+
+    public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String ovfpackageListURL)
+    {
+        return proxyStub(userSession).createOVFPackageList(idEnterprise, ovfpackageListURL);
+    }
+
+    public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOvfpackageList)
+    {
+
+        return proxyStub(userSession).refreshOVFPackageList(idEnterprise, nameOvfpackageList);
+    }
+
+    public BasicResult deleteOVFPackageList(final UserSession userSession,
+        final Integer idEnterprise, final String nameOvfpackageList)
+    {
+        return proxyStub(userSession).deleteOVFPackageList(idEnterprise, nameOvfpackageList);
+    }
+
+    /** DC specific status. */
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListStatus(
+        final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
+        final Integer idRepository)
+    {
+
+        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
+
+        return proxyStub(userSession).getOVFPackageListState(nameOVFPackageList, idEnterprise,
+            datacenterId);
+    }
+
+    public DataResult<List<OVFPackageInstanceStatus>> refreshOVFPackageStatus(
+        final UserSession userSession, final List<String> ovfUrlsIn, final Integer idEnterprise,
+        final Integer idRepository)
+    {
+
+        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
+        final List<String> ovfUrls = ovfUrlsIn; // XXX cast to arraylist
+
+        return proxyStub(userSession).getOVFPackagesState(ovfUrls, idEnterprise, datacenterId);
+
+    }
+
+    public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
+        final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
+        final Integer idRepository)
+    {
+        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
+
+        return proxyStub(userSession).getOVFPackageState(ovfUrl, idEnterprise, datacenterId);
+    }
+
+    public BasicResult startDownloadOVFPackage(final UserSession userSession,
+        final List<String> idsOvfpackageIn, final Integer idEnterprise, final Integer idRepository)
+    {
+        final List<String> ovfUrls = idsOvfpackageIn; // XXX cast to arraylist
+
+        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
+
+        return proxyStub(userSession).installOVFPackagesInDatacenter(ovfUrls, idEnterprise,
+            datacenterId);
+    }
+
+    public DataResult<OVFPackageInstanceStatus> cancelDownloadOVFPackage(
+        final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
+        final Integer idRepository)
+    {
+        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
+
+        return proxyStub(userSession).uninstallOVFPackageInDatacenter(ovfUrl, idEnterprise,
+            datacenterId);
+    }
+
+    /**
+     * ################################# #################################
+     */
+
+    /**
+     * TODO user Format, Icon and Category ResourceStub
+     */
+
+    /**
+     * ################################# #################################
+     */
     public DataResult<List<DiskFormatType>> getDiskFormatTypes(final UserSession userSession)
     {
         DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
@@ -91,35 +238,6 @@ public class AppsLibraryService
 
             result.setData(disksFormat);
             result.setSuccess(true);
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
-        final Integer idDatacenter, final Integer idEnterprise) // TODO idEnterpise is not used
-    {
-        DataResult<Repository> result = new DataResult<Repository>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            RepositoryHB repoHb =
-                proxyService.getDatacenterRepository(userSession, idDatacenter, idEnterprise);
-
-            result.setData(repoHb.toPojo());
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
         }
         catch (UserSessionException e)
         {
@@ -250,84 +368,17 @@ public class AppsLibraryService
         return proxyStub(userSession).getIcons(idEnterprise);
     }
 
-    /** Virtual images */
+    /**
+     * ################################# #################################
+     */
 
     /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
+     * TODO user VirtualImageResourceStub
      */
-    public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
-        final Integer idCategory, final Integer idHypervisorType)
-    {
-        DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            List<VirtualImage> vimages =
-                proxyService.getVirtualImageByCategoryAndHypervisorCompatible(userSession,
-                    idEnterprise, idRepo, idCategory, idHypervisorType);
-
-            result.setData(vimages);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
 
     /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
+     * ################################# #################################
      */
-    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
-    {
-        DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-
-            List<VirtualimageHB> vimagesHb =
-                proxyService.getVirtualImageByCategory(userSession, idEnterprise, idRepo,
-                    idCategory);
-            List<VirtualImage> vimages = new LinkedList<VirtualImage>();
-
-            for (VirtualimageHB viHb : vimagesHb)
-            {
-                vimages.add(viHb.toPojo());
-
-            }
-
-            result.setData(vimages);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
 
     public BasicResult editVirtualImage(final UserSession userSession, final VirtualImage vimage)
     {
@@ -382,250 +433,13 @@ public class AppsLibraryService
         return result;
     }
 
-    /** List. */
-    public DataResult<List<String>> getOVFPackageListName(final UserSession userSession,
-        final Integer idEnterprise)
+    /**
+     * The Stub we will use to connect to API
+     */
+    protected AppsLibraryStub proxyStub(final UserSession userSession)
     {
-
-        return proxyStub(userSession).getOVFPackageListName(idEnterprise);
-    }
-
-    public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOVFPackageList)
-    {
-        return proxyStub(userSession).getOVFPackageList(idEnterprise, nameOVFPackageList);
-    }
-
-    public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String ovfpackageListURL)
-    {
-
-        return proxyStub(userSession).createOVFPackageList(idEnterprise, ovfpackageListURL);
-
-    }
-
-    public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOvfpackageList)
-    {
-
-        return proxyStub(userSession).refreshOVFPackageList(idEnterprise, nameOvfpackageList);
-    }
-
-    public BasicResult deleteOVFPackageList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOvfpackageList)
-    {
-        return proxyStub(userSession).deleteOVFPackageList(idEnterprise, nameOvfpackageList);
-    }
-
-    /** DC specific status. */
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListStatus(
-        final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
-        final Integer idRepository)
-    {
-
-        DataResult<List<OVFPackageInstanceStatus>> result =
-            new DataResult<List<OVFPackageInstanceStatus>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-
-            OVFPackageInstancesStateDto statusListDto =
-                proxyService.getOVFPackageListStatus(userSession, nameOVFPackageList, idEnterprise,
-                    idRepository);
-
-            List<OVFPackageInstanceStatus> statusList = transform(statusListDto);
-
-            result.setData(statusList);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-
-    }
-
-    public BasicResult startDownloadOVFPackage(final UserSession userSession,
-        final List<String> idsOvfpackageIn, final Integer idEnterprise, final Integer idRepository)
-    {
-        List<String> idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
-
-        BasicResult result = new BasicResult();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.startDownloadOVFPackage(userSession, idsOvfpackage, idEnterprise,
-                idRepository);
-
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    public DataResult<OVFPackageInstanceStatus> cancelDownloadOVFPackage(
-        final UserSession userSession, final String idOvfpackage, final Integer idEnterprise,
-        final Integer idRepository)
-    {
-
-        DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            OVFPackageInstanceStateDto statusDto =
-                proxyService.cancelDownloadOVFPackage(userSession, idOvfpackage, idEnterprise,
-                    idRepository);
-
-            result.setData(transform(statusDto));
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    public DataResult<List<OVFPackageInstanceStatus>> refreshOVFPackageStatus(
-        final UserSession userSession, final List<String> idsOvfpackageIn,
-        final Integer idEnterprise, final Integer idRepository)
-    {
-
-        List<String> idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
-
-        DataResult<List<OVFPackageInstanceStatus>> result =
-            new DataResult<List<OVFPackageInstanceStatus>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            OVFPackageInstancesStateDto statusListDto =
-                proxyService.refreshOVFPackageStatus(userSession, idsOvfpackage, idEnterprise,
-                    idRepository);
-
-            result.setData(transform(statusListDto));
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    protected OVFPackage transform(final OVFPackageDto packDto)
-    {
-        OVFPackage pack = new OVFPackage();
-        if (packDto.getName() != null)
-        {
-            pack.setCategory(packDto.getName());
-        }
-        else
-        {
-            pack.setCategory("Others");
-        }
-        pack.setDescription(packDto.getDescription());
-        pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatTypeUri()).name());
-        pack.setDiskSizeMb(packDto.getDiskSizeMb());
-        pack.setIconUrl(packDto.getIconPath());
-        pack.setIdOVFPackage(packDto.getId());
-        pack.setName(packDto.getProductName()); // XXX duplicated name
-        pack.setProductName(packDto.getProductName());
-        pack.setProductUrl(packDto.getProductUrl());
-        pack.setProductVendor(packDto.getProductVendor());
-        pack.setProductVersion(packDto.getProductVersion());
-        pack.setUrl(packDto.getUrl());
-
-        return pack;
-    }
-
-    protected OVFPackageList transform(final OVFPackageListDto listDto)
-    {
-        OVFPackageList list = new OVFPackageList();
-        list.setName(listDto.getName());
-        list.setUrl("unused URL"); // TODO missing URL
-
-        List<OVFPackage> packs = new LinkedList<OVFPackage>();
-
-        if (listDto.getOvfPackages() != null)
-        {
-            for (OVFPackageDto packDto : listDto.getOvfPackages())
-            {
-                packs.add(transform(packDto));
-            }
-        }
-
-        list.setOvfpackages(packs);
-        return list;
-    }
-
-    protected OVFPackageInstanceStatus transform(final OVFPackageInstanceStateDto statusDto)
-    {
-        OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
-
-        status.setStatus(statusDto.getStatus().name());
-        status.setUrl(statusDto.getOvfId());
-
-        status.setError(statusDto.getErrorCause());
-
-        if (statusDto.getDownloadingProgress() != null)
-        {
-            status.setProgress(statusDto.getDownloadingProgress().floatValue());
-        }
-
-        return status;
-    }
-
-    protected List<OVFPackageInstanceStatus> transform(
-        final OVFPackageInstancesStateDto statusListDto)
-    {
-        List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
-
-        for (OVFPackageInstanceStateDto statusDto : statusListDto.getCollection())
-        {
-            statusList.add(transform(statusDto));
-        }
-
-        return statusList;
+        return APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
+            AppsLibraryStub.class);
     }
 
     /**
@@ -640,56 +454,20 @@ public class AppsLibraryService
             AppsLibraryCommand.class);
     }
 
-    /**
-     * Refreshes the instance status of the image.
-     * 
-     * @param userSession current user.
-     * @param idsOvfpackageIn Name of the item to refresh.
-     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
-     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return DataResult<OVFPackageInstanceStatus>
-     */
-    public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
-        final UserSession userSession, final String idsOvfpackageIn, final Integer idEnterprise,
-        final Integer idRepository)
+    private Integer getDatacenterIdByRepository(final Integer idRepository)
     {
+        Integer idDatacenter;
 
-        String idsOvfpackage = idsOvfpackageIn; // XXX cast to arraylist
+        final DAOFactory daoF = HibernateDAOFactory.instance();
 
-        DataResult<OVFPackageInstanceStatus> result = new DataResult<OVFPackageInstanceStatus>();
+        daoF.beginConnection();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            OVFPackageInstanceStateDto statusListDto =
-                proxyService.refreshOVFPackageInstanceStatus(userSession, idsOvfpackage,
-                    idEnterprise, idRepository);
+        idDatacenter =
+            daoF.getRepositoryDAO().findById(idRepository).getDatacenter().getIdDataCenter();
 
-            result.setData(transform(statusListDto));
-            result.setSuccess(true);
-            if (result.getData().getError() != null && !"".equals(result.getData().getError()))
-            {
-                result.setSuccess(false);
-                result.setMessage(result.getData().getError());
-            }
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
+        daoF.endConnection();
 
-        return result;
+        return idDatacenter;
     }
 
-    protected AppsLibraryStub proxyStub(final UserSession userSession)
-    {
-        return APIStubFactory.getInstance(userSession, appsLibraryStub, AppsLibraryStub.class);
-    }
 }

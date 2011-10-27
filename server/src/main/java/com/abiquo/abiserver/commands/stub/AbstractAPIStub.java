@@ -186,8 +186,8 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
+            .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -238,8 +238,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -391,8 +391,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -485,8 +485,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -513,8 +513,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -546,8 +546,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -559,8 +559,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -572,6 +572,49 @@ public class AbstractAPIStub
         }
 
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createVirtualImagesLink(final Integer enterpriseId, final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}", params);
+
+        return uri;
+    }
+
+    protected String createVirtualImageLink(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualimageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+        params.put("virtualimage", valueOf(virtualimageId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}/virtualimages/{virtualimage}",
+                params);
+
+        return uri;
+    }
+
+    protected String createDatacenterRepositoryLink(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}", params);
+
+        return uri;
     }
 
     protected String createOVFPackagesLink(final String enterpriseId)
@@ -593,6 +636,19 @@ public class AbstractAPIStub
             "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}", params);
     }
 
+    protected String createOVFPackageListStatusLink(final String enterpriseId,
+        final String ovfPackageListId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackageList", ovfPackageListId);
+
+        return resolveURI(
+            apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}/actions/repositoryStatus",
+            params);
+    }
+
     protected String createOVFPackageListsLink(final String enterpriseId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -601,14 +657,50 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackagelists", params);
     }
 
-    protected String createOVFPackageLink(final String enterpriseId, final String ovfPackageListId)
+    protected String createOVFPackageLink(final String enterpriseId, final String ovfPackageId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseId);
-        params.put("ovfPackage", ovfPackageListId);
+        params.put("ovfPackage", ovfPackageId);
 
         return resolveURI(apiUri,
             "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}", params);
+    }
+
+    protected String createOVFPackageStateLink(final String enterpriseId, final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(
+            apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/actions/repositoryStatus",
+            params);
+    }
+
+    protected String createOVFPackageInstallLink(final String enterpriseId,
+        final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+                + "actions/repositoryInstall", params);
+    }
+
+    protected String createOVFPackageUninstallLink(final String enterpriseId,
+        final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+                + "actions/repositoryUninstall", params);
     }
 
     protected String createIconLink(final Integer iconId)

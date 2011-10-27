@@ -24,14 +24,12 @@ package com.abiquo.api.resources.appslibrary;
 import javax.annotation.Resource;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +41,9 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.OVFPackageService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.infrastructure.RemoteService;
 
 @Parent(OVFPackagesResource.class)
 @Path(OVFPackageResource.OVF_PACKAGE_PARAM)
@@ -58,9 +55,14 @@ public class OVFPackageResource extends AbstractResource
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
-    public static final String INSTALL_ACTION = "actions/install";
+    public static final String OVF_PACKAGE_INSTALL_ACTION_PATH = "actions/repositoryInstall";
 
-    public static final String INSTALL_TARGET_QUERY_PARAM = "idDatacenter";
+    public static final String OVF_PACKAGE_UN_INSTALL_ACTION_PATH = "actions/repositoryUninstall";
+
+    public static final String OVF_PACKAGE_REPOSITORY_STATUS_PATH = "actions/repositoryStatus";
+
+    public static final String OVF_PACKAGE_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM =
+        "datacenterId";
 
     /** Used to know where the AM is located on the current datacenter. */
     // @Autowired
@@ -79,8 +81,21 @@ public class OVFPackageResource extends AbstractResource
     public OVFPackageDto getOVFPackage(@PathParam(OVF_PACKAGE) final Integer ovfPackageId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        OVFPackage ovfpackage = service.getOVFPackage(ovfPackageId, restBuilder);
+        OVFPackage ovfpackage = service.getOVFPackage(ovfPackageId);
         return transformer.createTransferObject(ovfpackage, restBuilder);
+    }
+
+    @GET
+    @Path(OVF_PACKAGE_REPOSITORY_STATUS_PATH)
+    public OVFPackageInstanceStateDto getOVFPackageState(
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @QueryParam(OVF_PACKAGE_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM) final Integer datacenterId,
+
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        // TODO check enterprise can use repository
+        return service.getOVFPackageState(ovfPackageId, datacenterId, idEnterprise);
     }
 
     @PUT
@@ -102,35 +117,33 @@ public class OVFPackageResource extends AbstractResource
         service.removeOVFPackage(ovfPackageId);
     }
 
-    // @POST
-    // @Path(OVFPackageResource.INSTALL_ACTION)
-    // public Response installOVFPackageOnDatacenter(@Context final UriInfo uriInfo,
-    // @Context final IRESTBuilder restBuilder,
-    // @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-    // @PathParam(OVF_PACKAGE) final Integer ovfPackageId,
-    // @QueryParam(INSTALL_TARGET_QUERY_PARAM) final String idDatacenter) throws Exception
-    // {
-    // final String amUri = getApplianceManagerAddressOnDatacenter(Integer.valueOf(idDatacenter));
-    // final String ovfLocation = service.getOVFPackage(ovfPackageId, restBuilder).getUrl();
-    //
-    // return service.installOVFPackageOnDatacenter(amUri, String.valueOf(idEnterprise),
-    // ovfLocation);
-    // }
+    /**
+     * TODO use the datacenter URI on the post
+     */
+    @POST
+    @Path(OVFPackageResource.OVF_PACKAGE_INSTALL_ACTION_PATH)
+    public Void installOVFPackageOnDatacenterRepository(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
 
-    private String getApplianceManagerAddressOnDatacenter(final Integer idDatacenter)
     {
-        RemoteService rs =
-            remoteServices.getRemoteService(idDatacenter, RemoteServiceType.APPLIANCE_MANAGER);
+        service.installOVFPackage(ovfPackageId, datacenterId, idEnterprise);
+        return null;
+    }
 
-        if (rs == null)
-        {
-            final String cause =
-                String.format("The provided Datacenter [id %s]"
-                    + " do not have any ApplianceManager remote service configured", idDatacenter);
-            final Response resp = Response.status(Status.PRECONDITION_FAILED).entity(cause).build();
-            throw new WebApplicationException(resp);
-        }
+    /**
+     * TODO use the datacenter URI on the post
+     */
+    @POST
+    @Path(OVFPackageResource.OVF_PACKAGE_UN_INSTALL_ACTION_PATH)
+    public Void uninstallOVFPackageOnDatacenterRepository(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
 
-        return rs.getUri();
+    {
+        service.uninstallOVFPackage(ovfPackageId, datacenterId, idEnterprise);
+        return null;
     }
 }
