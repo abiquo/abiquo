@@ -47,6 +47,8 @@ public class SecurityService
     public static final String USERS_MANAGE_OTHER_ENTERPRISES = DRP
         + "USERS_MANAGE_OTHER_ENTERPRISES";
 
+    public static final String USERS_MANAGE_ENTERPRISE = DRP + "USERS_MANAGE_ENTERPRISE";
+
     public static final String USERS_MANAGE_ROLES = DRP + "USERS_MANAGE_ROLES";
 
     public static final String USERS_MANAGE_ROLES_OTHER_ENTERPRISES = DRP

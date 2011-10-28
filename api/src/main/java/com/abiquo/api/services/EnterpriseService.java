@@ -184,21 +184,23 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
         {
-            int idPricing = getPricingTemplateId(dto);
-            if (idPricing == 0)
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
-                enterprise.setPricingTemplate(null);
-            }
-            else
-            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    enterprise.setPricingTemplate(null);
+                }
+                else
+                {
 
-                PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
-                enterprise.setPricingTemplate(pricingTemplate);
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    enterprise.setPricingTemplate(pricingTemplate);
+                }
             }
         }
-
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
@@ -269,18 +271,21 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
         {
-            int idPricing = getPricingTemplateId(dto);
-            if (idPricing == 0)
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
-                old.setPricingTemplate(null);
-            }
-            else
-            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    old.setPricingTemplate(null);
+                }
+                else
+                {
 
-                PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
-                old.setPricingTemplate(pricingTemplate);
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    old.setPricingTemplate(pricingTemplate);
+                }
             }
         }
 
