@@ -21,10 +21,9 @@
 
 package com.abiquo.ovfmanager.ovf.section;
 
-import com.abiquo.model.enumerator.DiskFormatType;
 
 /**
- * TODO use {@link DiskFormatType}
+ * TODO use com.abiquo.model.enumerator.DiskFormatType (model)
  * <p>
  * Supported virtual disk formats. In order to meet the 5.2 clause an URI is required as disk
  * format. ''the disk format shall be given by a URI which identifies an unencumbered specification
