@@ -22,6 +22,7 @@
 package com.abiquo.api.resources.appslibrary;
 
 import javax.annotation.Resource;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,14 +123,15 @@ public class OVFPackageResource extends AbstractResource
      * TODO use the datacenter URI on the post
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Path(OVFPackageResource.OVF_PACKAGE_INSTALL_ACTION_PATH)
     public Void installOVFPackageOnDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final Integer datacenterId,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final String datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {
-        service.installOVFPackage(ovfPackageId, datacenterId, idEnterprise);
+        service.installOVFPackage(ovfPackageId, Integer.valueOf(datacenterId), idEnterprise);
         return null;
     }
 
@@ -136,14 +139,15 @@ public class OVFPackageResource extends AbstractResource
      * TODO use the datacenter URI on the post
      */
     @POST
+    @Consumes(MediaType.TEXT_PLAIN)
     @Path(OVFPackageResource.OVF_PACKAGE_UN_INSTALL_ACTION_PATH)
     public Void uninstallOVFPackageOnDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final Integer datacenterId,
+        @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final String datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {
-        service.uninstallOVFPackage(ovfPackageId, datacenterId, idEnterprise);
+        service.uninstallOVFPackage(ovfPackageId, Integer.valueOf(datacenterId), idEnterprise);
         return null;
     }
 }

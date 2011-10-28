@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,7 +236,10 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final String uri =
             createOVFPackageInstallLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
 
-        ClientResponse response = post(uri, ovfPackageId, MediaType.TEXT_PLAIN);
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 
         if (response.getStatusCode() / 200 != 1)
         {
@@ -254,7 +258,10 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             createOVFPackageUninstallLink(String.valueOf(idEnterprise),
                 String.valueOf(ovfPackageId));
 
-        ClientResponse response = post(uri, ovfPackageId, MediaType.TEXT_PLAIN);
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 
         if (response.getStatusCode() / 200 != 1)
         {
