@@ -83,6 +83,7 @@ import com.abiquo.server.core.infrastructure.nodecollector.ResourceType;
 import com.abiquo.server.core.infrastructure.nodecollector.VirtualDiskEnumType;
 import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemCollectionDto;
 import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemDto;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.util.network.IPAddress;
 
 /**
@@ -405,7 +406,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         for (ResourceType resource : host.getResources())
         {
             // TODO remove code
-            if (resource.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
+            if (resource.getResourceType().equals(ResourceEnumType.HARD_DISK))
             {
                 Datastore datastore =
                     new Datastore(machine, resource.getElementName(), resource.getAddress(), "");
@@ -420,7 +421,6 @@ public class NodecollectorServiceStub extends DefaultApiService
                 {
                     datastore.setDatastoreUUID(resource.getConnection());
                 }
-                // totalStorage += datastore.getSize();
             }
             else
             {
@@ -489,7 +489,7 @@ public class NodecollectorServiceStub extends DefaultApiService
             vm.setState(VirtualMachineState.valueOf(vs.getStatus().value()));
             for (ResourceType rt : vs.getResources())
             {
-                if (rt.getResourceType().equals(ResourceEnumType.STORAGE_DISK))
+                if (rt.getLabel().equals("SYSTEM DISK"))
                 {
                     long bytesHD = rt.getUnits();
                     vm.setHdInBytes(bytesHD);
@@ -504,19 +504,23 @@ public class NodecollectorServiceStub extends DefaultApiService
                         vm.setDatastore(ds);
                     }
 
-                    if (rt.getResourceSubType() != null)
+                    VirtualImage vi = new VirtualImage(null);
+                    VirtualDiskEnumType diskFormatType =
+                        VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
+                    vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
+                    if (diskFormatType.equals(VirtualDiskEnumType.STATEFUL))
                     {
-
-                        VirtualImage vi = new VirtualImage(null);
-                        VirtualDiskEnumType diskFormatType =
-                            VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
-                        if (diskFormatType.equals(VirtualDiskEnumType.STATEFUL))
-                        {
-                            vi.setStateful(1);
-                        }
-                        vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
-                        vm.setVirtualImage(vi);
+                        vi.setStateful(1);
                     }
+                    vm.setVirtualImage(vi);
+                    vm.setHdInBytes(rt.getUnits());
+                }
+                else
+                {
+                    DiskManagement disky =
+                        new DiskManagement(null, null, null, rt.getUnits() * MEGABYTE, 0);
+                    disky.setSizeInMb(rt.getUnits() * MEGABYTE);
+                    vm.getDisks().add(disky);
                 }
             }
 

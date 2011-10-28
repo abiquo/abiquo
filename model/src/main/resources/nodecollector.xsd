@@ -117,6 +117,8 @@
             <xs:element name="units" type="xs:long" nillable="true" />
             <xs:element name="availableUnits" type="xs:long" nillable="true" />
             <xs:element name="connection" type="xs:string" nillable="true" />
+            <xs:element name="label" type="xs:string" nillable="true" />
+            <xs:element name="attachment" type="xs:string" nillable="true" />
         </xs:sequence>
     </xs:complexType>
     <!-- -->
@@ -127,7 +129,7 @@
             <xs:enumeration value="8">
                 <xs:annotation>
                     <xs:appinfo>
-                        <jaxb:typesafeEnumMember name="STORAGE_DISK" />
+                        <jaxb:typesafeEnumMember name="VOLUME_DISK" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>
@@ -135,6 +137,13 @@
                 <xs:annotation>
                     <xs:appinfo>
                         <jaxb:typesafeEnumMember name="NETWORK_INTERFACE" />
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="17">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:typesafeEnumMember name="HARD_DISK" />
                     </xs:appinfo>
                 </xs:annotation>
             </xs:enumeration>

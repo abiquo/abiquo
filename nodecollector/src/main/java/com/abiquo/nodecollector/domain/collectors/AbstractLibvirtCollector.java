@@ -316,7 +316,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
     {
 
         final ResourceType currentHardDisk = new ResourceType();
-        currentHardDisk.setResourceType(ResourceEnumType.STORAGE_DISK);
+        currentHardDisk.setResourceType(ResourceEnumType.HARD_DISK);
         currentHardDisk.setAddress(imagePath);
         try
         {

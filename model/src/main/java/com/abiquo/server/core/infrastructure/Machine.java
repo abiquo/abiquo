@@ -755,7 +755,6 @@ public class Machine extends DefaultEntityBase
     }
 
     // Transient attributes needed to Management Racks functionality
-
     @Transient
     private List<String> listOfMacs;
 

@@ -21,8 +21,11 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -30,9 +33,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
@@ -43,6 +48,7 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -496,6 +502,25 @@ public class VirtualMachine extends DefaultEntityBase
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    /** List of disks */
+    @OneToMany(cascade = CascadeType.ALL, targetEntity = DiskManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<DiskManagement> disks = new ArrayList<DiskManagement>();
+
+    public List<DiskManagement> getDisks()
+    {
+        if (disks == null)
+        {
+            disks = new ArrayList<DiskManagement>();
+        }
+        return disks;
+    }
+
+    public void setDisks(final List<DiskManagement> disks)
+    {
+        this.disks = disks;
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
