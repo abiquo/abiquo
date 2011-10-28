@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -80,8 +81,6 @@ import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -91,13 +90,11 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement.OrderByEnum;
 
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -524,7 +521,7 @@ public class OVFGeneratorService
         {
             NodeVirtualImage nodeVirtualImage = node;
 
-            State vmState = nodeVirtualImage.getVirtualMachine().getState();
+            VirtualMachineState vmState = nodeVirtualImage.getVirtualMachine().getState();
 
             // Creates the virtual system inside the virtual system collection
             VirtualSystemType virtualSystem =
@@ -1059,7 +1056,7 @@ public class OVFGeneratorService
 
     }
 
-    private String getRepositoryManagerAddress(NodeVirtualImage nvi)
+    private String getRepositoryManagerAddress(final NodeVirtualImage nvi)
     {
         VirtualMachine vmachine = vmRepo.findVirtualMachineById(nvi.getVirtualMachine().getId());
 

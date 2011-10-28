@@ -29,12 +29,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -293,7 +293,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         {
             cpuRequired = Integer.parseInt(frg[1]);
             ramRequired = (int) (Integer.parseInt(frg[2]) * GB_TO_MB);
-            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * (1014 * 1024); // bytes
+            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
         VirtualImage vimage =
@@ -491,6 +491,6 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     public void runningVirtualMachine(final Integer virtualMachineId)
     {
-        vmachineDao.updateVirtualMachineState(virtualMachineId, State.RUNNING);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.RUNNING);
     }
 }

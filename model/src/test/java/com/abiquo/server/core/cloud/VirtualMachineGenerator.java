@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 import java.util.UUID;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -148,7 +149,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         virtualMachine.setCpu(vimage.getCpuRequired());
         virtualMachine.setRam(vimage.getRamRequired());
         virtualMachine.setHdInBytes((int) vimage.getHdRequiredInBytes());
-        virtualMachine.setState(State.NOT_DEPLOYED);
+        virtualMachine.setState(VirtualMachineState.NOT_DEPLOYED);
 
         return virtualMachine;
     }

@@ -26,6 +26,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryU
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
+import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObject;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestConfig.getParameter;
 import static org.testng.Assert.assertEquals;
@@ -68,6 +69,7 @@ import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
@@ -108,7 +110,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     private Datacenter datacenter;
 
     @BeforeMethod
-    public void setUpDatacenterRepository()
+    public void setUpDatacenterRepository() throws Exception
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
@@ -163,11 +165,12 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
     }
 
-    private void setUpApplianceManagerInDatacenter()
+    private void setUpApplianceManagerInDatacenter() throws Exception
     {
         amclient.checkService();
 
-        service.addRemoteService(amDto(), datacenter.getId());
+        RemoteService am = createPersistenceObject(amDto());
+        service.addRemoteService(am, datacenter.getId());
     }
 
     @Test

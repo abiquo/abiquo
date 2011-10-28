@@ -85,7 +85,8 @@ public class PrivateNetworksResource extends AbstractResource
         throws Exception
     {
         VLANNetwork network = PrivateNetworkResource.createPersistenceObject(dto);
-        network = service.createPrivateNetwork(virtualDatacenterId, network);
+        network =
+            service.createPrivateNetwork(virtualDatacenterId, network, dto.getDefaultNetwork());
         return PrivateNetworkResource.createTransferObject(network, virtualDatacenterId,
             restBuilder);
     }

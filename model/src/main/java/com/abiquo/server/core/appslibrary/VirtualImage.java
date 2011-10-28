@@ -56,7 +56,7 @@ public class VirtualImage extends DefaultEntityBase
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected VirtualImage()
+    public VirtualImage()
     {
         // Just for JPA support
     }

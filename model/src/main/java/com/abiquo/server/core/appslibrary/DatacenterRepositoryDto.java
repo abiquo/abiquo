@@ -24,7 +24,6 @@ package com.abiquo.server.core.appslibrary;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.cloud.State;
 
 @XmlRootElement(name = "DatacenterRepository")
 public class DatacenterRepositoryDto extends SingleResourceTransportDto
@@ -36,7 +35,7 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -52,7 +51,7 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -62,7 +61,7 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
         return error;
     }
 
-    public void setError(String error)
+    public void setError(final String error)
     {
         this.error = error;
     }
@@ -72,7 +71,7 @@ public class DatacenterRepositoryDto extends SingleResourceTransportDto
         return repositoryLocation;
     }
 
-    public void setRepositoryLocation(String repositoryLocation)
+    public void setRepositoryLocation(final String repositoryLocation)
     {
         this.repositoryLocation = repositoryLocation;
     }

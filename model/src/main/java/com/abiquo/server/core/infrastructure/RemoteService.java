@@ -52,11 +52,12 @@ public class RemoteService extends DefaultEntityBase
 
     public static final int STATUS_SUCCESS = 1;
 
-    protected RemoteService()
+    public RemoteService()
     {
     }
 
-    public RemoteService(Datacenter datacenter, RemoteServiceType type, String uri, int status)
+    public RemoteService(final Datacenter datacenter, final RemoteServiceType type,
+        final String uri, final int status)
     {
         setDatacenter(datacenter);
         setType(type);
@@ -71,6 +72,12 @@ public class RemoteService extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    public void setId(final Integer id)
+    {
+        this.id = id;
+    }
+
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -100,7 +107,7 @@ public class RemoteService extends DefaultEntityBase
         return this.uri;
     }
 
-    public void setUri(String uri)
+    public void setUri(final String uri)
     {
         this.uri = uri;
     }
@@ -122,7 +129,7 @@ public class RemoteService extends DefaultEntityBase
         return this.datacenter;
     }
 
-    public void setDatacenter(Datacenter datacenter)
+    public void setDatacenter(final Datacenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -145,7 +152,7 @@ public class RemoteService extends DefaultEntityBase
         return this.type;
     }
 
-    public void setType(RemoteServiceType type)
+    public void setType(final RemoteServiceType type)
     {
         this.type = type;
     }
@@ -167,7 +174,7 @@ public class RemoteService extends DefaultEntityBase
         return this.status;
     }
 
-    public void setStatus(int status)
+    public void setStatus(final int status)
     {
         this.status = status;
     }

@@ -60,9 +60,7 @@ public class LoginResource extends AbstractResource
     {
         User user = userService.getCurrentUser();
         UserDto userDto = UserResource.createTransferObject(user);
-        userDto.setIdEnterprise(user.getEnterprise().getId());
-        userDto.setIdRole(user.getRole().getId());
-        addLinks(restBuilder, userDto, userDto.getIdEnterprise(), userDto.getIdRole());
+        addLinks(restBuilder, userDto, user.getEnterprise().getId(), user.getRole().getId());
         return userDto;
     }
 

@@ -673,7 +673,7 @@
                             <mx:NumericStepper id="cpuInput"
                                 width="75" height="17"
                                 fontSize="10"
-                                minimum="1" maximum="32" stepSize="1"
+                                minimum="1" maximum="1024" stepSize="1"
                                 includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
                                 visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
                         </mx:FormItem>

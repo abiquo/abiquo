@@ -121,10 +121,48 @@ package net.undf.abicloud.vo.infrastructure
 
         override public function set assignedTo(iE:InfrastructureElement):void
         {
-            if (iE is Rack || iE == null)
+            if (iE is Rack || iE == null){
                 _assignedTo = iE;
-            else
+            }else if(iE is UcsRack){
+                _assignedTo = iE;
+                _name = returnUCSFormattedName(_name);
+            }else
                 throw Error("A physical machine can only be assigned to a rack");
+        }
+        
+        /* override public function set name(value:String):void{
+        	if(assignedTo is UcsRack){
+        		_name = returnUCSFormattedName(value);
+        	}else{
+        		_name = value;
+        	}
+        } */
+        
+         /**
+         * Return the formatted name for UCS blades
+         **/
+        private function returnUCSFormattedName(value:String):String{
+            //vale is sys/chassis-X/blade-Y and must be
+            //returned as Chassis-X, Blade-Y
+            
+            var formattedName:String = "";
+            
+            //Chassis
+            var chassis:String = value.split("/")[1];
+            var splittedName:Array = chassis.split("-");
+            chassis = chassis.replace(" ","");
+            formattedName += chassis.charAt(0).toUpperCase();
+            formattedName += chassis.slice(1,splittedName[0].length);
+            formattedName += " " + splittedName[1] + ", ";
+            
+            //Blade
+            var blade:String = value.split("/")[2];
+            splittedName = blade.split("-");
+            blade = blade.replace(" ","");
+            formattedName += blade.charAt(0).toUpperCase();
+            formattedName += blade.slice(1,splittedName[0].length);
+            formattedName += " " + splittedName[1];
+            return formattedName;
         }
     }
 }

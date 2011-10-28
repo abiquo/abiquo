@@ -96,4 +96,5 @@
             </list>
         </property>
     </bean>
+    <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>

@@ -46,18 +46,19 @@ public enum EventType implements Serializable
         206, "VIRTUAL_MACHINE_HEALTH_STATE", "Virtual Machine checked"), VM_CRASHED(207,
         "VM_CRASHED", "Virtual Machine turned into 'crashed' state"), VM_UNKNOWN(208, "VM_UNKNOWN",
         "Virtual Machine turned into 'unknown' state"), VM_UNDEPLOY_FORCED(209,
-        "VM_UNDEPLOY_FORCED", "Virtual Machine undeploy forced"), VDC_CREATE(210, "VDC_CREATE",
-        "Created Virtual Datacenter"), VDC_MODIFY(211, "VDC_MODIFY", "Modified Virtual Datacenter"), VDC_DELETE(
-        212, "VDC_DELETE", "Deleted Virtual Datacenter"), VAPP_CREATE(213, "VAPP_CREATE",
-        "Created Virtual Appliance"), VAPP_MODIFY(214, "VAPP_MODIFY", "Modified Virtual Appliance"), VAPP_DELETE(
-        215, "VAPP_DELETE", "Deleted Virtual Appliance"), VAPP_POWERON(216, "VAPP_POWERON",
-        "Deployed Virtual Appliance"), VAPP_POWEROFF(217, "VAPP_POWEROFF",
-        "Undeployed Virtual Appliance"), VAPP_RUNNING(218, "VAPP_RUNNING",
-        "Started Virtual Appliance"), VAPP_MOVE(219, "VAPP_MOVE", "Virtual Appliance moved"), VAPP_COPY(
-        220, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(221, "VIRTUAL_APPLIANCE_STATE",
-        "Virtual Appliance State Refreshed"), VAPP_CRASHED(222, "VAPP_CRASHED",
-        "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(223, "VAPP_UNKNOWN",
-        "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(224, "VAPP_BUNDLE",
+        "VM_UNDEPLOY_FORCED", "Virtual Machine undeploy forced"), VM_CREATE(210, "VM_CREATE",
+        "Virtual Machine created"), VDC_CREATE(211, "VDC_CREATE", "Created Virtual Datacenter"), VDC_MODIFY(
+        212, "VDC_MODIFY", "Modified Virtual Datacenter"), VDC_DELETE(213, "VDC_DELETE",
+        "Deleted Virtual Datacenter"), VAPP_CREATE(214, "VAPP_CREATE", "Created Virtual Appliance"), VAPP_MODIFY(
+        215, "VAPP_MODIFY", "Modified Virtual Appliance"), VAPP_DELETE(216, "VAPP_DELETE",
+        "Deleted Virtual Appliance"), VAPP_POWERON(217, "VAPP_POWERON",
+        "Deployed Virtual Appliance"), VAPP_POWEROFF(218, "VAPP_POWEROFF",
+        "Undeployed Virtual Appliance"), VAPP_RUNNING(219, "VAPP_RUNNING",
+        "Started Virtual Appliance"), VAPP_MOVE(220, "VAPP_MOVE", "Virtual Appliance moved"), VAPP_COPY(
+        221, "VAPP_COPY", "Virtual Appliance copied"), VAPP_REFRESH(222, "VIRTUAL_APPLIANCE_STATE",
+        "Virtual Appliance State Refreshed"), VAPP_CRASHED(223, "VAPP_CRASHED",
+        "Virtual Appliance turned into 'crashed' state"), VAPP_UNKNOWN(224, "VAPP_UNKNOWN",
+        "Virtual Appliance turned into 'unknown' state"), VAPP_BUNDLE(225, "VAPP_BUNDLE",
         "Virtual Appliance bundle started"),
 
     // Infrastructure-related events
@@ -67,10 +68,15 @@ public enum EventType implements Serializable
         305, "RACK_DELETE", "Rack Deleted"), RACK_NRSQ_EXCEEDED(306, "NRSQ_EXCEEDED",
         "NRSQ excedded in Rack"), MACHINE_CREATE(307, "MACHINE_CREATE", "Physical Machine created"), MACHINE_MODIFY(
         308, "MACHINE_MODIFY", "Physical Machine modified"), MACHINE_DELETE(309, "MACHINE_DELETE",
-        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), REMOTE_SERVICES_CREATE(
-        311, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(312,
-        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(313,
-        "REMOTE_SERVICES_CHECK", "Remote service checked"), RACK_RETRIEVAL(314, "RACK_RETRIEVAL",
+        "Physical Machine deleted"), MACHINE_CHECK(310, "MACHINE_CHECK", "Physical Machine checked"), MACHINE_RETRIVE_VMS(
+        311, "MACHINE_RETRIVE_VMS", "Virtual Machines discovered from physical machine"), MACHINE_CREATED_RETRIVED_VMS(
+        312, "MACHINE_CREATED_RETRIVED_VMS",
+        "Created Virtual Machines discovered from physical machine"), MACHINE_DELETE_VMS_NOTMANAGED(
+        313, "MACHINE_DELETE_VMS_NOTMANAGED", "Not managed Virtual Machines deleted"), REMOTE_SERVICES_CREATE(
+        314, "REMOTE_SERVICES_CREATE", "Remote Service created"), REMOTE_SERVICES_UPDATE(315,
+        "REMOTE_SERVICE_UPDATE", "Remote Service updated"), REMOTE_SERVICES_CHECK(316,
+        "REMOTE_SERVICES_CHECK", "Remote service checked"), REMOTE_SERVICES_DELETE(317,
+        "REMOTE_SERVICES_DELETE", "Remote Service deleted"), RACK_RETRIEVAL(318, "RACK_RETRIEVAL",
         "Retrieve Rack"),
 
     // Storage system-related events

@@ -21,26 +21,37 @@
 
 package com.abiquo.api.resources;
 
-import static com.abiquo.api.resources.DatacenterResource.addLinks;
+import static com.abiquo.api.resources.DatacenterResource.createPersistenceObject;
 import static com.abiquo.api.resources.DatacenterResource.createTransferObject;
+import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObjects;
+import static com.abiquo.api.resources.RemoteServiceResource.createTransferObject;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import com.abiquo.api.services.DatacenterService;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.DatacentersDto;
+import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
 @Path(DatacentersResource.DATACENTERS_PATH)
 @Controller
@@ -54,26 +65,93 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private DatacenterService service;
 
+    @Autowired
+    private RemoteServiceService remoteServiceService;
+
+    @Autowired
+    private EnterpriseService entService;
+
     @GET
-    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder) throws Exception
+    @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
+    public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
+        @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
     {
-        Collection<Datacenter> all = service.getDatacenters();
-        DatacentersDto datacenters = new DatacentersDto();
-        for (Datacenter d : all)
+        Collection<Datacenter> list = null;
+        if (StringUtils.hasText(idEnterprise))
         {
-            datacenters.add(createTransferObject(d, restBuilder));
+            Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));
+            list = service.getDatacenters(enterprise);
+        }
+        else
+        {
+            list = service.getDatacenters();
+        }
+
+        DatacentersDto datacenters = new DatacentersDto();
+        for (Datacenter d : list)
+        {
+            DatacenterDto dcdto = createTransferObject(d, restBuilder);
+            datacenters.add(dcdto);
+        }
+
+        return datacenters;
+    }
+
+    @GET
+    @Produces(FLAT_MEDIA_TYPE)
+    public DatacentersDto getDatacentersWithRS(@Context final IRESTBuilder restBuilder,
+        @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
+    {
+        Collection<Datacenter> list = null;
+        if (StringUtils.hasText(idEnterprise))
+        {
+            Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));
+            list = service.getDatacenters(enterprise);
+        }
+        else
+        {
+            list = service.getDatacenters();
+        }
+
+        DatacentersDto datacenters = new DatacentersDto();
+        for (Datacenter d : list)
+        {
+            DatacenterDto dcdto = createTransferObject(d, restBuilder);
+            dcdto.setRemoteServices(new RemoteServicesDto());
+
+            List<RemoteService> remoteServices =
+                remoteServiceService.getRemoteServicesByDatacenter(d.getId());
+            if (remoteServices != null)
+            {
+                for (RemoteService rs : remoteServices)
+                {
+                    dcdto.getRemoteServices().add(createTransferObject(rs, restBuilder));
+                }
+            }
+
+            datacenters.add(dcdto);
         }
 
         return datacenters;
     }
 
     @POST
-    public DatacenterDto postDatacenter(final DatacenterDto datacenter,
-        @Context final IRESTBuilder builder) throws Exception
+    public DatacenterDto postDatacenter(final DatacenterDto datacenterDto,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
-        DatacenterDto response = service.addDatacenter(datacenter);
-        addLinks(builder, response);
+        // create dacenter
+        Datacenter datacenter = createPersistenceObject(datacenterDto);
+        Datacenter d = service.addDatacenter(datacenter);
+        DatacenterDto dto = createTransferObject(d, restBuilder);
 
-        return response;
+        // create remote services if any
+        if (datacenterDto.getRemoteServices() != null)
+        {
+            RemoteServicesDto rsd =
+                service.addRemoteServices(
+                    createPersistenceObjects(datacenterDto.getRemoteServices()), datacenter);
+            dto.setRemoteServices(rsd);
+        }
+        return dto;
     }
 }
