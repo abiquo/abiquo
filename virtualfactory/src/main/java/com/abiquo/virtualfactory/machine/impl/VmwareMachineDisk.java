@@ -296,7 +296,15 @@ public class VmwareMachineDisk
     private String getSourceDiskPathToBundle(final String sourceDatastoreName,
         final String sourcePath, final boolean isManaged)
     {
-        if (isManaged)
+
+        boolean isSparse = vmConfig.getVirtualDiskBase().getFormatUri().contains("sparse");
+
+        if (isManaged && isSparse)
+        {
+            return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
+                + "-flat-s001.vmdk";
+        }
+        else if (isManaged)
         {
             return "[" + sourceDatastoreName + "] " + machineName + "/" + machineName
                 + "-flat.vmdk";

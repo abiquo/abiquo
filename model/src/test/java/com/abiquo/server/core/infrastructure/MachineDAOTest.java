@@ -31,6 +31,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -38,13 +39,13 @@ import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -52,7 +53,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
     }
 
     @Override
-    protected MachineDAO createDao(EntityManager arg0)
+    protected MachineDAO createDao(final EntityManager arg0)
     {
         return new MachineDAO(arg0);
     }
@@ -293,17 +294,17 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Machine machine10 = machineGenerator.createMachine(datacenter);
         Machine machine11 = machineGenerator.createMachine(datacenter);
 
-        machine1.setState(State.DISABLED_FOR_HA);
-        machine2.setState(State.HA_IN_PROGRESS);
-        machine3.setState(State.HALTED);
-        machine4.setState(State.MANAGED);
-        machine5.setState(State.NOT_MANAGED);
-        machine6.setState(State.PROVISIONED);
-        machine7.setState(State.STOPPED);
-        machine8.setState(State.UNLICENSED);
-        machine9.setState(State.MANAGED);
-        machine10.setState(State.MANAGED);
-        machine11.setState(State.MANAGED);
+        machine1.setState(MachineState.DISABLED_FOR_HA);
+        machine2.setState(MachineState.HA_IN_PROGRESS);
+        machine3.setState(MachineState.HALTED);
+        machine4.setState(MachineState.MANAGED);
+        machine5.setState(MachineState.NOT_MANAGED);
+        machine6.setState(MachineState.PROVISIONED);
+        machine7.setState(MachineState.STOPPED);
+        machine8.setState(MachineState.UNLICENSED);
+        machine9.setState(MachineState.MANAGED);
+        machine10.setState(MachineState.MANAGED);
+        machine11.setState(MachineState.MANAGED);
 
         machine1.setRack(rack);
         machine2.setRack(rack);
@@ -389,7 +390,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         MachineDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertEquals(State.values().length, 8);
+        Assert.assertEquals(MachineState.values().length, 8);
         Assert.assertEquals(dao.findRackEnabledForHAMachines(reload(dao, rack)).size(), 1);
     }
 
@@ -429,10 +430,10 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine2_1.setEnterprise(e);
         machine2_2.setEnterprise(e);
 
-        machine1_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine1_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine2_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine2_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        machine1_1.setState(MachineState.MANAGED);
+        machine1_2.setState(MachineState.MANAGED);
+        machine2_1.setState(MachineState.MANAGED);
+        machine2_2.setState(MachineState.MANAGED);
 
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);
@@ -516,10 +517,10 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         machine2_1.setEnterprise(null);
         machine2_2.setEnterprise(null);
 
-        machine1_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine1_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine2_1.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
-        machine2_2.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        machine1_1.setState(MachineState.MANAGED);
+        machine1_2.setState(MachineState.MANAGED);
+        machine2_1.setState(MachineState.MANAGED);
+        machine2_2.setState(MachineState.MANAGED);
 
         Datastore ds11 = dsGenerator.createInstance(machine1_1);
         Datastore ds12 = dsGenerator.createInstance(machine1_2);

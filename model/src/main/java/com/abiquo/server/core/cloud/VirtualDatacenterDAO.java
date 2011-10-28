@@ -46,6 +46,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaVirtualDatacenterDAO")
 @SuppressWarnings("unchecked")
@@ -85,7 +86,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             }
         });
 
-        return Restrictions.in(VirtualDatacenter.ID_PROPERTY, ids);
+        return Restrictions.in(PersistentEntity.ID_PROPERTY, ids);
     }
 
     public Collection<VirtualDatacenter> findByEnterpriseAndDatacenter(final Enterprise enterprise,
@@ -103,6 +104,17 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         if (user != null)
         {
             restrictions.add(availableToUser(user));
+        }
+
+        return findVirtualDatacentersByCriterions(restrictions);
+    }
+
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        Collection<Criterion> restrictions = new ArrayList<Criterion>();
+        if (datacenter != null)
+        {
+            restrictions.add(sameDatacenter(datacenter));
         }
 
         return findVirtualDatacentersByCriterions(restrictions);
@@ -154,14 +166,23 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
             + "and rm.idResourceType = '8' and rm.idVirtualDatacenter = :virtualDatacenterId";
 
     private static final String COUNT_PUBLIC_IP_RESOURCES =
-        "select count(rm.idManagement) from rasd r, rasd_management rm where r.instanceID = rm.idResource "
-            + "and rm.idResourceType = '10' and r.resourceSubType = '1' and rm.idVirtualDatacenter = :virtualDatacenterId";
+        "select count(*) from ip_pool_management ipm, rasd_management rm, vlan_network vn, virtualdatacenter vdc "
+            + " where ipm.vlan_network_id = vn.vlan_network_id "
+            + " and rm.idManagement = ipm.idManagement "
+            + " and rm.idVirtualDataCenter = vdc.idVirtualDataCenter "
+            + " and vdc.idVirtualDataCenter = :virtualDatacenterId "
+            + " and vn.networktype = 'PUBLIC' ";
 
     private static final String COUNT_PRIVATE_VLANS_RESOURCES = " SELECT vlan "//
         + "FROM com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
         + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
         + "WHERE vlan.network.id = vdc.network.id "//
         + "and vdc.id = :virtualDatacenterId";
+
+    private static final String GET_VDC_FROM_DEFAULT_VLAN = " SELECT vdc "//
+        + "FROM VirtualDatacenter vdc "//
+        + "WHERE vdc.defaultVlan.id = :vlanId "//
+        + "and vdc.defaultVlan.type = 'EXTERNAL'";
 
     public DefaultEntityCurrentUsed getCurrentResourcesAllocated(final int virtualDatacenterId)
     {
@@ -197,6 +218,14 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
     {
         Query query = getSession().createQuery(COUNT_PRIVATE_VLANS_RESOURCES);
         query.setParameter("virtualDatacenterId", virtualdatacenterId);
+
+        return query.list();
+    }
+
+    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
+    {
+        Query query = getSession().createQuery(GET_VDC_FROM_DEFAULT_VLAN);
+        query.setParameter("vlanId", defaultVlanId);
 
         return query.list();
     }

@@ -36,7 +36,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
 
     private String name, shortDescription, longDescription;
 
-    private Integer vlanIdMin, vlanIdMax, vlanPerVdcExpected, nrsq;
+    private Integer vlanIdMin, vlanIdMax, vlanPerVdcReserved, nrsq;
 
     private String vlansIdAvoided;
 
@@ -47,7 +47,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -57,7 +57,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -67,7 +67,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return shortDescription;
     }
 
-    public void setShortDescription(String description)
+    public void setShortDescription(final String description)
     {
         this.shortDescription = description;
     }
@@ -77,7 +77,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return longDescription;
     }
 
-    public void setLongDescription(String description)
+    public void setLongDescription(final String description)
     {
         this.longDescription = description;
     }
@@ -87,7 +87,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return vlanIdMin;
     }
 
-    public void setVlanIdMin(Integer vlanIdMin)
+    public void setVlanIdMin(final Integer vlanIdMin)
     {
         this.vlanIdMin = vlanIdMin;
     }
@@ -97,19 +97,9 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return vlanIdMax;
     }
 
-    public void setVlanIdMax(Integer vlanIdMax)
+    public void setVlanIdMax(final Integer vlanIdMax)
     {
         this.vlanIdMax = vlanIdMax;
-    }
-
-    public Integer getVlanPerVdcExpected()
-    {
-        return vlanPerVdcExpected;
-    }
-
-    public void setVlanPerVdcExpected(Integer vlanPerVdcExpected)
-    {
-        this.vlanPerVdcExpected = vlanPerVdcExpected;
     }
 
     public Integer getNrsq()
@@ -117,7 +107,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return nrsq;
     }
 
-    public void setNrsq(Integer nrsq)
+    public void setNrsq(final Integer nrsq)
     {
         this.nrsq = nrsq;
     }
@@ -127,9 +117,19 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return vlansIdAvoided;
     }
 
-    public void setVlansIdAvoided(String vlansIdAvoided)
+    public void setVlansIdAvoided(final String vlansIdAvoided)
     {
         this.vlansIdAvoided = vlansIdAvoided;
+    }
+
+    public Integer getVlanPerVdcReserved()
+    {
+        return vlanPerVdcReserved;
+    }
+
+    public void setVlanPerVdcReserved(final Integer vlanPerVdcReserved)
+    {
+        this.vlanPerVdcReserved = vlanPerVdcReserved;
     }
 
     public boolean isHaEnabled()
@@ -137,7 +137,7 @@ public class RackDto extends SingleResourceTransportDto implements Serializable
         return haEnabled;
     }
 
-    public void setHaEnabled(boolean haEnabled)
+    public void setHaEnabled(final boolean haEnabled)
     {
         this.haEnabled = haEnabled;
     }

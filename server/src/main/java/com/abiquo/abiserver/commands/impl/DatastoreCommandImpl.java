@@ -62,8 +62,8 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
     }
 
     @Override
-    public DatastoreHB createDatastore(UserSession userSession, DatastoreHB newDatastore,
-        Integer physicalMachineId) throws DatastoreCommandException
+    public DatastoreHB createDatastore(final UserSession userSession, DatastoreHB newDatastore,
+        final Integer physicalMachineId) throws DatastoreCommandException
     {
         try
         {
@@ -97,7 +97,7 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
     }
 
     @Override
-    public DatastoreHB editDatastore(UserSession userSession, DatastoreHB datastore)
+    public DatastoreHB editDatastore(final UserSession userSession, final DatastoreHB datastore)
         throws DatastoreCommandException
     {
         DatastoreHB dataHB;
@@ -135,7 +135,6 @@ public class DatastoreCommandImpl extends BasicCommand implements DatastoreComma
 
             // Currently we only use one pm per datastore...
             PhysicalmachineHB pmHB = pmDAO.getPhysicalMachineListByDatastore(datastoreId).get(0);
-            pmHB.setRealStorage(pmHB.getRealStorage() - dataHB.getSize() + datastore.getSize());
             pmDAO.makePersistent(pmHB);
 
             if (!datastore.getDirectory().equals(dataHB.getDirectory()))

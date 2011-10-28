@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 @XmlRootElement(name = "remoteServices")
 public class RemoteServicesDto extends WrapperDto<RemoteServiceDto>
@@ -36,6 +37,18 @@ public class RemoteServicesDto extends WrapperDto<RemoteServiceDto>
      * Default serial version.
      */
     private static final long serialVersionUID = 1L;
+
+    private ErrorsDto configErrors;
+
+    public ErrorsDto getConfigErrors()
+    {
+        return configErrors;
+    }
+
+    public void setConfigErrors(final ErrorsDto configErrors)
+    {
+        this.configErrors = configErrors;
+    }
 
     @Override
     @XmlElement(name = "remoteService")

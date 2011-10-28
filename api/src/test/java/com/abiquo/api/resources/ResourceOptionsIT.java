@@ -34,17 +34,18 @@ public class ResourceOptionsIT extends AbstractJpaGeneratorIT
     @Test
     public void datacenterReturnsRestOptions()
     {
-        assertAllow(resolveDatacenterURI(12345), "GET", "PUT", "OPTIONS");
-        assertNotAllow(resolveDatacenterURI(12345), "DELETE");
+        assertAllow(resolveDatacenterURI(12345), "GET", "PUT", "DELETE", "OPTIONS");
+        assertNotAllow(resolveDatacenterURI(12345), "POST");
     }
 
     @Test
     public void datacentersReturnsRestOptions()
     {
         assertAllow(resolveDatacentersURI(), "GET", "POST", "OPTIONS");
+        assertNotAllow(resolveDatacentersURI(), "PUT", "DELETE");
     }
 
-    private void assertAllow(String url, String... expectedMethods)
+    private void assertAllow(final String url, final String... expectedMethods)
     {
         Resource resource = client.resource(url);
         ClientResponse response = resource.options();
@@ -56,7 +57,7 @@ public class ResourceOptionsIT extends AbstractJpaGeneratorIT
         }
     }
 
-    private void assertNotAllow(String url, String... unxpectedMethods)
+    private void assertNotAllow(final String url, final String... unxpectedMethods)
     {
         Resource resource = client.resource(url);
         ClientResponse response = resource.options();

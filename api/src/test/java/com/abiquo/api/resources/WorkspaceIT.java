@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 
 public class WorkspaceIT extends AbstractJpaGeneratorIT
 {
-    @Test
+    @Test(enabled = false)
     public void showWorkspace() throws Exception
     {
         Resource resource = client.resource(API_URI);
@@ -53,7 +53,7 @@ public class WorkspaceIT extends AbstractJpaGeneratorIT
             serviceDocument.contains("collection href=\"" + resolveRolesURI() + "\""));
     }
 
-    protected String prettyPrint(Resource resource) throws IOException
+    protected String prettyPrint(final Resource resource) throws IOException
     {
         InputStream stream = resource.get(InputStream.class);
         BufferedReader r = new BufferedReader(new InputStreamReader(stream));

@@ -32,7 +32,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +76,6 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RackDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
-import com.abiquo.abiserver.persistence.dao.workload.FitPolicyRuleDAO;
-import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -94,7 +91,6 @@ import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.networking.VlanNetworkParameters;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -124,6 +120,11 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
     protected static ResourceManager resourceManager =
         new ResourceManager(InfrastructureCommandImpl.class);
+
+    public static ResourceManager getResourceManager()
+    {
+        return resourceManager;
+    }
 
     private IInfrastructureWS infrastructureWS;
 
@@ -249,49 +250,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     }
 
     @Override
-    public ArrayList<RackHB> getRacksByDatacenter(final UserSession userSession,
-        final Integer datacenterId, final String filters)
-    {
-        ArrayList<RackHB> racks = new ArrayList<RackHB>();
-
-        factory.beginConnection();
-
-        DataCenterDAO dcDAO = factory.getDataCenterDAO();
-        racks = dcDAO.getRacks(datacenterId, filters);
-
-        factory.endConnection();
-        return racks;
-    }
-
-    /**
-     * Gets the physical machine list by rack
-     * 
-     * @param rackId the rack identifier
-     * @return the list of physical machine
-     * @throws PersistenceException
-     * @throws InfrastructureCommandException
-     * @see com.abiquo.abiserver.commands.InfrastructureCommand#getPhysicalMachinesByRack(java.lang.Integer)
-     */
-    @Override
-    public List<PhysicalMachine> getPhysicalMachinesByRack(final UserSession userSession,
-        final Integer rackId, final String filters)
-    {
-        factory.beginConnection();
-
-        PhysicalMachineDAO pmDAO = factory.getPhysicalMachineDAO();
-        List<PhysicalmachineHB> availablePms = pmDAO.getPhysicalMachineByRack(rackId, filters);
-        List<PhysicalMachine> result = new ArrayList<PhysicalMachine>();
-        for (PhysicalmachineHB singleResult : availablePms)
-        {
-            result.add(singleResult.toPojo());
-        }
-
-        factory.endConnection();
-
-        return result;
-    }
-
-    @Override
     public List<VirtualmachineHB> getVirtualMachinesByPhysicalMachine(
         final UserSession userSession, final Integer physicalMachineId)
     {
@@ -361,9 +319,9 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         physicalmachineHB, enterpriseId);
             }
 
-            if ((numberOfVM.equals(new Long(0)))
-                && ((physicalmachineHB.getIdEnterprise() == null) || (physicalmachineHB
-                    .getIdEnterprise() == 0)))
+            if (numberOfVM.equals(new Long(0))
+                && (physicalmachineHB.getIdEnterprise() == null || physicalmachineHB
+                    .getIdEnterprise() == 0))
             {
                 infrastructures.add(physicalmachineHB.toPojo());
             }
@@ -1434,9 +1392,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             physicalMachineHb.setDescription(pm.getDescription());
             physicalMachineHb.setCpu(pm.getCpu());
             physicalMachineHb.setRam(pm.getRam());
-            physicalMachineHb.setHd(pm.getHd());
-            physicalMachineHb.setRealCpu(pm.getRealCpu());
-            physicalMachineHb.setRealRam(pm.getRealRam());
             physicalMachineHb.setIdState(pm.getIdState());
             physicalMachineHb.getHypervisor().setIpService(ipService);
             physicalMachineHb.setVswitchName(pm.getVswitchName());
@@ -1473,7 +1428,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 userSession, physicalMachineAux.getDataCenter(), null, "Physical machine '"
                     + physicalMachineAux.getName() + "' has been modified [Name: "
                     + physicalMachineHb.getName() + ", " + +physicalMachineHb.getCpu() + "CPUs, "
-                    + physicalMachineHb.getRam() + " RAM, " + physicalMachineHb.getHd() + " HD, "
+                    + physicalMachineHb.getRam() + " RAM, "
                     + physicalMachineHb.getHypervisor().getType().getValue() + " hypervisor]",
                 null, (Rack) physicalMachineAux.getAssignedTo(), physicalMachineAux, null, null);
         }
@@ -1840,8 +1795,13 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
+                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+                            {
+                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            }
                             // errorManager.reportError(resourceManager, basicResult,
                             // "editVirtualMachine", e.toString());
+
                             return basicResult;
                         }
                     }
@@ -2230,20 +2190,31 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             {
                 // There was a problem shuting down the virtual machine
                 // Leaving the virtual machine with unknown state
+                String errorMesssage =
+                    "Operation cannot be performed on " + virtualMachine.getName()
+                        + " because the hypervisor could be disconnected.";
+
                 PhysicalMachine machine =
                     (PhysicalMachine) virtualMachine.getAssignedTo().getAssignedTo();
                 traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_POWEROFF, userSession, machine.getDataCenter(), null,
-                    "Operation cannot be performed on " + virtualMachine.getName()
-                        + " because datacenter isn't well configured.", null, machine.getRack(),
-                    machine, userSession.getUser(), userSession.getEnterpriseName());
+                    errorMesssage, null, machine.getRack(), machine, userSession.getUser(),
+                    userSession.getEnterpriseName());
                 // Generating the result
-                dataResult.setMessage(basicResult.getMessage());
+
+                factory.beginConnection();
+                String nameVApp =
+                    factory.getVirtualApplianceDAO()
+                        .getVirtualAppByVirtualMachine(virtualMachine.getId()).getName();
+                factory.endConnection();
+
+                String errorNotificacion = nameVApp + ": " + basicResult.getMessage();
+
+                dataResult.setMessage(errorNotificacion);
                 dataResult.setSuccess(basicResult.getSuccess());
                 dataResult.setData(new State(StateEnum.UNKNOWN));
                 return dataResult;
             }
-
             dataResult.setMessage(basicResult.getMessage());
             dataResult.setSuccess(basicResult.getSuccess());
             State inProgressState = new State(StateEnum.IN_PROGRESS);
@@ -2488,7 +2459,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
      * .abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB)
      */
     @Override
-    public BasicResult updateUsedResourcesByDatacenter(final DatacenterHB dataCenter)
+    public BasicResult updateUsedResourcesByDatacenter(final Integer dataCenter)
     {
         BasicResult basicResult = new BasicResult();
 
@@ -2499,7 +2470,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             factory.beginConnection();
             DataCenterDAO datacenterDAO = factory.getDataCenterDAO();
 
-            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
+            datacenterDAO.updateUsedResourcesByDatacenter(dataCenter);
             basicResult.setSuccess(true);
             basicResult.setMessage(InfrastructureCommandImpl.resourceManager
                 .getMessage("updateUsedResourcesByDatacenter.success"));
@@ -2665,7 +2636,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
         DatacenterHB dataCenter = pm.getDataCenter();
         factory.endConnection();
 
-        return updateUsedResourcesByDatacenter(dataCenter);
+        return updateUsedResourcesByDatacenter(dataCenter.getIdDataCenter());
     }
 
     /*

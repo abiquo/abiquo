@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <service id="remoting-service" class="flex.messaging.services.RemotingService">
     <adapters>
-        <adapter-definition id="java-object"
-            class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true" />
+        <adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true" />
     </adapters>
     <default-channels>
         <channel ref="my-amf" />
@@ -15,6 +14,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Infrastructure Services ******** -->
@@ -25,6 +25,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Login Services ******** -->
@@ -46,6 +47,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Virtual Appliance Services ******** -->
@@ -56,6 +58,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Virtual Image Services ******** -->
@@ -66,6 +69,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Non blocking Services ******** -->
@@ -76,6 +80,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Networking Services ******** -->
@@ -86,6 +91,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** ApplianceManager Service ********
@@ -106,6 +112,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Configuration Service ******** -->
@@ -116,6 +123,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Remote Services ******** -->
@@ -126,6 +134,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** Datastore Services ******** -->
@@ -136,6 +145,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
     <!-- ******** System properties Services ******** -->
@@ -146,6 +156,7 @@
         </properties>
         <channels>
             <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
 </service>

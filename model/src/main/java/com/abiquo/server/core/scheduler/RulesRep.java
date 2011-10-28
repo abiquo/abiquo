@@ -52,7 +52,7 @@ public class RulesRep extends DefaultRepBase
 
     }
 
-    public RulesRep(EntityManager entityManager)
+    public RulesRep(final EntityManager entityManager)
     {
         this.entityManager = entityManager;
 
@@ -82,7 +82,7 @@ public class RulesRep extends DefaultRepBase
      * @param idDatacenter
      * @return List<PersistentRule>
      */
-    public List<PersistentRule> getDatacenterRules(Integer idDatacenter)
+    public List<PersistentRule> getDatacenterRules(final Integer idDatacenter)
     {
         List<PersistentRule> rules = new ArrayList<PersistentRule>();
 
@@ -101,12 +101,12 @@ public class RulesRep extends DefaultRepBase
         return enterpriseExclusionRuleDao.findAll();
     }
 
-    public EnterpriseExclusionRule findEnterpriseExclusionRuleById(Integer id)
+    public EnterpriseExclusionRule findEnterpriseExclusionRuleById(final Integer id)
     {
         return this.enterpriseExclusionRuleDao.findById(id);
     }
 
-    public void deleteEnterpriseExclusionRule(EnterpriseExclusionRule enterpriseExclusionRule)
+    public void deleteEnterpriseExclusionRule(final EnterpriseExclusionRule enterpriseExclusionRule)
     {
         if (enterpriseExclusionRule != null)
         {
@@ -116,7 +116,7 @@ public class RulesRep extends DefaultRepBase
 
     }
 
-    public EnterpriseExclusionRule insertEnterpriseExclusionRule(EnterpriseExclusionRule rule)
+    public EnterpriseExclusionRule insertEnterpriseExclusionRule(final EnterpriseExclusionRule rule)
     {
         enterpriseExclusionRuleDao.persist(rule);
         enterpriseExclusionRuleDao.flush();
@@ -128,12 +128,12 @@ public class RulesRep extends DefaultRepBase
         return fitPolicyRuleDao.findAll();
     }
 
-    public FitPolicyRule findFitPolicyRuleById(Integer id)
+    public FitPolicyRule findFitPolicyRuleById(final Integer id)
     {
         return this.fitPolicyRuleDao.findById(id);
     }
 
-    public FitPolicyRule insertFitPolicyRule(FitPolicyRule rule)
+    public FitPolicyRule insertFitPolicyRule(final FitPolicyRule rule)
     {
         fitPolicyRuleDao.persist(rule);
         fitPolicyRuleDao.flush();
@@ -145,12 +145,17 @@ public class RulesRep extends DefaultRepBase
         return machineLoadRuleDao.findAll();
     }
 
-    public MachineLoadRule findMachineLoadRuleById(Integer id)
+    public MachineLoadRule findMachineLoadRuleById(final Integer id)
     {
         return this.machineLoadRuleDao.findById(id);
     }
 
-    public void deleteMachineLoadRule(MachineLoadRule machineLoadRule)
+    public List<MachineLoadRule> findMachineLoadRuleByMachine(final Integer id)
+    {
+        return this.machineLoadRuleDao.findByMachine(id);
+    }
+
+    public void deleteMachineLoadRule(final MachineLoadRule machineLoadRule)
     {
         if (machineLoadRule != null)
         {
@@ -159,14 +164,14 @@ public class RulesRep extends DefaultRepBase
         }
     }
 
-    public MachineLoadRule insertMachineLoadRule(MachineLoadRule rule)
+    public MachineLoadRule insertMachineLoadRule(final MachineLoadRule rule)
     {
         machineLoadRuleDao.persist(rule);
         machineLoadRuleDao.flush();
         return rule;
     }
 
-    public Set<EnterpriseDto> findEnterprises(EnterpriseExclusionRule eeR)
+    public Set<EnterpriseDto> findEnterprises(final EnterpriseExclusionRule eeR)
     {
         Set<EnterpriseDto> enterprises = new HashSet<EnterpriseDto>();
 
@@ -178,14 +183,17 @@ public class RulesRep extends DefaultRepBase
         return enterprises;
     }
 
-    public void deleteFitPolicyRule(FitPolicyRule fitPolicyRule)
+    public void deleteFitPolicyRule(final FitPolicyRule fitPolicyRule)
     {
         if (fitPolicyRule != null)
+        {
             fitPolicyRuleDao.remove(fitPolicyRule);
+            fitPolicyRuleDao.flush();
+        }
 
     }
 
-    public FitPolicyRule getFitPolicyForDatacenter(Integer datacenterId)
+    public FitPolicyRule getFitPolicyForDatacenter(final Integer datacenterId)
     {
         FitPolicyRule fpr = fitPolicyRuleDao.getFitPolicyForDatacenter(datacenterId);
         return fpr;
@@ -197,7 +205,7 @@ public class RulesRep extends DefaultRepBase
         return fpr;
     }
 
-    public List<MachineLoadRule> getMachineLoadForDatacenter(Integer datacenterId)
+    public List<MachineLoadRule> getMachineLoadForDatacenter(final Integer datacenterId)
     {
         List<MachineLoadRule> mlrList = machineLoadRuleDao.getRulesForDatacenter(datacenterId);
         return mlrList;

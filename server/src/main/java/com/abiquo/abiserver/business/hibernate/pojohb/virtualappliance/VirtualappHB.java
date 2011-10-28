@@ -220,7 +220,8 @@ public class VirtualappHB implements java.io.Serializable, IPojoHB<VirtualApplia
         virtualAppliance.setState(new State(state));
         virtualAppliance.setSubState(new State(subState));
         virtualAppliance.setError(error != 0);
-        virtualAppliance.setVirtualDataCenter(virtualDataCenterHB.toPojo());
+        virtualAppliance.setVirtualDataCenter(virtualDataCenterHB != null ? virtualDataCenterHB
+                .toPojo() : null);
         virtualAppliance.setNodeConnections(nodeConnections);
 
         if (enterpriseHB != null)

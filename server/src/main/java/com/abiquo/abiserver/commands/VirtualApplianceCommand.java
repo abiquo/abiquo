@@ -207,6 +207,9 @@ public interface VirtualApplianceCommand
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterprise(
         UserSession userSession, final Enterprise enterprise);
 
+    public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseFaster(
+        UserSession userSession, final Enterprise enterprise);
+
     public abstract DataResult<Collection<VirtualDataCenter>> getVirtualDataCentersByEnterpriseAndDatacenter(
         UserSession userSession, final Enterprise enterprise, final DataCenter datacenter);
 
@@ -369,5 +372,8 @@ public interface VirtualApplianceCommand
      * @return the virtualApplianceWs
      */
     public abstract IVirtualApplianceWS getVirtualApplianceWs();
+
+    public abstract DataResult<Collection<Log>> getVirtualApplianceLogs(UserSession userSession,
+        VirtualAppliance virtualAppliance);
 
 }

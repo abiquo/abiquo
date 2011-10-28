@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.Min;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -39,16 +41,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.DatacenterService;
-import com.abiquo.api.services.IpAddressService;
-import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.util.PagedList;
 
 @Parent(DatacentersResource.class)
@@ -63,7 +68,13 @@ public class DatacenterResource extends AbstractResource
 
     public static final String HYPERVISORS_PATH = "hypervisors";
 
+    public static final String ENTERPRISES = "enterprises";
+
     public static final String ENTERPRISES_PATH = "action/enterprises";
+
+    public static final String UPDATE_RESOURCES = "updateUsedResources";
+
+    public static final String UPDATE_RESOURCES_PATH = "action/updateUsedResources";
 
     public static final String NETWORK = "network";
 
@@ -71,7 +82,10 @@ public class DatacenterResource extends AbstractResource
     DatacenterService service;
 
     @Autowired
-    IpAddressService ipService;
+    InfrastructureService infraService;
+
+    @Autowired
+    NetworkService netService;
 
     @Context
     UriInfo uriInfo;
@@ -86,29 +100,31 @@ public class DatacenterResource extends AbstractResource
     }
 
     @PUT
-    public DatacenterDto modifyDatacenter(final DatacenterDto datacenter,
+    public DatacenterDto modifyDatacenter(final DatacenterDto datacenterDto,
         @PathParam(DATACENTER) final Integer datacenterId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        Datacenter d = service.getDatacenter(datacenterId);
+        Datacenter datacenter = createPersistenceObject(datacenterDto);
+        datacenter = service.modifyDatacenter(datacenterId, datacenter);
 
-        d = service.modifyDatacenter(datacenterId, datacenter);
-
-        return createTransferObject(d, restBuilder);
+        return createTransferObject(datacenter, restBuilder);
     }
 
     @GET
     @Path(ENTERPRISES_PATH)
     public EnterprisesDto getEnterprises(@PathParam(DATACENTER) final Integer datacenterId,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
-        @QueryParam(NETWORK) Boolean network, @QueryParam(LIMIT) @Min(0) final Integer limit,
+        @QueryParam(NETWORK) Boolean network,
+        @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @Context final IRESTBuilder restBuilder) throws Exception
 
     {
-        Integer firstElem = (startwith == null) ? 0 : startwith;
-        Integer numElem = (limit == null) ? DEFAULT_PAGE_LENGTH : limit;
+        Integer firstElem = startwith == null ? 0 : startwith;
+        Integer numElem = limit == null ? DEFAULT_PAGE_LENGTH : limit;
         if (network == null)
+        {
             network = false;
+        }
 
         Datacenter datacenter = service.getDatacenter(datacenterId);
         List<Enterprise> enterprises =
@@ -143,11 +159,28 @@ public class DatacenterResource extends AbstractResource
     }
 
     // FIXME: Not allowed right now
-    // @DELETE
-    // public void deleteDatacenter(@PathParam(DATACENTER) Integer datacenterId)
-    // {
-    // service.removeDatacenter(datacenterId);
-    // }
+    @DELETE
+    public void deleteDatacenter(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        service.removeDatacenter(datacenterId);
+    }
+
+    @PUT
+    @Path(UPDATE_RESOURCES_PATH)
+    public void updateUsedResources(@PathParam(DATACENTER) final Integer datacenterId)
+    {
+        Datacenter datacenter = service.getDatacenter(datacenterId);
+        List<Rack> racks = service.getRacks(datacenter);
+        for (Rack rack : racks)
+        {
+            List<Machine> machines = infraService.getMachines(rack);
+            for (Machine machine : machines)
+            {
+                infraService.updateUsedResourcesByMachine(machine);
+            }
+        }
+
+    }
 
     public static DatacenterDto addLinks(final IRESTBuilder builder, final DatacenterDto datacenter)
     {
@@ -165,6 +198,7 @@ public class DatacenterResource extends AbstractResource
         return dto;
     }
 
+    // Create the persistence object.
     public static Datacenter createPersistenceObject(final DatacenterDto datacenter)
         throws Exception
     {
@@ -172,7 +206,7 @@ public class DatacenterResource extends AbstractResource
     }
 
     private List<RESTLink> buildEnterprisesLinks(final String Path, final PagedList< ? > list,
-        Boolean network, Integer numElem)
+        final Boolean network, final Integer numElem)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -181,7 +215,7 @@ public class DatacenterResource extends AbstractResource
         if (list.getCurrentElement() != 0)
         {
             Integer previous = list.getCurrentElement() - list.getPageSize();
-            previous = (previous < 0) ? 0 : previous;
+            previous = previous < 0 ? 0 : previous;
 
             links.add(new RESTLink("prev", Path + "?" + NETWORK + "=" + network.toString() + '&'
                 + AbstractResource.START_WITH + "=" + previous + '&' + AbstractResource.LIMIT + "="
@@ -205,4 +239,5 @@ public class DatacenterResource extends AbstractResource
             + numElem));
         return links;
     }
+
 }

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachine;
 
 /**
@@ -51,7 +51,7 @@ public class VirtualMachineAllocatorTestService extends VirtualMachineAllocatorS
 
         vmachineDao.flush();
 
-        vmachineDao.updateVirtualMachineState(virtualMachineId, State.RUNNING);
+        vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.RUNNING);
 
         return vmachineDao.findById(virtualMachineId);
     }

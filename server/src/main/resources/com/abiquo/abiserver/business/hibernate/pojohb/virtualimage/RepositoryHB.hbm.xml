@@ -2,8 +2,7 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB"
-        table="repository">
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB" table="repository">
         <id name="idRepository" type="java.lang.Integer">
             <column name="idRepository" />
             <generator class="identity" />
@@ -14,8 +13,7 @@
         <property name="url" type="string">
             <column length="45" name="URL" not-null="true" />
         </property>
-        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
-            lazy="false" fetch="select" name="datacenter">
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" lazy="false" fetch="select" name="datacenter">
             <column name="idDataCenter" not-null="true" />
         </many-to-one>
         <!--

@@ -39,6 +39,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
 
     private EnterpriseGenerator enterpriseGenerator;
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
@@ -48,7 +49,7 @@ public class DatacenterDAOTest extends DefaultDAOTestBase<DatacenterDAO, Datacen
     }
 
     @Override
-    protected DatacenterDAO createDao(EntityManager arg0)
+    protected DatacenterDAO createDao(final EntityManager arg0)
     {
         return new DatacenterDAO(arg0);
     }

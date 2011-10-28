@@ -53,7 +53,7 @@ public class UcsRack extends Rack
         return port;
     }
 
-    public void setPort(int port)
+    public void setPort(final int port)
     {
         this.port = port;
     }
@@ -63,7 +63,7 @@ public class UcsRack extends Rack
         return ip;
     }
 
-    public void setIp(String ip)
+    public void setIp(final String ip)
     {
         this.ip = ip;
     }
@@ -73,7 +73,7 @@ public class UcsRack extends Rack
         return password;
     }
 
-    public void setPassword(String password)
+    public void setPassword(final String password)
     {
         this.password = password;
     }
@@ -83,7 +83,7 @@ public class UcsRack extends Rack
         return user;
     }
 
-    public void setUser(String user)
+    public void setUser(final String user)
     {
         this.user = user;
     }
@@ -113,7 +113,7 @@ public class UcsRack extends Rack
         return rackPojo;
     }
 
-    public static UcsRack create(UcsRackDto dto, DataCenter datacenter)
+    public static UcsRack create(final UcsRackDto dto, final DataCenter datacenter)
     {
         UcsRack rack = new UcsRack();
         rack.setDataCenter(datacenter);
@@ -130,7 +130,7 @@ public class UcsRack extends Rack
                 dto.getVlanIdMax(),
                 dto.getVlansIdAvoided(),
                 dto.getNrsq(),
-                dto.getVlanPerVdcExpected());
+                dto.getVlanPerVdcReserved());
         rack.setVlanNetworkParameters(vlanNetworkParameters);
         rack.setHaEnabled(dto.isHaEnabled());
         return rack;

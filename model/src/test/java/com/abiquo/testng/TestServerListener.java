@@ -65,6 +65,7 @@ public class TestServerListener implements ISuiteListener
         try
         {
             server.start();
+            LOGGER.info("Test server started.");
         }
         catch (Exception ex)
         {
@@ -80,6 +81,7 @@ public class TestServerListener implements ISuiteListener
         try
         {
             server.stop();
+            LOGGER.info("Test server stoped.");
         }
         catch (Exception ex)
         {
