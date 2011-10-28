@@ -24,8 +24,6 @@ package com.abiquo.api.exceptions;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.springframework.util.StringUtils;
-
 import com.abiquo.model.validation.IscsiPath;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 
@@ -292,7 +290,7 @@ public enum APIError
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
         "VIMAGE-0", "The requested virtual image does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
-        "Provided virtual image is not a bundle", "Provided [%s] is not a bundle"),
+        "Provided virtual image is not a bundle"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -427,24 +425,12 @@ public enum APIError
      */
     String message;
 
-    /**
-     * Message with patter to format
-     */
-    String message2format;
-
     String cause;
 
     private APIError(final String code, final String message)
     {
         this.code = code;
         this.message = message;
-    }
-
-    private APIError(final String code, final String message, final String message2format)
-    {
-        this.code = code;
-        this.message = message;
-        this.message2format = message2format;
     }
 
     public String getCode()
@@ -460,15 +446,6 @@ public enum APIError
     public void addCause(final String cause)
     {
         this.cause = cause;
-    }
-
-    public APIError formatMessage(final Object... args)
-    {
-        if (StringUtils.hasText(this.message2format))
-        {
-            this.message = String.format(this.message2format, args);
-        }
-        return this;
     }
 
     public static void main(final String[] args)
