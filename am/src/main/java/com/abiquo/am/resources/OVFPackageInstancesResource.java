@@ -61,9 +61,9 @@ import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 @Parent(EnterpriseRepositoryResource.class)
 @Path(OVFPackageInstancesResource.OVFPI_PATH)
@@ -105,7 +105,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
      * XXX do not include DOWNLOADING or ERROR status
      */
     @GET
-    public OVFPackageInstanceStatusListDto getOVFPackageInstancesStatus(
+    public OVFPackageInstancesStateDto getOVFPackageInstancesStatus(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise)
     {
         List<String> availables =
@@ -113,15 +113,15 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
                 EnterpriseRepositoryService.getRepo(idEnterprise).getEnterpriseRepositoryPath(),
                 false);
 
-        OVFPackageInstanceStatusListDto list = new OVFPackageInstanceStatusListDto();
+        OVFPackageInstancesStateDto list = new OVFPackageInstancesStateDto();
 
         for (String ovf : availables)
         {
-            OVFPackageInstanceStatusDto stat = new OVFPackageInstanceStatusDto();
+            OVFPackageInstanceStateDto stat = new OVFPackageInstanceStateDto();
             stat.setOvfId(ovf);
-            stat.setOvfPackageStatus(OVFPackageInstanceStatusType.DOWNLOAD);
+            stat.setStatus(OVFStatusEnumType.DOWNLOAD);
 
-            list.getOvfPackageInstancesStatus().add(stat);
+            list.getCollection().add(stat);
         }
 
         return list;
@@ -213,10 +213,10 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
          * TODO check OVFid is in this hostname ..
          */
 
-        diskInfo.setDiskFileSize(diskFile.length());
+        diskInfo.setDiskSizeMb(diskFile.length());
         service.upload(diskInfo, diskFile, errorMsg);
 
-        return Response.created(URI.create(diskInfo.getOvfUrl())).build();
+        return Response.created(URI.create(diskInfo.getOvfId())).build();
     }
 
     /**

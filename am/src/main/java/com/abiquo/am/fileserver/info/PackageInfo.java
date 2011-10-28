@@ -34,7 +34,7 @@ import com.abiquo.am.resources.ApplianceManagerPaths;
 import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.OVFPackageInstanceNotifier;
 import com.abiquo.am.services.notify.AMNotifierFactory;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 /**
  * An OVF package being download.
@@ -128,7 +128,7 @@ public class PackageInfo
             try
             {
                 AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
-                    OVFPackageInstanceStatusType.DOWNLOAD);
+                    OVFStatusEnumType.DOWNLOAD);
             }
             catch (Exception e) // IdNotFoundException RepositoryException EventException
             {
@@ -160,7 +160,7 @@ public class PackageInfo
             if(deleteFolder)
             {                
                 AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
-                    OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+                    OVFStatusEnumType.NOT_DOWNLOAD);
 
                 enterpriseRepository.deleteOVF(ovfId);
 

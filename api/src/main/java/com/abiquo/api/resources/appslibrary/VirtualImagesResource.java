@@ -28,8 +28,10 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,6 +52,11 @@ public class VirtualImagesResource extends AbstractResource
 {
     public final static String VIRTUAL_IMAGES_PATH = "virtualimages";
 
+    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryId";
+
+    public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
+        "hypervisorTypeId";
+
     @Autowired
     private VirtualImageService service;
 
@@ -60,8 +67,13 @@ public class VirtualImagesResource extends AbstractResource
     public VirtualImagesDto getVirtualImages(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
+        @QueryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM) final Integer categoryId,
+        @QueryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final Integer hypervisorTypeId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        // TODO use categoryName and hypervisorType (optinals)
+        // TODO query params : categoryName and HyeprvisorType.name()
+
         final String amUri =
             infrastructureService.getRemoteService(datacenterId,
                 RemoteServiceType.APPLIANCE_MANAGER).getUri();
@@ -70,7 +82,7 @@ public class VirtualImagesResource extends AbstractResource
 
         List<VirtualImage> all = service.getVirtualImages(enterpriseId, datacenterId);
 
-        if (all != null && !all.isEmpty())
+        if (!CollectionUtils.isEmpty(all))
         {
             for (VirtualImage vimage : all)
             {

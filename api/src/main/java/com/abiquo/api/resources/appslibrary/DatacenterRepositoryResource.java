@@ -25,6 +25,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -60,6 +61,10 @@ public class DatacenterRepositoryResource extends AbstractResource
 
     public final static String DATACENTER_REPOSITORY_REFRESH_PATH = "/actions/refresh";
 
+    public final static String DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM = "refresh";
+
+    public final static String DATACENTER_REPOSITORY_GET_USAGE_QUERY_PARAM = "usage";
+
     @Autowired
     private DatacenterRepositoryService repoService;
 
@@ -74,20 +79,41 @@ public class DatacenterRepositoryResource extends AbstractResource
 
     /**
      * Return the remote repository if exists.
+     * 
+     * @param refresh, communicate with the EnterpriseRepositoryResource (ApplianceManager
+     *            datacenter service) to add vimages include in the repository filesystem.
+     * @param includeUsage, communicate with the EnterpriseRepositoryResource (ApplianceManager
+     *            datacenter service) in order to include the repository filesytem usage.
      */
     @GET
     public DatacenterRepositoryDto getDatacenterRepository(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
+        @QueryParam(DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM) final boolean refresh,
+        @QueryParam(DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM) final boolean includeUsage,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO check enterprise can use the datacenter
+
         Repository repo = vimageService.getDatacenterRepository(dcId);
 
         final String amUri =
             infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
 
-        return createTransferObject(repo, enterpId, amUri, restBuilder);
+        if (refresh)
+        {
+            refreshDatacenterRepository(enterpId, dcId, restBuilder);
+        }
+
+        DatacenterRepositoryDto repositoryDto =
+            createTransferObject(repo, enterpId, amUri, restBuilder);
+
+        if (includeUsage)
+        {
+            return repoService.includeRepositoryUsageFromAm(repositoryDto, enterpId, dcId);
+        }
+
+        return repositoryDto;
     }
 
     @PUT
@@ -115,7 +141,7 @@ public class DatacenterRepositoryResource extends AbstractResource
             ModelTransformer.transportFromPersistence(DatacenterRepositoryDto.class, repo);
 
         dto.setRepositoryLocation(repo.getUrl());
-        
+
         // use datacenterId as self id
         final Integer dcId = repo.getDatacenter().getId();
         dto = addLinks(builder, dto, enterpId, dcId, dcId, amUri);

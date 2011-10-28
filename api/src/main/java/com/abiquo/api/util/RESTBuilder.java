@@ -723,7 +723,11 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
 
         params.put(CategoryResource.CATEGORY, category.getId().toString());
-        links.add(builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params));
+
+        RESTLink categoryLink =
+            builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params);
+        categoryLink.setTitle(category.getName());
+        links.add(categoryLink);
 
         params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
         links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
@@ -731,7 +735,11 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, icon.getId().toString());
-            links.add(builder.buildRestLink(IconResource.class, IconResource.ICON, params));
+
+            RESTLink iconLink =
+                builder.buildRestLink(IconResource.class, IconResource.ICON, params);
+            iconLink.setTitle(icon.getPath()); // TODO do not use title (altRef)
+            links.add(iconLink);
         }
 
         // TODO: How to build a link for an imported one??

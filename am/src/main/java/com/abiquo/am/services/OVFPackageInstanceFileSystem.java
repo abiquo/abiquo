@@ -32,8 +32,6 @@ import static com.abiquo.am.services.OVFPackageConventions.getBundleMasterOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.getBundleSnapshot;
 import static com.abiquo.am.services.OVFPackageConventions.getOVFPackagePath;
 import static com.abiquo.am.services.OVFPackageConventions.getRelativeOVFPath;
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.deleteBundleConversion;
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getEnvelope;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +53,8 @@ import com.abiquo.am.services.util.BundleImageFileFilter;
 import com.abiquo.am.services.util.FormatsFilter;
 import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
@@ -119,35 +118,39 @@ public class OVFPackageInstanceFileSystem
         return envelope;
     }
 
-    public static OVFPackageInstanceStatusType getOVFStatus(final String enterpriseRepositoryPath,
+    public static OVFPackageInstanceStateDto getOVFStatus(final String enterpriseRepositoryPath,
         final String ovfId)
     {
         TimeoutFSUtils.getInstance().canUseRepository();
 
+        final OVFPackageInstanceStateDto state = new OVFPackageInstanceStateDto();
+        state.setOvfId(ovfId);
+
         final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
-        final String ovfEnvelopePath = FilenameUtils.concat(enterpriseRepositoryPath, getRelativeOVFPath(ovfId));
+        final String ovfEnvelopePath =
+            FilenameUtils.concat(enterpriseRepositoryPath, getRelativeOVFPath(ovfId));
 
         File errorMarkFile = new File(packagePath + OVF_STATUS_ERROR_MARK);
         if (errorMarkFile.exists())
         {
-            OVFPackageInstanceStatusType status = OVFPackageInstanceStatusType.ERROR;
-            status.setErrorCause(readErrorMarkFile(errorMarkFile));
-            return status;
+            state.setStatus(OVFStatusEnumType.ERROR);
+            state.setErrorCause(readErrorMarkFile(errorMarkFile));
         }
-
-        if (new File(packagePath + OVF_STATUS_DOWNLOADING_MARK).exists())
+        else if (new File(packagePath + OVF_STATUS_DOWNLOADING_MARK).exists())
         {
-            return OVFPackageInstanceStatusType.DOWNLOADING;
+            state.setStatus(OVFStatusEnumType.DOWNLOADING);
+
         }
-
-        if (!new File(ovfEnvelopePath).exists())
+        else if (!new File(ovfEnvelopePath).exists())
         {
-            return OVFPackageInstanceStatusType.NOT_DOWNLOAD;
+            state.setStatus(OVFStatusEnumType.NOT_DOWNLOAD);
         }
         else
         {
-            return OVFPackageInstanceStatusType.DOWNLOAD;
+            state.setStatus(OVFStatusEnumType.DOWNLOAD);
         }
+
+        return state;
     }
 
     /**
@@ -156,7 +159,7 @@ public class OVFPackageInstanceFileSystem
      * @throws RepositoryException
      */
     public static synchronized void createOVFStatusMarks(final String enterpriseRepositoryPath,
-        final String ovfId, final OVFPackageInstanceStatusType status, final String errorMsg)
+        final String ovfId, final OVFStatusEnumType status, final String errorMsg)
     {
         final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
 
@@ -517,8 +520,7 @@ public class OVFPackageInstanceFileSystem
                         File fileStartFile = new File(packagePath + fileStart);
                         if (!fileStartFile.delete())
                         {
-                            LOG.error("Try to remove the path [{}] but is not possible",
-                                fileStart);
+                            LOG.error("Try to remove the path [{}] but is not possible", fileStart);
                         }
                     }
                 }

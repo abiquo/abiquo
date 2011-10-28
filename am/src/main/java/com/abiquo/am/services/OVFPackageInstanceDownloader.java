@@ -45,7 +45,8 @@ import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 /**
  * Take an OVF-Envelope document and download all its references into the internal repository
@@ -130,9 +131,10 @@ public class OVFPackageInstanceDownloader
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(enterpriseId);
 
-        final OVFPackageInstanceStatusType status = enterpriseRepository.getOVFStatus(ovfId);
+        final OVFPackageInstanceStateDto state = enterpriseRepository.getOVFStatus(ovfId);
+        final OVFStatusEnumType status = state.getStatus();
 
-        if (status == OVFPackageInstanceStatusType.DOWNLOADING)
+        if (status == OVFStatusEnumType.DOWNLOADING)
         {
 
             if (htCurrentTransfers.containsKey(ovfId))
@@ -265,7 +267,7 @@ public class OVFPackageInstanceDownloader
     {
 
         final long idEnterprise = diskInfo.getIdEnterprise();
-        final String ovfId = diskInfo.getOvfUrl(); // XXX
+        final String ovfId = diskInfo.getOvfId(); // XXX
 
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(String.valueOf(idEnterprise));

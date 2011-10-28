@@ -62,8 +62,8 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
@@ -97,7 +97,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
     public void delete(final String erId, final String ovfId)
     {
-        OVFPackageInstanceStatusType status = getOVFStatus(erId, ovfId);
+        OVFStatusEnumType status =
+            EnterpriseRepositoryService.getRepo(erId).getOVFStatus(ovfId).getStatus();
 
         switch (status)
         {
@@ -114,7 +115,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         try
         {
             AMNotifierFactory.getInstance().setOVFStatus(erId, ovfId,
-                OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+                OVFStatusEnumType.NOT_DOWNLOAD);
             // ?
         }
         catch (Exception e)
@@ -141,8 +142,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         // sets the current state to start downloading
         try
         {
-            AMNotifierFactory.getInstance().setOVFStatus(erId, ovfId,
-                OVFPackageInstanceStatusType.DOWNLOADING);
+            AMNotifierFactory.getInstance()
+                .setOVFStatus(erId, ovfId, OVFStatusEnumType.DOWNLOADING);
         }
         catch (Exception e)
         {
@@ -153,13 +154,13 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile)
-        throws IOException,  EventException
+        throws IOException, EventException
     {
         downloader.uploadOVFPackage(diskinfo, diskFile);
 
         // sets the current state to start downloading
         AMNotifierFactory.getInstance().setOVFStatus(String.valueOf(diskinfo.getIdEnterprise()),
-            diskinfo.getOvfUrl(), OVFPackageInstanceStatusType.DOWNLOAD);
+            diskinfo.getOvfId(), OVFStatusEnumType.DOWNLOAD);
 
     }
 
@@ -245,7 +246,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
             packDto.setMasterDiskFilePath(masterDiskPath);
             packDto.setDiskFilePath(bundleDiskPath);
-            packDto.setOvfUrl(ovfId);
+            packDto.setOvfId(ovfId);
             // packDto.setDiskFileSize(diskFileSize); TODO change the disk size
         }
 
@@ -268,7 +269,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     {
 
         final String erId = String.valueOf(diskInfo.getIdEnterprise());
-        final String ovfIdSnapshot = diskInfo.getOvfUrl();
+        final String ovfIdSnapshot = diskInfo.getOvfId();
 
         EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
 
@@ -626,38 +627,32 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      * @throws DownloadException if the state is DOWNLOADING (exist the file mark on the Enterprise
      *             Repository) but it isn't in the ''htCurrentTransfers'' structure.
      */
-    public OVFPackageInstanceStatusDto getOVFPackageStatusIncludeProgress(final String ovfId,
+    public OVFPackageInstanceStateDto getOVFPackageStatusIncludeProgress(final String ovfId,
         final String enterpriseId) throws DownloadException
     {
 
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(enterpriseId);
 
-        final OVFPackageInstanceStatusType status = enterpriseRepository.getOVFStatus(ovfId);
-
-        OVFPackageInstanceStatusDto statusDto = new OVFPackageInstanceStatusDto();
-        statusDto.setOvfId(ovfId);
-        statusDto.setOvfPackageStatus(status);
+        final OVFPackageInstanceStateDto state = enterpriseRepository.getOVFStatus(ovfId);
+        final OVFStatusEnumType status = state.getStatus();
 
         logger.debug("Status for [{}] : {}", ovfId, status.name());
 
-        if (status == OVFPackageInstanceStatusType.DOWNLOADING)
+        if (status == OVFStatusEnumType.DOWNLOADING)
         {
-            statusDto.setProgress(downloader.getDownloadProgress(ovfId));
-        }
-        else if (status == OVFPackageInstanceStatusType.ERROR)
-        {
-            statusDto.setErrorCause(status.getErrorCause());
+            final double progress = downloader.getDownloadProgress(ovfId);
+            state.setDownloadingProgress(progress);
         }
 
-        return statusDto;
+        return state;
     }
 
     public OVFPackageInstanceDto createBunlde(final OVFPackageInstanceDto master,
         final String snapshot)
     {
 
-        final String ovfId = master.getOvfUrl();
+        final String ovfId = master.getOvfId();
         final String bundleOvfId =
             ovfId.substring(0, ovfId.lastIndexOf('/') + 1) + snapshot + "-snapshot-"
                 + ovfId.substring(ovfId.lastIndexOf('/') + 1, ovfId.length());
@@ -678,7 +673,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         // di.setImageSize(121212); // XXX not use
         // di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
         di.setMasterDiskFilePath(master.getDiskFilePath());
-        di.setOvfUrl(bundleOvfId);
+        di.setOvfId(bundleOvfId);
 
         di.setIdEnterprise(master.getIdEnterprise());
         // di.setIdUser(2);
@@ -714,11 +709,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     //
     // return fileLocations;
     // }
-
-    public OVFPackageInstanceStatusType getOVFStatus(final String erId, final String ovfId)
-    {
-        return EnterpriseRepositoryService.getRepo(erId).getOVFStatus(ovfId);
-    }
 
     /**
      * default is byte
@@ -794,7 +784,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile, String errorMsg)
-        throws IOException,  EventException
+        throws IOException, EventException
     {
 
         upload(diskinfo, diskFile);
@@ -802,10 +792,10 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         {
             // sets the current state to start downloading
             AMNotifierFactory.getInstance().setOVFStatus(
-                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(),
-                OVFPackageInstanceStatusType.ERROR);
+                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(),
+                OVFStatusEnumType.ERROR);
             AMNotifierFactory.getInstance().setOVFStatusError(
-                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(), errorMsg);
+                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(), errorMsg);
         }
 
     }

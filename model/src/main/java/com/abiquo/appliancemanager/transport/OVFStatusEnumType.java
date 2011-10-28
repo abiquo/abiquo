@@ -21,29 +21,34 @@
 
 package com.abiquo.appliancemanager.transport;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement
-@XmlType(name = "AMConfiguration")
-public class AMConfigurationDto
+import com.abiquo.server.core.appslibrary.OVFPackage;
+
+/**
+ * status of a {@link OVFPackage} in a {@link EnterpriseRepositoriesDto}.
+ */
+@XmlType(name = "ovfInstanceStatus")
+@XmlEnum
+public enum OVFStatusEnumType
 {
-    // @XmlAttribute(name = "OVFId", namespace =
-    // "http://www.abiquo.com/model/transport/appliancemanager", required = true)
-    /**
-     * Where the ''repositoryPath'' is exported. Usually a NFS location such
-     * 'nsf-devel:/opt/vm_repository' .
-     */
-    protected String repositoryLocation;
+    /** ovf package not found in the enterprise repository */
+    NOT_DOWNLOAD,
+    /** currently being created **/
+    DOWNLOADING,
+    /** ovf package installed in the current enterprise repository. */
+    DOWNLOAD,
+    /** error during the creation */
+    ERROR;
 
-    public String getRepositoryLocation()
+    public String value()
     {
-        return repositoryLocation;
+        return name();
     }
 
-    public void setRepositoryLocation(String repositoryLocation)
+    public static OVFStatusEnumType fromValue(String v)
     {
-        this.repositoryLocation = repositoryLocation;
+        return valueOf(v);
     }
-
 }

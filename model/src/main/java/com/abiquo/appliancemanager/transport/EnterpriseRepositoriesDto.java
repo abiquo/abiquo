@@ -29,20 +29,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.WrapperDto;
 
-/**
- * @author destevez
- */
 @XmlRootElement
-@XmlType(name = "EnterpriseRepository")
+@XmlType(name = "enterpriseRepositories")
 public class EnterpriseRepositoriesDto extends WrapperDto<EnterpriseRepositoryDto>
 {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = -623287378452830519L;
 
-    @XmlElement(name = "EnterpriseRepository")
+    @XmlElement(name = "enterpriseRepository")
     public List<EnterpriseRepositoryDto> getCollection()
     {
         return collection;

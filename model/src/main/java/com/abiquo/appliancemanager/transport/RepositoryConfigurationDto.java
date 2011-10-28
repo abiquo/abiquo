@@ -21,39 +21,31 @@
 
 package com.abiquo.appliancemanager.transport;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement
-// (name = "OVFPackageInstanceStatusList")
-@XmlType(name = "OVFPackageInstanceStatusList")
-public class OVFPackageInstanceStatusListDto extends SingleResourceTransportDto implements
-    Serializable
+@XmlType(name = "repositoryConfiguration")
+public class RepositoryConfigurationDto extends SingleResourceTransportDto
 {
-    private static final long serialVersionUID = -2686268059706206584L;
+    private static final long serialVersionUID = -912929254475352163L;
 
-    private List<OVFPackageInstanceStatusDto> ovfPackageInstancesStatus;
+    /**
+     * {@link abiquo.appliancemanager.repositoryLocation} property in the datacenter remote services
+     * configuration. Remote repository NFS exported location ('nsf-devel:/opt/vm_repository')
+     */
+    protected String repositoryLocation;
 
-    public List<OVFPackageInstanceStatusDto> getOvfPackageInstancesStatus()
+    public String getRepositoryLocation()
     {
-        if (ovfPackageInstancesStatus == null)
-        {
-            ovfPackageInstancesStatus = new LinkedList<OVFPackageInstanceStatusDto>();
-        }
-
-        return ovfPackageInstancesStatus;
+        return repositoryLocation;
     }
 
-    public void setOvfPackageInstancesStatus(
-        List<OVFPackageInstanceStatusDto> ovfPackageInstancesStatus)
+    public void setRepositoryLocation(String repositoryLocation)
     {
-        this.ovfPackageInstancesStatus = ovfPackageInstancesStatus;
+        this.repositoryLocation = repositoryLocation;
     }
 
 }

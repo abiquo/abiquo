@@ -25,13 +25,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
-
+import org.apache.wink.client.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,10 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
@@ -97,8 +99,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
-                ovfpackageListURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .post(ovfpackageListURL);
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -138,6 +140,136 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             result.setSuccess(Boolean.TRUE);
         }
         return result;
+    }
+
+    @Override
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
+        String nameOVFPackageList, Integer idEnterprise, Integer datacenterId)
+    {
+        final DataResult<List<OVFPackageInstanceStatus>> result =
+            new DataResult<List<OVFPackageInstanceStatus>>();
+
+        final Integer listId = getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        final String uri =
+            createOVFPackageListStatusLink(idEnterprise.toString(), String.valueOf(listId));
+
+        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(OVFPackageInstancesStateDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "getOVFPackageList");
+            // TODO getOVFPackageListStatus messages
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(List<String> ovfUrls,
+        Integer idEnterprise, Integer datacenterId)
+    {
+        final DataResult<List<OVFPackageInstanceStatus>> result =
+            new DataResult<List<OVFPackageInstanceStatus>>();
+        final List<OVFPackageInstanceStatus> list = new LinkedList<OVFPackageInstanceStatus>();
+        for (String ovfUrl : ovfUrls)
+        {
+            list.add(getOVFPackageState(ovfUrl, idEnterprise, datacenterId).getData());
+        }
+
+        result.setData(list);
+        return result;
+    }
+
+    @Override
+    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId)
+    {
+        final DataResult<OVFPackageInstanceStatus> result =
+            new DataResult<OVFPackageInstanceStatus>();
+
+        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+
+        final String uri =
+            createOVFPackageStateLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
+
+        ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexOVFPackageListObject(response
+                .getEntity(OVFPackageInstanceStateDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "getOVFPackageList");
+            // TODO getOVFPackageStatus messages
+        }
+
+        return result;
+    }
+
+    public BasicResult installOVFPackagesInDatacenter(List<String> ovfUrls, Integer idEnterprise,
+        Integer datacenterId)
+    {
+        for (String ovfUrl : ovfUrls)
+        {
+            installOVFPackageInDatacenter(ovfUrl, idEnterprise, datacenterId);
+        }
+
+        BasicResult result = new BasicResult();
+        result.setSuccess(true);
+        return result;
+    }
+
+    private void installOVFPackageInDatacenter(final String ovfUrl, Integer idEnterprise,
+        Integer datacenterId)
+    {
+        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+
+        final String uri =
+            createOVFPackageInstallLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
+
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
+
+        if (response.getStatusCode() / 200 != 1)
+        {
+            logger.error("Can't install OVFPackage {} in dc {}", ovfUrl, datacenterId);
+            // error cause will be shown with getOVFPackageState
+        }
+    }
+
+    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId)
+    {
+
+        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+
+        final String uri =
+            createOVFPackageUninstallLink(String.valueOf(idEnterprise),
+                String.valueOf(ovfPackageId));
+
+        Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
+        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        // TODO post use the the provided mediatype both for mediatype and accepttype
+        // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
+
+        if (response.getStatusCode() / 200 != 1)
+        {
+            logger.error("Can't install OVFPackage {} in dc {}", ovfUrl, datacenterId);
+            // error cause will be shown with getOVFPackageState
+        }
+
+        return new DataResult<OVFPackageInstanceStatus>(); // TODO no content
     }
 
     @Override
@@ -289,8 +421,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
-                null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .put(null);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -301,6 +433,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return response.getEntity(OVFPackageListDto.class);
     }
 
+    @Deprecated
+    // TODO remove
     private static Response response(final ClientResponse response)
     {
         String cause = new String();
@@ -471,4 +605,66 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         return pack;
     }
+
+    private List<OVFPackageInstanceStatus> createFlexOVFPackageListObject(
+        OVFPackageInstancesStateDto entity)
+    {
+        List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
+
+        for (OVFPackageInstanceStateDto statusDto : entity.getCollection())
+        {
+            statusList.add(createFlexOVFPackageListObject(statusDto));
+        }
+
+        return statusList;
+    }
+
+    protected OVFPackageInstanceStatus createFlexOVFPackageListObject(
+        final OVFPackageInstanceStateDto statusDto)
+    {
+        OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
+
+        status.setStatus(statusDto.getStatus().name());
+        status.setUrl(statusDto.getOvfId());
+
+        status.setError(statusDto.getErrorCause());
+
+        if (statusDto.getDownloadingProgress() != null)
+        {
+            status.setProgress(statusDto.getDownloadingProgress().floatValue());
+        }
+
+        return status;
+    }
+
+    // TODO the client should use IDS for OVFPackages .... then this code MUST die
+    private Integer getOvfPackageIdByUrl(final String ovfUrl, final Integer idEnterprise)
+    {
+        List<OVFPackageDto> ovfs = getAllOVFPackages(idEnterprise).getCollection();
+
+        for (OVFPackageDto ovf : ovfs)
+        {
+            if (ovfUrl.equalsIgnoreCase(ovf.getUrl()))
+            {
+                return ovf.getId();
+            }
+        }
+        return null; // TODO FAIL ... see the TODO above, if there is a related bug fix it first
+    }
+
+    private OVFPackagesDto getAllOVFPackages(final Integer idEnterprise)
+    {
+        String uri = createOVFPackagesLink(idEnterprise.toString());
+        ClientResponse response = get(uri);
+
+        final Integer httpStatus = response.getStatusCode();
+
+        if (httpStatus != 200)
+        {
+            throw new WebApplicationException(response(response));
+        }
+
+        return response.getEntity(OVFPackagesDto.class);
+    }
+
 }

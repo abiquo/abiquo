@@ -33,11 +33,11 @@ import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.OVFPackageConventions;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
-import com.abiquo.appliancemanager.transport.OVFPackageDiskFormat;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.model.enumerator.DiskFormatType;
 
 public class ApplianceManagerStubTestUtils
 {
@@ -57,17 +57,17 @@ public class ApplianceManagerStubTestUtils
         this.stub = stub;
     }
 
-    public void ovfStatus(final String ovfId, final OVFPackageInstanceStatusType expectedStatus)
+    public void ovfStatus(final String ovfId, final OVFStatusEnumType expectedStatus)
     {
 
-        OVFPackageInstanceStatusDto prevStatus =
+        OVFPackageInstanceStateDto prevStatus =
             stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
         // stub..getOVFPackageStatus(baseUrl, idEnterprise, ovfId);
 
-        Assert.assertEquals(expectedStatus, prevStatus.getOvfPackageStatus());
+        Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
 
-        if (expectedStatus == OVFPackageInstanceStatusType.ERROR)
+        if (expectedStatus == OVFStatusEnumType.ERROR)
         {
             Assert.assertNotNull(prevStatus.getErrorCause());
         }
@@ -83,12 +83,11 @@ public class ApplianceManagerStubTestUtils
      */
     public Integer ovfAvailable(final String ovfId, final Boolean isContained)
     {
-        OVFPackageInstanceStatusListDto prevList =
-            stub.getOVFPackagInstanceStatusList(idEnterprise);
+        OVFPackageInstancesStateDto prevList = stub.getOVFPackagInstanceStatusList(idEnterprise);
 
         Assert.assertEquals(isContained, isContained(prevList, ovfId));
 
-        return prevList.getOvfPackageInstancesStatus().size();
+        return prevList.getCollection().size();
     }
 
     public void installOvf(final String ovfId)
@@ -169,11 +168,11 @@ public class ApplianceManagerStubTestUtils
         di.setRamSizeUnit(MemorySizeUnit.BYTE);
 
         di.setIconPath("thiIconPath");
-        di.setDiskFileFormat(OVFPackageDiskFormat.VMDK_FLAT);
+        di.setDiskFileFormat(DiskFormatType.VMDK_FLAT);
 
         // di.setImageSize(121212); // XXX not use
         di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
-        di.setOvfUrl(bundleOVFid);
+        di.setOvfId(bundleOVFid);
 
         di.setIdEnterprise(Integer.valueOf(idEnterprise));
         di.setIdUser(2);
@@ -195,11 +194,11 @@ public class ApplianceManagerStubTestUtils
         di.setRamSizeUnit(MemorySizeUnit.BYTE);
 
         di.setIconPath("thiIconPath");
-        di.setDiskFileFormat(OVFPackageDiskFormat.VHD_FLAT);
+        di.setDiskFileFormat(DiskFormatType.VHD_FLAT);
 
         // di.setImageSize(121212); // XXX not use
         di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
-        di.setOvfUrl("upload/testUpload/envelope.ovf");
+        di.setOvfId("upload/testUpload/envelope.ovf");
 
         di.setIdEnterprise(Integer.valueOf(idEnterprise));
         di.setIdUser(2);
@@ -208,10 +207,9 @@ public class ApplianceManagerStubTestUtils
         return di;
     }
 
-    protected static Boolean isContained(final OVFPackageInstanceStatusListDto list,
-        final String ovfId)
+    protected static Boolean isContained(final OVFPackageInstancesStateDto list, final String ovfId)
     {
-        for (OVFPackageInstanceStatusDto status : list.getOvfPackageInstancesStatus())
+        for (OVFPackageInstanceStateDto status : list.getCollection())
         {
             if (ovfId.equalsIgnoreCase(status.getOvfId()))
             {
@@ -225,8 +223,8 @@ public class ApplianceManagerStubTestUtils
     {
         Thread.sleep(downloadProgressInterval);
 
-        OVFPackageInstanceStatusDto status = stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
-        switch (status.getOvfPackageStatus())
+        OVFPackageInstanceStateDto status = stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        switch (status.getStatus())
         {
             case DOWNLOAD:
                 return;

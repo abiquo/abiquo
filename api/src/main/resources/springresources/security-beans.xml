@@ -107,22 +107,41 @@
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines/*" method="DELETE" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines/machine" method="POST" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <!-- OVF PACKAGE -->
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/install" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+
         <!-- OVF PACKAGE LIST -->
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="DELETE" access="ROLE_APPLIB_MANAGE_REPOSITORY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_MANAGE_REPOSITORY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        
+        
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        
         <!-- DATACENTERS -->
         <security:intercept-url pattern="/admin/datacenters" method="POST" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters" method="GET" access="ROLE_PHYS_DC_ENUMERATE,ROLE_VDC_MANAGE,ROLE_USERS_MANAGE_ENTERPRISE" />

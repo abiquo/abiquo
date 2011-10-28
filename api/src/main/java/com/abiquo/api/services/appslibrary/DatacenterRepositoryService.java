@@ -21,10 +21,6 @@
 
 package com.abiquo.api.services.appslibrary;
 
-import static com.abiquo.tracer.Enterprise.enterprise;
-import static com.abiquo.tracer.Platform.platform;
-import static com.abiquo.tracer.User.user;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,33 +31,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
+import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
-import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
-import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.Platform;
-import com.abiquo.tracer.SeverityType;
-import com.abiquo.tracer.UserInfo;
-import com.abiquo.tracer.client.TracerFactory;
 
 @Service
-public class DatacenterRepositoryService extends DefaultApiService
+public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceManagerClient
 {
     public static final Logger logger = LoggerFactory.getLogger(DatacenterRepositoryService.class);
-
-    @Autowired
-    private InfrastructureService infService;
 
     @Autowired
     private OVFPackageInstanceToVirtualImage toimage;
@@ -73,6 +60,8 @@ public class DatacenterRepositoryService extends DefaultApiService
     public void synchronizeDatacenterRepository(final Datacenter datacenter,
         final Enterprise enterprise)
     {
+        logger.debug("synchronizing datacenter repository (AM refresh)");
+
         ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenter.getId());
 
         Repository repo = checkRepositoryLocation(datacenter, amStub);
@@ -80,32 +69,35 @@ public class DatacenterRepositoryService extends DefaultApiService
 
     }
 
-    private ApplianceManagerResourceStubImpl getApplianceManagerClient(final Integer dcId)
+    /**
+     * Request to the AM EnterpriseRepositoryResource the usage of the repository filesystem
+     * <p>
+     * TODO usage shared accros all enterprises
+     */
+    public DatacenterRepositoryDto includeRepositoryUsageFromAm(DatacenterRepositoryDto repoDto,
+        final Integer enterpriseId, final Integer datacenterId)
     {
-        final String amUri =
-            infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
-        ApplianceManagerResourceStubImpl amStub = new ApplianceManagerResourceStubImpl(amUri);
-
         try
         {
-            amStub.checkService();
+            ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenterId);
+            EnterpriseRepositoryDto erepoDto = amStub.getRepository(String.valueOf(enterpriseId));
+
+            repoDto.setRepositoryCapacityMb(erepoDto.getRepositoryCapacityMb());
+            repoDto.setRepositoryRemainingMb(erepoDto.getRepositoryRemainingMb());
+            // TODO enterprise utilization
         }
-        catch (ApplianceManagerStubException e)
+        catch (Exception e) // TODO only if timeout getting usage
         {
-            logger.error("ApplianceManager configuration error", e);
+            // TODO trace or propagate the exception
+            logger.error(String.format("Can not obtain the repository usage info "
+                + "of the Datacenter [%s] for the Enterprise [%s]. "
+                + "NFS could be busy (check it later).", datacenterId, enterpriseId), e);
 
-            // A user named "SYSTEM" is created
-            UserInfo ui = new UserInfo("SYSTEM");
-            Platform platform =
-                platform("abicloud").enterprise(enterprise("abiCloud").user(user("SYSTEM")));
-            TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.APPLIANCE_MANAGER,
-                com.abiquo.tracer.EventType.UNKNOWN, e.getLocalizedMessage(), ui, platform);
-
-            addConflictErrors(APIError.VIMAGE_AM_DOWN);
-            flushErrors();
+            repoDto.setRepositoryCapacityMb(0);
+            repoDto.setRepositoryRemainingMb(0);
         }
 
-        return amStub;
+        return repoDto;
     }
 
     private Repository checkRepositoryLocation(final Datacenter datacenter,
@@ -159,12 +151,12 @@ public class DatacenterRepositoryService extends DefaultApiService
 
         try
         {
-            OVFPackageInstanceStatusListDto list =
+            OVFPackageInstancesStateDto list =
                 amStub.getOVFPackagInstanceStatusList(idEnterprise.toString());
 
-            for (OVFPackageInstanceStatusDto status : list.getOvfPackageInstancesStatus())
+            for (OVFPackageInstanceStateDto status : list.getCollection())
             {
-                if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.DOWNLOAD)
+                if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
                 {
                     ovfids.add(status.getOvfId());
                 }

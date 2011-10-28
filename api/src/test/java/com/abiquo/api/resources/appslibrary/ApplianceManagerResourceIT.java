@@ -56,8 +56,8 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
@@ -199,7 +199,6 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
         EnterpriseRepositoryDto amrepo = amresponse.getEntity(EnterpriseRepositoryDto.class);
         assertNotNull(amrepo);
         assertEquals(amrepo.getId(), enterpriseId);
-        assertNotNull(amrepo.getName());
 
         assertNotNull(amrepo.getRepositoryCapacityMb());
         assertNotNull(amrepo.getRepositoryEnterpriseUsedMb());
@@ -218,22 +217,23 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
         boolean isdown = false;
         while (!isdown)
         {
-            OVFPackageInstanceStatusDto status =
+            OVFPackageInstanceStateDto status =
                 amclient.getOVFPackageInstanceStatus(enterpriseId.toString(), DEFAULT_OVF);
 
-            if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.ERROR)
+            if (status.getStatus() == OVFStatusEnumType.ERROR)
             {
                 isdown = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.DOWNLOAD)
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdown = true;
             }
-            else if (status.getOvfPackageStatus() == OVFPackageInstanceStatusType.DOWNLOADING)
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
             {
-                LOG.info("{} Installing {}", status.getProgress().toString(), DEFAULT_OVF);
+                LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
+                    DEFAULT_OVF);
             }
 
             try

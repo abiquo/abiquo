@@ -21,34 +21,23 @@
 
 package com.abiquo.appliancemanager.transport;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import java.util.List;
 
-@XmlType(name = "OVFPackageInstanceStatusType")
-@XmlEnum
-public enum OVFPackageInstanceStatusType
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "ovfInstancesState")
+public class OVFPackageInstancesStateDto extends WrapperDto<OVFPackageInstanceStateDto>
 {
-    NOT_DOWNLOAD, DOWNLOADING, DOWNLOAD, ERROR;
+    private static final long serialVersionUID = -5521047055700500865L;
 
-    public String value()
+    @Override
+    @XmlElement(name = "ovfInstanceState")
+    public List<OVFPackageInstanceStateDto> getCollection()
     {
-        return name();
+        return collection;
     }
 
-    public static OVFPackageInstanceStatusType fromValue(String v)
-    {
-        return valueOf(v);
-    }
-
-    private String errorCause;
-
-    public String getErrorCause()
-    {
-        return errorCause;
-    }
-
-    public void setErrorCause(String errorCause)
-    {
-        this.errorCause = errorCause;
-    }
 }

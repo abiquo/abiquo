@@ -21,11 +21,11 @@
 
 package com.abiquo.am.services;
 
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 public interface OVFPackageInstanceNotifier
 {
-    void setOVFStatus(final String erId, final String ovfId, OVFPackageInstanceStatusType status);
+    void setOVFStatus(final String erId, final String ovfId, OVFStatusEnumType status);
 
     void setOVFStatusError(final String erId, final String ovfId, final String errorMessage);
 }

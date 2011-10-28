@@ -25,13 +25,18 @@ import java.util.List;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public interface AppsLibraryStub
 {
 
+    /**
+     * OVFPackages
+     */
     public DataResult<List<String>> getOVFPackageListName(final Integer idEnterprise);
 
     DataResult<OVFPackageList> getOVFPackageList(final Integer idEnterprise,
@@ -46,21 +51,37 @@ public interface AppsLibraryStub
     public BasicResult deleteOVFPackageList(final Integer idEnterprise,
         final String nameOvfpackageList);
 
-    public BasicResult deleteIcon(final Integer idIcon);
-
-    public DataResult<Icon> createIcon(final Integer idEnterprise, final IconDto icon);
-
-    /**
-     * Recupera la
-     * 
-     * @param idEnterprise
-     * @param nameOVFPackageList
-     * @return
-     */
     public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
 
-    public BasicResult editIcon(final Icon icon);
+    /**
+     * ICONS
+     */
 
     public DataResult<List<Icon>> getIcons(final Integer idEnterprise);
 
+    public DataResult<Icon> createIcon(final Integer idEnterprise, final IconDto icon);
+
+    public BasicResult editIcon(final Icon icon);
+
+    public BasicResult deleteIcon(final Integer idIcon);
+
+    /**
+     * API will update the {@link OVFPackageInstanceStateDto} the creation state in the provided
+     * datacenter of the (AM datacenter communication)
+     */
+
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
+        String nameOVFPackageList, Integer idEnterprise, Integer datacenterId);
+
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(List<String> ovfUrls,
+        Integer idEnterprise, Integer datacenterId);
+
+    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId);
+
+    public BasicResult installOVFPackagesInDatacenter(List<String> ovfUrls, Integer idEnterprise,
+        Integer datacenterId);
+
+    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId);
 }

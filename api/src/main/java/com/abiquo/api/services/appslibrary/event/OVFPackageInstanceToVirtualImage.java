@@ -166,7 +166,7 @@ public class OVFPackageInstanceToVirtualImage
                 disk.getName(),
                 diskFormat,
                 disk.getDiskFilePath(),
-                disk.getDiskFileSize(),
+                disk.getDiskSizeMb(),
                 category);
 
         // TODO: Icon
@@ -174,7 +174,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setCpuRequired(disk.getCpu());
         vimage.setRamRequired(getRamInMb(disk).intValue());
         vimage.setHdRequiredInBytes(getHdInBytes(disk));
-        vimage.setOvfid(disk.getOvfUrl());
+        vimage.setOvfid(disk.getOvfId());
         vimage.setRepository(repository);
         if (master != null)
         {

@@ -22,53 +22,28 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
-import javax.ws.rs.WebApplicationException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.abiquo.abiserver.appslibrary.AppsLibraryRecovery;
-import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
-import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.StateConversionEnum;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.BasicCommand;
-import com.abiquo.abiserver.commands.stub.APIStubFactory;
-import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
-import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
-import com.abiquo.server.core.infrastructure.Repository;
 
 public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryCommand
 {
-
-    private static final Logger logger = LoggerFactory.getLogger(AppsLibraryCommandImpl.class);
 
     /**
      * DAOFactory to create DAOs
@@ -80,6 +55,9 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
         final UserSession userSession)
     {
+        /**
+         * TODO DiskFormatType API Resource
+         */
         List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> diskFormats =
             new ArrayList<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>();
 
@@ -89,132 +67,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
 
         return diskFormats;
-    }
-
-    @Override
-    public RepositoryHB getDatacenterRepository(final UserSession userSession,
-        final Integer idDatacenter, final Integer idEnterprise) throws AppsLibraryCommandException
-    {
-        final DAOFactory factory = HibernateDAOFactory.instance();
-
-        /** check images on the repository */
-        try
-        {
-            recovery.initializeApplianceManager(idDatacenter);
-        }
-        catch (Exception e)
-        {
-            logger.error("Can not update virtual images on the datacenter " + idDatacenter);
-        }
-
-        RepositoryHB repository;
-
-        try
-        {
-            factory.beginConnection();
-
-            repository = factory.getRepositoryDAO().findByDatacenter(idDatacenter);
-
-            if (repository == null)
-            {
-                throw new PersistenceException("There isn't a valid respository");
-            }
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            String cause;
-
-            try
-            {
-                final String datacenterName =
-                    factory.getDataCenterDAO().findById(idDatacenter).getName();
-                cause =
-                    String.format("The Datacenter [%s] do not have any Repository associated",
-                        datacenterName);
-            }
-            catch (final PersistenceException e1)
-            {
-                cause =
-                    String.format("Can not obtain the datacenter with id [%s]", idDatacenter
-                        .toString());
-            }
-
-            factory.rollbackConnection();
-
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        try
-        {
-            final EnterpriseRepositoryDto enterpriseRepo =
-                getEnterpriseRepository(idDatacenter, String.valueOf(idEnterprise));
-
-            repository.setRepositoryCapacityMb(enterpriseRepo.getRepositoryCapacityMb());
-            repository
-                .setRepositoryEnterpriseUsedMb(enterpriseRepo.getRepositoryEnterpriseUsedMb());
-            repository.setRepositoryRemainingMb(enterpriseRepo.getRepositoryRemainingMb());
-
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            logger.warn("{}", e);
-
-            repository.setRepositoryCapacityMb(0l);
-            repository.setRepositoryEnterpriseUsedMb(0l);
-            repository.setRepositoryRemainingMb(0l);
-        }
-
-        return repository;
-    }
-
-    // /**
-    // * It it is not subscribed (the am on database after a server reinit) there is subscribed and
-    // * the virtual image library recovered
-    // */
-    // private void checkApplianceManagerListener(final Integer idDatacenter)
-    // throws RemoteServiceException
-    // {
-    // final String eventingError = AMConsumer.getInstance(idDatacenter).getInitializeError();
-    //
-    // if (eventingError != null)
-    // {
-    // final String cause =
-    // String
-    // .format("The Appliance Manager is not properly configured: %s", eventingError);
-    // throw new RemoteServiceException(cause);
-    // }
-    //
-    // }
-
-    private EnterpriseRepositoryDto getEnterpriseRepository(final Integer idDatacenter,
-        final String idEnterprise) throws AppsLibraryCommandException
-    {
-        final String amServiceUri;
-        try
-        {
-            amServiceUri = getApplianceManagerUriOnDatacenter(idDatacenter);
-
-            ApplianceManagerResourceStubImpl amStub =
-                new ApplianceManagerResourceStubImpl(amServiceUri);
-
-            return amStub.getRepository(idEnterprise);
-
-            // return amClient.getRepository(amServiceUri, idEnterprise);
-        }
-        catch (final Exception e)
-        {
-            final String cause =
-                String.format("Can not obtain the repository usage info "
-                    + "of the Datacenter [%s] for the Enterprise [%s]. "
-                    + "NFS could be busy (check it later).", idDatacenter, idEnterprise);
-
-            final String detail = e.getMessage();
-
-            throw new AppsLibraryCommandException(cause + "\n" + detail, e);
-
-        }
     }
 
     /** Category */
@@ -370,148 +222,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
     }
 
     /** Virtual images */
-
-    /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
-     */
-    @Override
-    public List<VirtualimageHB> getVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
-        throws AppsLibraryCommandException
-    {
-        // TODO check the userSession belongs to the same idEnterprise
-        return getAvailableVirtualImages(idEnterprise, idRepo, idCategory);
-    }
-
-    private List<VirtualimageHB> getAvailableVirtualImages(final Integer idEnterprise,
-        final Integer idRepository, final Integer idCategory) throws AppsLibraryCommandException
-    {
-        List<VirtualimageHB> virtualImages;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            if (idCategory != null && idCategory != 0)
-            {
-                virtualImages =
-                    factory.getVirtualImageDAO().getImagesByEnterpriseAndRepositoryAndCategory(
-                        idEnterprise, idRepository, idCategory);
-            }
-            else
-            {
-                virtualImages =
-                    factory.getVirtualImageDAO().getImagesByEnterpriseAndRepository(idEnterprise,
-                        idRepository);
-            }
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-            final String cause =
-                String.format("Can not obtain the list of available virtual images "
-                    + "for Enterprise[id %s] on Repository[id %s]", idEnterprise, idRepository);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return virtualImages;
-    }
-
-    /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
-     */
-    @Override
-    public List<VirtualImage> getVirtualImageByCategoryAndHypervisorCompatible(
-        final UserSession userSession, final Integer idEnterprise, final Integer idRepository,
-        final Integer idCategory, final Integer idHypervisorType)
-        throws AppsLibraryCommandException
-    {
-        // TODO check the userSession belongs to the same idEnterprise
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        final List<VirtualImage> virtualImages = new LinkedList<VirtualImage>();
-
-        final HypervisorType hypervisorType = HypervisorType.fromId(idHypervisorType);
-
-        final Collection<VirtualimageHB> virtualImagesHB =
-            getAvailableVirtualImages(idEnterprise, idRepository, idCategory);
-
-        try
-        {
-            factory.beginConnection();
-
-            for (final VirtualimageHB virtualImageHB : virtualImagesHB)
-            {
-                if (isVirtualImageConvertedOrCompatible(virtualImageHB, hypervisorType))
-                {
-                    virtualImages.add(virtualImageHB.toPojo());
-                }
-            }
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = "Can not obtain the list of compatible virtual images";
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return virtualImages;
-    }
-
-    /**
-     * Return true the virtual image format is compatible.
-     * 
-     * <pre>
-     * Premium: if there virtual image conversions check FINISH state.
-     * </pre>
-     */
-    private Boolean isVirtualImageConvertedOrCompatible(final VirtualimageHB vi,
-        final HypervisorType hypervisorType)
-    {
-
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        final DiskFormatType virtualImageFormatType = vi.getType();
-
-        if (hypervisorType.isCompatible(virtualImageFormatType))
-        {
-            return true;
-        }
-
-        final Collection<VirtualImageConversionsHB> conversions =
-            factory.getVirtualImageConversionsDAO().getConversion(vi, hypervisorType.baseFormat);
-
-        // the conversion do not exist
-        if (conversions == null || conversions.size() == 0)
-        {
-            return false;
-        }
-
-        // Conversion is the *single* conversion of the desired format
-        for (final VirtualImageConversionsHB conversion : conversions)
-        {
-            if (conversion.getState() != StateConversionEnum.FINISHED)
-            {
-                return false;
-            }
-            else if (hypervisorType.isCompatible(conversion.getTargetType()))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private DiskFormatType getBaseDiskFormatType(final Integer idHypervisorType)
-    {
-        return HypervisorType.fromId(idHypervisorType).baseFormat;
-    }
 
     @Override
     public Void editVirtualImage(final UserSession userSession, final VirtualimageHB vimage)
@@ -708,48 +418,35 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         return String.format("http://bundle-imported/%s", vipath);
     }
 
-    private String getApplianceManagerUriOnRepository(final Integer idRepository)
+    private List<VirtualappHB> getVirtualAppliancesWith(final Integer idVirtualImage)
         throws AppsLibraryCommandException
     {
+        List<VirtualappHB> vapps;
         final DAOFactory factory = HibernateDAOFactory.instance();
-        RepositoryHB repository;
         try
         {
             factory.beginConnection();
 
-            repository = factory.getRepositoryDAO().findById(idRepository);
+            vapps =
+                factory.getVirtualApplianceDAO().findByUsingVirtualImage(
+                    String.valueOf(idVirtualImage));
 
             factory.endConnection();
         }
         catch (final PersistenceException e)
         {
             factory.rollbackConnection();
+
             final String cause =
-                String.format("Can not obtain the datacenter associated to repository [%s]",
-                    idRepository);
-            throw new AppsLibraryCommandException(cause);
+                String.format("Can not obtain the list of virtual appliances "
+                    + "using the virtual image [%s]", idVirtualImage);
+            throw new AppsLibraryCommandException(cause, e);
         }
 
-        final Integer idDatacenter = repository.getDatacenter().getIdDataCenter();
-
-        return getApplianceManagerUriOnDatacenter(idDatacenter);
+        return vapps;
     }
 
-    private Integer getDatacenterIdByRepository(final Integer idRepository)
-    {
-        Integer idDatacenter;
-
-        final DAOFactory daoF = HibernateDAOFactory.instance();
-
-        daoF.beginConnection();
-
-        idDatacenter =
-            daoF.getRepositoryDAO().findById(idRepository).getDatacenter().getIdDataCenter();
-
-        daoF.endConnection();
-
-        return idDatacenter;
-    }
+    /** #################### FIXME delete virtual image requires #################### */
 
     private String getApplianceManagerUriOnDatacenter(final Integer idDatacenter)
         throws AppsLibraryCommandException
@@ -786,274 +483,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
 
         return amRemoteServices.get(0).getUri();
-    }
-
-    private List<VirtualappHB> getVirtualAppliancesWith(final Integer idVirtualImage)
-        throws AppsLibraryCommandException
-    {
-        List<VirtualappHB> vapps;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            vapps =
-                factory.getVirtualApplianceDAO().findByUsingVirtualImage(
-                    String.valueOf(idVirtualImage));
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause =
-                String.format("Can not obtain the list of virtual appliances "
-                    + "using the virtual image [%s]", idVirtualImage);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return vapps;
-    }
-
-    /** DC specific status. */
-
-    @Override
-    public Void startDownloadOVFPackage(final UserSession userSession,
-        final List<String> idsOvfpackage, final Integer idEnterprise, final Integer idRepository)
-        throws AppsLibraryCommandException
-    {
-        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
-        final String idEnterpriseSt = String.valueOf(idEnterprise);
-
-        ApplianceManagerResourceStubImpl amStub =
-            new ApplianceManagerResourceStubImpl(amServiceUri);
-
-        boolean checkCanWrite = true;
-        amStub.getRepository(idEnterpriseSt, checkCanWrite);
-
-        for (final String ovfId : idsOvfpackage)
-        {
-            try
-            {
-
-                amStub.createOVFPackageInstance(idEnterpriseSt, ovfId);
-
-                // stat = amClient.installOVFPackage(amServiceUri, idEnterpriseSt, ovfId);
-                // TODO stat is not used, after the ''startDownload'' a ''getStatus'' is called.
-            }
-            catch (final Exception e)
-            {
-                final String remoteCause = e.getMessage();
-                logger.error("Can not install package [{}] caused by\n{}", ovfId, remoteCause);
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public OVFPackageInstanceStatusDto cancelDownloadOVFPackage(final UserSession userSession,
-        final String idOvfpackage, final Integer idEnterprise, final Integer idRepository)
-        throws AppsLibraryCommandException
-    {
-        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
-        final String idEnterpriseSt = String.valueOf(idEnterprise);
-
-        try
-        {
-            ApplianceManagerResourceStubImpl amStub =
-                new ApplianceManagerResourceStubImpl(amServiceUri);
-
-            amStub.delete(idEnterpriseSt, idOvfpackage);
-            // .cancelOVFPackage(amServiceUri, idEnterpriseSt, idOvfpackage);
-        }
-        catch (final Exception e)
-        {
-            final String remoteCause = e.getMessage();
-            final String cause =
-                String.format("Can not cancell the OVF package [%s].\n%s", idOvfpackage,
-                    remoteCause);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        final OVFPackageInstanceStatusDto status = new OVFPackageInstanceStatusDto();
-        status.setOvfId(idOvfpackage);
-        status.setOvfPackageStatus(OVFPackageInstanceStatusType.NOT_DOWNLOAD);
-
-        return status;
-    }
-
-    @Override
-    public OVFPackageInstanceStatusListDto refreshOVFPackageStatus(final UserSession userSession,
-        final List<String> idsOvfpackage, final Integer idEnterprise, final Integer idRepository)
-        throws AppsLibraryCommandException
-    {
-        final OVFPackageInstanceStatusListDto statusList = new OVFPackageInstanceStatusListDto();
-
-        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
-        final String idEnterpriseSt = String.valueOf(idEnterprise);
-
-        for (final String ovfId : idsOvfpackage)
-        {
-            OVFPackageInstanceStatusDto status;
-            try
-            {
-                ApplianceManagerResourceStubImpl amStub =
-                    new ApplianceManagerResourceStubImpl(amServiceUri);
-
-                status = amStub.getOVFPackageInstanceStatus(idEnterpriseSt, ovfId);
-                // status = amClient.getOVFPackageStatus(amServiceUri, idEnterpriseSt, ovfId);
-            }
-            catch (final Exception e)
-            {
-                final String errorCause =
-                    String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
-
-                status = new OVFPackageInstanceStatusDto();
-                status.setOvfId(ovfId);
-                status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
-                status.setErrorCause(errorCause);
-            }
-
-            statusList.getOvfPackageInstancesStatus().add(status);
-        }
-
-        return statusList;
-    }
-
-    @Override
-    public OVFPackageInstanceStatusListDto getOVFPackageListStatus(final UserSession userSession,
-        final String nameOVFPackageList, final Integer idEnterprise, final Integer idRepository)
-        throws AppsLibraryCommandException
-    {
-        final List<String> ovfIds =
-            getOVFPackageUrlOnList(userSession, idEnterprise, nameOVFPackageList);
-
-        return refreshOVFPackageStatus(userSession, ovfIds, idEnterprise, idRepository);
-    }
-
-    private List<String> getOVFPackageUrlOnList(final UserSession userSession,
-        final Integer idEnterprise, final String nameOVFPackageList)
-        throws AppsLibraryCommandException
-    {
-        final List<String> ovfIds = new LinkedList<String>();
-
-        OVFPackageList packageList;
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
-                AppsLibraryStub.class);
-
-        try
-        {
-            packageList = proxy.getOVFPackageList(idEnterprise, nameOVFPackageList).getData();
-        }
-        catch (final WebApplicationException e)
-        {
-            final String cause =
-                String.format("Can not obtain the OVFPackageList [%s].\n%s", nameOVFPackageList);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        for (OVFPackage ovfPackage : packageList.getOvfpackages())
-        {
-            ovfIds.add(ovfPackage.getUrl());
-        }
-
-        return ovfIds;
-    }
-
-    /**
-     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#getOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
-     *      java.lang.String, java.lang.Integer, java.lang.Integer, java.lang.Integer)
-     */
-    @Override
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final UserSession userSession,
-        final String nameOVFPackageList, final Integer idOVFPackageName,
-        final Integer idEnterprise, final Integer idRepository) throws AppsLibraryCommandException
-    {
-        final String ovfIds =
-            getOVFPackageInstanceUrl(userSession, idEnterprise, nameOVFPackageList,
-                idOVFPackageName);
-
-        return refreshOVFPackageInstanceStatus(userSession, ovfIds, idEnterprise, idRepository);
-    }
-
-    /**
-     * @see com.abiquo.abiserver.commands.AppsLibraryCommand#refreshOVFPackageInstanceStatus(com.abiquo.abiserver.pojo.authentication.UserSession,
-     *      java.lang.String, java.lang.Integer, java.lang.Integer)
-     */
-    @Override
-    public OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(
-        final UserSession userSession, final String idsOvfInstance, final Integer idEnterprise,
-        final Integer idRepository) throws AppsLibraryCommandException
-    {
-
-        final String amServiceUri = getApplianceManagerUriOnRepository(idRepository);
-        final String idEnterpriseSt = String.valueOf(idEnterprise);
-
-        OVFPackageInstanceStatusDto status;
-        try
-        {
-            ApplianceManagerResourceStubImpl amStub =
-                new ApplianceManagerResourceStubImpl(amServiceUri);
-
-            status = amStub.getCurrentOVFPackageInstanceStatus(idEnterpriseSt, idsOvfInstance);
-        }
-        catch (final Exception e)
-        {
-            final String errorCause =
-                String.format("Can not obtain the OVFStatus from [%s]", amServiceUri);
-
-            status = new OVFPackageInstanceStatusDto();
-            status.setOvfId(idsOvfInstance);
-            status.setOvfPackageStatus(OVFPackageInstanceStatusType.ERROR);
-            status.setErrorCause(errorCause);
-        }
-        return status;
-
-    }
-
-    /**
-     * Retorna la URL del {@link OVFPackageInstance}.
-     * 
-     * @param userSession Current logged.
-     * @param userSession Data from the current user.
-     * @param idsOvfInstance Name of the item to refresh.
-     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
-     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return URL.
-     * @throws AppsLibraryCommandException String
-     */
-    private String getOVFPackageInstanceUrl(final UserSession userSession,
-        final Integer idEnterprise, final String nameOVFPackageList,
-        final Integer nameOVFPackageInstance) throws AppsLibraryCommandException
-    {
-        OVFPackagesDto packageList;
-
-        AppsLibraryStub proxy =
-            APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
-                AppsLibraryStub.class);
-        try
-        {
-            packageList = proxy.getOVFPackages(idEnterprise, nameOVFPackageList);
-        }
-        catch (final WebApplicationException e)
-        {
-            final String cause =
-                String.format("Can not obtain the OVFPackageList [%s].\n%s", nameOVFPackageList);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-        for (int i = 0; i < packageList.getTotalSize(); i++)
-        {
-            final OVFPackageDto ovfPackage = packageList.getCollection().get(i++);
-            if (nameOVFPackageInstance.equals(ovfPackage.getId()))
-            {
-                return ovfPackage.getUrl();
-            }
-        }
-
-        return null;
     }
 
 }

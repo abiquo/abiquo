@@ -28,19 +28,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-/**
- * Represent a collection of OVFPackageInstanceDto
- */
-@XmlRootElement(name = "ovfPackageInstances")
+@XmlRootElement(name = "ovfInstances")
 public class OVFPackageInstancesDto extends WrapperDto<OVFPackageInstanceDto>
 {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = -6377664546542567434L;
 
-    @XmlElement(name = "ovfPackageInstance")
+    @XmlElement(name = "ovfInstance")
     public List<OVFPackageInstanceDto> getCollection()
     {
         return collection;
