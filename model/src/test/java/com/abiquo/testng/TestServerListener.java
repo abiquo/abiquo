@@ -44,8 +44,12 @@ public class TestServerListener implements ISuiteListener
     protected static final String WEBAPP_CONTEXT = "webapp.context";
 
     protected static final String WEBAPP_PORT = "webapp.port";
-    
-    
+
+    private final static String PORT = getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT);
+
+    private final static String CONTEXT = getParameter(WEBAPP_CONTEXT);
+
+    public final static String BASE_URI = "http://localhost:" + PORT + CONTEXT;
 
     protected Server server;
 
@@ -54,11 +58,11 @@ public class TestServerListener implements ISuiteListener
     {
         LOGGER.info("Starting test server...");
 
-        int port = Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
+        int port = Integer.valueOf(PORT);
         server = new Server(port);
 
         WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath(getParameter(WEBAPP_CONTEXT));
+        webapp.setContextPath(CONTEXT);
         webapp.setWar(getParameter(WEBAPP_DIR));
         webapp.setServer(server);
 

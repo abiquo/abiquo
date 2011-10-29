@@ -23,6 +23,10 @@ package com.abiquo.testng;
 
 import static com.abiquo.testng.TestConfig.getParameter;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.DefaultHandler;
@@ -34,18 +38,37 @@ import org.slf4j.LoggerFactory;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 
-public class TestServerAndOVFListener implements ISuiteListener
+/**
+ * Set up a remote repository to act as an HTTP server for content in resouces/testovf folder.
+ */
+public class OVFRemoteRepositoryListener implements ISuiteListener
 {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(TestServerAndOVFListener.class);
+    protected static final Logger LOGGER = LoggerFactory
+        .getLogger(OVFRemoteRepositoryListener.class);
+
+    /** ##### ##### ##### ##### ##### */
+
+    public static final int RS_FILE_SERVER_PORT = 7979;
+
+    public final static String ovfId = String.format("http://localhost:%d/testovf/description.ovf",
+        RS_FILE_SERVER_PORT);
+
+    public final static String ovfIdInvalid = ovfId + "NOT-FOUND-OVF";
+
+    /** ##### ##### ##### ##### ##### */
 
     /** remote repository file server configuration */
     protected Server rsServer;
 
-    public static final int RS_FILE_SERVER_PORT = 7979;
+    private final static String fileServerPath = getParameter("rs.basedir")
+        + "/src/test/resources/";
 
-    private final static String fileServerPath =
-        getParameter("rs.basedir") + "/src/test/resources/";
+    private final static String diskFilePath = getParameter("rs.basedir")
+        + "/src/test/resources/testovf/diskFile.vmdk";
+
+    /** Should be the same of on the References size on the ''src/test/resources/description.ovf'' */
+    private final static Long diskFileSize = 1024 * 1024 * 10l;
 
     @Override
     public void onStart(final ISuite suite)
@@ -54,6 +77,8 @@ public class TestServerAndOVFListener implements ISuiteListener
         {
             startRemoteServiceServer();
             LOGGER.info("Test server for ovfindex started.");
+
+            createDiskFile();
 
         }
         catch (Exception ex)
@@ -81,7 +106,7 @@ public class TestServerAndOVFListener implements ISuiteListener
     @Override
     public void onFinish(final ISuite suite)
     {
-        LOGGER.info("Stopping test server...");
+        LOGGER.info("Stopping test server for ovfindex...");
 
         try
         {
@@ -90,10 +115,42 @@ public class TestServerAndOVFListener implements ISuiteListener
                 rsServer.stop();
             }
             LOGGER.info("Test server for ovfindex stoped.");
+
+            deleteDiskFile();
         }
         catch (Exception ex)
         {
             throw new RuntimeException("Could not stop test server for ovfindex", ex);
+        }
+    }
+
+    /**
+     * creates the referenced file in testovf/description.ovf
+     */
+    private void createDiskFile() throws IOException
+    {
+        File diskFile = new File(diskFilePath);
+        RandomAccessFile f = new RandomAccessFile(diskFile, "rw");
+        f.setLength(diskFileSize);
+    }
+
+    private void deleteDiskFile() throws Exception
+    {
+        File diskFile = new File(diskFilePath);
+
+        final String errorCause =
+            String.format("Can not delete the disk file at [%s]", diskFilePath);
+
+        if (diskFile.exists())
+        {
+            if (!diskFile.delete())
+            {
+                throw new Exception(errorCause);
+            }
+        }
+        else
+        {
+            throw new Exception(errorCause);
         }
     }
 

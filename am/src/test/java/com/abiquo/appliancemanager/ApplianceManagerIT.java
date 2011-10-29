@@ -21,20 +21,16 @@
 
 package com.abiquo.appliancemanager;
 
+import static com.abiquo.testng.AMRepositoryListener.REPO_PATH;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfIdInvalid;
+import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestServerListener.BASE_URI;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
-import org.apache.commons.io.FileUtils;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -48,71 +44,27 @@ import com.ning.http.client.FilePart;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
 
-public class ApplianceManagerStubIT
+@Test(groups = {AM_INTEGRATION_TESTS})
+public class ApplianceManagerIT
 {
+    final static String snapshot = "000snap000";
 
-    protected final static String snapshot = "000snap000";
-
-    public static final int RS_FILE_SERVER_PORT = 8282;
-
-    protected final static String ovfId = String.format(
-        "http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
-
-    protected final static String ovfIdInvalid =
-        "http://localhost:8080/testovf/description-INVALID.ovf";
-
-    protected final static String idEnterprise = "1";
-
-    protected final static String baseUrl = getLocation();
+    final static String idEnterprise = "1";
 
     protected ApplianceManagerResourceStubImpl stub;
 
-    protected ApplianceManagerStubTestUtils testUtils;
+    protected ApplianceManagerAsserts testUtils;
 
-    protected static String REPO_PATH;
-
-    // @Test
-    // public void testDownload()
-    // {
-    // stub = new ApplianceManagerResourceStubImpl("http://localhost:80/am");
-    //
-    // OVFPackageInstanceStatusListDto statuslist =
-    // stub.getOVFPackagInstanceStatusList(idEnterprise);
-    //
-    // for(OVFPackageInstanceStatusDto status : statuslist.getOvfPackageInstancesStatus())
-    // {
-    // OVFPackageInstanceDto inst = stub.getOVFPackageInstance(idEnterprise, status.getOvfId());
-    // EnvelopeType envelope = stub.getOVFPackageInstanceEnvelope(idEnterprise, status.getOvfId());
-    // }
-    // }
-    //
-    /**
-     * Clear the test configured repository.path folder.
-     * 
-     * @throws IOException
-     */
     @BeforeClass
-    // XXX BeforeMethod
-    public void initializeRepositoryFileSystem() throws IOException
+    public void setUp() throws IOException
     {
-
-        REPO_PATH = "/tmp/testrepo/";
-        File vmrepo = new File(REPO_PATH);
-        if (vmrepo.exists())
-        {
-            FileUtils.deleteDirectory(vmrepo);
-        }
-
-        vmrepo.mkdirs();
-        new File(REPO_PATH + ".abiquo_repository").createNewFile();
-
+        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
+        testUtils = new ApplianceManagerAsserts(stub);
     }
 
     @Test
     public void testDeploy() throws Exception
     {
-        stub = new ApplianceManagerResourceStubImpl(baseUrl);
-        testUtils = new ApplianceManagerStubTestUtils(stub);
 
         // The OVF is NOT_DOWNLOAD
         testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
@@ -141,8 +93,8 @@ public class ApplianceManagerStubIT
     @Test(enabled = false)
     public void testDeployCancel() throws Exception
     {
-        stub = new ApplianceManagerResourceStubImpl(baseUrl);
-        testUtils = new ApplianceManagerStubTestUtils(stub);
+        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
+        testUtils = new ApplianceManagerAsserts(stub);
 
         // The OVF is NOT_DOWNLOAD
         testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
@@ -199,8 +151,8 @@ public class ApplianceManagerStubIT
     @Test(enabled = false)
     public void testDeployInvalid()
     {
-        stub = new ApplianceManagerResourceStubImpl(baseUrl);
-        testUtils = new ApplianceManagerStubTestUtils(stub);
+        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
+        testUtils = new ApplianceManagerAsserts(stub);
 
         // The OVF is NOT_DOWNLOAD
         testUtils.ovfStatus(ovfIdInvalid, OVFStatusEnumType.NOT_DOWNLOAD);
@@ -234,8 +186,8 @@ public class ApplianceManagerStubIT
     @Test(enabled = false)
     public void testUploadStreaming() throws Exception
     {
-        stub = new ApplianceManagerResourceStubImpl(baseUrl);
-        testUtils = new ApplianceManagerStubTestUtils(stub);
+        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
+        testUtils = new ApplianceManagerAsserts(stub);
 
         OVFPackageInstanceDto diskInfo = testUtils.createTestDiskInfoUpload();
         File upFile = testUtils.createUploadTempFile();
@@ -255,7 +207,7 @@ public class ApplianceManagerStubIT
         httpClient = new AsyncHttpClient(clientConf);
 
         BoundRequestBuilder request =
-            httpClient.preparePost(baseUrl + "er/" + idEnterprise + "/ovfs/");
+            httpClient.preparePost(BASE_URI + "er/" + idEnterprise + "/ovfs/");
 
         request.addBodyPart(new StringPart("diskInfo", diskInfo.toString())); // TODO JSON
         request.addBodyPart(new FilePart("disk.vmkd", upFile, "octet-stream", "UTF-8"));
@@ -272,143 +224,20 @@ public class ApplianceManagerStubIT
 
         testUtils.createBundleDiskFile(ovfId, snapshot);
 
-        stub.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(baseUrl,
+        stub.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(BASE_URI,
         // idEnterprise, snapshot, ovfDto);
     }
 
-    public void testDelete()
-    {
-
-    }
-
-    public void testDeleteBundle()
-    {
-
-    }
-
-    /** Static file server for Test OVF Remote Repository */
-    private static Server rsServer;
-
-    // protected static String amContextConfigLocation = "classpath:springresources/am-cxf.xml";
-
-    private final static String fileServerPath = "src/test/resources/";
-
-    private final static String diskFilePath = "src/test/resources/testovf/diskFile.vmdk";
-
-    /** Should be the same of on the References size on the ''src/test/resources/description.ovf'' */
-    private final static Long diskFileSize = 1024 * 1024 * 10l;
-
-    
-    private static Server server;
-
-    @BeforeClass
-    protected void setupAm()
-    {
-        server = new Server(9008);
-
-        WebAppContext webapp = new WebAppContext();
-        webapp.setContextPath("/am");
-        webapp.setWar("src/main/webapp");
-        webapp.setServer(server);
-        server.setHandler(webapp);
-
-        try
-        {
-            server.start();
-        }
-        catch (Exception ex)
-        {
-            throw new RuntimeException("Could not start test server", ex);
-        }
-    }
-
-    @AfterClass
-    protected void teardownAm() throws Exception
-    {
-        server.stop();
-    }
-
-    @BeforeClass
-    protected void configureFileServerTestResources() throws Exception
-    {
-        rsServer = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
-        connector.setPort(RS_FILE_SERVER_PORT);
-        rsServer.addConnector(connector);
-
-        ResourceHandler resource_handler = new ResourceHandler();
-        // resource_handler.setDirectoriesListed(true);
-        // resource_handler.setWelcomeFiles(new String[] {"index.html"});
-        resource_handler.setResourceBase(fileServerPath);
-
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] {resource_handler, new DefaultHandler()});
-        rsServer.setHandler(handlers);
-        rsServer.start();
-        // rsServer.join();
-
-        
-
-        stub = new ApplianceManagerResourceStubImpl(baseUrl);
-        testUtils = new ApplianceManagerStubTestUtils(stub);
-
-        createDiskFile();
-    }
-
-    @AfterClass
-    public static void tearDownFileServer() throws Exception
-    {
-        if (rsServer != null)
-        {
-            rsServer.stop();
-        }
-        deleteDiskFile();
-        cleanupRepository();
-    }
-
-    protected static void cleanupRepository() throws IOException
-    {
-        File vmrepo = new File(REPO_PATH);
-        if (vmrepo.exists())
-        {
-            FileUtils.deleteDirectory(vmrepo);
-        }
-    }
-
-    protected static void createDiskFile() throws IOException
-    {
-        File diskFile = new File(diskFilePath);
-        RandomAccessFile f = new RandomAccessFile(diskFile, "rw");
-        f.setLength(diskFileSize);
-    }
-
-    // @AfterClass
-    protected static void deleteDiskFile() throws Exception
-    {
-        File diskFile = new File(diskFilePath);
-
-        final String errorCause =
-            String.format("Can not delete the disk file at [%s]", diskFilePath);
-
-        if (diskFile.exists())
-        {
-            if (!diskFile.delete())
-            {
-                throw new Exception(errorCause);
-            }
-        }
-        else
-        {
-            throw new Exception(errorCause);
-        }
-    }
-
-    protected static String getLocation()
-    {
-        return "http://localhost:9008/am"; 
-        // TODO jetty port configured on pom.xml
-        // return String.format("http://localhost:%s/am", AM_SERVICE_MAPPING_PORT);
-    }
+//TODO    
+//    public void testDelete()
+//    {
+//
+//    }
+//TODO
+//    public void testDeleteBundle()
+//    {
+//
+//    }
 
     /**
      * using http://aruld.info/handling-multiparts-in-restful-applications-using-cxf
@@ -422,7 +251,7 @@ public class ApplianceManagerStubIT
     // File upFile = testUtils.createUploadTempFile();
     //
     // HttpClient httpclient = new DefaultHttpClient();
-    // HttpPost httppost = new HttpPost(baseUrl + "er/" + idEnterprise + "/ovf/upload");
+    // HttpPost httppost = new HttpPost(BASE_URI + "er/" + idEnterprise + "/ovf/upload");
     //
     // ContentBody bin = new FileBody(upFile);
     //

@@ -38,21 +38,22 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.testng.TestServerListener;
 
-public class ApplianceManagerStubTestUtils
+public class ApplianceManagerAsserts
 {
 
     private ApplianceManagerResourceStubImpl stub;
 
-    protected final static String idEnterprise = ApplianceManagerStubIT.idEnterprise;
+    protected final static String idEnterprise = ApplianceManagerIT.idEnterprise;
 
-    protected final static String baseUrl = ApplianceManagerStubIT.baseUrl;
+    protected final static String baseUrl = TestServerListener.BASE_URI;
 
     protected final static Long downloadProgressInterval = 5 * 1000l;
 
     private final static Long UPLOAD_FILE_SIZE_BYTES = (1024 * 1024) * 1l;
 
-    public ApplianceManagerStubTestUtils(ApplianceManagerResourceStubImpl stub)
+    public ApplianceManagerAsserts(ApplianceManagerResourceStubImpl stub)
     {
         this.stub = stub;
     }
@@ -62,7 +63,6 @@ public class ApplianceManagerStubTestUtils
 
         OVFPackageInstanceStateDto prevStatus =
             stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
-        // stub..getOVFPackageStatus(baseUrl, idEnterprise, ovfId);
 
         Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());

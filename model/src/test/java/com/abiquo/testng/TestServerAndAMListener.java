@@ -24,21 +24,14 @@ package com.abiquo.testng;
 import static com.abiquo.testng.TestConfig.DEFAULT_SERVER_PORT;
 import static com.abiquo.testng.TestConfig.getParameter;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.testng.ISuite;
 
+/**
+ * Adds a precompiled appliance manager in the current server context
+ */
 public class TestServerAndAMListener extends TestServerListener
 {
 
@@ -49,25 +42,8 @@ public class TestServerAndAMListener extends TestServerListener
 
     protected static final String AM_WEBAPP_CONTEXT_DEFAULT = "/am";
 
-    /** remote repository file server configuration */
-    protected Server rsServer;
-
-    public static final int RS_FILE_SERVER_PORT = 8282;
-
-    private final static String fileServerPath = getParameter("rs.basedir")
-        + "/src/test/resources/";
-
-    private final static String diskFilePath = getParameter("rs.basedir")
-        + "/src/test/resources/testovf/diskFile.vmdk";
-
-    /** Should be the same of on the References size on the ''src/test/resources/description.ovf'' */
-    private final static Long diskFileSize = 1024 * 1024 * 10l;
-
-    protected final static String ovfId = String.format(
-        "http://localhost:%d/testovf/description.ovf", RS_FILE_SERVER_PORT);
-
-    protected final static String REPO_PATH = getParameter(
-        "abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
+    public static final String AM_URI = "http://localhost:" + WEBAPP_PORT
+        + AM_WEBAPP_CONTEXT_DEFAULT;
 
     @Override
     public void onStart(final ISuite suite)
@@ -93,115 +69,12 @@ public class TestServerAndAMListener extends TestServerListener
 
         try
         {
-            createRepository();
-
             server.start();
             LOGGER.info("Test server started with am.");
-
-            startRemoteServiceServer();
-
         }
         catch (Exception ex)
         {
             throw new RuntimeException("Could not start test server with am", ex);
-        }
-    }
-
-    public void onFinish(final ISuite suite)
-    {
-        super.onFinish(suite);
-
-        try
-        {
-            tearDownFileServer();
-
-            cleanupRepository();
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("can tear down RS", e);
-        }
-    }
-
-    private static void cleanupRepository() throws IOException
-    {
-        File vmrepo = new File(REPO_PATH);
-        if (vmrepo.exists())
-        {
-            FileUtils.deleteDirectory(vmrepo);
-        }
-    }
-
-    private static void createRepository() throws IOException
-    {
-        File vmrepo = new File(REPO_PATH);
-        if (vmrepo.exists())
-        {
-            FileUtils.deleteDirectory(vmrepo);
-        }
-
-        vmrepo = new File(REPO_PATH);
-        vmrepo.mkdirs();
-
-        new File(FilenameUtils.concat(REPO_PATH, ".abiquo_repository")).createNewFile();
-    }
-
-    private void startRemoteServiceServer() throws Exception
-    {
-        rsServer = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
-        connector.setPort(RS_FILE_SERVER_PORT);
-        rsServer.addConnector(connector);
-
-        ResourceHandler resource_handler = new ResourceHandler();
-        // resource_handler.setDirectoriesListed(true);
-        // resource_handler.setWelcomeFiles(new String[] {"index.html"});
-        resource_handler.setResourceBase(fileServerPath);
-
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] {resource_handler, new DefaultHandler()});
-        rsServer.setHandler(handlers);
-        rsServer.start();
-
-        createDiskFile();
-    }
-
-    private void tearDownFileServer() throws Exception
-    {
-        if (rsServer != null)
-        {
-            rsServer.stop();
-        }
-        deleteDiskFile();
-    }
-
-    /**
-     * creates the referenced file in testovf/description.ovf
-     */
-    private void createDiskFile() throws IOException
-    {
-        File diskFile = new File(diskFilePath);
-        RandomAccessFile f = new RandomAccessFile(diskFile, "rw");
-        f.setLength(diskFileSize);
-    }
-
-    private void deleteDiskFile() throws Exception
-    {
-        File diskFile = new File(diskFilePath);
-
-        final String errorCause =
-            String.format("Can not delete the disk file at [%s]", diskFilePath);
-
-        if (diskFile.exists())
-        {
-            if (!diskFile.delete())
-            {
-                throw new Exception(errorCause);
-            }
-        }
-        else
-        {
-            throw new Exception(errorCause);
         }
     }
 

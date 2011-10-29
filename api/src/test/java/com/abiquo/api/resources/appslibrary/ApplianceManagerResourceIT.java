@@ -71,14 +71,12 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.testng.TestServerAndAMListener;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 {
     private final static Logger LOG = LoggerFactory.getLogger(ApplianceManagerResourceIT.class);
-
-    private final static String AM_BASE_URI = "http://localhost:"
-        + String.valueOf(getEmbededServerPort()) + "/am";
 
     // to add the am properly
     @Autowired
@@ -100,7 +98,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     {
         RemoteServiceDto am = new RemoteServiceDto();
         am.setType(RemoteServiceType.APPLIANCE_MANAGER);
-        am.setUri(AM_BASE_URI);
+        am.setUri(TestServerAndAMListener.AM_URI);
 
         return am;
     }
@@ -118,7 +116,7 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
         setup(ent, datacenter, limits);
 
-        amclient = new ApplianceManagerResourceStubImpl(AM_BASE_URI);
+        amclient = new ApplianceManagerResourceStubImpl(TestServerAndAMListener.AM_URI);
 
         setUpUser();
         setUpApplianceManagerInDatacenter();
@@ -283,7 +281,8 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
     private static String amEnterpriseRepositoryUrl(final Integer enterpriseId)
     {
-        return String.format("%s/erepos/%s", AM_BASE_URI, enterpriseId.toString());
+        return String.format("%s/erepos/%s", TestServerAndAMListener.AM_URI,
+            enterpriseId.toString());
     }
 
 }

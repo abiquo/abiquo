@@ -48,7 +48,6 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     protected static int getEmbededServerPort()
     {
         return Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
-
     }
 
     protected RestClient client = new RestClient();

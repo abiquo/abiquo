@@ -55,13 +55,11 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.testng.TestServerAndAMListener;
 
 public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin";
-
-    private final static String AM_BASE_URI = "http://localhost:"
-        + String.valueOf(getEmbededServerPort()) + "/am";
 
     private Enterprise ent;
 
@@ -78,7 +76,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
         RemoteService am =
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, datacenter);
-        am.setUri(AM_BASE_URI);
+        am.setUri(TestServerAndAMListener.AM_URI);
 
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
@@ -268,7 +266,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         params.put("ovf", ovf);
 
         // Must use the URI resolver in the AM in order to encode the ovf parameter
-        return URIResolver.resolveURI(AM_BASE_URI, "erepos/{erepo}/ovfs/{ovf}", params);
+        return URIResolver.resolveURI(TestServerAndAMListener.AM_URI, "erepos/{erepo}/ovfs/{ovf}",
+            params);
     }
 
 }

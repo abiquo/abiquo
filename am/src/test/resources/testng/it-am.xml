@@ -1,14 +1,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="AppsLibrary integration tests" verbose="1">
 	<listeners>
-		<listener class-name="com.abiquo.testng.TestDatabaseListener" />
 		<listener class-name="com.abiquo.testng.AMRepositoryListener" />
 		<listener class-name="com.abiquo.testng.OVFRemoteRepositoryListener" />
-		<listener class-name="com.abiquo.testng.TestServerAndAMListener" />
+
+		<listener class-name="com.abiquo.testng.TestServerListener" />
 	</listeners>
 	<test name="AppsLibrary integration tests">
 		<classes>
-			<class name="com.abiquo.api.resources.appslibrary.ApplianceManagerResourceIT"></class>
+			<class name="com.abiquo.appliancemanager.ApplianceManagerIT"></class>
 		</classes>
 	</test>
 </suite>
