@@ -22,9 +22,10 @@
 package com.abiquo.appliancemanager;
 
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
-import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfIdInvalid;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfIdNotFound;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestServerListener.BASE_URI;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,8 +47,8 @@ import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
-
-import static org.testng.Assert.*;
+import static com.abiquo.appliancemanager.AMConsumerTestListener.*;
+import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.*;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerIT
@@ -62,7 +63,6 @@ public class ApplianceManagerIT
 
     protected ApplianceManagerAsserts asserts;
 
-
     @BeforeClass
     public void setUp() throws IOException
     {
@@ -74,32 +74,40 @@ public class ApplianceManagerIT
     public void assertCleanPre()
     {
         asserts.ovfInstanceNoExist(ovfId);
+        assertEventsEmpty();
     }
-    
+
     @AfterMethod
     public void assertCleanPost()
     {
         asserts.ovfInstanceNoExist(ovfId);
+        assertEventsEmpty();
     }
 
+    // TODO config and repos !!
+
     @Test
-    public void testDeploy() throws Exception
+    public void testCreate() throws Exception
     {
         asserts.installOvfAndWaitCompletion(ovfId);
         asserts.ovfInstanceExist(ovfId);
 
         asserts.clean(ovfId);
+
+        expectedEvents(DOWNLOADING, DOWNLOAD, NOT_DOWNLOAD);
     }
 
     @Test
-    public void testDeployCancel() throws Exception
+    public void testCreateCancel() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovfId);
         client.delete(idEnterprise, ovfId);
+
+        expectedEvents(DOWNLOADING, NOT_DOWNLOAD);
     }
 
     @Test
-    public void testDoubleDeploy() throws Exception
+    public void testCreateDouble() throws Exception
     {
         asserts.ovfInstanceNoExist(ovfId);
         asserts.installOvfAndWaitCompletion(ovfId);
@@ -116,37 +124,18 @@ public class ApplianceManagerIT
         }
         asserts.ovfInstanceExist(ovfId);
         asserts.clean(ovfId);
+
+        // ERROR event not generated as request rejected (still download)
+        expectedEvents(DOWNLOADING, DOWNLOAD, NOT_DOWNLOAD);
     }
 
-    @Test(enabled = false)
-    public void testDeployInvalid()
+    @Test
+    public void testCreateNotFound()
     {
-        asserts.ovfStatus(ovfIdInvalid, OVFStatusEnumType.NOT_DOWNLOAD);
+        client.createOVFPackageInstance(idEnterprise, ovfIdNotFound);
+        asserts.ovfStatus(ovfIdNotFound, OVFStatusEnumType.ERROR);
 
-        // The OVF is not on the available list
-        final Integer prevSize = asserts.ovfAvailable(ovfIdInvalid, false);
-
-        // Install the package
-        try
-        {
-            // OVFPackageInstanceStatusDto statusInstall =
-            client.createOVFPackageInstance(idEnterprise, ovfIdInvalid);
-
-            // TODO doesn't fail Assert.assertNotNull(null);
-        }
-        catch (Exception e)
-        {
-            Assert.assertNotNull(e);
-        }
-
-        // The OVF is not contained on the available list
-        final Integer actualSize = asserts.ovfAvailable(ovfIdInvalid, false);
-
-        // There are the same availables packages
-        Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
-
-        // The OVF is ERROR
-        asserts.ovfStatus(ovfIdInvalid, OVFStatusEnumType.ERROR);
+        assertEventsEmpty();
     }
 
     @Test(enabled = false)
@@ -184,7 +173,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void testBundle() throws Exception
     {
-        testDeploy();
+        testCreate();
 
         OVFPackageInstanceDto ovfDto = asserts.createTestDiskInfoBundle(ovfId, snapshot);
 

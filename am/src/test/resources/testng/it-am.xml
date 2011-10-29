@@ -2,9 +2,9 @@
 <suite name="AppsLibrary integration tests" verbose="1">
 	<listeners>
 		<listener class-name="com.abiquo.testng.AMRepositoryListener" />
-		<listener class-name="com.abiquo.testng.OVFRemoteRepositoryListener" />
-
 		<listener class-name="com.abiquo.testng.TestServerListener" />
+		<listener class-name="com.abiquo.testng.OVFRemoteRepositoryListener" />
+		<listener class-name="com.abiquo.appliancemanager.AMConsumerTestListener" />
 	</listeners>
 	<test name="AppsLibrary integration tests">
 		<classes>

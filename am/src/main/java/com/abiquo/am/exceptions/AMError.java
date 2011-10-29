@@ -30,6 +30,7 @@ public enum AMError
     AM_CHECK("AM-CHECK",
         "Appliance Manager is not well configured. Check the repository filesystem"), //
     OVF_INVALID("OVF-INVALID", "Invalid OVF document"), //
+    OVF_INVALID_LOCATION("OVF-INVALID_LOC", "Invalid OVF location"), //
     OVF_NOT_FOUND("OVF-NOT-FOUND", "OVF document not found in the repository"), //
     OVF_MALFORMED("OVF-MALFORMED", "OVF document can not be read"), //
     OVF_INSTALL("OVF-INSTALL", "Can't create the ovf package folder"), //

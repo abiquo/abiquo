@@ -54,7 +54,7 @@ public class OVFRemoteRepositoryListener implements ISuiteListener
     public final static String ovfId = String.format("http://localhost:%d/testovf/description.ovf",
         RS_FILE_SERVER_PORT);
 
-    public final static String ovfIdInvalid = ovfId + "NOT-FOUND-OVF";
+    public final static String ovfIdNotFound = ovfId + "NOT-FOUND-OVF";
 
     /** ##### ##### ##### ##### ##### */
 

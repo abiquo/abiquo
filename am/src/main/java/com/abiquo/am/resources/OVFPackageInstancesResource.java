@@ -128,6 +128,9 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         return list;
     }
 
+    /**
+     * Never return error. Use GET_STATUS to see errors
+     * */
     @POST
     public void downloadOVFPackage(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
@@ -135,6 +138,11 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     {
         logger.debug("[deploy] {}", ovfId);
 
+        if(!OVFPackageConventions.isValidOVFLocation(ovfId))
+        {
+            return;
+        }
+        
         
         switch (service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise).getStatus())
         {
@@ -144,7 +152,6 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
             default:
                 break;
         }
-        
         
         if (ovfId.startsWith("upload"))
         {
@@ -156,7 +163,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         {
             service.startDownload(idEnterprise, ovfId);
         }
-        catch (Exception e)
+        catch (Exception e) // TODO events in the service
         {
             try
             {

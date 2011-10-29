@@ -35,6 +35,7 @@ import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.OVFPackageInstanceNotifier;
 import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.model.validation.IscsiPath;
 
 /**
  * An OVF package being download.
@@ -98,6 +99,7 @@ public class PackageInfo
     public synchronized void onFileEnd()
     {
         boolean pendings = false;
+        boolean cancelled = false;
 
         Iterator<FileInfo> itFiles = files.iterator();
 
@@ -115,6 +117,7 @@ public class PackageInfo
                 pendings = true;
             }
 
+            cancelled = cancelled || file.isCancell;
         }
 
         if (!pendings)
@@ -125,17 +128,25 @@ public class PackageInfo
                 htTransfers.remove(ovfId);
             }
 
-            try
+            if (cancelled)
             {
-                AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
-                    OVFStatusEnumType.DOWNLOAD);
+                // no download event, checks if deleted
+                EnterpriseRepositoryService.getRepo(idEnterprise).deleteOVF(ovfId);
             }
-            catch (Exception e) // IdNotFoundException RepositoryException EventException
+            else
             {
-                final String msg =
-                    String.format("Can not notify the DOWNLOAD of [%s] caused by [%s]", ovfId,
-                        e.getLocalizedMessage());
-                logger.error(msg);
+                try
+                {
+                    AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
+                        OVFStatusEnumType.DOWNLOAD);
+                }
+                catch (Exception e) // IdNotFoundException RepositoryException EventException
+                {
+                    final String msg =
+                        String.format("Can not notify the DOWNLOAD of [%s] caused by [%s]", ovfId,
+                            e.getLocalizedMessage());
+                    logger.error(msg);
+                }
             }
         }
     }
@@ -157,11 +168,12 @@ public class PackageInfo
         try
         {
 
-            AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
-                OVFStatusEnumType.NOT_DOWNLOAD);
-
             if (deleteFolder)
             {
+                // TODO !deleteFolder
+                AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
+                    OVFStatusEnumType.NOT_DOWNLOAD);
+
                 enterpriseRepository.deleteOVF(ovfId);
             }
         }

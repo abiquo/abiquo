@@ -157,7 +157,6 @@ public class FileInfo implements AsyncHandler<Boolean>
         getPackage().onError(t.getMessage());
     }
 
-    public Future<Boolean> execution;
 
     private final static Logger logger = LoggerFactory.getLogger(FileInfo.class);
 

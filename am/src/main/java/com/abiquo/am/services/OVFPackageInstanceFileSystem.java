@@ -121,10 +121,17 @@ public class OVFPackageInstanceFileSystem
     public static OVFPackageInstanceStateDto getOVFStatus(final String enterpriseRepositoryPath,
         final String ovfId)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         final OVFPackageInstanceStateDto state = new OVFPackageInstanceStateDto();
         state.setOvfId(ovfId);
+
+        if (!OVFPackageConventions.isValidOVFLocation(ovfId))
+        {
+            state.setStatus(OVFStatusEnumType.ERROR);
+            state.setErrorCause(AMError.OVF_INVALID_LOCATION.toString());
+            return state;
+        }
+
+        TimeoutFSUtils.getInstance().canUseRepository();
 
         final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
         final String ovfEnvelopePath =

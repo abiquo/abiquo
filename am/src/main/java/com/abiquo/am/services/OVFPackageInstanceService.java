@@ -100,12 +100,18 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         OVFStatusEnumType status =
             EnterpriseRepositoryService.getRepo(erId).getOVFStatus(ovfId).getStatus();
 
+        boolean requireNotifyError = true;
         switch (status)
         {
+            case NOT_DOWNLOAD:
+                return; // TODO status code
+
             case DOWNLOADING:
+
                 try
                 {
                     downloader.cancelDeployOVFPackage(ovfId, erId);
+                    requireNotifyError = false;
                 }
                 catch (Exception e)
                 {
@@ -115,6 +121,11 @@ public class OVFPackageInstanceService extends OVFPackageConventions
             default:
                 EnterpriseRepositoryService.getRepo(erId).deleteOVF(ovfId);
                 break;
+        }
+
+        if (!requireNotifyError)
+        {
+            return;
         }
 
         try

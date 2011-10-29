@@ -32,7 +32,6 @@ import com.abiquo.am.fileserver.info.PackageInfo;
 import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.ProxyServer;
 
@@ -99,14 +98,11 @@ public class HttpClientOVFPackage
         }
     }
 
-    protected void addDownload(FileInfo file) throws IOException
+    protected synchronized void addDownload(FileInfo file) throws IOException
     {
-        BoundRequestBuilder request = httpClient.prepareGet(file.fileUrl);
+        httpClient.prepareGet(file.fileUrl).execute(file);
         // request.addBodyPart(arg0);
         // request.addHeader(arg0, arg1);
-
-        file.execution = request.execute(file);
-
     }
 
 }
