@@ -43,7 +43,7 @@ import com.ning.http.client.HttpResponseStatus;
 public class FileInfo implements AsyncHandler<Boolean>
 {
     boolean berror = false;
-    
+
     @Override
     public STATE onStatusReceived(HttpResponseStatus status) throws Exception
     {
@@ -102,11 +102,11 @@ public class FileInfo implements AsyncHandler<Boolean>
     @Override
     public STATE onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception
     {
-        if(isCancell)
+        if (isCancell)
         {
             return STATE.ABORT;
         }
-        
+
         try
         {
             byte[] bodyBytes = bodyPart.getBodyPartBytes();
@@ -131,17 +131,15 @@ public class FileInfo implements AsyncHandler<Boolean>
         }
     }
 
-    
-    
     @Override
     public Boolean onCompleted() throws Exception
     {
         // Will be invoked once the response has been fully read or a ResponseComplete exception
         // has been thrown.
 
-        if(!berror)
+        if (!berror)
         {
-            onDownload();    
+            onDownload();
         }
 
         return true;
@@ -151,6 +149,11 @@ public class FileInfo implements AsyncHandler<Boolean>
     public void onThrowable(Throwable t)
     {
         berror = true;
+
+        // XXX annoying AHC 1.0.0 bug ... internal NPE
+        String error = t.getLocalizedMessage();
+        error = error != null ? error : "Internal AHC error " + t.getClass().getCanonicalName();
+
         getPackage().onError(t.getMessage());
     }
 

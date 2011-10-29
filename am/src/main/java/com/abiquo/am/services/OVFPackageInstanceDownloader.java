@@ -88,7 +88,7 @@ public class OVFPackageInstanceDownloader
      * @throws DownloadException, content is not a valid OVF envelope document or any error during
      *             the download of some file on the package.
      */
-    public void deployOVFPackage(final String enterpriseId, final String ovfId,
+    public synchronized void deployOVFPackage(final String enterpriseId, final String ovfId,
         EnvelopeType envelope)
     {
 
@@ -126,7 +126,7 @@ public class OVFPackageInstanceDownloader
      * @param ovfId, the OVF package identifier.
      * @throws RepositoryException if the package is not on DOWNLOADING state.
      */
-    public void cancelDeployOVFPackage(final String ovfId, String enterpriseId)
+    public synchronized void cancelDeployOVFPackage(final String ovfId, String enterpriseId)
     {
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(enterpriseId);
@@ -262,7 +262,7 @@ public class OVFPackageInstanceDownloader
      * @return the OVFid of the just uploaded package
      * @throws IOException
      */
-    public String uploadOVFPackage(OVFPackageInstanceDto diskInfo, File diskFile)
+    public synchronized String uploadOVFPackage(OVFPackageInstanceDto diskInfo, File diskFile)
         throws IOException
     {
 
@@ -283,25 +283,17 @@ public class OVFPackageInstanceDownloader
         return ovfId;
     }// up
 
-    public Double getDownloadProgress(final String ovfId) throws DownloadException
+    public synchronized  Double getDownloadProgress(final String ovfId) throws DownloadException
     {
         if (htCurrentTransfers.containsKey(ovfId))
         {
             return htCurrentTransfers.get(ovfId).getProgress();
 
         }
-        // else if (htUploadTransfers.containsKey(ovfId))
-        // {
-        // return htUploadTransfers.get(ovfId).getProgress();
-        //
-        // }
         else
         {
-            final String msg =
-                String.format(
-                    "Provided OVF[%s] appears as DOWNLOADING but is not beeing deployed/uploaded",
-                    ovfId);
-            throw new DownloadException(msg, null);
+            return 100.0; // just downloaded
+            
         }
     }
 }

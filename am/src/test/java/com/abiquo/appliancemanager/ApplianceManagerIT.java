@@ -21,7 +21,6 @@
 
 package com.abiquo.appliancemanager;
 
-import static com.abiquo.testng.AMRepositoryListener.REPO_PATH;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfIdInvalid;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
@@ -30,8 +29,12 @@ import static com.abiquo.testng.TestServerListener.BASE_URI;
 import java.io.File;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
@@ -44,127 +47,90 @@ import com.ning.http.client.FilePart;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
 
+import static org.testng.Assert.*;
+
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerIT
 {
+    private final static Logger LOG = LoggerFactory.getLogger(ApplianceManagerIT.class);
+
     final static String snapshot = "000snap000";
 
     final static String idEnterprise = "1";
 
-    protected ApplianceManagerResourceStubImpl stub;
+    protected ApplianceManagerResourceStubImpl client;
 
-    protected ApplianceManagerAsserts testUtils;
+    protected ApplianceManagerAsserts asserts;
+
 
     @BeforeClass
     public void setUp() throws IOException
     {
-        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
-        testUtils = new ApplianceManagerAsserts(stub);
+        client = new ApplianceManagerResourceStubImpl(BASE_URI);
+        asserts = new ApplianceManagerAsserts(client);
+    }
+
+    @BeforeMethod
+    public void assertCleanPre()
+    {
+        asserts.ovfInstanceNoExist(ovfId);
+    }
+    
+    @AfterMethod
+    public void assertCleanPost()
+    {
+        asserts.ovfInstanceNoExist(ovfId);
     }
 
     @Test
     public void testDeploy() throws Exception
     {
+        asserts.installOvfAndWaitCompletion(ovfId);
+        asserts.ovfInstanceExist(ovfId);
 
-        // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
-
-        // The OVF is not on the available list
-        final Integer prevSize = testUtils.ovfAvailable(ovfId, false);
-
-        // Install the package
-        testUtils.installOvfAndWaitCompletion(ovfId);
-
-        OVFPackageInstanceDto pi = stub.getOVFPackageInstance(idEnterprise, ovfId);
-        String diskPath = pi.getDiskFilePath();
-        File diskFile = new File(REPO_PATH + diskPath);
-        Assert.assertTrue(diskFile.exists());
-
-        // The OVF is contained on the available list
-        final Integer actualSize = testUtils.ovfAvailable(ovfId, true);
-
-        // There are one new available ovf.
-        Assert.assertEquals((prevSize.intValue() + 1), actualSize.intValue());
-
-        // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
+        asserts.clean(ovfId);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testDeployCancel() throws Exception
     {
-        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
-        testUtils = new ApplianceManagerAsserts(stub);
-
-        // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
-
-        // The OVF is not on the available list
-        final Integer prevSize = testUtils.ovfAvailable(ovfId, false);
-
-        // Install the package
-        testUtils.installOvf(ovfId);
-
-        // wait to start download
-        Thread.sleep(10);
-
-        // Require the cancel
-        stub.delete(idEnterprise, ovfId);
-
-        Thread.sleep(10);
-
-        // The OVF is contained on the available list
-        final Integer actualSize = testUtils.ovfAvailable(ovfId, false);
-
-        // There are one new available ovf.
-        Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
-
-        // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
+        client.createOVFPackageInstance(idEnterprise, ovfId);
+        client.delete(idEnterprise, ovfId);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testDoubleDeploy() throws Exception
     {
+        asserts.ovfInstanceNoExist(ovfId);
+        asserts.installOvfAndWaitCompletion(ovfId);
+        asserts.ovfInstanceExist(ovfId);
 
-        testDeploy();
+        try
+        {
+            client.createOVFPackageInstance(idEnterprise, ovfId);
+            fail("Duplicated ovf instance");
+        }
+        catch (Exception e)
+        {
 
-        // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
-
-        // The OVF is on the available list
-        final Integer prevSize = testUtils.ovfAvailable(ovfId, true);
-
-        // Install the package
-        testUtils.installOvfAndWaitCompletion(ovfId);
-
-        // The OVF is contained on the available list
-        final Integer actualSize = testUtils.ovfAvailable(ovfId, true);
-
-        // There are one new available ovf.
-        Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
-
-        // The OVF is DOWNLOAD
-        testUtils.ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
+        }
+        asserts.ovfInstanceExist(ovfId);
+        asserts.clean(ovfId);
     }
 
     @Test(enabled = false)
     public void testDeployInvalid()
     {
-        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
-        testUtils = new ApplianceManagerAsserts(stub);
-
-        // The OVF is NOT_DOWNLOAD
-        testUtils.ovfStatus(ovfIdInvalid, OVFStatusEnumType.NOT_DOWNLOAD);
+        asserts.ovfStatus(ovfIdInvalid, OVFStatusEnumType.NOT_DOWNLOAD);
 
         // The OVF is not on the available list
-        final Integer prevSize = testUtils.ovfAvailable(ovfIdInvalid, false);
+        final Integer prevSize = asserts.ovfAvailable(ovfIdInvalid, false);
 
         // Install the package
         try
         {
             // OVFPackageInstanceStatusDto statusInstall =
-            stub.createOVFPackageInstance(idEnterprise, ovfIdInvalid);
+            client.createOVFPackageInstance(idEnterprise, ovfIdInvalid);
 
             // TODO doesn't fail Assert.assertNotNull(null);
         }
@@ -174,23 +140,23 @@ public class ApplianceManagerIT
         }
 
         // The OVF is not contained on the available list
-        final Integer actualSize = testUtils.ovfAvailable(ovfIdInvalid, false);
+        final Integer actualSize = asserts.ovfAvailable(ovfIdInvalid, false);
 
         // There are the same availables packages
         Assert.assertEquals(prevSize.intValue(), actualSize.intValue());
 
         // The OVF is ERROR
-        testUtils.ovfStatus(ovfIdInvalid, OVFStatusEnumType.ERROR);
+        asserts.ovfStatus(ovfIdInvalid, OVFStatusEnumType.ERROR);
     }
 
     @Test(enabled = false)
     public void testUploadStreaming() throws Exception
     {
-        stub = new ApplianceManagerResourceStubImpl(BASE_URI);
-        testUtils = new ApplianceManagerAsserts(stub);
+        client = new ApplianceManagerResourceStubImpl(BASE_URI);
+        asserts = new ApplianceManagerAsserts(client);
 
-        OVFPackageInstanceDto diskInfo = testUtils.createTestDiskInfoUpload();
-        File upFile = testUtils.createUploadTempFile();
+        OVFPackageInstanceDto diskInfo = asserts.createTestDiskInfoUpload();
+        File upFile = asserts.createUploadTempFile();
 
         AsyncHttpClientConfig clientConf;
         AsyncHttpClient httpClient;
@@ -220,24 +186,24 @@ public class ApplianceManagerIT
     {
         testDeploy();
 
-        OVFPackageInstanceDto ovfDto = testUtils.createTestDiskInfoBundle(ovfId, snapshot);
+        OVFPackageInstanceDto ovfDto = asserts.createTestDiskInfoBundle(ovfId, snapshot);
 
-        testUtils.createBundleDiskFile(ovfId, snapshot);
+        asserts.createBundleDiskFile(ovfId, snapshot);
 
-        stub.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(BASE_URI,
+        client.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(BASE_URI,
         // idEnterprise, snapshot, ovfDto);
     }
 
-//TODO    
-//    public void testDelete()
-//    {
-//
-//    }
-//TODO
-//    public void testDeleteBundle()
-//    {
-//
-//    }
+    // TODO
+    // public void testDelete()
+    // {
+    //
+    // }
+    // TODO
+    // public void testDeleteBundle()
+    // {
+    //
+    // }
 
     /**
      * using http://aruld.info/handling-multiparts-in-restful-applications-using-cxf

@@ -115,8 +115,11 @@
 		<dependency>
 			<groupId>com.ning</groupId>
 			<artifactId>async-http-client</artifactId>
-			<version>1.0.0</version>
-			<!-- <exclusions> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+             <!--
+	             <version>1.6.2</version>
+             -->
+             <version>1.0.0</version>
+                <!-- <exclusions> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
 				</exclusion> </exclusions> -->
 		</dependency>
 		<!-- LOGGER -->

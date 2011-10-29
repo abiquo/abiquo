@@ -103,10 +103,15 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         switch (status)
         {
             case DOWNLOADING:
-                downloader.cancelDeployOVFPackage(ovfId, erId);
-                break;
+                try
+                {
+                    downloader.cancelDeployOVFPackage(ovfId, erId);
+                }
+                catch (Exception e)
+                {
+                    logger.warn("not downloading (just download)", e);
+                }
 
-            // TODO case error
             default:
                 EnterpriseRepositoryService.getRepo(erId).deleteOVF(ovfId);
                 break;

@@ -40,6 +40,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Providers;
 
 import org.apache.commons.io.IOUtils;
@@ -134,6 +135,17 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     {
         logger.debug("[deploy] {}", ovfId);
 
+        
+        switch (service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise).getStatus())
+        {
+            case DOWNLOADING:
+            case DOWNLOAD:
+                throw new AMException(AMError.OVF_INSTALL_ALREADY);
+            default:
+                break;
+        }
+        
+        
         if (ovfId.startsWith("upload"))
         {
             throw new AMException(AMError.OVF_UPLOAD, String.format(

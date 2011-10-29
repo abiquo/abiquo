@@ -21,6 +21,9 @@
 
 package com.abiquo.appliancemanager;
 
+import static com.abiquo.testng.AMRepositoryListener.REPO_PATH;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -64,6 +67,12 @@ public class ApplianceManagerAsserts
         OVFPackageInstanceStateDto prevStatus =
             stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
 
+        if(prevStatus.getStatus() == OVFStatusEnumType.ERROR)
+        {
+            System.err.println("ERROR ....... "+prevStatus.getErrorCause());
+        }
+        
+        
         Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
 
@@ -108,6 +117,40 @@ public class ApplianceManagerAsserts
 
         waitUnitlDownloaded(ovfId);
     }
+
+    /**
+     * Status DOWNLOAD, in the available list and the disk file in the repository fs.
+     */
+    public void ovfInstanceExist(final String ovfId)
+    {
+        ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
+
+        ovfAvailable(ovfId, true);
+
+        OVFPackageInstanceDto pi = stub.getOVFPackageInstance(idEnterprise, ovfId);
+        File diskFile = new File(REPO_PATH + pi.getDiskFilePath());
+        Assert.assertTrue(diskFile.exists());
+    }
+
+    /**
+     * Status NOT_DOWNLOAD and not available in the list
+     */
+    public void ovfInstanceNoExist(final String ovfId)
+    {
+        // The OVF is NOT_DOWNLOAD
+        ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
+
+        // The OVF is not on the available list
+        ovfAvailable(ovfId, false);
+    }
+
+    public void clean(final String ovfId)
+    {
+        // deletes the ovfs
+        stub.delete(idEnterprise, ovfId);
+        ovfAvailable(ovfId, false);
+    }
+    
 
     /**
      * 

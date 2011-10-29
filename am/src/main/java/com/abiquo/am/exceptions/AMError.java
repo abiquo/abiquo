@@ -33,6 +33,8 @@ public enum AMError
     OVF_NOT_FOUND("OVF-NOT-FOUND", "OVF document not found in the repository"), //
     OVF_MALFORMED("OVF-MALFORMED", "OVF document can not be read"), //
     OVF_INSTALL("OVF-INSTALL", "Can't create the ovf package folder"), //
+    OVF_INSTALL_ALREADY("OVF-INSTALL-ALREADY", "OVF already exist"), //
+
     OVF_DOWNLOAD("OVF-DOWNLOAD", "Can't download the ovf package"), //
     OVF_CANCEL("OVF-CANCEL", "Can't cancel the ovf package install"), //
     REPO_NO_SPACE("REPO-NO-SPACE", "No space left in the repository file system"), //

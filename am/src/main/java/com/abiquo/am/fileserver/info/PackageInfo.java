@@ -157,13 +157,12 @@ public class PackageInfo
         try
         {
 
-            if(deleteFolder)
-            {                
-                AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
-                    OVFStatusEnumType.NOT_DOWNLOAD);
+            AMNotifierFactory.getInstance().setOVFStatus(idEnterprise, ovfId,
+                OVFStatusEnumType.NOT_DOWNLOAD);
 
+            if (deleteFolder)
+            {
                 enterpriseRepository.deleteOVF(ovfId);
-
             }
         }
         catch (Exception e)
