@@ -222,48 +222,6 @@ public class ApplianceManagerIT
     }
 
     @Test(enabled = false)
-    public void testUploadStreaming() throws Exception
-    {
-        client = new ApplianceManagerResourceStubImpl(BASE_URI);
-        asserts = new ApplianceManagerAsserts(client);
-
-        OVFPackageInstanceDto diskInfo = ApplianceManagerAsserts.createTestDiskInfoUpload();
-        File upFile = ApplianceManagerAsserts.createUploadTempFile();
-
-        AsyncHttpClientConfig clientConf;
-        AsyncHttpClient httpClient;
-        int TIMEOUT = 10000;
-        int CONNECTIONS = 10;
-
-        // TODO read proxy info
-        clientConf =
-            new AsyncHttpClientConfig.Builder().setFollowRedirects(true)
-                .setCompressionEnabled(true)// .setIdleConnectionTimeoutInMs(TIMEOUT)
-                .setRequestTimeoutInMs(TIMEOUT).setMaximumConnectionsTotal(CONNECTIONS)
-                // .setProxyServer(new ProxyServer("127.0.0.1", 38080))
-                .build();
-
-        httpClient = new AsyncHttpClient(clientConf);
-
-        final String uploadUrl = String.format("%s/erepos/%d/ovfs/", BASE_URI, idEnterprise);
-
-        System.err.println("using upload url " + uploadUrl);
-        BoundRequestBuilder request = httpClient.preparePost(uploadUrl);
-
-        request.addBodyPart(new StringPart("diskInfo", diskInfo.toString())); // TODO JSON
-        request.addBodyPart(new FilePart("disk.vmkd", upFile, "octet-stream", "UTF-8"));
-
-        com.ning.http.client.Response response = request.execute().get();
-
-        if (response.getStatusCode() != 201)
-        {
-            System.err.println(String.format("upload error %d  %s", response.getStatusCode(),
-                response.getResponseBody()));
-        }
-        Assert.assertTrue(response.getStatusCode() == 201);
-    }
-
-    @Test(enabled = false)
     public void testBundle() throws Exception
     {
         testCreate();
@@ -287,53 +245,4 @@ public class ApplianceManagerIT
     //
     // }
 
-    /**
-     * using http://aruld.info/handling-multiparts-in-restful-applications-using-cxf
-     * http://svn.apache .org/repos/asf/cxf/trunk/systests/jaxrs/src/test/java/org
-     * /apache/cxf/systest/ jaxrs/MultipartStore.java <br/>
-     **/
-    // @Test(enabled = false)
-    // public void testUploadStreaming() throws Exception
-    // {
-    // OVFPackageInstanceDto diskInfo = testUtils.createTestDiskInfoUpload();
-    // File upFile = testUtils.createUploadTempFile();
-    //
-    // HttpClient httpclient = new DefaultHttpClient();
-    // HttpPost httppost = new HttpPost(BASE_URI + "er/" + idEnterprise + "/ovf/upload");
-    //
-    // ContentBody bin = new FileBody(upFile);
-    //
-    // // XXX InputStreamBody bin =
-    // // new InputStreamBody(new FileInputStream(upFile), "multipart/mixed",
-    // // "testDiskUpload.file");
-    // /*
-    // * XXX
-    // * @see
-    // * http://radomirml.com/2009/02/13/file-upload-with-httpcomponents-successor-of-commons-
-    // * httpclient to create an extension of InputStreamBody in order to determine the
-    // * content-length of the attachment. *
-    // */
-    //
-    // final String diskText = RSSerializerJACK.writeJSON(diskInfo);
-    //
-    // StringBody disk = new StringBody(diskText, "application/json", null);
-    //
-    // MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE); // XXX
-    // reqEntity.addPart("diskInfo", disk);
-    // reqEntity.addPart("diskFile", bin);
-    //
-    // httppost.setEntity(reqEntity);
-    // httppost.setHeader("content-disposition", "2testDiskUpload.file");
-    // // XXX --can not set-- httppost.addHeader("Content-Length",
-    // // String.valueOf(upFile.length()));
-    //
-    // HttpResponse response = httpclient.execute(httppost);
-    //
-    // final Integer httpRespCode = response.getStatusLine().getStatusCode();
-    // Assert.assertEquals(1, httpRespCode / 200);
-    //
-    // HttpEntity resEntity = response.getEntity();
-    //
-    // Assert.assertNotNull(resEntity);
-    // }
 }

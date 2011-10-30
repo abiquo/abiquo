@@ -217,7 +217,7 @@ public class ApplianceManagerAsserts
         return di;
     }
 
-    protected static OVFPackageInstanceDto createTestDiskInfoUpload()
+    protected static OVFPackageInstanceDto createTestDiskInfoUpload(final String ovfid)
     {
         OVFPackageInstanceDto di = new OVFPackageInstanceDto();
         di.setName("theDiskName");
@@ -234,7 +234,7 @@ public class ApplianceManagerAsserts
 
         // di.setImageSize(121212); // XXX not use
         di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
-        di.setOvfId("upload/testUpload/envelope.ovf");
+        di.setOvfId(ovfid);
 
         di.setIdEnterprise(Integer.valueOf(idEnterprise));
         di.setIdUser(2);

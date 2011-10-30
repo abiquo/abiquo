@@ -129,7 +129,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
 
     /**
      * Never return error. Use GET_STATUS to see errors
-     * */
+     */
     @POST
     public void downloadOVFPackage(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
@@ -137,12 +137,11 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     {
         logger.debug("[deploy] {}", ovfId);
 
-        if(!OVFPackageConventions.isValidOVFLocation(ovfId))
+        if (!OVFPackageConventions.isValidOVFLocation(ovfId))
         {
             return;
         }
-        
-        
+
         switch (service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise).getStatus())
         {
             case DOWNLOADING:
@@ -151,7 +150,7 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
             default:
                 break;
         }
-        
+
         if (ovfId.startsWith("upload"))
         {
             throw new AMException(AMError.OVF_UPLOAD, String.format(
@@ -187,24 +186,11 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     {
         OVFPackageInstanceDto diskInfo = null;
         String errorMsg = null;
-        String json = "";
+
         try
         {
             InPart diskInfoPart = mp.next();
-
-            fixMediaType(diskInfoPart);
-
-            json = diskInfoPart.getBody(String.class, null);
-            // we replace the \ with / because a fail parsing strings with \ followed by a char that
-            // might resemble a control char. (C:\f... ends up as C:[ctrl-L]...)
-            String json2 = removeFakePath(removeControlChar(json));
-
-            diskInfo =
-                providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
-                    MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null,
-                    null, MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
-                    new ByteArrayInputStream(json2.getBytes()));
-
+            diskInfo = readOVFPackageInstanceDtoFromMultipart(diskInfoPart, headers, providers);
         }
         catch (Exception e)
         {
@@ -219,6 +205,9 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
 
             diskInfo.setDiskFilePath(OVFPackageConventions.OVF_STATUS_ERROR_MARK);
         }
+
+        // AMNotifierFactory.getInstance().setOVFStatus(String.valueOf(diskInfo.getIdEnterprise()),
+        // diskInfo.getOvfId(), OVFStatusEnumType.DOWNLOADING);
 
         InPart diskFilePart = mp.next();
 
@@ -235,6 +224,28 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
         service.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getOvfId())).build();
+    }
+
+    private OVFPackageInstanceDto readOVFPackageInstanceDtoFromMultipart(InPart diskInfoPart,
+        HttpHeaders headers, Providers providers) throws Exception
+    {
+        fixMediaType(diskInfoPart);
+
+        String json = diskInfoPart.getBody(String.class, null);
+        // we replace the \ with / because a fail parsing strings with \ followed by a char that
+        // might resemble a control char. (C:\f... ends up as C:[ctrl-L]...)
+        String json2 = removeFakePath(removeControlChar(json));
+
+        return providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
+            MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
+            MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
+            new ByteArrayInputStream(json2.getBytes()));
+
+        // return diskInfoPart.getBody(OVFPackageInstanceDto.class, null);
+        // return providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
+        // MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
+        // MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
+        // diskInfoPart.getInputStream());
     }
 
     /**

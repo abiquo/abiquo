@@ -8,7 +8,8 @@
 	</listeners>
 	<test name="AppsLibrary integration tests">
 		<classes>
-			<class name="com.abiquo.appliancemanager.ApplianceManagerIT"></class>
+			<class name="com.abiquo.appliancemanager.ApplianceManagerUploadIT"></class>
+			<class name="com.abiquo.appliancemanager.ApplianceManagerIT"></class>			
 		</classes>
 	</test>
 </suite>

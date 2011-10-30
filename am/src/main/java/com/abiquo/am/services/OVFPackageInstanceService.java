@@ -803,16 +803,12 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         throws IOException, EventException
     {
 
-        upload(diskinfo, diskFile);
         if (!StringUtils.isBlank(errorMsg))
         {
-            // sets the current state to start downloading
-            AMNotifierFactory.getInstance().setOVFStatus(
-                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(),
-                OVFStatusEnumType.ERROR);
             AMNotifierFactory.getInstance().setOVFStatusError(
                 String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(), errorMsg);
         }
 
+        upload(diskinfo, diskFile);
     }
 }
