@@ -47,7 +47,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
             actual = EVENTS.poll();
             if (actual != null)
             {
-                Assert.assertEquals(actual, expected);
+                Assert.assertEquals(actual, expected, "Event sequence");
                 return;
             }
             try

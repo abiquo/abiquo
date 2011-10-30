@@ -67,12 +67,6 @@ public class ApplianceManagerAsserts
         OVFPackageInstanceStateDto prevStatus =
             stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
 
-        if(prevStatus.getStatus() == OVFStatusEnumType.ERROR)
-        {
-            System.err.println("ERROR ....... "+prevStatus.getErrorCause());
-        }
-        
-        
         Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
 
@@ -115,7 +109,7 @@ public class ApplianceManagerAsserts
     {
         installOvf(ovfId);
 
-        waitUnitlDownloaded(ovfId);
+        waitUnitlExpected(ovfId, OVFStatusEnumType.DOWNLOAD);
     }
 
     /**
@@ -150,7 +144,6 @@ public class ApplianceManagerAsserts
         stub.delete(idEnterprise, ovfId);
         ovfAvailable(ovfId, false);
     }
-    
 
     /**
      * 
@@ -262,21 +255,28 @@ public class ApplianceManagerAsserts
         return false;
     }
 
-    protected void waitUnitlDownloaded(final String ovfId) throws Exception
+    /**
+     * TODO test timeout
+     */
+    public void waitUnitlExpected(final String ovfId, final OVFStatusEnumType expected)
+        throws Exception
     {
-        Thread.sleep(downloadProgressInterval);
+        Thread.sleep(downloadProgressInterval); // FIXME
 
         OVFPackageInstanceStateDto status = stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
-        switch (status.getStatus())
+        if (status.getStatus() == expected)
         {
-            case DOWNLOAD:
-                return;
-            case DOWNLOADING:
-                Thread.sleep(downloadProgressInterval);
-                waitUnitlDownloaded(ovfId);
-                break;
-            default: // ERROR:
-                throw new Exception("Error downloading ");
+            return;
+        }
+        else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+        {
+            Thread.sleep(downloadProgressInterval);
+            waitUnitlExpected(ovfId, expected);
+        }
+        else
+        {
+            throw new Exception(String.format("Expected %s get %s", expected.name(), status
+                .getStatus().name()));
         }
     }
 

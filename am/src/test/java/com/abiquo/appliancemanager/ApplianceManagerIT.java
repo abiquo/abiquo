@@ -21,8 +21,19 @@
 
 package com.abiquo.appliancemanager;
 
+import static com.abiquo.appliancemanager.AMConsumerTestListener.assertEventsEmpty;
+import static com.abiquo.appliancemanager.AMConsumerTestListener.expectedEvents;
+import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOAD;
+import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOADING;
+import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.ERROR;
+import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.NOT_DOWNLOAD;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
-import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfIdNotFound;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_fileNotFound;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_invalidDiskFormat;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_invalidUrl;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_malformed;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_multiDisk;
+import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_notFound;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestServerListener.BASE_URI;
 import static org.testng.Assert.fail;
@@ -45,10 +56,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.FilePart;
-import com.ning.http.client.ProxyServer;
 import com.ning.http.client.StringPart;
-import static com.abiquo.appliancemanager.AMConsumerTestListener.*;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.*;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerIT
@@ -98,6 +106,14 @@ public class ApplianceManagerIT
     }
 
     @Test
+    public void testDeleteNotfound() throws Exception
+    {
+        client.delete(idEnterprise, ovfId);
+
+        assertEventsEmpty();
+    }
+
+    @Test
     public void testCreateCancel() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovfId);
@@ -130,12 +146,79 @@ public class ApplianceManagerIT
     }
 
     @Test
-    public void testCreateNotFound()
+    public void testErrorCreateInvalidOvfUrl()
     {
-        client.createOVFPackageInstance(idEnterprise, ovfIdNotFound);
-        asserts.ovfStatus(ovfIdNotFound, OVFStatusEnumType.ERROR);
+        client.createOVFPackageInstance(idEnterprise, ovf_invalidUrl);
+        asserts.ovfStatus(ovf_invalidUrl, OVFStatusEnumType.ERROR);
+
+        // client.delete(idEnterprise, ovf_invalidUrl);
 
         assertEventsEmpty();
+    }
+
+    @Test
+    public void testErrorCreateOvfNotFound() throws Exception
+    {
+        client.createOVFPackageInstance(idEnterprise, ovf_notFound);
+
+        asserts.waitUnitlExpected(ovf_notFound, ERROR);
+
+        client.delete(idEnterprise, ovf_notFound);
+
+        // no DOWNLOADING, nothing to put into the repository
+        expectedEvents(ERROR, NOT_DOWNLOAD);
+    }
+
+    // TODO ovf_fileNotAllowed
+
+    @Test
+    public void testErrorCreateFileNotFound() throws Exception
+    {
+        client.createOVFPackageInstance(idEnterprise, ovf_fileNotFound);
+
+        asserts.waitUnitlExpected(ovf_fileNotFound, ERROR);
+
+        client.delete(idEnterprise, ovf_fileNotFound);
+
+        expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
+    }
+
+    @Test
+    public void testErrorCreateInvalidDiskFormat() throws Exception
+    {
+        client.createOVFPackageInstance(idEnterprise, ovf_invalidDiskFormat);
+
+        asserts.waitUnitlExpected(ovf_invalidDiskFormat, ERROR);
+
+        client.delete(idEnterprise, ovf_invalidDiskFormat);
+
+        expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
+    }
+
+    @Test
+    public void testErrorCreateMalformed() throws Exception
+    {
+        client.createOVFPackageInstance(idEnterprise, ovf_malformed);
+
+        asserts.waitUnitlExpected(ovf_malformed, ERROR);
+
+        client.delete(idEnterprise, ovf_malformed);
+
+        // no DOWNLOADING, nothing to put into the repository
+        expectedEvents(ERROR, NOT_DOWNLOAD);
+    }
+
+    @Test
+    public void testErrorCreateMultidisk() throws Exception
+    {
+        client.createOVFPackageInstance(idEnterprise, ovf_multiDisk);
+
+        asserts.waitUnitlExpected(ovf_multiDisk, ERROR);
+
+        client.delete(idEnterprise, ovf_multiDisk);
+
+        // no DOWNLOADING, nothing to put into the repository
+        expectedEvents(ERROR, NOT_DOWNLOAD);
     }
 
     @Test(enabled = false)
@@ -144,8 +227,8 @@ public class ApplianceManagerIT
         client = new ApplianceManagerResourceStubImpl(BASE_URI);
         asserts = new ApplianceManagerAsserts(client);
 
-        OVFPackageInstanceDto diskInfo = asserts.createTestDiskInfoUpload();
-        File upFile = asserts.createUploadTempFile();
+        OVFPackageInstanceDto diskInfo = ApplianceManagerAsserts.createTestDiskInfoUpload();
+        File upFile = ApplianceManagerAsserts.createUploadTempFile();
 
         AsyncHttpClientConfig clientConf;
         AsyncHttpClient httpClient;
@@ -155,19 +238,29 @@ public class ApplianceManagerIT
         // TODO read proxy info
         clientConf =
             new AsyncHttpClientConfig.Builder().setFollowRedirects(true)
-                .setCompressionEnabled(true).setIdleConnectionTimeoutInMs(TIMEOUT)
+                .setCompressionEnabled(true)// .setIdleConnectionTimeoutInMs(TIMEOUT)
                 .setRequestTimeoutInMs(TIMEOUT).setMaximumConnectionsTotal(CONNECTIONS)
-                .setProxyServer(new ProxyServer("127.0.0.1", 38080)).build();
+                // .setProxyServer(new ProxyServer("127.0.0.1", 38080))
+                .build();
 
         httpClient = new AsyncHttpClient(clientConf);
 
-        BoundRequestBuilder request =
-            httpClient.preparePost(BASE_URI + "er/" + idEnterprise + "/ovfs/");
+        final String uploadUrl = String.format("%s/erepos/%d/ovfs/", BASE_URI, idEnterprise);
+
+        System.err.println("using upload url " + uploadUrl);
+        BoundRequestBuilder request = httpClient.preparePost(uploadUrl);
 
         request.addBodyPart(new StringPart("diskInfo", diskInfo.toString())); // TODO JSON
         request.addBodyPart(new FilePart("disk.vmkd", upFile, "octet-stream", "UTF-8"));
 
-        Assert.assertTrue(request.execute().get().getStatusCode() == 201);
+        com.ning.http.client.Response response = request.execute().get();
+
+        if (response.getStatusCode() != 201)
+        {
+            System.err.println(String.format("upload error %d  %s", response.getStatusCode(),
+                response.getResponseBody()));
+        }
+        Assert.assertTrue(response.getStatusCode() == 201);
     }
 
     @Test(enabled = false)

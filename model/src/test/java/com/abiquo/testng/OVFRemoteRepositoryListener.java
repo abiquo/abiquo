@@ -54,7 +54,26 @@ public class OVFRemoteRepositoryListener implements ISuiteListener
     public final static String ovfId = String.format("http://localhost:%d/testovf/description.ovf",
         RS_FILE_SERVER_PORT);
 
-    public final static String ovfIdNotFound = ovfId + "NOT-FOUND-OVF";
+    // ERRORS
+    public final static String ovf_invalidUrl = ovfId + "NOT-FOUND-OVF";
+
+    public final static String ovf_notFound = String.format(
+        "http://localhost:%d/testovf/errors/ovfId_notFound.ovf", RS_FILE_SERVER_PORT);
+
+    public final static String ovf_fileNotAllowed = String.format(
+        "http://localhost:%d/testovf/errors/fileNotAllowed.ovf", RS_FILE_SERVER_PORT);
+
+    public final static String ovf_fileNotFound = String.format(
+        "http://localhost:%d/testovf/errors/fileNotFound.ovf", RS_FILE_SERVER_PORT);
+
+    public final static String ovf_invalidDiskFormat = String.format(
+        "http://localhost:%d/testovf/errors/invalidDiskFormat.ovf", RS_FILE_SERVER_PORT);
+
+    public final static String ovf_malformed = String.format(
+        "http://localhost:%d/testovf/errors/malformed.ovf", RS_FILE_SERVER_PORT);
+
+    public final static String ovf_multiDisk = String.format(
+        "http://localhost:%d/testovf/errors/multiDisk.ovf", RS_FILE_SERVER_PORT);
 
     /** ##### ##### ##### ##### ##### */
 
