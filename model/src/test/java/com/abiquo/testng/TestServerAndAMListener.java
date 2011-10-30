@@ -42,7 +42,7 @@ public class TestServerAndAMListener extends TestServerListener
 
     protected static final String AM_WEBAPP_CONTEXT_DEFAULT = "/am";
 
-    public static final String AM_URI = "http://localhost:" + WEBAPP_PORT
+    public static final String AM_URI = "http://localhost:" + getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT)
         + AM_WEBAPP_CONTEXT_DEFAULT;
 
     @Override

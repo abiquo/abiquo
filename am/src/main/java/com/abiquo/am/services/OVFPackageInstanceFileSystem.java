@@ -544,5 +544,8 @@ public class OVFPackageInstanceFileSystem
                 bundleAbsoultePath.substring(bundleAbsoultePath.lastIndexOf('/') + 1);
             deleteBundleConversion(packagePath, relativePath);
         }// all files
+
+        final String envelopePath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId);
+        new File(envelopePath).delete();
     }
 }

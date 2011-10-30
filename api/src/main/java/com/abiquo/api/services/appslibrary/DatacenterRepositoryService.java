@@ -103,7 +103,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     private Repository checkRepositoryLocation(final Datacenter datacenter,
         ApplianceManagerResourceStubImpl amStub)
     {
-        final String repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+        final String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
 
         final Repository repo = infService.getRepository(datacenter);
 

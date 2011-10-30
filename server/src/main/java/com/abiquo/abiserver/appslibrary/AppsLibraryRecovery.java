@@ -122,7 +122,7 @@ public class AppsLibraryRecovery
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(amServiceUri);
 
-        final String repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+        final String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
 
         daoF = HibernateDAOFactory.instance();
 

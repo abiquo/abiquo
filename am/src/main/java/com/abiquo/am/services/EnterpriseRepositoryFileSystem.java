@@ -107,7 +107,7 @@ public class EnterpriseRepositoryFileSystem
 
         try
         {
-            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS); 
+            availableOvs = futureAvailable.get(FS_TIMOUT_MS, TimeUnit.MILLISECONDS);
         }
         catch (TimeoutException e)
         {
@@ -215,10 +215,10 @@ public class EnterpriseRepositoryFileSystem
             throw new AMException(AMError.OVFPI_SNAPSHOT_ALREADY_EXIST, bundlePath);
         }
 
-        envelopeBundle =
-            OVFPackageInstanceToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot,
-                packagePath);
-
+            envelopeBundle =
+                OVFPackageInstanceToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot,
+                    packagePath);
+        
         try
         {
             OVFSerializer.getInstance().writeXML(envelopeBundle, bundleEnvelopeStream);

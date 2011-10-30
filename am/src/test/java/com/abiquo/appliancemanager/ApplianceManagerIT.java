@@ -23,6 +23,8 @@ package com.abiquo.appliancemanager;
 
 import static com.abiquo.appliancemanager.AMConsumerTestListener.assertEventsEmpty;
 import static com.abiquo.appliancemanager.AMConsumerTestListener.expectedEvents;
+import static com.abiquo.appliancemanager.ApplianceManagerAsserts.createBundleDiskFile;
+import static com.abiquo.appliancemanager.ApplianceManagerAsserts.createTestDiskInfoBundle;
 import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOAD;
 import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOADING;
 import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.ERROR;
@@ -38,11 +40,9 @@ import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestServerListener.BASE_URI;
 import static org.testng.Assert.fail;
 
-import java.io.File;
 import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -50,21 +50,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.FilePart;
-import com.ning.http.client.StringPart;
+import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
 public class ApplianceManagerIT
 {
-    private final static Logger LOG = LoggerFactory.getLogger(ApplianceManagerIT.class);
-
-    final static String snapshot = "000snap000";
-
     final static String idEnterprise = "1";
 
     protected ApplianceManagerResourceStubImpl client;
@@ -92,10 +85,32 @@ public class ApplianceManagerIT
         assertEventsEmpty();
     }
 
-    // TODO config and repos !!
+    public void test_RepositoryConfig()
+    {
+        client.checkService();
 
-    @Test
-    public void testCreate() throws Exception
+        RepositoryConfigurationDto config = client.getRepositoryConfiguration();
+        Assert.assertFalse(StringUtils.isEmpty(config.getRepositoryLocation()));
+    }
+
+    public void test_EnterpriseRepository()
+    {
+        EnterpriseRepositoryDto erepo = client.getRepository(idEnterprise, true);
+
+        Assert.assertFalse(StringUtils.isEmpty(erepo.getRepositoryLocation()));
+        Assert.assertTrue((erepo.getRepositoryCapacityMb() > 0));
+        Assert.assertTrue((erepo.getRepositoryRemainingMb() > 0));
+        Assert.assertTrue((erepo.getRepositoryEnterpriseUsedMb() >= 0));
+
+        // TODO check size after a create
+
+        Assert
+            .assertTrue((erepo.getRepositoryEnterpriseUsedMb() < erepo.getRepositoryCapacityMb()));
+        Assert.assertTrue((erepo.getRepositoryCapacityMb() >= erepo.getRepositoryEnterpriseUsedMb()
+            + erepo.getRepositoryRemainingMb()));
+    }
+
+    public void test_Create() throws Exception
     {
         asserts.installOvfAndWaitCompletion(ovfId);
         asserts.ovfInstanceExist(ovfId);
@@ -105,16 +120,14 @@ public class ApplianceManagerIT
         expectedEvents(DOWNLOADING, DOWNLOAD, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testDeleteNotfound() throws Exception
+    public void test_DeleteNotfound() throws Exception
     {
         client.delete(idEnterprise, ovfId);
 
         assertEventsEmpty();
     }
 
-    @Test
-    public void testCreateCancel() throws Exception
+    public void test_CreateCancel() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovfId);
         client.delete(idEnterprise, ovfId);
@@ -122,8 +135,7 @@ public class ApplianceManagerIT
         expectedEvents(DOWNLOADING, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testCreateDouble() throws Exception
+    public void test_CreateDouble() throws Exception
     {
         asserts.ovfInstanceNoExist(ovfId);
         asserts.installOvfAndWaitCompletion(ovfId);
@@ -145,8 +157,7 @@ public class ApplianceManagerIT
         expectedEvents(DOWNLOADING, DOWNLOAD, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testErrorCreateInvalidOvfUrl()
+    public void test_ErrorCreateInvalidOvfUrl()
     {
         client.createOVFPackageInstance(idEnterprise, ovf_invalidUrl);
         asserts.ovfStatus(ovf_invalidUrl, OVFStatusEnumType.ERROR);
@@ -156,8 +167,7 @@ public class ApplianceManagerIT
         assertEventsEmpty();
     }
 
-    @Test
-    public void testErrorCreateOvfNotFound() throws Exception
+    public void test_ErrorCreateOvfNotFound() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovf_notFound);
 
@@ -171,8 +181,7 @@ public class ApplianceManagerIT
 
     // TODO ovf_fileNotAllowed
 
-    @Test
-    public void testErrorCreateFileNotFound() throws Exception
+    public void test_ErrorCreateFileNotFound() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovf_fileNotFound);
 
@@ -183,8 +192,7 @@ public class ApplianceManagerIT
         expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testErrorCreateInvalidDiskFormat() throws Exception
+    public void test_ErrorCreateInvalidDiskFormat() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovf_invalidDiskFormat);
 
@@ -195,8 +203,7 @@ public class ApplianceManagerIT
         expectedEvents(DOWNLOADING, ERROR, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testErrorCreateMalformed() throws Exception
+    public void test_ErrorCreateMalformed() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovf_malformed);
 
@@ -208,8 +215,7 @@ public class ApplianceManagerIT
         expectedEvents(ERROR, NOT_DOWNLOAD);
     }
 
-    @Test
-    public void testErrorCreateMultidisk() throws Exception
+    public void test_ErrorCreateMultidisk() throws Exception
     {
         client.createOVFPackageInstance(idEnterprise, ovf_multiDisk);
 
@@ -221,28 +227,43 @@ public class ApplianceManagerIT
         expectedEvents(ERROR, NOT_DOWNLOAD);
     }
 
-    @Test(enabled = false)
-    public void testBundle() throws Exception
+    public void test_CreateBundle() throws Exception
     {
-        testCreate();
+        final String snapshot = "SnapshotUUID";
 
-        OVFPackageInstanceDto ovfDto = asserts.createTestDiskInfoBundle(ovfId, snapshot);
+        asserts.installOvfAndWaitCompletion(ovfId);
+        asserts.ovfInstanceExist(ovfId);
 
-        asserts.createBundleDiskFile(ovfId, snapshot);
+        OVFPackageInstanceDto ovfDto = createTestDiskInfoBundle(ovfId, snapshot);
 
-        client.bundleOVFPackage(idEnterprise, snapshot, ovfDto);// .bundleOVFPackage(BASE_URI,
-        // idEnterprise, snapshot, ovfDto);
+        final String ovfBundle = ovfDto.getOvfId();
+        asserts.ovfInstanceNoExist(ovfBundle);
+
+        // client.preBundleOVFPackage(idEnterprise, snapshot);
+
+        createBundleDiskFile(ovfId, snapshot);
+        client.bundleOVFPackage(idEnterprise, snapshot, ovfDto);
+
+        asserts.ovfInstanceExist(ovfBundle);
+
+        try
+        {
+            asserts.clean(ovfId);
+
+            fail("cant delete if some bundle");
+        }
+        catch (Exception e)
+        {
+        }
+
+        asserts.clean(ovfBundle);
+        asserts.clean(ovfId);
+
+        /**
+         * TODO bundles SHOULD generate the DOWNLOAD event, not implemented as server doesn't expect
+         * this.
+         */
+        expectedEvents(DOWNLOADING, DOWNLOAD, NOT_DOWNLOAD, NOT_DOWNLOAD);
     }
-
-    // TODO
-    // public void testDelete()
-    // {
-    //
-    // }
-    // TODO
-    // public void testDeleteBundle()
-    // {
-    //
-    // }
 
 }

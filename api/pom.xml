@@ -365,9 +365,6 @@
                         <am.webapp.context>/am</am.webapp.context>
                         <am.webapp.dir>${basedir}/../am/target/am</am.webapp.dir>
                         <rs.basedir>${basedir}</rs.basedir>
-                        <!--
-                            <am.webapp.dir>${basedir}/../am/src/main/webapp</am.webapp.dir>
-                        -->
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

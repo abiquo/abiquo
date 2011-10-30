@@ -83,7 +83,7 @@ public class ApplianceManagerUploadIT
         assertEventsEmpty();
     }
 
-    public void testUpload() throws Exception
+    public void test_CreateUpload() throws Exception
     {
 
         OVFPackageInstanceDto info = ApplianceManagerAsserts.createTestDiskInfoUpload(ovfId);

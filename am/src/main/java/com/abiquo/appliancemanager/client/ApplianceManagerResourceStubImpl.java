@@ -144,7 +144,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         return response.getEntity(OVFPackageInstancesStateDto.class);
     }
 
-    public RepositoryConfigurationDto getAMConfiguration()
+    public RepositoryConfigurationDto getRepositoryConfiguration()
     {
         Resource resource = repositories();
 
@@ -204,7 +204,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
             resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
         checkResponse(response);
-        
+
     }
 
     public String preBundleOVFPackage(final String idEnterprise, final String name)
@@ -244,11 +244,11 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * Current status, eval if uploading.
      * 
      * @param idsOvfpackageIn Name of the item to refresh.
-     * @param idEnterprise Id of  Enterprise to which this {@link OVFPackage} belongs.
+     * @param idEnterprise Id of Enterprise to which this {@link OVFPackage} belongs.
      * @return OVFPackageInstanceStatusDto
      */
-    public OVFPackageInstanceStateDto getCurrentOVFPackageInstanceStatus(
-        final String idEnterprise, final String ovfId)
+    public OVFPackageInstanceStateDto getCurrentOVFPackageInstanceStatus(final String idEnterprise,
+        final String ovfId)
     {
         Resource resource = ovfPackage(idEnterprise, ovfId);
 
@@ -286,6 +286,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
     /**
      * Returns the proper error.
+     * 
      * @param response response.
      * @param httpStatus code.
      */
@@ -300,7 +301,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         {
             cause = response.getMessage();
 
-            }
+        }
 
         throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
             response.getMessage(), cause));

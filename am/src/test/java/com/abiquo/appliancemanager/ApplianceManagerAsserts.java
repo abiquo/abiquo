@@ -22,13 +22,14 @@
 package com.abiquo.appliancemanager;
 
 import static com.abiquo.testng.AMRepositoryListener.REPO_PATH;
-import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Random;
+
+import org.apache.commons.io.FilenameUtils;
 
 import junit.framework.Assert;
 
@@ -158,7 +159,11 @@ public class ApplianceManagerAsserts
         final String ovfpath = OVFPackageConventions.getRelativePackagePath(ovfId);
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         // final String diskFilePathRel = diskFilePath.substring(diskFilePath.lastIndexOf('/'));
-        final String path = ovfpath + '/' + snapshot + "-snapshot-" + diskFilePathRel;
+
+        final String path =
+            FilenameUtils.concat(FilenameUtils.concat(er.getEnterpriseRepositoryPath(), ovfpath),
+                (snapshot + "-snapshot-" + diskFilePathRel));
+
         // "/opt/testvmrepo/1/rs.bcn.abiquo.com/m0n0wall/000snap000-snapshot-m0n0wall-1.3b18-i386-flat.vmdk"
 
         File f = new File(path);
@@ -190,8 +195,17 @@ public class ApplianceManagerAsserts
     protected static OVFPackageInstanceDto createTestDiskInfoBundle(final String ovfId,
         final String snapshot)
     {
-        final String bundleOVFid =
-            ovfId.substring(0, ovfId.lastIndexOf('.')) + "-snapshot-" + snapshot + ".ovf";
+
+        final String name = ovfId.substring(ovfId.lastIndexOf('/') + 1);
+        final String url = ovfId.substring(0, ovfId.lastIndexOf('/') + 1);
+        final String bundleOVFid = url + snapshot + "-snapshot-" + name;
+        // final String bundleOVFid =
+        // ovfId.substring(0, ovfId.lastIndexOf('.')) + "-snapshot-" + snapshot + ".ovf";
+
+        EnterpriseRepositoryService er = EnterpriseRepositoryService.getRepo(idEnterprise);
+
+        final String diskFilePathRel = er.getDiskFilePath(ovfId);
+        final String diskPath = ("-snapshot-" + diskFilePathRel);
 
         OVFPackageInstanceDto di = new OVFPackageInstanceDto();
         di.setName("theBundleDiskName");
@@ -207,7 +221,7 @@ public class ApplianceManagerAsserts
         di.setDiskFileFormat(DiskFormatType.VMDK_FLAT);
 
         // di.setImageSize(121212); // XXX not use
-        di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
+        di.setDiskFilePath(diskPath);
         di.setOvfId(bundleOVFid);
 
         di.setIdEnterprise(Integer.valueOf(idEnterprise));
