@@ -171,7 +171,7 @@ public class InfrastructureService extends DefaultApiService
         repo.insertRack(rack);
 
         tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
-            "Rack '" + rack.getName() + "' has been created succesfully");
+            "Rack '" + rack.getName() + "' has been created successfully");
 
         return rack;
     }
@@ -322,7 +322,7 @@ public class InfrastructureService extends DefaultApiService
             .getHypervisor().getUser(), machine.getHypervisor().getPassword());
 
         tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
-            + machine.getName() + "' has been created succesfully");
+            + machine.getName() + "' has been created successfully");
 
         return machine;
     }
@@ -393,7 +393,8 @@ public class InfrastructureService extends DefaultApiService
 
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
-        RemoteServiceType type = RemoteServiceType.valueFromName(remoteServiceMapping.toUpperCase());
+        RemoteServiceType type =
+            RemoteServiceType.valueFromName(remoteServiceMapping.toUpperCase());
 
         return isAssignedTo(datacenterId, type);
     }
