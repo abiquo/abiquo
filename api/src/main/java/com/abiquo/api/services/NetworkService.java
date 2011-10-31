@@ -674,22 +674,30 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
         Boolean found = Boolean.FALSE;
+        Integer configurationId = null;
         for (IpPoolManagement ip : ips)
         {
             if (!found)
             {
                 if (Integer.valueOf(ip.getRasd().getConfigurationName()).equals(nicOrder))
                 {
+
                     // if this ip is the used by configurate the network, raise an exception.
                     if (ip.getConfigureGateway() == Boolean.TRUE)
                     {
-                        addConflictErrors(APIError.VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION);
-                        flushErrors();
+                        if (repo.findIpsWithConfigurationIdInVirtualMachine(vm,
+                            ip.getVlanNetwork().getConfiguration().getId()).size() == 1)
+                        {
+                            addConflictErrors(APIError.VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION);
+                            flushErrors();
+                        }
+                        configurationId = ip.getVlanNetwork().getConfiguration().getId();
                     }
                     repo.deleteRasd(ip.getRasd());
                     // this is the object to release.
                     ip.setVirtualAppliance(null);
                     ip.setVirtualMachine(null);
+                    ip.setConfigureGateway(Boolean.FALSE);
                     if (ip.isExternalIp())
                     {
                         // set virtual datacenter as null when release an external IP.
@@ -735,6 +743,21 @@ public class NetworkService extends DefaultApiService
                 Integer currentOrder = Integer.valueOf(ip.getRasd().getConfigurationName());
                 ip.getRasd().setConfigurationName(String.valueOf(currentOrder - 1));
                 repo.updateRasd(ip.getRasd());
+            }
+        }
+
+        // Do the loop again to see if we can set the configuration gateway to another
+        // ip...
+        if (configurationId != null)
+        {
+            ips = repo.findIpsByVirtualMachine(vm);
+            for (IpPoolManagement ip : ips)
+            {
+                if (ip.getVlanNetwork().getConfiguration().getId().equals(configurationId))
+                {
+                    ip.setConfigureGateway(Boolean.TRUE);
+                    repo.updateIpManagement(ip);
+                }
             }
         }
 
@@ -1007,7 +1030,8 @@ public class NetworkService extends DefaultApiService
         // Recover the virtual machine for trace purposes
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        // The user has the role for manage This. But... is the user from the same enterprise
+        // The user has the role for execute this action. But... is the user from the same
+        // enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(repo.findById(vdcId).getEnterprise());
 
