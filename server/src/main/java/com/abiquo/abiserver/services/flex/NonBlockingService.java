@@ -30,10 +30,13 @@ import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.impl.BundleCommandImpl;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
+import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
@@ -54,11 +57,14 @@ public class NonBlockingService
 
     VirtualApplianceCommand virtualAppCommand;
 
+    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
+
     /**
      * Constructor The implemention of the BasicCommand
      */
     public NonBlockingService()
     {
+        virtualApplianceResourceStub = new VirtualApplianceResourceStubImpl();
         try
         {
             infrastructureCommand =
@@ -187,11 +193,25 @@ public class NonBlockingService
     public BasicResult startVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance, final Boolean force)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
+        //
+        // return command.beforeStartVirtualAppliance(session, virtualAppliance, force);
+        return deployVirtualAppliance(session, virtualAppliance);
+    }
 
-        return command.beforeStartVirtualAppliance(session, virtualAppliance, force);
+    /**
+     * @param session
+     * @param virtualAppliance
+     * @return BasicResult
+     */
+    public DataResult deployVirtualAppliance(final UserSession session,
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return virtualApplianceResourceStub.deployVirtualAppliance(virtualAppliance
+            .getVirtualDataCenter().getId(), virtualAppliance.getId(), Boolean.FALSE);
     }
 
     /**

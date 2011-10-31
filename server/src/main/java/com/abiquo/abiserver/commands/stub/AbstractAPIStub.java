@@ -1178,4 +1178,20 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
+
+    /**
+     * @param virtualDatacenterId
+     * @param virtualApplianceId
+     * @return String
+     */
+    protected String createVirtualApplianceDeployLink(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("{virtualDatacenter}", String.valueOf(virtualDatacenterId));
+        params.put("{vapp}", String.valueOf(virtualApplianceId));
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}/action/deploy", params);
+    }
 }

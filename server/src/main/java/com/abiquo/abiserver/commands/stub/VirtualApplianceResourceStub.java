@@ -21,96 +21,22 @@
 
 package com.abiquo.abiserver.commands.stub;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.util.ErrorManager;
-import com.abiquo.util.URIResolver;
 
-public class VirtualApplianceResourceStub extends AbstractAPIStub
+public interface VirtualApplianceResourceStub
 {
 
-    public VirtualApplianceResourceStub()
-    {
-        super();
-    }
+    public VirtualmachineHB allocate(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualmachineHB vmachineRequ,
+        final List<ResourceManagementHB> resMans, final boolean forceEnterpirseLimits,
+        final ErrorManager errorManager) throws VirtualApplianceCommandException;
 
-    public VirtualmachineHB allocate(Integer virtualDatacenterId, Integer virtualApplianceId,
-        VirtualmachineHB vmachineRequ, List<ResourceManagementHB> resMans,
-        boolean forceEnterpirseLimits, ErrorManager errorManager)
-        throws VirtualApplianceCommandException // TODO
-    {
-        // VirtualImageWithResourcesDto vimageReq =
-        // createVirtualImageAndResourceDto(vmachineRequ, resMans, forceEnterpirseLimits);
-        //
-        // String vappUrl = resolveVirtualApplianceUrl(virtualDatacenterId, virtualApplianceId);
-        //
-        // ClientResponse response = post(vappUrl, vimageReq);
-        //
-        // if (response.getStatusCode() != 201)
-        // {
-        // onError(response);
-        // }
-        //
-        // Integer vmachineId = response.getEntity(Integer.class);
-        //
-        // BasicCommand.traceLog(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE,
-        // EventType.VAPP_CREATE, getCurrentUser(), null, "XXX", "Selected virtual machine", null,
-        // null, null, null, null);
-        //
-        // DAOFactory dao = HibernateDAOFactory.instance();
-        // dao.beginConnection();
-        // VirtualmachineHB vmachine = dao.getVirtualMachineDAO().findById(vmachineId);
-        //
-        // /**
-        // * TODO substitute vmachineRequ with vmachine on the current virutal appliance
-        // */
-        //
-        // dao.endConnection();
-        //
-        // return vmachine;
-        return null;
-    }
-
-    /**
-     * vimage constains the modified cpu, ram and hd
-     */
-    // VirtualImageWithResourcesDto createVirtualImageAndResourceDto(VirtualmachineHB vmachine,
-    // List<ResourceManagementHB> resMans, boolean forceEnterpirseLimits)
-    // {
-    // VirtualImageWithResourcesDto vimageReq = new VirtualImageWithResourcesDto();
-    //
-    // vimageReq.setVirtualImageId(vmachine.getImage().getIdImage());
-    //
-    // vimageReq.setRequiredCpu(vmachine.getCpu());
-    // vimageReq.setRequiredRam(vmachine.getRam());
-    // vimageReq.setRequiredHd(vmachine.getHd());
-    //
-    // vimageReq.setForeceEnterpriseSoftLimits(forceEnterpirseLimits);
-    //
-    // Collection<Integer> rasdIds = new HashSet<Integer>();
-    // for (ResourceManagementHB rasdHb : resMans)
-    // {
-    // rasdIds.add(rasdHb.getIdManagement());
-    // }
-    //
-    // vimageReq.setRasdIds(rasdIds);
-    //
-    // return vimageReq;
-    // }
-
-    private String resolveVirtualApplianceUrl(Integer virtualDatacenterId,
-        Integer virtualApplianceId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("{virtualDatacenter}", String.valueOf(virtualDatacenterId));
-        params.put("{vapp}", String.valueOf(virtualApplianceId));
-
-        return URIResolver.resolveURI(apiUri,
-            "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}", params);
-    }
+    public DataResult deployVirtualAppliance(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, Boolean forceEnterpriseLimit);
 }

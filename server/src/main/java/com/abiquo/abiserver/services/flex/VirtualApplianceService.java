@@ -28,6 +28,8 @@ import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
+import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -50,6 +52,9 @@ import com.abiquo.tracer.SeverityType;
 
 public class VirtualApplianceService
 {
+
+    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
+
     /**
      * The command to invoke.
      */
@@ -62,7 +67,7 @@ public class VirtualApplianceService
      */
     public VirtualApplianceService()
     {
-        super();
+        virtualApplianceResourceStub = new VirtualApplianceResourceStubImpl();
         try
         {
             virtualApplianceCommand =
@@ -374,5 +379,19 @@ public class VirtualApplianceService
         VirtualApplianceCommand command = proxyCommand(session);
 
         return command.forceRefreshVirtualApplianceState(virtualAppliance);
+
+    }
+
+    /**
+     * @param session
+     * @param virtualAppliance
+     * @return BasicResult
+     */
+    public DataResult deployVirtualAppliance(final UserSession session,
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return virtualApplianceResourceStub.deployVirtualAppliance(virtualAppliance
+            .getVirtualDataCenter().getId(), virtualAppliance.getId(), Boolean.FALSE);
     }
 }

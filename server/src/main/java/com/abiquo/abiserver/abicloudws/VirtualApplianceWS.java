@@ -165,7 +165,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             String virtualSystemMonitor =
                 RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualAppliance);
 
-            if (virtualAppliance.getState().toEnum() == StateEnum.ALLOCATED)
+            if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED) // DEPLOYED
             {
 
                 String destination = RemoteServiceUtils.getVirtualFactoryFromVA(virtualAppliance);
