@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.Required;
@@ -81,17 +82,18 @@ public class EnterpriseProperties extends DefaultEntityBase
 
     private final static boolean PROPERTIES_REQUIRED = true;
 
-    public final static int PROPERTIES_LENGTH_MIN = 1;
+    public final static int KEY_LENGTH_MIN = 1;
 
-    public final static int PROPERTIES_LENGTH_MAX = 128;
+    public final static int KEY_LENGTH_MAX = 50;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = TABLE_NAME + "_map", joinColumns = @JoinColumn(name = JOIN_COLUMN))
-    @MapKeyColumn(name = KEY_COLUMN)
-    @Column(name = VALUE_COLUMN)
+    @MapKeyColumn(name = KEY_COLUMN, length = 30, nullable = false)
+    @Column(name = VALUE_COLUMN, length = 50, nullable = false)
     private Map<String, String> map = new HashMap<String, String>();
 
     @Required(value = PROPERTIES_REQUIRED)
+    @Length(min = KEY_LENGTH_MIN, max = KEY_LENGTH_MAX)
     public Map<String, String> getProperties()
     {
         return map;
