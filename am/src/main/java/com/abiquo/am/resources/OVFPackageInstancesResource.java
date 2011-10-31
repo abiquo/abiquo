@@ -68,8 +68,7 @@ import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 @Parent(EnterpriseRepositoryResource.class)
 @Path(OVFPackageInstancesResource.OVFPI_PATH)
 @Service(value = "ovfPackageInstancesResource")
-// @ContextConfiguration(locations = "classpath:springresources/applicationContext.xml")
-public class OVFPackageInstancesResource // implements ApplicationContextAware
+public class OVFPackageInstancesResource
 {
     // @Autowired
     static OVFPackageInstanceService service;// TODO null
@@ -93,12 +92,6 @@ public class OVFPackageInstancesResource // implements ApplicationContextAware
     private final static Logger logger = LoggerFactory.getLogger(OVFPackageInstancesResource.class);
 
     public static final String OVFPI_PATH = ApplianceManagerPaths.OVFPI_PATH;
-
-    /*
-     * 
-     * 
-     * 
-     */
 
     /**
      * include bundles <br>

@@ -131,6 +131,8 @@ public class OVFPackageInstanceDto extends OVFPackageDto
     public void setDiskFileFormat(DiskFormatType diskFileFormat)
     {
         this.diskFileFormat = diskFileFormat;
+        this.setDiskFormatTypeUri(diskFileFormat.uri);
+        // TODO FIXME once OVFPackageDto work with Enum 
     }
 
     public String getIconPath()

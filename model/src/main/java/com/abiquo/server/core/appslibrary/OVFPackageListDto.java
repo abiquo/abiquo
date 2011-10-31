@@ -75,7 +75,7 @@ public class OVFPackageListDto extends SingleResourceTransportDto
 
     public List<OVFPackageDto> getOvfPackages()
     {
-        return ovfPackages;
+        return ovfPackages; // TODO GET or CREATE
     }
 
     public void setOvfPackages(final List<OVFPackageDto> ovfPackages)

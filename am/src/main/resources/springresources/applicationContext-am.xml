@@ -37,6 +37,8 @@
 				<ref bean="enterpriseRepositoryResource" />
 				<ref bean="ovfPackageInstanceResource" />
 				<ref bean="ovfPackageInstancesResource" />
+				<ref bean="ovfPackageListResource" />
+				
 				<!-- aux -->
 				<ref bean="ovfPackageInstanceService" />
 				<ref bean="ovfPackageInstanceDownloader" />
