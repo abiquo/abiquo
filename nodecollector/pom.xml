@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>platform</artifactId>
-        <version>1.8.5-HF2</version>
+        <version>1.8.5-HF3-SNAPSHOT</version>
     </parent>
     <!-- Setting the basic POM configuration -->
     <modelVersion>4.0.0</modelVersion>
