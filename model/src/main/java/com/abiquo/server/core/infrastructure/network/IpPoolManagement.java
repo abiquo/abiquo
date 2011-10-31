@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -38,7 +36,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -95,22 +92,22 @@ public class IpPoolManagement extends RasdManagement
     {
         super(DISCRIMINATOR);
 
-        // RasdManagement properties
-        Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(DISCRIMINATOR));
-
-        rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
-        rasd.setConnection("");
-        rasd.setAllocationUnits("0");
-        rasd.setAutomaticAllocation(0);
-        rasd.setAutomaticDeallocation(0);
-
-        setRasd(rasd);
-
-        // IpManagement properties
-        setType(type);
+        // // RasdManagement properties
+        // Rasd rasd =
+        // new Rasd(UUID.randomUUID().toString(),
+        // DEFAULT_RESOURCE_NAME,
+        // Integer.valueOf(DISCRIMINATOR));
+        //
+        // rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
+        // rasd.setConnection("");
+        // rasd.setAllocationUnits("0");
+        // rasd.setAutomaticAllocation(0);
+        // rasd.setAutomaticDeallocation(0);
+        //
+        // setRasd(rasd);
+        //
+        // // IpManagement properties
+        // setType(type);
 
         setDhcp(dhcp);
         setMac(mac);
