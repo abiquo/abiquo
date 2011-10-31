@@ -39,7 +39,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
@@ -597,6 +596,12 @@ public class InfrastructureService extends DefaultApiService
 
     public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
+        return checkRemoteServiceStatus(type, url, false);
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
+        final boolean flushErrors)
+    {
         ErrorsDto configurationErrors = new ErrorsDto();
         if (type.canBeChecked())
         {
@@ -604,38 +609,52 @@ public class InfrastructureService extends DefaultApiService
             config.connectTimeout(5000);
 
             RestClient restClient = new RestClient(config);
-            Resource checkResource =
-                restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
+            String uriToCheck = UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE);
+            Resource checkResource = restClient.resource(uriToCheck);
 
             try
             {
                 ClientResponse response = checkResource.get();
                 if (response.getStatusCode() != 200)
                 {
-                    APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                    configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                        + error.getMessage()));
+                    configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                        .getCode(), type.getName() + ", "
+                        + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage()));
+                    if (flushErrors)
+                    {
+                        switch (response.getStatusCode())
+                        {
+                            case 404:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            case 503:
+                                addServiceUnavailableErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            default:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                        }
+                    }
                 }
-            }
-            catch (WebApplicationException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (ClientRuntimeException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
             }
             catch (Exception e)
             {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
+                configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                    .getCode(), type.getName() + ", "
+                    + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage() + ", "
+                    + e.getMessage()));
+                if (flushErrors)
+                {
+                    addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                }
             }
         }
+
+        if (flushErrors)
+        {
+            flushErrors();
+        }
+
         return configurationErrors;
     }
 
