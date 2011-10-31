@@ -62,7 +62,7 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         {
             // It comes from the {@link InputParamConstraintHandler}. Return as it comes.
             WebApplicationException wepExcp = (WebApplicationException) exception;
-            return (wepExcp.getResponse());
+            return wepExcp.getResponse();
         }
         else if (exception instanceof NodecollectorException)
         {
@@ -93,7 +93,7 @@ public class NodeCollectorExceptionMapper<T extends Exception> implements Except
         }
     }
 
-    private Status defineStatus(NodecollectorException exception)
+    private Status defineStatus(final NodecollectorException exception)
     {
         if (exception instanceof LoginException)
         {

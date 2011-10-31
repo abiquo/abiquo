@@ -34,7 +34,7 @@ import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.nodecollector.domain.HypervisorCollector;
 import com.abiquo.nodecollector.exception.BadRequestException;
 import com.abiquo.nodecollector.exception.CannotExecuteException;
@@ -560,7 +560,7 @@ public class NodeCollectorRESTClient
         throws BadRequestException, LoginException, ConnectionException, UnprovisionedException,
         CollectorException, CannotExecuteException
     {
-        ErrorsDto error;
+        ErrorDto error;
 
         if (response.getStatusCode() == Status.INTERNAL_SERVER_ERROR.getStatusCode())
         {
@@ -575,7 +575,7 @@ public class NodeCollectorRESTClient
         // context)
         try
         {
-            error = response.getEntity(ErrorsDto.class);
+            error = response.getEntity(ErrorDto.class);
         }
         catch (Exception e)
         {
@@ -587,17 +587,17 @@ public class NodeCollectorRESTClient
         switch (response.getStatusCode())
         {
             case 400:
-                throw new BadRequestException(error.getCollection().get(0).getMessage());
+                throw new BadRequestException(error.getMessage());
             case 401:
-                throw new LoginException(error.getCollection().get(0).getMessage());
+                throw new LoginException(error.getMessage());
             case 404:
-                throw new UnprovisionedException(error.getCollection().get(0).getMessage());
+                throw new UnprovisionedException(error.getMessage());
             case 409:
-                throw new CannotExecuteException(error.getCollection().get(0).getMessage());
+                throw new CannotExecuteException(error.getMessage());
             case 412:
-                throw new ConnectionException(error.getCollection().get(0).getMessage());
+                throw new ConnectionException(error.getMessage());
             default:
-                throw new CollectorException(error.getCollection().get(0).getMessage());
+                throw new CollectorException(error.getMessage());
         }
     }
 
