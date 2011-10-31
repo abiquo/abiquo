@@ -609,8 +609,8 @@ public class VirtualMachineService extends DefaultApiService
      * @throws Exception
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deployVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId,
-        final Boolean foreceEnterpriseSoftLimits)
+    public String deployVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
         logger.debug("Starting the deploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
@@ -749,6 +749,9 @@ public class VirtualMachineService extends DefaultApiService
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
             "The enqueuing in Tarantino was OK.");
+        logger.info("Generating the link to the status! {}", virtualMachine.getId());
+
+        return "link";
     }
 
     private void closeProducerChannel(final TarantinoRequestProducer producer)

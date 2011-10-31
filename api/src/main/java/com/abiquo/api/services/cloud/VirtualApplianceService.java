@@ -326,22 +326,26 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void startVirtualAppliance1(final Integer vdcId, final Integer vappId)
+    public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
+        List<String> dto = new ArrayList<String>();
         try
         {
             for (NodeVirtualImage machine : virtualAppliance.getNodes())
             {
-                vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId, vdcId,
-                    false);
+                String link =
+                    vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
+                        vdcId, false);
+                dto.add(link);
             }
         }
         catch (Exception e)
         {
             // The virtual appliance is in an unknown state
         }
+        return dto;
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

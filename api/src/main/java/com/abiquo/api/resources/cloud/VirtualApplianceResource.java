@@ -24,6 +24,7 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -37,7 +38,8 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -45,6 +47,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -271,6 +274,19 @@ public class VirtualApplianceResource
 
     }
 
+    @POST
+    @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
+    public AcceptedRequestDto<String> deploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder)
+    {
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+        addStatusLinks(links, dto);
+        return dto;
+    }
+
     private VirtualApplianceStateDto virtualApplianceStateToDto(final Integer vdcId,
         final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
     {
@@ -278,5 +294,14 @@ public class VirtualApplianceResource
         dto.setPower(state.name());
         dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
         return dto;
+    }
+
+    private void addStatusLinks(final List<String> links, final AcceptedRequestDto dto)
+    {
+        for (String url : links)
+        {
+            RESTLink link = new RESTLink("status", url);
+            dto.addLink(link);
+        }
     }
 }
