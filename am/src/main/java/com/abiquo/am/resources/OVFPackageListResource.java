@@ -43,6 +43,9 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 
+/*
+ * FIXME proof of concept WIP
+ */
 @Parent(EnterpriseRepositoryResource.class)
 @Path(OVFPackageListResource.OVFLIST_PATH)
 @Service(value = "ovfPackageListResource")
@@ -72,11 +75,6 @@ public class OVFPackageListResource
     private final static String REPO_LOCATION = AMConfigurationManager.getInstance()
         .getAMConfiguration().getRepositoryLocation();
 
-    /*
-     * 
-     * 
-     * 
-     */
     @GET
     public OVFPackageListDto getAsOVFRepository(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
@@ -98,7 +96,8 @@ public class OVFPackageListResource
 
         for (OVFPackageInstanceDto ovfpi : lst)
         {
-            final String ovfurl = String.format("http://%s:%d/files/%s", contextUri.getBaseUri().getHost(),); 
+            // final String ovfurl = String.format("http://%s:%d/files/%s",
+            // contextUri.getBaseUri().getHost(),);
             ovfpi.setUrl("myurl");
             ovflist.getOvfPackages().add(ovfpi);
         }
