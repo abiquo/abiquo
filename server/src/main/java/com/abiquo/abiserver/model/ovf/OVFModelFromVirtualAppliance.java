@@ -264,9 +264,9 @@ public class OVFModelFromVirtualAppliance
             case OFF:
                 state = AbiCloudConstants.POWERDOWN_ACTION;
                 break;
-            case REBOOTED:
-                state = AbiCloudConstants.RESUME_ACTION;
-                break;
+        // case REBOOTED:
+        // state = AbiCloudConstants.RESUME_ACTION;
+        // break;
         }
         return state;
     }

@@ -126,7 +126,7 @@ public class VSMListener implements VSMCallback
 
             // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 -
             // DISABLED_FOR_HA states
-            if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
+            if (virtualMachine.getState() == StateEnum.LOCKED) // HA_IN_PROGRESS)
             {
                 logger
                     .trace(
@@ -323,7 +323,7 @@ public class VSMListener implements VSMCallback
                             virtualApplianceId);
                     vappHB = (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
                     vappHB.setState(StateEnum.LOCKED);
-                    vappHB.setSubState(StateEnum.LOCKED);
+                    // vappHB.setSubState(StateEnum.LOCKED);
                     session.update(vappHB);
                     transaction.commit();
 
@@ -360,8 +360,8 @@ public class VSMListener implements VSMCallback
 
     private boolean isBundling(final VirtualAppliance virtualAppliance)
     {
-        return virtualAppliance.getState().toEnum() == StateEnum.LOCKED
-            && virtualAppliance.getSubState().toEnum() == StateEnum.BUNDLING;
+        return virtualAppliance.getState().toEnum() == StateEnum.LOCKED;
+        // && virtualAppliance.getSubState().toEnum() == StateEnum.BUNDLING;
     }
 
     /**

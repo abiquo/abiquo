@@ -187,6 +187,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.password = password;
     }
 
+    private String uuid;
+
+    public String getUuid()
+    {
+        return uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
     @Override
     public int compareTo(final VirtualMachineDto vm2)
     {

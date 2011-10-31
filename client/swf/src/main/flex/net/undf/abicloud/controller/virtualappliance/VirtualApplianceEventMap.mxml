@@ -487,7 +487,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 
@@ -552,7 +552,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 
@@ -582,7 +582,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 
@@ -611,7 +611,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 
@@ -754,7 +754,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 
@@ -784,7 +784,7 @@
 
         </RemoteObjectInvoker>
 
-        <!-- Once the service is called, we set the virtual appliance to State.IN_PROGRESS -->
+        <!-- Once the service is called, we set the virtual appliance to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceInProgress}"
             arguments="{[event.virtualAppliance]}"/>
 

@@ -198,7 +198,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         int enterpriseId = user.getEnterpriseHB().getIdEnterprise();
 
         VirtualappHB virtualApp = virtualappDAO.findByIdNamedExtended(idVirtualApp);
-        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.BUNDLING);
+        virtualApp = virtualappDAO.blockVirtualAppliance(virtualApp, StateEnum.LOCKED);
 
         factory.endConnection();
 
@@ -384,7 +384,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             VirtualApplianceDAO virtualappDAO = factory.getVirtualApplianceDAO();
 
             virtualApp.setState(state.toEnum());
-            virtualApp.setSubState(subState.toEnum());
+            // virtualApp.setSubState(subState.toEnum());
 
             virtualappDAO.makePersistentBasic(virtualApp);
             factory.endConnection();

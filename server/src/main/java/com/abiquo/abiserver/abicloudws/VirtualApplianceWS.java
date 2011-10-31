@@ -579,7 +579,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         Collection<Node> nodesNew = new ArrayList<Node>();
         try
         {
-            if (virtualAppliance.getState().toEnum() == StateEnum.APPLY_CHANGES_NEEDED)
+            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE)
             {
                 Collection<Node> nodes = virtualAppliance.getNodes();
 

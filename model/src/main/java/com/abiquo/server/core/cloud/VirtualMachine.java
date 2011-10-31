@@ -391,9 +391,9 @@ public class VirtualMachine extends DefaultEntityBase
 
     @Column(name = ID_TYPE_COLUMN, nullable = false)
     @Range(min = ID_TYPE_MIN, max = ID_TYPE_MAX)
-    private Integer idType;
+    private int idType;
 
-    public Integer getIdType()
+    public int getIdType()
     {
         return this.idType;
     }
@@ -403,7 +403,7 @@ public class VirtualMachine extends DefaultEntityBase
         return getIdType() == MANAGED;
     }
 
-    public void setIdType(final Integer idType)
+    public void setIdType(final int idType)
     {
         this.idType = idType;
     }

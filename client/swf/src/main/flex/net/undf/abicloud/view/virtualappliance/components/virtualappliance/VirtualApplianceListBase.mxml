@@ -251,10 +251,10 @@
              }
              
              private function compareVirtualImageState(virtualImg1:VirtualAppliance, virtualImg2:VirtualAppliance):int{
-            	var virtualMachineState1:Number = virtualImg1.state.id;
-            	var virtualMachineState2:Number = virtualImg2.state.id;
+            	var virtualMachineState1:String = virtualImg1.state.description;
+            	var virtualMachineState2:String = virtualImg2.state.description;
             	
-            	return ObjectUtil.numericCompare(virtualMachineState1, virtualMachineState2);
+            	return ObjectUtil.stringCompare(virtualMachineState1, virtualMachineState2);
             }
         ]]>
     </mx:Script>
@@ -408,10 +408,10 @@
                                         width="14" height="14"
                                         horizontalCenter="0"
                                         verticalCenter="0"
-                                        includeInLayout="{this._virtualAppliance.subState.id != State.UNKNOWN}"
-                                        source="{(this._virtualAppliance.state.id == State.RUNNING) ? StateIcons.RUNNING : 
-						   										((this._virtualAppliance.state.id == State.APPLY_CHANGES_NEEDED) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.POWERED_OFF)}"
-                                        visible="{this._virtualAppliance.subState.id != State.IN_PROGRESS &amp;&amp; this._virtualAppliance.subState.id != State.UNKNOWN}"/>
+                                        includeInLayout="{this._virtualAppliance.state.description != State.UNKNOWN}"
+                                        source="{(this._virtualAppliance.state.description == State.ON) ? StateIcons.RUNNING : 
+						   										((this._virtualAppliance.state.description == State.NEEDS_SYNC) ? StateIcons.APPLY_CHANGES_NEEDED : StateIcons.OFF)}"
+                                        visible="{this._virtualAppliance.state.description != State.LOCKED &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN}"/>
 									        
 									   <utils:SmoothImage 
 									        width="18" height="18"
@@ -419,8 +419,8 @@
                                         	verticalCenter="0"
 									        source="{CommonAssets.unknownIcon}"
 									        toolTip="@Resource(bundle='Infrastructure', key='LABEL_VM_UNKNOWN')"
-									        includeInLayout="{this._virtualAppliance.subState.id == State.UNKNOWN}"
-									        visible="{this._virtualAppliance.subState.id == State.UNKNOWN}"/>
+									        includeInLayout="{this._virtualAppliance.state.description == State.UNKNOWN}"
+									        visible="{this._virtualAppliance.state.description == State.UNKNOWN}"/>
                                    
                                     <mx:SWFLoader
                                     	id="virtualApplicanceListBaseLoadingSmall" 
@@ -428,7 +428,7 @@
                                         horizontalCenter="0"
                                         verticalCenter="0"
                                         creationComplete="AbicloudUtils.getImageFromStyle('VirtualApplianceBusyIconSmall', virtualApplicanceListBaseLoadingSmall)"
-                                        visible="{this._virtualAppliance.state.id == State.IN_PROGRESS}"/>
+                                        visible="{this._virtualAppliance.state.description == State.LOCKED}"/>
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -466,7 +466,9 @@
                                         id="virtualApplianceListBaseAlertIcon"
                                         creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualApplianceMiniatureAlertIcon', virtualApplianceListBaseAlertIcon)"
                                         visible="{this._virtualAppliance.error || 
-													   			 this._virtualAppliance.state.id == State.FAILED}"/>
+													   			 this._virtualAppliance.state.description == State.UNKNOWN}"/>
+									    <!--visible="{this._virtualAppliance.error || 
+                                                                 this._virtualAppliance.state.description == State.FAILED}"/>-->
                                 </mx:Canvas>
                             </mx:Component>
                         </mx:itemRenderer>
@@ -507,8 +509,8 @@
 	
 	        <mx:Button id="deleteVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS &amp;&amp;
-					   			 this._selectedVirtualAppliance.subState.id != State.UNKNOWN}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED &amp;&amp;
+					   			 this._selectedVirtualAppliance.state.description != State.UNKNOWN}"
 	            styleName="RemoveButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	            click="deleteVirtualAppliance()"/>
@@ -517,7 +519,7 @@
 	
 	        <mx:Button id="editVirtualApplianceButton"
 	            enabled="{this._selectedVirtualAppliance != null &amp;&amp; 
-					   			 this._selectedVirtualAppliance.state.id != State.IN_PROGRESS}"
+					   			 this._selectedVirtualAppliance.state.description != State.LOCKED}"
 	            styleName="ConfigurationButton"
 	            toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
 	            click="editVirtualAppliance()"/>

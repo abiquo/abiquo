@@ -134,6 +134,11 @@ public class NodeCollectorRESTClient
     protected static final String PASSWORD_PARAM = "password";
 
     /**
+     * Path value to filter a virtual system by its UUID.
+     */
+    protected static String byUUIDPath = "by_uuid";
+
+    /**
      * Constructor of the REST client.
      * 
      * @param remoteServiceURI IP Address where the NodeCollector is deployed.
@@ -537,5 +542,64 @@ public class NodeCollectorRESTClient
     public String getRemoteServiceURI()
     {
         return remoteServiceURI;
+    }
+
+    /**
+     * Get a unique and known remote Virtual Machine information based on its UUID.
+     * 
+     * @param uuid identifier of the remote virtual machine.
+     * @param hypervisorIP IP address of the remote machine.
+     * @param hypervisorType {@link HypervisorEnumTypeDto} object containgin Hypervisor is running
+     *            remotely.
+     * @param user user to login to the Hypervisor.
+     * @param password password to authenticate to the Hypervisor.
+     * @param aimport port of the aim
+     * @return the Virtual Machine information encapsulated into the {@link VirtualSystemDto}
+     *         object.
+     * @throws BadRequestException if any parameter is missing, wrong or null.
+     * @throws LoginException if the provided user and password don't match with any Hypervisor
+     *             user.
+     * @throws ConnectionException if the remote machine doesn't run the provided hypervisorType
+     *             parameter.
+     * @throws UnprovisionedException if the machine doesn't respond.
+     * @throws CollectorException for unexpected exceptions.
+     * @throws CannotExecuteException
+     */
+    public VirtualSystemDto getRemoteVirtualSystemByUUID(final String uuid,
+        final String hypervisorIP, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport) throws BadRequestException, LoginException,
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
+    {
+        String uri =
+            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byUUIDPath, uuid);
+        Resource resource =
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
+
+        if (aimport != null)
+        {
+            resource.queryParam(AIMPORT, aimport);
+        }
+
+        try
+        {
+            ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
+
+            if (response.getStatusCode() != 200)
+            {
+                throwAppropiateException(response);
+            }
+
+            return response.getEntity(VirtualSystemDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            if (e.getCause().getCause() instanceof SocketTimeoutException)
+            {
+                throw new ConnectionException(NodeCollectorRESTClient.TIMEOUT);
+            }
+            // Mostly caused by ConnectException
+            throw new ConnectionException(NodeCollectorRESTClient.UNREACHABLE);
+        }
     }
 }

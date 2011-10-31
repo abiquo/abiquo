@@ -894,7 +894,7 @@ package net.undf.abicloud.business.managers
             for (i = 0; i < infrastructureLength; i++)
             {
                 element = _infrastructure.getItemAt(i) as InfrastructureElement;
-                if (element is VirtualMachine && VirtualMachine(element).state.id != State.NOT_DEPLOYED)
+                if (element is VirtualMachine && VirtualMachine(element).state.description != State.NOT_ALLOCATED)
                     allVM.push(element);
             }
 

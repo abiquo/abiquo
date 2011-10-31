@@ -964,7 +964,6 @@ CREATE TABLE  `kinton`.`virtualapp` (
   `idEnterprise` int(10) unsigned default NULL,
   `name` varchar(30) NOT NULL,
   `public` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
-  `state` varchar(50) NOT NULL,
   `high_disponibility` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
   `error` int(1) unsigned NOT NULL,
   `nodeconnections` text,

@@ -215,7 +215,7 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
             // We set it now to IN_PROGRESS, and return that it is allowed
             // to manipulate it
             virtualAppHB.setState(StateEnum.LOCKED);
-            virtualAppHB.setSubState(subState);
+            // virtualAppHB.setSubState(subState);
 
             getSession().update("VirtualappHB", virtualAppHB);
 
@@ -245,7 +245,7 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
         if (virtualApp.getState() != StateEnum.LOCKED)
         {
             virtualApp.setState(StateEnum.LOCKED);
-            virtualApp.setSubState(subState);
+            // virtualApp.setSubState(subState);
 
             makePersistent(virtualApp);
         }
@@ -322,16 +322,16 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
             vapp.setName((String) row[1]);
             vapp.setHighDisponibility((Integer) row[2]);
             vapp.setState((StateEnum) row[3]);
-            vapp.setSubState((StateEnum) row[4]);
-            vapp.setError((Integer) row[5]);
-            vapp.setPublic_((Integer) row[6]);
-            vapp.setNodeConnections((String) row[7]);
+            // vapp.setSubState((StateEnum) row[4]);
+            vapp.setError((Integer) row[4]);
+            vapp.setPublic_((Integer) row[5]);
+            vapp.setNodeConnections((String) row[6]);
 
             VirtualDataCenterHB vdc = new VirtualDataCenterHB();
-            vdc.setIdVirtualDataCenter((Integer) row[8]);
-            vdc.setName((String) row[9]);
-            vdc.setIdDataCenter((Integer) row[10]);
-            vdc.setHypervisorType((HypervisorType) row[11]);
+            vdc.setIdVirtualDataCenter((Integer) row[7]);
+            vdc.setName((String) row[8]);
+            vdc.setIdDataCenter((Integer) row[9]);
+            vdc.setHypervisorType((HypervisorType) row[10]);
 
             vapp.setVirtualDataCenterHB(vdc);
 

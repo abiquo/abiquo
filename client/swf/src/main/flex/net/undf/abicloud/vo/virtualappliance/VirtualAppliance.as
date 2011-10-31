@@ -45,8 +45,6 @@ package net.undf.abicloud.vo.virtualappliance
 
         public var state:State;
 
-        public var subState:State;
-
         public var highDisponibility:Boolean;
 
         //Array containing a list of nodes
@@ -75,8 +73,7 @@ package net.undf.abicloud.vo.virtualappliance
             id = 0;
             name = "";
             isPublic = false;
-            state = new State(5);
-            subState = new State(5);
+            state = new State(State.NOT_DEPLOYED);
             highDisponibility = false;
             nodes = new ArrayCollection();
             nodeConnections = "<connections></connections>";

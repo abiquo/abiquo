@@ -43,15 +43,14 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
@@ -307,7 +306,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     private VirtualMachineState validateState(final VirtualMachineStateDto state)
     {
-        if (!VirtualMachineState.ON.name().equals(state.getPower()) && !VirtualMachineState.OFF.name().equals(state.getPower())
+        if (!VirtualMachineState.ON.name().equals(state.getPower())
+            && !VirtualMachineState.OFF.name().equals(state.getPower())
             && !VirtualMachineState.PAUSED.name().equals(state.getPower()))
         {
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
@@ -424,7 +424,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path("action/deploy")
-    public void deployVirtualMachine(
+    public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
@@ -433,6 +433,12 @@ public class VirtualMachineResource extends AbstractResource
     {
         vmService.deployVirtualMachine(vmId, vappId, vdcId,
             forceSoftLimits.isForeceEnterpriseSoftLimits());
+
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink("http://status");
+        a202.setEntity("");
+
+        return a202;
     }
 
     /**

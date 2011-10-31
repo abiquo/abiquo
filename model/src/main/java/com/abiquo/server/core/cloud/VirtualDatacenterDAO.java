@@ -188,7 +188,7 @@ public class VirtualDatacenterDAO extends DefaultDAOBase<Integer, VirtualDatacen
         Object[] vmResources =
             (Object[]) getSession().createSQLQuery(SUM_VM_RESOURCES)
                 .setParameter("virtualDatacenterId", virtualDatacenterId)
-                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.toString())
+                .setParameter("not_deployed", VirtualMachineState.NOT_ALLOCATED.name())
                 .uniqueResult();
 
         Long cpu = vmResources[0] == null ? 0 : ((BigDecimal) vmResources[0]).longValue();

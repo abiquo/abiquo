@@ -27,45 +27,35 @@ package net.undf.abicloud.vo.infrastructure
     public class State
     {
 
-        public static const RUNNING:int = 1;
+        public static const ON:String = "ON"; // ON (VM) -> RUNNING:1
 
-        public static const PAUSED:int = 2;
+        public static const PAUSED:String = "PAUSED"; // PAUSED (VM)
 
-        public static const POWERED_OFF:int = 3;
+        public static const OFF:String = "OFF"; // OFF (VM) -> OFF:int = 3
 
-        public static const REBOOTED:int = 4;
-
-        public static const NOT_DEPLOYED:int = 5;
-
-        public static const IN_PROGRESS:int = 6;
-
-        public static const APPLY_CHANGES_NEEDED:int = 7;
-
-        public static const UPDATING_NODES:int = 8;
-
-        public static const FAILED:int = 9;
-
-        public static const COPYING:int = 10;
-
-        public static const MOVING:int = 11;
-
-        public static const CHECKING:int = 12;
-
-        public static const BUNDLING:int = 13;
-
-        public static const STATEFUL:int = 14;
+        public static const NOT_DEPLOYED:String = "NOT_DEPLOYED"; // NOT_DEPLOYED (VAPP) -> NOT_DEPLOYED:int = 5;
         
-        public static const UNKNOWN:int = 15;
+        public static const NOT_ALLOCATED:String = "NOT_ALLOCATED"; // NOT_ALLOCATED (VM) -> NOT_DEPLOYED:int = 5;
+
+        public static const LOCKED:String = "LOCKED"; // LOCKED (VAPP) (VM) -> IN_PROGRESS:int = 6
+
+        public static const NEEDS_SYNC:String = "NEEDS_SYNC"; // NEEDS_SYNC (VAPP) -> APPLY_CHANGES_NEEDED:int = 7;
+
+        //public static const UPDATING_NODES:int = 8; // LOCKED (VAPP) -> UPDATING_NODES:int = 8;
+
+        //public static const FAILED:int = 9; // UNKNOWN (VAPP) (VM) -> FAILED:int = 9;
+
+        public static const UNKNOWN:String = "UNKNOWN"; // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
         
 
         public var id:int;
 
         public var description:String;
 
-        public function State(id:int = 0)
+        public function State(description:String = "")
         {
-            this.id = id;
-            this.description = "";
+            this.id = 0;
+            this.description = description;
         }
 
     }

@@ -680,14 +680,14 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 NodeVirtualImageHB nVI = (NodeVirtualImageHB) node;
                 if (nVI.getVirtualMachineHB().getState() != StateEnum.ALLOCATED)
                 {
-                    newState = StateEnum.APPLY_CHANGES_NEEDED;
+                    newState = StateEnum.NEEDS_SYNCHRONIZE;
                     break;
                 }
             }
         }
 
         vApp.setState(newState);
-        vApp.setSubState(newState);
+        // vApp.setSubState(newState);
         vAppDAO.makePersistent(vApp);
 
         // Finally we update the userResources
