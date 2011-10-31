@@ -87,7 +87,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
     public static void assertEventsEmpty()
     {
         OVFStatusEnumType noEvent = EVENTS.poll();
-        Assert.assertNull(noEvent, "expected no event" + noEvent);
+        Assert.assertNull(noEvent, "expected no event but there is a : " + noEvent);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
             consumer.start();
             LOG.info("test AMConsumer started");
 
-            Thread.sleep(1000); // FIXME wait for lost events to consume it
+            Thread.sleep(3000); // FIXME wait for lost events to consume it
             EVENTS.clear();
         }
         catch (Exception e)
@@ -114,7 +114,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
     {
         try
         {
-            Thread.sleep(1000); // FIXME wait for lost events to consume it
+            Thread.sleep(3000); // FIXME wait for lost events to consume it
             EVENTS.clear();
 
             consumer.stop();
