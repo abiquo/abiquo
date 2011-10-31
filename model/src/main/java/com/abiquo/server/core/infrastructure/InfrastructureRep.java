@@ -426,9 +426,13 @@ public class InfrastructureRep extends DefaultRepBase
     public void insertHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
+        assert hypervisor.getMachine() != null;
+        assert hypervisor.getMachine().getDatacenter() != null;
         assert !hypervisorDao.isManaged(hypervisor);
-        assert !existAnyHypervisorWithIp(hypervisor.getIp());
-        assert !existAnyHypervisorWithIpService(hypervisor.getIpService());
+        assert !existAnyHypervisorWithIpServiceInDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId());
+        assert !existAnyHypervisorWithIpServiceInDatacenter(hypervisor.getIpService(), hypervisor
+            .getMachine().getDatacenter().getId());
 
         hypervisorDao.persist(hypervisor);
         hypervisorDao.flush();
@@ -439,19 +443,19 @@ public class InfrastructureRep extends DefaultRepBase
         updateMachine(machine);
     }
 
-    public boolean existAnyHypervisorWithIp(final String ip)
-    {
-        assert !StringUtils.isEmpty(ip);
-
-        return hypervisorDao.existsAnyWithIp(ip);
-    }
-
-    public boolean existAnyHypervisorWithIpService(final String ipService)
-    {
-        assert !StringUtils.isEmpty(ipService);
-
-        return hypervisorDao.existsAnyWithIpService(ipService);
-    }
+    // public boolean existAnyHypervisorWithIp(final String ip)
+    // {
+    // assert !StringUtils.isEmpty(ip);
+    //
+    // return hypervisorDao.existsAnyWithIp(ip);
+    // }
+    //
+    // public boolean existAnyHypervisorWithIpService(final String ipService)
+    // {
+    // assert !StringUtils.isEmpty(ipService);
+    //
+    // return hypervisorDao.existsAnyWithIpService(ipService);
+    // }
 
     public List<Datastore> findMachineDatastores(final Machine machine)
     {
@@ -733,6 +737,12 @@ public class InfrastructureRep extends DefaultRepBase
     public boolean existAnyHypervisorWithIpInDatacenter(final String ip, final Integer datacenterId)
     {
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
+    }
+
+    public boolean existAnyHypervisorWithIpServiceInDatacenter(final String ip,
+        final Integer datacenterId)
+    {
+        return hypervisorDao.existsAnyWithIpServiceAndDatacenter(ip, datacenterId);
     }
 
     /**
