@@ -78,7 +78,7 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
         "logicservers/assoctemplate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicservers/assocslone";
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE = "logicservers/assocclone";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_REL = "ls-associate";
 
