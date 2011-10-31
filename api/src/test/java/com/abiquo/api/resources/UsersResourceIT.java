@@ -26,15 +26,20 @@ import static com.abiquo.api.common.UriTestResolver.resolveUsersURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -124,11 +129,11 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI("_");
         uri =
-            UriHelper.appendQueryParamsToPath(uri,
-                Collections.singletonMap("orderBy", new String[] {"nick"}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("orderBy",
+                new String[] {"nick"}), false);
         uri =
-            UriHelper.appendQueryParamsToPath(uri,
-                Collections.singletonMap("filter", new String[] {u1.getNick()}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("filter",
+                new String[] {u1.getNick()}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -164,8 +169,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri,
-                Collections.singletonMap("desc", new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
+                new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -283,6 +288,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             post(resolveUsersURI(user.getEnterprise().getId()), dto, SYSADMIN, SYSADMIN);
 
+        dto.setPassword(encrypt(dto.getPassword()));
         assertEquals(response.getStatusCode(), 201);
 
         assertUserResponse(dto, response);
@@ -312,11 +318,12 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
             post(resolveUsersURI(user.getEnterprise().getId()), dto, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
+        dto.setPassword(encrypt(dto.getPassword()));
 
         assertUserResponse(dto, response);
         UserDto entityPost = response.getEntity(UserDto.class);
-        assertEquals(entityPost.getAvailableVirtualDatacenters(),
-            dto.getAvailableVirtualDatacenters());
+        assertEquals(entityPost.getAvailableVirtualDatacenters(), dto
+            .getAvailableVirtualDatacenters());
     }
 
     @Test
@@ -340,8 +347,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri,
-                Collections.singletonMap("connected", new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
+                new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -396,6 +403,22 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     private void assertAccessDenied(final ClientResponse response)
     {
         assertEquals(response.getStatusCode(), 403);
+    }
+
+    private String encrypt(final String toEncrypt)
+    {
+        MessageDigest messageDigest = null;
+        try
+        {
+            messageDigest = MessageDigest.getInstance("MD5");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+        }
+        messageDigest.reset();
+        messageDigest.update(toEncrypt.getBytes(Charset.forName("UTF8")));
+        final byte[] resultByte = messageDigest.digest();
+        return new String(Hex.encodeHex(resultByte));
     }
 
     @Override
