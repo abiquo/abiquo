@@ -35,6 +35,7 @@ import org.virtualbox_4_0.IVirtualBox;
 import org.virtualbox_4_0.VirtualBoxManager;
 import org.virtualbox_4_0.jaxws.VboxPortType;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -52,8 +53,8 @@ public class VirtualBoxHypervisor implements IHypervisor
 {
 
     /** The Constant logger. */
-    private final static Logger logger =
-        LoggerFactory.getLogger(VirtualBoxHypervisor.class.getName());
+    private final static Logger logger = LoggerFactory.getLogger(VirtualBoxHypervisor.class
+        .getName());
 
     /** The url. */
     private URL url;
@@ -108,6 +109,7 @@ public class VirtualBoxHypervisor implements IHypervisor
      * (non-Javadoc)
      * @see com.abiquo.abicloud.model.IHypervisor#connect(java.net.URL)
      */
+    @Override
     public void connect(final URL url)
     {
         this.url = url;
@@ -151,6 +153,7 @@ public class VirtualBoxHypervisor implements IHypervisor
      * (non-Javadoc)
      * @see com.abiquo.abicloud.model.IHypervisor#logout()
      */
+    @Override
     public void logout()
     {
         mgr.disconnect();
@@ -166,6 +169,7 @@ public class VirtualBoxHypervisor implements IHypervisor
      * (non-Javadoc)
      * @see com.abiquo.abicloud.model.IHypervisor#login(java.lang.String, java.lang.String)
      */
+    @Override
     public void login(final String user, final String password)
     {
         this.user = user;
@@ -177,6 +181,7 @@ public class VirtualBoxHypervisor implements IHypervisor
      * @see com.abiquo.abicloud.model.IHypervisor#createMachine(com.abiquo.abicloud
      * .model.VirtualMachineConfiguration)
      */
+    @Override
     public AbsVirtualMachine createMachine(final VirtualMachineConfiguration config)
         throws VirtualMachineException
     {
@@ -187,6 +192,7 @@ public class VirtualBoxHypervisor implements IHypervisor
      * (non-Javadoc)
      * @see com.abiquo.abicloud.model.IHypervisor#getAddress()
      */
+    @Override
     public URL getAddress()
     {
         return url;
@@ -196,9 +202,10 @@ public class VirtualBoxHypervisor implements IHypervisor
      * (non-Javadoc)
      * @see com.abiquo.abicloud.model.IHypervisor#getHypervisorType()
      */
+    @Override
     public String getHypervisorType()
     {
-        return "vbox";
+        return HypervisorType.VBOX.getValue();
     }
 
     @Override
