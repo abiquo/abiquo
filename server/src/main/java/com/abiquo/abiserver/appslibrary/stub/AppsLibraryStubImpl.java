@@ -237,7 +237,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             createOVFPackageInstallLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
-        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        ClientResponse response = resource.post(String.valueOf(datacenterId));
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 
@@ -259,7 +259,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 String.valueOf(ovfPackageId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
-        ClientResponse response = resource.post(String.valueOf(ovfPackageId));
+        ClientResponse response = resource.post(String.valueOf(datacenterId));
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 

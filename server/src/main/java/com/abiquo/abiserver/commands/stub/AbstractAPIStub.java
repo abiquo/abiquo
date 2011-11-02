@@ -582,7 +582,7 @@ public class AbstractAPIStub
 
         String uri =
             URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
-                + "datacenterrepositories/{datacenterrepository}", params);
+                + "datacenterrepositories/{datacenterrepository}/virtualimages", params);
 
         return uri;
     }
