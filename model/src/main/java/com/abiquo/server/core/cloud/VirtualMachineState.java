@@ -124,4 +124,21 @@ public enum VirtualMachineState
     {
         return "";
     }
+
+    public boolean isDeployed()
+    {
+        switch (this)
+        {
+            case ON:
+            case OFF:
+            case PAUSED:
+                return true;
+                // Configured state. The VM is in the hypervisor but it
+                // has never been powered on. The Chef agent has not run
+                // yet and the node does not exist in the Chef server.
+            case CONFIGURED:
+            default:
+                return false;
+        }
+    }
 }

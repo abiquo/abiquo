@@ -165,7 +165,6 @@ public class VirtualMachinesResource extends AbstractResource
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
             vm.isChefEnabled()));
 

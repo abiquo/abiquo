@@ -154,6 +154,18 @@ public class VirtualMachineRep extends DefaultRepBase
         return virtualMachine;
     }
 
+    /**
+     * Retrieve a {@link VirtualImage}.
+     * 
+     * @param virtualImage id.
+     * @return
+     */
+    public VirtualImage getVirtualImage(final Integer id)
+    {
+
+        return this.imageDao.findById(id);
+    }
+
     public void insert(final VirtualMachine virtualMachine)
     {
         assert virtualMachine != null;
@@ -163,7 +175,7 @@ public class VirtualMachineRep extends DefaultRepBase
         this.dao.persist(virtualMachine);
         this.dao.flush();
     }
-    
+
     public RunlistElement findRunlistElementById(final Integer id)
     {
         return chefDao.findById(id);

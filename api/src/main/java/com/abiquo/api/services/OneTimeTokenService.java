@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -53,7 +54,7 @@ public class OneTimeTokenService extends DefaultApiService
      * Generates a valid and persisted one time token to be used as an authentication header in http
      * petitions.
      */
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String generateOneTimeToken()
     {
         LOGGER.debug("generateOneTimeToken: generating token... ");
