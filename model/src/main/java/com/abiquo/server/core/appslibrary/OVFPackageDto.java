@@ -23,6 +23,8 @@ package com.abiquo.server.core.appslibrary;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
@@ -67,7 +69,7 @@ public class OVFPackageDto extends SingleResourceTransportDto
 
     public void setName(final String name)
     {
-        this.name = name;
+        this.name = StringUtils.strip(name);
     }
 
     private String productVendor;
@@ -79,7 +81,7 @@ public class OVFPackageDto extends SingleResourceTransportDto
 
     public void setProductVendor(final String productVendor)
     {
-        this.productVendor = productVendor;
+        this.productVendor = StringUtils.strip(productVendor);
     }
 
     private String productUrl;
@@ -127,7 +129,7 @@ public class OVFPackageDto extends SingleResourceTransportDto
 
     public void setProductName(final String productName)
     {
-        this.productName = productName;
+        this.productName = StringUtils.strip(productName);
     }
 
     private long diskSizeMb;
@@ -151,7 +153,7 @@ public class OVFPackageDto extends SingleResourceTransportDto
 
     public void setDescription(final String description)
     {
-        this.description = description;
+        this.description = StringUtils.strip(description);
     }
 
     private String diskFormatTypeUri;

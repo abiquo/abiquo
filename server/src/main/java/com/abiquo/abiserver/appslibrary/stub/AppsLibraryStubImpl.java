@@ -182,6 +182,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             list.add(getOVFPackageState(ovfUrl, idEnterprise, datacenterId).getData());
         }
 
+        result.setSuccess(Boolean.TRUE);
         result.setData(list);
         return result;
     }

@@ -396,7 +396,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static int DESCRIPTION_LENGTH_MAX = 255;
 
-    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean DESCRIPTION_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = true;
 
     private final static String DESCRIPTION_COLUMN = "description";
 

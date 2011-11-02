@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +37,14 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.OVFPackageDAO;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Repository;
 
-/**
- * TODO icon and category !!!
- */
 /**
  * Transforms an {@link OVFPackageInstanceDto} from ApplianceManager into a {@link VirtualImage} in
  * API
@@ -56,6 +57,9 @@ public class OVFPackageInstanceToVirtualImage
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
+
+    @Autowired
+    private OVFPackageDAO ovfDao;
 
     @Autowired
     private EnterpriseRep entRepo;
@@ -91,7 +95,7 @@ public class OVFPackageInstanceToVirtualImage
         // second bunded
         for (OVFPackageInstanceDto disk : disksToInsert)
         {
-            if (disk.getMasterDiskFilePath() == null)
+            if (disk.getMasterDiskFilePath() != null)
             {
                 try
                 {
@@ -159,7 +163,7 @@ public class OVFPackageInstanceToVirtualImage
             diskFormat = DiskFormatType.valueOf(disk.getDiskFileFormat().name().toUpperCase());
         }
 
-        Category category = appslibraryRep.getDefaultCategory(); // TODO find by ProductSection
+        Category category = getCategory(disk);
 
         VirtualImage vimage =
             new VirtualImage(enterprise,
@@ -169,7 +173,7 @@ public class OVFPackageInstanceToVirtualImage
                 disk.getDiskSizeMb(),
                 category);
 
-        // TODO: Icon
+        vimage.setIcon(getIcon(disk));
         vimage.setDescription(getDescription(disk));
         vimage.setCpuRequired(disk.getCpu());
         vimage.setRamRequired(getRamInMb(disk).intValue());
@@ -184,8 +188,34 @@ public class OVFPackageInstanceToVirtualImage
         return vimage;
     }
 
+    private Category getCategory(final OVFPackageInstanceDto disk)
+    {
+
+        String categoryName = disk.getCategoryName();
+        if (!StringUtils.isEmpty(categoryName))
+        {
+            return appslibraryRep.findByCategoryNameOrCreateNew(disk.getCategoryName());
+        }
+
+        // try to find in the OVFPackage
+        OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
+        return (ovf != null) ? ovf.getCategory() : null;
+    }
+
+    private Icon getIcon(final OVFPackageInstanceDto disk)
+    {
+        if (!StringUtils.isEmpty(disk.getIconPath()))
+        {
+            return appslibraryRep.findByIconPathOrCreateNew(disk.getIconPath());
+        }
+
+        // try to find in the OVFPackage
+        OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
+        return (ovf != null) ? ovf.getIcon() : null;
+    }
+
     /*
-     * returns a 254 trucated description
+     * returns a 254 trucated description. TODO in the DAO
      */
     private String getDescription(final OVFPackageInstanceDto disk)
     {
