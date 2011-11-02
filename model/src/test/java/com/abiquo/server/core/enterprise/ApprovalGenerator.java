@@ -24,7 +24,8 @@ public class ApprovalGenerator extends DefaultEntityGenerator<Approval>
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Approval.TIME_REQUESTED_PROPERTY,
             Approval.TOKEN_PROPERTY, Approval.TIME_RESPONSE_PROPERTY, Approval.REASON_PROPERTY,
-            Approval.STATUS_PROPERTY, Approval.APPROVAL_TYPE_PROPERTY, Approval.REQUEST_PROPERTY);
+            Approval.STATUS_PROPERTY, Approval.APPROVAL_TYPE_PROPERTY, Approval.REQUEST_PROPERTY,
+            Approval.USER_PROPERTY);
     }
 
     @Override
