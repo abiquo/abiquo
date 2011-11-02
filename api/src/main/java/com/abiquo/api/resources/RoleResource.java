@@ -92,8 +92,8 @@ public class RoleResource extends AbstractResource
     {
         User currentUser = userService.getCurrentUser();
         Role role = null;
-
-        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+        
+	if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
             && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             if (currentUser.getRole().getId().equals(roleId))

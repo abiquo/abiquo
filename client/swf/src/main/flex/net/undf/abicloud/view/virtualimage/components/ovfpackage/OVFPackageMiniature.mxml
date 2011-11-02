@@ -34,6 +34,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.binding.utils.ChangeWatcher;
             import mx.controls.Alert;
@@ -244,6 +246,7 @@
 
     <!-- Visible when the OVFPackage.status = NOT_DOWNLOAD -->
     <mx:HBox 
+    	id="imageInfo_box"
         right="5" top="5"
         horizontalGap="2"
         paddingRight="0"
@@ -268,7 +271,7 @@
             toolTip="@Resource(bundle='VirtualImage', key='LABEL_DOWNLOADED')"
             visible="{this._ovfPackage.ovfPackageStatus.status == OVFPackageInstanceStatus.DOWNLOAD}"/>
 
-        <mx:Label text="@Resource(bundle='VirtualImage', key='LABEL_TO_DOWNLOAD')"/>
+        <mx:Label id="downloadLabel" text="@Resource(bundle='VirtualImage', key='LABEL_TO_DOWNLOAD')"/>
         <mx:CheckBox id="downloadCheck"
             selected="{this._ovfPackage.selectedToDownload}"
             change="onDownloadCheckChange()"/>
