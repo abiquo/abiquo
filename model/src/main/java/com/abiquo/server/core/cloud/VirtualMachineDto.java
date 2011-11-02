@@ -139,17 +139,17 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.idState = idState;
     }
 
-    // private VirtualMachineState state;
-    //
-    // public void setState(final VirtualMachineState state)
-    // {
-    // this.state = state;
-    // }
-    //
-    // public VirtualMachineState getState()
-    // {
-    // return state;
-    // }
+    private VirtualMachineState state;
+
+    public void setState(final VirtualMachineState state)
+    {
+        this.state = state;
+    }
+
+    public VirtualMachineState getState()
+    {
+        return state;
+    }
 
     private int highDisponibility;
 
