@@ -111,7 +111,7 @@ public class ApplianceManagerStubIT
 //        .getAMConfiguration().getRepositoryPath();
     }
 
-    @Test
+    @Test(enabled = false)
     public void testDeploy() throws Exception
     {
         stub = new ApplianceManagerResourceStubImpl(baseUrl);
