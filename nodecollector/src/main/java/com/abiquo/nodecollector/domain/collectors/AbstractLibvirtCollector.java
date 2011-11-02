@@ -27,6 +27,7 @@ import java.util.List;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
@@ -332,7 +333,7 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
             currentHardDisk.setUnits(0L);
         }
         currentHardDisk.setResourceSubType(VirtualDiskEnumType.UNKNOWN.value());
-        currentHardDisk.setConnection(getDatastoreFromFile(imagePath));
+        currentHardDisk.setConnection(FilenameUtils.getFullPathNoEndSeparator(imagePath));
         return currentHardDisk;
 
     }
