@@ -21,13 +21,12 @@
 
 package com.abiquo.api.common;
 
-import java.util.List;
-
 import org.springframework.security.Authentication;
 import org.springframework.security.GrantedAuthority;
 import org.springframework.security.GrantedAuthorityImpl;
 
-import com.abiquo.server.core.enterprise.RoleGenerator;
+import com.abiquo.api.spring.security.AbiquoUserDetailsService;
+import com.abiquo.api.spring.security.SecurityService;
 
 public class MockAuthentication implements Authentication
 {
@@ -54,15 +53,16 @@ public class MockAuthentication implements Authentication
     @Override
     public GrantedAuthority[] getAuthorities()
     {
-        List<String> authorityStrings = RoleGenerator.getAllPrivileges("ROLE_");
-        authorityStrings.add("ROLE_AUTHENTICATED");
 
-        GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.size()];
+        Privileges[] authorityStrings = SecurityService.getAllPrivileges();
+        GrantedAuthority[] authorities = new GrantedAuthority[authorityStrings.length];
 
         int i = 0;
         for (String authString : authorityStrings)
         {
-            authorities[i] = new GrantedAuthorityImpl(authString);
+            authorities[i] =
+                new GrantedAuthorityImpl(AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
+                    + authorityStrings[i].name());
             i++;
         }
 
