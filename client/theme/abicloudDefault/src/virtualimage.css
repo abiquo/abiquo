@@ -123,3 +123,8 @@
 	horizontal-center: "0";
 	vertical-center: "-30";
 }
+
+.VirtualImageMiniatureBaseChefImage {
+    source:Embed("/assets/virtualimage/chefEnabled.png");
+
+}

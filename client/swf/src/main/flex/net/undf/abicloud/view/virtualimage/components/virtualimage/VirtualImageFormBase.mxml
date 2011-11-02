@@ -237,6 +237,7 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
+                    chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
                     costInput.text = this._virtualImage.costCode;
                 }
                 else
@@ -258,6 +259,7 @@
                     iconInput.text = "";
                     iconsList.selectedIndex = -1;
                     costInput.text = "";
+                    chefEnabledCombobox.selected = false;
 
                     ovfPackageInstanceDTO = null;
                     ovfPackageInstanceUploadDTO = null;
@@ -294,6 +296,9 @@
                         updatedValues.shared = 1;
                     else
                         updatedValues.shared = 0; 
+                        
+                    //Chef integration
+                    updatedValues.chefEnabled = chefEnabledCombobox.selected;
                         
                     updatedValues.costCode = costInput.text;                   
 
@@ -656,7 +661,7 @@
 
 
         <mx:Form id="virtualImageFormContainer"
-            paddingTop="3">
+            paddingTop="3" paddingBottom="{this._virtualImage ? 0:30}">
             <mx:Label 
                 fontWeight="bold"
                 text="@Resource(bundle='VirtualImage', key='LABEL_VIRTUAL_IMAGE_FORM_STEP1')"
@@ -826,6 +831,14 @@
                 visible="{this._virtualImage != null}">
                 <mx:CheckBox id="publicImageInput"
                 	change="validateForm()"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                id="chefEnabledFormItem"
+                label="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
+                includeInLayout="{this._virtualImage != null}">
+                <mx:CheckBox id="chefEnabledCombobox"
+                    change="validateForm()"/>
             </mx:FormItem>
             
             <mx:FormItem 

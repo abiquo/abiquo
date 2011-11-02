@@ -52,6 +52,21 @@ package net.undf.abicloud.vo.user
 
 		//FIXME: this is hardcoded. Should be aquire from server         
         public var defaultTheme:String ="abicloudDefault";
+        
+        /*******
+        * 
+        * Related with Chef integration
+        * 
+        * ******/
+        public var chefURL:String;
+        
+        public var chefValidatorCertificate:String;
+        
+        public var chefValidator:String;
+        
+        public var chefClient:String;
+        
+        public var chefClientCertificate:String;
 
         public function Enterprise()
         {
@@ -62,7 +77,7 @@ package net.undf.abicloud.vo.user
             limits = new ResourceAllocationLimit();
             dcLimits = new ArrayCollection();
             reservedMachines = new ArrayCollection();
-	    isReservationRestricted = false;
+	       isReservationRestricted = false;
         }
 
     }

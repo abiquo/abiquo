@@ -402,6 +402,22 @@ public enum APIError
         "HD-2",
         "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"), HD_INVALID_DISK_SIZE(
         "HD-3", "Invalid disk size."),
+    // Chef
+    CHEF_ERROR_GETTING_RECIPES("CHEF-0",
+        "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
+        "CHEF-1", "Could not get the list of available roles for the enterprise"), CHEF_ERROR_CONNECTION(
+        "CHEF-2", "Cannot connect to the Chef Server"), CHEF_NODE_DOES_NOT_EXIST("CHEF-3",
+        "The node does not exist in the Chef Server. "
+            + "If the virtual machine is bootstraping, please wait until the process completes."), CHEF_ELEMENT_DOES_NOT_EXIST(
+        "CHEF-4", "The given runlist element does not exist in the Chef Server"), CHEF_CANNOT_UPDATE_NODE(
+        "CHEF-5", "The node could not be updated in the Chef Server. "
+            + "Please, contact the administrator."), CHEF_CANNOT_CONNECT("CHEF-6",
+        "Could not connect to the Chef server. Please, contact the administrator."), CHEF_INVALID_ENTERPRISE_DATA(
+        "CHEF-7", "Could not connect to the Chef server with the given Validator and Admin data. "
+            + "Please verify the credentials"), CHEF_INVALID_ENTERPRISE("CHEF-8",
+        "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
+        "The virtual machine can not use Chef. "
+            + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"),
 
     ;
 
@@ -451,11 +467,21 @@ public enum APIError
 
         });
 
+        System.out.println("\n ************ Wiki errors ************** \n");
+
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
             System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
                 error.name()));
+        }
+
+        System.out.println("\n ************ Flex client labels ************** \n");
+
+        // Outputs all errors for the Chef client
+        for (APIError error : errors)
+        {
+            System.out.println(String.format("%s=%s", error.code, error.message));
         }
     }
 

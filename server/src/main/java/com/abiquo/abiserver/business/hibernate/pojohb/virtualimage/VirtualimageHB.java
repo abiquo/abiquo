@@ -78,7 +78,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private String volumePath;
 
-    private Boolean isChef;
+    private boolean chefEnabled;
 
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
@@ -255,16 +255,6 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.deleted = deleted;
     }
 
-    public Boolean isChef()
-    {
-        return isChef;
-    }
-
-    public void setChef(final Boolean isChef)
-    {
-        this.isChef = isChef;
-    }
-
     public Integer getIdEnterprise()
     {
         return idEnterprise;
@@ -313,6 +303,16 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public void setShared(int shared)
     {
         this.shared = shared;
+    }
+
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
     }
 
     public String getCostCode()
@@ -378,6 +378,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         virtualImage.setOvfId(ovfId);
         virtualImage.setStateful(stateful);
         virtualImage.setDiskFileSize(diskFileSize);
+        virtualImage.setChefEnabled(chefEnabled);
         virtualImage.setCostCode(costCode);
 
         return virtualImage;
@@ -422,6 +423,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         imageBundled.setType(getType());
         imageBundled.setPathName(getPathName());
         imageBundled.setDiskFileSize(getDiskFileSize());
+        imageBundled.setChefEnabled(isChefEnabled());
         imageBundled.setCostCode(getCostCode());
 
         if (getMaster() == null)

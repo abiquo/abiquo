@@ -37,6 +37,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
+import org.hibernate.validator.constraints.URL;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
@@ -187,6 +188,138 @@ public class Enterprise extends DefaultEntityWithLimits
         setRepositoryHard(limit.hard);
     }
 
+    public final static String CHEF_URL_PROPERTY = "chefURL";
+
+    private final static boolean CHEF_URL_REQUIRED = false;
+
+    public final static int CHEF_URL_LENGTH_MIN = 1;
+
+    public final static int CHEF_URL_LENGTH_MAX = 255;
+
+    private final static boolean CHEF_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_URL_COLUMN = "chef_url";
+
+    @Column(name = CHEF_URL_COLUMN, nullable = !CHEF_URL_REQUIRED, length = CHEF_URL_LENGTH_MAX)
+    private String chefURL;
+
+    @Required(value = CHEF_URL_REQUIRED)
+    @Length(min = CHEF_URL_LENGTH_MIN, max = CHEF_URL_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_URL_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @URL
+    public String getChefURL()
+    {
+        return chefURL;
+    }
+
+    public void setChefURL(final String chefURL)
+    {
+        this.chefURL = chefURL;
+    }
+
+    public final static String CHEF_VALIDATOR_PROPERTY = "chefValidator";
+
+    private final static boolean CHEF_VALIDATOR_REQUIRED = false;
+
+    /* package */final static int CHEF_VALIDATOR_LENGTH_MIN = 1;
+
+    /* package */final static int CHEF_VALIDATOR_LENGTH_MAX = 50;
+
+    private final static boolean CHEF_VALIDATOR_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_VALIDATOR_COLUMN = "chef_validator";
+
+    @Column(name = CHEF_VALIDATOR_COLUMN, nullable = !CHEF_VALIDATOR_REQUIRED, length = CHEF_VALIDATOR_LENGTH_MAX)
+    private String chefValidator;
+
+    @Required(value = CHEF_VALIDATOR_REQUIRED)
+    @Length(min = CHEF_VALIDATOR_LENGTH_MIN, max = CHEF_VALIDATOR_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_VALIDATOR_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefValidator()
+    {
+        return this.chefValidator;
+    }
+
+    public void setChefValidator(final String chefValidator)
+    {
+        this.chefValidator = chefValidator;
+    }
+
+    public final static String CHEF_CLIENT_PROPERTY = "chefClient";
+
+    private final static boolean CHEF_CLIENT_REQUIRED = false;
+
+    /* package */final static int CHEF_CLIENT_LENGTH_MIN = 1;
+
+    /* package */final static int CHEF_CLIENT_LENGTH_MAX = 50;
+
+    private final static boolean CHEF_CLIENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_CLIENT_COLUMN = "chef_client";
+
+    @Column(name = CHEF_CLIENT_COLUMN, nullable = !CHEF_CLIENT_REQUIRED, length = CHEF_CLIENT_LENGTH_MAX)
+    private String chefClient;
+
+    @Required(value = CHEF_CLIENT_REQUIRED)
+    @Length(min = CHEF_CLIENT_LENGTH_MIN, max = CHEF_CLIENT_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_CLIENT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefClient()
+    {
+        return this.chefClient;
+    }
+
+    public void setChefClient(final String chefClient)
+    {
+        this.chefClient = chefClient;
+    }
+
+    public final static String CHEF_CLIENT_CERT_PROPERTY = "chefClientCertificate";
+
+    private final static boolean CHEF_CLIENT_CERT_REQUIRED = false;
+
+    private final static boolean CHEF_CLIENT_CERT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CHEF_CLIENT_CERT_COLUMN = "chef_client_certificate";
+
+    @Column(name = CHEF_CLIENT_CERT_COLUMN, nullable = !CHEF_CLIENT_CERT_REQUIRED, columnDefinition = "TEXT")
+    private String chefClientCertificate;
+
+    @Required(value = CHEF_CLIENT_CERT_REQUIRED)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_CLIENT_CERT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefClientCertificate()
+    {
+        return chefClientCertificate;
+    }
+
+    public void setChefClientCertificate(final String chefClientCertificate)
+    {
+        this.chefClientCertificate = chefClientCertificate.trim();
+    }
+
+    public final static String CHEF_VALIDATOR_CERT_PROPERTY = "chefValidatorCertificate";
+
+    private final static boolean CHEF_VALIDATOR_CERT_REQUIRED = false;
+
+    private final static boolean CHEF_VALIDATOR_CERT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED =
+        false;
+
+    private final static String CHEF_VALIDATOR_CERT_COLUMN = "chef_validator_certificate";
+
+    @Column(name = CHEF_VALIDATOR_CERT_COLUMN, nullable = !CHEF_VALIDATOR_CERT_REQUIRED, columnDefinition = "TEXT")
+    private String chefValidatorCertificate;
+
+    @Required(value = CHEF_VALIDATOR_CERT_REQUIRED)
+    @LeadingOrTrailingWhitespace(allowed = CHEF_VALIDATOR_CERT_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getChefValidatorCertificate()
+    {
+        return chefValidatorCertificate;
+    }
+
+    public void setChefValidatorCertificate(final String chefValidatorCertificate)
+    {
+        this.chefValidatorCertificate = chefValidatorCertificate.trim();
+    }
+
     // *************************** Mandatory constructors ***********************
     public Enterprise(final String name, final int ramSoftLimitInMb, final int cpuCountSoftLimit,
         final long hdSoftLimitInMb, final int ramHardLimitInMb, final int cpuCountHardLimit,
@@ -200,6 +333,14 @@ public class Enterprise extends DefaultEntityWithLimits
     }
 
     // ********************************** Others ********************************
+
+    public boolean isChefEnabled()
+    {
+        return getChefURL() != null && getChefClient() != null
+            && getChefClientCertificate() != null && getChefValidator() != null
+            && getChefValidatorCertificate() != null;
+    }
+
     @Override
     public String toString()
     {

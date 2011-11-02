@@ -74,6 +74,9 @@ public class EnterpriseRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO limitsDAO;
 
+    @Autowired
+    private OneTimeTokenSessionDAO ottSessionDAO;
+
     public EnterpriseRep()
     {
 
@@ -89,6 +92,7 @@ public class EnterpriseRep extends DefaultRepBase
         virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
+        ottSessionDAO = new OneTimeTokenSessionDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);
         roleLdapDAO = new RoleLdapDAO(entityManager);
     }
@@ -407,6 +411,28 @@ public class EnterpriseRep extends DefaultRepBase
     public void deleteLimit(final DatacenterLimits limit)
     {
         limitsDAO.remove(limit);
+    }
+    
+    /**
+     * Consumes the token. After a successful execution the token will be invalidated.
+     * 
+     * @param token token.
+     * @return boolean true if there was token. False otherwise.
+     */
+    public boolean existOneTimeToken(String token)
+    {
+        return ottSessionDAO.consumeToken(token) > 0;
+    }
+    
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param token token to persist.
+     */
+    public void persistToken(String token)
+    {
+        OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
+        ottSessionDAO.persist(ottSession);
     }
 
     /**

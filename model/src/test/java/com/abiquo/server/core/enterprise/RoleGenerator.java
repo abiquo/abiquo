@@ -110,7 +110,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         return createInstance(name, p1, p3, p4, p5, p6, p7, p8, p9, p10, p11);
     }
 
-    public Role createInstanceEnterprisAdmin()
+    public Role createInstanceEnterpriseAdmin()
     {
         Privilege p3 = new Privilege(USERS_VIEW);
         Privilege p4 = new Privilege(USERS_VIEW_PRIVILEGES);
