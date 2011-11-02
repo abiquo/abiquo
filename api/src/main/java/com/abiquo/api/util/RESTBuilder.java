@@ -298,7 +298,7 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(RemoteServiceResource.REMOTE_SERVICE, remoteService.getType().toString()
-            .toLowerCase().replace("_",""));
+            .toLowerCase().replace("_", ""));
 
         if (remoteService.getType().canBeChecked())
         {
@@ -403,6 +403,7 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
     public List<RESTLink> buildEnterprisePropertiesLinks(final Integer enterpriseId,
         final EnterprisePropertiesDto enterpriseProperties)
     {
