@@ -33,6 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,7 +188,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
             if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
@@ -280,7 +281,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
             if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
@@ -472,11 +473,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {
