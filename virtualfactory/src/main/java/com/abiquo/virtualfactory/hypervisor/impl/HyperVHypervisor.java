@@ -23,7 +23,6 @@ package com.abiquo.virtualfactory.hypervisor.impl;
 import static com.abiquo.virtualfactory.utils.hyperv.HyperVUtils.enumToJIVariantArray;
 
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +33,7 @@ import org.jinterop.dcom.impls.automation.IJIDispatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.virtualfactory.constants.MessageValues;
 import com.abiquo.virtualfactory.exception.HypervisorException;
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
@@ -44,7 +44,6 @@ import com.abiquo.virtualfactory.model.IHypervisor;
 import com.abiquo.virtualfactory.model.State;
 import com.abiquo.virtualfactory.model.config.Configuration;
 import com.abiquo.virtualfactory.model.config.HyperVHypervisorConfiguration;
-import com.abiquo.virtualfactory.model.config.HypervisorConfiguration;
 import com.abiquo.virtualfactory.model.config.VirtualMachineConfiguration;
 import com.abiquo.virtualfactory.utils.hyperv.HyperVConstants;
 import com.hyper9.jwbem.SWbemLocator;
@@ -142,14 +141,15 @@ public class HyperVHypervisor implements IHypervisor
     @Override
     public String getHypervisorType()
     {
-        return HyperVConstants.HYPER_TYPE;
+        return HypervisorType.HYPERV_301.getValue();
     }
 
     /**
      * @see com.abiquo.virtualfactory.model.IHypervisor#init(java.net.URL)
      */
     @Override
-    public void init(final URL address, String user, String password) throws HypervisorException
+    public void init(final URL address, final String user, final String password)
+        throws HypervisorException
     {
         AbiCloudModel model = AbiCloudModel.getInstance();
         Configuration mainConfig = model.getConfigManager().getConfiguration();
@@ -212,7 +212,7 @@ public class HyperVHypervisor implements IHypervisor
         for (int x = 0; x < propList.size(); ++x)
         {
             queryAux.append(propList.get(x));
-            if (x < (propList.size() - 1))
+            if (x < propList.size() - 1)
             {
                 queryAux.append(",");
             }
@@ -325,7 +325,7 @@ public class HyperVHypervisor implements IHypervisor
     }
 
     @Override
-    public AbsVirtualMachine getMachine(VirtualMachineConfiguration virtualMachineConfig)
+    public AbsVirtualMachine getMachine(final VirtualMachineConfiguration virtualMachineConfig)
         throws HypervisorException
     {
         try
