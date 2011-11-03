@@ -132,7 +132,7 @@ public class EnterpriseService extends DefaultApiService
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
         if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
             && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(Privileges.ENTRPRISE_ADMINISTER_ALL))
+            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
