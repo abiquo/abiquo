@@ -178,8 +178,9 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
-        assertLinkExist(dto, resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(),
-            user.getId()), "action", VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
+        assertLinkExist(dto,
+            resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(), user.getId()),
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
 
@@ -470,8 +471,8 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         VirtualMachineDto vmDto = vms.getCollection().get(0);
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
-            .getId()), "machine");
+        assertLinkExist(vmDto,
+            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
     }
 
     @Test
