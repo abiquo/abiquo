@@ -237,7 +237,7 @@
                 }
                 else
                 {
-                    userCopy.pass = this._userToEdit.pass;
+                    userCopy.pass = null;
                 }
 
                 userCopy.email = emailInput.text;
