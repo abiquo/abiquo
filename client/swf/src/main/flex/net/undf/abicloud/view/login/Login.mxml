@@ -73,7 +73,7 @@
                                              { label: "Español", data: "es_ES" },
                                              { label: "日本語", data: "ja_JP" },
                                              { label: "中文", data: "zh_ZH" },
-                                             { label: "Portuguese", data: "pt_PT" }
+                                             { label: "Português", data: "pt_PT" }
                                               ];
 
             [Bindable]
