@@ -132,11 +132,12 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createInstance(sysEnterprise);
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration(), vlan, vdc,
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(), vlan
+            .getConfiguration(), vlan, vdc,
             new DatacenterLimits(sysEnterprise, vdc.getDatacenter()));
 
         ClientResponse response = get(resolveVirtualDatacentersURI(), "sysadmin", "sysadmin");
@@ -153,8 +154,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
         DatacenterLimits dcl1 = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
@@ -164,8 +165,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(vdc.getEnterprise());
         DatacenterLimits dcl2 = new DatacenterLimits(vdc2.getEnterprise(), vdc2.getDatacenter());
         RemoteService rs2 =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc2.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc2
+                .getDatacenter());
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc2.getNetwork(), rs2, "255.255.255.0");
         vdc2.setDefaultVlan(vlan2);
         setup(vdc2.getDatacenter(), rs2, vdc2.getNetwork(), vlan2.getConfiguration(), vlan2, vdc2,
@@ -175,7 +176,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         DatacenterLimits dcl3 = new DatacenterLimits(vdc3.getEnterprise(), vdc3.getDatacenter());
         VLANNetwork vlan3 = vlanGenerator.createInstance(vdc3.getNetwork(), rs, "255.255.255.0");
         vdc3.setDefaultVlan(vlan3);
-        setup(vdc3.getEnterprise(), vdc3.getNetwork(), vlan3.getConfiguration(), vlan3, vdc3, dcl3);
+        setup(vdc3.getEnterprise(), vdc3.getNetwork(), vlan3.getConfiguration().getDhcp(), vlan3
+            .getConfiguration(), vlan3, vdc3, dcl3);
 
         String uri = resolveVirtualDatacentersURI();
         uri =
@@ -195,13 +197,13 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createInstance(sysEnterprise);
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
         DatacenterLimits dcl1 = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
-        setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(),
-            vlan.getConfiguration(), vlan, vdc, dcl1);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(), vlan
+            .getConfiguration(), vlan, vdc, dcl1);
 
         VirtualDatacenter vdc3 = vdcGenerator.createInstance(vdc.getDatacenter(), sysEnterprise);
         VLANNetwork vlan3 = vlanGenerator.createInstance(vdc3.getNetwork(), rs, "255.255.255.0");
@@ -211,8 +213,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
 
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(sysEnterprise);
         RemoteService rs2 =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc2.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc2
+                .getDatacenter());
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc2.getNetwork(), rs2, "255.255.255.0");
         DatacenterLimits dcl2 = new DatacenterLimits(vdc2.getEnterprise(), vdc2.getDatacenter());
         vdc2.setDefaultVlan(vlan2);
@@ -237,8 +239,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc
+                .getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
         DatacenterLimits dcl1 = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
@@ -248,8 +250,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc2 = vdcGenerator.createInstance(vdc.getEnterprise());
         DatacenterLimits dcl2 = new DatacenterLimits(vdc2.getEnterprise(), vdc2.getDatacenter());
         RemoteService rs2 =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc2.getDatacenter());
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, vdc2
+                .getDatacenter());
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc2.getNetwork(), rs2, "255.255.255.0");
         vdc2.setDefaultVlan(vlan2);
         setup(vdc2.getDatacenter(), rs2, vdc2.getNetwork(), vlan2.getConfiguration(), vlan2, vdc2,
@@ -259,7 +261,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
         DatacenterLimits dcl3 = new DatacenterLimits(vdc3.getEnterprise(), vdc3.getDatacenter());
         VLANNetwork vlan3 = vlanGenerator.createInstance(vdc3.getNetwork(), rs, "255.255.255.0");
         vdc3.setDefaultVlan(vlan3);
-        setup(vdc3.getEnterprise(), vdc3.getNetwork(), vlan3.getConfiguration(), vlan3, vdc3, dcl3);
+        setup(vdc3.getEnterprise(), vdc3.getNetwork(), vlan3.getConfiguration().getDhcp(), vlan3
+            .getConfiguration(), vlan3, vdc3, dcl3);
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(DatacenterResource.DATACENTER, new String[] {vdc.getDatacenter().getId()

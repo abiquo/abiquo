@@ -233,7 +233,7 @@
                 //Only if passwordInput > 0 else copy the current password
                 if (passwordInput.text.length > 0)
                 {
-                    userCopy.pass = MD5.hash(passwordInput.text);
+                    userCopy.pass = passwordInput.text;
                 }
                 else
                 {
