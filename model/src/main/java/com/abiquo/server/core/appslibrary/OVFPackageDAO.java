@@ -51,6 +51,11 @@ public class OVFPackageDAO extends DefaultDAOBase<Integer, OVFPackage>
         super(OVFPackage.class, entityManager);
     }
 
+    public OVFPackage findByUrl(final String url)
+    {
+        return findUniqueByProperty(OVFPackage.URL_PROPERTY, url);
+    }
+
     public List<OVFPackage> findByEnterprise(final Integer enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);

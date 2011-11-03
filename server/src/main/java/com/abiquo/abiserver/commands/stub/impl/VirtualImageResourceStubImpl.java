@@ -49,6 +49,7 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.infrastructure.Repository;
 
 public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     VirtualImageResourceStub
@@ -148,20 +149,45 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setCostCode(vi.getCostCode());
         img.setCategory(createCategoryFromLink(getLink("category", vi.getLinks())));
         img.setIcon(createIconFromLink(getLink("icon", vi.getLinks())));
-
-        /**
-         * TODO WIP checkpoint here
-         */
-        // private Repository repository;
-        // private DiskFormatType diskFormatType;
-        // private VirtualImage master;
-        // private Integer idEnterprise;
+        img.setRepository(createRepositoryFromLinks());
+        img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
+        // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
+        // properly)
+        // private VirtualImage master; // TODO master instance images
 
         return img;
     }
 
+    private com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createDiskFormatType(
+        DiskFormatType formattype)
+    {
+        com.abiquo.abiserver.pojo.virtualimage.DiskFormatType forma =
+            new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType();
+        // forma.setAlias(alias);
+        forma.setId(formattype.id());
+        forma.setName(formattype.name());
+        forma.setDescription(formattype.description);
+        forma.setUri(formattype.uri);
+        return forma;
+    }
+
+    private com.abiquo.abiserver.pojo.virtualimage.Repository createRepositoryFromLinks()
+    {
+        com.abiquo.abiserver.pojo.virtualimage.Repository repo =
+            new com.abiquo.abiserver.pojo.virtualimage.Repository();
+        // repo.setId(2); // XXX (in AppslLibraryService this value is set properly)
+        repo.setName("myrepo");
+        // repo.setDatacenter(datacenter);
+        return repo;
+    }
+
     private Icon createIconFromLink(RESTLink link)
     {
+        if (link == null)
+        {
+            return null;
+        }
+
         Icon i = new Icon();
         i.setId(Integer.valueOf(link.getHref().substring(link.getHref().lastIndexOf("/") + 1)));
         i.setPath(link.getTitle());

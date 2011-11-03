@@ -105,8 +105,11 @@ public class AppsLibraryService
         // idCategory == 0 indicate return all the categories
         final Integer categoryId = idCategory == 0 ? null : idCategory;
 
-        return vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise,
-            datacenterId, categoryId, idHypervisorType);
+        DataResult<List<VirtualImage>> listImages =
+            vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
+                categoryId, idHypervisorType);
+
+        return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
 
     /**
@@ -125,7 +128,22 @@ public class AppsLibraryService
         // idCategory == 0 indicate return all the categories
         final Integer categoryId = idCategory == 0 ? null : idCategory;
 
-        return vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryId);
+        DataResult<List<VirtualImage>> listImages =
+            vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryId);
+
+        return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
+    }
+
+    private DataResult<List<VirtualImage>> fixVirtaulImageRepositroyAndEnterprise(
+        DataResult<List<VirtualImage>> images, Integer idEnterprise, Integer idRepository)
+    {
+        for (VirtualImage vimage : images.getData())
+        {
+            vimage.setIdEnterprise(idEnterprise);
+            vimage.getRepository().setId(idRepository);
+        }
+
+        return images;
     }
 
     /** List. */

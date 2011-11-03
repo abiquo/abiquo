@@ -24,6 +24,8 @@ package com.abiquo.appliancemanager.transport;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -132,7 +134,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
     {
         this.diskFileFormat = diskFileFormat;
         this.setDiskFormatTypeUri(diskFileFormat.uri);
-        // TODO FIXME once OVFPackageDto work with Enum 
+        // TODO FIXME once OVFPackageDto work with Enum
     }
 
     public String getIconPath()
@@ -152,7 +154,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
 
     public void setCategoryName(String categoryName)
     {
-        this.categoryName = categoryName;
+        this.categoryName = StringUtils.strip(categoryName);
     }
 
     @Deprecated
