@@ -41,6 +41,7 @@
 
     <mx:Script>
         <![CDATA[
+            import net.undf.abicloud.events.NetworkingEvent;
             import mx.collections.ArrayCollection;
             import mx.containers.Canvas;
             import mx.controls.Alert;
@@ -151,6 +152,7 @@
                 virtualInfrastructureToggledContainer.addContent(vdcNetworkManagement,
                                                                  ResourceManager.getInstance().getString("Networking",
                                                                                                          "LABEL_NETWORK"));
+                AbiCloudModel.getInstance().networkingManager.addEventListener(NetworkingEvent.VLAN_CREATED, checkVirtualDatacentersAndAppliances);
             }
 
             private function onInitialize():void

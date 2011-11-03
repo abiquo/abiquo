@@ -128,6 +128,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return nvi;
     }
 
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
+    }
+
     public boolean containsResources(final VirtualDatacenter virtualDatacenter,
         final String idResource)
     {

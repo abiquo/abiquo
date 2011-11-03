@@ -66,10 +66,13 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
         machine = hypervisor.getMachine();
 
-        RemoteService rs =
+        RemoteService vsm =
             machine.getDatacenter().createRemoteService(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 "http://localhost:8080/fooo", 1);
-        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, rs);
+        RemoteService nc =
+            machine.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
+        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, vsm, nc);
 
         machinesURI =
             resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
@@ -93,6 +96,23 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void getMachinesListFiltered() throws Exception
+    {
+        String filter = "?filter=notMatches";
+        Resource resource = client.resource(machinesURI + filter);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        assertEquals(200, response.getStatusCode());
+
+        MachinesDto entity = response.getEntity(MachinesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 0);
+    }
+
+    @Test
     public void createMachinesWithDatastores()
     {
         Resource resource = client.resource(machinesURI);
@@ -109,8 +129,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         // m.setHypervisor(hypervisor);
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                m);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(m);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -120,7 +140,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getName(), entityPost.getName());
         assertEquals(m.getDescription(), entityPost.getDescription());
         assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
         assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
         assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
         assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
@@ -129,8 +148,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getIpService(), entityPost.getIpService());
         assertEquals(m.getUser(), entityPost.getUser());
         assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
 
@@ -141,8 +158,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         resource = client.resource(datastoresURI);
         response =
-            resource.contentType(MediaType.APPLICATION_XML_TYPE).accept(
-                MediaType.APPLICATION_XML_TYPE).get();
+            resource.contentType(MediaType.APPLICATION_XML_TYPE)
+                .accept(MediaType.APPLICATION_XML_TYPE).get();
 
         assertEquals(response.getStatusCode(), 200);
         DatastoresDto datastoresGET = response.getEntity(DatastoresDto.class);
@@ -174,8 +191,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                machineDto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(machineDto);
 
         assertError(response, Status.CONFLICT.getStatusCode(),
             APIError.MACHINE_CAN_NOT_BE_ADDED_IN_UCS_RACK);
@@ -204,8 +221,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                machineDto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(machineDto);
 
         assertError(response, Status.NOT_FOUND.getStatusCode(),
             APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
@@ -216,7 +233,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
      * 
      * @throws Exception
      */
-    @Test
+    // @Test
+    // TODO SCG Post for multiple machines must use a machine dto, not query params
     void createMultipleMachines() throws Exception
     {
         MachineDto m = getValidMachine();
@@ -245,8 +263,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
-            resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE).accept(
-                MachinesResource.MULTIPLE_MACHINES_MIME_TYPE).post(machinesDto);
+            resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)
+                .accept(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE).post(machinesDto);
 
         // Assert both are created
         assertEquals(response.getStatusCode(), 201);
@@ -279,8 +297,8 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         // m.setHypervisor(hypervisor);
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                m);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(m);
 
         assertError(response, Status.BAD_REQUEST.getStatusCode(),
             APIError.MACHINE_INVALID_VIRTUAL_SWITCH_NAME);
@@ -293,18 +311,12 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setName("machine_test");
         m.setDescription("machine_test_description");
 
-        m.setRealRamInMb(200);
         m.setVirtualRamInMb(2);
         m.setVirtualRamUsedInMb(4);
 
-        m.setRealCpuCores(200);
         m.setVirtualCpuCores(18);
-        m.setVirtualCpusPerCore(2);
+        m.setVirtualCpusPerCore(1);
         m.setVirtualCpusUsed(0);
-
-        m.setRealHardDiskInMb(200L);
-        m.setVirtualHardDiskInMb(100L);
-        m.setVirtualHardDiskUsedInMb(10L);
 
         m.setState(MachineState.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
@@ -332,7 +344,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
     private Resource getMachineResource()
     {
-        return client.resource(machinesURI).contentType(MediaType.APPLICATION_XML).accept(
-            MediaType.APPLICATION_XML);
+        return client.resource(machinesURI).contentType(MediaType.APPLICATION_XML)
+            .accept(MediaType.APPLICATION_XML);
     }
 }

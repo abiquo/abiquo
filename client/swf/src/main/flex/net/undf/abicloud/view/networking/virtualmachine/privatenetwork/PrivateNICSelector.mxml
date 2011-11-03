@@ -118,6 +118,7 @@
             {
                 listRequest = new ListRequest();
                 listRequest.numberOfNodes = IP_RESULTS_PER_PAGE;
+                listRequest.asc = true;
 
                 ipFilter.text = "";
                 ipPaginator.value = 1;

@@ -288,13 +288,11 @@ public class PopulateModelTest
         mach.setDescription("test");
 
         mach.setCpu(cpu);
-        mach.setHd(hd);
         mach.setRam(ram);
 
         mach.setCpuRatio(cpuRatio);
 
         mach.setCpuUsed(0);
-        mach.setHdUsed(0);
         mach.setRamUsed(0);
 
         return mach;
@@ -644,8 +642,7 @@ public class PopulateModelTest
         {
             log.debug("PhysicalMachine name:" + pm.getName() + " dc:"
                 + pm.getRack().getDatacenter().getName() + "\t cpu:" + pm.getCpu() + "("
-                + pm.getCpuUsed() + ")" + "\t ram:" + pm.getRam() + "(" + pm.getRamUsed() + ")"
-                + "\t hd:" + pm.getHd() + "(" + pm.getHdUsed() + ")");
+                + pm.getCpuUsed() + ")" + "\t ram:" + pm.getRam() + "(" + pm.getRamUsed() + ")");
         }
 
         factorytest.endConnection();

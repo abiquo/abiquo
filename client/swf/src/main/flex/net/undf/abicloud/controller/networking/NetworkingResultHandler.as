@@ -76,13 +76,22 @@ package net.undf.abicloud.controller.networking
             }
         }
 
-        public function handleCreateVLAN(result:BasicResult, network:Network):void
+        public function handleCreateVLAN(result:BasicResult, network:Network, virtualDatacenter:VirtualDataCenter, defaultNewtwork:Boolean):void
         {
             if (result.success)
             {
+                
+                if(defaultNewtwork)
+                {
+                	virtualDatacenter.defaultVlan = DataResult(result).data as VlanNetwork;
+                }
+                
                 //Adding the new VLAN to the Network
                 AbiCloudModel.getInstance().networkingManager.addVLANToNetwork(network,
                                                                                DataResult(result).data as VlanNetwork);
+                
+                 //dispatch an event to close the edit vlan form
+                AbiCloudModel.getInstance().networkingManager.dispatchEvent(new Event("vlanUpdated"));
             }
             else
             {
