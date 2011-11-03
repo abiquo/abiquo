@@ -1133,6 +1133,21 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `virtualmachine` ENABLE KEYS */;
 
 --
+-- Definition of table `kinton`.`virtualmachinetrackedstate`
+-- This table is kept only for tracking VM states and updating statistics/accounting information
+--
+DROP TABLE IF EXISTS `kinton`.`virtualmachinetrackedstate`;
+CREATE TABLE  `kinton`.`virtualmachinetrackedstate` (
+  `idVM` int(10) unsigned NOT NULL,
+  `previousState` varchar(50) NOT NULL,
+  PRIMARY KEY  (`idVM`),
+  KEY `VirtualMachineTrackedState_FK1` (`idVM`),
+  CONSTRAINT `VirtualMachineTrackedState_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+  )
+ ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
 -- Definition of table `kinton`.`remote_service`
 --
 
