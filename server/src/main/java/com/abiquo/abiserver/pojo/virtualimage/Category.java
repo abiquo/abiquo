@@ -23,6 +23,7 @@ package com.abiquo.abiserver.pojo.virtualimage;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
 import com.abiquo.abiserver.pojo.IPojo;
+import com.abiquo.server.core.appslibrary.CategoryDto;
 
 public class Category implements IPojo<CategoryHB>
 {
@@ -48,7 +49,7 @@ public class Category implements IPojo<CategoryHB>
         return id;
     }
 
-    public void setId(int id)
+    public void setId(final int id)
     {
         this.id = id;
     }
@@ -58,7 +59,7 @@ public class Category implements IPojo<CategoryHB>
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
@@ -68,7 +69,7 @@ public class Category implements IPojo<CategoryHB>
         return isErasable;
     }
 
-    public void setIsErasable(boolean isErasable)
+    public void setIsErasable(final boolean isErasable)
     {
         this.isErasable = isErasable;
     }
@@ -78,11 +79,12 @@ public class Category implements IPojo<CategoryHB>
         return isDefault;
     }
 
-    public void setIsDefault(boolean isDefault)
+    public void setIsDefault(final boolean isDefault)
     {
         this.isDefault = isDefault;
     }
 
+    @Override
     public CategoryHB toPojoHB()
     {
         CategoryHB categoryHB = new CategoryHB();
@@ -94,4 +96,21 @@ public class Category implements IPojo<CategoryHB>
         return categoryHB;
     }
 
+    public CategoryDto toDto()
+    {
+        CategoryDto dto = new CategoryDto();
+        dto.setName(this.getName());
+        dto.setDefaultCategory(this.getIsDefault());
+        dto.setErasable(this.getIsErasable());
+        return dto;
+    }
+
+    public Category toPojo(final CategoryDto dto)
+    {
+        Category category = new Category();
+        category.setName(dto.getName());
+        category.setIsErasable(dto.isErasable());
+        category.setIsDefault(dto.isDefaultCategory());
+        return category;
+    }
 }

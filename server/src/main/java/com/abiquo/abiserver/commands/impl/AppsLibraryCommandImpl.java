@@ -69,94 +69,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         return diskFormats;
     }
 
-    /** Category */
-    @Override
-    public CategoryHB createCategory(final UserSession userSession, final Integer idEnterprise,
-        final String categoryName) throws AppsLibraryCommandException
-    {
-        CategoryHB category;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-
-            factory.beginConnection();
-
-            category = factory.getCategoryDAO().findByName(categoryName);
-
-            if (category != null)
-            {
-                factory.rollbackConnection();
-
-                final String cause = String.format("Category [%s] already exist", categoryName);
-                throw new AppsLibraryCommandException(cause);
-            }
-
-            category = new CategoryHB();
-            category.setName(categoryName);
-            category.setIsDefault(0);
-            category.setIsErasable(1);
-
-            category = factory.getCategoryDAO().makePersistent(category);
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = String.format("Can not create Category [%s]", categoryName);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return category;
-    }
-
-    @Override
-    public Void deleteCategory(final UserSession userSession, final Integer idCategory)
-        throws AppsLibraryCommandException
-    {
-
-        // First, we have to check if there are any virtual image assigned to this category
-        assignDefaultCategoryToVirtualImagesWithCategory(idCategory);
-
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            // Getting the category that will be deleted
-            final CategoryHB category = factory.getCategoryDAO().findById(idCategory);
-
-            if (category == null)
-            {
-                factory.rollbackConnection();
-
-                final String cause =
-                    String.format("There aren't any category with id [%s]", idCategory.toString());
-                throw new AppsLibraryCommandException(cause);
-            }
-
-            if (category.getIsDefault() > 0)
-            {
-                factory.rollbackConnection();
-                throw new AppsLibraryCommandException("'" + category.getName()
-                    + "' is the default Category. Can not delete it");
-            }
-
-            factory.getCategoryDAO().makeTransient(category);
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = String.format("Can not delete category with id [%s]", idCategory);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-        return null;
-    }
-
     private void assignDefaultCategoryToVirtualImagesWithCategory(final Integer idCategory)
         throws AppsLibraryCommandException
     {
@@ -193,32 +105,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
                     idCategory);
             throw new AppsLibraryCommandException(cause);
         }
-    }
-
-    @Override
-    public List<CategoryHB> getCategories(final UserSession userSession, final Integer idEnterprise)
-        throws AppsLibraryCommandException
-
-    {
-        List<CategoryHB> categories;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            categories = factory.getCategoryDAO().findAll();
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = "Can not obtain the list of ''Categories''";
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return categories;
     }
 
     /** Virtual images */
@@ -358,7 +244,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
         }
 
         final Integer idEnterprise =
-            (vimage.getMaster() != null) ? vimage.getMaster().getIdEnterprise() : vimage
+            vimage.getMaster() != null ? vimage.getMaster().getIdEnterprise() : vimage
                 .getIdEnterprise();
 
         final Integer idDatacenter = vimage.getRepository().getDatacenter().getIdDataCenter();

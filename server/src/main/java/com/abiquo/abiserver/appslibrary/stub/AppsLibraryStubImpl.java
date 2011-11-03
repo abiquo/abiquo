@@ -38,6 +38,7 @@ import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
@@ -47,6 +48,8 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
+import com.abiquo.server.core.appslibrary.CategoriesDto;
+import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -66,7 +69,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static final String OVF_PACKAGE_PATH = "appslib/ovfpackages";
 
     @Override
-    public DataResult<Icon> createIcon(final Integer idEnterprise, final IconDto icon)
+    public DataResult<Icon> createIcon(final IconDto icon)
     {
         DataResult<Icon> result = new DataResult<Icon>();
 
@@ -85,6 +88,12 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
 
         return result;
+    }
+
+    private Category createFlexCategoryObject(final CategoryDto dto)
+    {
+        Category category = new Category();
+        return category.toPojo(dto);
     }
 
     @Override
@@ -144,7 +153,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     @Override
     public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
-        String nameOVFPackageList, Integer idEnterprise, Integer datacenterId)
+        final String nameOVFPackageList, final Integer idEnterprise, final Integer datacenterId)
     {
         final DataResult<List<OVFPackageInstanceStatus>> result =
             new DataResult<List<OVFPackageInstanceStatus>>();
@@ -171,8 +180,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(List<String> ovfUrls,
-        Integer idEnterprise, Integer datacenterId)
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(
+        final List<String> ovfUrls, final Integer idEnterprise, final Integer datacenterId)
     {
         final DataResult<List<OVFPackageInstanceStatus>> result =
             new DataResult<List<OVFPackageInstanceStatus>>();
@@ -187,8 +196,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(String ovfUrl,
-        Integer idEnterprise, Integer datacenterId)
+    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(final String ovfUrl,
+        final Integer idEnterprise, final Integer datacenterId)
     {
         final DataResult<OVFPackageInstanceStatus> result =
             new DataResult<OVFPackageInstanceStatus>();
@@ -215,8 +224,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    public BasicResult installOVFPackagesInDatacenter(List<String> ovfUrls, Integer idEnterprise,
-        Integer datacenterId)
+    @Override
+    public BasicResult installOVFPackagesInDatacenter(final List<String> ovfUrls,
+        final Integer idEnterprise, final Integer datacenterId)
     {
         for (String ovfUrl : ovfUrls)
         {
@@ -228,8 +238,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    private void installOVFPackageInDatacenter(final String ovfUrl, Integer idEnterprise,
-        Integer datacenterId)
+    private void installOVFPackageInDatacenter(final String ovfUrl, final Integer idEnterprise,
+        final Integer datacenterId)
     {
         final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
 
@@ -248,8 +258,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
     }
 
-    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
-        Integer idEnterprise, Integer datacenterId)
+    @Override
+    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(
+        final String ovfUrl, final Integer idEnterprise, final Integer datacenterId)
     {
 
         final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
@@ -522,7 +533,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<List<Icon>> getIcons(final Integer idEnterprise)
+    public DataResult<List<Icon>> getIcons()
     {
 
         DataResult<List<Icon>> result = new DataResult<List<Icon>>();
@@ -607,7 +618,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     private List<OVFPackageInstanceStatus> createFlexOVFPackageListObject(
-        OVFPackageInstancesStateDto entity)
+        final OVFPackageInstancesStateDto entity)
     {
         List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
 
@@ -667,4 +678,79 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return response.getEntity(OVFPackagesDto.class);
     }
 
+    /**
+     * CATEGORY
+     */
+
+    @Override
+    public DataResult<List<Category>> getCategories()
+    {
+
+        DataResult<List<Category>> result = new DataResult<List<Category>>();
+
+        final String uri = createCategoriesLink();
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+            CategoriesDto categoriesDto = response.getEntity(CategoriesDto.class);
+            List<Category> listCategory = new ArrayList<Category>();
+            for (CategoryDto category : categoriesDto.getCollection())
+            {
+                listCategory.add(createFlexCategoryObject(category));
+            }
+            result.setData(listCategory);
+        }
+        else
+        {
+            populateErrors(response, result, "getIcons");
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public DataResult<Category> createCategory(final CategoryDto categoryDto)
+    {
+        DataResult<Category> result = new DataResult<Category>();
+
+        String uri = createCategoriesLink();
+
+        ClientResponse response = post(uri, categoryDto);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(createFlexCategoryObject(response.getEntity(CategoryDto.class)));
+        }
+        else
+        {
+            populateErrors(response, result, "createCategory");
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult deleteCategory(final Integer idCategory)
+    {
+        BasicResult result = new BasicResult();
+
+        final String uri = createCategoryLink(idCategory);
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusCode() == 200)
+        {
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteCategory");
+        }
+        return result;
+    }
 }

@@ -23,7 +23,6 @@ package com.abiquo.abiserver.commands;
 
 import java.util.List;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -38,16 +37,6 @@ public interface AppsLibraryCommand
 {
 
     List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
-
-    /** Category */
-    CategoryHB createCategory(UserSession userSession, Integer idEnterprise, String category)
-        throws AppsLibraryCommandException;
-
-    Void deleteCategory(UserSession userSession, Integer idCategory)
-        throws AppsLibraryCommandException;
-
-    List<CategoryHB> getCategories(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
 
     /** Virtual images */
 
