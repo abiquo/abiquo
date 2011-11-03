@@ -25,6 +25,7 @@ package net.undf.abicloud.vo.configuration
 	
 	import net.undf.abicloud.vo.systemproperties.SystemProperty;
 
+	[Bindable]
 	public dynamic class Config extends ObjectProxy
 	{
 		public var defaultTheme:String = "abicloudDefault";
@@ -115,6 +116,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_vm_createInstance:SystemProperty;
 		public var client_wiki_vm_createStateful:SystemProperty;
 		public var client_wiki_vm_captureVirtualMachine:SystemProperty;
+		public var client_wiki_vm_deployInfo:SystemProperty;
 		
 		public var client_wiki_apps_uploadVM:SystemProperty;
 		

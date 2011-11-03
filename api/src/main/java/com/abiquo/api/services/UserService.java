@@ -23,6 +23,9 @@ package com.abiquo.api.services;
 
 import static com.abiquo.api.util.URIResolver.buildPath;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -31,8 +34,12 @@ import java.util.regex.Pattern;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
@@ -67,6 +74,8 @@ import com.abiquo.tracer.SeverityType;
 @Transactional(readOnly = true)
 public class UserService extends DefaultApiService
 {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     EnterpriseRep repo;
@@ -163,7 +172,8 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo
+                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -194,8 +204,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), dto.getPassword(), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -226,13 +236,9 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_CREATE,
-            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
-                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
-                + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "User "
+            + user.getName() + " has been created [Enterprise: " + enterprise.getName() + " Name: "
+            + user.getName() + " Surname: " + user.getSurname() + " Role: " + user.getRole() + "]");
 
         return user;
     }
@@ -287,7 +293,7 @@ public class UserService extends DefaultApiService
         old.setEmail(user.getEmail());
         old.setLocale(user.getLocale());
         old.setName(user.getName());
-        old.setPassword(user.getPassword());
+        old.setPassword(encrypt(user.getPassword()));
         old.setSurname(user.getSurname());
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());
@@ -364,13 +370,10 @@ public class UserService extends DefaultApiService
 
         updateUser(old);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_MODIFY,
-            "User " + old.getName() + " has been modified [Enterprise: "
-                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
-                + old.getSurname() + " Role: " + old.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "User "
+            + old.getName() + " has been modified [Enterprise: " + old.getEnterprise().getName()
+            + " Name: " + old.getName() + " Surname: " + old.getSurname() + " Role: "
+            + old.getRole() + "]");
 
         return old;
     }
@@ -409,13 +412,10 @@ public class UserService extends DefaultApiService
 
         repo.removeUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_DELETE,
-            "User " + user.getName() + " has been deleted [Enterprise: "
-                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
-                + user.getSurname() + " Role: " + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "User "
+            + user.getName() + " has been deleted [Enterprise: " + user.getEnterprise().getName()
+            + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
+            + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
@@ -582,5 +582,25 @@ public class UserService extends DefaultApiService
         {
             return true;
         }
+    }
+
+    private String encrypt(final String toEncrypt)
+    {
+        MessageDigest messageDigest = null;
+        try
+        {
+            messageDigest = MessageDigest.getInstance("MD5");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            LOGGER.debug("cannot get the instance of messageDigest", e);
+            // revise if the method is called from other method
+            addUnexpectedErrors(APIError.STATUS_BAD_REQUEST);
+            flushErrors();
+        }
+        messageDigest.reset();
+        messageDigest.update(toEncrypt.getBytes(Charset.forName("UTF8")));
+        final byte[] resultByte = messageDigest.digest();
+        return new String(Hex.encodeHex(resultByte));
     }
 }

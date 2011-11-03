@@ -321,7 +321,7 @@
                     ovfPackageInstanceDTO.description = descriptionInput.text;
                     ovfPackageInstanceDTO.idEnterprise = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
                     ovfPackageInstanceDTO.idUser = AbiCloudModel.getInstance().loginManager.user.id;
-                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).alias;
+                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).name;
                     ovfPackageInstanceDTO.categoryName = Category(categoryInput.selectedItem).name;
                     if (iconsList.selectedIndex > -1)
                         ovfPackageInstanceDTO.iconPath = Icon(iconsList.selectedItem).path;
