@@ -48,7 +48,7 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         return idDcEnterpriseStats;
     }
 
-    public void setIdcCEnterpriseStats(final int idDcEnterpriseStats)
+    public void setIdDcEnterpriseStats(final int idDcEnterpriseStats)
     {
         this.idDcEnterpriseStats = idDcEnterpriseStats;
     }
