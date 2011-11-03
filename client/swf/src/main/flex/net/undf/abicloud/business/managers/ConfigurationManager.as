@@ -60,7 +60,7 @@ package net.undf.abicloud.business.managers
             var loader:URLLoader = new URLLoader();
             loader.addEventListener(Event.COMPLETE, loadXMLConfigFileCompleteHandler);
             loader.addEventListener(IOErrorEvent.IO_ERROR, loadXMLConfigFileIOErrorHandler);
-			loader.load(new URLRequest("config/client-config.xml")); 
+			loader.load(new URLRequest("config/client-config.xml.jsp")); 
         }
 
         /**
