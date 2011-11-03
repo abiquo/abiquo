@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.abiquo</groupId>
             <artifactId>commons-amqp</artifactId>
-            <version>${project.version}</version>
+            <version>${commonsamqp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
