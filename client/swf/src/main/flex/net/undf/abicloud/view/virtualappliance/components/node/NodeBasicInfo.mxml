@@ -35,6 +35,11 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.HyperVisor;
+        	import net.undf.abicloud.vo.infrastructure.State;
+        	import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+        	import net.undf.abicloud.events.InfrastructureEvent;
+        	import mx.utils.ObjectUtil;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
         	import mx.managers.DragManager;
@@ -89,12 +94,33 @@
                 _virtualMachine = node.virtualMachine;
                 _virtualDatacenter = virtualDatacenter;
                 _isEditionAllowed = isEditionAllowed;
-
-                if (_virtualMachine)
-                {
-                    
+                
+                if(virtualDatacenter.hyperType.id == HyperVisorType.HYPERV){
+                    remoteServicePsw.enabled = false;
+                }else{
+                    remoteServicePsw.enabled = true;
                 }
+
             }
+            
+            private function editVirtualMachine():void{
+            
+                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
+                var virtualMachineEdited:VirtualMachine = ObjectUtil.copy(this._virtualMachine) as VirtualMachine;
+
+                //Saving changes made by the user
+                virtualMachineEdited.name = nameInput.text;
+                virtualMachineEdited.cpu = cpuInput.value;
+                virtualMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+                virtualMachineEdited.password = passwordInput.text;
+                virtualMachineEdited.description = descriptionInput.text;
+
+                //Announcing that a virtual machine has been edited
+                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
+                infrastructureEvent.infrastructureElement = virtualMachineEdited;
+                dispatchEvent(infrastructureEvent);
+            }
+
 
            
            
@@ -112,9 +138,10 @@
         </mx:FormItem>
 
         <mx:FormItem 
-            height="17"
             label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')">
-            <mx:Label text="{_virtualMachine.virtualImage.name}"/>
+            <mx:TextInput id="nameInput" 
+            	editable="{this._isEditionAllowed}"
+            	text="{_virtualMachine.virtualImage.name}"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -124,25 +151,23 @@
         </mx:FormItem>
 
         <mx:FormItem 
-            height="17"
             label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
             direction="horizontal">
 
-            <!-- CPU IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
             <mx:NumericStepper id="cpuInput"
-                width="75" height="17"
+            	enabled="{this._isEditionAllowed}"
+                width="75"
                 fontSize="10"
                 minimum="1" maximum="32" stepSize="1"/>
         </mx:FormItem>
 
         <mx:FormItem 
-            height="17"
             label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
             direction="horizontal">
      
-            <!-- RAM IS ONLY EDITABLE WHEN THE VIRTUAL MACHINE IS NOT RUNNING -->
             <mx:NumericStepper id="ramInput"
-                width="75" height="17"
+            	enabled="{this._isEditionAllowed}"
+                width="75" 
                 fontSize="10"
                 minimum="0"
                 maximum="{ramUnitsSelector.selectedItem.maximum}"
@@ -150,7 +175,8 @@
                 value="{this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion}"/>
 
             <mx:ComboBox id="ramUnitsSelector"
-                width="80" height="17"
+            	enabled="{this._isEditionAllowed}"
+                width="80" height="18"
                 labelField="label"
                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                 selectedIndex="0"/>
@@ -173,7 +199,11 @@
             includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
             direction="horizontal">
             <mx:Label id="remoteAccessLabel"
-                text="{this._virtualMachine.vdrpIP == null}"/>
+                text="{(this._virtualMachine.vdrpIP == null || 
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+                                                                                                                           _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
+                selectable="true"/>
 
             <mx:Button id="copyRemoteAccessAddressButton"
                 height="16"
@@ -181,20 +211,41 @@
                 includeInLayout="false"
                 visible="false"/>
         </mx:FormItem>
+        
+        <mx:FormItem id="remoteServicePsw" 
+        	label="@Resource(bundle='Infrastructure',key='LABEL_REMOTE_ACCESS_PASSWORD')" direction="horizontal">
+	        <mx:TextInput 
+	        	editable="{this._isEditionAllowed}"
+	            displayAsPassword="{!hidePassword.selected}" 
+	            id="passwordInput" 
+	            maxChars="32"
+	            text="{this._virtualMachine.password}"/>
+	        <mx:CheckBox 
+	        	enabled="{this._isEditionAllowed}"
+	            id="hidePassword" 
+	            labelPlacement="right" 
+	            label="@Resource(bundle='Infrastructure',key='LABEL_SHOW_PASSWORD')"/>
+	    </mx:FormItem>
                    
 		<mx:FormItem 
             label="@Resource(bundle='Infrastructure', key='LABEL_DESCRIPTION')"
             direction="horizontal" width="100%">
 
             <mx:TextArea id="descriptionInput"
-                            width="100%"
-                            maxChars="255"
-                            minHeight="100"
-                            text="{_virtualMachine.description}"/>
+            	editable="{this._isEditionAllowed}"
+                width="100%"
+                maxChars="255"
+                minHeight="100"
+                text="{_virtualMachine.description}"/>
 
         </mx:FormItem>
                    
     </mx:Form>
 
-
+    <mx:HBox width="100%" horizontalAlign="center">
+        <mx:Button height="18" 
+            label="@Resource(bundle='Common',key='BUTTON_SAVE')"
+            enabled="{this._isEditionAllowed}"
+            click="editVirtualMachine()"/>
+   </mx:HBox>
 </mx:VBox>

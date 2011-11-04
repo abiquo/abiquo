@@ -71,7 +71,17 @@
             }
             
             [Bindable]
-            public var enterprise:Enterprise;
+            private var _enterprise:Enterprise;
+            
+            public function get enterprise():Enterprise
+            {
+            	return this._enterprise;
+            }
+            
+            public function set enterprise(value:Enterprise):void
+            {
+                this._enterprise = value;
+            }
 
 
         ]]>
@@ -129,9 +139,9 @@
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
                  <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
-                 	includeInLayout="{enterprise}"
-                 	visible="{enterprise}">
-                    <mx:Label text="{enterprise.name}"/>
+                 	includeInLayout="{this._enterprise}"
+                 	visible="{this._enterprise}">
+                    <mx:Label text="{this._enterprise.name}"/>
                 </mx:FormItem>
                 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">

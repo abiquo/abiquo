@@ -99,7 +99,9 @@
 
                 //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_DEPLOYED or POWERED_OFF
                 var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
-                if (nodeVirtualImage.virtualMachine && nodeVirtualImage.virtualMachine.state.id == State.NOT_DEPLOYED)
+                if (nodeVirtualImage.virtualMachine 
+                && (nodeVirtualImage.virtualMachine.state.id == State.NOT_DEPLOYED || 
+                    nodeVirtualImage.virtualMachine.state.id == State.POWERED_OFF ))
                 {
                     this._isEditionAllowed = true
                 }

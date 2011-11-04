@@ -44,7 +44,7 @@ package net.undf.abicloud.vo.infrastructure
 													   (XEN.toString()):"XEN", 
 													   (VMX.toString()):"ESXi", 
 													   (HYPERV.toString()):"Hyper-V",
-													(XENSERVER.toString()):"XenServer"};
+													   (XENSERVER.toString()):"XenServer"};
 		
 		/* ------------- Public atributes ------------- */
 		public var id:int;
