@@ -72,7 +72,7 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-    <listener>
+    <!--listener>
         <listener-class>com.abiquo.api.web.listener.AmqpConsumerContextListener</listener-class>
-    </listener>
+    </listener-->
 </web-app>
