@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
  * Represent a collection of machines
@@ -35,6 +36,19 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "machines")
 public class MachinesDto extends WrapperDto<MachineDto>
 {
+    private ErrorsDto errors;
+
+    public ErrorsDto getErrors()
+    {
+        return errors;
+    }
+
+    public void setErrors(final ErrorsDto errors)
+    {
+        this.errors = errors;
+    }
+
+    @Override
     @XmlElement(name = "machine")
     public List<MachineDto> getCollection()
     {

@@ -24,11 +24,11 @@
  */
 package com.abiquo.abiserver.networking;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import com.abiquo.abiserver.exception.InvalidIPAddressException;
 
@@ -86,7 +86,8 @@ public class IPNetworkRangTest
 
     /**
      * Test method for {@link com.abiquo.abiserver.networking.IPAddress#previousIPAddress()}.
-     * @throws InvalidIPAddressException 
+     * 
+     * @throws InvalidIPAddressException
      */
     @Test
     public void testLastIPAddressWithNumNodes() throws InvalidIPAddressException

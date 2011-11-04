@@ -23,8 +23,10 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.util.List;
 
+import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -37,9 +39,13 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
 
     private DhcpGenerator dhcpGenerator;
 
+    private RasdManagementGenerator rasdmGenerator;
+
     private VirtualDatacenterGenerator vdcGenerator;
 
-    private RasdManagementGenerator rasdmGenerator;
+    private VirtualApplianceGenerator vappGenerator;
+
+    private VirtualMachineGenerator vmGenerator;
 
     public IpPoolManagementGenerator(final SeedGenerator seed)
     {
@@ -47,8 +53,10 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
 
         vlanNetworkGenerator = new VLANNetworkGenerator(seed);
         dhcpGenerator = new DhcpGenerator(seed);
-        rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        rasdmGenerator = new RasdManagementGenerator(seed);
+        vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override

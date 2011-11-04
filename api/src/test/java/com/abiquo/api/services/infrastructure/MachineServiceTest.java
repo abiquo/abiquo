@@ -21,7 +21,7 @@
 
 package com.abiquo.api.services.infrastructure;
 
-import static com.abiquo.server.core.cloud.State.RUNNING;
+import static com.abiquo.model.enumerator.VirtualMachineState.RUNNING;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +32,16 @@ import org.springframework.security.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
-import com.abiquo.api.common.Assert;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.services.stub.VsmServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
@@ -55,7 +55,7 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
-public class MachineServiceTest extends AbstractGeneratorTest
+public class MachineServiceTest extends AbstractUnitTest
 {
     // @AfterMethod
     // public void tearDown()
@@ -124,6 +124,7 @@ public class MachineServiceTest extends AbstractGeneratorTest
         EntityManagerHelper.beginReadWriteTransaction(em);
 
         MachineService service = new MachineService(em);
+        service.setVsm(new VsmServiceStubMock()); // Must use the mocked VSM
         service.removeMachine(machineId);
 
         EntityManagerHelper.commit(em);
@@ -137,7 +138,7 @@ public class MachineServiceTest extends AbstractGeneratorTest
         }
         catch (NotFoundException e)
         {
-            Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
+            org.testng.Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
                 "The requested machine does not exist");
         }
 
@@ -145,8 +146,8 @@ public class MachineServiceTest extends AbstractGeneratorTest
 
         VirtualMachine virtualMachine =
             vmService.getVirtualMachine(vdc.getId(), vapp.getId(), vm.getId());
-        Assert.assertNull(virtualMachine.getHypervisor());
-        Assert.assertNull(virtualMachine.getDatastore());
-        Assert.assertEquals(virtualMachine.getState(), State.NOT_DEPLOYED);
+        org.testng.Assert.assertNull(virtualMachine.getHypervisor());
+        org.testng.Assert.assertNull(virtualMachine.getDatastore());
+        org.testng.Assert.assertEquals(virtualMachine.getState(), VirtualMachineState.NOT_DEPLOYED);
     }
 }

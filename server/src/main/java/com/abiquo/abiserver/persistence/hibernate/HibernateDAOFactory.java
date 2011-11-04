@@ -26,6 +26,7 @@ package com.abiquo.abiserver.persistence.hibernate;
 
 import java.net.URISyntaxException;
 
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -234,13 +235,26 @@ public class HibernateDAOFactory implements DAOFactory
     @Override
     public void beginConnection()
     {
-        getSessionFactory().getCurrentSession().beginTransaction();
+        beginConnection(false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.abiquo.abiserver.persistence.DAOFactory#endConnection()
-     */
+    @Override
+    public void beginConnection(final boolean readOnly)
+    {
+        if (readOnly)
+        {
+            getSessionFactory().getCurrentSession().setFlushMode(FlushMode.MANUAL);
+        }
+        else
+        {
+            getSessionFactory().getCurrentSession().setFlushMode(FlushMode.AUTO);
+        }
+        getSessionFactory().getCurrentSession().beginTransaction();
+    }/*
+      * (non-Javadoc)
+      * @see com.abiquo.abiserver.persistence.DAOFactory#endConnection()
+      */
+
     @Override
     public void endConnection()
     {

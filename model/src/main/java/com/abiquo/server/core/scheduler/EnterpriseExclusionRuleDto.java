@@ -19,25 +19,27 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.scheduler;
+package com.abiquo.server.core.scheduler;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
+@XmlRootElement(name = "enterpriseExclusionRule")
+public class EnterpriseExclusionRuleDto extends SingleResourceTransportDto
+{
+    private static final long serialVersionUID = 1L;
 
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
+    private Integer id;
 
-      
-  }
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+}

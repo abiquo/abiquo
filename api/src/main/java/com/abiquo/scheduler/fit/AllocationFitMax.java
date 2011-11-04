@@ -22,7 +22,6 @@
 package com.abiquo.scheduler.fit;
 
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 
 /**
  * {@link FitPolicy.PERFORMANCE} implementation. Highest rank for machines with less resource
@@ -60,7 +59,7 @@ public class AllocationFitMax implements IAllocationFit
         return rank;
     }
 
-    public static void main(String[] args)
+    public static void main(final String[] args)
     {
         double pCpu = (4 - 2) / 1;
         double pRam = (4085 - 512) / 512;

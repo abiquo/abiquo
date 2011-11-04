@@ -58,7 +58,6 @@
             import net.undf.abicloud.events.VirtualApplianceEvent;
             import net.undf.abicloud.model.AbiCloudModel;
             import net.undf.abicloud.view.general.AbiCloudAlert;
-            import net.undf.abicloud.view.networking.virtualdatacenter.NetworkManagement;
             import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceForm;
             import net.undf.abicloud.view.virtualappliance.components.virtualappliance.VirtualApplianceList;
             import net.undf.abicloud.vo.infrastructure.State;
@@ -126,7 +125,11 @@
             private function onInitialize():void
             {
                 //Check privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES,"removeChild",enterprisePanel,this);
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES)
+                && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.USERS_MANAGE_ENTERPRISE)){
+                    SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.USERS_MANAGE_OTHER_ENTERPRISES,"removeChild",enterprisePanel,this);
+                }
+                                
                 
                 //Listening for changes in model related to VirtualAppliances
                	userToggledContainer.selectedIndex = 0;

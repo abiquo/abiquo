@@ -22,40 +22,69 @@
 package com.abiquo.api.services;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.api.services.cloud.VirtualDatacenterService;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
+import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = true)
 public class DatacenterService extends DefaultApiService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatacenterService.class);
+
     @Autowired
     InfrastructureRep repo;
 
     @Autowired
     InfrastructureService infrastructureService;
+
+    @Autowired
+    RemoteServiceService remoteServiceService;
+
+    @Autowired
+    VirtualDatacenterService virtualDatacenterService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    EnterpriseRep enterpriseRep;
 
     public DatacenterService()
     {
@@ -66,6 +95,21 @@ public class DatacenterService extends DefaultApiService
     {
         repo = new InfrastructureRep(em);
         infrastructureService = new InfrastructureService(em);
+        remoteServiceService = new RemoteServiceService(em);
+        virtualDatacenterService = new VirtualDatacenterService(em);
+        userService = new UserService(em);
+        tracer = new TracerLogger();
+    }
+
+    public Collection<Datacenter> getDatacenters(final Enterprise enterprise)
+    {
+        Collection<DatacenterLimits> dcLimits = repo.findDatacenterLimits(enterprise);
+        Set<Datacenter> dcs = new HashSet<Datacenter>();
+        for (DatacenterLimits dcl : dcLimits)
+        {
+            dcs.add(dcl.getDatacenter());
+        }
+        return dcs;
     }
 
     public Collection<Datacenter> getDatacenters()
@@ -73,11 +117,14 @@ public class DatacenterService extends DefaultApiService
         return repo.findAll();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public DatacenterDto addDatacenter(final DatacenterDto dto) throws Exception
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public Datacenter addDatacenter(final Datacenter datacenter) throws Exception
     {
-        if (repo.existsAnyDatacenterWithName(dto.getName()))
+        if (repo.existsAnyDatacenterWithName(datacenter.getName()))
         {
+            tracer.log(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                "Another datacenter with the name '" + datacenter.getName()
+                    + "' already exists. Please choose a different name.");
             addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
@@ -87,13 +134,14 @@ public class DatacenterService extends DefaultApiService
         Network network = new Network(UUID.randomUUID().toString());
         repo.insertNetwork(network);
 
-        Datacenter datacenter = new Datacenter(dto.getName(), dto.getLocation());
         isValidDatacenter(datacenter);
         datacenter.setNetwork(network);
         repo.insert(datacenter);
 
-        DatacenterDto responseDto =
-            ModelTransformer.transportFromPersistence(DatacenterDto.class, datacenter);
+        // Assign datacenter to the own enterprise
+        DatacenterLimits dcLimits =
+            new DatacenterLimits(userService.getCurrentUser().getEnterprise(), datacenter);
+        enterpriseRep.insertLimit(dcLimits);
 
         // Add the default tiers
         for (int i = 1; i <= 4; i++)
@@ -103,20 +151,79 @@ public class DatacenterService extends DefaultApiService
             repo.insertTier(tier);
         }
 
+        // Log the event
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE, "Datacenter '"
+            + datacenter.getName() + "' has been created in " + datacenter.getLocation());
+
+        return datacenter;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public RemoteServicesDto addRemoteServices(final List<RemoteService> remoteServices,
+        final Datacenter datacenter)
+    {
         // Add the Remote Services in database in case are informed in the request
-        if (dto.getRemoteServices() != null)
+        RemoteServicesDto responseRemoteService = new RemoteServicesDto();
+        if (remoteServices != null)
         {
-            RemoteServicesDto responseRemoteService = new RemoteServicesDto();
-            for (RemoteServiceDto rsd : dto.getRemoteServices().getCollection())
+            for (RemoteService rs : remoteServices)
             {
-                RemoteServiceDto rsDto =
-                    infrastructureService.addRemoteService(rsd, datacenter.getId());
-                responseRemoteService.add(rsDto);
+
+                SingleResourceTransportDto srtDto =
+                    remoteServiceService.addRemoteService(rs, datacenter);
+
+                if (srtDto instanceof RemoteServiceDto)
+                {
+                    RemoteServiceDto rsDto = (RemoteServiceDto) srtDto;
+                    if (rsDto != null)
+                    {
+                        responseRemoteService.add(rsDto);
+                        if (rsDto.getConfigurationErrors() != null
+                            && !rsDto.getConfigurationErrors().isEmpty())
+                        {
+                            if (responseRemoteService.getConfigErrors() == null)
+                            {
+                                responseRemoteService.setConfigErrors(new ErrorsDto());
+                            }
+                            responseRemoteService.getConfigErrors().addAll(
+                                rsDto.getConfigurationErrors());
+                        }
+                    }
+                }
+                else if (srtDto instanceof ErrorsDto)
+                {
+                    if (responseRemoteService.getConfigErrors() == null)
+                    {
+                        responseRemoteService.setConfigErrors(new ErrorsDto());
+                    }
+                    responseRemoteService.getConfigErrors().addAll((ErrorsDto) srtDto);
+                }
+
             }
-            responseDto.setRemoteServices(responseRemoteService);
         }
 
-        return responseDto;
+        if (responseRemoteService.getConfigErrors() != null
+            && !responseRemoteService.getConfigErrors().isEmpty())
+        {
+            // Log the event
+            for (ErrorDto error : responseRemoteService.getConfigErrors().getCollection())
+            {
+                tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER, EventType.DC_CREATE,
+                    "Datacenter '" + datacenter.getName() + ": " + error.getMessage());
+            }
+        }
+        else
+        {
+            // Log the event
+            tracer.log(
+                SeverityType.INFO,
+                ComponentType.DATACENTER,
+                EventType.DC_CREATE,
+                "Datacenter '" + datacenter.getName() + "' has been created in "
+                    + datacenter.getLocation());
+        }
+
+        return responseRemoteService;
     }
 
     public Datacenter getDatacenter(final Integer id)
@@ -133,22 +240,27 @@ public class DatacenterService extends DefaultApiService
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Datacenter modifyDatacenter(final Integer datacenterId, final DatacenterDto dto)
+    public Datacenter modifyDatacenter(final Integer datacenterId, final Datacenter datacenter)
     {
         Datacenter old = getDatacenter(datacenterId);
 
-        if (repo.existsAnyOtherWithName(old, dto.getName()))
+        if (repo.existsAnyOtherWithName(old, datacenter.getName()))
         {
             addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
 
-        old.setName(dto.getName());
-        old.setLocation(dto.getLocation());
+        old.setName(datacenter.getName());
+        old.setLocation(datacenter.getLocation());
 
         isValidDatacenter(old);
 
         repo.update(old);
+
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY, "Datacenter '"
+            + old.getName() + "' has been modified [Name: " + datacenter.getName()
+            + ", Situation: " + datacenter.getLocation() + "]");
+
         return old;
     }
 
@@ -173,30 +285,97 @@ public class DatacenterService extends DefaultApiService
         flushErrors();
     }
 
-    public List<Rack> getRacks(Datacenter datacenter)
+    public List<Rack> getRacks(final Datacenter datacenter)
     {
         return repo.findRacks(datacenter);
     }
 
-    public List<Rack> getRacksWithHAEnabled(Datacenter datacenter)
+    public List<Rack> getRacksWithHAEnabled(final Datacenter datacenter)
     {
         return repo.findRacksWithHAEnabled(datacenter);
     }
 
-    public List<Machine> getMachines(Rack rack)
-    {
-        return repo.findRackMachines(rack);
-    }
-
-    public List<Machine> getEnabledMachines(Rack rack)
+    public List<Machine> getEnabledMachines(final Rack rack)
     {
         return repo.findRackEnabledForHAMachines(rack);
     }
 
-    // FIXME: Delete is now allowed right now
-    // public void removeDatacenter(Integer id)
-    // {
-    // Datacenter datacenter = dao.findById(id);
-    // dao.makeTransient(datacenter);
-    // }
+    public void removeDatacenter(final Integer id)
+    {
+        Datacenter datacenter = repo.findById(id);
+        if (datacenter == null)
+        {
+            addNotFoundErrors(APIError.DATASTORE_NON_EXISTENT);
+            flushErrors();
+        }
+
+        // only delete the datacenter if it doesn't have any virtual datacenter and any storage
+        // device associated
+        Collection<VirtualDatacenter> vdcs =
+            virtualDatacenterService.getVirtualDatacentersByDatacenter(datacenter);
+        if (vdcs == null || vdcs.isEmpty())
+        {
+            List<StorageDevice> sDevices = getStorageDevices(datacenter);
+            if (sDevices == null || sDevices.isEmpty())
+            {
+
+                // deleting datacenter
+                deleteAllocationRules(datacenter);
+
+                deleteNetwork(datacenter);
+
+                List<Rack> racks = getRacks(datacenter);
+                if (racks != null)
+                {
+                    for (Rack rack : racks)
+                    {
+                        infrastructureService.removeRack(rack);
+                    }
+                }
+
+                repo.delete(datacenter);
+
+                LOGGER.debug("Deleting datacenter");
+
+                tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
+                    "Datacenter " + datacenter.getName() + " deleted");
+            }
+            else
+            {
+                tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
+                    "Cannot delete datacenter with storage devices associated");
+                addConflictErrors(APIError.DATACENTER_DELETE_STORAGE);
+                flushErrors();
+            }
+        }
+        else
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
+                "Cannot delete datacenter with virtual datacenters associated");
+            addConflictErrors(APIError.DATACENTER_DELETE_VIRTUAL_DATACENTERS);
+            flushErrors();
+        }
+
+    }
+
+    public boolean isAssignedTo(final Integer datacenterId, final RemoteServiceType type)
+    {
+        return infrastructureService.isAssignedTo(datacenterId, type);
+    }
+
+    // overrided on premium
+    protected List<StorageDevice> getStorageDevices(final Datacenter datacenter)
+    {
+        return null;
+    }
+
+    // overrided on premium
+    protected void deleteAllocationRules(final Datacenter datacenter)
+    {
+    }
+
+    // overrided on premium
+    protected void deleteNetwork(final Datacenter datacenter)
+    {
+    }
 }

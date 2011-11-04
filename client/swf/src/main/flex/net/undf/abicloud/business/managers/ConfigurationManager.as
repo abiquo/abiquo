@@ -55,12 +55,14 @@ package net.undf.abicloud.business.managers
          * for the application, and stores the parameters in _config associative array
          * for further access
          */
+        private var loader:URLLoader = new URLLoader();
         private function loadXMLConfigFile():void
         {
-            var loader:URLLoader = new URLLoader();
+            loader = new URLLoader();
             loader.addEventListener(Event.COMPLETE, loadXMLConfigFileCompleteHandler);
             loader.addEventListener(IOErrorEvent.IO_ERROR, loadXMLConfigFileIOErrorHandler);
-			loader.load(new URLRequest("config/client-config.xml.jsp"));
+			//First load local xml file if exists, then open the xml.jsp configuration file
+			loader.load(new URLRequest("config/client-config.xml"));  
         }
 
         /**
@@ -89,8 +91,12 @@ package net.undf.abicloud.business.managers
          */
         private function loadXMLConfigFileIOErrorHandler(ioErrorEvent:IOErrorEvent):void
         {
-            Alert.show("Unable to load client-config.xml.jsp. The application will not start correctly",
+            if(ioErrorEvent.text.search('client-config.xml.jsp') != -1){
+            	Alert.show("Unable to load client-config.xml.jsp. The application will not start correctly",
                        "Error");
+            }else{
+	            loader.load(new URLRequest("config/client-config.xml.jsp")); 
+            }
         }
 
 

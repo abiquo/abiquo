@@ -21,13 +21,13 @@
 
 package com.abiquo.mbeans;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SystemPropertiesServiceTest
 {

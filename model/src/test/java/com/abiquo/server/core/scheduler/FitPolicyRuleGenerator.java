@@ -23,10 +23,10 @@ package com.abiquo.server.core.scheduler;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -35,7 +35,7 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
 
     DatacenterGenerator datacenterGen;
 
-    public FitPolicyRuleGenerator(SeedGenerator seed)
+    public FitPolicyRuleGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -44,7 +44,7 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
     }
 
     @Override
-    public void assertAllPropertiesEqual(FitPolicyRule obj1, FitPolicyRule obj2)
+    public void assertAllPropertiesEqual(final FitPolicyRule obj1, final FitPolicyRule obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, FitPolicyRule.FIT_POLICY_PROPERTY);
     }
@@ -59,8 +59,21 @@ public class FitPolicyRuleGenerator extends DefaultEntityGenerator<FitPolicyRule
         return fitPolicyRule;
     }
 
+    public FitPolicyRule createGlobalFitPolicyInstance()
+    {
+        return new FitPolicyRule(FitPolicy.PROGRESSIVE);
+    }
+
+    public FitPolicyRule createInstance(final Datacenter datacenter)
+    {
+        FitPolicyRule fitPolicyRule = new FitPolicyRule(datacenter, FitPolicy.PROGRESSIVE);
+
+        return fitPolicyRule;
+    }
+
     @Override
-    public void addAuxiliaryEntitiesToPersist(FitPolicyRule entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final FitPolicyRule entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

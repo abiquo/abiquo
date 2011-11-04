@@ -84,6 +84,7 @@
             {
                 this._virtualAppliance = virtualAppliance;
                 this._defaultVirtualDataCenter = defaultVirtualDataCenter;
+                automaticOpenCheckIsEnable = false;
 
                 if (this._virtualAppliance == null)
                 {

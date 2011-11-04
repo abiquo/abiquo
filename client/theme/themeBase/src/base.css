@@ -22,239 +22,263 @@
 /**
 * This is the minimal CSS File and is loaded before the login is done
 **/
+Application {
+	theme-color: #505050;
+	font-size: 11;
+	color: #505050;
+	modal-transparency-duration: 500;
+	modal-transparency-blur: 1;
+	modal-transparency-color: #000000;
+	modal-transparency: 0.4;
+}
 
+Label {
+	color: #505050;
+}
 
+.ApplicationLoginBackground {
+	background-image: Embed("/assets/application/login_background_image.jpg");
+	background-size: "100%";
+}
 
+.ApplicationPostLoginBackground {
+	background-image: Embed("/assets/application/postlogin_background_image.png");
+	background-repeat: repeat;
+	background-position: center;
+	/* background-blend:    	multiply; */
+	borderSkin: ClassReference("com.degrafa.skins.CSSSkin");
+}
 
-	Application
-	{
-		theme-color:					#505050;
-		font-size:						11;
-		color:							#505050;
-		modal-transparency-duration:	500;
-		modal-transparency-blur:		1;
-		modal-transparency-color:		#000000;
-		modal-transparency:				0.4;
-	}
+.MainLoginStyle {
+	background-image: Embed("/assets/application/login/background_image.png", scaleGridTop =
+		  
+		   "62", scaleGridBottom =       "80", scaleGridLeft =       "17",
+		scaleGridRight =   
+		   "80");
+	background-size: "100%";
+	padding-bottom: 16;
+	padding-left: 20;
+	padding-right: 20;
+	padding-top: 13;
+}
 
-	Label
-	{
- 		color:							#505050;
-	}
+.MainLoginStyleIntern {
+	background-image: Embed("/assets/application/login/intern_background_image.jpg",
+		scaleGridTop =       "7", scaleGridBottom =       "9", scaleGridLeft =
+		    
+		 "6", scaleGridRight =       "8");
+	background-size: "100%";
+	padding-bottom: 18;
+	padding-left: 15;
+	padding-right: 15;
+	padding-top: 12;
+}
 
-	.ApplicationLoginBackground 
-	{
-		background-image:	Embed("/assets/application/login_background_image.jpg");
-		background-size: 	"100%";
-	}
-	
-	
-	.ApplicationPostLoginBackground 
-	{
- 			background-image:   	Embed("/assets/application/postlogin_background_image.png");
-			background-repeat:   	repeat;
-			background-position: 	center;
-			/* background-blend:    	multiply; */
-			borderSkin:          	ClassReference("com.degrafa.skins.CSSSkin");   	 	     
- 	}
-	
-	
-	.MainLoginStyle
-	{
-		background-image:		Embed("/assets/application/login/background_image.png", scaleGridTop="62", scaleGridBottom="80", scaleGridLeft="17", scaleGridRight="80");
-		background-size:		"100%";
-		padding-bottom:			16;
-		padding-left:			20;
-		padding-right:			20;
-		padding-top:			13;
-	}
-	
-	
-	.MainLoginStyleIntern
-	{
-		background-image:		Embed("/assets/application/login/intern_background_image.jpg", scaleGridTop="7", scaleGridBottom="9", scaleGridLeft="6", scaleGridRight="8");
-		background-size:		"100%";
-		padding-bottom:			18;
-		padding-left:			15;
-		padding-right:			15;
-		padding-top:			12;
-	}
+TextInput {
+	background-image: Embed("/assets/flexcomponents/textinput/background.png", scaleGridTop = 
+		 
+		   "10", scaleGridBottom =       "11", scaleGridLeft =       "11",
+		scaleGridRight =   
+		   "15");
+	background-size: "100%";
+	border-style: none;
+	background-color: none;
+	color: #505050;
+	font-weight: normal;
+	font-size: 11px;
+	focus-thickness: 0;
+	padding-top: 2;
+	padding-left: 5;
+	error-color: #FF0000;
+}
 
-	TextInput
-	{
-		background-image:		Embed("/assets/flexcomponents/textinput/background.png", scaleGridTop="10", scaleGridBottom="11", scaleGridLeft="11", scaleGridRight="15");
-		background-size:		"100%";
-		border-style:			none;
-		background-color:		none;
-		color:					#505050;
-		font-weight:			normal;
-		font-size:				11px;
-		focus-thickness:		0;
-		padding-top:			2;
-		padding-left:			5;
-		error-color:			#FF0000;
-	}
+.TextInputInvalid {
+	background-image: Embed("/assets/flexcomponents/textinput/background_error.png",
+		scaleGridTop =       "10", scaleGridBottom =       "11", scaleGridLeft
+		= 
+		  
+		  "11", scaleGridRight =       "15");
+	background-size: "100%";
+	border-style: none;
+	background-color: none;
+	color: #505050;
+	font-weight: normal;
+	font-size: 11px;
+	focus-thickness: 0;
+	padding-top: 2;
+	padding-left: 5;
+	error-color: #FF0000;
+}
 
-	.TextInputInvalid
-	{
-		background-image:		Embed("/assets/flexcomponents/textinput/background_error.png", scaleGridTop="10", scaleGridBottom="11", scaleGridLeft="11", scaleGridRight="15");
-		background-size:		"100%";
-		border-style:			none;
-		background-color:		none;
-		color:					#505050;
-		font-weight:			normal;
-		font-size:				11px;
-		focus-thickness:		0;
-		padding-top:			2;
-		padding-left:			5;
-		error-color:			#FF0000;
-	}
-	
-	CheckBox
-	{
-		up-icon:				Embed("/assets/flexcomponents/checkbox/up_icon.png");
-		over-icon: 				Embed("/assets/flexcomponents/checkbox/up_icon.png");
-		down-icon: 				Embed("/assets/flexcomponents/checkbox/down_icon.png");
-		selected-up-icon: 		Embed("/assets/flexcomponents/checkbox/selected_up_icon.png");
-		selected-over-icon: 	Embed("/assets/flexcomponents/checkbox/selected_up_icon.png");
-		selected-down-icon: 	Embed("/assets/flexcomponents/checkbox/selected_down_icon.png");
-		color:					#505050;
-		roll-over-color:		#505050;
-		text-roll-over-color:	#505050;
-		text-selected-color:	#505050;
+CheckBox {
+	up-icon: Embed("/assets/flexcomponents/checkbox/up_icon.png");
+	over-icon: Embed("/assets/flexcomponents/checkbox/up_icon.png");
+	down-icon: Embed("/assets/flexcomponents/checkbox/down_icon.png");
+	selected-up-icon: Embed("/assets/flexcomponents/checkbox/selected_up_icon.png");
+	selected-over-icon: Embed("/assets/flexcomponents/checkbox/selected_up_icon.png");
+	selected-down-icon: Embed("/assets/flexcomponents/checkbox/selected_down_icon.png");
+	color: #505050;
+	roll-over-color: #505050;
+	text-roll-over-color: #505050;
+	text-selected-color: #505050;
+	font-anti-alias-type: advanced;
+	font-grid-fit-type: subpixel;
+	font-thickness: 0;
+}
 
-		font-anti-alias-type:advanced;
-		font-grid-fit-type:subpixel;
-		font-thickness:0; 
+Alert {
+	background-color: #000000;
+	color: #cccccc;
+	title-style-name: #000000;
+	button-height: 18;
+	border-style: solid;
+	title-style-name: "alertTitleStyleName";
+	button-height: 18;
+}
 
+.alertTitleStyleName {
+	font-weight: bold;
+	color: #cccccc;
+	font-size: 13;
+}
 
-	}
-		
-		
-	Alert
-	{
-		background-color:		#000000;
-		color:					#cccccc;
-		title-style-name:		#000000;
-		button-height:			18;
-		border-style:			solid;
-		title-style-name:		"alertTitleStyleName";
-		button-height:			18;
-	}
-	
-		.alertTitleStyleName
-		{
-			font-weight:			bold;
-			color:					#cccccc;
-			font-size:				13;
-		}
-		
-	/**
+/**
 	 * by default, but is overwritten in the main theme
 	 **/
-	Button
-	{
-		up-skin:				Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		over-skin:				Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		down-skin:				Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		disabled-skin:			Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop="5", scaleGridBottom="13", scaleGridLeft="5", scaleGridRight="12");
-		font-weight:			normal;
-		font-size:				11;
-		color:				#ffffff;
-		roll-over-color:			#ffffff;
-		text-roll-over-color:		#ffffff;
-		text-selected-color:		#e5e5e5;
-		padding-left:			5;
-		padding-right:			5;
-		padding-top:			3;
-		
-		font-anti-alias-type:advanced;
-		font-grid-fit-type:subpixel;
-		font-thickness:-200; 
-	}		
-	
-	
-	ComboBox
-	{
-		up-skin:					Embed("/assets/flexcomponents/combobox/up_skin.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		over-skin: 					Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		down-skin: 					Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		border-alpha:				0;
-		background-alpha:				0;
-	}
-	
-	.ComboBoxInvalid
-	{
-		up-skin:					Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		over-skin: 					Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		down-skin: 					Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop="6", scaleGridBottom="13", scaleGridLeft="6", scaleGridRight="13");
-		border-alpha:				0;
-		background-alpha:				0;
-	}
-	
-	CursorManager
-	{
-		busy-cursor: Embed("/assets/flexcomponents/cursormanager/BusyCursor.swf");
-	}
+Button {
+	up-skin: Embed("/assets/flexcomponents/button/up_skin.png", scaleGridTop =     
+		 "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =    
+		  "12");
+	over-skin: Embed("/assets/flexcomponents/button/over_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	down-skin: Embed("/assets/flexcomponents/button/down_skin.png", scaleGridTop =    
+		  "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =  
+		    "12");
+	disabled-skin: Embed("/assets/flexcomponents/button/disabled_skin.png", scaleGridTop = 
+		 
+		   "5", scaleGridBottom =       "13", scaleGridLeft =       "5",
+		scaleGridRight =   
+		   "12");
+	font-weight: normal;
+	font-size: 11;
+	color: #ffffff;
+	roll-over-color: #ffffff;
+	text-roll-over-color: #ffffff;
+	text-selected-color: #e5e5e5;
+	padding-left: 5;
+	padding-right: 5;
+	padding-top: 3;
+	font-anti-alias-type: advanced;
+	font-grid-fit-type: subpixel;
+	font-thickness: -200;
+}
 
-	.AbiCloudAlert
-	{
-		background-image:				Embed("/assets/customcomponents/abicloudalert/background_image.png", scaleGridTop="29", scaleGridBottom="113", scaleGridLeft="48", scaleGridRight="231");
-		background-size:				"100%";
+ComboBox {
+	up-skin: Embed("/assets/flexcomponents/combobox/up_skin.png", scaleGridTop =    
+		  "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =  
+		    "13");
+	over-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =   
+		   "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
+	down-skin: Embed("/assets/flexcomponents/combobox/down_skin.png", scaleGridTop =   
+		   "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
+	border-alpha: 0;
+	background-alpha: 0;
+}
 
-	}
+.ComboBoxInvalid {
+	up-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
+	over-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
+	down-skin: Embed("/assets/flexcomponents/combobox/up_skin_error.png", scaleGridTop
+		=       "6", scaleGridBottom =       "13", scaleGridLeft =       "6",
+		scaleGridRight =   
+		   "13");
+	border-alpha: 0;
+	background-alpha: 0;
+}
 
-		.AbicloudAlertMainText
-		{
-			background-alpha:			"0";
-			font-size:					"12";
+CursorManager {
+	busy-cursor: Embed("/assets/flexcomponents/cursormanager/BusyCursor.swf");
+}
 
-		}
+.AbiCloudAlert {
+	background-image: Embed("/assets/customcomponents/abicloudalert/background_image.png",
+		scaleGridTop =       "29", scaleGridBottom =       "113",
+		scaleGridLeft = 
+		  
+		  "48", scaleGridRight =       "231");
+	background-size: "100%";
+}
 
-		.AbiCloudAlertCloseButton
-		{
-			up-skin:				Embed("/assets/customcomponents/abicloudalert/closebutton_up_skin.png");
-			over-skin:				Embed("/assets/customcomponents/abicloudalert/closebutton_over_skin.png");
-			down-skin:				Embed("/assets/customcomponents/abicloudalert/closebutton_down_skin.png");
-		}
-	
-		.AbiCloudAlertTitle
-		{
-			font-size:				12;
-			font-weight:			bold;
-			color:					#505050;
-		}
-	
-		.AbiCloudAlertSubtitle
-		{
-			font-size:				14;
-			font-weight:			bold;
-			color:					#fe8f0a;
-		}
-	
-		.AbiCloudPopUp
-	{
-		background-image:			Embed("/assets/customcomponents/abicloudpopup/background_image.png", scaleGridTop="29", scaleGridBottom="113", scaleGridLeft="48", scaleGridRight="231");
-		background-size:			"100%";
-		padding-bottom:			"30";
-		padding-left:			"21";
-		padding-right:			"20";
-		padding-top:			"7";
-		vertical-gap:			"6";
-	}
-	
-		.AbiCloudPopUpTitle
-		{
-			font-size:				12;
-			font-weight:			bold;
-			color:					#505050;
-		}
-		
-	/**
+.AbicloudAlertMainText {
+	background-alpha: "0";
+	font-size: "12";
+}
+
+.AbiCloudAlertCloseButton {
+	up-skin: Embed("/assets/customcomponents/abicloudalert/closebutton_up_skin.png");
+	over-skin: Embed("/assets/customcomponents/abicloudalert/closebutton_over_skin.png"
+		);
+	down-skin: Embed("/assets/customcomponents/abicloudalert/closebutton_down_skin.png"
+		);
+}
+
+.AbiCloudAlertTitle {
+	font-size: 12;
+	font-weight: bold;
+	color: #505050;
+}
+
+.AbiCloudAlertSubtitle {
+	font-size: 14;
+	font-weight: bold;
+	color: #fe8f0a;
+}
+
+.AbiCloudPopUp {
+	background-image: Embed("/assets/customcomponents/abicloudpopup/background_image.png",
+		scaleGridTop =       "29", scaleGridBottom =       "113",
+		scaleGridLeft = 
+		  
+		  "48", scaleGridRight =       "231");
+	background-size: "100%";
+	padding-bottom: "30";
+	padding-left: "21";
+	padding-right: "20";
+	padding-top: "7";
+	vertical-gap: "6";
+}
+
+.AbiCloudPopUpTitle {
+	font-size: 12;
+	font-weight: bold;
+	color: #505050;
+}
+
+/**
 	* used in abicloudAlert
 	**/
-	.CommonAssetsAlertIconError
-	 {
-		/**custom property**/
-		source:Embed("/assets/customcomponents/abicloudalert/icon_error.png");
-	 }
+.CommonAssetsAlertIconError { /**custom property**/
+	source: Embed("/assets/customcomponents/abicloudalert/icon_error.png");
+}
+
+.TokenProgressBar {
+	bar-color: #FE9608;
+	border-color: #666666;
+	track-height: 10;
+	color: #505050;
+}

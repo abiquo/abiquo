@@ -23,6 +23,7 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -62,7 +63,7 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     public VirtualAppliance createUniqueInstance()
     {
         String name = newString(nextSeed(), 0, 255);
-        State state = newEnum(State.class, nextSeed());
+        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         VirtualDatacenter virtualDatacenter = virtualDatacenterGenerator.createInstance(enterprise);
 
@@ -75,7 +76,7 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     public VirtualAppliance createInstance(VirtualDatacenter virtualDatacenter)
     {
         String name = newString(nextSeed(), 0, 255);
-        State state = newEnum(State.class, nextSeed());
+        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
         Enterprise enterprise = virtualDatacenter.getEnterprise();
 
         VirtualAppliance virtualAppliance =
@@ -86,7 +87,7 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     
     public VirtualAppliance createInstance(VirtualDatacenter virtualDatacenter, String vappName)
     {
-        State state = newEnum(State.class, nextSeed());
+        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
         Enterprise enterprise = virtualDatacenter.getEnterprise();
 
         VirtualAppliance virtualAppliance =

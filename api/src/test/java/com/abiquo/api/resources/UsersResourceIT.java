@@ -35,7 +35,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.Assert;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -141,7 +141,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
         UserDto u = entity.getCollection().iterator().next();
-        Assert.assertEquals(u.getNick(), "neck");
+        org.testng.Assert.assertEquals(u.getNick(), "neck");
     }
 
     @Test
@@ -296,9 +296,21 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
+        Privilege pToRemove = null;
         for (Privilege p : user.getRole().getPrivileges())
         {
-            entitiesToSetup.add(p);
+            if (!p.getName().equals(Privileges.USERS_PROHIBIT_VDC_RESTRICTION.name()))
+            {
+                entitiesToSetup.add(p);
+            }
+            else
+            {
+                pToRemove = p;
+            }
+        }
+        if (pToRemove != null)
+        {
+            user.getRole().getPrivileges().remove(pToRemove);
         }
         entitiesToSetup.add(user.getRole());
         entitiesToSetup.add(user.getEnterprise());
@@ -397,5 +409,12 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
     private void assertAccessDenied(final ClientResponse response)
     {
         assertEquals(response.getStatusCode(), 403);
+    }
+
+    @Override
+    protected ClientResponse get(final String uri, final String username, final String password)
+    {
+        return super.get(uri, username, password, AbstractResource.LINK_MEDIA_TYPE,
+            AbstractResource.LINK_MEDIA_TYPE);
     }
 }

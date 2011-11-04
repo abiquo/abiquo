@@ -26,25 +26,20 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.services.RoleService;
-import com.abiquo.api.spring.security.SecurityService;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
-@Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-public class RoleServiceTest extends AbstractGeneratorTest
+public class RoleServiceTest extends AbstractUnitTest
 {
     private Enterprise e;
 
@@ -56,8 +51,8 @@ public class RoleServiceTest extends AbstractGeneratorTest
     public void setupSysadmin()
     {
         e = enterpriseGenerator.createUniqueInstance();
-        Privilege p1 = new Privilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES);
-        Privilege p2 = new Privilege(SecurityService.USERS_MANAGE_USERS);
+        Privilege p1 = new Privilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(Privileges.USERS_MANAGE_USERS);
         r = roleGenerator.createInstance("sys", p1, p2);
         u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
@@ -142,11 +137,11 @@ public class RoleServiceTest extends AbstractGeneratorTest
 
         Collection<Role> roles = service.getRolesByEnterprise(e1.getId(), null, "name", false);
         Role r = roles.iterator().next();
-        Assert.assertEquals(r.getName(), "r1");
+        org.testng.Assert.assertEquals(r.getName(), "r1");
 
         roles = service.getRolesByEnterprise(e1.getId(), null, "name", true);
         r = roles.iterator().next();
-        Assert.assertEquals(u.getNick(), "sysadmin");
+        org.testng.Assert.assertEquals(u.getNick(), "sysadmin");
     }
 
 }

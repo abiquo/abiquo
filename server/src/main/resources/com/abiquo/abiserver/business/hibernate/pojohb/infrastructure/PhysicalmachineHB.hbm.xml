@@ -1,324 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-	<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
+<!-- Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA -->
 <hibernate-mapping>
-	<class catalog="kinton"
-		name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
-		table="physicalmachine">
-		<id name="idPhysicalMachine" type="java.lang.Integer">
-			<column name="idPhysicalMachine" />
-			<generator class="identity" />
-		</id>
-		<many-to-one
-			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB"
-			lazy="false" fetch="select" name="rack">
-			<column name="idRack" not-null="false" />
-		</many-to-one>
-		<many-to-one
-			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB"
-			fetch="select" name="dataCenter">
-			<column name="idDataCenter" not-null="true" />
-		</many-to-one>
-		<property name="name" type="string">
-			<column length="30" name="name" not-null="true" />
-		</property>
-		<property name="description" type="string">
-			<column length="100" name="description" />
-		</property>
-		<property name="ram" type="int">
-			<column name="ram" not-null="true" />
-		</property>
-		<property name="cpu" type="int">
-			<column name="cpu" not-null="true" />
-		</property>
-		<property name="hd" type="java.lang.Long">
-			<column name="hd" not-null="true" />
-		</property>
-		<property name="realRam" type="int">
-			<column name="realram" not-null="true" />
-		</property>
-		<property name="realCpu" type="int">
-			<column name="realcpu" not-null="true" />
-		</property>
-		<property name="realStorage" type="java.lang.Long">
-			<column name="realStorage" not-null="true" />
-		</property>
-		<property name="cpuRatio" type="int">
-			<column name="cpuRatio" not-null="true" />
-		</property>
-		<property name="ramUsed" type="int">
-			<column name="ramUsed" not-null="true" />
-		</property>
-		<property name="cpuUsed" type="int">
-			<column name="cpuUsed" not-null="true" />
-		</property>
-		<property name="hdUsed" type="java.lang.Long">
-			<column name="hdUsed" not-null="true" />
-		</property>
-		<property name="idState" type="int">
-			<column name="idState" not-null="true" />
-		</property>
-		<property name="vswitchName" type="string">
-			<column length="30" name="vswitchName" not-null="true" />
-		</property>
-		<property name="initiatorIQN" type="string">
-			<column length="256" name="initiatorIQN" />
-		</property>
-		<property name="ipmiIp" type="string">
-			<column name="ipmiIP" length="39" not-null="false"/>
-		</property>	
-		<property name="ipmiPort" type="int">
-			<column name="ipmiPort"  not-null="false"/>
-		</property>
-		<property name="ipmiUser" type="string">
-			<column name="ipmiUser" length="255" not-null="false"/>
-		</property>	
-		<property name="ipmiPassword" type="string">
-			<column name="ipmiPassword" length="255" not-null="false"/>
-		</property>	
-		<property name="idEnterprise" type="java.lang.Integer">
-			<column name="idEnterprise" not-null="false"/>
-		</property>
-		<!--
-			one-to-one name="physicalMachine"
-			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
-			cascade="all" fetch="select" property-ref="idPhysicalMachine" /
-		-->
-		<one-to-one name="hypervisor"
-			class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB"
-			property-ref="physicalMachine" lazy="false" cascade="all" />
-
-		<set name="datastoresHB" table="datastore_assignment" lazy="false" cascade="all">
-			<key>
-				<column name="idPhysicalMachine" not-null="true" />
-			</key>
-			<many-to-many column="idDatastore"
-				class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB" />
-		</set>
-	</class>
-	<!--
-		PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES recovers only the ones
-		managed by AbiCloud
-	-->
-	<query name="PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES">
-		select count(vm)
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		inner join hy.virtualmachines vm
-		where
-		pm.idPhysicalMachine = :idphysicalmachine
-		and vm.idType = 1
-        </query>
-        
-    <query name="PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE">
-		select count(vm)
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm, 
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB
-		vapp, 
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB
-		vdc, 
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB
-		nvi, 
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB
-		n
-		inner join pm.hypervisor hy
-		inner join hy.virtualmachines vm
-		where
-		pm.idPhysicalMachine = :idphysicalmachine
-		and vm.idVm = nvi.virtualMachineHB.idVm AND n.idNode = nvi.idNode AND n.idVirtualApp = vapp.idVirtualApp AND vdc.idVirtualDataCenter = vapp.virtualDataCenterHB.idVirtualDataCenter
-		and vm.idType = 1
-		and vdc.enterpriseHB.idEnterprise != :identerprise
-        </query>
-        
-
-
-	<query name="PHYSICALMACHINE.GET_DEPLOYED_VIRTUAL_MACHINES">
-		select vm
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		inner join hy.virtualmachines vm
-		where
-		pm.idPhysicalMachine = :idphysicalmachine
-        </query>
-        
-      <query name="PHYSICALMACHINE.GET_DEPLOYED_ABIQUO_VIRTUAL_MACHINES">
-		select vm
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		inner join hy.virtualmachines vm
-		where
-		vm.idType = 1
-		and pm.idPhysicalMachine = :idphysicalmachine
-        </query>
-
-
-	<query name="PHYSICALMACHINE.GET_HYPERVISOR_IP">
-		select hy.ip
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		where pm.idPhysicalMachine =
-		:idphysicalmachine
-        </query>
-
-
-	<query name="PHYSICALMACHINE.GET_ALL_HYPERVISOR_IP">
-		select hy.ip
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy    
-        </query>
-
-
-	<query name="PHYSICALMACHINE.GET_FROM_IP">
-		select pm
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		where hy.ip = :ipPhysicalMachine
-		and
-		pm.dataCenter = :idDataCenter
-        </query>
-
-	<query name="PHYSICALMACHINE.GET_NOT_MANAGED_VIRTUAL_MACHINES">
-		select vm
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor hy
-		inner join hy.virtualmachines vm
-		where
-		pm.idPhysicalMachine = :idphysicalmachine
-		and vm.idType != 1
-	</query>
-
-	<query name="PHYSICALMACHINE.GET_LIST_BY_DATASTORE">
-		select pm
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.datastoresHB ds
-		where ds.idDatastore = :idDatastore
-	</query>
-	
-	<query name="PHYSICALMACHINE.GET_LIST_BY_RACK">
-		select distinct(pm)
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		where pm.rack.idRack = :idRack
-	</query>
-
-	<query name="PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE">
-		select distinct(pm)
-		from
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		where pm.rack.idRack = :idRack
-		and (
-		      pm.name like :filterLike or
-		      pm in (
-		             Select pms
-		             from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pms,
-		             com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent
-		             where pms.idEnterprise = ent.idEnterprise   
-		               and ent.name like :filterLike
-		             )   
-		      )
-	</query>
-	
-	<!-- allocator -->
-	<query name="PHYSICALMACHINE.FIND_BY_RACK_AND_VDC">
-		SELECT pm
-		FROM
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm
-		inner join pm.hypervisor h,
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB
-		vdc
-		WHERE h.type = vdc.hypervisorType AND pm.rack.idRack = :idRack AND
-		vdc.idVirtualDataCenter = :idVirtualDataCenter
-</query>
-
-<query name="PHYSICALMACHINE.FIRST_PASS_QUERY">
-		SELECT pm
-		FROM
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		pm,
-		com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB
-		vdc,
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB
-		h
-		JOIN pm.dataCenter dc
-		WHERE pm = h.physicalMachine AND h.type = vdc.hypervisorType AND dc.idDataCenter = vdc.idDataCenter
-		AND pm.rack.idRack = :idRack AND vdc.idVirtualDataCenter =
-		:idVirtualDataCenter
-
-		AND pm.idState = 3
-		AND pm.idPhysicalMachine in
-		(
-		SELECT py.idPhysicalMachine
-		FROM
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB
-		datastore,
-		com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB
-		py
-		WHERE (datastore.size - datastore.usedSize) > :hdRequiredOnRepository
-		AND py in elements(datastore.pmList)
-		AND datastore.size > datastore.usedSize
-		)
-		AND pm.idPhysicalMachine not in
-		(
-		SELECT DISTINCT vm.hypervisor.physicalMachine.idPhysicalMachine
-		FROM VirtualmachineHB vm
-		WHERE (vm.enterpriseHB IN( SELECT rule.enterprise2 FROM
-		EnterpriseExclusionRuleHB rule WHERE rule.enterprise1 = :enterprise ))
-		OR (vm.enterpriseHB IN( SELECT rule.enterprise1 FROM
-		EnterpriseExclusionRuleHB rule WHERE rule.enterprise2 = :enterprise ))
-		)               
-</query>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <class catalog="kinton" name="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB" table="physicalmachine">
+        <id name="idPhysicalMachine" type="java.lang.Integer">
+            <column name="idPhysicalMachine" />
+            <generator class="identity" />
+        </id>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB" lazy="false" fetch="select" name="rack">
+            <column name="idRack" not-null="false" />
+        </many-to-one>
+        <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB" fetch="select" name="dataCenter">
+            <column name="idDataCenter" not-null="true" />
+        </many-to-one>
+        <property name="name" type="string">
+            <column length="30" name="name" not-null="true" />
+        </property>
+        <property name="description" type="string">
+            <column length="100" name="description" />
+        </property>
+        <property name="ram" type="int">
+            <column name="ram" not-null="true" />
+        </property>
+        <property name="cpu" type="int">
+            <column name="cpu" not-null="true" />
+        </property>
+        <property name="cpuRatio" type="int">
+            <column name="cpuRatio" not-null="true" />
+        </property>
+        <property name="ramUsed" type="int">
+            <column name="ramUsed" not-null="true" />
+        </property>
+        <property name="cpuUsed" type="int">
+            <column name="cpuUsed" not-null="true" />
+        </property>
+        <property name="idState" type="int">
+            <column name="idState" not-null="true" />
+        </property>
+        <property name="vswitchName" type="string">
+            <column length="30" name="vswitchName" not-null="true" />
+        </property>
+        <property name="initiatorIQN" type="string">
+            <column length="256" name="initiatorIQN" />
+        </property>
+        <property name="ipmiIp" type="string">
+            <column name="ipmiIP" length="39" not-null="false" />
+        </property>
+        <property name="ipmiPort" type="int">
+            <column name="ipmiPort" not-null="false" />
+        </property>
+        <property name="ipmiUser" type="string">
+            <column name="ipmiUser" length="255" not-null="false" />
+        </property>
+        <property name="ipmiPassword" type="string">
+            <column name="ipmiPassword" length="255" not-null="false" />
+        </property>
+        <property name="idEnterprise" type="java.lang.Integer">
+            <column name="idEnterprise" not-null="false" />
+        </property>
+        <!--
+            one-to-one name="physicalMachine"
+            class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB"
+            cascade="all" fetch="select" property-ref="idPhysicalMachine" /
+        -->
+        <one-to-one name="hypervisor" class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB" property-ref="physicalMachine" lazy="false" cascade="all" />
+        <set name="datastoresHB" table="datastore_assignment" lazy="false" cascade="all">
+            <key>
+                <column name="idPhysicalMachine" not-null="true" />
+            </key>
+            <many-to-many column="idDatastore" class="com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB" />
+        </set>
+    </class>
+    <!--
+        PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES recovers only the ones
+        managed by AbiCloud
+    -->
+    <query name="PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES"> select count(vm) from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy inner join hy.virtualmachines vm where
+        pm.idPhysicalMachine = :idphysicalmachine and vm.idType = 1</query>
+    <query name="PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE"> select count(vm) from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB vapp, com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vdc,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeVirtualImageHB nvi, com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB n inner join pm.hypervisor hy
+        inner join hy.virtualmachines vm where pm.idPhysicalMachine = :idphysicalmachine and vm.idVm = nvi.virtualMachineHB.idVm AND n.idNode = nvi.idNode AND n.idVirtualApp = vapp.idVirtualApp AND
+        vdc.idVirtualDataCenter = vapp.virtualDataCenterHB.idVirtualDataCenter and vm.idType = 1 and vdc.enterpriseHB.idEnterprise != :identerprise</query>
+    <query name="PHYSICALMACHINE.GET_DEPLOYED_VIRTUAL_MACHINES"> select vm from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy inner join hy.virtualmachines vm where
+        pm.idPhysicalMachine = :idphysicalmachine</query>
+    <query name="PHYSICALMACHINE.GET_DEPLOYED_ABIQUO_VIRTUAL_MACHINES"> select vm from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy inner join hy.virtualmachines vm where vm.idType =
+        1 and pm.idPhysicalMachine = :idphysicalmachine</query>
+    <query name="PHYSICALMACHINE.GET_HYPERVISOR_IP"> select hy.ip from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy where pm.idPhysicalMachine = :idphysicalmachine
+    </query>
+    <query name="PHYSICALMACHINE.GET_ALL_HYPERVISOR_IP"> select hy.ip from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy</query>
+    <query name="PHYSICALMACHINE.GET_FROM_IP"> select pm from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy where hy.ip = :ipPhysicalMachine and pm.dataCenter
+        = :idDataCenter</query>
+    <query name="PHYSICALMACHINE.GET_NOT_MANAGED_VIRTUAL_MACHINES"> select vm from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor hy inner join hy.virtualmachines vm where
+        pm.idPhysicalMachine = :idphysicalmachine and vm.idType != 1</query>
+    <query name="PHYSICALMACHINE.GET_LIST_BY_DATASTORE"> select pm from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.datastoresHB ds where ds.idDatastore = :idDatastore</query>
+    <query name="PHYSICALMACHINE.GET_LIST_BY_RACK"> select distinct(pm) from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm where pm.rack.idRack = :idRack</query>
+    <query name="PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE"> select distinct(pm) from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm where pm.rack.idRack = :idRack and ( pm.name like :filterLike or pm
+        in ( Select pms from com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pms, com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB ent where
+        pms.idEnterprise = ent.idEnterprise and ent.name like :filterLike ) )</query>
+    <!-- allocator -->
+    <query name="PHYSICALMACHINE.FIND_BY_RACK_AND_VDC"> SELECT pm FROM com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm inner join pm.hypervisor h,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vdc WHERE h.type = vdc.hypervisorType AND pm.rack.idRack = :idRack AND vdc.idVirtualDataCenter =
+        :idVirtualDataCenter</query>
+    <query name="PHYSICALMACHINE.FIRST_PASS_QUERY"> SELECT pm FROM com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB pm,
+        com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualDataCenterHB vdc, com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB h JOIN pm.dataCenter dc
+        WHERE pm = h.physicalMachine AND h.type = vdc.hypervisorType AND dc.idDataCenter = vdc.idDataCenter AND pm.rack.idRack = :idRack AND vdc.idVirtualDataCenter = :idVirtualDataCenter AND
+        pm.idState = 3 AND pm.idPhysicalMachine in ( SELECT py.idPhysicalMachine FROM com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB datastore,
+        com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB py WHERE (datastore.size - datastore.usedSize) > :hdRequiredOnRepository AND py in elements(datastore.pmList)
+        AND datastore.size > datastore.usedSize ) AND pm.idPhysicalMachine not in ( SELECT DISTINCT vm.hypervisor.physicalMachine.idPhysicalMachine FROM VirtualmachineHB vm WHERE (vm.enterpriseHB IN(
+        SELECT rule.enterprise2 FROM EnterpriseExclusionRuleHB rule WHERE rule.enterprise1 = :enterprise )) OR (vm.enterpriseHB IN( SELECT rule.enterprise1 FROM EnterpriseExclusionRuleHB rule WHERE
+        rule.enterprise2 = :enterprise )) )</query>
 </hibernate-mapping>

@@ -32,6 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,6 +43,7 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -128,7 +130,9 @@ public class EnterpriseService extends DefaultApiService
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (securityService.isEnterpriseAdmin())
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTRPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -195,7 +199,12 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
 
-        userService.checkEnterpriseAdminCredentials(old);
+        Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !userEnt.equals(dto.getId()))
+        {
+            throw new AccessDeniedException("");
+        }
 
         if (dto.getName().isEmpty())
         {
@@ -253,8 +262,8 @@ public class EnterpriseService extends DefaultApiService
             for (Machine m : reservedMachines)
             {
                 releaseMachine(m.getId(), id);
-	    }
-	}
+            }
+        }
 
         if (!userService.enterpriseWithBlockedRoles(enterprise).isEmpty())
         {

@@ -44,6 +44,8 @@
     
     <mx:Script>
         <![CDATA[
+        	import mx.containers.Panel;
+        	import net.undf.abicloud.view.login.TokenLoader;
         	import net.undf.abicloud.utils.ScreenBlocker;
         	import net.undf.abicloud.events.SystemPropertiesEvent;
         	import net.undf.abicloud.business.managers.ConfigurationManager;
@@ -79,6 +81,15 @@
 
             //The Login view
             protected var loginView:net.undf.abicloud.view.login.Login;
+            
+            //The loading view
+            protected var tokenView:TokenLoader;
+            
+            //Token is used
+            private var _isTokenUsed:Boolean;
+            
+            //Token language
+            private var _tokenLanguage:String = "en_US";
 
             //The Main view, visible once user has logged in
             protected var mainView:Main;
@@ -96,9 +107,6 @@
             {
 				trace(net.undf.abicloud.view.main.components.RepeatedBackground);
 				
-//            	ThemeHandler.getInstance().addEventListener("onFontLoaded", onFontLoaded);
-            	
-//            	ThemeHandler.getInstance().changeSystemFont("arialComplete");
 				onFontLoaded(null);
             }
             
@@ -134,7 +142,7 @@
             	if( ThemeHandler.getInstance().isThemeLoaded("base") ){
             		cursorManager.removeBusyCursor();
             		
-            		prepareToShowLogin();
+            		checkSingleSignOn()
 
 	                application.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
 	
@@ -145,29 +153,28 @@
                		BindingUtils.bindSetter(trackChannel, AbiCloudModel.getInstance().configurationManager,
                                         "channelSet");
 
-					
-            		
             	}
             }
 
 			public function onThemeLoaded(evt:ThemeEvent):void{
-	                //Watching for when server is unreachable
-	                ChangeWatcher.watch(AbiCloudModel.getInstance().notificationManager, "isServerUnreachable", onServerIsUnreachable);
+                //Watching for when server is unreachable
+                ChangeWatcher.watch(AbiCloudModel.getInstance().notificationManager, "isServerUnreachable", onServerIsUnreachable);
 
-					themeComplete = true;
-					ThemeHandler.getInstance().refreshImages();
+				themeComplete = true;
+				ThemeHandler.getInstance().refreshImages();
 
 
-	        		StateIcons.refresh();
-	        		CommonAssets.refresh();
-	        		ThemeHandler.getInstance().refreshImages();
+        		StateIcons.refresh();
+        		CommonAssets.refresh();
+        		ThemeHandler.getInstance().refreshImages();
 
-					startMainView();
-            		Application.application.cursorManager.removeBusyCursor();
-            		ScreenBlocker.unblockScreen();
+				startMainView();
+        		Application.application.cursorManager.removeBusyCursor();
+        		ScreenBlocker.unblockScreen();
             }
             
             public function startMainView():void{
+            	
                 appContainer.removeAllChildren();
                 appContainer.styleName = "ApplicationPostLoginBackground";
                 appContainer.addChild(mainView);
@@ -182,10 +189,7 @@
             	//we call the autoLogin
             	 
             	if(channel){
-            		//We need to know when the user has logged in or logged out from the application
-                	BindingUtils.bindSetter(trackUserLogged, AbiCloudModel.getInstance().loginManager,
-                                        "userLogged"); 
-            		checkSingleSignOn();
+            		//checkSingleSignOn();
             	}
             }
 
@@ -194,7 +198,11 @@
                 //Retrieving the App version from the html file
                 AbiCloudModel.getInstance().appVersion = ExternalInterface.call("getAppShowVersion");
                 
-                AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showLoginform);
+                AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showRelatedFormAfterAuthenticationFail);
+                
+                //Creating the Main component
+                mainView = new Main();
+                loginView = new net.undf.abicloud.view.login.Login();
             }
 
             /**
@@ -219,16 +227,12 @@
             	}
  
                 if (logged){
-                	//GaB.Changed workflow to load first the systemproperties 
-//                	loadMainView();
 
-                // Load the System properties from server
+                    // Load the System properties from server
                 	AbiCloudModel.getInstance().configurationManager.addEventListener("systemPropertiesLoaded", onSystemPropertiesLoaded);
                 	
                 	dispatchEvent(new SystemPropertiesEvent(SystemPropertiesEvent.GET_SYSTEM_PROPERTIES));
                 	
-                }else if( logged == false){
-//                	prepareToShowLogin();
                 }
             }
 
@@ -254,24 +258,6 @@
             }
             
             
-			private function prepareToShowLogin():void{
-                //Creating Login component
-                loginView = new net.undf.abicloud.view.login.Login();
-                
-                loginView.setStyle("verticalCenter", 0);
-                loginView.setStyle("horizontalCenter", 0);
-                appContainer.styleName = "ApplicationLoginBackground";
-
-                //Creating the Main component
-                mainView = new Main();
-
-                appContainer.removeAllChildren();
-                appContainer.styleName = "ApplicationLoginBackground";
-
-                appContainer.addChild(loginView);
-                loginView.init();
-            }
-            
             private function checkSingleSignOn():void{ 
        	
 				var urlString:String = ExternalInterface.call('window.location.href.toString');
@@ -289,26 +275,39 @@
 				}
             	//we check if the selected language is passed in the URL
             	if(language){          		
-            		AbiCloudModel.getInstance().configurationManager.config.selectedLanguage = loginView.returnLanguage(language);
+            		this._tokenLanguage = loginView.returnLanguage(language);
             	}
             	//if the token exists, we try an automatic loggin
             	if(token){
+            		this._isTokenUsed = true;
             		singleSignOnlogin(token);
             	}else{
+            		this._isTokenUsed = false;
             		showLoginform();
             	}
             	
             }
             
-            private function showLoginform(event:Event = null):void{
-            	if(!appContainer.contains(loginView)){
-            		appContainer.addChild(loginView);
-                	loginView.init();
-                	if( AbiCloudModel.getInstance().configurationManager.config.selectedLanguage != -1){
-                		loginView.languageCombo.selectedIndex = AbiCloudModel.getInstance().configurationManager.config.selectedLanguage;
-                		loginView.onChangeLanguage();
-                	}
-            	}            	
+            private function showRelatedFormAfterAuthenticationFail(event:Event):void
+            {
+            	if(this._isTokenUsed)
+            	{
+            		showTokenLoader(event);
+            	}
+            }
+            
+            private function showLoginform():void{
+            	loginView = new net.undf.abicloud.view.login.Login();
+                
+                loginView.setStyle("verticalCenter", 0);
+                loginView.setStyle("horizontalCenter", 0);
+                appContainer.styleName = "ApplicationLoginBackground";
+
+                appContainer.removeAllChildren();
+                appContainer.styleName = "ApplicationLoginBackground";
+
+                appContainer.addChild(loginView);
+                loginView.init();      	
             }
             
             /**
@@ -316,14 +315,37 @@
              **/
             private function singleSignOnlogin(token:String):void
             {
+            	showTokenLoader();
+            	
             	var loginInfo:net.undf.abicloud.vo.authentication.Login = new net.undf.abicloud.vo.authentication.Login();
 				loginInfo.authToken = token;
-				//loginInfo.authToken.writeUTFBytes(token);	            
 	            loginInfo.locale = ResourceManager.getInstance().localeChain[0];
 	
 	            var event:LoginEvent = new LoginEvent(LoginEvent.LOGIN);
 	            event.login = loginInfo;
 	            dispatchEvent(event); 
+            }
+            
+            private function showTokenLoader(event:Event = null):void{
+            	
+            	ResourceManager.getInstance().localeChain = [ this._tokenLanguage, "en_US" ];
+
+                //Display the loading component
+                tokenView = new TokenLoader();
+                
+                tokenView.setStyle("verticalCenter", 0);
+                tokenView.setStyle("horizontalCenter", 0);
+                appContainer.styleName = "ApplicationLoginBackground";
+
+                appContainer.removeAllChildren();
+                appContainer.styleName = "ApplicationLoginBackground";
+                appContainer.addChild(tokenView);   
+                
+                //Show warning message in case of error
+                if(event){
+                	tokenView.showError();
+                }
+                    
             }
 
             private function loadStartUpAlert():void
@@ -347,7 +369,7 @@
                                                                                        "LABEL_WELCOME"),
                                                URLLoader(event.currentTarget).data.toString(),
                                                Alert.OK,
-                                               null);
+                                               null,true);
             }
 
             private function loadAlertFileIOErrorHandler(ioErrorEvent:IOErrorEvent):void

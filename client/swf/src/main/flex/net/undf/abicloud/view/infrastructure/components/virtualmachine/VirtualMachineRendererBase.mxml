@@ -33,6 +33,11 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.ChangeWatcher;
+        	import net.undf.abicloud.events.VirtualApplianceEvent;
+        	import mx.binding.utils.BindingUtils;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
@@ -67,11 +72,22 @@
             [Bindable]
             public var nodeName:String;
             
+            private var _stateChangeWatcher:ChangeWatcher;
+            
             private function onCreationComplete():void{
             	//Checking privilege
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
+            	
+            	this._stateChangeWatcher = BindingUtils.bindSetter(updateStateChanges,busyIcon,"visible");
+            }
+            
+            //Need to know when blocked the virtual machine editon button
+            private function updateStateChanges(id:int):void{
+            	var event:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE);
+            	event.virtualMachine = this._virtualMachine;
+            	AbiCloudModel.getInstance().virtualApplianceManager.dispatchEvent(event);
             }
 
             [Bindable]
@@ -85,11 +101,41 @@
 
             [Bindable]
             private var _editMode:Boolean;
+            
+            //Related Virtual Datacenter
+            [Bindable]
+            protected var _virtualDatacenter:VirtualDataCenter;
+            
+            public function set virtualDatacenter(value:VirtualDataCenter):void{
+            	this._virtualDatacenter = value;
+            }
+            
+            [Bindable(event="virtualDatacenterChange")]
+            public function get virtualDatacenter():VirtualDataCenter
+            {
+                return this._virtualDatacenter;
+            }
+            
+            //Related Virtual Datacenter
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+            
+            public function set virtualAppliance(value:VirtualAppliance):void{
+                this._virtualAppliance = value;
+            }
+            
+            [Bindable(event="virtualApplianceChange")]
+            public function get virtualAppliance():VirtualAppliance
+            {
+                return this._virtualAppliance;
+            }
 
 
             public function set virtualMachine(value:VirtualMachine):void
             {
                 var update:Boolean;
+                
+                
                 if(this._virtualMachine){
                 	if(this._virtualMachine.id != value.id){
 		                update = true;                		
@@ -627,7 +673,7 @@
                             <mx:NumericStepper id="cpuInput"
                                 width="75" height="17"
                                 fontSize="10"
-                                minimum="1" maximum="32" stepSize="1"
+                                minimum="1" maximum="1024" stepSize="1"
                                 includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
                                 visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
                         </mx:FormItem>
@@ -738,7 +784,9 @@
                     <!-- Networking -->
                     <virtualmachine:VirtualMachineNICListSmall id="virtualMachineNICSmall"
                         label="@Resource(bundle='Networking', key='LABEL_NETWORK')"
-                        virtualMachine="{_virtualMachine}"/>
+                        virtualDatacenter="{this._virtualDatacenter}"
+                        virtualAppliance="{this._virtualAppliance}"
+                        virtualMachine="{this._virtualMachine}"/>
                 </mx:ViewStack>
             </mx:HBox>
 
@@ -751,7 +799,6 @@
     	id="actionTool"
         width="57" height="100%"
         right="0"
-        verticalAlign="middle"
         verticalGap="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
         enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.id != State.IN_PROGRESS &amp;&amp; (! this._editMode)}">

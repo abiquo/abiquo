@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service id="remoting-service"
-    class="flex.messaging.services.RemotingService">
-
+<service id="remoting-service" class="flex.messaging.services.RemotingService">
     <adapters>
-        <adapter-definition id="java-object"
-            class="flex.messaging.services.remoting.adapters.JavaAdapter"
-            default="true"/>
+        <adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true" />
     </adapters>
-
     <default-channels>
-        <channel ref="my-amf"/>
+        <channel ref="my-amf" />
     </default-channels>
-
     <!-- ******** Main Services ******** -->
     <destination id="mainService">
         <properties>
@@ -19,10 +13,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** Infrastructure Services ******** -->
     <destination id="infrastructureService">
         <properties>
@@ -30,13 +24,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
-
-
-
     <!-- ******** Login Services ******** -->
     <destination id="loginService">
         <properties>
@@ -44,12 +35,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
-            <channel ref="my-secure-amf"/>
+            <channel ref="my-amf" />
+            <channel ref="my-secure-amf" />
         </channels>
     </destination>
-
-
     <!-- ******** User Services ******** -->
     <destination id="userService">
         <properties>
@@ -57,11 +46,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
-
     <!-- ******** Virtual Appliance Services ******** -->
     <destination id="virtualApplianceService">
         <properties>
@@ -69,11 +57,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
-
     <!-- ******** Virtual Image Services ******** -->
     <destination id="appsLibraryService">
         <properties>
@@ -81,10 +68,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** Non blocking Services ******** -->
     <destination id="nonBlockingService">
         <properties>
@@ -92,10 +79,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** Networking Services ******** -->
     <destination id="networkingService">
         <properties>
@@ -103,21 +90,20 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** ApplianceManager Service ********
-         <destination id="applianceManagerService">
-         <properties>
-         <source>com.abiquo.abiserver.services.flex.ApplianceManagerService</source>
-         <scope>application</scope>
-         </properties>
-         <channels>
-         <channel ref="my-amf"/>
-         </channels>
-         </destination> -->
-
+        <destination id="applianceManagerService">
+        <properties>
+        <source>com.abiquo.abiserver.services.flex.ApplianceManagerService</source>
+        <scope>application</scope>
+        </properties>
+        <channels>
+        <channel ref="my-amf"/>
+        </channels>
+        </destination> -->
     <!-- ******** Meter Service ******** -->
     <destination id="meterService">
         <properties>
@@ -125,10 +111,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** Configuration Service ******** -->
     <destination id="configurationService">
         <properties>
@@ -136,10 +122,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
     <!-- ******** Remote Services ******** -->
     <destination id="remoteServicesService">
         <properties>
@@ -147,10 +133,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-    
     <!-- ******** Datastore Services ******** -->
     <destination id="datastoreService">
         <properties>
@@ -158,10 +144,10 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-    
     <!-- ******** System properties Services ******** -->
     <destination id="systemPropertiesService">
         <properties>
@@ -169,8 +155,8 @@
             <scope>application</scope>
         </properties>
         <channels>
-            <channel ref="my-amf"/>
+            <channel ref="my-amf" />
+			<channel ref="my-secure-amf" />
         </channels>
     </destination>
-
 </service>

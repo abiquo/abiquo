@@ -23,10 +23,10 @@ package com.abiquo.server.core.scheduler;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.scheduler.FitPolicyRule.FitPolicy;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "fitPolicyRule")
 public class FitPolicyRuleDto extends SingleResourceTransportDto
 {
     private Integer id;
@@ -36,7 +36,7 @@ public class FitPolicyRuleDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -48,7 +48,7 @@ public class FitPolicyRuleDto extends SingleResourceTransportDto
         return fitPolicy;
     }
 
-    public void setFitPolicy(FitPolicy fitPolicy)
+    public void setFitPolicy(final FitPolicy fitPolicy)
     {
         this.fitPolicy = fitPolicy;
     }

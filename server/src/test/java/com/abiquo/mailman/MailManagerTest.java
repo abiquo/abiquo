@@ -21,12 +21,12 @@
 
 package com.abiquo.mailman;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
  * 
@@ -49,7 +49,6 @@ public class MailManagerTest extends MailTestBase
             to.add(mailTo);
             cc.add(mailCC);
             mail.send(mailUser, to, cc, mailSubject, mailBody);
-            assertTrue("Message sent", true);
         }
         catch (Exception e)
         {
@@ -69,7 +68,6 @@ public class MailManagerTest extends MailTestBase
         try
         {
             mail.send(mailUser, mailTo, mailCC, mailSubject, mailBody);
-            assertTrue("Message sent", true);
         }
         catch (Exception e)
         {

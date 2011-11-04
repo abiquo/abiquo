@@ -36,21 +36,9 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
-    }
-
-    private int idDataCenter;
-
-    public int getIdDataCenter()
-    {
-        return idDataCenter;
-    }
-
-    public void setIdDataCenter(int idDataCenter)
-    {
-        this.idDataCenter = idDataCenter;
     }
 
     private int idDcEnterpriseStats;
@@ -60,21 +48,9 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         return idDcEnterpriseStats;
     }
 
-    public void setIdDCEnterpriseStats(int idDcEnterpriseStats)
+    public void setIdDCEnterpriseStats(final int iddcEnterpriseStats)
     {
-        this.idDcEnterpriseStats = idDcEnterpriseStats;
-    }
-
-    private int idEnterprise;
-
-    public int getIdEnterprise()
-    {
-        return idEnterprise;
-    }
-
-    public void setIdEnterprise(int idEnterprise)
-    {
-        this.idEnterprise = idEnterprise;
+        this.idDcEnterpriseStats = iddcEnterpriseStats;
     }
 
     private long repositorySoftLimitsInMb;
@@ -85,7 +61,7 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         return repositorySoftLimitsInMb;
     }
 
-    public void setRepositorySoftLimitsInMb(long repositorySoftLimitsInMb)
+    public void setRepositorySoftLimitsInMb(final long repositorySoftLimitsInMb)
     {
         this.repositorySoftLimitsInMb = repositorySoftLimitsInMb;
     }
@@ -98,7 +74,7 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         return repositoryHardLimitsInMb;
     }
 
-    public void setRepositoryHardLimitsInMb(long repositoryHardLimitsInMb)
+    public void setRepositoryHardLimitsInMb(final long repositoryHardLimitsInMb)
     {
         this.repositoryHardLimitsInMb = repositoryHardLimitsInMb;
     }

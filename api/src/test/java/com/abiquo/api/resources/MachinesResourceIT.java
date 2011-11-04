@@ -37,13 +37,13 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.DatastoresDto;
 import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.Machine.State;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -66,10 +66,13 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
         machine = hypervisor.getMachine();
 
-        RemoteService rs =
+        RemoteService vsm =
             machine.getDatacenter().createRemoteService(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 "http://localhost:8080/fooo", 1);
-        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, rs);
+        RemoteService nc =
+            machine.getDatacenter().createRemoteService(RemoteServiceType.NODE_COLLECTOR,
+                "http://localhost:8080/bar", 1);
+        setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, vsm, nc);
 
         machinesURI =
             resolveMachinesURI(machine.getDatacenter().getId(), machine.getRack().getId());
@@ -90,6 +93,23 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
+    }
+
+    @Test
+    public void getMachinesListFiltered() throws Exception
+    {
+        String filter = "?filter=notMatches";
+        Resource resource = client.resource(machinesURI + filter);
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+
+        assertEquals(200, response.getStatusCode());
+
+        MachinesDto entity = response.getEntity(MachinesDto.class);
+
+        assertNotNull(entity);
+        assertNotNull(entity.getCollection());
+        assertEquals(entity.getCollection().size(), 0);
     }
 
     @Test
@@ -120,7 +140,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getName(), entityPost.getName());
         assertEquals(m.getDescription(), entityPost.getDescription());
         assertEquals(m.getVirtualCpuCores(), entityPost.getVirtualCpuCores());
-        assertEquals(m.getRealCpuCores(), entityPost.getRealCpuCores());
         assertEquals(m.getVirtualRamUsedInMb(), entityPost.getVirtualRamUsedInMb());
         assertEquals(m.getVirtualCpusUsed(), entityPost.getVirtualCpusUsed());
         assertEquals(m.getVirtualCpusPerCore(), entityPost.getVirtualCpusPerCore());
@@ -129,8 +148,6 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getIpService(), entityPost.getIpService());
         assertEquals(m.getUser(), entityPost.getUser());
         assertEquals(m.getPassword(), entityPost.getPassword());
-        assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
-        assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());
         assertEquals(entityPost.getVirtualSwitch(), m.getVirtualSwitch());
 
@@ -213,9 +230,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
     /**
      * Create multiple physical machines in the same time.
+     * 
      * @throws Exception
      */
-    @Test
+    // @Test
+    // TODO SCG Post for multiple machines must use a machine dto, not query params
     void createMultipleMachines() throws Exception
     {
         MachineDto m = getValidMachine();
@@ -228,19 +247,20 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
 
         MachineDto m2 = getValidMachine();
         IPAddress nextIP = IPAddress.newIPAddress(m2.getIp()).nextIPAddress();
+        m2.setName(m2.getName() + "-two");
         m2.setIp(nextIP.toString());
         m2.setIpService(nextIP.toString());
         DatastoreDto dto2 = new DatastoreDto();
         dto2.setName("datastoreNameTwo");
-        dto2.setRootPath("/");
-        dto2.setDirectory("var/lib/virt");
+        dto2.setRootPath("/another-root");
+        dto2.setDirectory("var/lib/virt2");
         dto2.setEnabled(Boolean.TRUE);
         m2.getDatastores().add(dto2);
 
         MachinesDto machinesDto = new MachinesDto();
         machinesDto.add(m);
         machinesDto.add(m2);
-        
+
         Resource resource = client.resource(machinesURI);
         ClientResponse response =
             resource.contentType(MachinesResource.MULTIPLE_MACHINES_MIME_TYPE)
@@ -291,20 +311,14 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         m.setName("machine_test");
         m.setDescription("machine_test_description");
 
-        m.setRealRamInMb(200);
         m.setVirtualRamInMb(2);
         m.setVirtualRamUsedInMb(4);
 
-        m.setRealCpuCores(200);
         m.setVirtualCpuCores(18);
-        m.setVirtualCpusPerCore(2);
+        m.setVirtualCpusPerCore(1);
         m.setVirtualCpusUsed(0);
 
-        m.setRealHardDiskInMb(200L);
-        m.setVirtualHardDiskInMb(100L);
-        m.setVirtualHardDiskUsedInMb(10L);
-
-        m.setState(State.STOPPED);
+        m.setState(MachineState.STOPPED);
         m.setVirtualSwitch("192.168.1.1");
 
         m.setType(HypervisorType.HYPERV_301);

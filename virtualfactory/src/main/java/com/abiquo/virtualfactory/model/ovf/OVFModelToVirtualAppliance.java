@@ -28,10 +28,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.sound.midi.SysexMessage;
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
@@ -229,11 +231,44 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             // AbsVirtualMachine newVirtualMachine =
             // VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
 
+            newConfig = removeStatefulFromExtendedList(newConfig);
+            
             // Apply the new configuration to the machine in the hypervisor
             virtualMachine.reconfigVM(newConfig);
         }
     }
+    
+    /**
+     * Due ABICLOUDPREMIUM-2129 an stateful virtual disk is also present in the list of auxiliary disks
+     * */
+    private VirtualMachineConfiguration removeStatefulFromExtendedList(VirtualMachineConfiguration conf)
+    {
+        VirtualDisk primary = conf.getVirtualDiskBase();
+        
+        if(primary.getDiskType() == VirtualDiskType.STANDARD)
+        {
+            return conf;
+        }
+        
+        final String primaryLocation = primary.getLocation();
+        
+        List<VirtualDisk> newList = new LinkedList<VirtualDisk>();
+        for(VirtualDisk vd : conf.getExtendedVirtualDiskList())
+        {
+            final String loc = vd.getLocation();
+            if(!primaryLocation.equalsIgnoreCase(loc))
+            {
+                newList.add(vd);
+            }
+        }
+        
+        conf.getExtendedVirtualDiskList().clear();
+        conf.getExtendedVirtualDiskList().addAll(newList);
+        
+        return conf;
+    }
 
+    
     private VirtualMachineConfiguration buildUpdateConfiguration(
         final VirtualMachineConfiguration vmConfig, final ContentType virtualSystem)
         throws SectionException
