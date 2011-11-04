@@ -723,14 +723,14 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("category", valueOf(categoryId));
 
-        return resolveURI(apiUri, "admin/config/categories/{category}", params);
+        return resolveURI(apiUri, "config/categories/{category}", params);
     }
 
     protected String createCategoriesLink()
     {
         Map<String, String> params = new HashMap<String, String>();
 
-        return resolveURI(apiUri, "admin/config/categories", params);
+        return resolveURI(apiUri, "config/categories", params);
     }
 
     protected String createUserLink(final int enterpriseId, final int userId)

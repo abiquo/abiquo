@@ -135,7 +135,8 @@ public class AppsLibraryService
     }
 
     private DataResult<List<VirtualImage>> fixVirtaulImageRepositroyAndEnterprise(
-        DataResult<List<VirtualImage>> images, Integer idEnterprise, Integer idRepository)
+        final DataResult<List<VirtualImage>> images, final Integer idEnterprise,
+        final Integer idRepository)
     {
         for (VirtualImage vimage : images.getData())
         {
@@ -406,7 +407,7 @@ public class AppsLibraryService
     }
 
     public DataResult<Category> createCategory(final UserSession userSession,
-        final Integer idEnterprise, final String categoryName)
+        final String categoryName)
     {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setName(categoryName);

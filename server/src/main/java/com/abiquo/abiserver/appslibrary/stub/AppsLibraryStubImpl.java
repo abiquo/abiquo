@@ -722,7 +722,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = post(uri, categoryDto);
 
-        if (response.getStatusCode() == 200)
+        if (response.getStatusCode() == 201)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexCategoryObject(response.getEntity(CategoryDto.class)));
