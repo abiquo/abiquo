@@ -363,6 +363,8 @@
         <xs:attribute name="name" type="xs:string" />
         <xs:attribute name="ip" type="xs:string" />
         <xs:attribute name="configureGateway" type="xs:boolean" />
+        <xs:attribute name="bootstrapConfigURI" type="xs:anyURI" />
+        <xs:attribute name="bootstrapConfigAuth" type="xs:string" />
         <xs:attribute ref="ovf:required" />
     </xs:complexType>
     <!-- end of custom network section -->

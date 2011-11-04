@@ -63,7 +63,7 @@ public class EnterprisesResourceIT extends AbstractJpaGeneratorIT
        
 
         Role r1 = roleGenerator.createInstanceSysAdmin();
-        Role r2 = roleGenerator.createInstanceEnterprisAdmin();
+        Role r2 = roleGenerator.createInstanceEnterpriseAdmin();
 
         User u1 = userGenerator.createInstance(e1, r1, "foo");
         User u2 = userGenerator.createInstance(e2, r2, "bar");

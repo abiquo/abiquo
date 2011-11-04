@@ -15,6 +15,18 @@
         <property name="isReservationRestricted" type="boolean">
             <column name="isReservationRestricted" />
         </property>
+        <property name="chefURL" type="string">
+            <column name="chef_url" length="255" not-null="false" />
+        </property>
+        <property name="chefValidator" type="string">
+            <column name="chef_validator" length="50" not-null="false" />
+        </property>
+        <property name="chefClientCertificate" type="string">
+            <column name="chef_client_certificate" sql-type="TEXT" not-null="false"/>
+        </property>
+        <property name="chefValidatorCertificate" type="string">
+            <column name="chef_validator_certificate" sql-type="TEXT" not-null="false" />
+        </property>
         <set name="dcLimits" cascade="all-delete-orphan" lazy="false">
             <key>
                 <column name="idEnterprise" not-null="true" />

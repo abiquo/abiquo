@@ -28,10 +28,9 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.tracer.hierarchy.AbstractHierarchyProcessor;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.infrastructure.Rack;
 
 /**
- * Processes the hierarchy to extract {@link Rack} data.
+ * Processes the hierarchy to extract {@link VirtualMachine} data.
  * 
  * @author ibarrera
  */
@@ -52,8 +51,8 @@ public class VirtualMachineProcessor extends AbstractHierarchyProcessor<VirtualM
     @Transactional(readOnly = true)
     protected String getResourceName(final String resourceId)
     {
-        VirtualMachine virtualMachine = dao.findVirtualMachineById(Integer.valueOf(resourceId));
-        return virtualMachine.getName();
+        VirtualMachine vm = dao.findVirtualMachineById(Integer.valueOf(resourceId));
+        return vm.getName();
     }
 
 }

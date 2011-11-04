@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
 
 @XmlRootElement(name = "virtualMachine")
 public class VirtualMachineDto extends SingleResourceTransportDto implements
@@ -218,6 +219,18 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         {
             return 1;
         }
+    }
+
+    private RunlistElementsDto runlist;
+
+    public RunlistElementsDto getRunlist()
+    {
+        return runlist;
+    }
+
+    public void setRunlist(final RunlistElementsDto runlist)
+    {
+        this.runlist = runlist;
     }
 
 }

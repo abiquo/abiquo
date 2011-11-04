@@ -568,6 +568,26 @@ public class VirtualImage extends DefaultEntityBase
         this.repository = repository;
     }
 
+    public final static String CHEF_PROPERTY = "chefEnabled";
+
+    public final static String CHEF_COLUMN = "chefEnabled";
+
+    private final static boolean CHEF_REQUIRED = true;
+
+    @Column(name = CHEF_COLUMN, nullable = false)
+    private boolean chefEnabled = false;
+
+    @Required(value = CHEF_REQUIRED)
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
+    }
+
     public void setRequirements(final int cpu, final int ram, final long hd)
     {
         setCpuRequired(cpu);

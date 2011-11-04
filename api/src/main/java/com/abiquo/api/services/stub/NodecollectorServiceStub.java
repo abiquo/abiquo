@@ -487,6 +487,7 @@ public class NodecollectorServiceStub extends DefaultApiService
             vm.setRam(new Long(vs.getRam() / MEGABYTE).intValue());
             vm.setVdrpPort(new Long(vs.getVport()).intValue());
             vm.setState(VirtualMachineState.valueOf(vs.getStatus().value()));
+            vm.setDisks(new ArrayList<DiskManagement>());
             for (ResourceType rt : vs.getResources())
             {
                 if (rt.getLabel().equals("SYSTEM DISK"))

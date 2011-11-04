@@ -57,6 +57,9 @@
         <property name="costCode" type="string">
             <column length="50" name="cost_code" not-null="false" />
         </property>
+	<property name="chefEnabled" type="boolean">
+            <column name="chefEnabled" />
+	</property>
         <property name="type" type="DiskFormatType" not-null="true" />
         <!-- RELATIONS -->
         <many-to-one class="RepositoryHB" name="repository" fetch="select" lazy="false">

@@ -34,16 +34,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -452,6 +455,27 @@ public class VirtualMachine extends DefaultEntityBase
         this.user = user;
     }
 
+    public final static String SUB_STATE_PROPERTY = "subState";
+
+    private final static boolean SUB_STATE_REQUIRED = false;
+
+    private final static String SUB_STATE_COLUMN = "subState";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    private State subState;
+
+    @Required(value = SUB_STATE_REQUIRED)
+    public State getSubState()
+    {
+        return this.subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
+
     //
     public final static String STATE_PROPERTY = "state";
 
@@ -505,22 +529,57 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of disks */
-    @OneToMany(cascade = CascadeType.ALL, targetEntity = DiskManagement.class)
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = DiskManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
-    private List<DiskManagement> disks = new ArrayList<DiskManagement>();
+    private List<DiskManagement> disks;
 
     public List<DiskManagement> getDisks()
     {
-        if (disks == null)
-        {
-            disks = new ArrayList<DiskManagement>();
-        }
         return disks;
     }
 
     public void setDisks(final List<DiskManagement> disks)
     {
         this.disks = disks;
+    }
+
+    public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
+
+    public static final String CHEF_RUNLIST_PROPERTY = "runlist";
+
+    static final String CHEF_RUNLIST_ID_COLUMN = "id";
+
+    static final String VIRTUALMACHINE_ID_COLUMN = "idVM";
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = CHEF_RUNLIST_TABLE, joinColumns = {@JoinColumn(name = CHEF_RUNLIST_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = VIRTUALMACHINE_ID_COLUMN)})
+    @OrderBy(RunlistElement.PRIORITY_PROPERTY + " ASC")
+    private List<RunlistElement> runlist = new ArrayList<RunlistElement>();
+
+    public List<RunlistElement> getRunlist()
+    {
+        if (runlist == null)
+        {
+            runlist = new ArrayList<RunlistElement>();
+        }
+        return runlist;
+    }
+
+    /* package */void addRunlistElement(final RunlistElement element)
+    {
+        this.runlist.add(element);
+    }
+
+    /* package */void removeRunlistElement(final RunlistElement element)
+    {
+        this.runlist.remove(element);
+    }
+
+    /* ******************* Helper methods ******************* */
+
+    public boolean isChefEnabled()
+    {
+        return getVirtualImage().isChefEnabled() && getEnterprise().isChefEnabled();
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,

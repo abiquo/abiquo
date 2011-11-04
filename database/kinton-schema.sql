@@ -284,6 +284,11 @@ CREATE TABLE  `kinton`.`enterprise` (
   `repositoryHard` bigint(20)  NOT NULL default 0,
   `vlanHard` bigint(20)  NOT NULL default 0,
   `publicIPHard` bigint(20)  NOT NULL default 0,
+  `chef_url` varchar(255) default NULL,
+  `chef_client` varchar(50) default NULL,
+  `chef_validator` varchar(50) default NULL,
+  `chef_client_certificate` text default NULL,
+  `chef_validator_certificate` text default NULL,
   `isReservationRestricted` tinyint(1) default '0',
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idEnterprise`)
@@ -295,7 +300,7 @@ CREATE TABLE  `kinton`.`enterprise` (
 
 /*!40000 ALTER TABLE `enterprise` DISABLE KEYS */;
 LOCK TABLES `enterprise` WRITE;
-INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 1);
+INSERT INTO `kinton`.`enterprise` VALUES  (1,'Abiquo',0,0,0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,NULL,NULL,NULL,0,1);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `enterprise` ENABLE KEYS */;
 
@@ -1059,6 +1064,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `ovfid` varchar(255),
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
+  `chefEnabled` boolean NOT NULL default false,
   `cost_code` varchar(50) default NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
@@ -1100,6 +1106,7 @@ CREATE TABLE  `kinton`.`virtualmachine` (
   `vdrpPort` int(5) unsigned default NULL,
   `vdrpIP` varchar(39) default NULL,
   `state` varchar(50) NOT NULL,
+  `subState` varchar(50) DEFAULT NULL,
   `high_disponibility` int(1) unsigned NOT NULL,
   `idConversion` INT(10) UNSIGNED,
   `idType` INT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 - NOT MANAGED BY ABICLOUD  1 - MANAGED BY ABICLOUD',
@@ -1133,6 +1140,21 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `virtualmachine` ENABLE KEYS */;
 
 --
+-- Definition of table `kinton`.`virtualmachinetrackedstate`
+-- This table is kept only for tracking VM states and updating statistics/accounting information
+--
+DROP TABLE IF EXISTS `kinton`.`virtualmachinetrackedstate`;
+CREATE TABLE  `kinton`.`virtualmachinetrackedstate` (
+  `idVM` int(10) unsigned NOT NULL,
+  `previousState` varchar(50) NOT NULL,
+  PRIMARY KEY  (`idVM`),
+  KEY `VirtualMachineTrackedState_FK1` (`idVM`),
+  CONSTRAINT `VirtualMachineTrackedState_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+  )
+ ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
 -- Definition of table `kinton`.`remote_service`
 --
 
@@ -1148,6 +1170,23 @@ CREATE TABLE  `kinton`.`remote_service` (
   KEY `idDatecenter_FK` (`idDataCenter`),
   CONSTRAINT `idDatecenter_FK` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`chef_runlist`
+--
+
+DROP TABLE IF EXISTS `kinton`.`chef_runlist`;
+CREATE TABLE  `kinton`.`chef_runlist` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `idVM` int(10) unsigned NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255),
+  `priority` int(10) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY  (`id`),
+  KEY `chef_runlist_FK1` (`idVM`),
+  CONSTRAINT `chef_runlist_FK1` FOREIGN KEY (`idVM`) REFERENCES `virtualmachine` (`idVM`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 /**
@@ -1968,7 +2007,15 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`enterprise_theme` (
   CONSTRAINT `THEME_FK1` FOREIGN KEY (`idEnterprise`) REFERENCES `enterprise` (`idEnterprise`) ON DELETE CASCADE
 )ENGINE = InnoDB DEFAULT CHARSET=utf8;
 
-
+--
+-- ONETIMETOKEN TABLE
+--
+DROP  TABLE IF EXISTS `kinton`.`one_time_token`;
+CREATE  TABLE `kinton`.`one_time_token` (`idOneTimeTokenSession` int(3) unsigned NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(128) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idOneTimeTokenSession`)) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+ 
 --
 -- STATISTICS MODULE TRIGGERS
 --
@@ -1988,7 +2035,6 @@ DROP TRIGGER IF EXISTS `kinton`.`update_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_datastore_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_datastore_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_datastore_update_stats`;
-DROP TRIGGER IF EXISTS `kinton`.`delete_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`update_virtualmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_nodevirtualimage_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_nodevirtualimage_update_stats`;
@@ -2085,7 +2131,7 @@ CREATE TRIGGER `kinton`.`update_virtualapp_update_stats` AFTER UPDATE ON `kinton
       AND v.idVM = nvi.idVM
       AND n.idNode = nvi.idNode
       AND n.idVirtualApp = NEW.idVirtualApp
-      AND v.state != "NOT_DEPLOYED" AND v.state != "UNKNOWN" AND v.state != "CRASHED"
+      AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
       and v.idType = 1;
       UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated- numVMachinesCreated WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
       UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+ numVMachinesCreated WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
@@ -2405,24 +2451,61 @@ END
 --
 -- ******************************************************************************************
 -- Description: 
+--  * Keeps track of previous states for virtualmachines
+--
+-- ******************************************************************************************
+|
+CREATE TRIGGER `kinton`.`create_virtualmachine_update_stats` AFTER INSERT ON `kinton`.`virtualmachine`
+    FOR EACH ROW BEGIN
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+		INSERT INTO virtualmachinetrackedstate (idVM) VALUES (NEW.idVM);
+	END IF;
+    END;
+--
+|
+--
+-- ******************************************************************************************
+-- Description: 
+--  * Keeps track of previous states for virtualmachines
+--
+-- ******************************************************************************************	
+CREATE TRIGGER `kinton`.`delete_virtualmachine_update_stats` AFTER DELETE ON `kinton`.`virtualmachine`
+    FOR EACH ROW BEGIN
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+		DELETE FROM virtualmachinetrackedstate WHERE idVM = OLD.idVM;
+	END IF;
+    END;
+--
+|
+--	
+-- ******************************************************************************************
+-- Description: 
 --  * Updates resources (cpu, ram, hd) used by Enterprise
 --  * Updates vMachinesRunning for cloud Usage Stats
---  * TODO: Updates vmCreated for enterprise stats (vapp, vdc)
+--  * Keeps track of previous states for virtualmachines
 --
 -- Fires: ON UPDATE IGNORE an virtualmachine for the virtualmachine table
 --
 --
 -- ******************************************************************************************
-|
 CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `kinton`.`virtualmachine`
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE costCodeObj VARCHAR(50);
+	DECLARE previousState VARCHAR(50);
 	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
+	-- We always store previous state when starting a transaction
+	IF NEW.state != OLD.state AND NEW.state='LOCKED' THEN
+		UPDATE virtualmachinetrackedstate SET previousState=OLD.state WHERE idVM=NEW.idVM;
+	END IF;
+	--
+	SELECT vmts.previousState INTO previousState
+        FROM virtualmachinetrackedstate vmts
+	WHERE vmts.idVM = NEW.idVM;
         --  Updating enterprise_resources_stats: VCPU Used, Memory Used, Local Storage Used
         IF OLD.idHypervisor IS NULL OR (OLD.idHypervisor != NEW.idHypervisor) THEN
             SELECT pm.idDataCenter INTO idDataCenterObj
@@ -2441,7 +2524,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         WHERE NEW.idVM = nvi.idVM
         AND nvi.idNode = n.idNode
         AND vapp.idVirtualApp = n.idVirtualApp;   
-
+	--
 	IF NEW.idType = 1 AND OLD.idType = 0 THEN
 		-- Imported !!!
 		UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
@@ -2450,7 +2533,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-		IF NEW.state = "RUNNING" THEN 	
+		IF NEW.state = "ON" AND previousState != "ON" THEN 	
 			UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
 		        WHERE idVirtualApp = idVirtualAppObj;
 		        UPDATE IGNORE vdc_enterprise_stats SET vmActive = vmActive+1
@@ -2473,8 +2556,9 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
 		            localStorageUsed = localStorageUsed + NEW.hd
 		        WHERE idVirtualDataCenter = idVirtualDataCenterObj;	
 		END IF;
+	-- Main case: an imported VM changes its state (from LOCKED to ...)
 	ELSEIF NEW.idType = 1 AND (NEW.state != OLD.state) THEN
-            IF NEW.state = "RUNNING" THEN 
+            IF NEW.state = "ON" AND previousState != "ON" THEN 
                 -- New Active
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
                 WHERE idVirtualApp = idVirtualAppObj;
@@ -2498,7 +2582,8 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                     localStorageUsed = localStorageUsed + NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            ELSEIF OLD.state = "RUNNING" THEN           
+            -- ELSEIF OLD.state = "ON" THEN           * This has to change, OLD.state is always LOCKED
+		ELSEIF (NEW.state = "OFF" AND previousState != "OFF") OR (NEW.state = "PAUSED" AND previousState != "OFF") THEN
                 -- Active Out
                 UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
                 WHERE idVirtualApp = idVirtualAppObj;
@@ -2522,8 +2607,8 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                     localStorageUsed = localStorageUsed - NEW.hd
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj; 
 -- cloud_usage_stats Used Stats (vCpuUsed, vMemoryUsed, vStorageUsed) are updated from update_physical_machine_update_stats trigger
-            END IF;     
-            IF OLD.state = "NOT_DEPLOYED" OR OLD.state = "UNKNOWN"  THEN -- OR OLD.idType != NEW.idType
+            END IF;     	    
+            IF NEW.state = "CONFIGURED" AND previousState != "CONFIGURED" THEN -- OR OLD.idType != NEW.idType
                 -- VMachine Deployed or VMachine imported
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
                 WHERE idDataCenter = idDataCenterObj;
@@ -2531,8 +2616,8 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
                 WHERE idVirtualApp = idVirtualAppObj;
                 UPDATE IGNORE vdc_enterprise_stats SET vmCreated = vmCreated+1
                 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
-            ELSEIF NEW.state = "NOT_DEPLOYED" OR NEW.state = "CRASHED" OR (NEW.state = "UNKNOWN" AND OLD.state != "CRASHED") THEN 
-                -- VMachine Undeployed
+            ELSEIF NEW.state = "NOT_ALLOCATED"  AND previousState != "NOT_ALLOCATED" THEN 
+                -- VMachine was deconfigured (still allocated)
                 UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
                 WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
@@ -2548,7 +2633,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         -- Register Accounting Events
         IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingVMRegisterEvents' ) THEN
        		 IF EXISTS(SELECT * FROM virtualimage vi WHERE vi.idImage=NEW.idImage AND vi.idRepository IS NOT NULL) THEN 
-	          CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, NEW.ram, NEW.cpu, NEW.hd, costCodeObj);
+	          CALL AccountingVMRegisterEvents(NEW.idVM, NEW.idType, OLD.state, NEW.state, previousState, NEW.ram, NEW.cpu, NEW.hd, costCodeObj);
        		 END IF;              
 	    END IF;
       END IF;
@@ -2583,7 +2668,7 @@ CREATE TRIGGER `kinton`.`create_nodevirtualimage_update_stats` AFTER INSERT ON `
       AND n.idVirtualApp = vapp.idVirtualApp;
       SELECT vm.state, vm.idType INTO state, type FROM virtualmachine vm WHERE vm.idVM = NEW.idVM;
       --
-      IF state != "NOT_DEPLOYED" AND state != "UNKNOWN" AND state != "CRASHED"  AND type = 1 THEN
+      IF state != "NOT_ALLOCATED" AND state != "UNKNOWN" AND type = 1 THEN
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal+1
         WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated+1
@@ -2592,7 +2677,7 @@ CREATE TRIGGER `kinton`.`create_nodevirtualimage_update_stats` AFTER INSERT ON `
         WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
       --
-      IF state = "RUNNING" AND type = 1 THEN
+      IF state = "ON" AND type = 1 THEN
         UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning+1
         WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive+1
@@ -2632,7 +2717,7 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
     SELECT state, idType INTO oldState, type FROM virtualmachine WHERE idVM = OLD.idVM;
     --
     IF type = 1 THEN
-      IF oldState != "NOT_DEPLOYED" AND oldState != "UNKNOWN" AND oldState != "CRASHED" THEN
+      IF oldState != "NOT_ALLOCATED" AND oldState != "UNKNOWN" THEN
         UPDATE IGNORE cloud_usage_stats SET vMachinesTotal = vMachinesTotal-1
           WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmCreated = vmCreated-1
@@ -2641,7 +2726,7 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
           WHERE idVirtualDataCenter = idVirtualDataCenterObj;
       END IF;
       --
-      IF oldState = "RUNNING" THEN
+      IF oldState = "ON" THEN
         UPDATE IGNORE cloud_usage_stats SET vMachinesRunning = vMachinesRunning-1
         WHERE idDataCenter = idDataCenterObj;
         UPDATE IGNORE vapp_enterprise_stats SET vmActive = vmActive-1
@@ -3718,7 +3803,7 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     AND vapp.idVirtualApp = n.idVirtualApp
     AND vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
     AND vdc.idDataCenter = idDataCenterObj
-    AND v.state != "NOT_DEPLOYED" AND v.state != "UNKNOWN" AND v.state != "CRASHED"
+    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN" 
     and v.idType = 1;
     --
     SELECT  IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vMachinesRunning
@@ -3728,10 +3813,10 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     AND vapp.idVirtualApp = n.idVirtualApp
     AND vdc.idVirtualDataCenter = vapp.idVirtualDataCenter
     AND vdc.idDataCenter = idDataCenterObj
-    AND v.state = "RUNNING"
+    AND v.state = "ON"
     and v.idType = 1;
     --
-    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)) INTO vCpuTotal, vMemoryTotal, vCpuUsed, vMemoryUsed
+    SELECT IF (SUM(cpu*cpuRatio) IS NULL,0,SUM(cpu*cpuRatio)), IF (SUM(ram) IS NULL,0,SUM(ram)), IF (SUM(hd) IS NULL,0,SUM(hd)) , IF (SUM(cpuUsed) IS NULL,0,SUM(cpuUsed)), IF (SUM(ramUsed) IS NULL,0,SUM(ramUsed)), IF (SUM(hdUsed) IS NULL,0,SUM(hdUsed)) INTO vCpuTotal, vMemoryTotal, vStorageTotal, vCpuUsed, vMemoryUsed, vStorageUsed
     FROM physicalmachine
     WHERE idDataCenter = idDataCenterObj
     AND idState = 3; 
@@ -3810,6 +3895,7 @@ CREATE PROCEDURE `kinton`.CalculateCloudUsageStats()
     vlanUsed,
     numUsersCreated,numVDCCreated,numEnterprisesCreated);
    END;
+
 |
 --
 --
@@ -3857,7 +3943,7 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
     --
     SELECT IF (SUM(vm.cpu) IS NULL, 0, SUM(vm.cpu)), IF (SUM(vm.ram) IS NULL, 0, SUM(vm.ram)), IF (SUM(vm.hd) IS NULL, 0, SUM(vm.hd)) INTO vCpuUsed, memoryUsed, localStorageUsed
     FROM virtualmachine vm
-    WHERE vm.state = "RUNNING"
+    WHERE vm.state = "ON"
     AND vm.idType = 1
     AND vm.idEnterprise = idEnterpriseObj;
     --
@@ -3957,7 +4043,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj
-    AND v.state != "NOT_DEPLOYED" AND v.state != "UNKNOWN" AND v.state != "CRASHED";
+    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN";
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmActive
     FROM nodevirtualimage nvi, virtualmachine v, node n, virtualapp vapp
@@ -3966,7 +4052,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj
-    AND v.state = "RUNNING";
+    AND v.state = "ON";
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volCreated
     FROM rasd_management rm
@@ -3995,7 +4081,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
     WHERE vm.idVM = nvi.idVM
     AND nvi.idNode = n.idNode
     AND vapp.idVirtualApp = n.idVirtualApp
-    AND vm.state = "RUNNING"
+    AND vm.state = "ON"
     AND vm.idType = 1
     AND vapp.idVirtualDataCenter = idVirtualDataCenterObj;
     --
@@ -4086,7 +4172,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualApp = idVirtualAppObj
-    AND v.state != "NOT_DEPLOYED" AND v.state != "UNKNOWN" AND v.state != "CRASHED"
+    AND v.state != "NOT_ALLOCATED" AND v.state != "UNKNOWN"
     and v.idType = 1;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO vmActive
@@ -4096,7 +4182,7 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
     AND n.idNode = nvi.idNode
     AND n.idVirtualApp = vapp.idVirtualApp
     AND vapp.idVirtualApp = idVirtualAppObj
-    AND v.state = "RUNNING"
+    AND v.state = "ON"
     and v.idType = 1;
     --
     SELECT IF (COUNT(*) IS NULL, 0, COUNT(*)) INTO volAssociated

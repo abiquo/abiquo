@@ -652,6 +652,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Registering the machine VSM");
         // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         List<RemoteService> services =
             infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
@@ -680,7 +681,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Tasks needs the definition of the virtual machine
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
         // so Task 1 and its job would be 1.1, another 1.2
@@ -895,9 +897,10 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (i.getConfigureGateway())
             {
-                logger.debug("Network configuration with gateway");
                 // This interface is the one that configures the Network parameters.
                 // We force the forward mode to BRIDGED
+                logger.debug("Network configuration with gateway");
+
                 NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
                 vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor()
                     .getMachine().getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork()
@@ -916,6 +919,14 @@ public class VirtualMachineService extends DefaultApiService
                 null, null, null, null, null, null, null,
                 Integer.valueOf(i.getRasd().getConfigurationName()));
         }
+    }
+
+    protected void bootstrapConfiguration(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder vmDesc, final VirtualDatacenter virtualDatacenter,
+        final VirtualAppliance virtualAppliance)
+    {
+        // PREMIUM
+        logger.debug("bootstrap community implementation");
     }
 
     /**
@@ -1072,12 +1083,14 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Remote services are ok!");
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
 
         DatacenterTasks deployTask = new DatacenterTasks();
 
         // Tasks needs the definition of the virtual machine
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
         // so Task 1 and its job would be 1.1, another 1.2
@@ -1233,6 +1246,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Registering the machine VSM");
         // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         List<RemoteService> services =
             infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
@@ -1263,7 +1277,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Tasks needs the definition of the virtual machine
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         logger.debug("Configure the hypervisor connection");
         // Hypervisor connection related configuration
@@ -1331,7 +1346,8 @@ public class VirtualMachineService extends DefaultApiService
      * @return VirtualMachineDescriptionBuilder
      */
     private VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
-        final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter)
+        final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter,
+        final VirtualAppliance virtualAppliance)
     {
         VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
         logger.debug("Creating disk information");
@@ -1346,6 +1362,11 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Creating the network related configuration");
         // Network related configuration
         vnicDefinitionConfiguration(virtualMachine, vmDesc);
+        logger.debug("Network configuration done!");
+
+        logger.debug("Creating the bootstrap configuration");
+        // Network related configuration
+        bootstrapConfiguration(virtualMachine, vmDesc, virtualDatacenter, virtualAppliance);
         logger.debug("Network configuration done!");
 
         logger.debug("Configure secondary iSCSI volumes");
@@ -1390,8 +1411,10 @@ public class VirtualMachineService extends DefaultApiService
         blockVirtualMachine(virtualMachine);
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         VirtualMachineDescriptionBuilder machineDescriptionBuilder =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
         DatacenterTasks deployTask = new DatacenterTasks();
 
         // The id identifies this job and is neede to create the ids of the items. It is

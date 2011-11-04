@@ -112,8 +112,7 @@ public class VirtualMachinesResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
 
-        VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+        VirtualMachineDto vmDto = VirtualMachineResource.createTransferObject(vm, restBuilder);
 
         Hypervisor hypervisor = vm.getHypervisor();
         Machine machine = hypervisor == null ? null : hypervisor.getMachine();
@@ -145,9 +144,9 @@ public class VirtualMachinesResource extends AbstractResource
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, v);
-        vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId()));
-
+            VirtualMachineResource.createTransferObject(v, vdcId, vappId, restBuilder);
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId(),
+            v.isChefEnabled()));
         return vmDto;
     }
 
@@ -155,7 +154,7 @@ public class VirtualMachinesResource extends AbstractResource
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         VirtualMachineDto vmDto =
-            ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
+            VirtualMachineResource.createTransferObject(vm, vdcId, vappId, restBuilder);
         Hypervisor hypervisor = vm.getHypervisor();
         Machine machine = hypervisor == null ? null : hypervisor.getMachine();
         Rack rack = machine == null ? null : machine.getRack();
@@ -166,7 +165,8 @@ public class VirtualMachinesResource extends AbstractResource
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, vm.getId(),
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
-            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
+            vm.isChefEnabled()));
 
         return vmDto;
     }
