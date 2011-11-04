@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -37,11 +37,11 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
-public abstract class EventingProcessorTestBase extends AbstractGeneratorTest
+public abstract class VSMEventingProcessorTestBase extends AbstractUnitTest
 {
-    protected abstract EventingProcessor getEventingProcessor(EntityManager em);
+    protected abstract VSMEventingProcessor getEventingProcessor(EntityManager em);
 
-    protected void runTestStage(VirtualMachineStage stage)
+    protected void assertStage(VirtualMachineStage stage)
     {
         // List of entities to persist
         List<Object> entitiesToPersist = new ArrayList<Object>();
@@ -71,6 +71,7 @@ public abstract class EventingProcessorTestBase extends AbstractGeneratorTest
         vm.setEnterprise(enterprise);
         vm.setName(stage.getName());
         vm.setState(stage.getState());
+        vm.getVirtualImage().setIdCategory(null); // TODO remove
 
         vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
         entitiesToPersist.add(vm);
@@ -86,7 +87,7 @@ public abstract class EventingProcessorTestBase extends AbstractGeneratorTest
 
         // Testing stuff
         EntityManager manager = getEntityManagerWithAnActiveTransaction();
-        EventingProcessor processor = getEventingProcessor(manager);
+        VSMEventingProcessor processor = getEventingProcessor(manager);
 
         try
         {
