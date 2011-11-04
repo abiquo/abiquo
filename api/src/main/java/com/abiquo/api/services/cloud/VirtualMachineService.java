@@ -1365,9 +1365,8 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Network configuration done!");
 
         logger.debug("Creating the bootstrap configuration");
-        // Network related configuration
         bootstrapConfiguration(virtualMachine, vmDesc, virtualDatacenter, virtualAppliance);
-        logger.debug("Network configuration done!");
+        logger.debug("Bootstrap configuration done!");
 
         logger.debug("Configure secondary iSCSI volumes");
         secondaryScsiDefinition(virtualMachine, vmDesc);
