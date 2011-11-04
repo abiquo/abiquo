@@ -27,6 +27,7 @@ import static com.abiquo.server.core.cloud.VirtualMachineState.NOT_ALLOCATED;
 import static com.abiquo.server.core.cloud.VirtualMachineState.OFF;
 import static com.abiquo.server.core.cloud.VirtualMachineState.ON;
 import static com.abiquo.server.core.cloud.VirtualMachineState.PAUSED;
+import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
 import static com.abiquo.vsm.events.VMEventType.CREATED;
 import static com.abiquo.vsm.events.VMEventType.DESTROYED;
 import static com.abiquo.vsm.events.VMEventType.MOVED;
@@ -47,6 +48,7 @@ import com.abiquo.vsm.events.VMEventType;
  * 
  * @author eruiz@abiquo.com
  */
+@Test(groups = BASIC_UNIT_TESTS)
 public class VSMEventingProcessorTest extends VSMEventingProcessorTestBase
 {
     private static final String INVALID_EVENT = "INVALID_EVENT";
