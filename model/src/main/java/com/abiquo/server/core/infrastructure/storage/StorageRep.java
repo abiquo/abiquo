@@ -30,11 +30,12 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import com.abiquo.server.core.cloud.VirtualMachine;
+
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -126,7 +127,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.findById(volumeId);
     }
-    
+
     public VolumeManagement findVolumeByRasd(final Rasd rasd)
     {
         return volumeDAO.getVolumeByRasd(rasd);
@@ -145,6 +146,12 @@ public class StorageRep extends DefaultRepBase
     public List<StoragePool> getPoolsByDevice(final Integer deviceId)
     {
         return poolDAO.getPoolsByStorageDevice(deviceId);
+    }
+
+    public List<VolumeManagement> getVolumesAssociatedToVirtualMachine(final VirtualDatacenter vdc,
+        final VirtualMachine vm, final FilterOptions filterOptions) throws Exception
+    {
+        return volumeDAO.getVolumesAssociatedToVirtualMachine(vdc, vm, filterOptions);
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
@@ -173,7 +180,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
     }
-    
+
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
         return volumeDAO.getVolumeFromImage(idImage);
@@ -283,13 +290,13 @@ public class StorageRep extends DefaultRepBase
     {
         volumeDAO.flush();
     }
-    
+
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm);
     }
 
-    public void insertInitiatorMapping(InitiatorMapping imapping)
+    public void insertInitiatorMapping(final InitiatorMapping imapping)
     {
         initiatorMappingDAO.persist(imapping);
     }
