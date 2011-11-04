@@ -72,6 +72,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         // XXX Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
+        vi.setIdCategory(null);
         // XXX vi.setCategory(category);
 
         return vi;
@@ -85,6 +86,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         // XXX Category category = categoryGenerator.createUniqueInstance();
 
         VirtualImage vi = new VirtualImage(enterprise);
+        vi.setIdCategory(null);
         // XXX vi.setCategory(category);
 
         return vi;
@@ -102,6 +104,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         vimage.setRamRequired(ramRequired);
         vimage.setHdRequiredInBytes(hdRequired);
         vimage.setRepository(repository);
+        vimage.setIdCategory(null);
 
         String ovfid =
             newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
