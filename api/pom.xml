@@ -355,6 +355,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
+                        <rs.basedir>${basedir}</rs.basedir>
                         <db.create>${basedir}/../database/test/kinton-schema-test.sql</db.create>
                         <db.insert>${basedir}/src/test/resources/data/execute_test_inserts.sql</db.insert>
                         <db.delete>${basedir}/src/test/resources/data/execute_test_deletes.sql</db.delete>
@@ -364,7 +365,6 @@
                         <abicloud.tracer.brokerUrl>tcp://localhost:6996</abicloud.tracer.brokerUrl>
                         <am.webapp.context>/am</am.webapp.context>
                         <am.webapp.dir>${basedir}/../am/target/am</am.webapp.dir>
-                        <rs.basedir>${basedir}</rs.basedir>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

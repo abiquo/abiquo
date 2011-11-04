@@ -299,8 +299,7 @@
 				<configuration>
 					<systemPropertyVariables>
 						<webapp.context>/am</webapp.context>
-						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>
-						<am.webapp.context>/am</am.webapp.context>
+						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>						
 						<rs.basedir>${basedir}</rs.basedir>
 					</systemPropertyVariables>
 				</configuration>

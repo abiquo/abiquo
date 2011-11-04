@@ -1,23 +1,23 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="API all integration tests" verbose="1">
-    <listeners>
-        <listener class-name="com.abiquo.testng.TestDatabaseListener" />
-        <listener class-name="com.abiquo.testng.TestServerListener" />
-        <listener class-name="com.abiquo.testng.TestServerAndOVFListener" />
-    </listeners>
-    <test name="All integration tests">
-        <groups>
-            <run>
-                <include name="it-basic" />
-                <include name="it-network" />
-                <include name="it-appslibrary" />
-                <include name="it-all" />
-                <exclude name="it-am" />    <!-- These tests require a running AM -->
-            </run>
-        </groups>
-        <packages>
-            <package name="com.abiquo.api.*" />
-            <package name="com.abiquo.scheduler.*" />
-        </packages>
-    </test>
+	<listeners>
+		<listener class-name="com.abiquo.testng.OVFRemoteRepositoryListener" />
+		<listener class-name="com.abiquo.testng.TestDatabaseListener" />
+		<listener class-name="com.abiquo.testng.TestServerListener" />
+	</listeners>
+	<test name="All integration tests">
+		<groups>
+			<run>
+				<include name="it-basic" />
+				<include name="it-network" />
+				<include name="it-appslibrary" />
+				<include name="it-all" />				
+				<exclude name="it-am"/>				
+			</run>
+		</groups>
+		<packages>
+			<package name="com.abiquo.api.*" />
+			<package name="com.abiquo.scheduler.*" />
+		</packages>
+	</test>
 </suite>

@@ -71,7 +71,6 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
-import com.abiquo.testng.OVFRemoteRepositoryListener;
 import com.abiquo.testng.TestServerAndAMListener;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
@@ -87,7 +86,9 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
     private static final String SYSADMIN = "sysadmin";
 
-    private static final String DEFAULT_OVF = OVFRemoteRepositoryListener.ovfId;
+    // TODO use configured port in OVFPackageRepositoryListener
+    private static final String DEFAULT_OVF = "http://localhost:7979/testovf/description.ovf";
+
     // "http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
     // "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
 
