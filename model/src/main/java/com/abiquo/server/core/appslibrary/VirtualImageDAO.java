@@ -35,6 +35,10 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.storage.StorageDevice;
+import com.abiquo.server.core.infrastructure.storage.StoragePool;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Repository("jpaVirtualImageDAO")
 /* package */class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
@@ -53,8 +57,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
     {
         Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
+        return getResultList(criteria);
     }
 
     public List<VirtualImage> findByEnterpriseAndRepository(final Enterprise enterprise,
@@ -62,8 +65,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
     {
         Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
+        return getResultList(criteria);
     }
 
     public VirtualImage findByName(final String name)
@@ -92,24 +94,49 @@ import com.abiquo.server.core.enterprise.Enterprise;
         return CollectionUtils.isEmpty(result) ? false : true;
     }
 
+    public List<VirtualImage> findStatefuls()
+    {
+        Criteria criteria = createCriteria(statefulImage());
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        return getResultList(criteria);
+    }
+
+    public List<VirtualImage> findStatefulsByDatacenter(final Datacenter datacenter)
+    {
+        // Build Datacenter criteria
+        Criteria crit = createCriteria();
+        crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
+        crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+
+        // Generate the where clause
+        crit.add(statefulImage());
+        crit.add(Restrictions.eq("device." + StorageDevice.DATACENTER_PROPERTY, datacenter));
+        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+
+        return getResultList(crit);
+    }
+
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
-        assert enterprise != null;
-
         return Restrictions.eq(VirtualImage.ENTERPRISE_PROPERTY, enterprise);
     }
 
     private static Criterion sameRepository(
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        assert repository != null;
-
         return Restrictions.eq(VirtualImage.REPOSITORY_PROPERTY, repository);
     }
 
     private static Criterion sharedImage()
     {
         return Restrictions.eq(VirtualImage.SHARED_PROPERTY, true);
+    }
+
+    private static Criterion statefulImage()
+    {
+        return Restrictions.and(Restrictions.eq(VirtualImage.STATEFUL_PROPERTY, true),
+            Restrictions.isNotNull(VirtualImage.VOLUME_PROPERTY));
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)

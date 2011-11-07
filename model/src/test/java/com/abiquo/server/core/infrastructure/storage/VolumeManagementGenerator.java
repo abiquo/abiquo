@@ -109,6 +109,16 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
     }
 
+    public VolumeManagement createStatefulInstance()
+    {
+        VolumeManagement volume = createUniqueInstance();
+        VirtualImage image =
+            virtualImageGenerator.createInstance(volume.getStoragePool().getDevice()
+                .getDatacenter());
+        volume.setVirtualImage(image);
+        return volume;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final VolumeManagement entity,
         final List<Object> entitiesToPersist)

@@ -31,6 +31,7 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "virtualImages")
 public class VirtualImagesDto extends WrapperDto<VirtualImageDto>
 {
+    private static final long serialVersionUID = 1L;
 
     @Override
     @XmlElement(name = "virtualImage")

@@ -31,6 +31,8 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "categories")
 public class CategoriesDto extends WrapperDto<CategoryDto>
 {
+    private static final long serialVersionUID = 1L;
+
     @Override
     @XmlElement(name = "category")
     public List<CategoryDto> getCollection()

@@ -34,8 +34,12 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -45,6 +49,10 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
     private RepositoryGenerator repositoryGenerator;
 
+    private VolumeManagementGenerator volumeGenerator;
+
+    private DatacenterGenerator datacenterGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -52,6 +60,8 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         super.methodSetUp();
         enterpriseGenerator = new EnterpriseGenerator(getSeed());
         repositoryGenerator = new RepositoryGenerator(getSeed());
+        volumeGenerator = new VolumeManagementGenerator(getSeed());
+        datacenterGenerator = new DatacenterGenerator(getSeed());
     }
 
     @Override
@@ -138,8 +148,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         persistAll(ds(), entitiesToPersist, vi);
 
         VirtualImageDAO dao = createDaoForRollbackTransaction();
-        VirtualImage image =
-            dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
+        VirtualImage image = dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
         assertNotNull(image);
 
         try
@@ -169,5 +178,64 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         exists = dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), "UNEXISTING");
         assertFalse(exists);
+    }
+
+    @Test
+    public void testFindStatefuls()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findStatefuls();
+        assertEquals(images.size(), 1);
+    }
+
+    @Test
+    public void testFindStatefulsWithoutResults()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findStatefuls();
+        assertEquals(images.size(), 0);
+    }
+
+    @Test
+    public void testFindStatefulsByDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findStatefulsByDatacenter(datacenter);
+        assertEquals(images.size(), 1);
+    }
+
+    @Test
+    public void testFindStatefulsByDatacenterWithoutResults()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        Datacenter anotherDatacenter = datacenterGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherDatacenter);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findStatefulsByDatacenter(anotherDatacenter);
+        assertEquals(images.size(), 0);
     }
 }

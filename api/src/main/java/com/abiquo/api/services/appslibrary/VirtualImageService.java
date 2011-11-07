@@ -103,10 +103,11 @@ public class VirtualImageService extends DefaultApiService
     public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
         final Integer datacenterId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
 
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
         Repository repository = infrastructureService.getRepository(datacenter);
 
         return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);

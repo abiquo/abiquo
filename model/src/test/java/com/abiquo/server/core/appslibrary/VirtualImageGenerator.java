@@ -31,7 +31,6 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -46,8 +45,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     private IconGenerator iconGenerator;
 
     private DatacenterGenerator datacenterGenerator;
-
-    private VolumeManagementGenerator volumeGenerator;;
 
     public VirtualImageGenerator(final SeedGenerator seed)
     {
@@ -101,6 +98,12 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     public VirtualImage createInstance(final Enterprise enterprise)
     {
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+        return createInstance(enterprise, datacenter);
+    }
+
+    public VirtualImage createInstance(final Datacenter datacenter)
+    {
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         return createInstance(enterprise, datacenter);
     }
 
