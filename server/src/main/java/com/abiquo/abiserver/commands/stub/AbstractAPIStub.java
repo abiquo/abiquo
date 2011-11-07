@@ -851,10 +851,13 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
         if (includeMachineId)
         {
-            uri += "{machine}/";
+            uri += "{machine}/action/checkState?sync=true";
         }
-        uri +=
-            "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+        else
+        {
+            uri +=
+                "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+        }
 
         return resolveURI(apiUri, uri, params);
     }
@@ -884,9 +887,12 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
         if (includeMachineId)
         {
-            uri += "{machine}/";
+            uri += "{machine}/action/checkIpmi";
         }
-        uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+        else
+        {
+            uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+        }
 
         return resolveURI(apiUri, uri, params);
     }
@@ -923,26 +929,14 @@ public class AbstractAPIStub
         return resolveURI(apiUri, uri, params);
     }
 
-    protected String createMachinesLinkMultiplePost(final Integer datacenterId,
-        final Integer rackId, final String ipFrom, final String ipTo, final String hypervisor,
-        final String user, final String password, final Integer port, final String vSwitch)
+    protected String createMachinesLinkMultiplePost(final Integer datacenterId, final Integer rackId)
     {
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
-        params.put("ipFrom", ipFrom);
-        params.put("ipTo", ipTo);
-        params.put("hypervisor", hypervisor);
-        params.put("user", user);
-        params.put("password", password);
-        params.put("port", port.toString());
-        params.put("vSwitch", vSwitch);
 
-        String uri =
-            "admin/datacenters/{datacenter}/racks/{rack}/machines"
-                + "?ipFrom={ipFrom}&ipTo={ipTo}&hypervisor={hypervisor}&user={user}"
-                + "&password={password}&port={port}&vSwitch={vSwitch}";
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines";
 
         return resolveURI(apiUri, uri, params);
     }

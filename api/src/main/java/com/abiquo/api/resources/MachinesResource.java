@@ -54,6 +54,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
+import com.abiquo.server.core.infrastructure.MachinesToCreateDto;
 
 @Parent(RackResource.class)
 @Path(MachinesResource.MACHINES_PATH)
@@ -111,19 +112,12 @@ public class MachinesResource extends AbstractResource
     public MachinesDto postMultipleMachines(
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) final Integer rackId,
-        @QueryParam("ipFrom") @NotNull final String ipFrom,
-        @QueryParam("ipTo") @NotNull final String ipTo,
-        @QueryParam("hypervisor") @NotNull final String hypervisor,
-        @QueryParam("user") @NotNull final String user,
-        @QueryParam("password") @NotNull final String password,
-        @QueryParam("port") @NotNull final Integer port,
-        @QueryParam("vSwitch") @NotNull final String vSwitch,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        final MachinesToCreateDto machinesToCreateDto, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         Map<String, Object> map =
-            infrastructureService.addMachines(datacenterId, rackId, ipFrom, ipTo, hypervisor, user,
-                password, port, vSwitch);
+            infrastructureService.addMachines(datacenterId, rackId, machinesToCreateDto);
 
         List<Machine> machines = (List<Machine>) map.get("machines");
         MachinesDto machinesDto = MachineResource.createTransferObjects(machines, restBuilder);

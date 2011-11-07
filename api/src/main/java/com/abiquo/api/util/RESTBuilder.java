@@ -168,6 +168,15 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_SINGLE_PATH,
+            DatacenterResource.ACTION_DISCOVER_SINGLE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE_PATH,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -234,6 +243,13 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final Boolean managedRack, final MachineDto machine)
     {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return this.buildMachineLinks(datacenterId, rackId, managedRack, machine, builder);
+    }
+
+    public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
+        final Boolean managedRack, final MachineDto machine, final AbiquoLinkBuilder builder)
+    {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
         Map<String, String> params = new HashMap<String, String>();
@@ -241,7 +257,6 @@ public class RESTBuilder implements IRESTBuilder
         params.put(RackResource.RACK, rackId.toString());
         params.put(MachineResource.MACHINE, machine.getId().toString());
 
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RackResource.class, RackResource.RACK, params));
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
@@ -250,6 +265,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+        links.add(builder.buildActionLink(MachineResource.class,
+            MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
 
         if (managedRack)
         {

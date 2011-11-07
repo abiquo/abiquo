@@ -1198,7 +1198,6 @@ CREATE PROCEDURE `kinton`.CalculateEnterpriseResourcesStats()
 |
 --
 
-<<<<<<< HEAD
 CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
    BEGIN
   DECLARE idVirtualDataCenterObj INTEGER;
