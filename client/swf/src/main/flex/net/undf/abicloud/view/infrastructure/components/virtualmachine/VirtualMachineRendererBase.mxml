@@ -76,7 +76,7 @@
             
             private function onCreationComplete():void{
             	//Checking privilege
-            	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
+            	//SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",virtualMachineEditButtonIcon,infoBox);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",actionTool,this);
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_PERFORM_ACTIONS,"removeChild",vmMoreActions,vmActions);
             	
@@ -583,14 +583,14 @@
                     maxWidth="300" maxChars="100" includeInLayout="false"
                     visible="false"/>
 
-                <utils:SmoothImage
+                <!--<utils:SmoothImage
                 	id="virtualMachineEditButtonIcon"
                     height="17"
                     creationComplete="AbicloudUtils.getImageFromStyle('VirtualMachineEditButtonIcon',virtualMachineEditButtonIcon)"
                     toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
                     includeInLayout="{! this._editMode}"
                     visible="{! this._editMode}"
-                    click="onClickEdit()"/>
+                    click="onClickEdit()"/>-->
 
                 <mx:Button 
                     height="17"

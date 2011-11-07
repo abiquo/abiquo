@@ -35,6 +35,10 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+        	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.infrastructure.HyperVisor;
         	import net.undf.abicloud.vo.infrastructure.State;
         	import net.undf.abicloud.vo.infrastructure.HyperVisorType;
@@ -69,10 +73,19 @@
             //The VirtualDatacenter where the VirtualMachine is
             [Bindable]
             protected var _virtualDatacenter:VirtualDataCenter;
+            
+            //The Virtual Appliance where the node is
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
 
             //Flag indicating if changes can be made to the VirtualMachine network configuration
             [Bindable]
-            private var _isEditionAllowed:Boolean;           
+            private var _isEditionAllowed:Boolean;  
+            
+            [Bindable]
+            private var _name:String;  
+            
+            private var _originalNode:NodeVirtualImage;       
 
             override protected function createChildren():void
             {
@@ -81,7 +94,7 @@
 
             private function onCreationComplete():void
             {
-                //Listening for updated from Model
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
                 
             }
 
@@ -89,11 +102,14 @@
              * Initializes this component to manage the Network of a Virtual Machine
              */
             public function init(node:NodeVirtualImage, isEditionAllowed:Boolean,
-                                 virtualDatacenter:VirtualDataCenter):void
+                                 virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance):void
             {
+                _originalNode = node;
+                _virtualAppliance = virtualAppliance;
                 _virtualMachine = node.virtualMachine;
                 _virtualDatacenter = virtualDatacenter;
                 _isEditionAllowed = isEditionAllowed;
+                _name = node.name;
                 
                 if(virtualDatacenter.hyperType.id == HyperVisorType.HYPERV){
                     remoteServicePsw.enabled = false;
@@ -105,23 +121,54 @@
             
             private function editVirtualMachine():void{
             
-                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
-                var virtualMachineEdited:VirtualMachine = ObjectUtil.copy(this._virtualMachine) as VirtualMachine;
-
-                //Saving changes made by the user
-                virtualMachineEdited.name = nameInput.text;
-                virtualMachineEdited.cpu = cpuInput.value;
-                virtualMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
-                virtualMachineEdited.password = passwordInput.text;
-                virtualMachineEdited.description = descriptionInput.text;
-
-                //Announcing that a virtual machine has been edited
-                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
-                infrastructureEvent.infrastructureElement = virtualMachineEdited;
-                dispatchEvent(infrastructureEvent);
+                //Need to check which function need to be call
+                if(nameInput.text != _originalNode.name)
+                {
+                	var updatedNode:NodeVirtualImage = returnVirtualApplianceNode(_originalNode);
+                	if(updatedNode)
+                	{
+	                	updatedNode.name = nameInput.text;
+	                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
+	                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
+	                    dispatchEvent(virtualApplianceEvent);
+                	}
+                } 
+                
+                if(cpuInput.value != _originalNode.virtualMachine.cpu
+                || ramInput.value != _originalNode.virtualMachine.ram
+                || (passwordInput.text != '' && passwordInput.text != _originalNode.virtualMachine.password)
+                || descriptionInput.text != _originalNode.virtualMachine.description)
+                {
+	                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
+	                var virtualMachineEdited:VirtualMachine = ObjectUtil.copy(this._virtualMachine) as VirtualMachine;
+	
+	                //Saving changes made by the user
+	                virtualMachineEdited.cpu = cpuInput.value;
+	                virtualMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+	                virtualMachineEdited.password = passwordInput.text;
+	                virtualMachineEdited.description = descriptionInput.text;
+	
+	                //Announcing that a virtual machine has been edited
+	                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
+	                infrastructureEvent.infrastructureElement = virtualMachineEdited;
+	                dispatchEvent(infrastructureEvent);
+                }
             }
 
-
+            private function returnVirtualApplianceNode(node:NodeVirtualImage):NodeVirtualImage
+            {
+                var _currentNode:NodeVirtualImage;
+                for(var i:int = 0 ; i < _virtualAppliance.nodes.length ; i++)
+                {
+                    _currentNode = _virtualAppliance.nodes.getItemAt(i) as NodeVirtualImage;
+                    if(_currentNode.id == node.id)
+                    {
+                    	return _currentNode;
+                    }
+                }	
+                
+                return null;
+            }
            
            
         ]]>
@@ -138,10 +185,9 @@
         </mx:FormItem>
 
         <mx:FormItem 
-            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_VIRTUALIMAGE')">
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')">
             <mx:TextInput id="nameInput" 
-            	editable="{this._isEditionAllowed}"
-            	text="{_virtualMachine.virtualImage.name}"/>
+            	text="{_name}"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -242,10 +288,9 @@
                    
     </mx:Form>
 
-    <mx:HBox width="100%" horizontalAlign="center">
-        <mx:Button height="18" 
+    <mx:HBox width="100%" horizontalAlign="center" id="saveBox">
+        <mx:Button height="18" id="saveButton"
             label="@Resource(bundle='Common',key='BUTTON_SAVE')"
-            enabled="{this._isEditionAllowed}"
             click="editVirtualMachine()"/>
    </mx:HBox>
 </mx:VBox>

@@ -111,7 +111,7 @@
                 }
 
                 //Initializing the NodeBasicInfo component
-                vmBasicInfo.init(this._node, this._isEditionAllowed, virtualDataCenter);
+                vmBasicInfo.init(this._node, this._isEditionAllowed, virtualDataCenter, virtualAppliance);
                 //Initializing the NodeNetworkManagement component
                 vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter, virtualAppliance);
             }
