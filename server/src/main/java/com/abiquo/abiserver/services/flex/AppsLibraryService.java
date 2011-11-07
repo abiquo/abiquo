@@ -21,14 +21,12 @@
 
 package com.abiquo.abiserver.services.flex;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -49,6 +47,7 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
+import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 
 public class AppsLibraryService
@@ -136,7 +135,8 @@ public class AppsLibraryService
     }
 
     private DataResult<List<VirtualImage>> fixVirtaulImageRepositroyAndEnterprise(
-        DataResult<List<VirtualImage>> images, Integer idEnterprise, Integer idRepository)
+        final DataResult<List<VirtualImage>> images, final Integer idEnterprise,
+        final Integer idRepository)
     {
         for (VirtualImage vimage : images.getData())
         {
@@ -269,105 +269,14 @@ public class AppsLibraryService
 
     // todo con idRepo
 
-    /** Category */
-    public DataResult<Category> createCategory(final UserSession userSession,
-        final Integer idEnterprise, final String categoryName)
-    {
-        DataResult<Category> result = new DataResult<Category>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            CategoryHB categoryHb =
-                proxyService.createCategory(userSession, idEnterprise, categoryName);
-
-            result.setData(categoryHb.toPojo());
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    public BasicResult deleteCategory(final UserSession userSession, final Integer idCategory)
-    {
-        BasicResult result = new BasicResult();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.deleteCategory(userSession, idCategory);
-
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
-    public DataResult<List<Category>> getCategories(final UserSession userSession,
-        final Integer idEnterprise)
-    {
-        DataResult<List<Category>> result = new DataResult<List<Category>>();
-
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            List<CategoryHB> categoriesHb = proxyService.getCategories(userSession, idEnterprise);
-            List<Category> categories = new LinkedList<Category>();
-
-            for (CategoryHB catHb : categoriesHb)
-            {
-                categories.add(catHb.toPojo());
-            }
-
-            result.setData(categories);
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
-    }
-
     /** Icon */
-    public DataResult<Icon> createIcon(final UserSession userSession, final Integer idEnterprise,
-        final Icon icon)
+    public DataResult<Icon> createIcon(final UserSession userSession, final Icon icon)
     {
         IconDto dto = new IconDto();
         dto.setName(icon.getName());
         dto.setPath(icon.getPath());
 
-        return proxyStub(userSession).createIcon(idEnterprise, dto);
+        return proxyStub(userSession).createIcon(dto);
     }
 
     public BasicResult editIcon(final UserSession userSession, final Icon icon)
@@ -380,10 +289,10 @@ public class AppsLibraryService
         return proxyStub(userSession).deleteIcon(idIcon);
     }
 
-    public DataResult<List<Icon>> getIcons(final UserSession userSession, final Integer idEnterprise)
+    public DataResult<List<Icon>> getIcons(final UserSession userSession)
     {
 
-        return proxyStub(userSession).getIcons(idEnterprise);
+        return proxyStub(userSession).getIcons();
     }
 
     /**
@@ -486,6 +395,30 @@ public class AppsLibraryService
         daoF.endConnection();
 
         return idDatacenter;
+    }
+
+    /**
+     * CATEGORY
+     */
+
+    public DataResult<List<Category>> getCategories(final UserSession userSession)
+    {
+        return proxyStub(userSession).getCategories();
+    }
+
+    public DataResult<Category> createCategory(final UserSession userSession,
+        final String categoryName)
+    {
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(categoryName);
+        categoryDto.setDefaultCategory(false);
+        categoryDto.setErasable(true);
+        return proxyStub(userSession).createCategory(categoryDto);
+    }
+
+    public BasicResult deleteCategory(final UserSession userSession, final Integer idCategory)
+    {
+        return proxyStub(userSession).deleteCategory(idCategory);
     }
 
 }

@@ -718,6 +718,21 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/config/icons", params);
     }
 
+    protected String createCategoryLink(final Integer categoryId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("category", valueOf(categoryId));
+
+        return resolveURI(apiUri, "config/categories/{category}", params);
+    }
+
+    protected String createCategoriesLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/categories", params);
+    }
+
     protected String createUserLink(final int enterpriseId, final int userId)
     {
         return createUserLink(valueOf(enterpriseId), userId);
