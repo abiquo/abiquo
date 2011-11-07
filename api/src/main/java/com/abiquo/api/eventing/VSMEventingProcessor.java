@@ -56,7 +56,7 @@ public class VSMEventingProcessor implements VSMCallback
     private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventingProcessor.class);
 
     @Autowired
-    protected VirtualMachineRep repo;
+    protected VirtualMachineRep vmRepo;
 
     @Autowired
     protected TracerLogger tracer;
@@ -96,7 +96,7 @@ public class VSMEventingProcessor implements VSMCallback
      */
     public VSMEventingProcessor(EntityManager em)
     {
-        this.repo = new VirtualMachineRep(em);
+        this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
     }
 
@@ -120,11 +120,11 @@ public class VSMEventingProcessor implements VSMCallback
         }
 
         // Update virtual machine state
-        VirtualMachine machine = repo.findByName(notification.getVirtualSystemId());
+        VirtualMachine machine = vmRepo.findByName(notification.getVirtualSystemId());
 
         if (machine != null)
         {
-            repo.update(updateMachineState(machine, notification));
+            vmRepo.update(updateMachineState(machine, notification));
         }
     }
 
@@ -162,8 +162,7 @@ public class VSMEventingProcessor implements VSMCallback
             case RESUMED:
             case SAVED:
             case DESTROYED:
-                machine.setState(stateByEvent.get(event));
-                logAndTraceVirtualMachineStateUpdated(machine, event, notification);
+                onVMDestroyedEvent(machine, event, notification);
                 break;
 
             default:
@@ -213,5 +212,21 @@ public class VSMEventingProcessor implements VSMCallback
         {
             return null;
         }
+    }
+
+    /**
+     * Fires on Virtual Machine Destroyed event detection. - Sets VM state to NOT_ALLOCATED -
+     * Resources ARE freed
+     * 
+     * @param vm
+     */
+    protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
+        final VirtualSystemEvent notification)
+    {
+        vMachine.setState(stateByEvent.get(event));
+        logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
+
+        // TODO: Resources are freed?
+        // onDeleteNode(session, nodeVi.toPojoHB()
     }
 }
