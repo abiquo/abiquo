@@ -56,6 +56,9 @@ public class VirtualImageService extends DefaultApiService
     @Autowired
     private AppsLibraryRep appsLibraryRep;
 
+    @Autowired
+    private CategoryService categoryService;
+
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
     {
@@ -128,15 +131,24 @@ public class VirtualImageService extends DefaultApiService
     }
 
     @Transactional(readOnly = true)
-    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Datacenter datacenter)
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Integer enterpriseId,
+        final Integer datacenterId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
         return appsLibraryRep.findStatefulVirtualImagesByDatacenter(datacenter);
     }
 
     @Transactional(readOnly = true)
     public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
-        final Category category, final Datacenter datacenter)
+        final Integer enterpriseId, final Integer datacenterId, final Integer categoryId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
+        Category category = categoryService.getCategory(categoryId);
+
         return appsLibraryRep
             .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
     }

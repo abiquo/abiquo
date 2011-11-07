@@ -22,6 +22,8 @@
 package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertError;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURIWithCategory;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
 import static org.testng.Assert.assertEquals;
 
@@ -35,6 +37,7 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -45,6 +48,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Test
 public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
@@ -115,6 +119,42 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidDatacenter()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId() + 100);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidEnterprise()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId() + 100, datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenNoDatacenterLimits()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidCategory()
+    {
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits);
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), 50);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+    }
+
+    @Test
     public void testGetVirtualImages()
     {
         VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
@@ -129,6 +169,106 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
         assertEquals(dto.getCollection().size(), 2);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesWithoutResults()
+    {
+        VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        setup(limits, vi1.getCategory(), vi1);
+
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 0);
+    }
+
+    @Test(enabled = false)
+    public void testGetStatefulVirtualImages()
+    {
+        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
+
+        // Avoid persisting already persisted entitites
+        entitiesToPersist.remove(datacenter);
+        entitiesToPersist.remove(repository);
+        entitiesToPersist.remove(ent);
+        entitiesToPersist.add(limits);
+        entitiesToPersist.add(stateful);
+
+        setup(entitiesToPersist.toArray());
+
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test(enabled = false)
+    public void testGetStatefulVirtualImagesByCategory()
+    {
+        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
+
+        // Avoid persisting already persisted entitites
+        entitiesToPersist.remove(datacenter);
+        entitiesToPersist.remove(repository);
+        entitiesToPersist.remove(ent);
+        entitiesToPersist.add(limits);
+        entitiesToPersist.add(stateful);
+
+        setup(entitiesToPersist.toArray());
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), stateful
+                .getVirtualImage().getCategory().getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesByCategoryWithoutResults()
+    {
+        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        Category anotherCategory = categoryGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
+
+        // Avoid persisting already persisted entitites
+        entitiesToPersist.remove(datacenter);
+        entitiesToPersist.remove(repository);
+        entitiesToPersist.remove(ent);
+        entitiesToPersist.add(limits);
+        entitiesToPersist.add(stateful);
+        entitiesToPersist.add(anotherCategory);
+
+        setup(entitiesToPersist.toArray());
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
+                anotherCategory.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 0);
     }
 
 }

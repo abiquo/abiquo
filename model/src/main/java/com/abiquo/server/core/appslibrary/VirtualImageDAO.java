@@ -103,7 +103,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     public List<VirtualImage> findStatefulsByDatacenter(final Datacenter datacenter)
     {
-        Criteria crit = criteriaWithStatefulNavigation(datacenter);
+        Criteria crit = criteriaWithStatefulNavigation();
         crit.add(statefulImage());
         crit.add(sameStatefulDatacenter(datacenter));
         crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
@@ -113,7 +113,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     public List<VirtualImage> findStatefulsByCategoryAndDatacenter(final Category category,
         final Datacenter datacenter)
     {
-        Criteria crit = criteriaWithStatefulNavigation(datacenter);
+        Criteria crit = criteriaWithStatefulNavigation();
         crit.add(statefulImage());
         crit.add(sameCategory(category));
         crit.add(sameStatefulDatacenter(datacenter));
@@ -176,7 +176,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return Restrictions.eq("device." + StorageDevice.DATACENTER_PROPERTY, datacenter);
     }
 
-    private Criteria criteriaWithStatefulNavigation(final Datacenter datacenter)
+    private Criteria criteriaWithStatefulNavigation()
     {
         Criteria crit = createCriteria();
         crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
