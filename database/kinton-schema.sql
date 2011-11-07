@@ -1061,6 +1061,8 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
   `cost_code` varchar(50) default NULL,
+  `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `creation_user` varchar(128) NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),

@@ -83,7 +83,7 @@ public class OVFPackageInstanceToVirtualImage
                     appslibraryRep.insertVirtualImage(vi);
 
                     addedvimages.add(vi);
-                    logger.info("Inserted virtual image [{}]", vi.getPathName());
+                    logger.info("Inserted virtual image [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {
@@ -102,7 +102,7 @@ public class OVFPackageInstanceToVirtualImage
                     VirtualImage vi = imageFromDisk(disk, repo);
                     appslibraryRep.insertVirtualImage(vi);
                     addedvimages.add(vi);
-                    logger.info("Inserted bundle virtual image [{}]", vi.getPathName());
+                    logger.info("Inserted bundle virtual image [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {

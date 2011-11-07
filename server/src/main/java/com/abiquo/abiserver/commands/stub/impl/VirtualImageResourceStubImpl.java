@@ -138,7 +138,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setId(vi.getId());
         img.setName(vi.getName());
         img.setDescription(vi.getDescription());
-        img.setPath(vi.getPathName());
+        img.setPath(vi.getPath());
         img.setHdRequired(vi.getHdRequired());
         img.setRamRequired(vi.getRamRequired());
         img.setCpuRequired(vi.getCpuRequired());

@@ -26,9 +26,7 @@ import java.util.List;
 import org.apache.wink.server.utils.LinkBuilders;
 
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -111,7 +109,7 @@ public interface IRESTBuilder
         final Integer dcId, final Integer repoId);
 
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId, final VirtualImage master, final Category category, final Icon icon);
+        final VirtualImage image, final VirtualImage master);
 
     /*
      * Premium methods
