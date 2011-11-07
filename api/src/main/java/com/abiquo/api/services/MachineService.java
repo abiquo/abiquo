@@ -38,6 +38,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -93,6 +94,7 @@ public class MachineService extends DefaultApiService
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
+        tracer = new TracerLogger();
     }
 
     public List<Machine> getMachinesByRack(final Integer rackId)
