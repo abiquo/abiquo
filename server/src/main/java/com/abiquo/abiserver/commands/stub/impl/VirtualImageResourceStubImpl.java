@@ -49,7 +49,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
-import com.abiquo.server.core.infrastructure.Repository;
 
 public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     VirtualImageResourceStub
@@ -65,8 +64,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
      * @param idCategory, if 0 indicate return all the categories
      */
     @Override
-    public DataResult<List<VirtualImage>> getVirtualImageByCategory(Integer idEnterprise,
-        Integer datacenterId, Integer idCategory)
+    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final Integer idEnterprise,
+        final Integer datacenterId, final Integer idCategory)
     {
         final Integer idHypervisorType = null;
         return getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
@@ -79,7 +78,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
      */
     @Override
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        Integer idEnterprise, Integer datacenterId, Integer idCategory, Integer idHypervisorType)
+        final Integer idEnterprise, final Integer datacenterId, final Integer idCategory,
+        final Integer idHypervisorType)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
@@ -120,7 +120,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
 
     }
 
-    private List<VirtualImage> transformToFlex(VirtualImagesDto images)
+    private List<VirtualImage> transformToFlex(final VirtualImagesDto images)
     {
         List<VirtualImage> vlst = new LinkedList<VirtualImage>();
         for (VirtualImageDto image : images.getCollection())
@@ -131,7 +131,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return vlst;
     }
 
-    private VirtualImage transformToFlex(VirtualImageDto vi)
+    private VirtualImage transformToFlex(final VirtualImageDto vi)
     {
         VirtualImage img = new VirtualImage();
 
@@ -151,6 +151,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setIcon(createIconFromLink(getLink("icon", vi.getLinks())));
         img.setRepository(createRepositoryFromLinks());
         img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
+        img.setCreationUser(vi.getCreationUser());
+        img.setCreationDate(vi.getCreationDate());
         // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
         // properly)
         // private VirtualImage master; // TODO master instance images
@@ -159,7 +161,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     }
 
     private com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createDiskFormatType(
-        DiskFormatType formattype)
+        final DiskFormatType formattype)
     {
         com.abiquo.abiserver.pojo.virtualimage.DiskFormatType forma =
             new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType();
@@ -181,7 +183,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return repo;
     }
 
-    private Icon createIconFromLink(RESTLink link)
+    private Icon createIconFromLink(final RESTLink link)
     {
         if (link == null)
         {
@@ -195,7 +197,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return i;
     }
 
-    private Category createCategoryFromLink(RESTLink link)
+    private Category createCategoryFromLink(final RESTLink link)
     {
         Category c = new Category();
         c.setId(Integer.valueOf(link.getHref().substring(link.getHref().lastIndexOf("/") + 1)));
@@ -203,7 +205,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return c;
     }
 
-    private RESTLink getLink(final String rel, List<RESTLink> links)
+    private RESTLink getLink(final String rel, final List<RESTLink> links)
     {
         for (RESTLink link : links)
         {
