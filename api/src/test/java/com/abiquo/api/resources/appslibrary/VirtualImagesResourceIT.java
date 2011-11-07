@@ -64,12 +64,16 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
     private Repository repository;
 
+    // Only used in stateful tests
+    private VolumeManagement volume;
+
     @BeforeMethod
     public void setUpDatacenterRepository()
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
         repository = repositoryGenerator.createInstance(datacenter);
+        volume = volumeManagementGenerator.createInstance(datacenter, ent);
 
         RemoteService am =
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, datacenter);
@@ -81,6 +85,12 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(ent);
         entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(volume.getStoragePool().getDevice());
+        entitiesToSetup.add(volume.getStoragePool().getTier());
+        entitiesToSetup.add(volume.getStoragePool());
+        entitiesToSetup.add(volume.getRasd());
+        entitiesToSetup.add(volume.getVirtualDatacenter());
+        entitiesToSetup.add(volume);
         entitiesToSetup.add(repository);
         entitiesToSetup.add(am);
 
@@ -187,23 +197,15 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(dto.getCollection().size(), 0);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testGetStatefulVirtualImages()
     {
-        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image);
 
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
-
-        // Avoid persisting already persisted entitites
-        entitiesToPersist.remove(datacenter);
-        entitiesToPersist.remove(repository);
-        entitiesToPersist.remove(ent);
-        entitiesToPersist.add(limits);
-        entitiesToPersist.add(stateful);
-
-        setup(entitiesToPersist.toArray());
+        volume.setVirtualImage(image);
+        update(volume, image);
 
         String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -213,27 +215,19 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(dto.getCollection().size(), 1);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testGetStatefulVirtualImagesByCategory()
     {
-        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image);
 
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
-
-        // Avoid persisting already persisted entitites
-        entitiesToPersist.remove(datacenter);
-        entitiesToPersist.remove(repository);
-        entitiesToPersist.remove(ent);
-        entitiesToPersist.add(limits);
-        entitiesToPersist.add(stateful);
-
-        setup(entitiesToPersist.toArray());
+        volume.setVirtualImage(image);
+        update(volume, image);
 
         String uri =
-            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), stateful
-                .getVirtualImage().getCategory().getId());
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), image
+                .getCategory().getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -244,22 +238,14 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetStatefulVirtualImagesByCategoryWithoutResults()
     {
-        VolumeManagement stateful = volumeManagementGenerator.createStatefulInstance(datacenter);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         Category anotherCategory = categoryGenerator.createUniqueInstance();
 
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(stateful, entitiesToPersist);
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image, anotherCategory);
 
-        // Avoid persisting already persisted entitites
-        entitiesToPersist.remove(datacenter);
-        entitiesToPersist.remove(repository);
-        entitiesToPersist.remove(ent);
-        entitiesToPersist.add(limits);
-        entitiesToPersist.add(stateful);
-        entitiesToPersist.add(anotherCategory);
-
-        setup(entitiesToPersist.toArray());
+        volume.setVirtualImage(image);
+        update(volume, image);
 
         String uri =
             resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),

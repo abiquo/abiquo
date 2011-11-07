@@ -29,6 +29,7 @@ import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
@@ -82,7 +83,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     public VolumeManagement createInstance(final StoragePool pool)
     {
-        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        VirtualDatacenter vdc = vdcGenerator.createInstance(pool.getDevice().getDatacenter());
         return createInstance(pool, vdc);
     }
 
@@ -92,9 +93,15 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         return createInstance(vdc);
     }
 
+    public VolumeManagement createInstance(final Datacenter datacenter, final Enterprise enterprise)
+    {
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
+        return createInstance(vdc);
+    }
+
     public VolumeManagement createInstance(final VirtualDatacenter vdc)
     {
-        StoragePool pool = poolGenerator.createUniqueInstance();
+        StoragePool pool = poolGenerator.createInstance(vdc.getDatacenter());
         return createInstance(pool, vdc);
     }
 
