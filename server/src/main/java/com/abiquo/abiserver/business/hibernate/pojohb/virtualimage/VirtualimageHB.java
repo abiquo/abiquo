@@ -60,7 +60,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private Integer cpuRequired;
 
-    private int shared;
+    private boolean shared;
 
     private VirtualimageHB master;
 
@@ -70,7 +70,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     private String ovfId;
 
-    private int stateful;
+    private boolean stateful;
 
     private String volumePath;
 
@@ -91,11 +91,11 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.category = category;
         this.name = name;
         this.pathName = pathName;
-        this.shared = 0;
+        this.shared = Boolean.FALSE;
         this.master = master;
         this.idEnterprise = idEnterprise;
         this.ovfId = ovfId;
-        this.stateful = 0;
+        this.stateful = Boolean.FALSE;
         this.diskFileSize = diskFileSize;
     }
 
@@ -114,11 +114,11 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.hdRequired = hdRequired;
         this.ramRequired = ramRequired;
         this.cpuRequired = cpuRequired;
-        this.shared = 0;
+        this.shared = Boolean.FALSE;
         this.master = master;
         this.idEnterprise = idEnterprise;
         this.ovfId = ovfId;
-        this.stateful = 0;
+        this.stateful = Boolean.FALSE;
         this.diskFileSize = diskFileSize;
         this.costCode = costCode;
     }
@@ -243,12 +243,12 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.ovfId = ovfId;
     }
 
-    public int getStateful()
+    public boolean isStateful()
     {
         return stateful;
     }
 
-    public void setStateful(final int stateful)
+    public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
@@ -263,12 +263,12 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.diskFileSize = diskFileSize;
     }
 
-    public int getShared()
+    public boolean isShared()
     {
         return shared;
     }
 
-    public void setShared(final int shared)
+    public void setShared(final boolean shared)
     {
         this.shared = shared;
     }
@@ -399,7 +399,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
 
     public boolean isImageStateful()
     {
-        return getStateful() != 0;
+        return isStateful();
     }
 
     public boolean isManaged()

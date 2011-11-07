@@ -156,10 +156,10 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             oldVimage.setName(vimage.getName());
             oldVimage.setDescription(vimage.getDescription());
             oldVimage.setPathName(vimage.getPathName());
-            oldVimage.setStateful(vimage.getStateful());
+            oldVimage.setStateful(vimage.isStateful());
             oldVimage.setVolumePath(vimage.getVolumePath());
             oldVimage.setIdEnterprise(vimage.getIdEnterprise());
-            oldVimage.setShared(vimage.getShared());
+            oldVimage.setShared(vimage.isShared());
             oldVimage.setCostCode(vimage.getCostCode());
             // XXX oldVimage.setMaster(master);
 
@@ -219,7 +219,7 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
             throw new AppsLibraryCommandException(cause);
         }
 
-        if (vimage.getShared() == 1)
+        if (vimage.isShared())
         {
             Integer userEnterpriseId = user.getEnterpriseHB().getIdEnterprise();
             Integer vimageEnterpriseId = vimage.getIdEnterprise();

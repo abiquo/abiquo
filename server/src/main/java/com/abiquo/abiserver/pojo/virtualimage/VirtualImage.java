@@ -59,11 +59,11 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private Integer idEnterprise;
 
-    private int shared;
+    private boolean shared;
 
     private String ovfId;
 
-    private int stateful;
+    private boolean stateful;
 
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
@@ -79,8 +79,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         category = new Category();
         repository = new Repository();
         ovfId = "";
-        stateful = 0;
-        shared = 0;
+        stateful = false;
+        shared = false;
         costCode = "";
     }
 
@@ -224,12 +224,12 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.ovfId = ovfId;
     }
 
-    public int getStateful()
+    public boolean isStateful()
     {
         return stateful;
     }
 
-    public void setStateful(final int stateful)
+    public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
@@ -246,7 +246,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     public boolean isImageStateful()
     {
-        return getStateful() != 0;
+        return isStateful();
     }
 
     public boolean isManaged()
@@ -254,12 +254,12 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return getRepository() != null;
     }
 
-    public int getShared()
+    public boolean isShared()
     {
         return shared;
     }
 
-    public void setShared(final int shared)
+    public void setShared(final boolean shared)
     {
         this.shared = shared;
     }
@@ -305,9 +305,9 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         virtualImageHB.setRamRequired(ramRequired);
         virtualImageHB.setCpuRequired(cpuRequired);
         virtualImageHB.setType(diskFormatType.toEnum());
-        virtualImageHB.setStateful(stateful);
+        virtualImageHB.setStateful(isStateful());
         virtualImageHB.setDiskFileSize(diskFileSize);
-        virtualImageHB.setShared(shared);
+        virtualImageHB.setShared(isShared());
 
         if (master != null)
         {

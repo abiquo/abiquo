@@ -62,6 +62,9 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 public class VirtualImageService extends DefaultApiService
@@ -277,8 +280,18 @@ public class VirtualImageService extends DefaultApiService
         // allowed
         if (masterLink == null)
         {
+            if (old.getMaster() != null)
+            {
+                if (tracer != null)
+                {
+                    String messageTrace =
+                        "Virtual Image '" + old.getName()
+                            + "' has been converted to a master image '";
+                    tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_UPDATE,
+                        messageTrace);
+                }
+            }
             old.setMaster(null);
-            // public a trace when the image wasn't master before
         }
 
         // case when the new master isn't null and the old can be null or the same image or a new
@@ -303,7 +316,7 @@ public class VirtualImageService extends DefaultApiService
 
             Integer masterId = Integer.parseInt(map.getFirst(VirtualImageResource.VIRTUAL_IMAGE));
 
-            if (!masterId.equals(old.getMaster().getId()))
+            if (old.getMaster() == null || !masterId.equals(old.getMaster().getId()))
             {
                 addConflictErrors(APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
                 flushErrors();

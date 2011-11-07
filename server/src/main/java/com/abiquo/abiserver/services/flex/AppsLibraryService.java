@@ -64,8 +64,8 @@ public class AppsLibraryService
         {
 
             appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -309,28 +309,12 @@ public class AppsLibraryService
 
     public BasicResult editVirtualImage(final UserSession userSession, final VirtualImage vimage)
     {
-        BasicResult result = new BasicResult();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.editVirtualImage(userSession, vimage.toPojoHB());
+        final VirtualImageResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
+                VirtualImageResourceStub.class);
 
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return vimageStub.editVirtualImage(vimage);
     }
 
     public BasicResult deleteVirtualImage(final UserSession userSession,

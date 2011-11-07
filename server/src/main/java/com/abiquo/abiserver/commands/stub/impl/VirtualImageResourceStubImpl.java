@@ -79,7 +79,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
      */
     @Override
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        final Integer idEnterprise, final Integer datacenterId, final Integer idCategory, final Integer idHypervisorType)
+        final Integer idEnterprise, final Integer datacenterId, final Integer idCategory,
+        final Integer idHypervisorType)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
@@ -142,8 +143,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setHdRequired(vi.getHdRequired());
         img.setRamRequired(vi.getRamRequired());
         img.setCpuRequired(vi.getCpuRequired());
-        img.setShared(vi.isShared() ? 1 : 0);
-        img.setStateful(vi.isShared() ? 1 : 0);
+        img.setShared(vi.isShared());
+        img.setStateful(vi.isShared());
         img.setOvfId(getLink("ovfpackage", vi.getLinks()).getHref());
         img.setDiskFileSize(vi.getDiskFileSize());
         img.setCostCode(vi.getCostCode());
@@ -353,8 +354,77 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     @Override
     public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage)
     {
-        // TODO Auto-generated method stub
-        return null;
+        final DataResult<VirtualImage> result = new DataResult<VirtualImage>();
+
+        String uri =
+            createVirtualImageLink(vimage.getIdEnterprise(), vimage.getRepository().getDatacenter()
+                .getId(), vimage.getId());
+
+        ClientResponse response = put(uri, createDtoObject(vimage));
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+            result.setData(transformToFlex(dto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editVirtualImage");
+        }
+
+        return result;
     }
 
+    private VirtualImageDto createDtoObject(final VirtualImage vimage)
+    {
+
+        VirtualImageDto dto = new VirtualImageDto();
+
+        Integer enterpriseId = vimage.getIdEnterprise();
+        Integer datacenterId = vimage.getRepository().getId();
+
+        dto.setCostCode(vimage.getCostCode());
+        dto.setCpuRequired(vimage.getCpuRequired());
+        dto.setDescription(vimage.getDescription());
+        dto.setDiskFileSize(vimage.getDiskFileSize());
+        dto.setDiskFormatType(vimage.getDiskFormatType().toString());
+        dto.setHdRequired(vimage.getHdRequired());
+        dto.setId(vimage.getId());
+        dto.setName(vimage.getName());
+        dto.setPathName(vimage.getPath());
+        dto.setRamRequired(vimage.getRamRequired());
+        dto.setShared(vimage.isShared());
+        dto.setStateful(vimage.isStateful());
+
+        RESTLink enterpriseLink = new RESTLink("enterprise", createEnterpriseLink(enterpriseId));
+        dto.addLink(enterpriseLink);
+
+        RESTLink datacenterRepoLink =
+            new RESTLink("datacenterrepository", createDatacenterRepositoryLink(enterpriseId,
+                datacenterId));
+        dto.addLink(datacenterRepoLink);
+
+        if (vimage.getMaster() != null)
+        {
+            RESTLink masterLink =
+                new RESTLink("master", createVirtualImageLink(enterpriseId, datacenterId, vimage
+                    .getMaster().getId()));
+            dto.addLink(masterLink);
+        }
+        if (vimage.getCategory() != null)
+        {
+            RESTLink categoryLink =
+                new RESTLink("category", createCategoryLink(vimage.getCategory().getId()));
+            dto.addLink(categoryLink);
+        }
+        if (vimage.getIcon() != null)
+
+        {
+            RESTLink iconLink = new RESTLink("icon", createIconLink(vimage.getIcon().getId()));
+            dto.addLink(iconLink);
+        }
+        return dto;
+
+    }
 }

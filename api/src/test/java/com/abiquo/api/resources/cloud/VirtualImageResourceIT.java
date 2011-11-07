@@ -305,11 +305,13 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void editVirtualImageSetNewMasterImageRises409()
+    public void editVirtualImageAllowSettingMasterNull()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
         VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setMaster(master);
 
         virtualImage.setOvfid(null);
         setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
@@ -320,24 +322,23 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
         VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
 
-        String masterUri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), master.getId());
+        RESTLink masterLink = dto.searchLink("master");
 
-        RESTLink masterLink = new RESTLink("master", masterUri);
-        dto.addLink(masterLink);
+        dto.getLinks().remove(masterLink);
 
         response = put(uri, dto, SYSADMIN, SYSADMIN);
 
-        assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
+        assertEquals(response.getStatusCode(), 200);
+
+        // assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
     }
 
-    @Test(enabled = false)
-    public void editVirtualImageAllowSettingMasterNull()
+    @Test
+    public void editVirtualImageSetNewMasterImageRises409()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
         VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-
-        virtualImage.setMaster(master);
 
         virtualImage.setOvfid(null);
         setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
