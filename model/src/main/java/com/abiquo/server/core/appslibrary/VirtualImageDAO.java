@@ -103,18 +103,27 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     public List<VirtualImage> findStatefulsByDatacenter(final Datacenter datacenter)
     {
-        // Build Datacenter criteria
-        Criteria crit = createCriteria();
-        crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
-        crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
-        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
-
-        // Generate the where clause
+        Criteria crit = criteriaWithStatefulNavigation(datacenter);
         crit.add(statefulImage());
-        crit.add(Restrictions.eq("device." + StorageDevice.DATACENTER_PROPERTY, datacenter));
+        crit.add(sameStatefulDatacenter(datacenter));
         crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
-
         return getResultList(crit);
+    }
+
+    public List<VirtualImage> findStatefulsByCategoryAndDatacenter(final Category category,
+        final Datacenter datacenter)
+    {
+        Criteria crit = criteriaWithStatefulNavigation(datacenter);
+        crit.add(statefulImage());
+        crit.add(sameCategory(category));
+        crit.add(sameStatefulDatacenter(datacenter));
+        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+        return getResultList(crit);
+    }
+
+    private static Criterion sameCategory(final Category category)
+    {
+        return Restrictions.eq(VirtualImage.CATEGORY_PROPERTY, category);
     }
 
     private static Criterion sameEnterprise(final Enterprise enterprise)
@@ -160,5 +169,19 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
         return Restrictions.and(Restrictions.eq(VirtualImage.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
+    }
+
+    private static Criterion sameStatefulDatacenter(final Datacenter datacenter)
+    {
+        return Restrictions.eq("device." + StorageDevice.DATACENTER_PROPERTY, datacenter);
+    }
+
+    private Criteria criteriaWithStatefulNavigation(final Datacenter datacenter)
+    {
+        Criteria crit = createCriteria();
+        crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
+        crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+        return crit;
     }
 }

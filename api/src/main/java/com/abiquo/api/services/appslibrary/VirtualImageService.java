@@ -33,6 +33,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -124,6 +125,20 @@ public class VirtualImageService extends DefaultApiService
         final Enterprise enterprise, final Repository repository)
     {
         return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Datacenter datacenter)
+    {
+        return appsLibraryRep.findStatefulVirtualImagesByDatacenter(datacenter);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+        final Category category, final Datacenter datacenter)
+    {
+        return appsLibraryRep
+            .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
     }
 
     private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,

@@ -238,8 +238,14 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualImageDAO.findStatefuls();
     }
 
-    public List<VirtualImage> findStatefulVirtualImagesInDatacenter(final Datacenter datacenter)
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Datacenter datacenter)
     {
         return virtualImageDAO.findStatefulsByDatacenter(datacenter);
+    }
+
+    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+        final Category category, final Datacenter datacenter)
+    {
+        return virtualImageDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
     }
 }

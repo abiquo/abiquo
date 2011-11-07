@@ -53,6 +53,8 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
     private DatacenterGenerator datacenterGenerator;
 
+    private CategoryGenerator categoryGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -62,6 +64,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         repositoryGenerator = new RepositoryGenerator(getSeed());
         volumeGenerator = new VolumeManagementGenerator(getSeed());
         datacenterGenerator = new DatacenterGenerator(getSeed());
+        categoryGenerator = new CategoryGenerator(getSeed());
     }
 
     @Override
@@ -236,6 +239,76 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         VirtualImageDAO dao = createDaoForRollbackTransaction();
         List<VirtualImage> images = dao.findStatefulsByDatacenter(anotherDatacenter);
+        assertEquals(images.size(), 0);
+    }
+
+    @Test
+    public void testFindStatefulsByCategoryAndDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+        Category category = statefulVolume.getVirtualImage().getCategory();
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images = dao.findStatefulsByCategoryAndDatacenter(category, datacenter);
+        assertEquals(images.size(), 1);
+    }
+
+    @Test
+    public void testFindStatefulsByCategoryAndDatacenterWithDifferentDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        Datacenter anotherDatacenter = datacenterGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherDatacenter);
+
+        Category category = statefulVolume.getVirtualImage().getCategory();
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images =
+            dao.findStatefulsByCategoryAndDatacenter(category, anotherDatacenter);
+        assertEquals(images.size(), 0);
+    }
+
+    @Test
+    public void testFindStatefulsByCategoryAndDatacenterWithDifferentCategory()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        Category anotherCategory = categoryGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherCategory);
+
+        Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images =
+            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, datacenter);
+        assertEquals(images.size(), 0);
+    }
+
+    @Test
+    public void testFindStatefulsByCategoryAndDatacenterWithDifferentCategoryAndDatacenter()
+    {
+        VolumeManagement statefulVolume = volumeGenerator.createStatefulInstance();
+        Category anotherCategory = categoryGenerator.createUniqueInstance();
+        Datacenter anotherDatacenter = datacenterGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, statefulVolume, anotherCategory, anotherDatacenter);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        List<VirtualImage> images =
+            dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter);
         assertEquals(images.size(), 0);
     }
 }
