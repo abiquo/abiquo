@@ -22,6 +22,7 @@
 package com.abiquo.server.core.appslibrary;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -34,6 +35,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
@@ -44,6 +46,7 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -62,16 +65,31 @@ public class VirtualImage extends DefaultEntityBase
     }
 
     public VirtualImage(final Enterprise enterprise, final String name,
-        final DiskFormatType diskFormatType, final String pathName, final long diskFileSize,
+        final DiskFormatType diskFormatType, final String path, final long diskFileSize,
         final Category category)
     {
         super();
         this.enterprise = enterprise;
         this.name = name;
         this.diskFormatType = diskFormatType;
-        this.pathName = pathName;
+        this.path = path;
         this.diskFileSize = diskFileSize;
         this.category = category;
+    }
+
+    public VirtualImage(final Enterprise enterprise, final String name,
+        final DiskFormatType diskFormatType, final String path, final long diskFileSize,
+        final Category category, final VolumeManagement volume)
+    {
+        super();
+        this.enterprise = enterprise;
+        this.name = name;
+        this.diskFormatType = diskFormatType;
+        this.path = path;
+        this.diskFileSize = diskFileSize;
+        this.category = category;
+        this.volume = volume;
+        this.stateful = volume != null;
     }
 
     private final static String ID_COLUMN = "idImage";
@@ -153,10 +171,28 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
+    // This method should be only called from VolumeManagement.setVirtualImage()
+
     public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
+
+    public final static String VOLUME_PROPERTY = "volume";
+
+    private final static boolean VOLUME_REQUIRED = false;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "virtualImage")
+    private VolumeManagement volume;
+
+    @Required(value = VOLUME_REQUIRED)
+    public VolumeManagement getVolume()
+    {
+        return volume;
+    }
+
+    // Set volume is not available. The link to the volume must be performed by calling
+    // VolumeManagement.setVirtualImage
 
     public final static String SHARED_PROPERTY = "shared";
 
@@ -222,32 +258,32 @@ public class VirtualImage extends DefaultEntityBase
         this.enterprise = enterprise;
     }
 
-    public final static String PATH_NAME_PROPERTY = "pathName";
+    public final static String PATH_PROPERTY = "path";
 
-    private final static boolean PATH_NAME_REQUIRED = true;
+    private final static boolean PATH_REQUIRED = true;
 
-    /* package */final static int PATH_NAME_LENGTH_MIN = 0;
+    /* package */final static int PATH_LENGTH_MIN = 0;
 
-    /* package */final static int PATH_NAME_LENGTH_MAX = 255;
+    /* package */final static int PATH_LENGTH_MAX = 255;
 
-    private final static boolean PATH_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean PATH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String PATH_NAME_COLUMN = "pathName";
+    private final static String PATH_COLUMN = "pathName";
 
-    @Column(name = PATH_NAME_COLUMN, nullable = !PATH_NAME_REQUIRED, length = PATH_NAME_LENGTH_MAX)
-    private String pathName = "FIXME";
+    @Column(name = PATH_COLUMN, nullable = !PATH_REQUIRED, length = PATH_LENGTH_MAX)
+    private String path;
 
-    @Required(value = PATH_NAME_REQUIRED)
-    @Length(min = PATH_NAME_LENGTH_MIN, max = PATH_NAME_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = PATH_NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public String getPathName()
+    @Required(value = PATH_REQUIRED)
+    @Length(min = PATH_LENGTH_MIN, max = PATH_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = PATH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getPath()
     {
-        return this.pathName;
+        return this.path;
     }
 
-    public void setPathName(final String pathName)
+    public void setPath(final String path)
     {
-        this.pathName = pathName;
+        this.path = path;
     }
 
     public final static String OVFID_PROPERTY = "ovfid";
@@ -485,6 +521,51 @@ public class VirtualImage extends DefaultEntityBase
         this.repository = repository;
     }
 
+    public final static String CREATION_DATE_PROPERTY = "creationDate";
+
+    private final static boolean CREATION_DATE_REQUIRED = false;
+
+    private final static String CREATION_DATE_COLUMN = "creation_date";
+
+    @Column(name = CREATION_DATE_COLUMN, nullable = !CREATION_DATE_REQUIRED)
+    private Date creationDate;
+
+    @Required(value = CREATION_DATE_REQUIRED)
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public final static String CREATION_USER_PROPERTY = "creationUser";
+
+    private final static boolean CREATION_USER_REQUIRED = true;
+
+    /* package */final static int CREATION_USER_LENGTH_MIN = 0;
+
+    /* package */final static int CREATION_USER_LENGTH_MAX = 128;
+
+    private final static boolean CREATION_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String CREATION_USER_COLUMN = "creation_user";
+
+    @Column(name = CREATION_USER_COLUMN, nullable = !CREATION_USER_REQUIRED, length = CREATION_USER_LENGTH_MAX)
+    private String creationUser;
+
+    @Required(value = CREATION_USER_REQUIRED)
+    @Length(min = CREATION_USER_LENGTH_MIN, max = CREATION_USER_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = CREATION_USER_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(final String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    // Creation date does not have a setter, since it will be auto generated.
+
     /* *********************** Helper methods ************************* */
 
     public void setRequirements(final int cpu, final int ram, final long hd)
@@ -517,7 +598,7 @@ public class VirtualImage extends DefaultEntityBase
     public String getNotManagedBundleName()
     {
         String name = getName() + "-snapshot";
-        if (isVhd(getPathName()))
+        if (isVhd(getPath()))
         {
             name = vhdPath(name);
         }

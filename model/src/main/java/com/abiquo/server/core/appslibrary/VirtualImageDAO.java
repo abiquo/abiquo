@@ -57,8 +57,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
         return result;
     }
 
-    public List<VirtualImage> findByEnterpriseAndRepository(
-        final Enterprise enterprise,
+    public List<VirtualImage> findByEnterpriseAndRepository(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
         Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
@@ -132,7 +131,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
             Restrictions.and(sameRepository(repository),
                 Restrictions.or(sameEnterprise(enterprise), sharedImage()));
 
-        return Restrictions.and(Restrictions.eq(VirtualImage.PATH_NAME_PROPERTY, path),
+        return Restrictions.and(Restrictions.eq(VirtualImage.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
     }
 }

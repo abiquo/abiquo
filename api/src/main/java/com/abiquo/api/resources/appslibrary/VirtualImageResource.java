@@ -88,12 +88,13 @@ public class VirtualImageResource extends AbstractResource
         dto.setDiskFileSize(vimage.getDiskFileSize());
         dto.setHdRequired(vimage.getHdRequiredInBytes());
         dto.setName(vimage.getName());
-        dto.setPathName(vimage.getPathName());
+        dto.setPath(vimage.getPath());
         dto.setRamRequired(vimage.getRamRequired());
-        dto.setStateful(vimage.isStateful());
         dto.setShared(vimage.isShared());
         dto.setDiskFormatType(vimage.getDiskFormatType().name());
         dto.setCostCode(vimage.getCostCode());
+        dto.setCreationDate(vimage.getCreationDate());
+        dto.setCreationUser(vimage.getCreationUser());
 
         return addLinks(builder, dto, enterpId, dcId, vimage, amUri);
     }
@@ -102,8 +103,7 @@ public class VirtualImageResource extends AbstractResource
         final Integer enterpriseId, final Integer dcId, final VirtualImage vimage,
         final String amUri)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage.getId(),
-            vimage.getMaster(), vimage.getCategory(), vimage.getIcon()));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage, vimage.getMaster()));
         addApplianceManagerLinks(dto, amUri, enterpriseId, vimage.getOvfid());
         return dto;
     }

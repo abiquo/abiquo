@@ -23,6 +23,9 @@
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `treaty`;
 ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `deleted`;
 
+ALTER TABLE `kinton`.`virtualimage` ADD COLUMN `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `cost_code`,
+ ADD COLUMN `creation_user` varchar(128) NOT NULL AFTER `creation_date`;
+
 ALTER TABLE `kinton`.`ovf_package_list_has_ovf_package`
  DROP FOREIGN KEY `fk_ovf_package_list_has_ovf_package_ovf_package1`;
 
@@ -49,6 +52,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 -- First I need to update some rows before to delete the `default_network` field
 UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
+
+UPDATE `kinton`.`virtualimage` set creation_user = 'ABIQUO-BEFORE-2.0', creation_date = CURRENT_TIMESTAMP;
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --

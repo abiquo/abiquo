@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.pojo.virtualimage;
 
+import java.util.Date;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.pojo.IPojo;
 
@@ -69,6 +71,10 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     private Long diskFileSize;
 
     private String costCode;
+
+    private String creationUser;
+
+    private Date creationDate;
 
     /* ------------- Constructor ------------- */
     public VirtualImage()
@@ -274,6 +280,26 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.costCode = costCode;
     }
 
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(final String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
     @Override
     public VirtualimageHB toPojoHB()
     {
@@ -321,6 +347,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
         virtualImageHB.setOvfId(ovfId);
         virtualImageHB.setCostCode(costCode);
+        virtualImageHB.setCreationUser(creationUser);
+        virtualImageHB.setCreationDate(creationDate);
 
         return virtualImageHB;
     }

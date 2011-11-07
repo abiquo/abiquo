@@ -44,6 +44,7 @@ import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.tracer.User;
 
 /**
  * Transforms an {@link OVFPackageInstanceDto} from ApplianceManager into a {@link VirtualImage} in
@@ -83,7 +84,7 @@ public class OVFPackageInstanceToVirtualImage
                     appslibraryRep.insertVirtualImage(vi);
 
                     addedvimages.add(vi);
-                    logger.info("Inserted virtual image [{}]", vi.getPathName());
+                    logger.info("Inserted virtual image [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {
@@ -102,7 +103,7 @@ public class OVFPackageInstanceToVirtualImage
                     VirtualImage vi = imageFromDisk(disk, repo);
                     appslibraryRep.insertVirtualImage(vi);
                     addedvimages.add(vi);
-                    logger.info("Inserted bundle virtual image [{}]", vi.getPathName());
+                    logger.info("Inserted bundle virtual image [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {
@@ -180,6 +181,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setHdRequiredInBytes(getHdInBytes(disk));
         vimage.setOvfid(disk.getOvfId());
         vimage.setRepository(repository);
+        vimage.setCreationUser(User.SYSTEM_USER.getName());// TODO
         if (master != null)
         {
             vimage.setMaster(master);
@@ -199,7 +201,7 @@ public class OVFPackageInstanceToVirtualImage
 
         // try to find in the OVFPackage
         OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
-        return (ovf != null) ? ovf.getCategory() : null;
+        return ovf != null ? ovf.getCategory() : appslibraryRep.getDefaultCategory();
     }
 
     private Icon getIcon(final OVFPackageInstanceDto disk)
@@ -211,7 +213,7 @@ public class OVFPackageInstanceToVirtualImage
 
         // try to find in the OVFPackage
         OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
-        return (ovf != null) ? ovf.getIcon() : null;
+        return ovf != null ? ovf.getIcon() : null;
     }
 
     /*

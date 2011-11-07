@@ -265,6 +265,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setType(diskFormat);
 
         vimage.setDiskFileSize(disk.getDiskSizeMb());
+        vimage.setCreationUser("SYSTEM"); // TODO
 
         // XXX daoF.endConnection();
         // TODO transaction.commit();

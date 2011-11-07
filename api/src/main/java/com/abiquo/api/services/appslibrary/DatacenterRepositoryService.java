@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualImage;
@@ -57,6 +59,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
      * Request the DOWNLOAD {@link OVFPackageInstanceDto} available in the ApplianceManager and
      * update the {@link VirtualImage} repository with new images.
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void synchronizeDatacenterRepository(final Datacenter datacenter,
         final Enterprise enterprise)
     {
@@ -74,8 +77,9 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
      * <p>
      * TODO usage shared accros all enterprises
      */
-    public DatacenterRepositoryDto includeRepositoryUsageFromAm(DatacenterRepositoryDto repoDto,
-        final Integer enterpriseId, final Integer datacenterId)
+    public DatacenterRepositoryDto includeRepositoryUsageFromAm(
+        final DatacenterRepositoryDto repoDto, final Integer enterpriseId,
+        final Integer datacenterId)
     {
         try
         {
@@ -101,9 +105,10 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     }
 
     private Repository checkRepositoryLocation(final Datacenter datacenter,
-        ApplianceManagerResourceStubImpl amStub)
+        final ApplianceManagerResourceStubImpl amStub)
     {
-        final String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+        final String repositoryLocation =
+            amStub.getRepositoryConfiguration().getRepositoryLocation();
 
         final Repository repo = infService.getRepository(datacenter);
 
@@ -145,7 +150,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
      * Returns OVF ids of the DOWNLOADED {@link OVFPackageInstanceDto} in the enterprise repository
      */
     private List<String> getAvailableOVFPackageInstance(final Integer idEnterprise,
-        ApplianceManagerResourceStubImpl amStub)
+        final ApplianceManagerResourceStubImpl amStub)
     {
         List<String> ovfids = new LinkedList<String>();
 

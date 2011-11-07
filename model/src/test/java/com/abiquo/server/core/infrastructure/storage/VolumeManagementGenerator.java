@@ -24,6 +24,8 @@ package com.abiquo.server.core.infrastructure.storage;
 import java.util.List;
 import java.util.UUID;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -40,12 +42,15 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     private VirtualDatacenterGenerator vdcGenerator;
 
+    private VirtualImageGenerator virtualImageGenerator;
+
     public VolumeManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         poolGenerator = new StoragePoolGenerator(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        virtualImageGenerator = new VirtualImageGenerator(seed);
     }
 
     @Override
@@ -115,6 +120,13 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         entitiesToPersist.add(storagePool);
 
         rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        if (entity.getVirtualImage() != null)
+        {
+            VirtualImage virtualImage = entity.getVirtualImage();
+            virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+            entitiesToPersist.add(virtualImage);
+        }
     }
 
 }

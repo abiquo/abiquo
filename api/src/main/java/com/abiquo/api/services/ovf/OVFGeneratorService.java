@@ -332,7 +332,7 @@ public class OVFGeneratorService
         }
 
         // from the image
-        String href = codifyRepositoryAndPath(virtualImage.getPathName(), imageRepository);
+        String href = codifyRepositoryAndPath(virtualImage.getPath(), imageRepository);
 
         String fileId = virtualImage.getName() + "." + virtualImage.getId();
         BigInteger fileSize = null;
@@ -643,7 +643,7 @@ public class OVFGeneratorService
         VirtualImage virtualImage = nodeVirtualImage.getVirtualImage();
         String fileId = virtualImage.getName() + "." + nodeVirtualImage.getVirtualImage().getId();
 
-        imagePath = virtualImage.getPathName();
+        imagePath = virtualImage.getPath();
 
         String imageRepository = null;
         if (virtualImage.isManaged())
@@ -685,12 +685,12 @@ public class OVFGeneratorService
         if (!virtualImage.isManaged())
         {
             path = virtualImage.getNotManagedBundlePath();
-            virtualImage.setPathName(path);
+            virtualImage.setPath(path);
             virtualImage.setName(virtualImage.getNotManagedBundleName());
         }
         else
         {
-            path = virtualImage.getPathName();
+            path = virtualImage.getPath();
         }
 
         virtualDiskImageFile.getOtherAttributes().put(new QName("destinationPath"), path);

@@ -24,10 +24,6 @@ package com.abiquo.server.core.appslibrary;
 import java.util.List;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -35,6 +31,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -49,6 +46,8 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     private IconGenerator iconGenerator;
 
     private DatacenterGenerator datacenterGenerator;
+
+    private VolumeManagementGenerator volumeGenerator;;
 
     public VirtualImageGenerator(final SeedGenerator seed)
     {
@@ -66,7 +65,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         // Properties
         AssertEx.assertPropertiesEqualSilent(img1, img2, VirtualImage.DISKFORMAT_TYPE_PROPERTY,
             VirtualImage.NAME_PROPERTY, VirtualImage.STATEFUL_PROPERTY,
-            VirtualImage.CPU_REQUIRED_PROPERTY, VirtualImage.PATH_NAME_PROPERTY,
+            VirtualImage.CPU_REQUIRED_PROPERTY, VirtualImage.PATH_PROPERTY,
             VirtualImage.OVFID_PROPERTY, VirtualImage.RAM_REQUIRED_PROPERTY,
             VirtualImage.HD_REQUIRED_PROPERTY, VirtualImage.DISK_FILE_SIZE_PROPERTY,
             VirtualImage.DESCRIPTION_PROPERTY, VirtualImage.SHARED_PROPERTY,
@@ -139,10 +138,12 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     {
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName =
-            newString(nextSeed(), VirtualImage.PATH_NAME_LENGTH_MIN,
-                VirtualImage.PATH_NAME_LENGTH_MAX);
+            newString(nextSeed(), VirtualImage.PATH_LENGTH_MIN, VirtualImage.PATH_LENGTH_MAX);
         String ovfid =
             newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
+        String creationUser =
+            newString(nextSeed(), VirtualImage.CREATION_USER_LENGTH_MIN,
+                VirtualImage.CREATION_USER_LENGTH_MAX);
 
         VirtualImage vimage =
             new VirtualImage(enterprise, name, DiskFormatType.RAW, pathName, diskFileSize, category);
@@ -152,6 +153,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         vimage.setRamRequired(ramRequired);
         vimage.setHdRequiredInBytes(hdRequired);
         vimage.setOvfid(ovfid);
+        vimage.setCreationUser(creationUser);
 
         return vimage;
     }

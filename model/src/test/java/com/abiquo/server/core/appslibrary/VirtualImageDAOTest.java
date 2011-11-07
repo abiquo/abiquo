@@ -139,7 +139,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         VirtualImageDAO dao = createDaoForRollbackTransaction();
         VirtualImage image =
-            dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPathName());
+            dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
         assertNotNull(image);
 
         try
@@ -164,7 +164,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         VirtualImageDAO dao = createDaoForRollbackTransaction();
         boolean exists =
-            dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), vi.getPathName());
+            dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
         assertTrue(exists);
 
         exists = dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), "UNEXISTING");
