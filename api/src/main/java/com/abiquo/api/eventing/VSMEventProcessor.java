@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
+import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -60,6 +61,9 @@ public class VSMEventProcessor implements VSMCallback
 
     @Autowired
     protected TracerLogger tracer;
+
+    @Autowired
+    protected ResourceUpgradeUse resourceUpgrader;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -223,10 +227,11 @@ public class VSMEventProcessor implements VSMCallback
     protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
         final VirtualSystemEvent notification)
     {
-        vMachine.setState(stateByEvent.get(event));
+
+        // Resources are freed
+        // State NOT_ALLOCATED is set in this method too
+        resourceUpgrader.rollbackUse(vMachine);
         logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
 
-        // TODO: Resources are freed?
-        // onDeleteNode(session, nodeVi.toPojoHB()
     }
 }
