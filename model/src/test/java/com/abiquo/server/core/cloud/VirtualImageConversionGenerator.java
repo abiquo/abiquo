@@ -23,6 +23,7 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
@@ -71,6 +72,19 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
         return virtualImageConversion;
     }
 
+    /** FINISHED */
+    public VirtualImageConversion createInstance(final VirtualImage vimage,
+        final DiskFormatType targetFormat)
+    {
+        VirtualImageConversion virtualImageConversion =
+            new VirtualImageConversion(vimage, targetFormat, newString(nextSeed(),
+                VirtualImageConversion.TARGET_PATH_LENGTH_MIN,
+                VirtualImageConversion.TARGET_PATH_LENGTH_MAX));
+
+        virtualImageConversion.setState(ConversionState.FINISHED);
+        return virtualImageConversion;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final VirtualImageConversion entity,
         final List<Object> entitiesToPersist)
@@ -80,7 +94,6 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
         VirtualImage virtualImage = entity.getVirtualImage();
         virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
         entitiesToPersist.add(virtualImage);
-
     }
 
 }

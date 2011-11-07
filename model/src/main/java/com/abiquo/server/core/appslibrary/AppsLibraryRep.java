@@ -27,6 +27,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.VirtualImageConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 
@@ -218,6 +220,26 @@ public class AppsLibraryRep extends DefaultRepBase
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
         return virtualImageDAO.findByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    /**
+     * Gets the list of compatible(*) virtual images available in the provided enterprise and
+     * repository.
+     * 
+     * @param category null indicate all categories (no filter)
+     * @param hypervisor (*) null indicate no filter compatibles, else return images compatibles or
+     *            with compatible conversions. @see {@link VirtualImageConversionDAO}
+     */
+    public List<VirtualImage> findVirtualImages(final Enterprise enterprise,
+        final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
+        final HypervisorType hypervisor)
+    {
+        if (category == null && hypervisor == null)
+        {
+            return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+        }
+
+        return virtualImageDAO.findBy(enterprise, repository, category, hypervisor);
     }
 
     public boolean existImageWithSamePath(final Enterprise enterprise,

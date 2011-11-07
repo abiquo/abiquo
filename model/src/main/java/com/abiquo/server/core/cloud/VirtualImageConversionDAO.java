@@ -21,10 +21,18 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import org.hibernate.NonUniqueObjectException;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
@@ -41,4 +49,71 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         super(VirtualImageConversion.class, entityManager);
     }
 
+    private static Criterion sameImage(final VirtualImage image)
+    {
+        return Restrictions.eq(VirtualImageConversion.VIRTUAL_IMAGE_PROPERTY, image);
+    }
+
+    private static Criterion sameTargetFormat(final DiskFormatType format)
+    {
+        return Restrictions.eq(VirtualImageConversion.TARGET_TYPE_PROPERTY, format);
+    }
+
+    private static Criterion sourceFormatNull()
+    {
+        return Restrictions.isNull(VirtualImageConversion.SOURCE_TYPE_PROPERTY);
+    }
+
+    /**
+     * This is used in {@link VirtualImageDAO} to determine if an image is compatible
+     * 
+     * @deprecated use {@link VirtualImageDAO#findBy}
+     */
+    public static Criterion compatibleConversion(VirtualImage virtualImage,
+        HypervisorType hypervisorType)
+    {
+        return Restrictions.and(sameImage(virtualImage),
+            compatibleConversion(hypervisorType.compatibles()));
+    }
+
+    private static Criterion compatibleConversion(DiskFormatType... types)
+    {
+        if (types.length == 1)
+        {
+            return sameTargetFormat(types[0]);
+        }
+        else
+        {
+            Criterion compatible = sameTargetFormat(types[0]);
+            for (DiskFormatType type : types)
+            {
+                compatible = Restrictions.or(compatible, sameTargetFormat(type));
+            }
+
+            return compatible;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
+        final DiskFormatType format)
+    {
+        // There can be no images
+        List<VirtualImageConversion> conversions =
+            createCriteria(sameImage(image)).add(sameTargetFormat(format)).add(sourceFormatNull())
+                .list();
+        // Are there any?
+        if (conversions != null && !conversions.isEmpty())
+        {
+            // This function should be returning the only object
+            if (conversions.size() > 1)
+            {
+                throw new NonUniqueObjectException("There is more than one conversion!",
+                    image.getId(),
+                    VirtualImageConversion.class.getSimpleName());
+            }
+            return conversions.get(0);
+        }
+        return null;
+    }
 }
