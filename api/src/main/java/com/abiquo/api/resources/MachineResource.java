@@ -343,7 +343,6 @@ public class MachineResource extends AbstractResource
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
                 dataDto.setDatastoreUUID(datastore.getDatastoreUUID());
-
                 dto.getDatastores().add(dataDto);
             }
         }

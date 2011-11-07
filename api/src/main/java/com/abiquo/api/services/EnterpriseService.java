@@ -33,6 +33,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
+import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -187,21 +188,23 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
-            int idPricing = getPricingTemplateId(dto);
-            if (idPricing == 0)
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
-                enterprise.setPricingTemplate(null);
-            }
-            else
-            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    enterprise.setPricingTemplate(null);
+                }
+                else
+                {
 
-                PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
-                enterprise.setPricingTemplate(pricingTemplate);
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    enterprise.setPricingTemplate(pricingTemplate);
+                }
             }
         }
-
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
@@ -278,18 +281,21 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
-            int idPricing = getPricingTemplateId(dto);
-            if (idPricing == 0)
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
-                old.setPricingTemplate(null);
-            }
-            else
-            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    old.setPricingTemplate(null);
+                }
+                else
+                {
 
-                PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
-                old.setPricingTemplate(pricingTemplate);
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    old.setPricingTemplate(pricingTemplate);
+                }
             }
         }
 
@@ -467,11 +473,20 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
-                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
-                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
-                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
-                .getVlansSoft(), dto.getVlansHard());
+            new DatacenterLimits(enterprise,
+                datacenter,
+                dto.getRamSoftLimitInMb(),
+                dto.getCpuCountSoftLimit(),
+                dto.getHdSoftLimitInMb(),
+                dto.getRamHardLimitInMb(),
+                dto.getCpuCountHardLimit(),
+                dto.getHdHardLimitInMb(),
+                dto.getStorageSoft(),
+                dto.getStorageHard(),
+                dto.getPublicIpsSoft(),
+                dto.getPublicIpsHard(),
+                dto.getVlansSoft(),
+                dto.getVlansHard());
 
         if (!limit.isValid())
         {

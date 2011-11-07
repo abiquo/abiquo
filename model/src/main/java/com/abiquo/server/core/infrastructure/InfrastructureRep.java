@@ -800,8 +800,9 @@ public class InfrastructureRep extends DefaultRepBase
         // TODO Auto-generated method stub
         return rackDao.getRandomMachinesToShutDownFromRack(rackId, howMany);
     }
-    
-    /** Return all the public VLANs by Datacenter.
+
+    /**
+     * Return all the public VLANs by Datacenter.
      * 
      * @param datacenter {@link Datacenter} where we search for.
      * @return list of found {@link VLANNetwork}
@@ -872,5 +873,4 @@ public class InfrastructureRep extends DefaultRepBase
     {
         pricingRep.insertPricingTier(pricingTier);
     }
-
 }
