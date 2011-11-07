@@ -26,10 +26,13 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -37,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.InfrastructureService;
@@ -46,6 +51,7 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -56,6 +62,7 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachineStateDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 
 @Parent(MachinesResource.class)
@@ -96,6 +103,10 @@ public class MachineResource extends AbstractResource
     public static final String MACHINE_LOCATOR_LED = "led";
 
     public static final String MACHINE_LOCATOR_LED_REL = "led";
+
+    public static final String MACHINE_ACTION_CHECK = "action/checkState";
+
+    public static final String MACHINE_CHECK = "checkState";
 
     @Autowired
     MachineService service;
@@ -154,8 +165,7 @@ public class MachineResource extends AbstractResource
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
         @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @PathParam(MachineResource.SYNC) final Boolean sync, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
@@ -213,6 +223,53 @@ public class MachineResource extends AbstractResource
 
         vmService.deleteNotManagedVirtualMachines(hypervisor, true);
         infraService.updateUsedResourcesByMachine(machineId);
+    }
+
+    /**
+     * Check the machine state and update it.
+     * 
+     * @param datacenterId The ID of the datacenter where this remote service and machine are
+     *            assigned.
+     * @param ip The IP of the target cloud node.
+     * @param hypervisorType The cloud node hypervisor type.
+     * @param user The hypervisor user.
+     * @param password The hypervisor password.
+     * @param port The hypervisor AIM port.
+     * @return The actual machine's state.
+     */
+    @GET
+    @Path(MACHINE_ACTION_CHECK)
+    public MachineStateDto checkMachineState(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @QueryParam("sync") @DefaultValue("false") final boolean sync,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        try
+        {
+            Machine m = service.getMachine(machineId);
+            Hypervisor h = m.getHypervisor();
+
+            MachineState state =
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
+                    h.getPassword(), h.getPort());
+
+            if (sync)
+            {
+                m.setState(state);
+                MachineDto machineDto = createTransferObject(m, restBuilder);
+                service.modifyMachine(machineId, machineDto);
+            }
+
+            MachineStateDto dto = new MachineStateDto();
+            dto.setState(state);
+            return dto;
+        }
+        catch (Exception e)
+        {
+            throw translateException(e);
+        }
     }
 
     // protected methods
@@ -361,5 +418,16 @@ public class MachineResource extends AbstractResource
         }
 
         return machinesDto;
+    }
+
+    /**
+     * Translates the Node Collector client exception into a {@link WebApplicationException}.
+     * 
+     * @param e The Exception to transform.
+     * @return The transformed Exception.
+     */
+    protected APIException translateException(final Exception e)
+    {
+        return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }

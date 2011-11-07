@@ -1333,4 +1333,3 @@ DELIMITER ;
 CALL `kinton`.`CalculateCloudUsageStats`();
 CALL `kinton`.`CalculateEnterpriseResourcesStats`();
 CALL `kinton`.`CalculateVdcEnterpriseStats`();
-

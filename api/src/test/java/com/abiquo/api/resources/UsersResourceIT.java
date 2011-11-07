@@ -40,7 +40,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.Privileges;
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -130,11 +129,11 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI("_");
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("orderBy",
-                new String[] {"nick"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("orderBy", new String[] {"nick"}), false);
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("filter",
-                new String[] {u1.getNick()}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("filter", new String[] {u1.getNick()}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -170,8 +169,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("desc",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("desc", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
@@ -335,8 +334,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         assertUserResponse(dto, response);
         UserDto entityPost = response.getEntity(UserDto.class);
-        assertEquals(entityPost.getAvailableVirtualDatacenters(), dto
-            .getAvailableVirtualDatacenters());
+        assertEquals(entityPost.getAvailableVirtualDatacenters(),
+            dto.getAvailableVirtualDatacenters());
     }
 
     @Test
@@ -360,8 +359,8 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveUsersURI(user.getEnterprise().getId());
         uri =
-            UriHelper.appendQueryParamsToPath(uri, Collections.singletonMap("connected",
-                new String[] {"true"}), false);
+            UriHelper.appendQueryParamsToPath(uri,
+                Collections.singletonMap("connected", new String[] {"true"}), false);
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
 
