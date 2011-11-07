@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.resources.cloud;
+package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;

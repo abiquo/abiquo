@@ -122,8 +122,6 @@ public class OVFPackageListResource extends AbstractResource
         @QueryParam(OVF_PACKAGE_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM) final Integer datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO check enterprise can use datacenter
-
         return service
             .getOVFPackageListInstanceStatus(ovfPackageListId, datacenterId, idEnterprise);
     }

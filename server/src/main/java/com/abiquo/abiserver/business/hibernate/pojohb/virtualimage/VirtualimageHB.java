@@ -23,6 +23,8 @@ package com.abiquo.abiserver.business.hibernate.pojohb.virtualimage;
 
 // Generated 16-oct-2008 16:52:14 by Hibernate Tools 3.2.1.GA
 
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
@@ -78,6 +80,10 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     private Long diskFileSize;
 
     private String costCode;
+
+    private String creationUser;
+
+    private Date creationDate;
 
     public VirtualimageHB()
     {
@@ -283,6 +289,26 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.costCode = costCode;
     }
 
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(final String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
     @Override
     public VirtualImage toPojo()
     {
@@ -336,6 +362,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         virtualImage.setStateful(stateful);
         virtualImage.setDiskFileSize(diskFileSize);
         virtualImage.setCostCode(costCode);
+        virtualImage.setCreationUser(creationUser);
+        virtualImage.setCreationDate(creationDate);
 
         return virtualImage;
     }

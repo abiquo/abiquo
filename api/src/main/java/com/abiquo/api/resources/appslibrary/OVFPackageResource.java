@@ -96,7 +96,6 @@ public class OVFPackageResource extends AbstractResource
 
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO check enterprise can use repository
         return service.getOVFPackageState(ovfPackageId, datacenterId, idEnterprise);
     }
 

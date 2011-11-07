@@ -49,7 +49,6 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
-import com.abiquo.server.core.infrastructure.Repository;
 
 public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     VirtualImageResourceStub
@@ -139,7 +138,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setId(vi.getId());
         img.setName(vi.getName());
         img.setDescription(vi.getDescription());
-        img.setPath(vi.getPathName());
+        img.setPath(vi.getPath());
         img.setHdRequired(vi.getHdRequired());
         img.setRamRequired(vi.getRamRequired());
         img.setCpuRequired(vi.getCpuRequired());
@@ -152,6 +151,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setIcon(createIconFromLink(getLink("icon", vi.getLinks())));
         img.setRepository(createRepositoryFromLinks());
         img.setDiskFormatType(createDiskFormatType(DiskFormatType.valueOf(vi.getDiskFormatType())));
+        img.setCreationUser(vi.getCreationUser());
+        img.setCreationDate(vi.getCreationDate());
         // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
         // properly)
         // private VirtualImage master; // TODO master instance images

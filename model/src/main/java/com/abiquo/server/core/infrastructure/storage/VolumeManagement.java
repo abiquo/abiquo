@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -30,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -50,7 +52,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {
+@NamedQueries({
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
@@ -67,20 +69,20 @@ public class VolumeManagement extends RasdManagement
 
     public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
 
-    public static final String BY_VDC =
-        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
-            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.virtualDatacenter.id = :vdcId "
-            + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
-            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String BY_VDC = "SELECT vol FROM VolumeManagement vol "
+        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
+        + "WHERE vol.virtualDatacenter.id = :vdcId " + "AND ("
+        + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+        + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+        + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
-    public static final String BY_POOL =
-        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
-            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.storagePool.idStorage = :poolId "
-            + "AND (" + "vol.rasd.elementName like :filterLike "
-            + "OR vol.rasd.id like :filterLike " + "OR vm.name like :filterLike "
-            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String BY_POOL = "SELECT vol FROM VolumeManagement vol "
+        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
+        + "WHERE vol.storagePool.idStorage = :poolId " + "AND ("
+        + "vol.rasd.elementName like :filterLike " + "OR vol.rasd.id like :filterLike "
+        + "OR vm.name like :filterLike " + "OR vapp.name like :filterLike "
+        + "OR vol.virtualDatacenter.name like :filterLike "
+        + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -141,7 +143,7 @@ public class VolumeManagement extends RasdManagement
     private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
 
     @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
     private VirtualImage virtualImage;
 
@@ -154,6 +156,12 @@ public class VolumeManagement extends RasdManagement
     public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
+
+        if (virtualImage != null)
+        {
+            this.virtualImage.setStateful(true);
+            this.virtualImage.setPath(getIdScsi());
+        }
     }
 
     public boolean isStateful()
@@ -189,6 +197,11 @@ public class VolumeManagement extends RasdManagement
     {
         this.idScsi = idScsi;
         getRasd().setConnection(idScsi);
+        if (isStateful())
+        {
+            // If the volume is stateful update the virtual image too
+            this.virtualImage.setPath(idScsi);
+        }
     }
 
     public final static String STATE_PROPERTY = "state";

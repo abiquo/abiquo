@@ -47,6 +47,12 @@
         <property name="costCode" type="string">
             <column length="50" name="cost_code" not-null="false" />
         </property>
+        <property name="creationUser" type="string">
+            <column length="128" name="creation_user" not-null="true" />
+        </property>
+        <property name="creationDate" type="timestamp">
+            <column name="creation_date" not-null="true" />
+        </property>
         <property name="type" type="DiskFormatType" not-null="true" />
         <!-- RELATIONS -->
         <many-to-one class="RepositoryHB" name="repository" fetch="select" lazy="false">

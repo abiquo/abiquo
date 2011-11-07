@@ -68,9 +68,7 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -700,12 +698,10 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
-    @Override
-    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final Integer vimageId, final VirtualImage master, final Category category, final Icon icon)
+    protected List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualImage image, final VirtualImage master, final AbiquoLinkBuilder builder)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
 
         Map<String, String> paramsDc = new HashMap<String, String>();
         paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
@@ -722,23 +718,23 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
             DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
 
-        params.put(CategoryResource.CATEGORY, category.getId().toString());
-
+        params.put(CategoryResource.CATEGORY, image.getCategory().getId().toString());
         RESTLink categoryLink =
             builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params);
-        categoryLink.setTitle(category.getName());
+        categoryLink.setTitle(image.getCategory().getName());
         links.add(categoryLink);
 
-        params.put(VirtualImageResource.VIRTUAL_IMAGE, vimageId.toString());
-        links.add(builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params));
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, image.getId().toString());
+        RESTLink imageLink = builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params);
+        imageLink.setTitle(image.getName());
+        links.add(imageLink);
 
-        if (icon != null)
+        if (image.getIcon() != null)
         {
-            params.put(IconResource.ICON, icon.getId().toString());
-
+            params.put(IconResource.ICON, image.getIcon().getId().toString());
             RESTLink iconLink =
                 builder.buildRestLink(IconResource.class, IconResource.ICON, params);
-            iconLink.setTitle(icon.getPath()); // TODO do not use title (altRef)
+            iconLink.setTitle(image.getIcon().getPath()); // TODO do not use title (altRef)
             links.add(iconLink);
         }
 
@@ -757,6 +753,14 @@ public class RESTBuilder implements IRESTBuilder
         }
 
         return links;
+    }
+
+    @Override
+    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualImage image, final VirtualImage master)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return buildVirtualImageLinks(enterpriseId, dcId, image, master, builder);
     }
 
     @Override

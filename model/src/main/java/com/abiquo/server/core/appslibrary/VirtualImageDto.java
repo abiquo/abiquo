@@ -21,14 +21,16 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualImage")
-@XmlType(propOrder = {"id", "name", "description", "pathName", "diskFormatType", "diskFileSize",
-"cpuRequired", "ramRequired", "hdRequired", "shared", "stateful", "costCode"})
+@XmlType(propOrder = {"id", "name", "description", "path", "diskFormatType", "diskFileSize",
+"cpuRequired", "ramRequired", "hdRequired", "shared", "costCode", "creationDate", "creationUser"})
 public class VirtualImageDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
@@ -39,11 +41,9 @@ public class VirtualImageDto extends SingleResourceTransportDto
 
     private String name;
 
-    private boolean stateful;
-
     private int cpuRequired;
 
-    private String pathName;
+    private String path;
 
     private int ramRequired;
 
@@ -56,6 +56,10 @@ public class VirtualImageDto extends SingleResourceTransportDto
     private boolean shared;
 
     private String costCode;
+
+    private Date creationDate;
+
+    private String creationUser;
 
     public Integer getId()
     {
@@ -87,16 +91,6 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.name = name;
     }
 
-    public boolean isStateful()
-    {
-        return stateful;
-    }
-
-    public void setStateful(final boolean stateful)
-    {
-        this.stateful = stateful;
-    }
-
     public int getCpuRequired()
     {
         return cpuRequired;
@@ -107,14 +101,14 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.cpuRequired = cpuRequired;
     }
 
-    public String getPathName()
+    public String getPath()
     {
-        return pathName;
+        return path;
     }
 
-    public void setPathName(final String pathName)
+    public void setPath(final String path)
     {
-        this.pathName = pathName;
+        this.path = path;
     }
 
     public int getRamRequired()
@@ -175,6 +169,26 @@ public class VirtualImageDto extends SingleResourceTransportDto
     public void setCostCode(final String costCode)
     {
         this.costCode = costCode;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
+    }
+
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(final String creationUser)
+    {
+        this.creationUser = creationUser;
     }
 
 }

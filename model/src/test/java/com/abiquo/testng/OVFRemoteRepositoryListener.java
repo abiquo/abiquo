@@ -151,6 +151,8 @@ public class OVFRemoteRepositoryListener implements ISuiteListener
         File diskFile = new File(diskFilePath);
         RandomAccessFile f = new RandomAccessFile(diskFile, "rw");
         f.setLength(diskFileSize);
+        
+        diskFile.deleteOnExit();
     }
 
     private void deleteDiskFile() throws Exception
