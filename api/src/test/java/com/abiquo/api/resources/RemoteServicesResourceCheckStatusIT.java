@@ -44,53 +44,53 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractResourcePlusAMI
 
     private static Server server;
 
-//    @BeforeClass
-//    public static void setupServer() throws Exception
-//    {
-//        server = new Server(9010);
-//
-//        Context amCheckContextHandler = new Context(server, "/am/check", Context.SESSIONS);
-//
-//        ServletHolder amCheckServletHolder = new ServletHolder(new CheckServlet());
-//        amCheckContextHandler.addServlet(amCheckServletHolder, "/");
-//
-//        Context amContextHandler = new Context(server, "/am", Context.SESSIONS);
-//
-//        Map<String, String> amInitParameters = new HashMap<String, String>();
-//        amInitParameters.put("contextConfigLocation", amContextConfigLocation);
-//
-//        amContextHandler.setInitParams(amInitParameters);
-//        amContextHandler.addEventListener(new ContextLoaderListener());
-//
-//        ServletHolder amServletHolder = new ServletHolder(new CXFServlet());
-//        amContextHandler.addServlet(amServletHolder, "/*");
-//
-//        // VM Test Repository for AM
-//        File vmrepo = new File(AbstractResourcePlusAMIT.VM_REPOSITORY_TEST);
-//        if (vmrepo != null && vmrepo.exists())
-//        {
-//            deleteDirectory(vmrepo);
-//        }
-//        vmrepo.mkdirs();
-//
-//        server.start();
-//    }
+    // @BeforeClass
+    // public static void setupServer() throws Exception
+    // {
+    // server = new Server(9010);
+    //
+    // Context amCheckContextHandler = new Context(server, "/am/check", Context.SESSIONS);
+    //
+    // ServletHolder amCheckServletHolder = new ServletHolder(new CheckServlet());
+    // amCheckContextHandler.addServlet(amCheckServletHolder, "/");
+    //
+    // Context amContextHandler = new Context(server, "/am", Context.SESSIONS);
+    //
+    // Map<String, String> amInitParameters = new HashMap<String, String>();
+    // amInitParameters.put("contextConfigLocation", amContextConfigLocation);
+    //
+    // amContextHandler.setInitParams(amInitParameters);
+    // amContextHandler.addEventListener(new ContextLoaderListener());
+    //
+    // ServletHolder amServletHolder = new ServletHolder(new CXFServlet());
+    // amContextHandler.addServlet(amServletHolder, "/*");
+    //
+    // // VM Test Repository for AM
+    // File vmrepo = new File(AbstractResourcePlusAMIT.VM_REPOSITORY_TEST);
+    // if (vmrepo != null && vmrepo.exists())
+    // {
+    // deleteDirectory(vmrepo);
+    // }
+    // vmrepo.mkdirs();
+    //
+    // server.start();
+    // }
 
-//    @AfterClass
-//    public static void tearDownServet() throws Exception
-//    {
-//        if (server != null)
-//        {
-//            server.stop();
-//        }
-//
-//        File vmrepo = new File(AbstractResourcePlusAMIT.VM_REPOSITORY_TEST);
-//        if (vmrepo != null || !vmrepo.exists())
-//        {
-//            vmrepo.delete();
-//        }
-//    }
-//
+    // @AfterClass
+    // public static void tearDownServet() throws Exception
+    // {
+    // if (server != null)
+    // {
+    // server.stop();
+    // }
+    //
+    // File vmrepo = new File(AbstractResourcePlusAMIT.VM_REPOSITORY_TEST);
+    // if (vmrepo != null || !vmrepo.exists())
+    // {
+    // vmrepo.delete();
+    // }
+    // }
+    //
     @Override
     protected List<String> data()
     {
@@ -107,8 +107,8 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractResourcePlusAMI
         dto.setUri("http://localhost:9010/am");
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                dto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(dto);
 
         assertEquals(201, response.getStatusCode());
 

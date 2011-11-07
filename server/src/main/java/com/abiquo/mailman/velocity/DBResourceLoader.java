@@ -42,8 +42,6 @@ public class DBResourceLoader extends ResourceLoader
 
     private static final Logger debug = LoggerFactory.getLogger(DBResourceLoader.class.getName());
 
-
-
     /**
      * Default constructor
      */
@@ -66,7 +64,8 @@ public class DBResourceLoader extends ResourceLoader
         {
             dao = (TemplateDao) DynamicDaoFactory.getInstance().getDao(FileTemplateDaoImpl.class);
             daoReturn =
-                dao.getTemplate(source, (String) super.rsvc.getApplicationAttribute(VelocityMailTemplate.APP_LANG),
+                dao.getTemplate(source,
+                    (String) super.rsvc.getApplicationAttribute(VelocityMailTemplate.APP_LANG),
                     (String) super.rsvc.getApplicationAttribute(VelocityMailTemplate.APP_BRAND));
         }
         catch (ResourceNotFoundException e)

@@ -38,6 +38,7 @@ import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Repository
 @Transactional
@@ -132,6 +133,14 @@ public class EnterpriseRep extends DefaultRepBase
     public List<Enterprise> findAll(final Integer offset, final Integer numResults)
     {
         return this.enterpriseDAO.findAll(offset, numResults);
+    }
+
+    public List<Enterprise> findByPricingTemplate(final PricingTemplate pricingTempl,
+        final boolean included, final String filterName, final Integer offset,
+        final Integer numResults)
+    {
+        return this.enterpriseDAO.findByPricingTemplate(pricingTempl, included, filterName, offset,
+            numResults);
     }
 
     public List<Enterprise> findByNameAnywhere(final String name)
@@ -435,5 +444,10 @@ public class EnterpriseRep extends DefaultRepBase
     public boolean existAnyUserWithNickAndAuth(final String nick, final AuthType authType)
     {
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
+    }
+
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return enterpriseDAO.existAnyEnterpriseWithPricingTemplate(pricingTemplate);
     }
 }

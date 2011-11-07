@@ -74,8 +74,8 @@ public class OVFPackageListsResourceIT extends AbstractResourceIT
         packageList.setName("created_name");
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                packageList);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(packageList);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -101,8 +101,8 @@ public class OVFPackageListsResourceIT extends AbstractResourceIT
         packageList.setOvfPackages(packages);
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                packageList);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(packageList);
 
         assertEquals(response.getStatusCode(), 201);
 

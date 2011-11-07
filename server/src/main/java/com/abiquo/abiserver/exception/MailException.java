@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.exception;
 
-
 public class MailException extends AbiCloudException
 {
     private static final long serialVersionUID = 4105278699638345392L;

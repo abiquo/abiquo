@@ -67,8 +67,8 @@ public class DatacenterLimitsDAO extends DefaultDAOBase<Integer, DatacenterLimit
 
     public Collection<DatacenterLimits> findByEnterprise(Enterprise enterprise)
     {
-        return findByCriterions(sameEnterprise(enterprise), Restrictions
-            .isNotNull(DatacenterLimits.DATACENTER_PROPERTY));
+        return findByCriterions(sameEnterprise(enterprise),
+            Restrictions.isNotNull(DatacenterLimits.DATACENTER_PROPERTY));
     }
 
     public DatacenterLimits findByEnterpriseAndDatacenter(Enterprise enterprise,

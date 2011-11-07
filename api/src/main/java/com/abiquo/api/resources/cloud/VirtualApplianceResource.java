@@ -61,6 +61,8 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
+
     public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
@@ -187,6 +189,17 @@ public class VirtualApplianceResource
         service.startVirtualAppliance(vdcId, vappId);
     }
 
+    @GET
+    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    public String getPriceVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
+        return virtualAppliancePrice;
+    }
+
     @PUT
     @Path(VIRTUAL_APPLIANCE_ACTION_POWERON)
     public List<VirtualMachineChangeStateResultDto> powerOnVirtualApp(
@@ -209,7 +222,8 @@ public class VirtualApplianceResource
     {
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
-        return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.POWERED_OFF);
+        return service
+            .changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.POWERED_OFF);
 
     }
 
@@ -238,4 +252,5 @@ public class VirtualApplianceResource
         return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.REBOOTED);
 
     }
+
 }

@@ -510,7 +510,6 @@ public class InfrastructureService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
-
         return remoteServiceService.addRemoteService(rs, datacenterId);
     }
 
@@ -810,6 +809,7 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+
     }
 
     public Collection<VirtualMachine> getVirtualMachinesByMachine(final Integer machineId)
@@ -823,6 +823,7 @@ public class InfrastructureService extends DefaultApiService
     {
         Machine machine = machineService.getMachine(machineId);
         updateUsedResourcesByMachine(machine);
+
     }
 
     public void updateUsedResourcesByMachine(final Machine machine)

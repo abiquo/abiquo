@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -71,12 +72,24 @@ public class DatacentersResource extends AbstractResource
     @Autowired
     private EnterpriseService entService;
 
+    @Autowired
+    private SecurityService securityService;
+
     @GET
     @Produces({MediaType.APPLICATION_XML, LINK_MEDIA_TYPE})
     public DatacentersDto getDatacenters(@Context final IRESTBuilder restBuilder,
-        @QueryParam(value = "idEnterprise") final String idEnterprise) throws Exception
+        @QueryParam(value = "idEnterprise") final String idEnterprise,
+        @QueryParam("pricing") final Integer pricingId) throws Exception
     {
+
         Collection<Datacenter> list = null;
+        if (pricingId != null)
+        {
+            if (!securityService.hasPrivilege(SecurityService.PRICING_VIEW))
+            {
+                securityService.requirePrivilege(SecurityService.PRICING_VIEW);
+            }
+        }
         if (StringUtils.hasText(idEnterprise))
         {
             Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));
@@ -138,6 +151,7 @@ public class DatacentersResource extends AbstractResource
     @POST
     public DatacenterDto postDatacenter(final DatacenterDto datacenterDto,
         @Context final IRESTBuilder restBuilder) throws Exception
+
     {
         // create dacenter
         Datacenter datacenter = createPersistenceObject(datacenterDto);

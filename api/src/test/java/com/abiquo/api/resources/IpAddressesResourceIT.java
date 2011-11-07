@@ -84,9 +84,9 @@ public class IpAddressesResourceIT extends AbstractJpaGeneratorIT
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
-                .getAddress()), IPNetworkRang
-                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(
+                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
+                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         while (!ip.equals(lastIP))
         {

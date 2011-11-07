@@ -41,7 +41,7 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
 
     public RESTLink buildRestLink(Class< ? > resource, String rel, Map<String, String> params)
     {
-        
+
         List<SyndLink> links = setResource(resource).rel(rel).pathParams(params).build(null);
         SyndLink first = links.get(0);
         return new RESTLink(first);
@@ -59,8 +59,8 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         Map<String, String> params)
     {
         List<SyndLink> links =
-            setResource(resource).rel("action").pathParams(params).subResource(subResource).build(
-                null);
+            setResource(resource).rel("action").pathParams(params).subResource(subResource)
+                .build(null);
         SyndLink first = links.get(0);
         RESTLink link = new RESTLink(first);
         link.setTitle(title);
@@ -73,10 +73,10 @@ public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-//                if (!pathParams.containsKey(entry.getKey()))
-//                {
-                    pathParam(entry.getKey(), entry.getValue());
-              //  }
+                // if (!pathParams.containsKey(entry.getKey()))
+                // {
+                pathParam(entry.getKey(), entry.getValue());
+                // }
             }
         }
         return this;

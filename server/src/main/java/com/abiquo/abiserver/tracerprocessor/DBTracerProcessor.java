@@ -187,16 +187,18 @@ public class DBTracerProcessor implements TracerProcessor
 
             log.debug("Query to write: " + insert);
             HibernateDAOFactory.getSessionFactory().getCurrentSession().createSQLQuery(insert)
-                .setParameter("datacenter", datacenter).setParameter("rack", rack).setParameter(
-                    "machine", physicalMachine).setParameter("storage", storageSystem)
+                .setParameter("datacenter", datacenter).setParameter("rack", rack)
+                .setParameter("machine", physicalMachine).setParameter("storage", storageSystem)
                 .setParameter("storagePool", storagePool).setParameter("volume", volume)
-                .setParameter("network", network).setParameter("subnet", subnet).setParameter(
-                    "enterprise", enterprise).setParameter("userId", userId).setParameter("user",
-                    user).setParameter("virtualDatacenter", virtualDataCenter).setParameter(
-                    "virtualApp", virtualApp).setParameter("virtualMachine", virtualMachine)
-                .setParameter("severity", severity).setParameter("performedBy", performedBy)
-                .setParameter("actionPerformed", actionPerformed).setParameter("component",
-                    component).setParameter("stacktrace", stacktrace).executeUpdate();
+                .setParameter("network", network).setParameter("subnet", subnet)
+                .setParameter("enterprise", enterprise).setParameter("userId", userId)
+                .setParameter("user", user).setParameter("virtualDatacenter", virtualDataCenter)
+                .setParameter("virtualApp", virtualApp)
+                .setParameter("virtualMachine", virtualMachine).setParameter("severity", severity)
+                .setParameter("performedBy", performedBy)
+                .setParameter("actionPerformed", actionPerformed)
+                .setParameter("component", component).setParameter("stacktrace", stacktrace)
+                .executeUpdate();
         }
         finally
         {

@@ -97,6 +97,7 @@ public class MachinesResource extends AbstractResource
         @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(0) final Integer datacenterId,
         @PathParam(RackResource.RACK) @Min(0) final Integer rackId, final MachineDto machine,
         @Context final IRESTBuilder restBuilder) throws Exception
+
     {
         Machine mToCreate = MachineResource.createPersistenceObject(machine);
         Machine m = infrastructureService.addMachine(mToCreate, datacenterId, rackId);
@@ -134,6 +135,7 @@ public class MachinesResource extends AbstractResource
 
     public static MachinesDto transformMachinesDto(final IRESTBuilder restBuilder,
         final Collection<Machine> machines) throws Exception
+
     {
         MachinesDto machinesDto = new MachinesDto();
 

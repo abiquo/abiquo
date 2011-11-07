@@ -90,8 +90,8 @@ public class InstallOVFPackageIT extends AbstractResourcePlusAMIT
         // System.out.println("installPackageAction: " + installPackageAction);
 
         Resource resource =
-            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML).queryParam(
-                OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, TARGET_DATACENTER_ID);
+            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML)
+                .queryParam(OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, TARGET_DATACENTER_ID);
 
         ClientResponse response = resource.post(null);
         assertEquals(response.getStatusCode(), 202);

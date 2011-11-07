@@ -91,8 +91,8 @@ public class OVFPackageResourceIT extends AbstractResourceIT
 
         Resource resource = client.resource(validOVFPackage);
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).put(
-                ovfPackageDto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .put(ovfPackageDto);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -135,8 +135,8 @@ public class OVFPackageResourceIT extends AbstractResourceIT
                 OVFPackageResource.INSTALL_ACTION);
 
         Resource resource =
-            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML).queryParam(
-                OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, 1);
+            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML)
+                .queryParam(OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, 1);
 
         ClientResponse response = resource.post(null);
         assertEquals(201, response.getStatusCode());

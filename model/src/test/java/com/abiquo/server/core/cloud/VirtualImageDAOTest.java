@@ -65,5 +65,4 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         return (VirtualImageGenerator) super.eg();
     }
 
-    
 }

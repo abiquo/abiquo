@@ -65,5 +65,4 @@ public class DhcpDAOTest extends DefaultDAOTestBase<DhcpDAO, Dhcp>
         return (DhcpGenerator) super.eg();
     }
 
-    
 }

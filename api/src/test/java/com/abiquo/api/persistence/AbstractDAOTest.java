@@ -67,9 +67,11 @@ public abstract class AbstractDAOTest extends AbstractJpaDBUnitTest
 
     private void assertResourceEquals(Object toPersist, Object persistent) throws Exception
     {
-        assertEquals(toPersist.getClass().getMethod(compareMethod(), new Class[0]).invoke(
-            toPersist, new Object[0]), persistent.getClass().getMethod(compareMethod(),
-            new Class[0]).invoke(persistent, new Object[0]));
+        assertEquals(
+            toPersist.getClass().getMethod(compareMethod(), new Class[0])
+                .invoke(toPersist, new Object[0]),
+            persistent.getClass().getMethod(compareMethod(), new Class[0])
+                .invoke(persistent, new Object[0]));
     }
 
 }

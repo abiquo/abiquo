@@ -100,7 +100,7 @@ public class VsmServiceStub extends DefaultApiService
         }
 
     }
-    
+
     protected VSMClient initializeVSMClient(String serviceURI)
     {
         return new VSMClient(serviceURI);

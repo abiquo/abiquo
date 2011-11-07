@@ -310,7 +310,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
             {
                 dataResult.setSuccess(false);
                 dataResult.setMessage("Connection refused: Heartbeat is not configured");
-                logger.error("error getting the heartbeating data","Heartbeat not enabled");
+                logger.error("error getting the heartbeating data", "Heartbeat not enabled");
             }
             else
             {

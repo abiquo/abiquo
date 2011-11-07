@@ -45,11 +45,10 @@ import com.abiquo.server.core.util.network.IPAddress;
 
 /**
  * @author jdevesa
- *
  */
 @Documented
 @Constraint(validatedBy = Hypervisor.Validator.class)
-@Target( {METHOD, FIELD, PARAMETER})
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Hypervisor
 {
@@ -81,7 +80,7 @@ public @interface Hypervisor
 
             boolean valid = false;
             if (!StringUtils.isEmpty(value))
-            {                
+            {
                 for (HypervisorType currentHyp : HypervisorType.values())
                 {
                     if (currentHyp.getValue().equalsIgnoreCase(value))
@@ -95,7 +94,8 @@ public @interface Hypervisor
             if (!valid)
             {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(hyp.message()).addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(hyp.message())
+                    .addConstraintViolation();
             }
 
             return valid;
