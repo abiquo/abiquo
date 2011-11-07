@@ -44,6 +44,8 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -117,6 +119,9 @@ public class InfrastructureRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
 
+    @Autowired
+    private DhcpOptionDAO dhcpOptionDAO;
+
     public InfrastructureRep()
     {
 
@@ -141,6 +146,7 @@ public class InfrastructureRep extends DefaultRepBase
         this.datacenterLimitDao = new DatacenterLimitsDAO(entityManager);
         this.storageRep = new StorageRep(entityManager);
         this.vlanDao = new VLANNetworkDAO(entityManager);
+        this.ipPoolDao = new IpPoolManagementDAO(entityManager);
         this.ipPoolDao = new IpPoolManagementDAO(entityManager);
     }
 
@@ -796,6 +802,11 @@ public class InfrastructureRep extends DefaultRepBase
     public void updateLimits(final DatacenterLimits dclimits)
     {
         datacenterLimitDao.flush();
+    }
+
+    public Collection<DhcpOption> findAllDhcp()
+    {
+        return this.dhcpOptionDAO.findAll();
     }
 
 }
