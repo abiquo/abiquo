@@ -47,7 +47,7 @@ public interface NetworkResourceStub
     public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
-        NetworkConfiguration configuration, Enterprise enterprise);
+        NetworkConfiguration configuration, Enterprise enterprise, boolean unmanaged);
 
     public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
 
