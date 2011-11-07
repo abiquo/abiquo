@@ -22,6 +22,7 @@
 package com.abiquo.api.resources.appslibrary;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -74,6 +75,24 @@ public class VirtualImageResource extends AbstractResource
         return createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder);
     }
 
+    @PUT
+    public VirtualImageDto editVirtualImage(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
+        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer virtualImageId,
+        final VirtualImageDto vImageDto, @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        VirtualImage vimage =
+            vimageService.updateVirtualImage(enterpriseId, datacenterId, virtualImageId, vImageDto);
+
+        final String amUri =
+            infrastructureService.getRemoteService(datacenterId,
+                RemoteServiceType.APPLIANCE_MANAGER).getUri();
+
+        return createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder);
+
+    }
+
     /**
      * Return the {@link VirtualImageDto}o object from the POJO {@link VirtualImage}
      */
@@ -102,8 +121,8 @@ public class VirtualImageResource extends AbstractResource
         final Integer enterpriseId, final Integer dcId, final VirtualImage vimage,
         final String amUri)
     {
-        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage.getId(),
-            vimage.getMaster(), vimage.getCategory(), vimage.getIcon()));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage.getId(), vimage
+            .getMaster(), vimage.getCategory(), vimage.getIcon()));
         addApplianceManagerLinks(dto, amUri, enterpriseId, vimage.getOvfid());
         return dto;
     }

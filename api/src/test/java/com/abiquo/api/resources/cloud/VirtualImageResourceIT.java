@@ -26,6 +26,8 @@ import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveCategoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
+import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -40,10 +42,13 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
@@ -210,6 +215,147 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
 
         VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
         assertVirtualImageWithLinks(virtualImage, dto);
+    }
+
+    @Test
+    public void editVirtualImage()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setOvfid(null);
+        setup(limits, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+
+        dto.setName("newName");
+        dto.setPathName("newPath");
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto modifiedDto = response.getEntity(VirtualImageDto.class);
+        assertEquals(modifiedDto.getName(), dto.getName());
+        assertEquals(modifiedDto.getPathName(), dto.getPathName());
+
+    }
+
+    @Test
+    public void editVirtualImageChangeEnterpriseRises409()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setOvfid(null);
+        setup(limits, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+
+        Enterprise otherEnterprise = enterpriseGenerator.createUniqueInstance();
+        setup(otherEnterprise);
+
+        String enterpriseUri = resolveEnterpriseURI(otherEnterprise.getId());
+
+        RESTLink enterpriseLink = dto.searchLink(EnterpriseResource.ENTERPRISE);
+        enterpriseLink.setHref(enterpriseUri);
+        dto.addLink(enterpriseLink);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, 409, APIError.VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED);
+    }
+
+    @Test
+    public void editVirtualImageChangeDataCenterRepoRises409()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setOvfid(null);
+        setup(limits, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+
+        Datacenter otherDatacenter = datacenterGenerator.createUniqueInstance();
+        DatacenterLimits limits1 = datacenterLimitsGenerator.createInstance(ent, otherDatacenter);
+
+        setup(limits1, otherDatacenter);
+
+        String repoUri = resolveDatacenterRepositoryURI(ent.getId(), otherDatacenter.getId());
+
+        RESTLink repoLink = dto.searchLink(DatacenterRepositoryResource.DATACENTER_REPOSITORY);
+        repoLink.setHref(repoUri);
+        dto.addLink(repoLink);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, 409, APIError.VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED);
+    }
+
+    @Test
+    public void editVirtualImageSetNewMasterImageRises409()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setOvfid(null);
+        setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+
+        String masterUri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), master.getId());
+
+        RESTLink masterLink = new RESTLink("master", masterUri);
+        dto.addLink(masterLink);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
+    }
+
+    @Test(enabled = false)
+    public void editVirtualImageAllowSettingMasterNull()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        virtualImage.setMaster(master);
+
+        virtualImage.setOvfid(null);
+        setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+
+        String masterUri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), master.getId());
+
+        RESTLink masterLink = new RESTLink("master", masterUri);
+        dto.addLink(masterLink);
+
+        response = put(uri, dto, SYSADMIN, SYSADMIN);
+
+        assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
     }
 
     // Do not make public to avoid TestNG run it as another test

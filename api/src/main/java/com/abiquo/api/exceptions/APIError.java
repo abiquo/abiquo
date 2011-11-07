@@ -75,7 +75,8 @@ public enum APIError
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
         "ENTERPRISE-9", "Missing link to the enterprise"), ENTERPRISE_NOT_ALLOWED_DATACENTER(
-        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"),
+        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
+        "ENTERPRISE-11", "Invalid Enterprise identifier in the Enterprise link"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -297,7 +298,12 @@ public enum APIError
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
         "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
         "VIMAGE-0", "The requested virtual image does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
-        "Provided virtual image is not a bundle"),
+        "Provided virtual image is not a bundle"), INVALID_VIMAGE_LINK("VIMAGE-2",
+        "Invalid Virtual Image identifier in the Virtual Image link"), INVALID_DATACENTER_RESPOSITORY_LINK(
+        "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED(
+        "VIMAGE-4", "Change in Enterprise of the Virtual Image is not allowed"), VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
+        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Image is not allowed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED(
+        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -414,13 +420,15 @@ public enum APIError
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
-        "This category is not erasable"),
+        "This category is not erasable"), INVALID_CATEGORY_LINK("ICON-5",
+        "Invalid Category identifier in the Category link"),
 
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISTENT_ICON("ICON-2",
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
-        "Cannot delete the icon because it is in use by some virtual image");
+        "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
+        "ICON-5", "Invalid Icon identifier in the Icon link");
 
     /**
      * Internal error code

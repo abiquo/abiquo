@@ -21,19 +21,42 @@
 
 package com.abiquo.api.services.appslibrary;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.resources.appslibrary.CategoriesResource;
+import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.IconResource;
+import com.abiquo.api.resources.appslibrary.IconsResource;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -123,6 +146,175 @@ public class VirtualImageService extends DefaultApiService
         final Enterprise enterprise, final Repository repository)
     {
         return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public VirtualImage updateVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualImageId, final VirtualImageDto virtualImage)
+    {
+        VirtualImage old = getVirtualImage(enterpriseId, datacenterId, virtualImageId);
+
+        old.setCostCode(virtualImage.getCostCode());
+        old.setCpuRequired(virtualImage.getCpuRequired());
+        old.setDescription(virtualImage.getDescription());
+        old.setDiskFileSize(virtualImage.getDiskFileSize());
+
+        DiskFormatType type = DiskFormatType.fromValue(virtualImage.getDiskFormatType());
+
+        old.setDiskFormatType(type);
+        old.setHdRequiredInBytes(virtualImage.getHdRequired());
+        old.setName(virtualImage.getName());
+        old.setPathName(virtualImage.getPathName());
+        old.setRamRequired(virtualImage.getRamRequired());
+        old.setShared(virtualImage.isShared());
+        old.setStateful(virtualImage.isStateful());
+        old.setIcon(null);
+
+        // retrieve the links
+        RESTLink categoryLink = virtualImage.searchLink(CategoryResource.CATEGORY);
+        RESTLink enterpriseLink = virtualImage.searchLink(EnterpriseResource.ENTERPRISE);
+        RESTLink datacenterRepositoryLink =
+            virtualImage.searchLink(DatacenterRepositoryResource.DATACENTER_REPOSITORY);
+        RESTLink iconLink = virtualImage.searchLink(IconResource.ICON);
+        RESTLink masterLink = virtualImage.searchLink("master");
+
+        // check the links
+        if (enterpriseLink != null)
+        {
+            String buildPath =
+                buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+            MultivaluedMap<String, String> map =
+                URIResolver.resolveFromURI(buildPath, enterpriseLink.getHref());
+
+            if (map == null || !map.containsKey(EnterpriseResource.ENTERPRISE))
+            {
+                addValidationErrors(APIError.INVALID_ENTERPRISE_LINK);
+                flushErrors();
+            }
+            Integer enterpriseIdFromLink =
+                Integer.parseInt(map.getFirst(EnterpriseResource.ENTERPRISE));
+            if (!enterpriseIdFromLink.equals(enterpriseId))
+            {
+                addConflictErrors(APIError.VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED);
+                flushErrors();
+            }
+        }
+
+        if (datacenterRepositoryLink != null)
+        {
+            String buildPath =
+                buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                    EnterpriseResource.ENTERPRISE_PARAM,
+                    DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                    DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM);
+            MultivaluedMap<String, String> map =
+                URIResolver.resolveFromURI(buildPath, datacenterRepositoryLink.getHref());
+
+            if (map == null || !map.containsKey(DatacenterRepositoryResource.DATACENTER_REPOSITORY))
+            {
+                addValidationErrors(APIError.INVALID_DATACENTER_RESPOSITORY_LINK);
+                flushErrors();
+            }
+            Integer datacenterRepositoryId =
+                Integer.parseInt(map.getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
+            if (!datacenterRepositoryId.equals(old.getRepository().getDatacenter().getId()))
+            {
+                addConflictErrors(APIError.VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED);
+                flushErrors();
+            }
+        }
+
+        if (categoryLink != null)
+        {
+            String buildPath =
+                buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
+            MultivaluedMap<String, String> map =
+                URIResolver.resolveFromURI(buildPath, categoryLink.getHref());
+
+            if (map == null || !map.containsKey(CategoryResource.CATEGORY))
+            {
+                addValidationErrors(APIError.INVALID_CATEGORY_LINK);
+                flushErrors();
+            }
+            Integer categoryId = Integer.parseInt(map.getFirst(CategoryResource.CATEGORY));
+            if (!categoryId.equals(old.getCategory().getId()))
+            {
+                Category category = appsLibraryRep.findCategoryById(categoryId);
+                if (category == null)
+                {
+                    addConflictErrors(APIError.NON_EXISTENT_CATEGORY);
+                    flushErrors();
+                }
+                old.setCategory(category);
+            }
+        }
+
+        if (iconLink != null)
+        {
+            String buildPath = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
+            MultivaluedMap<String, String> map =
+                URIResolver.resolveFromURI(buildPath, iconLink.getHref());
+
+            if (map == null || !map.containsKey(IconResource.ICON))
+            {
+                addValidationErrors(APIError.INVALID_ICON_LINK);
+                flushErrors();
+            }
+            Integer iconId = Integer.parseInt(map.getFirst(IconResource.ICON));
+            if (!iconId.equals(old.getIcon().getId()))
+            {
+                Icon icon = appsLibraryRep.findIconById(iconId);
+                if (icon == null)
+                {
+                    addConflictErrors(APIError.NON_EXISTENT_ICON);
+                    flushErrors();
+                }
+                old.setIcon(icon);
+            }
+        }
+
+        // the cases when the master was null or not null but the new master image is null
+        // allowed
+        if (masterLink == null)
+        {
+            old.setMaster(null);
+            // public a trace when the image wasn't master before
+        }
+
+        // case when the new master isn't null and the old can be null or the same image or a new
+        // image
+        else
+        {
+            String buildPath =
+                buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                    EnterpriseResource.ENTERPRISE_PARAM,
+                    DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                    DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM,
+                    VirtualImagesResource.VIRTUAL_IMAGES_PATH,
+                    VirtualImageResource.VIRTUAL_IMAGE_PARAM);
+            MultivaluedMap<String, String> map =
+                URIResolver.resolveFromURI(buildPath, masterLink.getHref());
+
+            if (map == null || !map.containsKey(VirtualImageResource.VIRTUAL_IMAGE))
+            {
+                addValidationErrors(APIError.INVALID_VIMAGE_LINK);
+                flushErrors();
+            }
+
+            Integer masterId = Integer.parseInt(map.getFirst(VirtualImageResource.VIRTUAL_IMAGE));
+
+            if (!masterId.equals(old.getMaster().getId()))
+            {
+                addConflictErrors(APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
+                flushErrors();
+            }
+            // if its the same no change is necessary
+
+        }
+
+        appsLibraryRep.updateVirtualImage(old);
+
+        return old;
     }
 
     private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,
