@@ -190,7 +190,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(VirtualMachineState.ALLOCATED);
+            virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
             vmachineDao.flush();
         }
         catch (final Exception e) // HibernateException NotEnoughResourcesException
