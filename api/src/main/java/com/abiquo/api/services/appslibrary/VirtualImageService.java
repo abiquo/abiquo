@@ -33,6 +33,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -54,6 +55,9 @@ public class VirtualImageService extends DefaultApiService
 
     @Autowired
     private AppsLibraryRep appsLibraryRep;
+
+    @Autowired
+    private CategoryService categoryService;
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
@@ -82,11 +86,8 @@ public class VirtualImageService extends DefaultApiService
     public VirtualImage getVirtualImage(final Integer enterpriseId, final Integer datacenterId,
         final Integer virtualImageId)
     {
-        // Validate the existance of the datacenter and the enterprise
-        enterpriseService.getEnterprise(enterpriseId);
-        infrastructureService.getDatacenter(datacenterId);
-
-        // Check that the enterprise can use the datacenter
+        // Check that the enterprise can use the datacenter (also checks enterprise and datacenter
+        // exists)
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         VirtualImage virtualImage = appsLibraryRep.findVirtualImageById(virtualImageId);
@@ -103,10 +104,11 @@ public class VirtualImageService extends DefaultApiService
     public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
         final Integer datacenterId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
 
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
         Repository repository = infrastructureService.getRepository(datacenter);
 
         return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
@@ -125,6 +127,33 @@ public class VirtualImageService extends DefaultApiService
         return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
     }
 
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
+        return appsLibraryRep.findStatefulVirtualImagesByDatacenter(datacenter);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final Integer categoryId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
+        Category category = categoryService.getCategory(categoryId);
+
+        return appsLibraryRep
+            .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
+    }
+
+    /**
+     * Checks the enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
     private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,
         final Integer datacenterId)
     {

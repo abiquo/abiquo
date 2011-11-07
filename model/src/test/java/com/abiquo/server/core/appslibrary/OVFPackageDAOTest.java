@@ -23,9 +23,7 @@ package com.abiquo.server.core.appslibrary;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -35,17 +33,19 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class OVFPackageDAOTest extends DefaultDAOTestBase<OVFPackageDAO, OVFPackage>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        
-        // FIXME: Remember to add all entities that have to be removed during tearDown in the method:
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
         // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected OVFPackageDAO createDao(EntityManager entityManager)
+    protected OVFPackageDAO createDao(final EntityManager entityManager)
     {
         return new OVFPackageDAO(entityManager);
     }
@@ -68,5 +68,4 @@ public class OVFPackageDAOTest extends DefaultDAOTestBase<OVFPackageDAO, OVFPack
         return (OVFPackageGenerator) super.eg();
     }
 
-    
 }

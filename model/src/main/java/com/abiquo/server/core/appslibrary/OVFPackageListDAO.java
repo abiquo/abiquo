@@ -55,6 +55,7 @@ public class OVFPackageListDAO extends DefaultDAOBase<Integer, OVFPackageList>
         super(OVFPackageList.class, entityManager);
     }
 
+    @SuppressWarnings("unchecked")
     public List<OVFPackageList> findByEnterprise(final Integer enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
@@ -72,11 +73,11 @@ public class OVFPackageListDAO extends DefaultDAOBase<Integer, OVFPackageList>
         return (OVFPackageList) query.uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public List<OVFPackage> findByName(final String name)
     {
         Criteria criteria = createCriteria(sameName(name));
         criteria.addOrder(Order.asc(OVFPackageList.NAME_PROPERTY));
-
         return criteria.list();
     }
 

@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
@@ -49,7 +50,6 @@ import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseRep;
 
 @Service
 public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClient
@@ -58,9 +58,6 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
 
     @Autowired
     private OVFPackageRep repo;
-
-    @Autowired
-    private EnterpriseRep entRepo;
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -73,7 +70,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public OVFPackageService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
-        entRepo = new EnterpriseRep(em);
+        entService = new EnterpriseService(em);
         appslibraryRep = new AppsLibraryRep(em);
     }
 
@@ -98,7 +95,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackage addOVFPackage(final OVFPackage ovfPackage, final Integer idEnterprise)
     {
-        Enterprise ent = entRepo.findById(idEnterprise);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
         return repo.addOVFPackage(ovfPackage, ent);
     }
 
@@ -106,7 +103,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public OVFPackage modifyOVFPackage(final Integer ovfPackageId, final OVFPackage ovfPackage,
         final Integer idEnterprise)
     {
-        Enterprise enterprise = entRepo.findById(idEnterprise);
+        Enterprise enterprise = entService.getEnterprise(idEnterprise);
         return repo.modifyOVFPackage(ovfPackageId, ovfPackage, enterprise);
     }
 
@@ -129,7 +126,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public OVFPackageInstanceStateDto getOVFPackageState(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
-        // TODO enterprise Vs datacenter validation
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
         final String ovfUrl = getOVFPackage(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
@@ -141,7 +138,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public void installOVFPackage(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        // TODO enterprise Vs datacenter validation
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
         final String ovfUrl = getOVFPackage(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
@@ -156,13 +153,14 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public void uninstallOVFPackage(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
-        // TODO enterprise Vs datacenter validation
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
         final String ovfUrl = getOVFPackage(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
         amClient.delete(String.valueOf(enterpriseId), ovfUrl);
     }
+
 
     /** #################### ovfindex.xml #################### */
     /** #################### */

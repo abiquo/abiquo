@@ -29,6 +29,7 @@ import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -85,6 +86,12 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         return createInstance(pool, vdc);
     }
 
+    public VolumeManagement createInstance(final Datacenter datacenter)
+    {
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter);
+        return createInstance(vdc);
+    }
+
     public VolumeManagement createInstance(final VirtualDatacenter vdc)
     {
         StoragePool pool = poolGenerator.createUniqueInstance();
@@ -107,6 +114,26 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         String idSCSI = "ip-10.60.1.26:3260-iscsi-iqn.2001-04.com.acme-lun-" + nextSeed();
 
         return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
+    }
+
+    public VolumeManagement createStatefulInstance()
+    {
+        VolumeManagement volume = createUniqueInstance();
+        return addStatefulImageToVolume(volume, volume.getStoragePool().getDevice().getDatacenter());
+    }
+
+    public VolumeManagement createStatefulInstance(final Datacenter datacenter)
+    {
+        VolumeManagement volume = createInstance(datacenter);
+        return addStatefulImageToVolume(volume, datacenter);
+    }
+
+    private VolumeManagement addStatefulImageToVolume(final VolumeManagement volume,
+        final Datacenter datacenter)
+    {
+        VirtualImage image = virtualImageGenerator.createInstance(datacenter);
+        volume.setVirtualImage(image);
+        return volume;
     }
 
     @Override

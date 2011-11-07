@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 
 @Repository
 public class AppsLibraryRep extends DefaultRepBase
@@ -230,5 +231,21 @@ public class AppsLibraryRep extends DefaultRepBase
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         return virtualImageDAO.findByPath(enterprise, repository, path);
+    }
+
+    public List<VirtualImage> findAllStatefulVirtualImages()
+    {
+        return virtualImageDAO.findStatefuls();
+    }
+
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Datacenter datacenter)
+    {
+        return virtualImageDAO.findStatefulsByDatacenter(datacenter);
+    }
+
+    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+        final Category category, final Datacenter datacenter)
+    {
+        return virtualImageDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
     }
 }
