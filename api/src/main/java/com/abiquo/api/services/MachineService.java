@@ -52,6 +52,9 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = false)
@@ -180,6 +183,12 @@ public class MachineService extends DefaultApiService
 
         repo.updateMachine(old);
 
+        tracer
+            .log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine "
+                + old.getName() + "[ ip: " + old.getHypervisor().getIp() + " type: "
+                + old.getHypervisor().getType() + " state: " + old.getState()
+                + "] created succesfully");
+
         return old;
     }
 
@@ -272,6 +281,11 @@ public class MachineService extends DefaultApiService
         }
 
         repo.deleteMachine(machine);
+
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE, "Machine "
+            + machine.getName() + "[ ip: " + machine.getHypervisor().getIp() + " type: "
+            + machine.getHypervisor().getType() + " state: " + machine.getState()
+            + "] deleted succesfully");
     }
 
     protected void deleteMachineLoadRulesFromMachine(final Machine machine)
