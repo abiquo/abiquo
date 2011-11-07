@@ -26,6 +26,12 @@ import java.util.UUID;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.vsm.events.VMEventType;
 
+/**
+ * Builder for virtual machine event stages in order to simplify the test of
+ * {@link VSMEventProcessor}.
+ * 
+ * @author eruiz
+ */
 public class VirtualMachineStage
 {
     protected VirtualMachineState state;

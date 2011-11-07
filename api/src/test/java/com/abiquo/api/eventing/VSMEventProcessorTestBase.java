@@ -37,9 +37,12 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
-public abstract class VSMEventingProcessorTestBase extends AbstractUnitTest
+/**
+ * @author eruiz
+ */
+public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
 {
-    protected abstract VSMEventingProcessor getEventingProcessor(EntityManager em);
+    protected abstract VSMEventProcessor getEventingProcessor(EntityManager em);
 
     protected void assertStage(VirtualMachineStage stage)
     {
@@ -87,7 +90,7 @@ public abstract class VSMEventingProcessorTestBase extends AbstractUnitTest
 
         // Testing stuff
         EntityManager manager = getEntityManagerWithAnActiveTransaction();
-        VSMEventingProcessor processor = getEventingProcessor(manager);
+        VSMEventProcessor processor = getEventingProcessor(manager);
 
         try
         {
