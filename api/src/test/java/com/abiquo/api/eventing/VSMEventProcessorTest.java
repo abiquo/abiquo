@@ -44,14 +44,14 @@ import org.testng.annotations.Test;
 import com.abiquo.vsm.events.VMEventType;
 
 /**
- * Test cases for virtual machines updating.
+ * Test cases for {@link VSMEventProcessor} in community version.
  * 
- * @author eruiz@abiquo.com
+ * @author eruiz
  */
 @Test(groups = BASIC_UNIT_TESTS)
-public class VSMEventingProcessorTest extends VSMEventingProcessorTestBase
+public class VSMEventProcessorTest extends VSMEventProcessorTestBase
 {
-    private static final String INVALID_EVENT = "INVALID_EVENT";
+    protected static final String INVALID_EVENT = "INVALID_EVENT";
 
     @Test
     public void test_lockedToOn()
@@ -96,8 +96,8 @@ public class VSMEventingProcessorTest extends VSMEventingProcessorTestBase
     }
 
     @Override
-    protected VSMEventingProcessor getEventingProcessor(EntityManager em)
+    protected VSMEventProcessor getEventingProcessor(EntityManager em)
     {
-        return new VSMEventingProcessor(em);
+        return new VSMEventProcessor(em);
     }
 }

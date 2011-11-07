@@ -51,9 +51,9 @@ import com.abiquo.vsm.events.VMEventType;
  * @author eruiz@abiquo.com
  */
 @Service
-public class VSMEventingProcessor implements VSMCallback
+public class VSMEventProcessor implements VSMCallback
 {
-    private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventingProcessor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventProcessor.class);
 
     @Autowired
     protected VirtualMachineRep repo;
@@ -94,13 +94,13 @@ public class VSMEventingProcessor implements VSMCallback
      * 
      * @param em The entity manager to use.
      */
-    public VSMEventingProcessor(EntityManager em)
+    public VSMEventProcessor(EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
     }
 
-    public VSMEventingProcessor()
+    public VSMEventProcessor()
     {
     }
 
