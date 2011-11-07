@@ -32,10 +32,12 @@ import org.springframework.stereotype.Service;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
@@ -50,6 +52,9 @@ public class DefaultApiServiceWithApplianceManagerClient extends DefaultApiServi
 
     @Autowired
     protected InfrastructureService infService;
+
+    @Autowired
+    protected EnterpriseService entService;
 
     protected ApplianceManagerResourceStubImpl getApplianceManagerClient(final Integer dcId)
     {
@@ -77,5 +82,19 @@ public class DefaultApiServiceWithApplianceManagerClient extends DefaultApiServi
         }
 
         return amStub;
+    }
+
+    /** Validates the provided enterprise exist can use the datacenter. */
+    protected void checkEnterpriseAndDatacenter(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        // Check that the enterprise can use the datacenter
+        DatacenterLimits limits =
+            entService.findLimitsByEnterpriseAndDatacenter(enterpriseId, datacenterId);
+        if (limits == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
     }
 }

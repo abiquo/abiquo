@@ -50,7 +50,6 @@ import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageRep;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -65,25 +64,20 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     protected AppsLibraryDAO appsLibraryDao;
 
     @Autowired
-    protected EnterpriseRep entRepo;
-
-    @Autowired
     protected OVFPackageRep repo;
 
     @Autowired
     protected OVFPackageService ovfPackageService;
 
-    
     public OVFPackageListService()
     {
     }
-    
+
     public OVFPackageListService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         ovfPackageService = new OVFPackageService(em);
-        entRepo = new EnterpriseRep(em);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -99,7 +93,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
         final String name = ovfPackageList.getName();
 
         OVFPackageList prevlist = null;
-        Enterprise ent = entRepo.findById(idEnterprise);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
         prevlist = repo.findOVFPackageListByNameAndEnterprise(name, ent);
 
         if (prevlist != null) // TODO name unique on BBDD
@@ -129,9 +123,8 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     public OVFPackageList addOVFPackageList(final String repositorySpaceURL,
         final Integer idEnterprise)
     {
-        Enterprise ent = entRepo.findById(idEnterprise);
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent); // TODO remove
-
+        // Enterprise ent = entRepo.findById(idEnterprise);
+        // AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         OVFPackageList ovfPackageList =
             obtainOVFPackageListFromRepositorySpaceLocation(repositorySpaceURL);
 
@@ -155,9 +148,10 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     public OVFPackageInstancesStateDto getOVFPackageListInstanceStatus(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+
         final OVFPackageList ovfPackageList = getOVFPackageList(id);
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-
         final OVFPackageInstancesStateDto stateList = new OVFPackageInstancesStateDto();
 
         for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
@@ -179,8 +173,6 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
                 LOGGER.error("Can not obtain the status of the list.{}", e);
             }
         }
-
-        // TODO check no content
 
         return stateList;
     }
@@ -206,7 +198,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     public List<OVFPackageList> getOVFPackageListsByEnterprise(final Integer idEnterprise)
     {
 
-        Enterprise ent = entRepo.findById(idEnterprise);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
         if (ent == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
@@ -234,7 +226,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
         old.setName(ovfPackageList.getName());
         old.setOvfPackages(ovfPackageList.getOvfPackages());
 
-        Enterprise ent = entRepo.findById(idEnterprise);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
         repo.updateList(old);

@@ -82,11 +82,8 @@ public class VirtualImageService extends DefaultApiService
     public VirtualImage getVirtualImage(final Integer enterpriseId, final Integer datacenterId,
         final Integer virtualImageId)
     {
-        // Validate the existance of the datacenter and the enterprise
-        enterpriseService.getEnterprise(enterpriseId);
-        infrastructureService.getDatacenter(datacenterId);
-
-        // Check that the enterprise can use the datacenter
+        // Check that the enterprise can use the datacenter (also checks enterprise and datacenter
+        // exists)
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         VirtualImage virtualImage = appsLibraryRep.findVirtualImageById(virtualImageId);
@@ -125,6 +122,10 @@ public class VirtualImageService extends DefaultApiService
         return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
     }
 
+    /**
+     * Checks the enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
     private void checkEnterpriseCanUseDatacenter(final Integer enterpriseId,
         final Integer datacenterId)
     {
