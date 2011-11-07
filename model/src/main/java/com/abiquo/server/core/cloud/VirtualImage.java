@@ -573,7 +573,7 @@ public class VirtualImage extends DefaultEntityBase
         return chefEnabled;
     }
 
-    public void setChefEnabled(boolean chefEnabled)
+    public void setChefEnabled(final boolean chefEnabled)
     {
         this.chefEnabled = chefEnabled;
     }

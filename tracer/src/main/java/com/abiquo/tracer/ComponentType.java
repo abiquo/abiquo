@@ -84,7 +84,7 @@ public enum ComponentType implements Serializable
 
     // STORAGE DEVICES
     STORAGE_DEVICE(33554432, "Storage device"),
-    
+
     // Abiquo's UCS
     UCS(10485776, "UCS");
 

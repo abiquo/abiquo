@@ -492,7 +492,6 @@ public class InfrastructureService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
-
         return remoteServiceService.addRemoteService(rs, datacenterId);
     }
 
