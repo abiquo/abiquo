@@ -349,6 +349,10 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterprise(enterprise);
     }
 
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
     @Transactional(readOnly = true)
     public DatacenterLimits findLimitsByEnterpriseAndDatacenter(final Integer enterpriseId,
         final Integer datacenterId)
