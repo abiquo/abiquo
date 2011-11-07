@@ -56,11 +56,11 @@ public class OVFPackageDAO extends DefaultDAOBase<Integer, OVFPackage>
         return findUniqueByProperty(OVFPackage.URL_PROPERTY, url);
     }
 
+    @SuppressWarnings("unchecked")
     public List<OVFPackage> findByEnterprise(final Integer enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
-
         return query.list();
     }
 
@@ -68,8 +68,7 @@ public class OVFPackageDAO extends DefaultDAOBase<Integer, OVFPackage>
     {
         Criteria criteria = createCriteria(sameAppsLibrary(appsLibrary));
         criteria.addOrder(Order.asc(OVFPackage.NAME_PROPERTY));
-
-        return criteria.list();
+        return getResultList(criteria);
     }
 
     private static Criterion sameAppsLibrary(final AppsLibrary appsLibrary)

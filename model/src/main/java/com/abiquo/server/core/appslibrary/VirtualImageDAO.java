@@ -40,6 +40,10 @@ import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.storage.StorageDevice;
+import com.abiquo.server.core.infrastructure.storage.StoragePool;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Repository("jpaVirtualImageDAO")
 /* package */class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
@@ -58,8 +62,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
     {
         Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
+        return getResultList(criteria);
     }
 
     public List<VirtualImage> findByEnterpriseAndRepository(final Enterprise enterprise,
@@ -67,8 +70,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
     {
         Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
-        return result;
+        return getResultList(criteria);
     }
 
     public List<VirtualImage> findBy(final Enterprise enterprise,
@@ -96,10 +98,8 @@ import com.abiquo.server.core.enterprise.Enterprise;
     private Criterion compatibleOrConversions(final HypervisorType hypervisorType,
         final Criteria criteria)
     {
-        return Restrictions.or(
-            compatible(Arrays.asList(hypervisorType.compatibilityTable)), //
-            compatibleConversions(Arrays.asList(hypervisorType.compatibilityTable),
-                criteria));
+        return Restrictions.or(compatible(Arrays.asList(hypervisorType.compatibilityTable)), //
+            compatibleConversions(Arrays.asList(hypervisorType.compatibilityTable), criteria));
     }
 
     /** Virtual image is compatible. */
@@ -155,15 +155,41 @@ import com.abiquo.server.core.enterprise.Enterprise;
         return CollectionUtils.isEmpty(result) ? false : true;
     }
 
-    private static Criterion sameEnterprise(final Enterprise enterprise)
+    public List<VirtualImage> findStatefuls()
     {
+        Criteria criteria = createCriteria(statefulImage());
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        return getResultList(criteria);
+    }
 
-        return Restrictions.eq(VirtualImage.ENTERPRISE_PROPERTY, enterprise);
+    public List<VirtualImage> findStatefulsByDatacenter(final Datacenter datacenter)
+    {
+        Criteria crit = criteriaWithStatefulNavigation();
+        crit.add(statefulImage());
+        crit.add(sameStatefulDatacenter(datacenter));
+        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+        return getResultList(crit);
+    }
+
+    public List<VirtualImage> findStatefulsByCategoryAndDatacenter(final Category category,
+        final Datacenter datacenter)
+    {
+        Criteria crit = criteriaWithStatefulNavigation();
+        crit.add(statefulImage());
+        crit.add(sameCategory(category));
+        crit.add(sameStatefulDatacenter(datacenter));
+        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+        return getResultList(crit);
     }
 
     private static Criterion sameCategory(final Category category)
     {
         return Restrictions.eq(VirtualImage.CATEGORY_PROPERTY, category);
+    }
+
+    private static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        return Restrictions.eq(VirtualImage.ENTERPRISE_PROPERTY, enterprise);
     }
 
     private static Criterion sameRepository(
@@ -175,6 +201,12 @@ import com.abiquo.server.core.enterprise.Enterprise;
     private static Criterion sharedImage()
     {
         return Restrictions.eq(VirtualImage.SHARED_PROPERTY, true);
+    }
+
+    private static Criterion statefulImage()
+    {
+        return Restrictions.and(Restrictions.eq(VirtualImage.STATEFUL_PROPERTY, true),
+            Restrictions.isNotNull(VirtualImage.VOLUME_PROPERTY));
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)
@@ -198,5 +230,19 @@ import com.abiquo.server.core.enterprise.Enterprise;
 
         return Restrictions.and(Restrictions.eq(VirtualImage.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
+    }
+
+    private static Criterion sameStatefulDatacenter(final Datacenter datacenter)
+    {
+        return Restrictions.eq("device." + StorageDevice.DATACENTER_PROPERTY, datacenter);
+    }
+
+    private Criteria criteriaWithStatefulNavigation()
+    {
+        Criteria crit = createCriteria();
+        crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
+        crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
+        return crit;
     }
 }

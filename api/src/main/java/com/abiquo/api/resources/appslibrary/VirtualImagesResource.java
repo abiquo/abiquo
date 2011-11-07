@@ -57,6 +57,8 @@ public class VirtualImagesResource extends AbstractResource
     public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeId";
 
+    public final static String VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM = "stateful";
+
     @Autowired
     private VirtualImageService service;
 
@@ -69,28 +71,46 @@ public class VirtualImagesResource extends AbstractResource
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @QueryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM) final Integer categoryId,
         @QueryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final Integer hypervisorTypeId,
+        @QueryParam(VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO use categoryName and hypervisorType (optinals)
-        // TODO query params : categoryName and HyeprvisorType.name()
-
         final String amUri =
             infrastructureService.getRemoteService(datacenterId,
                 RemoteServiceType.APPLIANCE_MANAGER).getUri();
 
-        VirtualImagesDto reposDto = new VirtualImagesDto();
+        List<VirtualImage> all = null;
 
-        List<VirtualImage> all = service.getVirtualImages(enterpriseId, datacenterId);
+        if (stateful == null || !stateful)
+        {
+            // TODO use categoryName and hypervisorType (optinals)
+            // TODO query params : categoryName and HyeprvisorType.name()
+            all = service.getVirtualImages(enterpriseId, datacenterId);
+        }
+        else
+        {
+            if (categoryId != null)
+            {
+                all =
+                    service.findStatefulVirtualImagesByCategoryAndDatacenter(enterpriseId,
+                        datacenterId, categoryId);
+            }
+            else
+            {
+                all = service.findStatefulVirtualImagesByDatacenter(enterpriseId, datacenterId);
+            }
+        }
+
+        VirtualImagesDto imagesDto = new VirtualImagesDto();
 
         if (!CollectionUtils.isEmpty(all))
         {
             for (VirtualImage vimage : all)
             {
-                reposDto.add(createTransferObject(vimage, enterpriseId, datacenterId, amUri,
+                imagesDto.add(createTransferObject(vimage, enterpriseId, datacenterId, amUri,
                     restBuilder));
             }
         }
 
-        return reposDto;
+        return imagesDto;
     }
 }

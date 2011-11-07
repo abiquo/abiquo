@@ -33,6 +33,7 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -54,6 +55,9 @@ public class VirtualImageService extends DefaultApiService
 
     @Autowired
     private AppsLibraryRep appsLibraryRep;
+
+    @Autowired
+    private CategoryService categoryService;
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
@@ -100,10 +104,11 @@ public class VirtualImageService extends DefaultApiService
     public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
         final Integer datacenterId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
 
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
         Repository repository = infrastructureService.getRepository(datacenter);
 
         return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
@@ -120,6 +125,29 @@ public class VirtualImageService extends DefaultApiService
         final Enterprise enterprise, final Repository repository)
     {
         return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
+        return appsLibraryRep.findStatefulVirtualImagesByDatacenter(datacenter);
+    }
+
+    @Transactional(readOnly = true)
+    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final Integer categoryId)
+    {
+        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
+
+        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
+        Category category = categoryService.getCategory(categoryId);
+
+        return appsLibraryRep
+            .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
     }
 
     /**

@@ -25,9 +25,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "appslibrary")
 public class AppsLibraryDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
