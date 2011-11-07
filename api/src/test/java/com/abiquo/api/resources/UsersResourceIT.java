@@ -40,6 +40,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.Privileges;
+<<<<<<< HEAD
+=======
+import com.abiquo.api.exceptions.APIError;
+>>>>>>> 624193cfc12a624b54504e2ecf936e6582fb9fd9
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
