@@ -279,7 +279,6 @@ DELIMITER ;
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
 -- ---------------------------------------------- --
-<<<<<<< HEAD
 DROP TRIGGER IF EXISTS `kinton`.`create_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_physicalmachine_update_stats`; 
 DROP TRIGGER IF EXISTS `kinton`.`update_physicalmachine_update_stats`;
