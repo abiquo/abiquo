@@ -61,13 +61,14 @@ public class VMUtils
 {
     public ExtendedAppUtil cb = null;
 
-    public VMUtils(ExtendedAppUtil argCB)
+    public VMUtils(final ExtendedAppUtil argCB)
     {
         cb = argCB;
     }
 
-    public ArrayList getVMs(String entity, String datacenter, String folder, String pool,
-        String vmname, String host, String[][] filter) throws Exception
+    public ArrayList getVMs(final String entity, final String datacenter, final String folder,
+        final String pool, final String vmname, final String host, final String[][] filter)
+        throws Exception
     {
         ManagedObjectReference dsMOR = null;
         ManagedObjectReference hostMOR = null;
@@ -155,7 +156,7 @@ public class VMUtils
             }
         }
         vmList = cb.getServiceUtil3().getDecendentMoRefs(tempMOR, "VirtualMachine", filterData);
-        if ((vmList == null) || (vmList.size() == 0))
+        if (vmList == null || vmList.size() == 0)
         {
             System.out.println("NO Virtual Machine found");
             return null;
@@ -173,7 +174,8 @@ public class VMUtils
      *         to a Datacenter or if the hostFolder doesn't exist
      * @throws Exception
      */
-    public ManagedObjectReference getHostFolder(ManagedObjectReference dcmor) throws Exception
+    public ManagedObjectReference getHostFolder(final ManagedObjectReference dcmor)
+        throws Exception
     {
         ManagedObjectReference hfmor = cb.getServiceUtil3().getMoRefProp(dcmor, "hostFolder");
         return hfmor;
@@ -188,8 +190,8 @@ public class VMUtils
      * @return MoRef to the HostSystem or null if not found
      * @throws Exception
      */
-    public ManagedObjectReference getHost(ManagedObjectReference hostFolderMor, String hostname)
-        throws Exception
+    public ManagedObjectReference getHost(final ManagedObjectReference hostFolderMor,
+        final String hostname) throws Exception
     {
         ManagedObjectReference hostmor = null;
 
@@ -205,7 +207,7 @@ public class VMUtils
         return hostmor;
     }
 
-    public void browseMOR(ManagedObjectReference MOR)
+    public void browseMOR(final ManagedObjectReference MOR)
     {
         try
         {
@@ -216,18 +218,20 @@ public class VMUtils
             DynamicProperty pc = null;
             if (ocary != null)
             {
-                for (int oci = 0; oci < ocary.length; oci++)
+                for (ObjectContent element : ocary)
                 {
-                    oc = ocary[oci];
+                    oc = element;
                     mor = oc.getObj();
                     pcary = oc.getPropSet();
                     if (pcary != null)
                     {
-                        for (int pci = 0; pci < pcary.length; pci++)
+                        for (DynamicProperty element2 : pcary)
                         {
-                            pc = pcary[pci];
+                            pc = element2;
                             if (pc.getName().equalsIgnoreCase("name"))
+                            {
                                 System.out.println(pc.getVal().toString());
+                            }
 
                         }
                     }
@@ -242,7 +246,7 @@ public class VMUtils
         }
     }
 
-    public void browseArrayList(ArrayList arrList)
+    public void browseArrayList(final ArrayList arrList)
     {
         try
         {
@@ -259,18 +263,20 @@ public class VMUtils
                 DynamicProperty pc = null;
                 if (ocary != null)
                 {
-                    for (int oci = 0; oci < ocary.length; oci++)
+                    for (ObjectContent element : ocary)
                     {
-                        oc = ocary[oci];
+                        oc = element;
                         mor = oc.getObj();
                         pcary = oc.getPropSet();
                         if (pcary != null)
                         {
-                            for (int pci = 0; pci < pcary.length; pci++)
+                            for (DynamicProperty element2 : pcary)
                             {
-                                pc = pcary[pci];
+                                pc = element2;
                                 if (pc.getName().equalsIgnoreCase("name"))
+                                {
                                     System.out.println(pc.getVal());
+                                }
                             }
                         }
                     }
@@ -287,15 +293,15 @@ public class VMUtils
     /**
      * @param rdmIQN, the IQN of the primary volume, if not null its an statefull image.
      */
-    public VirtualMachineConfigSpec createVmConfigSpec(String vmName, String datastoreName,
-        long diskSize, ManagedObjectReference computeResMor, ManagedObjectReference hostMor,
-        List<VirtualNIC> vnicList, String rdmIQN, VmwareMachineDisk disks) throws Exception
+    public VirtualMachineConfigSpec createVmConfigSpec(final String vmName, String datastoreName,
+        final long diskSize, final ManagedObjectReference computeResMor,
+        final ManagedObjectReference hostMor, final List<VirtualNIC> vnicList, final String rdmIQN,
+        final VmwareMachineDisk disks) throws Exception
     {
 
         ConfigTarget configTarget = getConfigTargetForHost(computeResMor, hostMor);
         VirtualDevice[] defaultDevices = getDefaultDevices(computeResMor, hostMor);
         VirtualMachineConfigSpec configSpec = new VirtualMachineConfigSpec();
-        String networkName = null;
         if (configTarget.getNetwork() != null)
         {
             for (int i = 0; i < configTarget.getNetwork().length; i++)
@@ -304,7 +310,6 @@ public class VMUtils
                 NetworkSummary netSummary = netInfo.getNetwork();
                 if (netSummary.isAccessible())
                 {
-                    networkName = netSummary.getName();
                     break;
                 }
             }
@@ -396,11 +401,11 @@ public class VMUtils
 
         // Find the IDE controller
         VirtualDevice ideCtlr = null;
-        for (int di = 0; di < defaultDevices.length; di++)
+        for (VirtualDevice defaultDevice : defaultDevices)
         {
-            if (defaultDevices[di] instanceof VirtualIDEController)
+            if (defaultDevice instanceof VirtualIDEController)
             {
-                ideCtlr = defaultDevices[di];
+                ideCtlr = defaultDevice;
                 break;
             }
         }
@@ -470,7 +475,7 @@ public class VMUtils
 
         configSpecList.addAll(nicSpecList);
 
-        //        
+        //
         // if (ideCtlr != null)
         // {
         // deviceConfigSpec = new VirtualDeviceConfigSpec[6]; // XXX[6]
@@ -512,7 +517,7 @@ public class VMUtils
      * @return
      * @throws Exception
      */
-    public List<VirtualDeviceConfigSpec> configureNetworkInterfaces(List<VirtualNIC> vnicList)
+    public List<VirtualDeviceConfigSpec> configureNetworkInterfaces(final List<VirtualNIC> vnicList)
         throws Exception
     {
         try
@@ -554,8 +559,8 @@ public class VMUtils
      * @return Instance of ConfigTarget for the supplied HostSystem/ComputeResource
      * @throws Exception When no ConfigTarget can be found
      */
-    public ConfigTarget getConfigTargetForHost(ManagedObjectReference computeResMor,
-        ManagedObjectReference hostMor) throws Exception
+    public ConfigTarget getConfigTargetForHost(final ManagedObjectReference computeResMor,
+        final ManagedObjectReference hostMor) throws Exception
     {
         ManagedObjectReference envBrowseMor =
             cb.getServiceUtil3().getMoRefProp(computeResMor, "environmentBrowser");
@@ -579,8 +584,8 @@ public class VMUtils
      * @return Array of VirtualDevice containing the default devices for the HostSystem
      * @throws Exception
      */
-    public VirtualDevice[] getDefaultDevices(ManagedObjectReference computeResMor,
-        ManagedObjectReference hostMor) throws Exception
+    public VirtualDevice[] getDefaultDevices(final ManagedObjectReference computeResMor,
+        final ManagedObjectReference hostMor) throws Exception
     {
         ManagedObjectReference envBrowseMor =
             cb.getServiceUtil3().getMoRefProp(computeResMor, "environmentBrowser");
@@ -606,7 +611,7 @@ public class VMUtils
         return defaultDevs;
     }
 
-    private String getVolumeName(String volName)
+    private String getVolumeName(final String volName)
     {
         String volumeName = null;
         if (volName != null && volName.length() > 0)
@@ -642,8 +647,8 @@ public class VMUtils
      * diskSpec.setDevice(disk); return diskSpec; }
      */
 
-    public VirtualDeviceConfigSpec createVirtualDisk(String volName, int diskCtlrKey,
-        ManagedObjectReference datastoreRef, long diskSize)
+    public VirtualDeviceConfigSpec createVirtualDisk(final String volName, final int diskCtlrKey,
+        final ManagedObjectReference datastoreRef, final long diskSize)
     {
 
         String volumeName = getVolumeName(volName);

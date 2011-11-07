@@ -28,7 +28,7 @@ package com.abiquo.model.enumerator;
  */
 public enum Privileges
 {
-    ENTRPRISE_ADMINISTER_ALL,
+    ENTERPRISE_ADMINISTER_ALL,
 
     PHYS_DC_ENUMERATE,
 
