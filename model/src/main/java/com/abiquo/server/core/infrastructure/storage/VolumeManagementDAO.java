@@ -230,7 +230,7 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
     }
 
     @SuppressWarnings("unchecked")
-    public List<VolumeManagement> getVolumesAssociatedToVirtualMachine(final VirtualDatacenter vdc,
+    public List<VolumeManagement> getVolumesAttachedToVirtualMachine(final VirtualDatacenter vdc,
         final VirtualMachine vm, final FilterOptions filters) throws Exception
     {
         // Check if the orderBy element is actually one of the available ones
@@ -247,7 +247,7 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
         String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
 
-        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_ASSOCIATED_TO_VM);
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_ATTACHED_TO_VM);
 
         String req = query.getQueryString() + orderBy;
         // Add order filter to the query
@@ -314,6 +314,47 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
         return volumes;
 
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<VolumeManagement> getAvailableVolumes(final VirtualDatacenter vdc,
+        final FilterOptions filters) throws Exception
+    {
+        // Check if the orderBy element is actually one of the available ones
+        VolumeManagement.OrderByEnum orderByEnum = null;
+
+        try
+        {
+            orderByEnum = VolumeManagement.OrderByEnum.valueOf(filters.getOrderBy().toUpperCase());
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.getMessage());
+        }
+
+        String orderBy = defineOrderBy(orderByEnum.getColumnHQL(), filters.getAsc());
+
+        Query query = getSession().getNamedQuery(VolumeManagement.VOLUMES_AVAILABLES);
+
+        String req = query.getQueryString() + orderBy;
+        // Add order filter to the query
+        Query queryWithOrder = getSession().createQuery(req);
+        queryWithOrder.setInteger("vdcId", vdc.getId());
+        queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
+            + filters.getFilter() + "%");
+
+        Integer size = queryWithOrder.list().size();
+
+        queryWithOrder.setFirstResult(filters.getStartwith());
+        queryWithOrder.setMaxResults(filters.getLimit());
+
+        PagedList<VolumeManagement> volumesList =
+            new PagedList<VolumeManagement>(queryWithOrder.list());
+        volumesList.setTotalResults(size);
+        volumesList.setPageSize(filters.getLimit() > size ? size : filters.getLimit());
+        volumesList.setCurrentElement(filters.getStartwith());
+
+        return volumesList;
     }
 
     public VolumeManagement getVolumeFromImage(final Integer idImage)

@@ -148,10 +148,16 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.getPoolsByStorageDevice(deviceId);
     }
 
-    public List<VolumeManagement> getVolumesAssociatedToVirtualMachine(final VirtualDatacenter vdc,
+    public List<VolumeManagement> getAvailableVolumes(final VirtualDatacenter vdc,
+        final FilterOptions filterOptions) throws Exception
+    {
+        return volumeDAO.getAvailableVolumes(vdc, filterOptions);
+    }
+
+    public List<VolumeManagement> getVolumesAttachedToVirtualMachine(final VirtualDatacenter vdc,
         final VirtualMachine vm, final FilterOptions filterOptions) throws Exception
     {
-        return volumeDAO.getVolumesAssociatedToVirtualMachine(vdc, vm, filterOptions);
+        return volumeDAO.getVolumesAttachedToVirtualMachine(vdc, vm, filterOptions);
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
