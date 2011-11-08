@@ -142,6 +142,7 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void addVirtualMachine(final VirtualMachine virtualMachine)
     {
         repo.insert(virtualMachine);

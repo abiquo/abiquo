@@ -45,6 +45,7 @@ import com.abiquo.api.services.RoleService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -91,8 +92,8 @@ public class RoleResource extends AbstractResource
     {
         User currentUser = userService.getCurrentUser();
         Role role = null;
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
-            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             if (currentUser.getRole().getId().equals(roleId))
             {
@@ -102,7 +103,7 @@ public class RoleResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW_PRIVILEGES);
+                securityService.requirePrivilege(Privileges.USERS_VIEW_PRIVILEGES);
             }
 
         }

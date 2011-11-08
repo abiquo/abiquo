@@ -31,10 +31,6 @@ import com.abiquo.model.transport.WrapperDto;
 @XmlRootElement(name = "icons")
 public class IconsDto extends WrapperDto<IconDto>
 {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     @Override

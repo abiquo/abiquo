@@ -23,29 +23,19 @@ package com.abiquo.abiserver.commands.stub.impl;
 
 import static java.lang.String.valueOf;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.StateConversionEnum;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.exception.PersistenceException;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
@@ -217,141 +207,6 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return null; // TODO check error. i guess could be null
     }
 
-    /**
-     * ###
-     */
-    public List<VirtualimageHB> XXXgetVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
-        throws AppsLibraryCommandException
-    {
-        // TODO check the userSession belongs to the same idEnterprise
-        return getAvailableVirtualImages(idEnterprise, idRepo, idCategory);
-    }
-
-    private List<VirtualimageHB> getAvailableVirtualImages(final Integer idEnterprise,
-        final Integer idRepository, final Integer idCategory) throws AppsLibraryCommandException
-    {
-        List<VirtualimageHB> virtualImages;
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        try
-        {
-            factory.beginConnection();
-
-            if (idCategory != null && idCategory != 0)
-            {
-                virtualImages =
-                    factory.getVirtualImageDAO().getImagesByEnterpriseAndRepositoryAndCategory(
-                        idEnterprise, idRepository, idCategory);
-            }
-            else
-            {
-                virtualImages =
-                    factory.getVirtualImageDAO().getImagesByEnterpriseAndRepository(idEnterprise,
-                        idRepository);
-            }
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-            final String cause =
-                String.format("Can not obtain the list of available virtual images "
-                    + "for Enterprise[id %s] on Repository[id %s]", idEnterprise, idRepository);
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return virtualImages;
-    }
-
-    public List<VirtualImage> XXXgetVirtualImageByCategoryAndHypervisorCompatible(
-        final UserSession userSession, final Integer idEnterprise, final Integer idRepository,
-        final Integer idCategory, final Integer idHypervisorType)
-        throws AppsLibraryCommandException
-    {
-        // TODO check the userSession belongs to the same idEnterprise
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        final List<VirtualImage> virtualImages = new LinkedList<VirtualImage>();
-
-        final HypervisorType hypervisorType = HypervisorType.fromId(idHypervisorType);
-
-        final Collection<VirtualimageHB> virtualImagesHB =
-            getAvailableVirtualImages(idEnterprise, idRepository, idCategory);
-
-        try
-        {
-            factory.beginConnection();
-
-            for (final VirtualimageHB virtualImageHB : virtualImagesHB)
-            {
-                if (isVirtualImageConvertedOrCompatible(virtualImageHB, hypervisorType))
-                {
-                    virtualImages.add(virtualImageHB.toPojo());
-                }
-            }
-
-            factory.endConnection();
-        }
-        catch (final PersistenceException e)
-        {
-            factory.rollbackConnection();
-
-            final String cause = "Can not obtain the list of compatible virtual images";
-            throw new AppsLibraryCommandException(cause, e);
-        }
-
-        return virtualImages;
-    }
-
-    /**
-     * Return true the virtual image format is compatible.
-     * 
-     * <pre>
-     * Premium: if there virtual image conversions check FINISH state.
-     * </pre>
-     */
-    private Boolean isVirtualImageConvertedOrCompatible(final VirtualimageHB vi,
-        final HypervisorType hypervisorType)
-    {
-
-        final DAOFactory factory = HibernateDAOFactory.instance();
-        final DiskFormatType virtualImageFormatType = vi.getType();
-
-        if (hypervisorType.isCompatible(virtualImageFormatType))
-        {
-            return true;
-        }
-
-        final Collection<VirtualImageConversionsHB> conversions =
-            factory.getVirtualImageConversionsDAO().getConversion(vi, hypervisorType.baseFormat);
-
-        // the conversion do not exist
-        if (conversions == null || conversions.size() == 0)
-        {
-            return false;
-        }
-
-        // Conversion is the *single* conversion of the desired format
-        for (final VirtualImageConversionsHB conversion : conversions)
-        {
-            if (conversion.getState() != StateConversionEnum.FINISHED)
-            {
-                return false;
-            }
-            else if (hypervisorType.isCompatible(conversion.getTargetType()))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private DiskFormatType getBaseDiskFormatType(final Integer idHypervisorType)
-    {
-        return HypervisorType.fromId(idHypervisorType).baseFormat;
-    }
-
     @Override
     public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage)
     {
@@ -393,10 +248,9 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         dto.setHdRequired(vimage.getHdRequired());
         dto.setId(vimage.getId());
         dto.setName(vimage.getName());
-        dto.setPathName(vimage.getPath());
+        dto.setPath(vimage.getPath());
         dto.setRamRequired(vimage.getRamRequired());
         dto.setShared(vimage.isShared());
-        dto.setStateful(vimage.isStateful());
 
         RESTLink enterpriseLink = new RESTLink("enterprise", createEnterpriseLink(enterpriseId));
         dto.addLink(enterpriseLink);

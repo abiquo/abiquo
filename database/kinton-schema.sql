@@ -1380,6 +1380,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.vm.createInstance","http://community.abiquo.com/display/ABI18/Create+Virtual+Machine+instances","Virtual Machine instance creation wiki"),
  ("client.wiki.vm.createStateful","http://community.abiquo.com/display/ABI18/Create+Persistent+Virtual+Machines","Virtual Machine stateful creation wiki"),
  ("client.wiki.vm.captureVirtualMachine","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-ImportaRetrievedVirtualMachine","Capture Virtual Machine wiki"),
+ ("client.wiki.vm.deployInfo","","Show more info when deploying"),
  ("client.wiki.apps.uploadVM","http://community.abiquo.com/display/ABI18/Adding+Virtual+Images+to+the+Appliance+Library#AddingVirtualImagestotheApplianceLibrary-UploadingfromtheLocalFilesystem","Virtual Image upload wiki"),
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-RestrictingDatacenterAccess","Datacenter Limits wiki"),
@@ -2352,45 +2353,6 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
 END IF;
 END;
-|
-CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
-FOR EACH ROW BEGIN
-DECLARE idDatacenter INT UNSIGNED;
-DECLARE machineState INT UNSIGNED;
-SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON da.idPhysicalMachine = da.idPhysicalMachine
-WHERE da.idDatastore = NEW.idDatastore;
-IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    IF OLD.enabled = 1 THEN
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        ELSEIF NEW.enabled = 0 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    ELSE
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    END IF;
-END IF;
-END
 --
 --
 -- ******************************************************************************************
@@ -3465,6 +3427,45 @@ CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_l
             publicIPsReserved = publicIPsReserved - OLD.publicIPHard,
             vlanReserved = vlanReserved - OLD.vlanHard
         WHERE idDataCenter = OLD.idDataCenter;
+    END;
+|
+CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
+    FOR EACH ROW BEGIN
+	DECLARE idDatacenter INT UNSIGNED;
+	DECLARE machineState INT UNSIGNED;
+	SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
+	WHERE da.idDatastore = NEW.idDatastore;
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+	    IF OLD.enabled = 1 THEN
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		ELSEIF NEW.enabled = 0 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    ELSE
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    END IF;
+	END IF;
     END;
 |
 -- ******************************************************************************************

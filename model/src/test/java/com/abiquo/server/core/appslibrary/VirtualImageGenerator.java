@@ -31,7 +31,6 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -46,8 +45,6 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     private IconGenerator iconGenerator;
 
     private DatacenterGenerator datacenterGenerator;
-
-    private VolumeManagementGenerator volumeGenerator;;
 
     public VirtualImageGenerator(final SeedGenerator seed)
     {
@@ -104,6 +101,12 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         return createInstance(enterprise, datacenter);
     }
 
+    public VirtualImage createInstance(final Datacenter datacenter)
+    {
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        return createInstance(enterprise, datacenter);
+    }
+
     public VirtualImage createInstance(final Enterprise enterprise, final Datacenter datacenter)
     {
         Repository repository = repositoryGenerator.createInstance(datacenter);
@@ -117,24 +120,32 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
+        final DiskFormatType baseType, final String name)
+    {
+        Category category = categoryGenerator.createUniqueInstance();
+
+        return createInstance(enterprise, repository, 0, 0, 0, name, category, baseType);
+    }
+
+    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final Category category)
     {
         final String name =
             newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
 
-        return createInstance(enterprise, repository, 0, 0, 0, name, category);
+        return createInstance(enterprise, repository, 0, 0, 0, name, category, DiskFormatType.RAW);
     }
 
     public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
-        return createInstance(enterprise, repository, 0, 0, 0, name, category);
+        return createInstance(enterprise, repository, 0, 0, 0, name, category, DiskFormatType.RAW);
     }
 
-    public VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
+    protected VirtualImage createInstance(final Enterprise enterprise, final Repository repository,
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name,
-        final Category category)
+        final Category category, final DiskFormatType diskFormat)
     {
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName =
@@ -146,7 +157,7 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
                 VirtualImage.CREATION_USER_LENGTH_MAX);
 
         VirtualImage vimage =
-            new VirtualImage(enterprise, name, DiskFormatType.RAW, pathName, diskFileSize, category);
+            new VirtualImage(enterprise, name, diskFormat, pathName, diskFileSize, category);
 
         vimage.setRepository(repository);
         vimage.setCpuRequired(cpuRequired);

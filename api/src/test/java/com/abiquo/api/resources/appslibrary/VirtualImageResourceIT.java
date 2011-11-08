@@ -28,6 +28,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveIconURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
+import static com.abiquo.api.util.URIResolver.buildPath;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -40,12 +41,16 @@ import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.appliancemanager.util.URIResolver;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
@@ -403,6 +408,20 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
             assertLinkExist(dto, amHref + "?format=status", "ovfpackagestatus");
             assertLinkExist(dto, amHref + "?format=envelope", "ovfdocument");
             assertLinkExist(dto, amHref + "?format=diskFile", "imagefile");
+        }
+
+        if (vi.isStateful())
+        {
+            String template =
+                buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, "volumes", "{volume}");
+            Map<String, String> values = new HashMap<String, String>();
+            values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vi.getVolume()
+                .getVirtualDatacenter().getId().toString());
+            values.put("volume", vi.getVolume().getId().toString());
+
+            String volumeHref = UriTestResolver.resolveURI(template, values);
+            assertLinkExist(dto, volumeHref, "volume");
         }
     }
 

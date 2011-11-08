@@ -324,6 +324,24 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
+    public static String resolveDatacenterURIActionDiscoverHypervidor(final Integer datacenterId,
+        final String ip)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE + "?ip=" + ip;
+    }
+
+    public static String resolveDatacenterURIActionDiscover(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ACTION_DISCOVER_SINGLE;
+    }
+
+    public static String resolveDatacenterURIActionDiscoverMultiple(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_MULTIPLE;
+    }
+
     /**
      * Creates something like
      * http://example.com/admin/datacenters/{$datacenterId}/racks/{$rackId}/machines
@@ -729,6 +747,52 @@ public class UriTestResolver
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
 
         return resolveURI(template, values);
+    }
+
+    public static String resolveStatefulVirtualImagesURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {"true"});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveStatefulVirtualImagesURIWithCategory(final Integer enterpriseId,
+        final Integer datacenterId, final Integer categoryId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
+            new String[] {String.valueOf(categoryId)});
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {"true"});
+
+        return resolveURI(template, values, queryParams);
     }
 
     public static String resolveVirtualImageURI(final Integer enterpriseId,

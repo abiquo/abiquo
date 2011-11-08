@@ -22,6 +22,8 @@
 package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertError;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURIWithCategory;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
 import static org.testng.Assert.assertEquals;
 
@@ -35,6 +37,7 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -45,6 +48,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Test
 public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
@@ -60,12 +64,16 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
     private Repository repository;
 
+    // Only used in stateful tests
+    private VolumeManagement volume;
+
     @BeforeMethod
     public void setUpDatacenterRepository()
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
         repository = repositoryGenerator.createInstance(datacenter);
+        volume = volumeManagementGenerator.createInstance(datacenter, ent);
 
         RemoteService am =
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, datacenter);
@@ -77,6 +85,12 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(ent);
         entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(volume.getStoragePool().getDevice());
+        entitiesToSetup.add(volume.getStoragePool().getTier());
+        entitiesToSetup.add(volume.getStoragePool());
+        entitiesToSetup.add(volume.getRasd());
+        entitiesToSetup.add(volume.getVirtualDatacenter());
+        entitiesToSetup.add(volume);
         entitiesToSetup.add(repository);
         entitiesToSetup.add(am);
 
@@ -115,6 +129,42 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidDatacenter()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId() + 100);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidEnterprise()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId() + 100, datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenNoDatacenterLimits()
+    {
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesRaises404WhenInvalidCategory()
+    {
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits);
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), 50);
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
+    }
+
+    @Test
     public void testGetVirtualImages()
     {
         VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
@@ -129,6 +179,82 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
         assertEquals(dto.getCollection().size(), 2);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesWithoutResults()
+    {
+        VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        setup(limits, vi1.getCategory(), vi1);
+
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 0);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImages()
+    {
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image);
+
+        volume.setVirtualImage(image);
+        update(volume, image);
+
+        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesByCategory()
+    {
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image);
+
+        volume.setVirtualImage(image);
+        update(volume, image);
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), image
+                .getCategory().getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetStatefulVirtualImagesByCategoryWithoutResults()
+    {
+        Category anotherCategory = categoryGenerator.createUniqueInstance();
+
+        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits, image.getCategory(), image, anotherCategory);
+
+        volume.setVirtualImage(image);
+        update(volume, image);
+
+        String uri =
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
+                anotherCategory.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 0);
     }
 
 }
