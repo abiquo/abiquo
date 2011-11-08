@@ -615,6 +615,8 @@ public class VirtualImage extends DefaultEntityBase
         return path + ".vhd";
     }
 
+    public final static String CONVERSIONS_PROPERTY = "conversions";
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "virtualImage")
     private final List<VirtualImageConversion> conversions =
         new ArrayList<VirtualImageConversion>();
