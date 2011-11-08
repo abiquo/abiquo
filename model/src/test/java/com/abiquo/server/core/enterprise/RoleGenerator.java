@@ -67,7 +67,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p7 = new Privilege(Privileges.USERS_MANAGE_SYSTEM_ROLES);
         Privilege p8 = new Privilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION);
         Privilege p9 = new Privilege(Privileges.USERS_MANAGE_LDAP_GROUP);
-        Privilege p10 = new Privilege(Privileges.ENTRPRISE_ADMINISTER_ALL);
+        Privilege p10 = new Privilege(Privileges.ENTERPRISE_ADMINISTER_ALL);
         Privilege p11 = new Privilege(Privileges.VDC_ENUMERATE);
         Privilege p12 = new Privilege(Privileges.USERS_MANAGE_ROLES);
         Privilege p13 = new Privilege(Privileges.PRICING_VIEW);
@@ -85,7 +85,7 @@ public class RoleGenerator extends DefaultEntityGenerator<Role>
         Privilege p7 = new Privilege(Privileges.USERS_MANAGE_SYSTEM_ROLES);
         Privilege p8 = new Privilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION);
         Privilege p9 = new Privilege(Privileges.USERS_MANAGE_LDAP_GROUP);
-        Privilege p10 = new Privilege(Privileges.ENTRPRISE_ADMINISTER_ALL);
+        Privilege p10 = new Privilege(Privileges.ENTERPRISE_ADMINISTER_ALL);
         Privilege p11 = new Privilege(Privileges.VDC_ENUMERATE);
         Privilege p13 = new Privilege(Privileges.PRICING_VIEW);
         Privilege p14 = new Privilege(Privileges.PRICING_MANAGE);
