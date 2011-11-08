@@ -28,6 +28,7 @@ import static com.abiquo.server.core.cloud.VirtualMachineState.OFF;
 import static com.abiquo.server.core.cloud.VirtualMachineState.ON;
 import static com.abiquo.server.core.cloud.VirtualMachineState.PAUSED;
 import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
+import static com.abiquo.testng.TestConfig.NETWORK_UNIT_TESTS;
 import static com.abiquo.vsm.events.VMEventType.CREATED;
 import static com.abiquo.vsm.events.VMEventType.DESTROYED;
 import static com.abiquo.vsm.events.VMEventType.MOVED;
@@ -39,6 +40,7 @@ import static com.abiquo.vsm.events.VMEventType.UNKNOWN;
 
 import javax.persistence.EntityManager;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.vsm.events.VMEventType;
@@ -48,7 +50,7 @@ import com.abiquo.vsm.events.VMEventType;
  * 
  * @author eruiz
  */
-@Test(groups = BASIC_UNIT_TESTS)
+@Test(groups = {BASIC_UNIT_TESTS})
 public class VSMEventProcessorTest extends VSMEventProcessorTestBase
 {
     protected static final String INVALID_EVENT = "INVALID_EVENT";
@@ -69,7 +71,7 @@ public class VSMEventProcessorTest extends VSMEventProcessorTestBase
     @Test
     public void test_lockedToNotAllocated()
     {
-        assertStage(createVirtualMachineStage().in(LOCKED).expecting(NOT_ALLOCATED)
+        assertStageAndDestroyed(createVirtualMachineStage().in(LOCKED).expecting(NOT_ALLOCATED)
             .onEvent(DESTROYED));
     }
 
@@ -99,5 +101,12 @@ public class VSMEventProcessorTest extends VSMEventProcessorTestBase
     protected VSMEventProcessor getEventingProcessor(EntityManager em)
     {
         return new VSMEventProcessor(em);
+    }
+
+    @Override
+    @AfterMethod(groups = {BASIC_UNIT_TESTS})
+    public void tearDown()
+    {
+        super.tearDown();
     }
 }
