@@ -25,6 +25,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -35,6 +36,9 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.DatastoreDAO;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 /**
@@ -57,8 +61,15 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
 
         // Create hypervisor
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+        // hypervisor.setMachine(datastore.getMachines().get(0));
         hypervisor.getMachine().setEnterprise(enterprise);
         hypervisor.getMachine().setHypervisor(hypervisor);
+
+        Datastore datastore = datastoreGenerator.createInstance(hypervisor.getMachine());
+        datastore.setDatastoreUUID(UUID.randomUUID().toString()); // TODO: UUID should be added to
+                                                                  // 'datastoreGenerator'
+        datastoreGenerator.addAuxiliaryEntitiesToPersist(datastore, entitiesToPersist);
+        entitiesToPersist.add(datastore);
 
         hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
         entitiesToPersist.add(hypervisor);
@@ -75,6 +86,7 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         vm.setName(stage.getName());
         vm.setState(stage.getState());
         vm.getVirtualImage().setIdCategory(null); // TODO remove
+        vm.setDatastore(datastore);
 
         vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
         entitiesToPersist.add(vm);

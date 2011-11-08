@@ -102,6 +102,7 @@ public class VSMEventProcessor implements VSMCallback
     {
         this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
+        this.resourceUpgrader = new ResourceUpgradeUse(em);
     }
 
     public VSMEventProcessor()
@@ -165,6 +166,8 @@ public class VSMEventProcessor implements VSMCallback
             case POWER_ON:
             case RESUMED:
             case SAVED:
+                machine.setState(stateByEvent.get(event));
+                break;
             case DESTROYED:
                 onVMDestroyedEvent(machine, event, notification);
                 break;
