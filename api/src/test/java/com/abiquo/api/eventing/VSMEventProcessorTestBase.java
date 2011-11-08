@@ -96,13 +96,13 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         {
             if (stage.getEvent() != null)
             {
-                VirtualMachine foundVM = processor.repo.findByName(stage.getName());
+                VirtualMachine foundVM = processor.vmRepo.findByName(stage.getName());
 
                 processor.onEvent(buildEvent(stage.getEvent(), foundVM.getName(), foundVM
                     .getHypervisor().getMachine().getName(), foundVM.getHypervisor().getType()
                     .name()));
 
-                foundVM = processor.repo.findByName(stage.getName());
+                foundVM = processor.vmRepo.findByName(stage.getName());
 
                 assertEquals(foundVM.getState(), stage.getExpected());
             }
