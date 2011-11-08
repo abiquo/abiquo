@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
+import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -51,15 +52,18 @@ import com.abiquo.vsm.events.VMEventType;
  * @author eruiz@abiquo.com
  */
 @Service
-public class EventingProcessor implements VSMCallback
+public class VSMEventProcessor implements VSMCallback
 {
-    private final static Logger LOGGER = LoggerFactory.getLogger(EventingProcessor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventProcessor.class);
 
     @Autowired
-    protected VirtualMachineRep repo;
+    protected VirtualMachineRep vmRepo;
 
     @Autowired
     protected TracerLogger tracer;
+
+    @Autowired
+    protected ResourceUpgradeUse resourceUpgrader;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -94,13 +98,13 @@ public class EventingProcessor implements VSMCallback
      * 
      * @param em The entity manager to use.
      */
-    public EventingProcessor(EntityManager em)
+    public VSMEventProcessor(EntityManager em)
     {
-        this.repo = new VirtualMachineRep(em);
+        this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
     }
 
-    public EventingProcessor()
+    public VSMEventProcessor()
     {
     }
 
@@ -120,11 +124,11 @@ public class EventingProcessor implements VSMCallback
         }
 
         // Update virtual machine state
-        VirtualMachine machine = repo.findByName(notification.getVirtualSystemId());
+        VirtualMachine machine = vmRepo.findByName(notification.getVirtualSystemId());
 
         if (machine != null)
         {
-            repo.update(updateMachineState(machine, notification));
+            vmRepo.update(updateMachineState(machine, notification));
         }
     }
 
@@ -161,8 +165,8 @@ public class EventingProcessor implements VSMCallback
             case POWER_ON:
             case RESUMED:
             case SAVED:
-                machine.setState(stateByEvent.get(event));
-                logAndTraceVirtualMachineStateUpdated(machine, event, notification);
+            case DESTROYED:
+                onVMDestroyedEvent(machine, event, notification);
                 break;
 
             default:
@@ -212,5 +216,22 @@ public class EventingProcessor implements VSMCallback
         {
             return null;
         }
+    }
+
+    /**
+     * Fires on Virtual Machine Destroyed event detection. - Sets VM state to NOT_ALLOCATED -
+     * Resources ARE freed
+     * 
+     * @param vm
+     */
+    protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
+        final VirtualSystemEvent notification)
+    {
+
+        // Resources are freed
+        // State NOT_ALLOCATED is set in this method too
+        resourceUpgrader.rollbackUse(vMachine);
+        logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
+
     }
 }
