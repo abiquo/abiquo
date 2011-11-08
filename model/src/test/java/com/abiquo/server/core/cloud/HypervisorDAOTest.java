@@ -45,7 +45,7 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
     }
 
     @Override
-    protected HypervisorDAO createDao(EntityManager entityManager)
+    protected HypervisorDAO createDao(final EntityManager entityManager)
     {
         return new HypervisorDAO(entityManager);
     }
@@ -69,9 +69,11 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
 
         HypervisorDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertTrue(dao.existsAnyWithIp(hypervisor.getIp()));
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId()));
 
-        Assert.assertTrue(dao.existsAnyWithIpService(hypervisor.getIpService()));
+        Assert.assertTrue(dao.existsAnyWithIpServiceAndDatacenter(hypervisor.getIpService(),
+            hypervisor.getMachine().getDatacenter().getId()));
     }
 
     @Test
@@ -81,8 +83,8 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
 
         HypervisorDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor.getMachine()
-            .getDatacenter().getId()));
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId()));
     }
 
     private Hypervisor createHypervisor()

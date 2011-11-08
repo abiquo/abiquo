@@ -42,6 +42,7 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -107,9 +108,9 @@ public class EnterpriseService extends DefaultApiService
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTRPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -178,7 +179,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !userEnt.equals(dto.getId()))
         {
             throw new AccessDeniedException("");

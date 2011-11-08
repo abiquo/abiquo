@@ -79,8 +79,6 @@
                 cpuInput.value = this.physicalMachine.cpu;
                 ramUnitsSelector.selectedIndex = 0;
                 ramInput.value = this.physicalMachine.ram / ramUnitsSelector.selectedItem.conversion;
-                hdUnitsSelector.selectedIndex = 3;
-                hdInput.value = this.physicalMachine.hd / hdUnitsSelector.selectedItem.conversion;
                 vswitchNameInput.text = this.physicalMachine.vswitchName;
                 datastoreManagement.physicalMachine = this.physicalMachine;
 
@@ -156,7 +154,6 @@
                 pm.description = descriptionInput.text;
                 pm.cpu = cpuInput.value;
                 pm.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
-                pm.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
                 pm.vswitchName = vswitchNameInput.text;
 
                 var hypervisor:HyperVisor = ObjectUtil.copy(this.physicalMachine.hypervisor) as HyperVisor;                
@@ -296,25 +293,6 @@
                 labelField="label"
                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                 selectedIndex="0"
-                change="validateForm()"/>
-        </mx:FormItem>
-
-        <mx:FormItem 
-            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
-            direction="horizontal">
-
-            <mx:NumericStepper id="hdInput"
-                width="100" height="20"
-                minimum="{hdUnitsSelector.selectedItem.minimum}"
-                maximum="{hdUnitsSelector.selectedItem.maximum}"
-                stepSize="{hdUnitsSelector.selectedItem.stepSize}"
-                change="validateForm()"/>
-
-            <mx:ComboBox id="hdUnitsSelector"
-                width="80" height="18"
-                labelField="label"
-                dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
-                selectedIndex="3"
                 change="validateForm()"/>
         </mx:FormItem>
 
