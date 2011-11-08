@@ -13,6 +13,7 @@
                 <include>*.js</include>
                 <include>assets/**</include>
                 <include>config/**</include>
+				<include>labguages/**</include>
                 <include>properJavaRDP/**</include>
                 <include>tightvnc/**</include>
                 <include>xsapplet/**</include>
