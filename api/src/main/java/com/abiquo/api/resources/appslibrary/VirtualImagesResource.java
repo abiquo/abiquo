@@ -74,6 +74,8 @@ public class VirtualImagesResource extends AbstractResource
         @QueryParam(VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+        // TODO use categoryName and hypervisorType (optinals)
+        // TODO query params : categoryName and HyeprvisorType.name()
         final String amUri =
             infrastructureService.getRemoteService(datacenterId,
                 RemoteServiceType.APPLIANCE_MANAGER).getUri();
@@ -82,13 +84,12 @@ public class VirtualImagesResource extends AbstractResource
 
         if (stateful == null || !stateful)
         {
-            // TODO use categoryName and hypervisorType (optinals)
-            // TODO query params : categoryName and HyeprvisorType.name()
-            all = service.getVirtualImages(enterpriseId, datacenterId);
+            all =
+                service.getVirtualImages(enterpriseId, datacenterId, categoryId, hypervisorTypeId);
         }
         else
         {
-            if (categoryId != null)
+            if (categoryId != null && categoryId != 0)
             {
                 all =
                     service.findStatefulVirtualImagesByCategoryAndDatacenter(enterpriseId,

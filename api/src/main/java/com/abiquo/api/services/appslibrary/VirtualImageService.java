@@ -28,14 +28,12 @@ import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.appslibrary.CategoriesResource;
@@ -51,12 +49,14 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
+import com.abiquo.server.core.cloud.VirtualImageConversionDAO;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -125,32 +125,38 @@ public class VirtualImageService extends DefaultApiService
         return virtualImage;
     }
 
+    /**
+     * Gets the list of compatible(*) virtual images available in the provided enterprise and
+     * repository.
+     * 
+     * @param category null indicate all categories (no filter)
+     * @param hypervisor (*) null indicate no filter compatibles, else return images compatibles or
+     *            with compatible conversions. @see {@link VirtualImageConversionDAO}
+     */
     @Transactional(readOnly = true)
     public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
-        final Integer datacenterId)
+        final Integer datacenterId, final Integer categoryId, final Integer hypervisorId)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-
         Repository repository = infrastructureService.getRepository(datacenter);
 
-        return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+        Category category = null;
+        HypervisorType hypervisor = null;
+        if (categoryId != null && categoryId != 0)
+        {
+            category = appsLibraryRep.findCategoryById(categoryId);
+        }
+        if (hypervisorId != null && hypervisorId != 0)
+        {
+            hypervisor = HypervisorType.fromId(hypervisorId);
+        }
+
+        return appsLibraryRep.findVirtualImages(enterprise, repository, category, hypervisor);
     }
 
-    @Transactional(readOnly = true)
-    public List<VirtualImage> findVirtualImageByEnterprise(final Enterprise enterprise)
-    {
-        return appsLibraryRep.findVirtualImagesByEnterprise(enterprise);
-    }
-
-    @Transactional(readOnly = true)
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
-        final Enterprise enterprise, final Repository repository)
-    {
-        return appsLibraryRep.findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
-    }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualImage updateVirtualImage(final Integer enterpriseId, final Integer datacenterId,

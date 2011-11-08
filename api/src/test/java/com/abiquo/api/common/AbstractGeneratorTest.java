@@ -43,6 +43,7 @@ import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -65,7 +66,7 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -104,6 +105,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         new VolumeManagementGenerator(seed);
 
     protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
+
+    protected VirtualImageConversionGenerator conversionGenerator =
+        new VirtualImageConversionGenerator(seed);
 
     protected NodeVirtualImageGenerator nodeVirtualImageGenerator =
         new NodeVirtualImageGenerator(seed);
