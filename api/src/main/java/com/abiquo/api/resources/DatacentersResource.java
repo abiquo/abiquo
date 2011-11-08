@@ -47,6 +47,7 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -85,9 +86,9 @@ public class DatacentersResource extends AbstractResource
         Collection<Datacenter> list = null;
         if (pricingId != null)
         {
-            if (!securityService.hasPrivilege(SecurityService.PRICING_VIEW))
+            if (!securityService.hasPrivilege(Privileges.PRICING_VIEW))
             {
-                securityService.requirePrivilege(SecurityService.PRICING_VIEW);
+                securityService.requirePrivilege(Privileges.PRICING_VIEW);
             }
         }
         if (StringUtils.hasText(idEnterprise))

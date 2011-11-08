@@ -188,7 +188,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
             if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
@@ -280,7 +280,7 @@ public class EnterpriseService extends DefaultApiService
 
         // if we are in community the Pricingtemplate id is not informed, is null
         // in this case we don't overwrite the old value.
-        if (securityService.hasPrivilege(SecurityService.PRICING_MANAGE))
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
         {
             if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
             {
