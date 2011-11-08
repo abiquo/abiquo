@@ -28,6 +28,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.BadCredentialsException;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
 
@@ -60,6 +62,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * Abiquo API URL.
      */
     private String apiUri;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
 
     /**
      * Factory of DAOs and transaction manager.
@@ -104,8 +108,10 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 // The session does not exist, so is not valid
                 checkSessionResult.setResultCode(BasicResult.SESSION_INVALID);
-                errorManager
-                    .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                // logger.debug("The session is invalid. Please log in again. "); // log into the
+                // authentication.log
+                // errorManager
+                // .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
             }
             else
             {
@@ -125,8 +131,11 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     getUserSessionDAO().makeTransient(sessionToCheck);
 
                     checkSessionResult.setResultCode(BasicResult.SESSION_TIMEOUT);
-                    errorManager.reportError(resourceManger, checkSessionResult,
-                        "checkSession.expired");
+                    // logger.debug("The session is expired. Please log in again. "); // log into
+                    // the
+                    // authentication.log
+                    // errorManager.reportError(resourceManger, checkSessionResult,
+                    // "checkSession.expired");
                 }
 
             }
