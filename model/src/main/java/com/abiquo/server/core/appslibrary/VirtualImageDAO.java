@@ -182,6 +182,12 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return getResultList(crit);
     }
 
+    public boolean isMaster(final VirtualImage vImage)
+    {
+        Criteria criteria = createCriteria(sameMaster(vImage));
+        return CollectionUtils.isEmpty(getResultList(criteria)) ? false : true;
+    }
+
     private static Criterion sameCategory(final Category category)
     {
         return Restrictions.eq(VirtualImage.CATEGORY_PROPERTY, category);
@@ -205,8 +211,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     private static Criterion statefulImage()
     {
-        return Restrictions.and(Restrictions.eq(VirtualImage.STATEFUL_PROPERTY, true),
-            Restrictions.isNotNull(VirtualImage.VOLUME_PROPERTY));
+        return Restrictions.and(Restrictions.eq(VirtualImage.STATEFUL_PROPERTY, true), Restrictions
+            .isNotNull(VirtualImage.VOLUME_PROPERTY));
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)
@@ -217,19 +223,24 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.and(sameRepository(repository),
-            Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+        return Restrictions.and(sameRepository(repository), Restrictions.or(
+            sameEnterprise(enterprise), sharedImage()));
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criterion sameEnterpriseOrSharedInRepo =
-            Restrictions.and(sameRepository(repository),
-                Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+            Restrictions.and(sameRepository(repository), Restrictions.or(
+                sameEnterprise(enterprise), sharedImage()));
 
         return Restrictions.and(Restrictions.eq(VirtualImage.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
+    }
+
+    private static Criterion sameMaster(final VirtualImage vimage)
+    {
+        return Restrictions.eq(VirtualImage.MASTER_PROPERTY, vimage);
     }
 
     private static Criterion sameStatefulDatacenter(final Datacenter datacenter)

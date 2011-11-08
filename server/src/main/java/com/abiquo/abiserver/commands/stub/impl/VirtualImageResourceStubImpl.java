@@ -31,6 +31,8 @@ import org.apache.wink.client.Resource;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
@@ -103,11 +105,32 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+            populateErrors(response, result, "getVirtualImageByCategoryAndHypervisorCompatible");
         }
 
         return result;
 
+    }
+
+    public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualimageId)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualImageLink(enterpriseId, datacenterId, virtualimageId);
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteVirtualImage");
+        }
+
+        return result;
     }
 
     private List<VirtualImage> transformToFlex(final VirtualImagesDto images)

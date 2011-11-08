@@ -303,7 +303,10 @@ public enum APIError
         "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED(
         "VIMAGE-4", "Change in Enterprise of the Virtual Image is not allowed"), VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
         "VIMAGE-5", "Change in Datacenter Repository of a Virtual Image is not allowed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED(
-        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"),
+        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED(
+        "VIMAGE-7",
+        "The requested virtual image is a master image, master images cannot be deleted"), VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED(
+        "VIMAGE-8", "Cannot delete a stateful image"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -420,7 +423,7 @@ public enum APIError
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
-        "This category is not erasable"), INVALID_CATEGORY_LINK("ICON-5",
+        "This category is not erasable"), INVALID_CATEGORY_LINK("CATEGORY-4",
         "Invalid Category identifier in the Category link"),
 
     // ICONS
