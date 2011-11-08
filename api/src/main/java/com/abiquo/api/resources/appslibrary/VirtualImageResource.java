@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -77,9 +80,9 @@ public class VirtualImageResource extends AbstractResource
 
     @PUT
     public VirtualImageDto editVirtualImage(
-        @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
-        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
-        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer virtualImageId,
+        @PathParam(EnterpriseResource.ENTERPRISE) @NotNull @Min(1) final Integer enterpriseId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) @NotNull @Min(1) final Integer virtualImageId,
         final VirtualImageDto vImageDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualImage vimage =
@@ -91,6 +94,16 @@ public class VirtualImageResource extends AbstractResource
 
         return createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder);
 
+    }
+
+    @DELETE
+    public void removeVirtualImage(
+        @PathParam(EnterpriseResource.ENTERPRISE) @NotNull @Min(1) final Integer enterpriseId,
+        @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(VirtualImageResource.VIRTUAL_IMAGE) @NotNull @Min(1) final Integer virtualImageId,
+        @Context final IRESTBuilder restBuilder)
+    {
+        vimageService.deleteVirtualImage(enterpriseId, datacenterId, virtualImageId);
     }
 
     /**

@@ -47,7 +47,9 @@ import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
@@ -67,7 +69,7 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class VirtualImageService extends DefaultApiService
+public class VirtualImageService extends DefaultApiServiceWithApplianceManagerClient
 {
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -83,6 +85,9 @@ public class VirtualImageService extends DefaultApiService
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private UserService userService;
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)
@@ -335,6 +340,64 @@ public class VirtualImageService extends DefaultApiService
 
         return old;
 
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualImageId)
+    {
+        VirtualImage vimageToDelete = getVirtualImage(enterpriseId, datacenterId, virtualImageId);
+
+        Enterprise ent = enterpriseService.getEnterprise(enterpriseId);
+
+        // all the checks to delete the virtual image
+
+        // TODO check if any virtual appliance is using the image
+
+        if (appsLibraryRep.isMaster(vimageToDelete))
+        {
+            addConflictErrors(APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED);
+            flushErrors();
+        }
+
+        if (vimageToDelete.isStateful())
+        {
+            addConflictErrors(APIError.VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED);
+            flushErrors();
+            // appsLibraryRep.findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter)
+        }
+
+        // if the virtual image is shared only the users from same enterprise can delete
+        // check if the user is for the same enterprise otherwise deny allegating permissions
+        userService.checkCurrentEnterpriseForPostMethods(ent);
+
+        String viOvf = vimageToDelete.getOvfid();
+
+        if (viOvf == null)
+        {
+            // this is a bundle of an imported virtual machine (it havent OVF)
+            viOvf = codifyBundleImportedOVFid(vimageToDelete.getPath());
+        }
+
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+        amClient.delete(enterpriseId.toString(), viOvf);
+
+        // delete
+        appsLibraryRep.deleteVirtualImage(vimageToDelete);
+
+        if (tracer != null)
+        {
+            String messageTrace =
+                "Virtual Image '" + vimageToDelete.getName() + "' has been deleted '";
+            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_DELETE,
+                messageTrace);
+        }
+
+    }
+
+    private String codifyBundleImportedOVFid(final String vipath)
+    {
+        return String.format("http://bundle-imported/%s", vipath);
     }
 
     @Transactional(readOnly = true)

@@ -334,8 +334,6 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         response = put(uri, dto, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
-
-        // assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
     }
 
     @Test
