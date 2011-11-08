@@ -37,8 +37,6 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datastore;
-import com.abiquo.server.core.infrastructure.DatastoreDAO;
-import com.abiquo.server.core.infrastructure.Machine;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 /**

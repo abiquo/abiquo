@@ -28,7 +28,6 @@ import static com.abiquo.server.core.cloud.VirtualMachineState.OFF;
 import static com.abiquo.server.core.cloud.VirtualMachineState.ON;
 import static com.abiquo.server.core.cloud.VirtualMachineState.PAUSED;
 import static com.abiquo.testng.TestConfig.BASIC_UNIT_TESTS;
-import static com.abiquo.testng.TestConfig.NETWORK_UNIT_TESTS;
 import static com.abiquo.vsm.events.VMEventType.CREATED;
 import static com.abiquo.vsm.events.VMEventType.DESTROYED;
 import static com.abiquo.vsm.events.VMEventType.MOVED;
