@@ -147,10 +147,6 @@
                     <targetPlayer>10.0.0</targetPlayer>
                     <compiledLocales>
                         <locale>en_US</locale>
-                        <locale>es_ES</locale>
-                        <locale>ja_JP</locale>
-                        <locale>zh_ZH</locale>
-                        <locale>pt_PT</locale>
                     </compiledLocales>
                     <skipTests>true</skipTests>
                     <generateHtmlWrapper>true</generateHtmlWrapper>
@@ -208,6 +204,28 @@
                         <goals>
                             <goal>attached</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/resources/languages</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/locales</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

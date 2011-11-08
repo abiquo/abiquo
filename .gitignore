@@ -13,6 +13,7 @@ bin-debug
 test-output
 client/swf/src/main/resources/config/client-config.xml
 client/swf/src/main/resources/themes
+client/swf/src/main/resources/languages
 *~
 *.swp
 api/test-output/

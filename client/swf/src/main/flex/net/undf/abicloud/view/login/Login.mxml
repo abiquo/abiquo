@@ -46,6 +46,10 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.configuration.LanguageLabelLoader;
+        	import net.undf.abicloud.vo.configuration.Language;
+        	import mx.collections.ArrayCollection;
         	import mx.controls.Alert;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.model.AbiCloudModel;
@@ -69,12 +73,7 @@
             private var rb2:ResourceBundle;
 
             [Bindable]
-            private var languageDP:Array = [ { label: "English", data: "en_US" },
-                                             { label: "Español", data: "es_ES" },
-                                             { label: "日本語", data: "ja_JP" },
-                                             { label: "中文", data: "zh_ZH" },
-                                             { label: "Português", data: "pt_PT" }
-                                              ];
+            private var languageDP:ArrayCollection = AbiCloudModel.getInstance().configurationManager.languageSet;
 
             [Bindable]
             private var _loginLogo:String;
@@ -90,6 +89,7 @@
             {
                 this.addEventListener(KeyboardEvent.KEY_UP, checkEnter);
             }
+            
 
             public function init():void
             {
@@ -107,14 +107,14 @@
                 var so2:SharedObject = SharedObject.getLocal("AbiCloudSOLocale");
                 if (so2.data.localeIndex != null)
                 {
-                	setLanguage( languageDP[so2.data.localeIndex].data );
-                    languageCombo.prompt = languageDP[so2.data.localeIndex].label;
+                	setLanguage( languageDP.getItemAt(so2.data.localeIndex) as Language);
+                    languageCombo.prompt = Language(languageDP.getItemAt(so2.data.localeIndex)).name;
                 }
                 else
                 {
                     //Setting default language: English
-                    setLanguage( languageDP[0].data );
-                    languageCombo.prompt = languageDP[0].label;
+                    setLanguage( languageDP.getItemAt(0) as Language);
+                    languageCombo.prompt = Language(languageDP.getItemAt(0)).name;
                 }
 
 				trace("[Login] Set locale chain : " + ResourceManager.getInstance().localeChain);
@@ -148,7 +148,7 @@
             public function returnLanguage(language:String):String{
             	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languageDP,language);
             	if(indexLanguage != -1){
-            		return languageDP[indexLanguage].data;
+            		return Language(languageDP.getItemAt(indexLanguage)).value;
             	}
                 return "en_US";    
             }
@@ -199,7 +199,7 @@
                 if (languageCombo.selectedIndex > -1)
                 {
                     //Setting the language selected by the user
-                    setLanguage( languageCombo.selectedItem.data );
+                    setLanguage( languageCombo.selectedItem as Language );
 
                     //Setting AbiCloudAlert buttons language
                     AbiCloudAlert.okLabel = ResourceManager.getInstance().getString("Common",
@@ -247,13 +247,16 @@
                }
              */
              
-             private function setLanguage(localeChain:String):void{
-				trace("[Login] set Language " + localeChain);
+             private function setLanguage(localeChain:Language):void{
+				trace("[Login] set Language " + localeChain.value);
 				cursorManager.setBusyCursor();
             	
-				pendingLocaleChange = localeChain;
+				pendingLocaleChange = localeChain.value;
 				
-				if(localeChain == "ja_JP"){
+				//Save selected language
+				AbiCloudModel.getInstance().configurationManager.selectedLanguage = localeChain;
+				
+				if(localeChain.value == "ja_JP"){
                 	
                 	ThemeHandler.getInstance().addEventListener("onFontLoaded", onFontLoaded);
                 	ThemeHandler.getInstance().addEventListener("onFontLoadedError", onFontLoadedError);
@@ -361,7 +364,7 @@
                 <mx:ComboBox id="languageCombo"
                     width="100%" height="20"
                     selectedIndex="-1" dataProvider="{languageDP}"
-                    labelField="label"
+                    labelField="name"
                     change="onChangeLanguage()"/>
             </mx:VBox>
         </mx:VBox>
