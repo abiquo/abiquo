@@ -233,14 +233,14 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
 
         dto.setName("newName");
-        dto.setPathName("newPath");
+        dto.setPath("newPath");
 
         response = put(uri, dto, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
         VirtualImageDto modifiedDto = response.getEntity(VirtualImageDto.class);
         assertEquals(modifiedDto.getName(), dto.getName());
-        assertEquals(modifiedDto.getPathName(), dto.getPathName());
+        assertEquals(modifiedDto.getPath(), dto.getPath());
 
     }
 

@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
@@ -76,6 +77,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     public OVFPackageListService(final EntityManager em)
     {
         repo = new OVFPackageRep(em);
+        entService = new EnterpriseService(em);
         appsLibraryDao = new AppsLibraryDAO(em);
         ovfPackageService = new OVFPackageService(em);
     }
@@ -158,8 +160,8 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
         {
             try
             {
-                stateList.add(amClient.getCurrentOVFPackageInstanceStatus(
-                    String.valueOf(enterpriseId), ovfPack.getUrl()));
+                stateList.add(amClient.getCurrentOVFPackageInstanceStatus(String
+                    .valueOf(enterpriseId), ovfPack.getUrl()));
             }
             catch (Exception e)
             {

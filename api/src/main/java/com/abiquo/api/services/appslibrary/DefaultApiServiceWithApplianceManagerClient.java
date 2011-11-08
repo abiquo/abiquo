@@ -47,8 +47,8 @@ import com.abiquo.tracer.client.TracerFactory;
 @Service
 public class DefaultApiServiceWithApplianceManagerClient extends DefaultApiService
 {
-    final private static Logger logger = LoggerFactory
-        .getLogger(DefaultApiServiceWithApplianceManagerClient.class);
+    final private static Logger logger =
+        LoggerFactory.getLogger(DefaultApiServiceWithApplianceManagerClient.class);
 
     @Autowired
     protected InfrastructureService infService;

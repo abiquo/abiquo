@@ -33,7 +33,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
-import org.testng.annotations.Listeners;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
@@ -44,11 +44,40 @@ import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 
+@Test(groups = {APPS_INTEGRATION_TESTS})
 public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 {
 
     private String validURI;
+
+    private Enterprise enterprise;
+
+    private static final String SYSADMIN = "sysadmin";
+
+    @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
+    public void setUpUser()
+    {
+        enterprise = enterpriseGenerator.createUniqueInstance();
+
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+    }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getOVFPackagesListsByEnterprise() throws Exception
@@ -59,16 +88,14 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         OVFPackage ovf0 = ovfPackageGenerator.createUniqueInstance();
         list.addToOvfPackages(ovf0);
 
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(ent);
+        app.setEnterprise(enterprise);
 
         ovf0.setAppsLibrary(app);
         list.setAppsLibrary(app);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(ent);
         entitiesToSetup.add(app);
         entitiesToSetup.add(ovf0.getCategory());
         entitiesToSetup.add(ovf0.getIcon());
@@ -76,9 +103,9 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(list);
         setup(entitiesToSetup.toArray());
 
-        validURI = resolveOVFPackageListsURI(ent.getId());
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
 
-        ClientResponse response = get(validURI);
+        ClientResponse response = get(validURI, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
         OVFPackageListsDto entity = response.getEntity(OVFPackageListsDto.class);
@@ -101,15 +128,13 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         OVFPackageListDto packageList = new OVFPackageListDto(); // empty list
         packageList.setName("Empty List");
         packageList.setUrl("http://listurl.com/index.xml");
-
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(ent);
-        setup(ent, app);
+        app.setEnterprise(enterprise);
+        setup(app);
 
-        validURI = resolveOVFPackageListsURI(ent.getId());
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
 
-        ClientResponse response = post(validURI, packageList);
+        ClientResponse response = post(validURI, packageList, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -122,18 +147,20 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     public void createOVFPackageList()
     {
 
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(ent);
-        setup(ent, app);
+        app.setEnterprise(enterprise);
+        setup(app);
 
-        validURI = resolveOVFPackageListsURI(ent.getId());
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/ovfindex.xml";
 
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
         ClientResponse response =
             client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).post(xmlindexURI);
+                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(
+                xmlindexURI);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -146,18 +173,19 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     public void createOVFPackageListwithBadURLRises404()
     {
 
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(ent);
-        setup(ent, app);
+        app.setEnterprise(enterprise);
+        setup(app);
 
-        validURI = resolveOVFPackageListsURI(ent.getId());
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
 
         String badURL = "http://localhost:7979/testovf/nonexistent/ovfindex.xml";
 
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
         ClientResponse response =
             client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).post(badURL);
+                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(badURL);
 
         assertError(response, 404, APIError.NON_EXISTENT_REPOSITORY_SPACE);
     }
@@ -166,12 +194,11 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     public void createOVFPackageListBadFormatXMLrises400()
     {
 
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
-        app.setEnterprise(ent);
-        setup(ent, app);
+        app.setEnterprise(enterprise);
+        setup(app);
 
-        validURI = resolveOVFPackageListsURI(ent.getId());
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
