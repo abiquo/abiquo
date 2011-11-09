@@ -195,6 +195,11 @@ public class StorageRep extends DefaultRepBase
         return tierDAO.getTiersByDatacenter(datacenterId);
     }
 
+    public List<Tier> getEnableTiersByDatacenter(final Integer datacenterId)
+    {
+        return tierDAO.getEnableTiersByDatacenter(datacenterId);
+    }
+
     public List<VolumeManagement> findVolumesByEnterprise(final Integer id,
         final FilterOptions filters)
     {

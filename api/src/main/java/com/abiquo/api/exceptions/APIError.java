@@ -351,7 +351,8 @@ public enum APIError
         "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
-        "TIER-6", "Can not disable a Tier with associated Storage Pools"),
+        "TIER-6", "Can not disable a Tier with associated Storage Pools"), TIER_DISABLED("TIER-7",
+        "The requested tier is disabled"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -527,6 +528,7 @@ public enum APIError
         for (APIError error : errors)
         {
             System.out.println(String.format("%s=%s", error.code, error.message));
+
         }
     }
 
