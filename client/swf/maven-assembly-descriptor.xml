@@ -13,12 +13,15 @@
                 <include>*.js</include>
                 <include>assets/**</include>
                 <include>config/**</include>
-				<include>languages/**</include>
-                <include>properJavaRDP/**</include>
+				<include>properJavaRDP/**</include>
                 <include>tightvnc/**</include>
                 <include>xsapplet/**</include>
                 <include>javascriptsupport/**</include>
             </includes>
+        </fileSet>
+		 <fileSet>
+            <directory>src/main/locales</directory>
+            <outputDirectory>/languages</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
