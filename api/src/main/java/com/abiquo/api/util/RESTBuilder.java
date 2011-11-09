@@ -270,8 +270,8 @@ public class RESTBuilder implements IRESTBuilder
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
-        links.add(builder.buildActionLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+        links.add(builder.buildRestLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, "privileges", params));
 
         return links;
     }
@@ -289,8 +289,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
-        links.add(builder.buildActionLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+        links.add(builder.buildRestLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE, params));
 
         return links;
     }
@@ -359,8 +359,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(UserResource.class, REL_EDIT, params));
 
         // virtual machines
-        links.add(builder.buildActionLink(UserResource.class,
-            UserResource.USER_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(UserResource.class,
+            UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         return links;
