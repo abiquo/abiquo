@@ -49,7 +49,7 @@ public class EnterpriseRepositoryResource extends AbstractResource
 
     public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
 
-    //@Autowired
+    // @Autowired
     @Resource(name = "infrastructureService")
     private InfrastructureService r;
 

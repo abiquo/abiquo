@@ -33,12 +33,12 @@ public class InternalServerErrorException extends APIException
     {
         super(apiError);
     }
-    
+
     public InternalServerErrorException(CommonError error)
     {
         super(error);
     }
-    
+
     public InternalServerErrorException(Set<CommonError> errors)
     {
         super(errors);

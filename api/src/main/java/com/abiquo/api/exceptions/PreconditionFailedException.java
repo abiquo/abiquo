@@ -31,12 +31,12 @@ public class PreconditionFailedException extends APIException
     {
         super(apiError);
     }
-    
+
     public PreconditionFailedException(CommonError error)
     {
         super(error);
     }
-    
+
     public PreconditionFailedException(Set<CommonError> errors)
     {
         super(errors);

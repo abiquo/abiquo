@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.statistics;
+package com.abiquo.server.core.statistics;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class CloudUsageTest extends DefaultEntityTestBase<CloudUsage>
-  {
+public class CloudUsageTest extends DefaultEntityTestBase<CloudUsage>
+{
 
-      @Override
-      protected InstanceTester<CloudUsage> createEntityInstanceGenerator()
-      {
-          return new CloudUsageGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<CloudUsage> createEntityInstanceGenerator()
+    {
+        return new CloudUsageGenerator(getSeed());
+    }
+}

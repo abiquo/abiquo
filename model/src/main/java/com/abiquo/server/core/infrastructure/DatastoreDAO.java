@@ -119,7 +119,7 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
             Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
 
     }
-    
+
     private Criteria inMachine(Machine machine, String uuid)
     {
         return createCriteria(sharedUuid(uuid)).createCriteria(Datastore.MACHINES_PROPERTY).add(

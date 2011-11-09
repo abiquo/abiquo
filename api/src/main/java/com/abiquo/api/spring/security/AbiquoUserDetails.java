@@ -168,5 +168,4 @@ public class AbiquoUserDetails implements UserDetails
         this.authType = authType;
     }
 
-
 }

@@ -31,9 +31,13 @@ import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.testng.Assert;
@@ -207,6 +211,51 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         UserDto modified = response.getEntity(UserDto.class);
         assertEquals(modified.getName(), "name");
+    }
+
+    @Test
+    public void modifyUserCheckPasswordIsEncrypted() throws ClientWebException
+    {
+        User user = userGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        UserDto dto = response.getEntity(UserDto.class);
+        dto.setPassword("unencryptedPass");
+
+        MessageDigest messageDigest = null;
+        try
+        {
+            messageDigest = MessageDigest.getInstance("MD5");
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+
+        }
+        messageDigest.reset();
+        messageDigest.update(new String("unencryptedPass").getBytes(Charset.forName("UTF8")));
+        final byte[] resultByte = messageDigest.digest();
+        String result = new String(Hex.encodeHex(resultByte));
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), 200);
+
+        UserDto modified = response.getEntity(UserDto.class);
+        assertEquals(modified.getPassword(), result);
+
     }
 
     @Test

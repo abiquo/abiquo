@@ -87,7 +87,16 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
+import com.abiquo.server.core.pricing.Currency;
+import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingCostCodeDto;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTemplateDto;
+import com.abiquo.server.core.pricing.PricingTierDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
@@ -155,6 +164,15 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_SINGLE, DatacenterResource.ACTION_DISCOVER_REL,
+            params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -189,6 +207,13 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final Boolean managedRack, final MachineDto machine)
     {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return this.buildMachineLinks(datacenterId, rackId, managedRack, machine, builder);
+    }
+
+    public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
+        final Boolean managedRack, final MachineDto machine, final AbiquoLinkBuilder builder)
+    {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
         Map<String, String> params = new HashMap<String, String>();
@@ -196,14 +221,15 @@ public class RESTBuilder implements IRESTBuilder
         params.put(RackResource.RACK, rackId.toString());
         params.put(MachineResource.MACHINE, machine.getId().toString());
 
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RackResource.class, RackResource.RACK, params));
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-        links.add(builder.buildRestLink(MachineResource.class,
+        links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+        links.add(builder.buildActionLink(MachineResource.class,
+            MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
 
         if (managedRack)
         {
@@ -840,6 +866,72 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
+        final PricingTemplateDto pricingTemplate)
+    {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildCostCodeCurrencyLinks(final CostCode costCode,
+        final Currency currency, final CostCodeCurrencyDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingCostCodeLinks(final CostCode costCode,
+        final PricingTemplate pricingTemplate, final PricingCostCodeDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPricingTierLinks(final Tier tier,
+        final PricingTemplate pricingTemplate, final PricingTierDto dto)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
+
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public List<RESTLink> buildVMNetworkConfigurationLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final VMNetworkConfiguration config)
     {
@@ -911,27 +1003,6 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         final IpPoolManagement ip)
     {
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
-    {
-        // TODO Auto-generated method stub
         return null;
     }
 

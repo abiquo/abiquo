@@ -321,6 +321,24 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
+    public static String resolveDatacenterURIActionDiscoverHypervidor(final Integer datacenterId,
+        final String ip)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE + "?ip=" + ip;
+    }
+
+    public static String resolveDatacenterURIActionDiscover(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ACTION_DISCOVER_SINGLE;
+    }
+
+    public static String resolveDatacenterURIActionDiscoverMultiple(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_MULTIPLE;
+    }
+
     /**
      * Creates something like
      * http://example.com/admin/datacenters/{$datacenterId}/racks/{$rackId}/machines

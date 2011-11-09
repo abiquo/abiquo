@@ -22,6 +22,7 @@
 package net.undf.abicloud.vo.systemproperties
 {
     [RemoteClass(alias="com.abiquo.abiserver.pojo.config.SystemProperty")]
+    [Bindable]
     public class SystemProperty
     {
         /* ------------- Public atributes ------------- */

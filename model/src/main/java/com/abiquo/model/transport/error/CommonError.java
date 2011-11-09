@@ -22,9 +22,8 @@
 package com.abiquo.model.transport.error;
 
 /**
- * Any exception of the API inside the service layer should 
- * have this object instead the  {@link ErrorDto} object, which is 
- * a REST object.
+ * Any exception of the API inside the service layer should have this object instead the
+ * {@link ErrorDto} object, which is a REST object.
  * 
  * @author jdevesa@abiquo.com
  */
@@ -49,5 +48,5 @@ public class CommonError
     {
         return message;
     }
-   
+
 }

@@ -57,29 +57,29 @@ public abstract class AbstractResourcePlusAMIT extends AbstractResourceIT
     @BeforeClass
     public static void setupServer() throws Exception
     {
-        // TODO 
-//        server = new Server(AM_SERVICE_MAPPING_PORT);
-//
-//        Context amContextHandler = new Context(server, "/am", Context.SESSIONS);
-//
-//        Map<String, String> amInitParameters = new HashMap<String, String>();
-//        amInitParameters.put("contextConfigLocation", amContextConfigLocation);
-//
-//        amContextHandler.setInitParams(amInitParameters);
-//        amContextHandler.addEventListener(new ContextLoaderListener());
-//
-//        ServletHolder amServletHolder = new ServletHolder(new CXFServlet());
-//        amContextHandler.addServlet(amServletHolder, "/*");
-//
-//        // VM Test Repository for AM
-//        File vmrepo = new File(VM_REPOSITORY_TEST);
-//        if (vmrepo != null && vmrepo.exists())
-//        {
-//            deleteDirectory(vmrepo);
-//        }
-//        vmrepo.mkdirs();
-//
-//        server.start();
+        // TODO
+        // server = new Server(AM_SERVICE_MAPPING_PORT);
+        //
+        // Context amContextHandler = new Context(server, "/am", Context.SESSIONS);
+        //
+        // Map<String, String> amInitParameters = new HashMap<String, String>();
+        // amInitParameters.put("contextConfigLocation", amContextConfigLocation);
+        //
+        // amContextHandler.setInitParams(amInitParameters);
+        // amContextHandler.addEventListener(new ContextLoaderListener());
+        //
+        // ServletHolder amServletHolder = new ServletHolder(new CXFServlet());
+        // amContextHandler.addServlet(amServletHolder, "/*");
+        //
+        // // VM Test Repository for AM
+        // File vmrepo = new File(VM_REPOSITORY_TEST);
+        // if (vmrepo != null && vmrepo.exists())
+        // {
+        // deleteDirectory(vmrepo);
+        // }
+        // vmrepo.mkdirs();
+        //
+        // server.start();
     }
 
     static protected boolean deleteDirectory(File path)

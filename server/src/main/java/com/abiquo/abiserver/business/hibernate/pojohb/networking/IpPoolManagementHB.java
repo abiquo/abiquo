@@ -292,7 +292,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         return available;
     }
 
-    public void setAvailable(Boolean available)
+    public void setAvailable(final Boolean available)
     {
         this.available = available;
     }

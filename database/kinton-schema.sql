@@ -738,7 +738,7 @@ CREATE TABLE  `kinton`.`repository` (
   `idRepository` int(3) unsigned NOT NULL auto_increment,
   `idDataCenter` INT UNSIGNED NOT NULL ,
   `name` varchar(30),
-  `URL` varchar(50) NOT NULL,
+  `URL` varchar(255) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`idRepository`),
   CONSTRAINT `fk_idDataCenter` FOREIGN KEY ( `idDataCenter` ) REFERENCES `datacenter` ( `idDataCenter` ) ON DELETE CASCADE
@@ -864,7 +864,9 @@ INSERT INTO `privilege` VALUES
  (45,'APPLIB_VM_COST_CODE',0),
  (46,'USERS_MANAGE_ENTERPRISE_BRANDING',0),
  (47,'SYSCONFIG_SHOW_REPORTS',0),
- (48,'USERS_DEFINE_AS_MANAGER',0);
+ (48,'USERS_DEFINE_AS_MANAGER',0),
+ (49,'PRICING_VIEW',0),
+ (50,'PRICING_MANAGE',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `privilege` ENABLE KEYS */;
 
@@ -875,8 +877,8 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `roles_privileges` DISABLE KEYS */;
 LOCK TABLES `roles_privileges` WRITE;
 INSERT INTO `roles_privileges` VALUES
- (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),
- (1,23,0),(1,24,0),(1,25,0),(1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),
+ (1,1,0),(1,2,0),(1,3,0),(1,4,0),(1,5,0),(1,6,0),(1,7,0),(1,8,0),(1,9,0),(1,10,0),(1,11,0),(1,12,0),(1,13,0),(1,14,0),(1,15,0),(1,16,0),(1,17,0),(1,18,0),(1,19,0),(1,20,0),(1,21,0),(1,22,0),(1,23,0),(1,24,0),(1,25,0),
+ (1,26,0),(1,27,0),(1,28,0),(1,29,0),(1,30,0),(1,31,0),(1,32,0),(1,33,0),(1,34,0),(1,35,0),(1,36,0),(1,37,0),(1,38,0),(1,39,0),(1,40,0),(1,41,0),(1,42,0),(1,43,0),(1,44,0),(1,45,0),(1,47,0),(1,48,0),(1,49,0),(1,50,0),
  (3,3,0),(3,12,0),(3,13,0),(3,14,0),(3,15,0),(3,16,0),(3,17,0),(3,18,0),(3,19,0),(3,20,0),(3,21,0),(3,22,0),(3,23,0),(3,24,0),(3,25,0),(3,26,0),(3,27,0),(3,28,0),(3,29,0),(3,30,0),(3,32,0),(3,34,0),(3,43,0),(3,48,0),
 (2,12,0),(2,14,0),(2,17,0),(2,18,0),(2,19,0),(2,20,0),(2,21,0),(2,22,0),(2,23,0),(2,43,0);
 UNLOCK TABLES;
@@ -1061,7 +1063,7 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `ovfid` varchar(255),
   `stateful` int(1) unsigned NOT NULL,
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
-  `cost_code` varchar(50) default NULL,
+  `cost_code` int(4),
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
@@ -1379,16 +1381,19 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.vm.createInstance","http://community.abiquo.com/display/ABI18/Create+Virtual+Machine+instances","Virtual Machine instance creation wiki"),
  ("client.wiki.vm.createStateful","http://community.abiquo.com/display/ABI18/Create+Persistent+Virtual+Machines","Virtual Machine stateful creation wiki"),
  ("client.wiki.vm.captureVirtualMachine","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-ImportaRetrievedVirtualMachine","Capture Virtual Machine wiki"),
+ ("client.wiki.vm.deployInfo","","Show more info when deploying"),
  ("client.wiki.apps.uploadVM","http://community.abiquo.com/display/ABI18/Adding+Virtual+Images+to+the+Appliance+Library#AddingVirtualImagestotheApplianceLibrary-UploadingfromtheLocalFilesystem","Virtual Image upload wiki"),
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-RestrictingDatacenterAccess","Datacenter Limits wiki"),
  ("client.wiki.user.createUser","http://community.abiquo.com/display/ABI18/Manage+Users#ManageUsers-CreatingorEditingaUser","User creation wiki"),
  ("client.wiki.user.createRole","http://community.abiquo.com/display/ABI18/Manage+Roles+and+Privileges","Role creation wiki"),
+ ("client.wiki.pricing.createCurrency","http://community.abiquo.com/display/ABI20/Pricing+View","Currency creation wiki"),
+ ("client.wiki.pricing.createTemplate","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing template wiki"),
+ ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing cost code wiki"),
  ("client.wiki.config.general","http://community.abiquo.com/display/ABI18/Configuration+view","Configuration wiki"),
  ("client.wiki.config.heartbeat","http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-Heartbeating","Heartbeat configuration wiki"),
  ("client.wiki.config.licence","http://community.abiquo.com/display/ABI18/Configuration+view#ConfigurationView-LicenseManagement","Licence configuration wiki"),
- ("client.wiki.config.registration","http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-ProductRegistration","Registration wiki"),
- ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");
+ ("client.wiki.config.registration","http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-ProductRegistration","Registration wiki");
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;
 
@@ -2351,45 +2356,6 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
 END IF;
 END;
-|
-CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
-FOR EACH ROW BEGIN
-DECLARE idDatacenter INT UNSIGNED;
-DECLARE machineState INT UNSIGNED;
-SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON da.idPhysicalMachine = da.idPhysicalMachine
-WHERE da.idDatastore = NEW.idDatastore;
-IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    IF OLD.enabled = 1 THEN
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        ELSEIF NEW.enabled = 0 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    ELSE
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    END IF;
-END IF;
-END
 --
 --
 -- ******************************************************************************************
@@ -2408,7 +2374,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         DECLARE idDataCenterObj INTEGER;
         DECLARE idVirtualAppObj INTEGER;
         DECLARE idVirtualDataCenterObj INTEGER;
-        DECLARE costCodeObj VARCHAR(50);
+        DECLARE costCodeObj int(4);
 	-- For debugging purposes only
         -- INSERT INTO debug_msg (msg) VALUES (CONCAT('UPDATE: ', OLD.idType, NEW.idType, OLD.state, NEW.state));	
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
@@ -2531,7 +2497,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
             END IF;         
         END IF;
         --
-        SELECT IF(vi.cost_code IS NULL, "", vi.cost_code) INTO costCodeObj
+        SELECT IF(vi.cost_code IS NULL, 0, vi.cost_code) INTO costCodeObj
         FROM virtualimage vi
         WHERE vi.idImage = NEW.idImage;
         -- Register Accounting Events
@@ -3466,6 +3432,45 @@ CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_l
         WHERE idDataCenter = OLD.idDataCenter;
     END;
 |
+CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
+    FOR EACH ROW BEGIN
+	DECLARE idDatacenter INT UNSIGNED;
+	DECLARE machineState INT UNSIGNED;
+	SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
+	WHERE da.idDatastore = NEW.idDatastore;
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+	    IF OLD.enabled = 1 THEN
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		ELSEIF NEW.enabled = 0 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    ELSE
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    END IF;
+	END IF;
+    END;
+|
 -- ******************************************************************************************
 --
 --  Checks statistics miscalculations and corrects them to zero
@@ -4195,5 +4200,137 @@ CREATE TABLE `tasks` (
   `action` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+-- ******************************************************************************************
+-- PRICING RELATED TABLES
+-- ******************************************************************************************
+
+-- DROP THE TABLES RELATED TO PRICING --
+DROP TABLE IF EXISTS `kinton`.`pricing_template`;
+DROP TABLE IF EXISTS `kinton`.`costCode`;
+DROP TABLE IF EXISTS `kinton`.`pricingCostCode`;
+DROP TABLE IF EXISTS `kinton`.`pricingTier`;
+DROP TABLE IF EXISTS `kinton`.`currency`;
+DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
+
+--
+-- Definition of table `kinton`.`currency`
+--
+
+CREATE TABLE `kinton`.`currency` (
+  `idCurrency` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `symbol` varchar(10) NOT NULL ,
+  `name` varchar(20) NOT NULL,
+  `digits` int(1)  NOT NULL default 2,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCurrency`)
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+    
+
+--
+-- Dumping data for table `kinton`.`currency`
+--
+
+/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
+LOCK TABLES `currency` WRITE;
+INSERT INTO `kinton`.`currency` values (1, "USD", "Dollar - $", 2,  0);
+INSERT INTO `kinton`.`currency` values (2, "EUR", CONCAT("Euro - " ,0xE282AC), 2,0);
+INSERT INTO `kinton`.`currency` values (3, "JPY", CONCAT("Yen - " , 0xc2a5), 0,  0);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `currency` ENABLE KEYS */;  
+  
+--
+-- Definition of table `kinton`.`costCode`
+--  
+
+CREATE TABLE `kinton`.`costCode` (
+  `idCostCode` int(10) NOT NULL AUTO_INCREMENT ,
+   `name` varchar(20) NOT NULL ,
+  `description` varchar(100) NOT NULL ,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idCostCode`)
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`pricing`
+--
+  
+
+CREATE TABLE `kinton`.`pricingTemplate` (
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `idCurrency` int(10) UNSIGNED NOT NULL ,
+  `name` varchar(256) NOT NULL ,
+  `chargingPeriod`  int(10) UNSIGNED NOT NULL ,
+  `minimumCharge` int(10) UNSIGNED NOT NULL ,
+  `showChangesBefore` boolean NOT NULL default 0,
+  `standingChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `minimumChargePeriod` DECIMAL(20,5) NOT NULL default 0,
+  `vcpu` DECIMAL(20,5) NOT NULL default 0,
+  `memoryMB` DECIMAL(20,5) NOT NULL default 0,
+  `hdGB` DECIMAL(20,5) NOT NULL default 0,
+  `vlan` DECIMAL(20,5) NOT NULL default 0,
+  `publicIp` DECIMAL(20,5) NOT NULL default 0,
+  `defaultTemplate` boolean NOT NULL default 0,
+  `description` varchar(1000)  NOT NULL,
+  `last_update` timestamp NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingTemplate`) ,
+  KEY `Pricing_FK2_Currency` (`idCurrency`),
+  CONSTRAINT `Pricing_FK2_Currency` FOREIGN KEY (`idCurrency` ) REFERENCES `kinton`.`currency` (`idCurrency` ) ON DELETE NO ACTION
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  
+
+--
+-- Definition of table `kinton`.`pricingCostCode`
+--  
+  
+
+CREATE TABLE `kinton`.`pricingCostCode` (
+`idPricingCostCode` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
+  `idCostCode` int(10) UNSIGNED NOT NULL,
+  `price` DECIMAL(20,5) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingCostCode`) 
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;  
+  
+ 
+--
+-- Table `kinton`.`costCodeCurrency`
+-- 
+
+DROP TABLE IF EXISTS `kinton`.`costCodeCurrency`;
+CREATE TABLE  `kinton`.`costCodeCurrency` (
+  `idCostCodeCurrency` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idCostCode` int(10) unsigned,
+  `idCurrency` int(10) unsigned,
+  `price` DECIMAL(20,5) NOT NULL default 0,
+  `version_c` integer NOT NULL DEFAULT 1,
+  PRIMARY KEY (`idCostCodeCurrency`)
+  -- CONSTRAINT `idCostCode_FK` FOREIGN KEY (`idCostCode`) REFERENCES `costCode` (`idCostCode`),
+  -- CONSTRAINT `idCurrency_FK` FOREIGN KEY (`idCurrency`) REFERENCES `currency` (`idCurrency`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+ 
+ 
+--
+-- Definition of table `kinton`.`pricingTemplate_tier`
+--  
+
+
+CREATE TABLE `kinton`.`pricingTier` (
+  `idPricingTier` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idPricingTemplate` int(10) UNSIGNED NOT NULL,
+  `idTier` int(10) UNSIGNED NOT NULL,
+  `price`  DECIMAL(20,5) NOT NULL default 0,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idPricingTier`) 
+  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;    
+  
+-- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
+ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
+ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricingTemplate` (`idPricingTemplate`);
+
 
 CALL `kinton`.`add_version_column_to_all`();

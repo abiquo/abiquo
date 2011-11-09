@@ -90,8 +90,8 @@ public class OVFPackageListResourceIT extends AbstractResourceIT
 
         Resource resource = client.resource(validOVFPackageList);
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).put(
-                ovfPackageListDto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .put(ovfPackageListDto);
 
         assertEquals(response.getStatusCode(), 200);
 

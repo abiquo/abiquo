@@ -105,8 +105,8 @@ public class OVFPackageInstancesResourceIT extends AbstractResourceIT
         String ovfUrl = "test_ovfurl";
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                ovfUrl);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(ovfUrl);
 
         Assert.assertEquals(response.getStatusCode(), 201);
 

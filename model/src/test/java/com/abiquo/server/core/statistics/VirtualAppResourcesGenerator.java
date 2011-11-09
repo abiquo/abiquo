@@ -32,18 +32,19 @@ import com.softwarementors.commons.testng.AssertEx;
 public class VirtualAppResourcesGenerator extends DefaultEntityGenerator<VirtualAppResources>
 {
 
-    
-
     public VirtualAppResourcesGenerator(SeedGenerator seed)
     {
         super(seed);
-        
+
     }
 
     @Override
     public void assertAllPropertiesEqual(VirtualAppResources obj1, VirtualAppResources obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualAppResources.VDC_NAME_PROPERTY,VirtualAppResources.VAPP_NAME_PROPERTY,VirtualAppResources.VOL_ATTACHED_PROPERTY,VirtualAppResources.VM_CREATED_PROPERTY,VirtualAppResources.VOL_ASSOCIATED_PROPERTY,VirtualAppResources.VM_ACTIVE_PROPERTY,VirtualAppResources.ID_ENTERPRISE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualAppResources.VDC_NAME_PROPERTY,
+            VirtualAppResources.VAPP_NAME_PROPERTY, VirtualAppResources.VOL_ATTACHED_PROPERTY,
+            VirtualAppResources.VM_CREATED_PROPERTY, VirtualAppResources.VOL_ASSOCIATED_PROPERTY,
+            VirtualAppResources.VM_ACTIVE_PROPERTY, VirtualAppResources.ID_ENTERPRISE_PROPERTY);
     }
 
     @Override
@@ -53,17 +54,15 @@ public class VirtualAppResourcesGenerator extends DefaultEntityGenerator<Virtual
 
         VirtualAppResources virtualAppResources = new VirtualAppResources();
 
-        
-
         return virtualAppResources;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VirtualAppResources entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(VirtualAppResources entity,
+        List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
+
     }
 
 }

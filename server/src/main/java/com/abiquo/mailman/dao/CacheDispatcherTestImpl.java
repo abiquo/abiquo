@@ -36,8 +36,8 @@ public class CacheDispatcherTestImpl implements CacheDispatcher, CacheReceiver
     /**
      * The Link to weblogic logger
      */
-    private static final Logger debug =
-        LoggerFactory.getLogger(CacheDispatcherTestImpl.class.getName());
+    private static final Logger debug = LoggerFactory.getLogger(CacheDispatcherTestImpl.class
+        .getName());
 
     private Hashtable registry_ = new Hashtable();
 

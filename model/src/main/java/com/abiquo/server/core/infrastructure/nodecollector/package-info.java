@@ -28,3 +28,4 @@
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://abiquo.com/server/core/infrastructure/nodecollector", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package com.abiquo.server.core.infrastructure.nodecollector;
+

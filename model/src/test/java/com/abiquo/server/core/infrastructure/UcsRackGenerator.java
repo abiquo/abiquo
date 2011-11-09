@@ -51,10 +51,10 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     @Override
     public UcsRack createUniqueInstance()
     {
-        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();   
+        Datacenter datacenter = this.datacenterGenerator.createUniqueInstance();
         return createInstance(datacenter);
     }
-    
+
     public UcsRack createInstance(Datacenter datacenter)
     {
         int seed = nextSeed();
@@ -70,7 +70,7 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
             newString(this.nextSeed(), Rack.VLANS_ID_AVOIDED_LENGTH_MIN,
                 Rack.VLANS_ID_AVOIDED_LENGTH_MAX);
         Integer vlan_per_vdc_expected = 8;
-        
+
         UcsRack ucsRack =
             new UcsRack("rack" + new Random().nextInt(),
                 datacenter,
@@ -93,7 +93,7 @@ public class UcsRackGenerator extends DefaultEntityGenerator<UcsRack>
     public void addAuxiliaryEntitiesToPersist(UcsRack entity, List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
+
         Datacenter datacenter = entity.getDatacenter();
 
         this.datacenterGenerator.addAuxiliaryEntitiesToPersist(datacenter, entitiesToPersist);

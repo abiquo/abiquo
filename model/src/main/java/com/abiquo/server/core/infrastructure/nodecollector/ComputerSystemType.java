@@ -26,7 +26,6 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import java.util.ArrayList;
@@ -37,15 +36,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * 
- *                 Class computer system POJO contains all the shared capabilities for physical and virtual systems
- *             
- * 
- * <p>Java class for ComputerSystemType complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * Class computer system POJO contains all the shared capabilities for physical and virtual systems
+ * <p>
+ * Java class for ComputerSystemType complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ComputerSystemType">
@@ -61,109 +57,94 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ComputerSystemType", propOrder = {
-    "name",
-    "cpu",
-    "ram",
-    "resources"
-})
-@XmlSeeAlso({
-    VirtualSystemDto.class,
-    HostDto.class
-})
-public abstract class ComputerSystemType {
+@XmlType(name = "ComputerSystemType", propOrder = {"name", "cpu", "ram", "resources"})
+@XmlSeeAlso({VirtualSystemDto.class, HostDto.class})
+public abstract class ComputerSystemType
+{
 
     @XmlElement(required = true)
     protected String name;
+
     protected long cpu;
+
     protected long ram;
+
     @XmlElement(nillable = true)
     protected List<ResourceType> resources;
 
     /**
      * Gets the value of the name property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     /**
      * Sets the value of the name property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setName(String value) {
+    public void setName(String value)
+    {
         this.name = value;
     }
 
     /**
      * Gets the value of the cpu property.
-     * 
      */
-    public long getCpu() {
+    public long getCpu()
+    {
         return cpu;
     }
 
     /**
      * Sets the value of the cpu property.
-     * 
      */
-    public void setCpu(long value) {
+    public void setCpu(long value)
+    {
         this.cpu = value;
     }
 
     /**
      * Gets the value of the ram property.
-     * 
      */
-    public long getRam() {
+    public long getRam()
+    {
         return ram;
     }
 
     /**
      * Sets the value of the ram property.
-     * 
      */
-    public void setRam(long value) {
+    public void setRam(long value)
+    {
         this.ram = value;
     }
 
     /**
      * Gets the value of the resources property.
-     * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the resources property.
-     * 
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the resources property.
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getResources().add(newItem);
+     * getResources().add(newItem);
      * </pre>
-     * 
-     * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link ResourceType }
-     * 
-     * 
+     * Objects of the following type(s) are allowed in the list {@link ResourceType }
      */
-    public List<ResourceType> getResources() {
-        if (resources == null) {
+    public List<ResourceType> getResources()
+    {
+        if (resources == null)
+        {
             resources = new ArrayList<ResourceType>();
         }
         return this.resources;
