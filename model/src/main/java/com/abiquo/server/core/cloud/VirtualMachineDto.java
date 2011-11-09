@@ -31,6 +31,11 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 public class VirtualMachineDto extends SingleResourceTransportDto implements
     Comparable<VirtualMachineDto>
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8877350185009627544L;
+
     private Integer id;
 
     public Integer getId()
