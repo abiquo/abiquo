@@ -118,6 +118,16 @@ public class StorageRep extends DefaultRepBase
         return initiatorMappingDAO.findByVolumeAndInitiator(idVolumeManagement, initiatorIqn);
     }
 
+    public List<InitiatorMapping> getInitiatorMappings(final Integer idVolume)
+    {
+        return initiatorMappingDAO.findByVolumeId(idVolume);
+    }
+
+    public InitiatorMapping getInitiatorMapping(final Integer mappingId)
+    {
+        return initiatorMappingDAO.findById(mappingId);
+    }
+
     public StoragePool findPoolByName(final Integer deviceId, final String name)
     {
         return poolDAO.findPoolByName(deviceId, name);
