@@ -51,6 +51,7 @@
         <class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
         <class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
+        <class>com.abiquo.server.core.infrastructure.network.DhcpOption</class>
         <!-- end: networking -->
         <!-- storage -->
         <class>com.abiquo.server.core.infrastructure.storage.Tier</class>

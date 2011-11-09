@@ -27,6 +27,13 @@ public class DhcpOption extends DefaultEntityBase
         // Just for JPA support
     }
 
+    public DhcpOption(final Integer option, final String description)
+    {
+        super();
+        this.option = option;
+        this.description = description;
+    }
+
     private final static String ID_COLUMN = "idDhcpOption";
 
     @Id

@@ -32,6 +32,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
@@ -298,7 +299,13 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // So we need to save another VLAN befor create the test
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs);
         vlan2.setEnterprise(vdc.getEnterprise());
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(vlan2.getConfiguration().getDhcp());
+        entitiesToSetup.add(vlan2.getConfiguration());
+        entitiesToSetup.add(vlan2);
+        setup(entitiesToSetup.toArray());
+
         String uri = resolvePrivateNetworkURI(vdc.getId(), vlan2.getId());
         ClientResponse response = delete(uri, "basicUser", "basicUser");
 

@@ -272,10 +272,10 @@ public class VLANNetwork extends DefaultEntityBase
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 
-    public final static String ASSOCIATION_TABLE = "vlans_dhcp";
+    public final static String ASSOCIATION_TABLE = "vlans_dhcpOption";
 
     @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
-    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "vlan_network_id"), inverseJoinColumns = @JoinColumn(name = "idDhcpOption"))
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idVlan"), inverseJoinColumns = @JoinColumn(name = "idDhcpOption"))
     private List<DhcpOption> dhcpOptions = new ArrayList<DhcpOption>();
 
     // ************************* Helper methods ****************************

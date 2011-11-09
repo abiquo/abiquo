@@ -1802,29 +1802,31 @@ CREATE TABLE `kinton`.`dhcpOption` (
   `description` varchar(100) NOT NULL ,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idDhcpOption`)
-  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
+LOCK TABLES `kinton`.`dhcpOption` WRITE;
 INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-("121","");
+(121,"");
 INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-("249","");
+(249,"");
+UNLOCK TABLES;
 --
--- Definition of table `kinton`.`vlans_dhcp`
+-- Definition of table `kinton`.`vlans_dhcpOption`
 --
 
-CREATE  TABLE `kinton`.`vlans_dhcp` (
+CREATE  TABLE `kinton`.`vlans_dhcpOption` (
   `idVlan` INT(10) UNSIGNED NOT NULL ,
-  `idDhcp` INT(10) UNSIGNED NOT NULL ,
+  `idDhcpOption` INT(10) UNSIGNED NOT NULL ,
   `version_c` INT(11) default 0,
   INDEX `fk_vlans_dhcp_vlan` (`idVlan` ASC) ,
-  INDEX `fk_vlans_dhcp_dhcp` (`idDhcp` ASC) ,
+  INDEX `fk_vlans_dhcp_dhcp` (`idDhcpOption` ASC) ,
   CONSTRAINT `fk_vlans_dhcp_vlan`
     FOREIGN KEY (`idVlan` )
     REFERENCES `kinton`.`vlan_network` (`vlan_network_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_vlans_dhcp_dhcp`
-    FOREIGN KEY (`idDhcp` )
+    FOREIGN KEY (`idDhcpOption` )
     REFERENCES `kinton`.`dhcpOption` (`idDhcpOption` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION
