@@ -62,7 +62,7 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
     public VirtualAppliance createUniqueInstance()
     {
         String name = newString(nextSeed(), 0, 255);
-        VirtualApplianceState state = newEnum(VirtualApplianceState.class, nextSeed());
+        VirtualApplianceState state = VirtualApplianceState.NOT_DEPLOYED;
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         VirtualDatacenter virtualDatacenter = virtualDatacenterGenerator.createInstance(enterprise);
 
