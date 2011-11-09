@@ -1317,27 +1317,28 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         final VirtualDataCenter virtualDataCenter)
     {
 
-        Session session = HibernateUtil.getSession();
-        Transaction tx = session.beginTransaction();
-
-        try
-        {
-            VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
-            checkLimits(vdcHb, userSession);
-        }
-        catch (HardLimitExceededException e)
-        {
-            BasicResult basicResult = new BasicResult();
-            basicResult.setSuccess(false);
-            basicResult.setMessage(resourceManager
-                .getMessage("editVirtualDataCenter.limitExceeded"));
-
-            return basicResult;
-        }
-        finally
-        {
-            tx.commit();
-        }
+        // Checked en api
+        // Session session = HibernateUtil.getSession();
+        // Transaction tx = session.beginTransaction();
+        //
+        // try
+        // {
+        // VirtualDataCenterHB vdcHb = virtualDataCenter.toPojoHB();
+        // checkLimits(vdcHb, userSession);
+        // }
+        // catch (HardLimitExceededException e)
+        // {
+        // BasicResult basicResult = new BasicResult();
+        // basicResult.setSuccess(false);
+        // basicResult.setMessage(resourceManager
+        // .getMessage("editVirtualDataCenter.limitExceeded"));
+        //
+        // return basicResult;
+        // }
+        // finally
+        // {
+        // tx.commit();
+        // }
 
         VirtualDatacenterResourceStub proxy =
             APIStubFactory.getInstance(userSession, new VirtualDatacenterResourceStubImpl(),
@@ -1820,10 +1821,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 }
                 else
                 {
+                    String messageError =
+                        "Operation cannot be performed on "
+                            + virtualAppliance.getName()
+                            + " because one of the virtual machines could be deployed on a disconnected hypervisor.";
+
                     traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                         EventType.VAPP_POWEROFF, userSession, null, virtualAppliance
-                            .getVirtualDataCenter().getName(), basicResult.getMessage(),
-                        virtualAppliance, null, null, null, null);
+                            .getVirtualDataCenter().getName(), messageError, virtualAppliance,
+                        null, null, null, null);
+
                     virtualAppliance =
                         updateOnlyStateInDB(virtualAppliance, oldState.toEnum()).getData();
                     dataResult.setData(virtualAppliance);

@@ -152,7 +152,9 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_PATH, params));
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -318,19 +320,18 @@ public class RESTBuilder implements IRESTBuilder
             OVFPackagesResource.OVF_PACKAGES_PATH, params));
 
         // action get virtual machines by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         // action get ips by enterprise
-        links
-            .add(builder.buildActionLink(EnterpriseResource.class,
-                EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
-                params));
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH, IpAddressesResource.IP_ADDRESSES,
+            params));
 
         // action get virtual datacenters by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH,
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
@@ -818,7 +819,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
@@ -832,30 +832,8 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
     public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
         final FitPolicyRule fpr)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
     {
         // TODO Auto-generated method stub
         return null;
@@ -933,6 +911,27 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         final IpPoolManagement ip)
     {
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpLinks(final Integer datacenterId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicIpRasdLinks(final Integer vdcId, final IpPoolManagement ip)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 

@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObject;
 import static com.abiquo.api.resources.RemoteServiceResource.createTransferObject;
 
 import java.util.List;
@@ -77,7 +78,8 @@ public class RemoteServicesResource extends AbstractResource
         final RemoteServiceDto remoteService, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        RemoteServiceDto persistentService = service.addRemoteService(remoteService, datacenterId);
+        RemoteService rs = createPersistenceObject(remoteService);
+        RemoteServiceDto persistentService = service.addRemoteService(rs, datacenterId);
 
         return RemoteServiceResource.addLinks(restBuilder, persistentService, datacenterId);
     }

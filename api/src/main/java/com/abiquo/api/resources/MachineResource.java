@@ -63,6 +63,8 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 @Controller
 public class MachineResource extends AbstractResource
 {
+    public static final String SYNC = "sync";
+
     public static final String MACHINE = "machine";
 
     public static final String MACHINE_PARAM = "{" + MACHINE + "}";
@@ -83,7 +85,7 @@ public class MachineResource extends AbstractResource
     MachineService service;
 
     @Autowired
-    InfrastructureService rackService;
+    InfrastructureService infraService;
 
     @Autowired
     VirtualMachineService vmService;
@@ -136,7 +138,8 @@ public class MachineResource extends AbstractResource
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
         @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @PathParam(MachineResource.SYNC) final Boolean sync, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
@@ -192,8 +195,11 @@ public class MachineResource extends AbstractResource
     {
         Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
 
-        vmService.deleteNotManagedVirtualMachines(hypervisor);
+        vmService.deleteNotManagedVirtualMachines(hypervisor, true);
+        infraService.updateUsedResourcesByMachine(machineId);
     }
+
+    // protected methods
 
     protected Hypervisor getHypervisor(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
@@ -229,15 +235,10 @@ public class MachineResource extends AbstractResource
         dto.setDescription(machine.getDescription());
         dto.setId(machine.getId());
         dto.setName(machine.getName());
-        dto.setRealCpuCores(machine.getRealCpuCores());
-        dto.setRealHardDiskInMb(machine.getRealHardDiskInBytes());
-        dto.setRealRamInMb(machine.getRealRamInMb());
         dto.setState(machine.getState());
         dto.setVirtualCpuCores(machine.getVirtualCpuCores());
         dto.setVirtualCpusPerCore(machine.getVirtualCpusPerCore());
         dto.setVirtualCpusUsed(machine.getVirtualCpusUsed());
-        dto.setVirtualHardDiskInMb(machine.getVirtualHardDiskInBytes());
-        dto.setVirtualHardDiskUsedInMb(machine.getVirtualHardDiskUsedInBytes());
         dto.setVirtualRamInMb(machine.getVirtualRamInMb());
         dto.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb());
         dto.setVirtualSwitch(machine.getVirtualSwitch());
@@ -253,6 +254,7 @@ public class MachineResource extends AbstractResource
             dto.setType(machine.getHypervisor().getType());
             dto.setUser(machine.getHypervisor().getUser());
             dto.setPassword(machine.getHypervisor().getPassword());
+            dto.setPort(machine.getHypervisor().getPort());
         }
 
         if (machine.getDatastores() != null)
@@ -267,7 +269,7 @@ public class MachineResource extends AbstractResource
                 dataDto.setRootPath(datastore.getRootPath());
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
-
+                dataDto.setDatastoreUUID(datastore.getDatastoreUUID());
                 dto.getDatastores().add(dataDto);
             }
         }
@@ -307,6 +309,7 @@ public class MachineResource extends AbstractResource
         String user = dto.getUser();
         String password = dto.getPassword();
         Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
+        hypervisor.setId(null);
         machine.setHypervisor(hypervisor);
 
         // Set the datastores

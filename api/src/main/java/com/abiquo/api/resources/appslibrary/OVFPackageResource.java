@@ -65,7 +65,7 @@ public class OVFPackageResource extends AbstractResource
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
-    public static final String INSTALL_ACTION = "actions/install";
+    public static final String INSTALL_ACTION = "action/install";
 
     public static final String INSTALL_TARGET_QUERY_PARAM = "iddatacenter";
 

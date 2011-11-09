@@ -24,6 +24,8 @@ package com.abiquo.api.resources;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -41,8 +43,10 @@ import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
+import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 
 @Parent(RemoteServicesResource.class)
 @Path(RemoteServiceResource.REMOTE_SERVICE_PARAM)
@@ -159,5 +163,27 @@ public class RemoteServiceResource extends AbstractResource
         {
             throw new NotFoundException(APIError.NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER);
         }
+    }
+
+    // Create the persistence objects.
+    public static List<RemoteService> createPersistenceObjects(final RemoteServicesDto remoteService)
+        throws Exception
+    {
+        List<RemoteService> rsList = new ArrayList<RemoteService>();
+        if (remoteService.getCollection() != null)
+        {
+            for (RemoteServiceDto rsd : remoteService.getCollection())
+            {
+                rsList.add(createPersistenceObject(rsd));
+            }
+        }
+        return rsList;
+    }
+
+    // Create the persistence object.
+    public static RemoteService createPersistenceObject(final RemoteServiceDto remoteService)
+        throws Exception
+    {
+        return ModelTransformer.persistenceFromTransport(RemoteService.class, remoteService);
     }
 }

@@ -25,18 +25,6 @@
         <property name="cpu" type="int">
             <column name="cpu" not-null="true" />
         </property>
-        <property name="hd" type="java.lang.Long">
-            <column name="hd" not-null="true" />
-        </property>
-        <property name="realRam" type="int">
-            <column name="realram" not-null="true" />
-        </property>
-        <property name="realCpu" type="int">
-            <column name="realcpu" not-null="true" />
-        </property>
-        <property name="realStorage" type="java.lang.Long">
-            <column name="realStorage" not-null="true" />
-        </property>
         <property name="cpuRatio" type="int">
             <column name="cpuRatio" not-null="true" />
         </property>
@@ -45,9 +33,6 @@
         </property>
         <property name="cpuUsed" type="int">
             <column name="cpuUsed" not-null="true" />
-        </property>
-        <property name="hdUsed" type="java.lang.Long">
-            <column name="hdUsed" not-null="true" />
         </property>
         <property name="idState" type="int">
             <column name="idState" not-null="true" />

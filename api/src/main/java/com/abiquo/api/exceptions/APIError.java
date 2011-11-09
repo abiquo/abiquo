@@ -62,7 +62,9 @@ public enum APIError
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
-        "The current enterprise can't use this datacenter"),
+        "The current enterprise can't use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
+        "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -80,12 +82,12 @@ public enum APIError
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
-        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+        "Cannot edit resource limits, current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), //
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
-        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "Cannot edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
         "LIMIT-11",
         "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
@@ -98,8 +100,8 @@ public enum APIError
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
-        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
         "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
         "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
@@ -160,7 +162,9 @@ public enum APIError
         "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
-        "VLAN-44", "The requested IP object does not exist"),
+        "VLAN-44", "The requested IP object does not exist"), VLANS_ASSIGNED_TO_ANOTHER_VIRTUAL_DATACENTER(
+        "VLAN-45",
+        "Cannot change enterprise because this network is used as default by Virtual Datacenter"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
@@ -174,7 +178,8 @@ public enum APIError
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
-        "There is a problem with the details of the UCS Rack"),
+        "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -185,12 +190,14 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
+        "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
+        "Invalid ip range"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
-        "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
+        "Invalid hypervisor IP. There is already a hypervisor with this IP address"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. There is already a hypervisor with this service IP"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -431,8 +438,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

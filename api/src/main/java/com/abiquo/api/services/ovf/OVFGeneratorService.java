@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -80,7 +81,6 @@ import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -504,7 +504,7 @@ public class OVFGeneratorService {
 		for (NodeVirtualImage node : virtualAppliance.getNodes()) {
 			NodeVirtualImage nodeVirtualImage = node;
 
-			State vmState = nodeVirtualImage.getVirtualMachine().getState();
+			VirtualMachineState vmState = nodeVirtualImage.getVirtualMachine().getState();
 
 			// Creates the virtual system inside the virtual system collection
 			VirtualSystemType virtualSystem = createVirtualSystem(

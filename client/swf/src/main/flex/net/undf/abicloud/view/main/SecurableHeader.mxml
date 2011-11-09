@@ -260,7 +260,7 @@
 				}
 				
 				//Making available this resource
-				menuOption = new HeaderButton(6);
+				menuOption = new HeaderButton(5);
 				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
 				menuOption.height = 61;
 				menuOption.label = ResourceManager.getInstance().getString("Main",
@@ -389,8 +389,8 @@
 
         <!-- Configuration, Documentation && Support Buttons -->
 
-
         <mx:Button id="configurationButton"
+        	height="61"
             label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_CONFIG')}"
             styleName="MainHeaderConfigurationButton" labelPlacement="bottom"
             includeInLayout="false"
@@ -398,6 +398,7 @@
             click="onClickConfigurationButton()"/>
 
         <mx:Button id="reportButton"
+        	height="61"
             label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_REPORT')}"
             styleName="MainHeaderReportButton" labelPlacement="bottom"
             visible="{AbiCloudModel.getInstance().configurationManager.config.client_main_billingUrl.value != ''}"
@@ -405,11 +406,13 @@
             click="onClickReportButton()"/>
         
         <mx:Button id="documentationButton"
+            height="61"
             label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_DOCUMENTATION')}"
             styleName="MainHeaderDocumentationButton" labelPlacement="bottom"
             click="onClickDocumentationButton()"/>
 
         <mx:Button id="supportButton"
+        	height="61"
             label="{ResourceManager.getInstance().getString('Main', 'HEADER_MENU_SUPPORT')}"
             styleName="MainHeaderSupportButton" labelPlacement="bottom"
             click="onClickSupportButton()"/>
