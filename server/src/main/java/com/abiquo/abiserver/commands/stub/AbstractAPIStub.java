@@ -1188,10 +1188,47 @@ public class AbstractAPIStub
         final Integer virtualApplianceId)
     {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("{virtualDatacenter}", String.valueOf(virtualDatacenterId));
-        params.put("{vapp}", String.valueOf(virtualApplianceId));
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualAppliances", String.valueOf(virtualApplianceId));
 
-        return URIResolver.resolveURI(apiUri,
-            "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}/action/deploy", params);
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualAppliances}/action/deploy",
+                params);
+    }
+
+    /**
+     * @param virtualDatacenterId
+     * @param virtualApplianceId
+     * @return String
+     */
+    protected String createVirtualApplianceUndeployLink(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualAppliances", String.valueOf(virtualApplianceId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualAppliances}/action/undeploy",
+                params);
+    }
+
+    protected String createEditVirtualMachineStateUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachine", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachine}/state",
+                params);
     }
 }

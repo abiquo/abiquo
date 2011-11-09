@@ -39,4 +39,7 @@ public interface VirtualApplianceResourceStub
 
     public DataResult deployVirtualAppliance(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, Boolean forceEnterpriseLimit);
+
+    public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId);
 }

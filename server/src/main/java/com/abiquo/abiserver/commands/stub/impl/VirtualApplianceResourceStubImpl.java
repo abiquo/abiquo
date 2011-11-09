@@ -32,6 +32,7 @@ import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
 import com.abiquo.util.ErrorManager;
 
 public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
@@ -45,10 +46,36 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public DataResult deployVirtualAppliance(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Boolean forceEnterpriseLimit)
+        final Integer virtualApplianceId, final Boolean forceEnterpriseSoftLimits)
     {
         DataResult result = new DataResult();
         String link = createVirtualApplianceDeployLink(virtualDatacenterId, virtualApplianceId);
+
+        VirtualMachineDeployDto options = new VirtualMachineDeployDto();
+        options.setForceEnterpriseSoftLimits(forceEnterpriseSoftLimits);
+
+        ClientResponse response = post(link, options);
+
+        if (response.getStatusCode() == 202)
+        {
+            result.setSuccess(Boolean.TRUE);
+            AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
+            result.setData(entity.getLinks());
+
+        }
+        else
+        {
+            populateErrors(response, result, "deployVirtualAppliance");
+        }
+        return result;
+    }
+
+    @Override
+    public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        DataResult result = new DataResult();
+        String link = createVirtualApplianceUndeployLink(virtualDatacenterId, virtualApplianceId);
 
         ClientResponse response = post(link, null);
 
@@ -61,7 +88,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, "deployVirtualAppliance");
+            populateErrors(response, result, "undeployVirtualAppliance");
         }
         return result;
     }

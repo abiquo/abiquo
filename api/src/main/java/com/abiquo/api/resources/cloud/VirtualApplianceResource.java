@@ -76,6 +76,8 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_STATE = "/state";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY = "/action/undeploy";
+
     @Autowired
     VirtualApplianceService service;
 
@@ -283,6 +285,19 @@ public class VirtualApplianceResource
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
         List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+        addStatusLinks(links, dto);
+        return dto;
+    }
+
+    @POST
+    @Path(VIRTUAL_APPLIANCE_ACTION_UNDEPLOY)
+    public AcceptedRequestDto<String> undeploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder)
+    {
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+        List<String> links = service.undeployVirtualAppliance(vdcId, vappId);
         addStatusLinks(links, dto);
         return dto;
     }
