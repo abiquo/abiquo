@@ -55,6 +55,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ConfigureVirtualMachineOp;
+import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtualMachineOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -249,6 +250,12 @@ public class VirtualMachineService extends DefaultApiService
         checkVirtualMachineStateAllowsReconfigure(virtualMachine);
         logger.debug("The state is valid for deploy");
 
+        logger.debug("Cloning and setting the data to become the new virtual machine");
+        VirtualMachine newVirtualMachine = virtualMachine.clone();
+        logger.trace("Clonned");
+        virtualMachineFromDto(dto, newVirtualMachine);
+        logger.debug("Modified");
+
         logger.debug("Updating the hardware needs in DB for virtual machine {}",
             virtualMachine.getUuid());
         // There might be different hardware needs. This call also recalculate.
@@ -260,17 +267,19 @@ public class VirtualMachineService extends DefaultApiService
 
         // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        DatacenterTasks deployTask = new DatacenterTasks();
+        DatacenterTasks reconfigureTask = new DatacenterTasks();
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
-        // Tasks needs the definition of the virtual machine
+        // Tasks needs the definition of the virtual machine and the new one
         VirtualMachineDescriptionBuilder vmDesc =
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+        VirtualMachineDescriptionBuilder newVmDesc =
             createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
 
         // The id identifies this job and is neede to create the ids of the items. It is
         // hyerarchic
         // so Task 1 and its job would be 1.1, another 1.2
-        deployTask.setId(virtualMachine.getUuid());
+        reconfigureTask.setId(virtualMachine.getUuid());
 
         logger.debug("Configure the hypervisor connection");
         // Hypervisor connection related configuration
@@ -279,13 +288,14 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Hypervisor connection configuration done");
 
         logger.debug("Reconfigure job");
-        ConfigureVirtualMachineOp configJob =
-            configureJobConfiguration(virtualMachine, deployTask, vmDesc, hypervisorConnection);
+        ReconfigureVirtualMachineOp configJob =
+            reconfigureJobConfiguration(virtualMachine, newVirtualMachine, reconfigureTask, vmDesc,
+                newVmDesc, hypervisorConnection);
         logger.debug("Reconfigure job done with id {}", configJob.getId());
 
         // The jobs are to be rolled back
-        deployTask.setDependent(Boolean.TRUE);
-        deployTask.getJobs().add(configJob);
+        reconfigureTask.setDependent(Boolean.TRUE);
+        reconfigureTask.getJobs().add(configJob);
 
         TarantinoRequestProducer producer =
             new TarantinoRequestProducer(virtualDatacenter.getDatacenter().getName());
@@ -293,7 +303,7 @@ public class VirtualMachineService extends DefaultApiService
         try
         {
             producer.openChannel();
-            producer.publish(deployTask);
+            producer.publish(reconfigureTask);
             logger.info("Deploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_RECONFIGURE,
@@ -339,6 +349,14 @@ public class VirtualMachineService extends DefaultApiService
     private VirtualMachine updateVirtualMachineFromDto(final VirtualMachineDto dto,
         final VirtualMachine old)
     {
+        virtualMachineFromDto(dto, old);
+        updateVirtualMachine(old);
+        return old;
+    }
+
+    private VirtualMachine virtualMachineFromDto(final VirtualMachineDto dto,
+        final VirtualMachine old)
+    {
         old.setName(dto.getName());
         old.setDescription(dto.getDescription());
         old.setCpu(dto.getCpu());
@@ -354,7 +372,6 @@ public class VirtualMachineService extends DefaultApiService
         {
             old.setPassword(null);
         }
-        updateVirtualMachine(old);
         return old;
     }
 
@@ -972,6 +989,20 @@ public class VirtualMachineService extends DefaultApiService
         return configJob;
     }
 
+    private ReconfigureVirtualMachineOp reconfigureJobConfiguration(
+        final VirtualMachine virtualMachine, final VirtualMachine newVirtualMachine,
+        final DatacenterTasks deployTask, final VirtualMachineDescriptionBuilder vmDesc,
+        final VirtualMachineDescriptionBuilder newVmDesc,
+        final HypervisorConnection hypervisorConnection)
+    {
+        ReconfigureVirtualMachineOp reconfigJob = new ReconfigureVirtualMachineOp();
+        reconfigJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
+        reconfigJob.setHypervisorConnection(hypervisorConnection);
+        reconfigJob.setNewVirtualMachine(newVmDesc.build(newVirtualMachine.getUuid()));
+        reconfigJob.setId(deployTask.getId() + "." + virtualMachine.getUuid() + "configure");
+        return reconfigJob;
+    }
+
     private HypervisorConnection hypervisorConnectionConfiguration(
         final VirtualMachine virtualMachine)
     {
@@ -1516,7 +1547,7 @@ public class VirtualMachineService extends DefaultApiService
      * @throws Exception
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void applyVirtualMachineState(final Integer vmId, final Integer vappId,
+    public String applyVirtualMachineState(final Integer vmId, final Integer vappId,
         final Integer vdcId, final VirtualMachineState state)
     {
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
@@ -1604,6 +1635,9 @@ public class VirtualMachineService extends DefaultApiService
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
             "The enqueuing in Tarantino was OK.");
+
+        // Here we add the url which contains the status
+        return "link";
     }
 
     /**

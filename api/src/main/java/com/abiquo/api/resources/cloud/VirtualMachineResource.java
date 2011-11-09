@@ -109,16 +109,27 @@ public class VirtualMachineResource extends AbstractResource
         return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
 
+    /***
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @return a link where you can keep track of the progress and the virtual machine.
+     * @throws Exception AcceptedRequestDto
+     */
     @PUT
-    public VirtualMachineDto updateVirtualMachine(
+    public AcceptedRequestDto updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        VirtualMachine vm = vmService.updateVirtualMachine(vdcId, vappId, vmId, dto);
+        String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
+        AcceptedRequestDto request = new AcceptedRequestDto();
+        request.setStatusUrlLink(link);
+        request.setEntity(dto);
 
-        return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
+        return request;
     }
 
     @PUT
@@ -243,12 +254,13 @@ public class VirtualMachineResource extends AbstractResource
      *            <li><b>ON</b></li>
      *            <li><b>PAUSED</b></li>
      *            </ul>
-     * @param restBuilder injected restbuilder context parameter
+     * @param restBuilder injected restbuilder context parameter * @return a link where you can keep
+     *            track of the progress and a message.
      * @throws Exception
      */
     @PUT
     @Path("state")
-    public void powerStateVirtualMachine(
+    public AcceptedRequestDto powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
@@ -256,7 +268,11 @@ public class VirtualMachineResource extends AbstractResource
         throws Exception
     {
         VirtualMachineState newState = validateState(state);
-        vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
+        String link = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
+        AcceptedRequestDto request = new AcceptedRequestDto();
+        request.setStatusUrlLink(link);
+        request.setEntity(null);
+        return request;
     }
 
     /**
@@ -419,7 +435,8 @@ public class VirtualMachineResource extends AbstractResource
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
-     * @param forceSoftLimits dto of options
+     * @param forceSoftLimits dto of options * @return a link where you can keep track of the
+     *            progress and a message.
      * @throws Exception
      */
     @POST
@@ -431,11 +448,12 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        vmService.deployVirtualMachine(vmId, vappId, vdcId,
-            forceSoftLimits.isForceEnterpriseSoftLimits());
+        String link =
+            vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                forceSoftLimits.isForceEnterpriseSoftLimits());
 
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-        a202.setStatusUrlLink("http://status");
+        a202.setStatusUrlLink(link);
         a202.setEntity("");
 
         return a202;
@@ -461,17 +479,24 @@ public class VirtualMachineResource extends AbstractResource
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
+     * @return a link where you can keep track of the progress and a message.
      * @throws Exception
      */
     @POST
     @Path("action/deploy")
-    public void deployVirtualMachine(
+    public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+
+        String link = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink(link);
+        a202.setEntity("");
+
+        return a202;
     }
 
     /**
@@ -491,16 +516,22 @@ public class VirtualMachineResource extends AbstractResource
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
      * @param restBuilder injected restbuilder context parameter
+     * @return a link where you can keep track of the progress and a message.
      * @throws Exception
      */
     @POST
     @Path("action/undeploy")
-    public void undeployVirtualMachine(
+    public AcceptedRequestDto<String> undeployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+        String link = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink(link);
+        a202.setEntity("");
+
+        return a202;
     }
 }
