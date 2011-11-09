@@ -37,6 +37,7 @@ import com.abiquo.heartbeat.client.services.impl.HeartbeatClientImpl;
 import com.abiquo.heartbeat.client.services.impl.RegistrationClientImpl;
 import com.abiquo.heartbeat.shared.dto.HeartbeatDTO;
 import com.abiquo.heartbeat.shared.dto.RegisterDTO;
+import com.abiquo.heartbeat.shared.dto.RegisterResponse;
 import com.abiquo.heartbeat.shared.exceptions.HeartbeatException;
 
 public class ConfigurationCommandImpl extends BasicCommand implements ConfigurationCommand
@@ -60,6 +61,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationStatusNo()
      */
+    @Override
     public BasicResult setRegistrationStatusNo()
     {
         register.setStatusNo();
@@ -74,6 +76,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationStatusLater()
      */
+    @Override
     public BasicResult setRegistrationStatusLater()
     {
         register.setStatusLater();
@@ -88,6 +91,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#mustShowRegistrationReminder()
      */
+    @Override
     public BasicResult mustShowRegistrationReminder()
     {
         boolean showRegister = register.isRegistrationReminderTimeout();
@@ -104,6 +108,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getRegistrationData()
      */
+    @Override
     public BasicResult getRegistrationData()
     {
         DataResult<RegisterDTO> dataResult = new DataResult<RegisterDTO>();
@@ -131,24 +136,26 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * com.abiquo.abiserver.commands.ConfigurationComman#setRegistrationData(com.abiquo.heartbeat
      * .shared.dto.RegisterDTO)
      */
-    public BasicResult setRegistrationData(RegisterDTO registrationData)
+    @Override
+    public DataResult<RegisterDTO> setRegistrationData(final RegisterDTO registrationData)
     {
-        BasicResult basicResult = new BasicResult();
+        DataResult<RegisterDTO> dataResult = new DataResult<RegisterDTO>();
 
         try
         {
-            register.send(registrationData);
-            basicResult.setSuccess(true);
+            RegisterResponse registerResponse = register.send(registrationData);
+            dataResult.setData(registerResponse.getRegisterDTO());
+            dataResult.setSuccess(true);
         }
         catch (Exception e)
         {
-            basicResult.setSuccess(false);
-            basicResult
+            dataResult.setSuccess(false);
+            dataResult
                 .setMessage("Connection refused: unabled to connect to the configuration server");
             logger.error("error sending the registration data", e);
         }
 
-        return basicResult;
+        return dataResult;
     }
 
     // //////////////////////////////////////////////////////////////
@@ -158,6 +165,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#mustShowHeartbeatReminder()
      */
+    @Override
     public BasicResult mustShowHeartbeatReminder()
     {
         DataResult<Boolean> dataResult = new DataResult<Boolean>();
@@ -173,6 +181,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#isHeartbeatEnabled()
      */
+    @Override
     public BasicResult isHeartbeatEnabled()
     {
         DataResult<Boolean> dataResult = new DataResult<Boolean>();
@@ -187,6 +196,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setHeartbeatStatusNo()
      */
+    @Override
     public BasicResult setHeartbeatStatusNo()
     {
         BasicResult basicResult = new BasicResult();
@@ -201,6 +211,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#setHeartbeatStatusLater()
      */
+    @Override
     public BasicResult setHeartbeatStatusLater()
     {
         BasicResult basicResult = new BasicResult();
@@ -215,6 +226,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#enableHeartbeat()
      */
+    @Override
     public BasicResult enableHeartbeat()
     {
         BasicResult basicResult = new BasicResult();
@@ -239,6 +251,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#disableHeartbeat()
      */
+    @Override
     public BasicResult disableHeartbeat()
     {
         BasicResult basicResult = new BasicResult();
@@ -264,6 +277,7 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getLastHeartbeat()
      */
+    @Override
     public BasicResult getLastHeartbeat()
     {
         DataResult<HeartbeatDTO> basicResult = new DataResult<HeartbeatDTO>();
@@ -300,7 +314,8 @@ public class ConfigurationCommandImpl extends BasicCommand implements Configurat
      * (non-Javadoc)
      * @see com.abiquo.abiserver.commands.ConfigurationComman#getLastHeartbeat(java.lang.Integer)
      */
-    public BasicResult getLastHeartbeat(Integer rows)
+    @Override
+    public BasicResult getLastHeartbeat(final Integer rows)
     {
         DataResult<List<HeartbeatDTO>> dataResult = new DataResult<List<HeartbeatDTO>>();
 
