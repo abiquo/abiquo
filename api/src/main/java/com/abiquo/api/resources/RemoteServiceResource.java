@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
+import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DELETE;

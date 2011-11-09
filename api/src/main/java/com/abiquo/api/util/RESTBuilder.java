@@ -261,7 +261,6 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-
         links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
@@ -933,7 +932,11 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+<<<<<<< HEAD
     public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
+=======
+    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
+>>>>>>> CHANGE_LINKS
     {
         // TODO Auto-generated method stub
         return null;

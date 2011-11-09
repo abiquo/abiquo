@@ -841,6 +841,7 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+
     }
 
     public Collection<VirtualMachine> getVirtualMachinesByMachine(final Integer machineId)

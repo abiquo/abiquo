@@ -136,7 +136,8 @@ public class VirtualDatacentersResourceIT extends AbstractJpaGeneratorIT
                 vdc.getDatacenter());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration(), vlan, vdc,
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(),
+            vlan.getConfiguration(), vlan, vdc,
             new DatacenterLimits(sysEnterprise, vdc.getDatacenter()));
 
         ClientResponse response = get(resolveVirtualDatacentersURI(), "sysadmin", "sysadmin");

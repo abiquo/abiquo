@@ -759,7 +759,6 @@ public class InfrastructureRep extends DefaultRepBase
      */
     public Integer getEmptyOffMachines(final Integer rackId)
     {
-
         return rackDao.getEmptyOffMachines(rackId);
     }
 
