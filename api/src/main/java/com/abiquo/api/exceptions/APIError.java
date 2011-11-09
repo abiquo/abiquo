@@ -192,8 +192,8 @@ public enum APIError
         "MACHINE-7",
         "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
-        "Invalid ip range"), MACHINE_IQN_MISSING(
-        "MACHINE-10", "The IQN of the target Physical Machine is not set"),
+        "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
+        "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -387,7 +387,8 @@ public enum APIError
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-19",
-        "Could not get the Storage Manager remote service"),
+        "Could not get the Storage Manager remote service"), VOLUME_GRANT_ACCESS_ERROR("VOL-20",
+        "Could not add the initiators mappings"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

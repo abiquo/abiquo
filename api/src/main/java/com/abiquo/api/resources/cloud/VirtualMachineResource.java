@@ -432,7 +432,7 @@ public class VirtualMachineResource extends AbstractResource
         throws Exception
     {
         vmService.deployVirtualMachine(vmId, vappId, vdcId,
-            forceSoftLimits.isForeceEnterpriseSoftLimits());
+            forceSoftLimits.isForceEnterpriseSoftLimits());
 
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink("http://status");
@@ -501,6 +501,6 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        vmService.undeployVirtualMachine(vmId, vappId, vdcId, false);
+        vmService.undeployVirtualMachine(vmId, vappId, vdcId);
     }
 }
