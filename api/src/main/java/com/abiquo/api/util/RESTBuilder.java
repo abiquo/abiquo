@@ -162,6 +162,7 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_DISCOVER_SINGLE, DatacenterResource.ACTION_DISCOVER_REL,
@@ -224,7 +225,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-        links.add(builder.buildActionLink(MachineResource.class,
+        links.add(builder.buildRestLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
         links.add(builder.buildActionLink(MachineResource.class,
