@@ -100,8 +100,11 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         Machine m0 = machineGenerator.createMachine(datacenter);
         Machine m1 = machineGenerator.createMachine(datacenter);
 
-        m0.setHypervisor(hypervisorGenerator.createInstance(m0));
-        m1.setHypervisor(hypervisorGenerator.createInstance(m1));
+        // m0.setHypervisor(hypervisorGenerator.createInstance(m0));
+        // m1.setHypervisor(hypervisorGenerator.createInstance(m1));
+
+        hypervisorGenerator.createInstance(m0);
+        hypervisorGenerator.createInstance(m1);
 
         setup(datacenter, m0, m1);
 
