@@ -81,6 +81,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_main_enterpriseLogoURL:SystemProperty;
 		public var client_main_billingUrl:SystemProperty;
 		public var client_logout_url:SystemProperty;
+		public var client_main_disableChangePassword:SystemProperty;
 		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
