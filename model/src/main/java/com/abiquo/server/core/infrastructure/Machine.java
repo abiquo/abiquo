@@ -39,6 +39,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
@@ -610,7 +611,9 @@ public class Machine extends DefaultEntityBase
 
     public final static String HYPERVISOR_PROPERTY = "hypervisor";
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "machine")
+    public final static String HYPERVISOR_ID_COLUMN = "hypervisor";
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = Hypervisor.MACHINE_PROPERTY)
     private Hypervisor hypervisor;
 
     @Required(value = false)
@@ -619,10 +622,10 @@ public class Machine extends DefaultEntityBase
         return this.hypervisor;
     }
 
-    public void setHypervisor(final Hypervisor hypervisor)
-    {
-        this.hypervisor = hypervisor;
-    }
+    // public void setHypervisor(final Hypervisor hypervisor)
+    // {
+    // this.hypervisor = hypervisor;
+    // }
 
     // code in Machine
     public static final String DATASTORES_ASSOCIATION_TABLE = "datastore_assignment";
