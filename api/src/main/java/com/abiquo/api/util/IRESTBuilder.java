@@ -205,4 +205,6 @@ public interface IRESTBuilder
     public List<RESTLink> buildPricingTierLinks(Tier tier, PricingTemplate pricingTemplate,
         PricingTierDto dto);
 
+    public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
+
 }
