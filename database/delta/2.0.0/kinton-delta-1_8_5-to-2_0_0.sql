@@ -124,6 +124,10 @@ ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigne
 ALTER TABLE `kinton`.`enterprise` ADD CONSTRAINT `enterprise_pricing_FK` FOREIGN KEY (`idPricingTemplate`) REFERENCES `kinton`.`pricing_template` (`idPricingTemplate`);
 
 ALTER TABLE `kinton`.`virtualimage` MODIFY COLUMN `cost_code` int(4) DEFAULT 0;
+
+-- VFILER --
+ALTER TABLE `kinton`.`storage_device` ADD COLUMN `username` varchar(256) DEFAULT NULL;
+ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT NULL;
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
