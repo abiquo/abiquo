@@ -50,10 +50,10 @@ import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
-import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ConfigureVirtualMachineOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -695,7 +695,7 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Hypervisor connection configuration done");
 
         logger.debug("Configuration job");
-        ConfigureVirtualMachineOp configJob =
+        ApplyVirtualMachineStateOp configJob =
             configureJobConfiguration(virtualMachine, deployTask, vmDesc, hypervisorConnection);
         logger.debug("Configuration job done with id {}", configJob.getId());
 
@@ -826,14 +826,15 @@ public class VirtualMachineService extends DefaultApiService
         return stateJob;
     }
 
-    private ConfigureVirtualMachineOp configureJobConfiguration(
+    private ApplyVirtualMachineStateOp configureJobConfiguration(
         final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
         final VirtualMachineDescriptionBuilder vmDesc,
         final HypervisorConnection hypervisorConnection)
     {
-        ConfigureVirtualMachineOp configJob = new ConfigureVirtualMachineOp();
+        ApplyVirtualMachineStateOp configJob = new ApplyVirtualMachineStateOp();
         configJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
         configJob.setHypervisorConnection(hypervisorConnection);
+        configJob.setTransaction(StateTransition.CONFIGURE);
         configJob.setId(deployTask.getId() + "." + virtualMachine.getUuid() + "configure");
         return configJob;
     }

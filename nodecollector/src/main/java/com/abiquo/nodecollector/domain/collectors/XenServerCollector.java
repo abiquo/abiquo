@@ -354,7 +354,7 @@ public class XenServerCollector extends AbstractCollector
                 LOGGER.debug("Found Storage Repository {}", srRecord.nameLabel);
 
                 ResourceType resource = new ResourceType();
-                resource.setResourceType(ResourceEnumType.STORAGE_DISK);
+                resource.setResourceType(ResourceEnumType.HARD_DISK);
                 resource.setResourceSubType(type.name());
                 resource.setAddress(srRecord.uuid);
                 resource.setElementName(srRecord.nameLabel);
@@ -444,7 +444,7 @@ public class XenServerCollector extends AbstractCollector
 
                     disk.setUnits(vdiRecord.virtualSize);
                     disk.setAddress(vdiRecord.location);
-                    disk.setResourceType(ResourceEnumType.STORAGE_DISK);
+                    disk.setResourceType(ResourceEnumType.HARD_DISK);
                     disk.setConnection(vdiRecord.SR.getUuid(connection));
                     disk.setElementName(vdiRecord.nameLabel);
 

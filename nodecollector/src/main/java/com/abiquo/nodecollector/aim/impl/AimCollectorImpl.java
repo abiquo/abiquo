@@ -231,7 +231,7 @@ public class AimCollectorImpl implements AimCollector
     {
         ResourceType rt = new ResourceType();
 
-        rt.setResourceType(ResourceEnumType.STORAGE_DISK);
+        rt.setResourceType(ResourceEnumType.HARD_DISK);
         rt.setConnection(ds.getType()); // datastore uuid
         rt.setElementName(ds.getDevice());
         rt.setAddress(ds.getPath());
