@@ -232,6 +232,7 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` DISABLE KEYS */;
 LOCK TABLES `kinton`.`system_properties` WRITE;
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.wiki.pricing.createCurrency","http://community.abiquo.com/display/ABI20/Pricing+View","Currency creation wiki"),
  ("client.wiki.pricing.createTemplate","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing template wiki"),
  ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing cost code wiki"),
