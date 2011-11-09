@@ -1410,6 +1410,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.main.enterpriseLogoURL","http://www.abiquo.com","URL displayed when the header enterprise logo is clicked"),
  ("client.main.billingUrl","","URL displayed when the report header logo is clicked, if empty the report button will not be displayed"),
  ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)"),
+ ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),

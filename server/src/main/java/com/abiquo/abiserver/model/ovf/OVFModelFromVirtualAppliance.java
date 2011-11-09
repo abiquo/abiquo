@@ -72,7 +72,6 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
-import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualDataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.infrastructure.Datastore;
@@ -443,7 +442,6 @@ public class OVFModelFromVirtualAppliance
         DAOFactory factory = HibernateDAOFactory.instance();
         VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
         VlanNetworkDAO vlanDAO = factory.getVlanNetworkDAO();
-        VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
         DataCenterDAO dcDAO = factory.getDataCenterDAO();
 
         factory.beginConnection();
@@ -515,9 +513,13 @@ public class OVFModelFromVirtualAppliance
                 RemoteServiceDAO rmDAO = factory.getRemoteServiceDAO();
                 List<RemoteServiceHB> remo =
                     rmDAO.getRemoteServicesByType(idDataCenter, RemoteServiceType.DHCP_SERVICE);
-                service.setDhcpAddress(remo.get(0).getURI().getHost());
-                service.setDhcpPort(remo.get(0).getURI().getPort());
-                vlan.getConfiguration().setDhcpService(service);
+                if (remo.size() != 0)
+                {
+                    service.setDhcpAddress(remo.get(0).getURI().getHost());
+                    service.setDhcpPort(remo.get(0).getURI().getPort());
+                    vlan.getConfiguration().setDhcpService(service);
+                }
+
             }
 
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
@@ -540,8 +542,7 @@ public class OVFModelFromVirtualAppliance
 
                 numberOfRules++;
             }
-
-            if (numberOfRules > 0)
+            if (numberOfRules > 0 && !vlanHB.getNetworkType().equals(NetworkType.UNMANAGED.name()))
             {
                 networkType.getNetworks().add(vlan);
             }

@@ -169,7 +169,8 @@ public enum APIError
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
         "VLAN-44", "The requested IP object does not exist"), VLANS_ASSIGNED_TO_ANOTHER_VIRTUAL_DATACENTER(
         "VLAN-45",
-        "Cannot change enterprise because this network is used as default by Virtual Datacenter"),
+        "Cannot change enterprise because this network is used as default by Virtual Datacenter"), VLANS_NOT_UNMANAGED(
+        "VLAN-46", "The virtual network is not Unmanaged "),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(

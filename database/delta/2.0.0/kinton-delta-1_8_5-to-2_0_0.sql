@@ -1,4 +1,3 @@
-
 -- WARNING
 -- Please maintain order of delta when merging or adding new lines
 -- 1st -> alter existing schema tables
@@ -7,9 +6,8 @@
 -- 4th -> Triggers
 -- 5th -> SQL Procedures
 
-
 -- ---------------------------------------------- --
---                 TABLE DROP                     --
+--                  TABLE DROP                    --
 -- ---------------------------------------------- --
 
 -- PRICING --
@@ -33,7 +31,7 @@ DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 
 
 -- ---------------------------------------------- --
---                  TABLE CREATION                --
+--                 TABLE CREATION                 --
 -- ---------------------------------------------- --
 
 -- PRICING --
@@ -234,9 +232,11 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` DISABLE KEYS */;
 LOCK TABLES `kinton`.`system_properties` WRITE;
 INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
+ ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.wiki.pricing.createCurrency","http://community.abiquo.com/display/ABI20/Pricing+View","Currency creation wiki"),
  ("client.wiki.pricing.createTemplate","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing template wiki"),
- ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing cost code wiki");
+ ("client.wiki.pricing.createCostCode","http://community.abiquo.com/display/ABI20/Pricing+View","create pricing cost code wiki"),
+ ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)");
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `kinton`.`system_properties` ENABLE KEYS */;
 
@@ -248,6 +248,9 @@ INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
 INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
 /*!40000 ALTER TABLE `kinton`.`enterprise_properties` ENABLE KEYS */;
 
+-- First I need to update some rows before to delete the `default_network` field
+UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
+ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 
 -- ---------------------------------------------- --
 --                   TRIGGERS                     --
@@ -652,6 +655,7 @@ DELIMITER ;
 -- *************************************************
 -- Triggers ON Physical Machine
 -- *************************************************
+
 
 DROP TRIGGER IF EXISTS `kinton`.`create_physicalmachine_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_physicalmachine_update_stats`; 

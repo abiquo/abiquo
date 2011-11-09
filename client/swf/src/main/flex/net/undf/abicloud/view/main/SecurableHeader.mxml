@@ -115,7 +115,17 @@
 			{
 				//Check privileges
 				SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.SYSCONFIG_SHOW_REPORTS,"removeChild",reportButton,menuBar);
-
+                
+                //Allow/deny user to modify their info
+                if(AbiCloudModel.getInstance().configurationManager.config.client_main_disableChangePassword.value == 1)
+                {
+	                userLoggedInfo.addEventListener(MouseEvent.CLICK,onClickUserLoggedInfo);
+	                userLoggedInfo.buttonMode = true;
+	                userLoggedInfo.useHandCursor = true;
+	                userLoggedInfo.mouseChildren = false;
+	                userLoggedInfo.addEventListener(MouseEvent.ROLL_OVER,function underline():void{userLoggedInfo.setStyle('textDecoration', 'underline')});
+	                userLoggedInfo.addEventListener(MouseEvent.ROLL_OUT,function underline():void{userLoggedInfo.setStyle('textDecoration', 'none')});
+                }
 				
 				var fade:Fade = new Fade();
 				fade.duration = 600;
@@ -133,7 +143,7 @@
 			/**
 			 * Shows a Pop Up for user who has logged in can modify his data
 			 **/
-			private function onClickUserLoggedInfo():void
+			private function onClickUserLoggedInfo(event:MouseEvent):void
 			{
 				PopUpManager.addPopUp(this._userEdit, Application.application.document,
 					true);
@@ -273,7 +283,7 @@
 					menuOptions.addItem(menuOption);
 						
 				}
-				
+
 				//Making available this resource
 				menuOption = new HeaderButton(6);
 				menuOption.labelPlacement = ButtonLabelPlacement.BOTTOM;
@@ -452,13 +462,7 @@
             fontWeight="bold"
             textAlign="right"
             truncateToFit="true"
-            text="{AbiCloudModel.getInstance().loginManager.user.name + ' ' + AbiCloudModel.getInstance().loginManager.user.surname}"
-            buttonMode="true"
-            useHandCursor="true"
-            mouseChildren="false"
-            rollOver="userLoggedInfo.setStyle('textDecoration', 'underline')"
-            rollOut="userLoggedInfo.setStyle('textDecoration', 'none')"
-            click="onClickUserLoggedInfo()"/>
+            text="{AbiCloudModel.getInstance().loginManager.user.name + ' ' + AbiCloudModel.getInstance().loginManager.user.surname}"/>
         <!--<mx:Label id="userLoggedInfoText"
             fontSize="11"
             fontWeight="bold"

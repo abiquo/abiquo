@@ -296,7 +296,11 @@ public class UserService extends DefaultApiService
         old.setEmail(user.getEmail());
         old.setLocale(user.getLocale());
         old.setName(user.getName());
-        old.setPassword(encrypt(user.getPassword()));
+        if (!StringUtils.isEmpty(user.getPassword()))
+        {
+            // Password must only be updated if it is provided
+            old.setPassword(encrypt(user.getPassword()));
+        }
         old.setSurname(user.getSurname());
         old.setNick(user.getNick());
         old.setDescription(user.getDescription());

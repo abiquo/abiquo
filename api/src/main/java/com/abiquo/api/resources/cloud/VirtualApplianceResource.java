@@ -196,6 +196,7 @@ public class VirtualApplianceResource
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
+
         VirtualAppliance vapp = service.getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
         return service.changeVirtualAppMachinesState(vdcId, vappId, VirtualMachineState.RUNNING);

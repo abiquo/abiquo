@@ -47,6 +47,7 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
@@ -81,23 +82,15 @@ public class DatacentersResource extends AbstractResource
         @QueryParam(value = "idEnterprise") final String idEnterprise,
         @QueryParam("pricing") final Integer pricingId) throws Exception
     {
+
         Collection<Datacenter> list = null;
-
-        // if (pricingId != null)
-        // {
-        // if (!securityService.hasPrivilege(Privileges.PRICING_VIEW))
-        // {
-        // securityService.requirePrivilege(Privileges.PRICING_VIEW);
-        // }
-        // }
-        // else
-        // {
-        // if (!securityService.hasPrivilege(Privileges.PHYS_DC_ENUMERATE))
-        // {
-        // securityService.requirePrivilege(Privileges.PHYS_DC_ENUMERATE);
-        // }
-        // }
-
+        if (pricingId != null)
+        {
+            if (!securityService.hasPrivilege(Privileges.PRICING_VIEW))
+            {
+                securityService.requirePrivilege(Privileges.PRICING_VIEW);
+            }
+        }
         if (StringUtils.hasText(idEnterprise))
         {
             Enterprise enterprise = entService.getEnterprise(new Integer(idEnterprise));

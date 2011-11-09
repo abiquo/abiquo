@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -52,6 +53,9 @@ public class EnterprisesResource extends AbstractResource
 
     @Autowired
     private EnterpriseService service;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Context
     UriInfo uriInfo;
