@@ -142,7 +142,40 @@
             </faultHandlers>
 
         </RemoteObjectInvoker>
-    </EventHandlers>   
+    </EventHandlers> 
+    
+    <!-- UserEvent.CHECK_ROLE_ACCESS ________________________________________________________________________ -->
+    <EventHandlers type="{UserEvent.CHECK_ROLE_ACCESS}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.userService}"
+            method="checkRoleAccess"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.role.id]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{UserResultHandler}"
+                    method="handleCheckRoleAccess"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+    </EventHandlers>     
 
 
 

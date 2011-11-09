@@ -388,6 +388,7 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
 
         if (result.getSuccess())
         {
+
             // Building result
             result.setSuccess(true);
             result.setMessage(resourceManager.getMessage("editEnterprise.success"));
@@ -518,6 +519,24 @@ public class UserCommandImpl extends BasicCommand implements UserCommand
         if (basicResult.getSuccess())
         {
             basicResult.setMessage(resourceManager.getMessage("checkRolePrivilege.success"));
+        }
+
+        return basicResult;
+    }
+
+    @Override
+    public BasicResult checkRoleAccess(final UserSession userSession, final Integer idRole)
+    {
+        BasicResult basicResult = new BasicResult();
+
+        UsersResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new UsersResourceStubImpl(),
+                UsersResourceStub.class);
+
+        basicResult = proxy.checkRoleAccess(idRole);
+        if (basicResult.getSuccess())
+        {
+            basicResult.setMessage(resourceManager.getMessage("checkRoleAccess.success"));
         }
 
         return basicResult;

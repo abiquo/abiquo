@@ -100,7 +100,7 @@
                 }
 
                 //Initializing the NodeNetworkManagement component
-                vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter);
+                vmNetworkManagement.init(this._node, this._isEditionAllowed, virtualDataCenter, virtualAppliance);
             }
 
             public function get node():Node

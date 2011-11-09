@@ -26,9 +26,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,8 +39,6 @@ import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
-@Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class RoleServiceTest extends AbstractUnitTest
 {
     private Enterprise e;
