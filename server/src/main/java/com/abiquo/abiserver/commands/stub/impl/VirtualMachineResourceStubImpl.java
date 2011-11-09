@@ -43,8 +43,12 @@ import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
@@ -303,4 +307,34 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 
         return result;
     }
+
+    @Override
+    public DataResult editVirtualMachineState(final VirtualMachine virtualMachine,
+        final VirtualMachineState virtualMachineState)
+    {
+        DataResult result = new DataResult();
+        String url = "";
+        // createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
+        // virtualMachine.getId());
+        VirtualMachineStateDto dto = new VirtualMachineStateDto();
+        dto.setPower(virtualMachineState.name());
+        ClientResponse response = post(url, dto);
+
+        if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+        {
+            result.setSuccess(true);
+            AcceptedRequestDto acc = response.getEntity(AcceptedRequestDto.class);
+            result.setData(acc.getLinks());
+        }
+        else
+        {
+            populateErrors(response, result, "editVirtualMachineState");
+        }
+
+        return result;
+    }
+
+    // private VirtualMachineDto getVirtualMachine(Integer virtualMachineId) {
+    //
+    // }
 }

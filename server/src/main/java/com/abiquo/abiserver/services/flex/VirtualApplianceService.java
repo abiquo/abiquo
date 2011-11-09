@@ -53,14 +53,14 @@ import com.abiquo.tracer.SeverityType;
 public class VirtualApplianceService
 {
 
-    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
-
     /**
      * The command to invoke.
      */
     protected VirtualApplianceCommand virtualApplianceCommand;
 
     protected UserCommand userCommand;
+
+    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
 
     /**
      * Default constructor.
@@ -380,18 +380,5 @@ public class VirtualApplianceService
 
         return command.forceRefreshVirtualApplianceState(virtualAppliance);
 
-    }
-
-    /**
-     * @param session
-     * @param virtualAppliance
-     * @return BasicResult
-     */
-    public DataResult deployVirtualAppliance(final UserSession session,
-        final VirtualAppliance virtualAppliance)
-    {
-
-        return virtualApplianceResourceStub.deployVirtualAppliance(virtualAppliance
-            .getVirtualDataCenter().getId(), virtualAppliance.getId(), Boolean.FALSE);
     }
 }
