@@ -932,11 +932,7 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-<<<<<<< HEAD
     public List<RESTLink> buildPublicNetworksLinks(final Integer datacenterId)
-=======
-    public List<RESTLink> buildCurrencyLinks(final CurrencyDto currencyDto, final Currency currency)
->>>>>>> CHANGE_LINKS
     {
         // TODO Auto-generated method stub
         return null;
