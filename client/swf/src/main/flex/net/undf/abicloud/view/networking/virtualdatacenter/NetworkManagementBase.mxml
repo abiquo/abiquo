@@ -80,10 +80,7 @@
 
             private function onShowPrivateNetworkManagement():void
             {
-                if (privateNetworkManagement.virtualDatacenter != _virtualDatacenter)
-                {
-                    privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
-                }
+               privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             }
         ]]>
     </mx:Script>
