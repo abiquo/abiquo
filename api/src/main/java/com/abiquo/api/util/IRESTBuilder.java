@@ -173,4 +173,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         IpPoolManagement ip);
+
+    public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
 }

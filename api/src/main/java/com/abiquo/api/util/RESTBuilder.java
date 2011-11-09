@@ -938,4 +938,11 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public List<RESTLink> buildVirtualDatacenterTierLinks(final Integer virtualDatacenterId,
+        final Integer id)
+    {
+        return null;
+    }
+
 }
