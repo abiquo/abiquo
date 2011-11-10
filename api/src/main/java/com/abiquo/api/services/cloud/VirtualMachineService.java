@@ -751,7 +751,7 @@ public class VirtualMachineService extends DefaultApiService
             "The enqueuing in Tarantino was OK.");
     }
 
-    private void closeProducerChannel(final TarantinoRequestProducer producer)
+    public void closeProducerChannel(final TarantinoRequestProducer producer)
     {
         try
         {
@@ -837,7 +837,7 @@ public class VirtualMachineService extends DefaultApiService
         return configJob;
     }
 
-    private HypervisorConnection hypervisorConnectionConfiguration(
+    public HypervisorConnection hypervisorConnectionConfiguration(
         final VirtualMachine virtualMachine)
     {
         HypervisorConnection hypervisorConnection = new HypervisorConnection();
@@ -1344,7 +1344,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualDatacenter additional data.
      * @return VirtualMachineDescriptionBuilder
      */
-    private VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
+    public VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
         final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter,
         final VirtualAppliance virtualAppliance)
     {

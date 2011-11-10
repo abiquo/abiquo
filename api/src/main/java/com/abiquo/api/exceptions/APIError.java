@@ -392,22 +392,11 @@ public enum APIError
         "Invalid link to the volume to attach"), VOLUME_ATTACH_INVALID_VDC_LINK("VOL-21",
         "Invalid virtual datacenter in the link to the volume to attach"), VOLUME_ALREADY_ATTACHED(
         "VOL-22", "The volume is already attached to a virtual machine"), VOLUME_TOO_MUCH_ATTACHMENTS(
-        "VOL-23", "The maximum number of attached disks and volumes has been reached"), VOLUME_OFFLINE_ATTACH(
-        "VOL-24", "The volume cannot be attached using this method because "
-            + "the virtual machine is already deployed. "
-            + "Please, use the method to attach it on the fly"), VOLUME_ATTACH_ERROR("VOL-25",
-        "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_LIVE_ATTACH(
-        "VOL-26", "The volume cannot be attached using this method because "
-            + "the virtual machine is not deployed. "
-            + "Please, use the method to attach it offline"), VOLUME_ALREADY_DETACHED("VOL-27",
-        "The volume is already detached"), VOLUME_OFFLINE_DETACH("VOL-28",
-        "The volume cannot be detached using this method because "
-            + "the virtual machine is already deployed. "
-            + "Please, use the method to detach it on the fly"), VOLUME_DETACH_ERROR("VOL-29",
-        "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_LIVE_DETACH(
-        "VOL-30", "The volume cannot be detached using this method because "
-            + "the virtual machine is not deployed. "
-            + "Please, use the method to detach it offline"),
+        "VOL-23", "The maximum number of attached disks and volumes has been reached"), VOLUME_ATTACH_ERROR(
+        "VOL-24",
+        "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
+        "VOL-25", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-26",
+        "An unexpected error occured while detaching the volume. Please, contact the administrator"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
