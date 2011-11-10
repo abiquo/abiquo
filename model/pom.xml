@@ -247,6 +247,15 @@
             <optional>true</optional>
         </dependency>
         <!-- END: OTHER DEPENDENCIES -->
+        <!-- JEDIS DEPENDENCIES -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.0.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <!-- END: JEDIS DEPENDENCIES -->
     </dependencies>
     <!-- -->
     <!-- PROJECT INFORMATION -->
