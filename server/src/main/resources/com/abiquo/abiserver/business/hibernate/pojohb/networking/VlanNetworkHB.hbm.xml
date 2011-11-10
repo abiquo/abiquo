@@ -22,6 +22,12 @@
         <many-to-one class="com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB" lazy="false" fetch="select" name="enterpriseHB">
             <column name="enterprise_id" />
         </many-to-one>
+         <set name="dhcpOptionsHB" table="vlans_dhcpOption" lazy="false" cascade="all">
+            <key>
+                <column name="idVlan" not-null="true" />
+            </key>
+            <many-to-many column="idDhcpOption" class="com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB" />
+        </set>
     </class>
     <query name="GET_DEFAULT_VLAN_BY_NETWORK_ID"> from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB where network_id = :network_id and default_network is true</query>
     <query name="GET_NUMBER_IPS_USED_BY_VLAN"> Select count(ip) from com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB vn inner join vn.configuration.dhcpService.ipPoolManagement ip where

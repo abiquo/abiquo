@@ -28,12 +28,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOption;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOptions;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -54,7 +57,9 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.NodeHB;
@@ -487,7 +492,20 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
+            VlanNetworkHB vlanHB = vlanDAO.findById(vlanId);
+
             DHCPServiceHB service = (DHCPServiceHB) vlan.getConfiguration().getDhcpService();
+
+            DHCPOptions options = new DHCPOptions();
+            Set<DhcpOptionHB> optionsHB = vlanHB.getDhcpOptionsHB();
+            for (DhcpOptionHB opHB : optionsHB)
+            {
+                DHCPOption option = new DHCPOption();
+                option.setValue(opHB.getOption());
+                options.getOption().add(option);
+            }
+            vlan.setDhcpOptions(options);
+
             if (service.getDhcpRemoteServiceId() != null)
             {
                 RemoteServiceDAO rmDAO = factory.getRemoteServiceDAO();

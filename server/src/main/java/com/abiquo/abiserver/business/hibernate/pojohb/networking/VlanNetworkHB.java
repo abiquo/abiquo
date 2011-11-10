@@ -21,10 +21,14 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.networking;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.dmtf.schemas.ovf.envelope._1.OrgNetworkType;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.IPojoHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.EnterpriseHB;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 
 /**
@@ -48,6 +52,8 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
      * The enterprise to which the Vlan is reserved for
      */
     private EnterpriseHB enterpriseHB;
+
+    private Set<DhcpOptionHB> dhcpOptionsHB;
 
     /**
      * @return the vlanNetworkId
@@ -97,6 +103,16 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         this.enterpriseHB = enterpriseHB;
     }
 
+    public Set<DhcpOptionHB> getDhcpOptionsHB()
+    {
+        return dhcpOptionsHB;
+    }
+
+    public void setDhcpOptionsHB(final Set<DhcpOptionHB> dhcpOptionsHB)
+    {
+        this.dhcpOptionsHB = dhcpOptionsHB;
+    }
+
     @Override
     public VlanNetwork toPojo()
     {
@@ -111,6 +127,17 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         {
             vnet.setConfiguration(((NetworkConfigurationHB) getConfiguration()).toPojo());
         }
+
+        Set<DhcpOption> dhcpOption = new HashSet<DhcpOption>();
+        if (dhcpOptionsHB != null)
+        {
+            for (DhcpOptionHB dHB : dhcpOptionsHB)
+            {
+                dhcpOption.add(dHB.toPojo());
+            }
+        }
+
+        vnet.setDhcpOptions(dhcpOption);
 
         return vnet;
     }
