@@ -73,7 +73,7 @@ public class RackResource extends AbstractResource
 
     public static final String RACK_ACTION_FSM = "fsm";
 
-    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lssemplates";
+    public static final String RACK_ACTION_LOGICSERVERS_TEMPLATES = "lstemplates";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE =
         "logicservers/assoctemplate";
@@ -97,9 +97,9 @@ public class RackResource extends AbstractResource
     public static final String RACK_ACTION_FSM_REL = "fsm";
 
     public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_TEMPLATE_REL =
-        "ls-associatesemplate";
+        "ls-associatetemplate";
 
-    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateslone";
+    public static final String RACK_ACTION_LOGICSERVERS_ASSOCIATE_CLONE_REL = "ls-associateclone";
 
     // Define its service. It should only have ONE
     @Autowired
