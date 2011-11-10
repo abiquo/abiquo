@@ -145,10 +145,12 @@
             /**
              * Return the selected language passed in the URL if proceed 
              **/
-            public function returnLanguage(language:String):String{
-            	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languageDP,language);
+            public function returnLanguage(language:Language):String{
+            	var languages:ArrayCollection = AbiCloudModel.getInstance().configurationManager.languageSet;
+            	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languages,language.value);
             	if(indexLanguage != -1){
-            		return Language(languageDP.getItemAt(indexLanguage)).value;
+            		setLanguage(language);
+            		return Language(languages.getItemAt(indexLanguage)).value;
             	}
                 return "en_US";    
             }

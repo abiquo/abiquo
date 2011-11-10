@@ -44,6 +44,7 @@
     
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.configuration.Language;
         	import net.undf.abicloud.vo.configuration.LanguageLabelLoader;
         	import net.undf.abicloud.events.ConfigurationEvent;
         	import mx.containers.Panel;
@@ -293,11 +294,12 @@
 				if(parameters.length != 1){
 					var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
 		            var token:String = parameterList.auth;
-		            var language:String = parameterList.lang;         
+		            var language:Language = new Language('',parameterList.lang);         
 				}
             	//we check if the selected language is passed in the URL
             	if(language){          		
             		this._tokenLanguage = loginView.returnLanguage(language);
+            		
             	}
             	//if the token exists, we try an automatic loggin
             	if(token){
@@ -350,7 +352,7 @@
             
             private function showTokenLoader(event:Event = null):void{
             	
-            	ResourceManager.getInstance().localeChain = [ this._tokenLanguage, "en_US" ];
+            	//ResourceManager.getInstance().localeChain = [ this._tokenLanguage, "en_US" ];
 
                 //Display the loading component
                 tokenView = new TokenLoader();

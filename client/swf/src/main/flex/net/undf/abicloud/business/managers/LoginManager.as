@@ -106,7 +106,7 @@ package net.undf.abicloud.business.managers
     	//function to return selected language passed in the URL -> singleSignOn
 	    public function returnLanguageIndex(languageArray:ArrayCollection , language:String):int{
 	    	for(var i:Number = 0 ; i < languageArray.length ; i++){
-	    		if(languageArray.getItemAt(i).data == language){
+	    		if(languageArray.getItemAt(i).value == language){
 	    			return i;
 	    		}
 	    	}
