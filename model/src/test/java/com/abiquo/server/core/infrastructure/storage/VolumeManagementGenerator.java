@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
@@ -40,12 +41,15 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     private VirtualDatacenterGenerator vdcGenerator;
 
+    private VirtualImageGenerator imageGenerator;
+
     public VolumeManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         poolGenerator = new StoragePoolGenerator(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        imageGenerator = new VirtualImageGenerator(seed);
     }
 
     @Override
@@ -56,6 +60,12 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
         poolGenerator.assertAllPropertiesEqual(obj1.getStoragePool(), obj2.getStoragePool());
         rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
+
+        // Optional properties
+        if (obj1.getVirtualImage() != null)
+        {
+            imageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
+        }
     }
 
     @Override

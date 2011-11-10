@@ -208,9 +208,7 @@ public class VirtualMachineService extends DefaultApiService
 
     public VirtualMachine getVirtualMachine(final Integer vmId)
     {
-        VirtualMachine vm = repo.findVirtualMachineById(vmId);
-
-        return vm;
+        return repo.findVirtualMachineById(vmId);
     }
 
     public void addVirtualMachine(final VirtualMachine virtualMachine)

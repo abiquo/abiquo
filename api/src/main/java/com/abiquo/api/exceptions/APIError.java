@@ -192,8 +192,8 @@ public enum APIError
         "MACHINE-7",
         "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
-        "Invalid ip range"), MACHINE_IQN_MISSING(
-        "MACHINE-10", "The IQN of the target Physical Machine is not set"),
+        "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
+        "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -386,8 +386,28 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-19",
-        "Could not get the Storage Manager remote service"),
+        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-18",
+        "Could not get the Storage Manager remote service"), VOLUME_NOT_ATTACHED("VOL-19",
+        "The volume is not attached to the virtual machine"), VOLUME_ATTACH_INVALID_LINK("VOL-20",
+        "Invalid link to the volume to attach"), VOLUME_ATTACH_INVALID_VDC_LINK("VOL-21",
+        "Invalid virtual datacenter in the link to the volume to attach"), VOLUME_ALREADY_ATTACHED(
+        "VOL-22", "The volume is already attached to a virtual machine"), VOLUME_TOO_MUCH_ATTACHMENTS(
+        "VOL-23", "The maximum number of attached disks and volumes has been reached"), VOLUME_OFFLINE_ATTACH(
+        "VOL-24", "The volume cannot be attached using this method because "
+            + "the virtual machine is already deployed. "
+            + "Please, use the method to attach it on the fly"), VOLUME_ATTACH_ERROR("VOL-25",
+        "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_LIVE_ATTACH(
+        "VOL-26", "The volume cannot be attached using this method because "
+            + "the virtual machine is not deployed. "
+            + "Please, use the method to attach it offline"), VOLUME_ALREADY_DETACHED("VOL-27",
+        "The volume is already detached"), VOLUME_OFFLINE_DETACH("VOL-28",
+        "The volume cannot be detached using this method because "
+            + "the virtual machine is already deployed. "
+            + "Please, use the method to detach it on the fly"), VOLUME_DETACH_ERROR("VOL-29",
+        "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_LIVE_DETACH(
+        "VOL-30", "The volume cannot be detached using this method because "
+            + "the virtual machine is not deployed. "
+            + "Please, use the method to detach it offline"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

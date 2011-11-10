@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure.management;
 
+import static com.abiquo.server.core.infrastructure.management.RasdManagement.FIRST_ATTACHMENT_SEQUENCE;
+
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.DefaultEntityTestBase;
@@ -40,14 +42,18 @@ public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
     {
         RasdManagement rasdm = createUniqueEntity();
 
-        rasdm.setAttachmentOrder(-1L);
-        assertEquals(rasdm.getAttachmentOrder(), 0L);
+        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE);
+        assertEquals(rasdm.getAttachmentOrder(), FIRST_ATTACHMENT_SEQUENCE);
 
-        rasdm.setAttachmentOrder(0L);
-        assertEquals(rasdm.getAttachmentOrder(), 0L);
+        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE + 1);
+        assertEquals(rasdm.getAttachmentOrder(), FIRST_ATTACHMENT_SEQUENCE + 1);
+    }
 
-        rasdm.setAttachmentOrder(1L);
-        assertEquals(rasdm.getAttachmentOrder(), 1L);
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testInvalidGenerationValues()
+    {
+        RasdManagement rasdm = createUniqueEntity();
+        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE - 1);
     }
 
     @Test

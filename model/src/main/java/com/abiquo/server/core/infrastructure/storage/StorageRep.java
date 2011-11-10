@@ -41,6 +41,8 @@ import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.util.FilterOptions;
 
 /**
@@ -71,6 +73,9 @@ public class StorageRep extends DefaultRepBase
     private RasdDAO rasdDAO;
 
     @Autowired
+    private RasdManagementDAO rasdManagementDAO;
+
+    @Autowired
     private TierDAO tierDAO;
 
     @Autowired
@@ -83,16 +88,16 @@ public class StorageRep extends DefaultRepBase
 
     public StorageRep(final EntityManager entityManager)
     {
-        assert entityManager != null;
-        assert entityManager.isOpen();
-
-        this.tierDAO = new TierDAO(entityManager);
         this.deviceDAO = new StorageDeviceDAO(entityManager);
-        this.poolDAO = new StoragePoolDAO(entityManager);
-        this.volumeDAO = new VolumeManagementDAO(entityManager);
+        this.diskManagementDAO = new DiskManagementDAO(entityManager);
         this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
         this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
-        this.diskManagementDAO = new DiskManagementDAO(entityManager);
+        this.nodeVirtualImageDAO = new NodeVirtualImageDAO(entityManager);
+        this.poolDAO = new StoragePoolDAO(entityManager);
+        this.rasdDAO = new RasdDAO(entityManager);
+        this.rasdManagementDAO = new RasdManagementDAO(entityManager);
+        this.tierDAO = new TierDAO(entityManager);
+        this.volumeDAO = new VolumeManagementDAO(entityManager);
     }
 
     public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
@@ -168,6 +173,12 @@ public class StorageRep extends DefaultRepBase
         final FilterOptions filters) throws Exception
     {
         return volumeDAO.getVolumesByPool(pool, filters);
+    }
+
+    public List< ? extends RasdManagement> findDisksAndVolumesByVirtualMachine(
+        final VirtualMachine vm)
+    {
+        return rasdManagementDAO.findDisksAndVolumesByVirtualMachine(vm);
     }
 
     public List<StorageDevice> getDevicesByDatacenter(final Integer datacenterId)

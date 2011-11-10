@@ -519,7 +519,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 else
                 {
                     DiskManagement disky =
-                        new DiskManagement(null, null, null, rt.getUnits() * MEGABYTE, 0);
+                        new DiskManagement.SystemDisk(null, rt.getUnits() * MEGABYTE);
                     disky.setSizeInMb(rt.getUnits() * MEGABYTE);
                     vm.getDisks().add(disky);
                 }

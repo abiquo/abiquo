@@ -47,6 +47,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
@@ -117,11 +118,14 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     @Test
     public void deleteDiskIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 =
+            new DiskManagement(vm, 9000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disk is deleted
-        String uri = resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        String uri =
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
+                Long.valueOf(inputDisk2.getAttachmentOrder()).intValue());
         ClientResponse response = delete(uri, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
     }
@@ -132,7 +136,8 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     @Test
     public void getDisksIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 =
+            new DiskManagement(vm, 9000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disks are in the list
@@ -153,11 +158,14 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     @Test
     public void getDiskIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 =
+            new DiskManagement(vm, 9000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disk is created
-        String uri = resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        String uri =
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
+                Long.valueOf(inputDisk2.getAttachmentOrder()).intValue());
 
         ClientResponse response = get(uri, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());

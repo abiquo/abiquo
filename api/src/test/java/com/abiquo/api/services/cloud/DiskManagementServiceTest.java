@@ -50,6 +50,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 
 /**
@@ -234,7 +235,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void deleteDiskTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
+        DiskManagement inputDisk1 =
+            new DiskManagement(vm, 7000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
         setup(inputDisk1.getRasd(), inputDisk1);
 
         // retrieve them
@@ -247,7 +249,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disks.size(), 2);
 
         // delete the first one
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(),
+            Long.valueOf(inputDisk1.getAttachmentOrder()).intValue());
 
         // Assert disk has been created
         disks = service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
@@ -452,8 +455,10 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void getAllDisksTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 2);
+        DiskManagement inputDisk1 =
+            new DiskManagement(vm, 7000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
+        DiskManagement inputDisk2 =
+            new DiskManagement(vm, 9000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE + 1);
         setup(inputDisk1.getRasd(), inputDisk1, inputDisk2.getRasd(), inputDisk2);
 
         // retrieve them
@@ -581,8 +586,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void getExtraDisksTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 2);
+        DiskManagement inputDisk1 = new DiskManagement(vm, 7000L, 1);
+        DiskManagement inputDisk2 = new DiskManagement(vm, 9000L, 2);
         setup(inputDisk1.getRasd(), inputDisk1, inputDisk2.getRasd(), inputDisk2);
 
         // retrieve them

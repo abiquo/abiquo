@@ -30,7 +30,6 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
-import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.config.LicenseDto;
 import com.abiquo.server.core.config.SystemPropertyDto;
@@ -184,5 +183,6 @@ public interface IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         IpPoolManagement ip);
 
-    public List<RESTLink> buildDiskLinks(DiskManagement disk);
+    public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
+        final Integer vappId);
 }
