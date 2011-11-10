@@ -233,7 +233,7 @@ public class VirtualBoxCollector extends AbstractCollector
                     if (medium.getDeviceType().compareTo(DeviceType.HardDisk) == 0)
                     {
                         String formatName = medium.getFormat();
-                        newResource.setResourceType(ResourceEnumType.STORAGE_DISK);
+                        newResource.setResourceType(ResourceEnumType.HARD_DISK);
                         if (!"iSCSI".equals(formatName))
                         {
                             newResource.setAddress(medium.getLocation());

@@ -262,8 +262,11 @@ public class HyperVCollector extends AbstractCollector
                         vm.setRam(virtualMemory);
                     }
                     vms.getVirtualSystems().add(vm);
-                } else {
-                    LOGGER.info("Ignoring found virtual machine {}. State {} not recognized.", name, status);
+                }
+                else
+                {
+                    LOGGER.info("Ignoring found virtual machine {}. State {} not recognized.",
+                        name, status);
                 }
             }
         }
@@ -460,7 +463,7 @@ public class HyperVCollector extends AbstractCollector
             imagePath = imagePath.replace("\\\\", "\\");
             ResourceType disk = new ResourceType();
             disk.setAddress(imagePath);
-            disk.setResourceType(ResourceEnumType.STORAGE_DISK);
+            disk.setResourceType(ResourceEnumType.HARD_DISK);
             disk.setConnection(getDatastoreFromFile(imagePath));
             try
             {
@@ -673,21 +676,22 @@ public class HyperVCollector extends AbstractCollector
         try
         {
             networks = HyperVUtils.execQuery("Select * from Win32_NetworkAdapter", cimService);
-        for (IJIDispatch resourceDispatch : networks)
-        {
-            try {
-                String rawMac = resourceDispatch.get("MACAddress").getObjectAsString2();
-                if (StringUtils.isBlank(rawMac))
+            for (IJIDispatch resourceDispatch : networks)
+            {
+                try
                 {
-                    continue;
-                }
-                macs.append(rawMac).append("\\");
+                    String rawMac = resourceDispatch.get("MACAddress").getObjectAsString2();
+                    if (StringUtils.isBlank(rawMac))
+                    {
+                        continue;
+                    }
+                    macs.append(rawMac).append("\\");
                 }
                 catch (Exception ex)
                 {
                     LOGGER.debug("This interface has no mac");
                 }
-        }
+            }
         }
         catch (Exception ex)
         {
@@ -731,7 +735,7 @@ public class HyperVCollector extends AbstractCollector
             ResourceType resource = new ResourceType();
             resource.setAddress(logicalDiskName + "\\");
             resource.setElementName(logicalDiskName);
-            resource.setResourceType(ResourceEnumType.STORAGE_DISK);
+            resource.setResourceType(ResourceEnumType.HARD_DISK);
             resource.setUnits(Long.valueOf(size));
             resource.setAvailableUnits(Long.valueOf(availableSize));
             // resource.setConnection(datastoreUuidMark);
@@ -775,7 +779,7 @@ public class HyperVCollector extends AbstractCollector
                 ResourceType resource = new ResourceType();
                 resource.setAddress(logicalDiskName + "\\");
                 resource.setElementName(logicalDiskName);
-                resource.setResourceType(ResourceEnumType.STORAGE_DISK);
+                resource.setResourceType(ResourceEnumType.HARD_DISK);
                 resource.setUnits(Long.valueOf(size));
                 resource.setAvailableUnits(Long.valueOf(availableSize));
                 resource.setConnection(datastoreUuidMark);
@@ -834,8 +838,9 @@ public class HyperVCollector extends AbstractCollector
      * @return a Datastore UUID
      * @throws CollectorException
      */
-    private String getDatastoreUuidMark(String mappedDrive) // , HostDatastoreBrowser dsBrowser,
-                                                            // Datacenter dc)
+    private String getDatastoreUuidMark(final String mappedDrive) // , HostDatastoreBrowser
+                                                                  // dsBrowser,
+        // Datacenter dc)
         throws CollectorException
     {
         String dsUUID = null;
@@ -878,7 +883,7 @@ public class HyperVCollector extends AbstractCollector
         return dsUUID;
     }
 
-    private String createDatastoreFolderMark(String mappedDrive) throws CollectorException
+    private String createDatastoreFolderMark(final String mappedDrive) throws CollectorException
     {
         String folderUuidMark = UUID.randomUUID().toString();
         String directoryOnDatastore =

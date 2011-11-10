@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
+import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -56,10 +57,13 @@ public class VSMEventProcessor implements VSMCallback
     private final static Logger LOGGER = LoggerFactory.getLogger(VSMEventProcessor.class);
 
     @Autowired
-    protected VirtualMachineRep repo;
+    protected VirtualMachineRep vmRepo;
 
     @Autowired
     protected TracerLogger tracer;
+
+    @Autowired
+    protected ResourceUpgradeUse resourceUpgrader;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -96,8 +100,9 @@ public class VSMEventProcessor implements VSMCallback
      */
     public VSMEventProcessor(EntityManager em)
     {
-        this.repo = new VirtualMachineRep(em);
+        this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
+        this.resourceUpgrader = new ResourceUpgradeUse(em);
     }
 
     public VSMEventProcessor()
@@ -120,11 +125,11 @@ public class VSMEventProcessor implements VSMCallback
         }
 
         // Update virtual machine state
-        VirtualMachine machine = repo.findByName(notification.getVirtualSystemId());
+        VirtualMachine machine = vmRepo.findByName(notification.getVirtualSystemId());
 
         if (machine != null)
         {
-            repo.update(updateMachineState(machine, notification));
+            vmRepo.update(updateMachineState(machine, notification));
         }
     }
 
@@ -161,9 +166,10 @@ public class VSMEventProcessor implements VSMCallback
             case POWER_ON:
             case RESUMED:
             case SAVED:
-            case DESTROYED:
                 machine.setState(stateByEvent.get(event));
-                logAndTraceVirtualMachineStateUpdated(machine, event, notification);
+                break;
+            case DESTROYED:
+                onVMDestroyedEvent(machine, event, notification);
                 break;
 
             default:
@@ -213,5 +219,22 @@ public class VSMEventProcessor implements VSMCallback
         {
             return null;
         }
+    }
+
+    /**
+     * Fires on Virtual Machine Destroyed event detection. - Sets VM state to NOT_ALLOCATED -
+     * Resources ARE freed
+     * 
+     * @param vm
+     */
+    protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
+        final VirtualSystemEvent notification)
+    {
+
+        // Resources are freed
+        // State NOT_ALLOCATED is set in this method too
+        resourceUpgrader.rollbackUse(vMachine);
+        logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
+
     }
 }

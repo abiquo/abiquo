@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -37,6 +38,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
@@ -49,6 +51,7 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -523,6 +526,21 @@ public class VirtualMachine extends DefaultEntityBase
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    /** List of disks */
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = DiskManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<DiskManagement> disks;
+
+    public List<DiskManagement> getDisks()
+    {
+        return disks;
+    }
+
+    public void setDisks(final List<DiskManagement> disks)
+    {
+        this.disks = disks;
     }
 
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";

@@ -78,8 +78,13 @@ public class MachineServiceTest extends AbstractUnitTest
     @Test
     public void testDeleteMachineWithVirtualMachinesDeployed()
     {
-        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
-        Datacenter datacenter = hypervisor.getMachine().getDatacenter();
+
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+
+        Machine machine = machineGenerator.createMachine(datacenter);
+
+        Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
+
         VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter);
         RemoteService rm =
             remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
@@ -93,11 +98,12 @@ public class MachineServiceTest extends AbstractUnitTest
 
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
-        hypervisor.getMachine().setHypervisor(hypervisor);
+        // hypervisor.getMachine().setHypervisor(hypervisor);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         entitiesToPersist.add(vdc.getEnterprise());
         entitiesToPersist.add(datacenter);
+        entitiesToPersist.add(machine);
         entitiesToPersist.add(rm);
         entitiesToPersist.add(hypervisor.getMachine().getRack());
         entitiesToPersist.add(hypervisor.getMachine());

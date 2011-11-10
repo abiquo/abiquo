@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
@@ -100,6 +101,27 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     HypervisorDAO hypervisorDao;
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
+    
+    public ResourceUpgradeUse()
+    {
+
+    }
+
+    // For Testign purposes only
+    public ResourceUpgradeUse(final EntityManager entityManager)
+    {
+        assert entityManager != null;
+        assert entityManager.isOpen();
+
+//        this.entityManager = entityManager;
+
+        this.datastoreDao = new DatastoreDAO(entityManager);
+        this.datacenterRepo = new InfrastructureRep(entityManager);
+        this.ipPoolManDao = new IpPoolManagementDAO(entityManager);
+        this.vlanNetworkDao = new VLANNetworkDAO(entityManager);
+        this.netAssignDao = new NetworkAssignmentDAO(entityManager);
+        this.vmachineDao = new VirtualMachineDAO(entityManager);
+    }
 
     /**
      * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
@@ -171,7 +193,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         // HibernateException NotEnoughResourcesException NoSuchObjectException
         {
             e.printStackTrace(); // FIXME
-            throw new ResourceUpgradeUseException("Can not update resource utilization"
+            throw new ResourceUpgradeUseException("Can not update resource utilization: "
                 + e.getMessage());
         }
     }
@@ -190,7 +212,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(VirtualMachineState.ALLOCATED);
+            virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
             vmachineDao.flush();
         }
         catch (final Exception e) // HibernateException NotEnoughResourcesException
