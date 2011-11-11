@@ -552,6 +552,7 @@
 	            	if(VirtualImage(virtualImageList[i]).master != null){
 	            		if(VirtualImage(virtualImageList[i]).master.id == this._virtualImage.id){
 	            			virtualImageMiniature = new VirtualImageMiniature();
+	            			virtualImageMiniature.datacenter = selectedDatacenter;
 		                    virtualImageMiniature.virtualImage = VirtualImage(virtualImageList[i]);
 		                    virtualImageMiniature.sizeMultiplier = 1.5;
 		                    virtualImageMiniature.editable = true;
