@@ -54,7 +54,7 @@ public class TaskDAO extends RedisDAOBase<Task>
     }
 
     @Override
-    public void insert(Task task, Transaction transaction)
+    public void save(Task task, Transaction transaction)
     {
         // Clear to persist
         delete(task, transaction);

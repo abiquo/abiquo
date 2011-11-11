@@ -6,9 +6,8 @@ import org.springframework.stereotype.Component;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Transaction;
 
-import com.abiquo.server.core.task.Job.JobState;
+import com.abiquo.model.redis.Transaction;
 
 @Component
 public class AsyncTaskRep
@@ -22,66 +21,106 @@ public class AsyncTaskRep
     @Autowired
     protected JobDAO jobDao;
 
-    public Task insert(Task task)
+    public Task save(Task task)
     {
-        Transaction transaction = pool.getResource().multi();
+        Jedis jedis = pool.getResource();
+        Transaction transaction = (Transaction) jedis.multi();
 
-        // Persist referenced Jobs
-        for (Job job : task.getJobs())
+        try
         {
-            jobDao.insert(job, transaction);
+            // Persist referenced Jobs
+            for (Job job : task.getJobs())
+            {
+                jobDao.save(job, transaction);
+            }
+
+            // Persist task
+            taskDao.save(task, transaction);
+
+            transaction.exec();
         }
-
-        // Persist task
-        taskDao.insert(task, transaction);
-
-        transaction.exec();
+        finally
+        {
+            transaction.discardIfNeeded();
+            pool.returnResource(jedis);
+        }
 
         return task;
     }
 
-    public void delete(Task task)
+    public Job save(Job job)
     {
-        Transaction transaction = pool.getResource().multi();
+        Jedis jedis = pool.getResource();
+        Transaction transaction = (Transaction) jedis.multi();
 
-        // Delete referenced jobs
-        for (Job job : task.getJobs())
+        try
         {
-            jobDao.delete(job, transaction);
+            jobDao.save(job, transaction);
+            transaction.exec();
+        }
+        finally
+        {
+            transaction.discardIfNeeded();
+            pool.returnResource(jedis);
         }
 
-        // Delete task
-        taskDao.delete(task, transaction);
+        return job;
+    }
 
-        transaction.exec();
+    public void delete(Task task)
+    {
+        Jedis jedis = pool.getResource();
+        Transaction transaction = (Transaction) jedis.multi();
+
+        try
+        {
+            // Delete referenced jobs
+            for (Job job : task.getJobs())
+            {
+                jobDao.delete(job, transaction);
+            }
+
+            // Delete task
+            taskDao.delete(task, transaction);
+
+            transaction.exec();
+        }
+        finally
+        {
+            transaction.discardIfNeeded();
+            pool.returnResource(jedis);
+        }
     }
 
     public Task findTask(String taskId)
     {
         Jedis jedis = pool.getResource();
 
-        Task task = taskDao.findById(taskId, jedis);
-        task.getJobs().addAll(jobDao.findJobs(taskDao.getTaskJobsKey(task.getIdAsString()), jedis));
+        try
+        {
+            Task task = taskDao.findById(taskId, jedis);
+            task.getJobs().addAll(
+                jobDao.findJobs(taskDao.getTaskJobsKey(task.getIdAsString()), jedis));
 
-        return task;
+            return task;
+        }
+        finally
+        {
+            pool.returnResource(jedis);
+        }
     }
 
     public Job findJob(String jobId)
     {
-        return jobDao.findById(jobId, pool.getResource());
-    }
+        Jedis jedis = pool.getResource();
 
-    public void updateJobState(Job job, JobState state)
-    {
-        Transaction transaction = pool.getResource().multi();
-        jobDao.updateJobState(job, state, transaction);
-        transaction.exec();
-    }
-
-    public void updateJobRollbackState(Job job, JobState state)
-    {
-        Transaction transaction = pool.getResource().multi();
-        jobDao.updateJobState(job, state, transaction);
-        transaction.exec();
+        try
+        {
+            return jobDao.findById(jobId, jedis);
+        }
+        finally
+        {
+            pool.returnResource(jedis);
+        }
     }
 }

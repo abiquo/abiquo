@@ -65,27 +65,6 @@ public class JobDAO extends RedisDAOBase<Job>
         return job;
     }
 
-    public void updateJobState(final Job job, final JobState state, Transaction transaction)
-    {
-        String entityKey = job.getEntityKey();
-
-        updateTimestamp(job, transaction);
-
-        transaction.hdel(entityKey, "state");
-        transaction.hset(entityKey, "state", state.name());
-
-    }
-
-    public void updateJobRollbackState(final Job job, final JobState state, Transaction transaction)
-    {
-        String entityKey = job.getEntityKey();
-
-        updateTimestamp(job, transaction);
-
-        transaction.hdel(entityKey, "rollbackState");
-        transaction.hset(entityKey, "rollbackState", state.name());
-    }
-
     protected void updateTimestamp(final Job job, Transaction transaction)
     {
         String entityKey = job.getEntityKey();
@@ -102,7 +81,7 @@ public class JobDAO extends RedisDAOBase<Job>
     }
 
     @Override
-    public void insert(Job job, Transaction transaction)
+    public void save(Job job, Transaction transaction)
     {
         // Clear to persist
         delete(job, transaction);
