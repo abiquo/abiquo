@@ -277,7 +277,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         Hypervisor hypervisor =
             machine.createHypervisor(hypType, hypervisorIp.toString(), hypervisorIp.toString(),
                 port, user, password);
-        machine.setHypervisor(hypervisor);
+        // machine.setHypervisor(hypervisor);
 
         return machine;
 

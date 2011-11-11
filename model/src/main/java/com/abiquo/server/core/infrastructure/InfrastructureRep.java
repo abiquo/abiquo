@@ -387,7 +387,8 @@ public class InfrastructureRep extends DefaultRepBase
 
     public Machine findMachineByIp(final Integer datacenterId, final String ip)
     {
-        return this.machineDao.findByIp(datacenterId, ip);
+        Datacenter datacenter = findById(datacenterId);
+        return this.machineDao.findByIp(datacenter, ip);
     }
 
     public void insertMachine(final Machine machine)
@@ -433,10 +434,10 @@ public class InfrastructureRep extends DefaultRepBase
         hypervisorDao.persist(hypervisor);
         hypervisorDao.flush();
 
-        Machine machine = hypervisor.getMachine();
-
-        machine.setHypervisor(hypervisor);
-        updateMachine(machine);
+        // Machine machine = hypervisor.getMachine();
+        //
+        // machine.setHypervisor(hypervisor);
+        // updateMachine(machine);
     }
 
     public boolean existAnyHypervisorWithIp(final String ip)

@@ -37,6 +37,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
 /**
@@ -57,11 +58,14 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
 
+        Machine machine = machineGenerator.createUniqueInstance();
+        machineGenerator.addAuxiliaryEntitiesToPersist(machine, entitiesToPersist);
+        entitiesToPersist.add(machine);
+
         // Create hypervisor
-        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
-        // hypervisor.setMachine(datastore.getMachines().get(0));
+        Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
         hypervisor.getMachine().setEnterprise(enterprise);
-        hypervisor.getMachine().setHypervisor(hypervisor);
+        // hypervisor.getMachine().setHypervisor(hypervisor);
 
         Datastore datastore = datastoreGenerator.createInstance(hypervisor.getMachine());
         datastore.setDatastoreUUID(UUID.randomUUID().toString()); // TODO: UUID should be added to
@@ -134,11 +138,14 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
 
+        Machine machine = machineGenerator.createUniqueInstance();
+        machineGenerator.addAuxiliaryEntitiesToPersist(machine, entitiesToPersist);
+        entitiesToPersist.add(machine);
+
         // Create hypervisor
-        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
-        // hypervisor.setMachine(datastore.getMachines().get(0));
+        Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
         hypervisor.getMachine().setEnterprise(enterprise);
-        hypervisor.getMachine().setHypervisor(hypervisor);
+        // hypervisor.getMachine().setHypervisor(hypervisor);
 
         hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
         entitiesToPersist.add(hypervisor);

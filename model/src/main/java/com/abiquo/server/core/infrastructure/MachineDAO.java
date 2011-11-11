@@ -771,10 +771,15 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
-    public Machine findByIp(final Integer datacenterId, final String ip)
+    public Machine findByIp(final Datacenter datacenter, final String ip)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq("hypervisor.ip", ip));
+        Criteria crit = createCriteria();
+        crit.createAlias(Machine.HYPERVISOR_PROPERTY, "hypervisor");
+
+        crit.add(sameDatacenter(datacenter));
+        crit.add(Restrictions.eq("hypervisor.ip", ip));
+
+        return (Machine) crit.uniqueResult();
     }
 
 }
