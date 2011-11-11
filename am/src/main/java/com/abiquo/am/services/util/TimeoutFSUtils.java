@@ -30,9 +30,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.ws.rs.core.Response.Status;
-
-import com.abiquo.appliancemanager.config.AMConfiguration;
+import com.abiquo.am.exceptions.AMError;
+import com.abiquo.api.service.DefaultApiService;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
@@ -40,22 +39,16 @@ import com.abiquo.appliancemanager.exceptions.AMException;
  * This class intends to avoid the application to hang when the NFS repository is not longer
  * exported.
  */
-public class TimeoutFSUtils
+public class TimeoutFSUtils extends DefaultApiService
+
 {
-    private final static Integer FILE_EXIST_TIMEOUT_SECONDS = 10;
-
-    private final static AMConfiguration CONF = AMConfigurationManager.getInstance()
-        .getAMConfiguration();
-
     private static TimeoutFSUtils instance;
 
-    // private ExecutorService executor;
+    private final static Integer FILE_EXIST_TIMEOUT_SECONDS = 10;
 
-    private final static String REPOSITORY_MARK = AMConfigurationManager.getInstance()
+    private final static File REPOSITORY_FILE_MARK = new File(AMConfigurationManager.getInstance()
         .getAMConfiguration().getRepositoryPath()
-        + ".abiquo_repository";
-
-    private final static File REPOSITORY_FILE_MARK = new File(REPOSITORY_MARK);
+        + ".abiquo_repository");
 
     public static synchronized TimeoutFSUtils getInstance()
     {
@@ -65,16 +58,6 @@ public class TimeoutFSUtils
         }
         return instance;
     }
-
-    // private TimeoutFSUtils()
-    // {
-    // executor = Executors.newSingleThreadExecutor();
-    // }
-    //
-    // public void destroyExecutor()
-    // {
-    // executor.shutdownNow();
-    // }
 
     public Void canUseRepository()
     {
@@ -109,13 +92,8 @@ public class TimeoutFSUtils
 
         if (!exist)
         {
-            final String cause =
-                String
-                    .format(
-                        "Can not access repository at [%s], check the exported location [%s] (propably NFS is stopped)",
-                        CONF.getRepositoryPath(), CONF.getRepositoryLocation());
-
-            throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
+            addError(new AMException(AMError.REPO_NOT_ACCESSIBLE));
+            flushErrors();
         }
 
         return null;
@@ -137,11 +115,10 @@ public class TimeoutFSUtils
 
         if (!canWrite)
         {
-            final String cause =
-                String.format("Can not write on the repository at [%s].", CONF.getRepositoryPath());
-
-            throw new AMException(Status.INTERNAL_SERVER_ERROR, cause);
+            addError(new AMException(AMError.REPO_NOT_WRITABLE));
+            flushErrors();
         }
+
         return null;
     }
 

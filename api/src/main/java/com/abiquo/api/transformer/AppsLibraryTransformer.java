@@ -24,16 +24,14 @@ package com.abiquo.api.transformer;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.NoResultException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.persistence.impl.CategoryDAO;
-import com.abiquo.api.persistence.impl.IconDAO;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
@@ -42,20 +40,16 @@ import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 
 @Service
-@Transactional
 public class AppsLibraryTransformer
 {
     @Autowired
-    IconDAO iconDao;
-
-    @Autowired
-    CategoryDAO categoryDao;
+    private AppsLibraryRep appslibraryRep;
 
     /**
      * ModelTransformer.transportFromPersistence(OVFPackageDto.class, ovfPackage);
      */
-    public OVFPackageDto createTransferObject(OVFPackage ovfPackage, IRESTBuilder builder)
-        throws Exception
+    public OVFPackageDto createTransferObject(final OVFPackage ovfPackage,
+        final IRESTBuilder builder) throws Exception
     {
 
         OVFPackageDto dto = new OVFPackageDto();
@@ -71,11 +65,11 @@ public class AppsLibraryTransformer
 
         if (ovfPackage.getCategory() != null)
         {
-            dto.setCategoryName(ovfPackage.getCategory().getName());
+            dto.setName(ovfPackage.getCategory().getName());
         }
         else
         {
-            dto.setCategoryName("Others");
+            dto.setName("Others");
         }
 
         dto.setDiskFormatTypeUri(ovfPackage.getType().uri);
@@ -92,8 +86,8 @@ public class AppsLibraryTransformer
         return dto;
     }
 
-    public OVFPackageListDto createTransferObject(OVFPackageList ovfPackageList,
-        IRESTBuilder builder) throws Exception
+    public OVFPackageListDto createTransferObject(final OVFPackageList ovfPackageList,
+        final IRESTBuilder builder) throws Exception
     {
 
         List<OVFPackageDto> ovfpackDtoList = new LinkedList<OVFPackageDto>();
@@ -106,6 +100,7 @@ public class AppsLibraryTransformer
         dto.setName(ovfPackageList.getName());
         dto.setId(ovfPackageList.getId());
         dto.setOvfPackages(ovfpackDtoList);
+        dto.setUrl(ovfPackageList.getUrl());
 
         final Integer idEnterprise = ovfPackageList.getAppsLibrary().getEnterprise().getId();
         dto.setLinks(builder.buildOVFPackageListLinks(idEnterprise, dto));
@@ -116,9 +111,9 @@ public class AppsLibraryTransformer
     /**
      * ModelTransformer.persistenceFromTransport(OVFPackage.class, ovfPackage);
      */
-    public OVFPackage createPersistenceObject(OVFPackageDto ovfDto) throws Exception
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackage createPersistenceObject(final OVFPackageDto ovfDto) throws Exception
     {
-
         DiskFormatType diskFormatType = DiskFormatType.fromURI(ovfDto.getDiskFormatTypeUri());
         if (diskFormatType == null)
         {
@@ -127,30 +122,18 @@ public class AppsLibraryTransformer
             throw new Exception(cause);
         }
 
-        Category category;
-
-        try
+        Category category = appslibraryRep.findCategoryByName(ovfDto.getName());
+        if (category == null)
         {
-            category = categoryDao.findByName(ovfDto.getCategoryName());
-        }
-        catch (NoResultException e)
-        {
-            category = new Category(ovfDto.getCategoryName());
-            category.setIsDefault(0);
-            category.setIsErasable(1);
-            category = categoryDao.makePersistent(category);
+            category = new Category(ovfDto.getName());
+            appslibraryRep.insertCategory(category);
         }
 
-        Icon icon;
-
-        try
+        Icon icon = appslibraryRep.findIconByPath(ovfDto.getIconPath());
+        if (icon == null)
         {
-            icon = iconDao.findByPath(ovfDto.getIconPath());
-        }
-        catch (Exception e)
-        {
-            icon = new Icon(ovfDto.getIconPath());
-            icon = iconDao.makePersistent(icon);
+            icon = new Icon("Icon name", ovfDto.getIconPath()); // TODO: icon name
+            appslibraryRep.insertIcon(icon);
         }
 
         OVFPackage pack = new OVFPackage();
@@ -172,7 +155,8 @@ public class AppsLibraryTransformer
         return pack;
     }
 
-    public OVFPackageList createPersistenceObject(OVFPackageListDto ovfDto) throws Exception
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackageList createPersistenceObject(final OVFPackageListDto ovfDto) throws Exception
     {
 
         List<OVFPackage> ovfPackList = new LinkedList<OVFPackage>();

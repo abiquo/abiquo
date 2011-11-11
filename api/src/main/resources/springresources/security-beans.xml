@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
-	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
     <security:http>
         <!-- / -->
         <security:intercept-url pattern="/" access="ROLE_AUTHENTICATED" />
@@ -64,6 +64,19 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks/*" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/chefelements" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <!-- REPOSITORY -->
+        <!-- Repositories and Virtual Images can be listed by the same people who can create Virtual Apps -->
+        <!-- Repositories can be refreshed by the same people who can create Virtual Apps and the Enterprise Admin -->
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP" />
+        <!-- VIRTUAL IMAGES -->
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
@@ -95,22 +108,41 @@
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines/*" method="DELETE" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <security:intercept-url pattern="/admin/enterprises/*/reservedmachines/machine" method="POST" access="ROLE_ENTERPRISE_ADMINISTER_ALL" />
         <!-- OVF PACKAGE -->
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/install" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackages/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY" />
+
         <!-- OVF PACKAGE LIST -->
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_ALLOW_MODIFY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="DELETE" access="ROLE_APPLIB_MANAGE_REPOSITORY" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_MANAGE_REPOSITORY" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        
+        
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        
         <!-- DATACENTERS -->
         <security:intercept-url pattern="/admin/datacenters" method="POST" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters" method="GET" access="ROLE_PHYS_DC_ENUMERATE,ROLE_VDC_MANAGE,ROLE_USERS_MANAGE_ENTERPRISE" />
@@ -123,10 +155,10 @@
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/action/enterprises" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE,ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/action/getLimits" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE" />
-        <security:intercept-url pattern="/admin/datacenters/*/action/discover" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/action/discover_multiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/discoversingle" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/discovermultiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/hypervisor" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/action/updateUsedResources" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/updateusedresources" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- RACKS -->
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
@@ -141,8 +173,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/action/checkState" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/action/checkState" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -152,8 +184,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/reenableafterha" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- PUBLIC NETWORKS -->
         <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network" method="POST" access="ROLE_PHYS_DC_MANAGE" />
@@ -262,10 +294,10 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/defaultvlan" method="GET" access="ROLE_VDC_MANAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase/*" method="GET" access="ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase/*" method="PUT" access="ROLE_VDC_MANAGE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase/*" method="PUT" access="ROLE_VDC_MANAGE_NETWORK" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/purchased" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/purchased/*" method="GET" access="ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/purchased/*" method="PUT" access="ROLE_VDC_MANAGE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/purchased/*" method="PUT" access="ROLE_VDC_MANAGE_NETWORK" />
         <!-- VOLUMES -->
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="POST" access="ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
@@ -336,6 +368,14 @@
         <security:intercept-url pattern="/config/licenses/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
         <security:intercept-url pattern="/config/licenses/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/licenses/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- ICONS -->
+        <security:intercept-url pattern="/config/icons" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_PHYS_DC_MANAGE" />
+        <security:intercept-url pattern="/config/icons" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/icons/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/icons/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/icons/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- PRIVILEGES -->
         <security:intercept-url pattern="/config/privileges" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_USERS_VIEW" />
         <security:intercept-url pattern="/config/privileges" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -350,6 +390,15 @@
         <security:intercept-url pattern="/config/properties/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/properties/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/properties/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <!-- CATEGORIES -->
+        <security:intercept-url pattern="/config/categories" method="POST" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/categories" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        <security:intercept-url pattern="/config/categories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
+        
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->

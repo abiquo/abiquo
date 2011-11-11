@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -30,6 +31,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -40,8 +42,8 @@ import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.model.validation.IscsiPath;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -141,7 +143,7 @@ public class VolumeManagement extends RasdManagement
     private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
 
     @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
     private VirtualImage virtualImage;
 
@@ -154,6 +156,12 @@ public class VolumeManagement extends RasdManagement
     public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
+
+        if (virtualImage != null)
+        {
+            this.virtualImage.setStateful(true);
+            this.virtualImage.setPath(getIdScsi());
+        }
     }
 
     public boolean isStateful()
@@ -189,6 +197,11 @@ public class VolumeManagement extends RasdManagement
     {
         this.idScsi = idScsi;
         getRasd().setConnection(idScsi);
+        if (isStateful())
+        {
+            // If the volume is stateful update the virtual image too
+            this.virtualImage.setPath(idScsi);
+        }
     }
 
     public final static String STATE_PROPERTY = "state";

@@ -71,7 +71,9 @@
             [Bindable]
             private var languageDP:Array = [ { label: "English", data: "en_US" },
                                              { label: "Español", data: "es_ES" },
-                                             { label: "Japanese", data: "ja_JP" }
+                                             { label: "日本語", data: "ja_JP" },
+                                             { label: "中文", data: "zh_ZH" },
+                                             { label: "Português", data: "pt_PT" }
                                               ];
 
             [Bindable]
@@ -143,13 +145,12 @@
             /**
              * Return the selected language passed in the URL if proceed 
              **/
-            public function returnLanguage(language:String):int{
+            public function returnLanguage(language:String):String{
             	var indexLanguage:int = AbiCloudModel.getInstance().loginManager.returnLanguageIndex(languageDP,language);
             	if(indexLanguage != -1){
-            		setLanguage( languageDP[indexLanguage].data );
-            		return indexLanguage;
+            		return languageDP[indexLanguage].data;
             	}
-                return -1;    
+                return "en_US";    
             }
             
             /**

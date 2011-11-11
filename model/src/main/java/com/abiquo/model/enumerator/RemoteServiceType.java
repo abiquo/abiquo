@@ -32,7 +32,7 @@ public enum RemoteServiceType
         "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm",
         "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), DHCP_SERVICE(
         "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager", "bpm",
-        "tcp://", 61616), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
+        "http://", 80), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
 
     String name;
 
@@ -71,7 +71,7 @@ public enum RemoteServiceType
         this.defaultPort = defaultPort;
     }
 
-    RemoteServiceType(String name, String serviceMapping)
+    RemoteServiceType(final String name, final String serviceMapping)
     {
         this.name = name;
         this.serviceMapping = serviceMapping;
@@ -79,16 +79,15 @@ public enum RemoteServiceType
 
     public boolean canBeChecked()
     {
-        return this != BPM_SERVICE && this != DHCP_SERVICE;
+        return this != DHCP_SERVICE;
     }
 
     public boolean checkUniqueness()
     {
-        return this == APPLIANCE_MANAGER
-            || this == VIRTUAL_FACTORY;
+        return this == APPLIANCE_MANAGER || this == VIRTUAL_FACTORY;
     }
 
-    public String fixUri(URI uri)
+    public String fixUri(final URI uri)
     {
         String protocol = uri.getScheme();
         String domainName = uri.getHost();

@@ -54,6 +54,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
@@ -91,15 +92,15 @@ public class VirtualDatacentersResource extends AbstractResource
         throws Exception
     {
 
-        if (!securityService.hasPrivilege(SecurityService.VDC_ENUMERATE)
-            && !securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES))
+        if (!securityService.hasPrivilege(Privileges.VDC_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES))
         {
             if (enterpriseId != null
                 && !enterpriseId.equals(userService.getCurrentUser().getEnterprise().getId()))
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.VDC_ENUMERATE);
+                securityService.requirePrivilege(Privileges.VDC_ENUMERATE);
             }
         }
 

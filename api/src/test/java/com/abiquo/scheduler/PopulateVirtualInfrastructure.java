@@ -29,6 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -36,9 +39,6 @@ import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
@@ -84,7 +84,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     RepositoryDAO repoDao;
 
     @Autowired
-    VirtualImageDAO vimageDao;
+    private AppsLibraryRep appslibraryRep;
 
     @Autowired
     VirtualMachineDAO vmachineDao;
@@ -293,13 +293,13 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         {
             cpuRequired = Integer.parseInt(frg[1]);
             ramRequired = (int) (Integer.parseInt(frg[2]) * GB_TO_MB);
-            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * (1014 * 1024); // bytes
+            hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
         VirtualImage vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        vimageDao.persist(vimage);
+        appslibraryRep.insertVirtualImage(vimage);
 
         return vimage;
     }
@@ -391,7 +391,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = vimageDao.findByName(virtualimageName);
+        VirtualImage vimage = appslibraryRep.findVirtualImageByName(virtualimageName);
         assertNotNull("vimage not found " + virtualimageName, vimage);
 
         VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);

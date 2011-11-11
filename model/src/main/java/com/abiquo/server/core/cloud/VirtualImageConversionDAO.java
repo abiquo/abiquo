@@ -31,6 +31,9 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -48,19 +51,51 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
 
     private static Criterion sameImage(final VirtualImage image)
     {
-        return Restrictions.eq("image", image);
+        return Restrictions.eq(VirtualImageConversion.VIRTUAL_IMAGE_PROPERTY, image);
     }
 
     private static Criterion sameTargetFormat(final DiskFormatType format)
     {
-        return Restrictions.eq("targetType", format);
+        return Restrictions.eq(VirtualImageConversion.TARGET_TYPE_PROPERTY, format);
     }
 
     private static Criterion sourceFormatNull()
     {
-        return Restrictions.isNull("sourceType");
+        return Restrictions.isNull(VirtualImageConversion.SOURCE_TYPE_PROPERTY);
     }
 
+    /**
+     * This is used in {@link VirtualImageDAO} to determine if an image is compatible
+     * 
+     * @deprecated use {@link VirtualImageDAO#findBy}
+     */
+    @Deprecated
+    public static Criterion compatibleConversion(final VirtualImage virtualImage,
+        final HypervisorType hypervisorType)
+    {
+        return Restrictions.and(sameImage(virtualImage),
+            compatibleConversion(hypervisorType.compatibles()));
+    }
+
+    private static Criterion compatibleConversion(final DiskFormatType... types)
+    {
+        if (types.length == 1)
+        {
+            return sameTargetFormat(types[0]);
+        }
+        else
+        {
+            Criterion compatible = sameTargetFormat(types[0]);
+            for (DiskFormatType type : types)
+            {
+                compatible = Restrictions.or(compatible, sameTargetFormat(type));
+            }
+
+            return compatible;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
         final DiskFormatType format)
     {

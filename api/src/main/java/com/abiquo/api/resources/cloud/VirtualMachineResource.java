@@ -35,6 +35,7 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResource;
@@ -44,7 +45,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
-import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
@@ -174,68 +175,6 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     /**
-     * Power on the VirtualMachine
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
-     * @deprecated use
-     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
-     *             instead
-     */
-    @POST
-    @Deprecated
-    @Path("action/poweron")
-    public void powerOnVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, VirtualMachineState.ON))
-        {
-
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.ON);
-
-        }
-    }
-
-    /**
-     * Power off the VirtualMachine
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
-     * @deprecated use
-     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
-     *             instead
-     */
-    @POST
-    @Deprecated
-    @Path("action/poweroff")
-    public void powerOffVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        if (!vmService.sameState(vm, VirtualMachineState.OFF))
-        {
-
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.OFF);
-
-        }
-    }
-
-    /**
      * Change the {@link VirtualMachineState} the virtual machine
      * 
      * @param vdcId VirtualDatacenter id
@@ -317,65 +256,6 @@ public class VirtualMachineResource extends AbstractResource
             throw new BadRequestException(APIError.VIRTUAL_MACHINE_EDIT_STATE);
         }
         return VirtualMachineState.valueOf(state.getPower());
-    }
-
-    /**
-     * Resume the Virtual Machine
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
-     * @deprecated use
-     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
-     *             instead
-     */
-    @POST
-    @Deprecated
-    @Path("action/resume")
-    public void resumeVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-
-        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
-        {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
-        }
-    }
-
-    /**
-     * Pause the VirtualMachine
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception * @deprecated use
-     *             {@link #powerStateVirtualMachine(Integer, Integer, Integer, VirtualMachineStateDto, IRESTBuilder)}
-     *             instead
-     */
-    @Deprecated
-    @POST
-    @Path("action/pause")
-    public void pauseVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-
-        if (!vmService.sameState(vm, VirtualMachineState.PAUSED))
-        {
-            vmService.changeVirtualMachineState(vmId, vappId, vdcId, VirtualMachineState.PAUSED);
-        }
     }
 
     /**
@@ -507,7 +387,7 @@ public class VirtualMachineResource extends AbstractResource
     {
         vmService.undeployVirtualMachine(vmId, vappId, vdcId, false);
     }
-    
+
     public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
