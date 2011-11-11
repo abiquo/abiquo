@@ -61,7 +61,8 @@ public enum EventType implements Serializable
         "Virtual Appliance bundle started"), VM_CREATE(225, "VM_CREATE", "Created Virtual Machine"), VM_DELETE(
         226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
         "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"), VM_STATE(
-        229, "VM_STATE", "Apply state Virtual Machine"),
+        229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
+        "Reconfigure Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",
@@ -176,7 +177,7 @@ public enum EventType implements Serializable
     STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
         "STORAGE DEVICE DELETED", "Storage device deleted"),
-    
+
     // CHEF
     CHEF_RUNLIST_ADD(1510, "CHEF_RUNLIST_ADD", "Add an element to the runlist"), CHEF_RUNLIST_DELETE(
         1511, "CHEF_RUNLIST_DELETE", "Remove an element from the runlist"), CHEF_NODE_UPDATE(1512,
