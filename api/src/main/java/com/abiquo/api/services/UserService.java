@@ -171,7 +171,8 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo
+                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -201,11 +202,18 @@ public class UserService extends DefaultApiService
 
         checkEnterpriseAdminCredentials(enterprise);
 
+        if (dto.getPassword() == null || dto.getPassword().isEmpty())
+        {
+            addValidationErrors(APIError.USER_PASSWORD_IS_NECESSARY);
+            flushErrors();
+        }
+
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
+        user.isValid();
 
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
         {
@@ -214,6 +222,10 @@ public class UserService extends DefaultApiService
         else
         {
             user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
+        }
+        if (dto.getPassword().isEmpty())
+        {
+
         }
 
         if (!user.isValid())
@@ -234,13 +246,9 @@ public class UserService extends DefaultApiService
 
         repo.insertUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_CREATE,
-            "User " + user.getName() + " has been created [Enterprise: " + enterprise.getName()
-                + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
-                + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_CREATE, "User "
+            + user.getName() + " has been created [Enterprise: " + enterprise.getName() + " Name: "
+            + user.getName() + " Surname: " + user.getSurname() + " Role: " + user.getRole() + "]");
 
         return user;
     }
@@ -376,13 +384,10 @@ public class UserService extends DefaultApiService
 
         updateUser(old);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_MODIFY,
-            "User " + old.getName() + " has been modified [Enterprise: "
-                + old.getEnterprise().getName() + " Name: " + old.getName() + " Surname: "
-                + old.getSurname() + " Role: " + old.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_MODIFY, "User "
+            + old.getName() + " has been modified [Enterprise: " + old.getEnterprise().getName()
+            + " Name: " + old.getName() + " Surname: " + old.getSurname() + " Role: "
+            + old.getRole() + "]");
 
         return old;
     }
@@ -421,13 +426,10 @@ public class UserService extends DefaultApiService
 
         repo.removeUser(user);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.USER,
-            EventType.USER_DELETE,
-            "User " + user.getName() + " has been deleted [Enterprise: "
-                + user.getEnterprise().getName() + " Name: " + user.getName() + " Surname: "
-                + user.getSurname() + " Role: " + user.getRole() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.USER, EventType.USER_DELETE, "User "
+            + user.getName() + " has been deleted [Enterprise: " + user.getEnterprise().getName()
+            + " Name: " + user.getName() + " Surname: " + user.getSurname() + " Role: "
+            + user.getRole() + "]");
     }
 
     public boolean isAssignedTo(final Integer enterpriseId, final Integer userId)
