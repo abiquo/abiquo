@@ -24,32 +24,22 @@ package com.abiquo.appliancemanager.transport;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "MemorySizeUnit")
+import com.abiquo.server.core.infrastructure.nodecollector.RackEnumTypeDto;
+
+@XmlType(name = "sizeUnit")
 @XmlEnum
 public enum MemorySizeUnit
 {
-    /**
-     * 
-     */
-    BYTE,
+    BYTE, KILOBYTE, MEGABYTE, GIGABYTE, TERABYTE;
 
-    /**
-     * 
-     */
-    KILOBYTE,
+    public String value()
+    {
+        return name();
+    }
 
-    /**
-     * 
-     */
-    MEGABYTE,
+    public static MemorySizeUnit fromValue(String v)
+    {
+        return valueOf(v);
+    }
 
-    /**
-     * 
-     */
-    GIGABYTE,
-
-    /**
-     * 
-     */
-    TERABYTE;
 }

@@ -31,6 +31,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -117,7 +120,7 @@ public class VirtualImageConversionDAOTest extends
         VirtualMachine virtualMachine =
             virtualMachineGenerator.createInstance(image, enterprise, hypervisor, user, "name");
         VirtualImageConversion imageConversion =
-            eg().create(image, DiskFormatType.VDI_SPARSE, "[FAKE]");
+            eg().createInstance(image, DiskFormatType.VDI_SPARSE);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(datacenter);

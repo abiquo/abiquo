@@ -29,6 +29,7 @@ import javax.ws.rs.QueryParam;
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.services.EnterpriseRepositoryFileSystem;
 import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
@@ -61,13 +62,12 @@ public class EnterpriseRepositoryResource extends AbstractResource
         EnterpriseRepositoryDto repo = new EnterpriseRepositoryDto();
 
         repo.setId(Integer.valueOf(idEnterprise));
-        repo.setName("Repository :" + REPOSITORY_LOCATION);
+        repo.setRepositoryLocation(REPOSITORY_LOCATION);
+        repo.setRepositoryCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
+        repo.setRepositoryRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
 
-        repo.setRepositoryCapacityMb(EnterpriseRepositoryService.getCapacityMb());
         repo.setRepositoryEnterpriseUsedMb(erepo.getUsedMb());
-        repo.setRepositoryRemainingMb(erepo.getFreeMb());
 
         return repo;
     }
-
 }

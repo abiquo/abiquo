@@ -27,6 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -34,13 +35,14 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.appslibrary.OVFPackageListService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 
@@ -54,32 +56,32 @@ public class OVFPackageListResource extends AbstractResource
 
     public static final String OVF_PACKAGE_LIST_PARAM = "{" + OVF_PACKAGE_LIST + "}";
 
-    @Autowired
-    OVFPackageListService service;
+    public static final String OVF_PACKAGE_LIST_REPOSITORY_STATUS_PATH = "actions/repositoryStatus";
+
+    public static final String OVF_PACKAGE_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM =
+        "datacenterId";
 
     @Autowired
-    AppsLibraryTransformer transformer;
+    protected OVFPackageListService service;
+
+    @Autowired
+    protected AppsLibraryTransformer transformer;
 
     @GET
     public OVFPackageListDto getOVFPackageList(
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId, @Context IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList ovfPackageList = service.getOVFPackageList(ovfPackageListId);
-
-        if (ovfPackageList == null)
-        {
-            throw new NotFoundException(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
-        }
 
         return transformer.createTransferObject(ovfPackageList, restBuilder);
     }
 
     @PUT
-    public OVFPackageListDto modifyOVFPackageList(OVFPackageListDto ovfPackageList,
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+    public OVFPackageListDto modifyOVFPackageList(final OVFPackageListDto ovfPackageList,
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList d = transformer.createPersistenceObject(ovfPackageList);
 
@@ -91,9 +93,9 @@ public class OVFPackageListResource extends AbstractResource
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     public OVFPackageListDto refreshOVFPackageList(
-        @PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId,
-        @PathParam(EnterpriseResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         OVFPackageList d;
 
@@ -103,9 +105,24 @@ public class OVFPackageListResource extends AbstractResource
     }
 
     @DELETE
-    public void deleteOVFPackageList(@PathParam(OVF_PACKAGE_LIST) Integer ovfPackageListId)
+    public void deleteOVFPackageList(@PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId)
     {
         service.removeOVFPackageList(ovfPackageListId);
     }
 
+    /**
+     * Get the all {@link OVFPackageInstanceStateDto} in the provided
+     * {@link DatacenterRepositoryResource} for all the {@link OVFPackage} in the current list.
+     */
+    @GET
+    @Path(OVFPackageListResource.OVF_PACKAGE_LIST_REPOSITORY_STATUS_PATH)
+    public OVFPackageInstancesStateDto getOVFPackageListStatus(
+        @PathParam(OVF_PACKAGE_LIST) final Integer ovfPackageListId,
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        @QueryParam(OVF_PACKAGE_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM) final Integer datacenterId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        return service
+            .getOVFPackageListInstanceStatus(ovfPackageListId, datacenterId, idEnterprise);
+    }
 }

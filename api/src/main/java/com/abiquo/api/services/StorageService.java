@@ -35,10 +35,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -202,8 +202,8 @@ public class StorageService extends DefaultApiService
         if (diskOrder.equals(0))
         {
             VirtualImage vi = vm.getVirtualImage();
-            DiskManagement diskRO =
-                new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
+            DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+            // new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
             return diskRO;
         }
         else
@@ -240,8 +240,8 @@ public class StorageService extends DefaultApiService
 
         // Insert the first hard disk, based on its virtual image
         VirtualImage vi = vm.getVirtualImage();
-        DiskManagement diskRO =
-            new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
+        DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
+        // new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
         disks.add(diskRO);
 
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));

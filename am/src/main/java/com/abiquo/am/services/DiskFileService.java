@@ -37,7 +37,7 @@ public interface DiskFileService
      * @return The path of the requested disk file.
      * @throws FileNotFoundException If disk file does not exist.
      */
-    public String get(String path) throws FileNotFoundException;
+    public String get(String path);
 
     /**
      * Performs a disk file copy.
@@ -47,5 +47,5 @@ public interface DiskFileService
      * @throws FileNotFoundException If the disk file to be copied does not exist.
      * @throws IOException If the copy operation cannot be performed.
      */
-    public void copy(String source, String destination) throws FileNotFoundException, IOException;
+    public void copy(String source, String destination);
 }

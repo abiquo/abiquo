@@ -28,24 +28,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.DatacenterGenerator;
-import com.abiquo.server.core.infrastructure.Machine;
-import com.abiquo.server.core.infrastructure.MachineGenerator;
+import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervisor>
 {
 
     @Override
-    @BeforeMethod
-    protected void methodSetUp()
-    {
-        super.methodSetUp();
-    }
-
-    @Override
-    protected HypervisorDAO createDao(EntityManager entityManager)
+    protected HypervisorDAO createDao(final EntityManager entityManager)
     {
         return new HypervisorDAO(entityManager);
     }
@@ -57,45 +48,55 @@ public class HypervisorDAOTest extends DefaultDAOTestBase<HypervisorDAO, Hypervi
     }
 
     @Override
+    protected EntityManagerFactoryForTesting getFactory()
+    {
+        return TestDataAccessManager.getFactory();
+    }
+
+    @Override
     public HypervisorGenerator eg()
     {
         return (HypervisorGenerator) super.eg();
     }
 
+    @Override
+    @BeforeMethod
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+    }
+
     @Test
     public void existAnyWithIp()
     {
-        Hypervisor hypervisor = createHypervisor();
+        Hypervisor hypervisor = eg().createUniqueInstance();
+
+        ds().persistAll(hypervisor.getMachine().getDatacenter(), hypervisor.getMachine().getRack(),
+            hypervisor.getMachine(), hypervisor);
+        /** ##### ##### */
 
         HypervisorDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertTrue(dao.existsAnyWithIp(hypervisor.getIp()));
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId()));
 
-        Assert.assertTrue(dao.existsAnyWithIpService(hypervisor.getIpService()));
+        Assert.assertTrue(dao.existsAnyWithIpServiceAndDatacenter(hypervisor.getIpService(),
+            hypervisor.getMachine().getDatacenter().getId()));
     }
 
     @Test
     public void existAnyWithIpSameDatacenter()
     {
-        Hypervisor hypervisor = createHypervisor();
+        Hypervisor hypervisor = eg().createUniqueInstance();
+
+        ds().persistAll(hypervisor.getMachine().getDatacenter(), hypervisor.getMachine().getRack(),
+            hypervisor.getMachine(), hypervisor);
+        /** ##### ##### */
 
         HypervisorDAO dao = createDaoForRollbackTransaction();
 
-        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor.getMachine()
-            .getDatacenter().getId()));
-    }
-
-    private Hypervisor createHypervisor()
-    {
-        DatacenterGenerator datacenterGenerator = new DatacenterGenerator(getSeed());
-        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
-
-        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
-        Machine machine = machineGenerator.createMachine(datacenter);
-        Hypervisor hypervisor = eg().createInstance(machine);
-
-        ds().persistAll(datacenter, machine, hypervisor);
-        return hypervisor;
+        Assert.assertTrue(dao.existsAnyWithIpAndDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId()));
     }
 
 }

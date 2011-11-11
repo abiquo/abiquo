@@ -16,18 +16,18 @@
         <!-- end : infrastructure -->
         <!-- appliance library -->
         <class>com.abiquo.server.core.appslibrary.AppsLibrary</class>
+        <class>com.abiquo.server.core.appslibrary.Icon</class>
+        <class>com.abiquo.server.core.appslibrary.Category</class>
+        <class>com.abiquo.server.core.appslibrary.VirtualImage</class>
+        <class>com.abiquo.server.core.appslibrary.VirtualImageConversion</class>
         <class>com.abiquo.server.core.appslibrary.OVFPackage</class>
         <class>com.abiquo.server.core.appslibrary.OVFPackageList</class>
-        <class>com.abiquo.server.core.appslibrary.Category</class>
-        <class>com.abiquo.server.core.appslibrary.Icon</class>
         <!-- end: appliance library -->
         <!-- cloud infrastructure -->
         <class>com.abiquo.server.core.cloud.VirtualDatacenter</class>
         <class>com.abiquo.server.core.cloud.VirtualAppliance</class>
         <class>com.abiquo.server.core.cloud.Hypervisor</class>
         <class>com.abiquo.server.core.cloud.VirtualMachine</class>
-        <class>com.abiquo.server.core.cloud.VirtualImage</class>
-        <class>com.abiquo.server.core.cloud.VirtualImageConversion</class>
         <class>com.abiquo.server.core.cloud.NodeVirtualImage</class>
 	<class>com.abiquo.server.core.cloud.chef.RunlistElement</class> 
         <!-- end: cloud infrastructure -->

@@ -63,6 +63,11 @@ public enum HypervisorType
         return ArrayUtils.contains(compatibilityTable, type);
     }
 
+    public DiskFormatType[] compatibles()
+    {
+        return compatibilityTable;
+    }
+
     public static HypervisorType fromId(final int id)
     {
         return values()[id - 1];

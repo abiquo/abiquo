@@ -93,6 +93,11 @@
             	SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VDC_MANAGE_VAPP,"visible",vappTools);
             }
             
+            public function cleanVirtualApplianceList():void
+            {
+                this._virtualAppliancesFiltered = new ArrayCollection();
+            }
+            
 
             /**
              * Initializes this component

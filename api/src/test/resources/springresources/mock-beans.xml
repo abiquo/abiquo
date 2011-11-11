@@ -6,6 +6,7 @@
                 <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
                 <entry key="vsmServiceStub" value="vsmServiceStubMock" />
                 <entry key="infrastructureService" value="infrastructureTestService" />
+                <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />
             </map>
         </property>
     </bean>

@@ -30,8 +30,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.common.persistence.DefaultJpaDataAccessTestBase;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
@@ -191,7 +191,8 @@ public class EnterpriseRepTest extends DefaultJpaDataAccessTestBase
     {
         Enterprise enterprise = eg().createUniqueInstance();
         VirtualImage image = virtualImageGenerator.createImageWithConversions(enterprise);
-        ds().persistAll(enterprise, image);
+        ds().persistAll(image.getRepository().getDatacenter(), enterprise, image.getRepository(),
+            image.getCategory(), image);
 
         int enterpriseId = enterprise.getId();
 

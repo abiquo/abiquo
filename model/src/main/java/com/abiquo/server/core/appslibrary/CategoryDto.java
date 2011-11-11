@@ -24,10 +24,13 @@ package com.abiquo.server.core.appslibrary;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.sun.xml.txw2.annotation.XmlElement;
 
 @XmlRootElement(name = "category")
 public class CategoryDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,7 +38,7 @@ public class CategoryDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
@@ -47,33 +50,34 @@ public class CategoryDto extends SingleResourceTransportDto
         return name;
     }
 
-    public void setName(String name)
+    public void setName(final String name)
     {
         this.name = name;
     }
 
-    private int isDefault;
+    private boolean erasable;
 
-    public int getIsDefault()
+    public boolean isErasable()
     {
-        return isDefault;
+        return erasable;
     }
 
-    public void setIsDefault(int isDefault)
+    public void setErasable(final boolean erasable)
     {
-        this.isDefault = isDefault;
+        this.erasable = erasable;
     }
 
-    private int isErasable;
+    private boolean defaultCategory;
 
-    public int getIsErasable()
+    @XmlElement("default")
+    public boolean isDefaultCategory()
     {
-        return isErasable;
+        return defaultCategory;
     }
 
-    public void setIsErasable(int isErasable)
+    public void setDefaultCategory(final boolean defaultCategory)
     {
-        this.isErasable = isErasable;
+        this.defaultCategory = defaultCategory;
     }
 
 }

@@ -21,17 +21,11 @@
 
 package com.abiquo.am.services;
 
-import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
-import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 public interface OVFPackageInstanceNotifier
 {
-    void setOVFStatus(final String erId, final String ovfId, OVFPackageInstanceStatusType status)
-        throws IdNotFoundException, RepositoryException, EventException;
+    void setOVFStatus(final String erId, final String ovfId, OVFStatusEnumType status);
 
-    void setOVFStatusError(final String erId, final String ovfId, final String errorMessage)
-        throws IdNotFoundException, RepositoryException, EventException;
-
+    void setOVFStatusError(final String erId, final String ovfId, final String errorMessage);
 }

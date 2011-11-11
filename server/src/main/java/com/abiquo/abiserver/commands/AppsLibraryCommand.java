@@ -23,19 +23,10 @@ package com.abiquo.abiserver.commands;
 
 import java.util.List;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.CategoryHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.IconHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.RepositoryHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
-import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.infrastructure.Repository;
 
 /**
  * This command collects all actions related to Virtual Images
@@ -47,46 +38,7 @@ public interface AppsLibraryCommand
 
     List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
 
-    RepositoryHB getDatacenterRepository(UserSession userSession, Integer idDatacenter,
-        Integer idEnterprise) throws AppsLibraryCommandException; // TODO idEnterprise is not used
-
-    /** Category */
-    CategoryHB createCategory(UserSession userSession, Integer idEnterprise, String category)
-        throws AppsLibraryCommandException;
-
-    Void deleteCategory(UserSession userSession, Integer idCategory)
-        throws AppsLibraryCommandException;
-
-    List<CategoryHB> getCategories(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
-
-    /** Icon */
-    IconHB createIcon(UserSession userSession, Integer idEnterprise, IconHB icon)
-        throws AppsLibraryCommandException;
-
-    Void editIcon(UserSession userSession, IconHB icon) throws AppsLibraryCommandException;
-
-    Void deleteIcon(UserSession userSession, Integer idIcon) throws AppsLibraryCommandException;
-
-    List<IconHB> getIcons(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
-
     /** Virtual images */
-
-    /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
-     */
-    List<VirtualImage> getVirtualImageByCategoryAndHypervisorCompatible(UserSession userSession,
-        Integer idEnterprise, Integer idRepo, Integer idCategory, Integer idHypervisorType)
-        throws AppsLibraryCommandException;
-
-    /**
-     * @param idRepo, if 0, indicate stateful images
-     * @param idCategory, if 0 indicate return all the categories
-     */
-    List<VirtualimageHB> getVirtualImageByCategory(UserSession userSession, Integer idEnterprise,
-        Integer idRepo, Integer idCategory) throws AppsLibraryCommandException;
 
     Void editVirtualImage(UserSession userSession, VirtualimageHB vimage)
         throws AppsLibraryCommandException;
@@ -94,64 +46,4 @@ public interface AppsLibraryCommand
     Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
         throws AppsLibraryCommandException;
 
-    /** List. */
-    List<String> getOVFPackageListName(UserSession userSession, Integer idEnterprise)
-        throws AppsLibraryCommandException;
-
-    OVFPackageListDto getOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOVFPackageList) throws AppsLibraryCommandException;
-
-    OVFPackageListDto createOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String ovfpackageListURL) throws AppsLibraryCommandException;
-
-    OVFPackageListDto refreshOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOvfpackageList) throws AppsLibraryCommandException;
-
-    Void deleteOVFPackageList(UserSession userSession, Integer idEnterprise,
-        String nameOvfpackageList) throws AppsLibraryCommandException;
-
-    /** DC specific status. */
-    OVFPackageInstanceStatusListDto getOVFPackageListStatus(UserSession userSession,
-        String nameOVFPackageList, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException;
-
-    /** Upload/download. */
-    Void startDownloadOVFPackage(UserSession userSession, List<String> idsOvfpackage,
-        Integer idEnterprise, Integer idRepository) throws AppsLibraryCommandException;
-
-    OVFPackageInstanceStatusListDto refreshOVFPackageStatus(UserSession userSession,
-        List<String> idsOvfpackage, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException;
-
-    OVFPackageInstanceStatusDto cancelDownloadOVFPackage(UserSession userSession,
-        String idOvfpackage, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException;
-
-    /**
-     * Returns the current status of a {@link OVFPackage} in the DB.
-     * 
-     * @param userSession Data from the current user.
-     * @param idOVFPackageName Name of the item to refresh.
-     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
-     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return {@link OVFPackageInstanceStatusDto } queried.
-     * @throws AppsLibraryCommandException .
-     */
-    OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
-        String idOVFPackageName, final Integer nameOVFPackageList, Integer idEnterprise,
-        Integer idRepository)
-        throws AppsLibraryCommandException;
-    
-    /**
-     * Refresh the current status of a {@link OVFPackage} in the DB.
-     * @param userSession Data from the current user.
-     * @param idsOvfInstance Name of the item to refresh.
-     * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.
-     * @param idRepository Id of the {@link Repository} to which the {@link OVFPackage} belongs.
-     * @return {@link OVFPackageInstanceStatusDto } queried.
-     * @throws AppsLibraryCommandException .
-     */
-    OVFPackageInstanceStatusDto refreshOVFPackageInstanceStatus(UserSession userSession,
-        String idsOvfInstance, Integer idEnterprise, Integer idRepository)
-        throws AppsLibraryCommandException;
 }

@@ -38,10 +38,10 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
@@ -54,7 +54,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 {
-
     protected Enterprise ent;
 
     protected Datacenter datacenter;
@@ -120,6 +119,11 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
+        vm.getVirtualImage().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
+        vm2.getVirtualImage().getRepository()
+            .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
+
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(ent);
@@ -135,6 +139,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
@@ -148,6 +154,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
+        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());

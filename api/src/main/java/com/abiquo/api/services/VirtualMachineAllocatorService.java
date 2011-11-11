@@ -22,6 +22,7 @@
 package com.abiquo.api.services;
 
 import javax.jms.ResourceAllocationException;
+import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 
 @Service
 @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -148,7 +150,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (Exception e)
         {
             addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));            
+                virtualMachineId, e));
         }
         finally
         {
@@ -158,8 +160,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return vmachine;
     }
 
-    private CommonError createErrorWithExceptionDetails(APIError apiError,
-        Integer virtualMachineId, Exception e)
+    private CommonError createErrorWithExceptionDetails(final APIError apiError,
+        final Integer virtualMachineId, final Exception e)
     {
         final String msg =
             String.format("%s (%s)\n%s", apiError.getMessage(),
@@ -167,7 +169,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         return new CommonError(apiError.getCode(), msg);
     }
-
 
     public void updateVirtualMachineUse(final Integer idVirtualApp, final VirtualMachine vMachine)
     {
@@ -179,8 +180,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()),
-                e.getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()), e
+                .getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -201,8 +202,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
-                e.getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine), e
+                .getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -215,8 +216,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
         VirtualMachine vm = vmachineDao.findById(vmid);
 
-        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
-            vm.getUuid());
+        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(), vm
+            .getUuid());
     }
 
 }
