@@ -161,7 +161,8 @@ public enum APIError
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
         "VLAN-44", "The requested IP object does not exist"), VLANS_NOT_UNMANAGED("VLAN-45",
-        "The virtual network is not Unmanaged "),
+        "The virtual network is not Unmanaged "), VLANS_UNMANAGED_WITH_VM_CAN_NOT_BE_DELETED(
+        "VLAN-46", "Cannot delete Unmanaged Networks associated with Virtual Machines"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
