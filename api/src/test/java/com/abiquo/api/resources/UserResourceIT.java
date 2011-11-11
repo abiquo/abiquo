@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.Assert.assertNonEmptyErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
@@ -45,6 +46,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -211,6 +213,34 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
 
         UserDto modified = response.getEntity(UserDto.class);
         assertEquals(modified.getName(), "name");
+    }
+
+    @Test
+    public void modifyUserNickRises409() throws ClientWebException
+    {
+        User user = userGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+
+        String uri = resolveUserURI(user.getEnterprise().getId(), user.getId());
+        ClientResponse response = get(uri, "sysadmin", "sysadmin");
+
+        UserDto dto = response.getEntity(UserDto.class);
+        dto.setNick("newNick");
+
+        response = put(uri, dto, "sysadmin", "sysadmin");
+        assertErrors(response, 409, APIError.USER_NICK_CANNOT_BE_CHANGED);
+
     }
 
     @Test
