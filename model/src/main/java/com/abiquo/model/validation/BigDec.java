@@ -73,7 +73,7 @@ public @interface BigDec
 
             if (value != null)
             {
-                valid = value.toString().length() < 15;
+                valid = value.toString().length() <= 15;
                 if (!valid)
                 {
                     context.disableDefaultConstraintViolation();
