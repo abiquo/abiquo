@@ -192,8 +192,8 @@ public enum APIError
         "MACHINE-7",
         "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
         "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
-        "Invalid ip range"), MACHINE_IQN_MISSING(
-        "MACHINE-10", "The IQN of the target Physical Machine is not set"),
+        "Invalid ip range"), MACHINE_IQN_MISSING("MACHINE-10",
+        "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
         "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
@@ -418,6 +418,10 @@ public enum APIError
         "The enterprise is not configured to use Chef"), CHEF_INVALID_VIRTUALMACHINE("CHEF-9",
         "The virtual machine can not use Chef. "
             + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"),
+
+    // Parsing links
+    LINKS_INVALID_LINK("LNK-0", "Invalid link. Check out documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
+        "LNK-1", "Number of links invalid: This resource only accepts a single link"),
 
     ;
 

@@ -681,6 +681,11 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
     }
 
+    protected String createVirtualAppliancesLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
+    }
+
     protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {

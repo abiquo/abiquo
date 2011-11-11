@@ -117,6 +117,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findById(vmId);
     }
 
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer virtualMachineId)
+    {
+        return dao.findVirtualMachineByHypervisor(hypervisor, virtualMachineId);
+    }
+
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         dao.deleteNotManagedVirtualMachines(hypervisor);

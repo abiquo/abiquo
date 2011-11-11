@@ -259,7 +259,15 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setHighDisponibility(vm.getHighDisponibility());
         dto.setName(vm.getName());
 
-        dto.setIdType(vm.getIdType());
+        // dto.setIdState(v.getidState)
+        if (vm.getIdType() == 0)
+        {
+        	dto.setType("NOT_MANAGED");
+        }
+        else
+        {
+        	dto.setType("MANAGED");
+        }
         dto.setPassword(vm.getPassword());
         dto.setRam(vm.getRam());
         dto.setVdrpIP(vm.getVdrpIP());

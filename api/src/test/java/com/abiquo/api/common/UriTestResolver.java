@@ -47,6 +47,7 @@ import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
+import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.EnterpriseRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.EnterpriseRepositoryResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageInstanceResource;
@@ -335,7 +336,7 @@ public class UriTestResolver
         final Integer rackId, final Integer machineId)
     {
         return UriHelper.appendPathToBaseUri(resolveMachineURI(datacenterId, rackId, machineId),
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES);
+            VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM);
     }
 
     public static String resolveRemoteServicesURI(final Integer datacenterId)

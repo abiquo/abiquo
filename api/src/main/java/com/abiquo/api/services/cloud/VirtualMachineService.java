@@ -213,6 +213,17 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    public VirtualMachine getVirtualMachineByHypervisor(final Hypervisor hyp, final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineByHypervisor(hyp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+        return vm;
+    }
+
     public void addVirtualMachine(final VirtualMachine virtualMachine)
     {
         repo.insert(virtualMachine);
@@ -1503,4 +1514,5 @@ public class VirtualMachineService extends DefaultApiService
 
         return errors;
     }
+
 }

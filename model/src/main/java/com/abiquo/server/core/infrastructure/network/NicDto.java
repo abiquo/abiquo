@@ -76,4 +76,17 @@ public class NicDto extends SingleResourceTransportDto
     {
         this.ip = ip;
     }
+
+    public void setSequence(Integer sequence)
+    {
+        this.sequence = sequence;
+    }
+
+    public Integer getSequence()
+    {
+        return sequence;
+    }
+
+    private Integer sequence;
+
 }

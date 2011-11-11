@@ -69,6 +69,9 @@
                 <ref bean="systemPropertyResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
+                <!--  -->
+                <ref bean="virtualMachinesInfrastructureResource" />
+                <ref bean="virtualMachineInfrastructureResource" />
             </set>
         </property>
     </bean>

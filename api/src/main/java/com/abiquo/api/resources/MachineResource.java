@@ -22,7 +22,6 @@
 package com.abiquo.api.resources;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -38,7 +37,6 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
-import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
@@ -48,10 +46,6 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -63,15 +57,12 @@ import com.abiquo.server.core.infrastructure.MachinesDto;
 @Controller
 public class MachineResource extends AbstractResource
 {
-    public static final String SYNC = "sync";
 
     public static final String MACHINE = "machine";
 
     public static final String MACHINE_PARAM = "{" + MACHINE + "}";
 
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
-
-    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
 
     public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
 
@@ -132,75 +123,7 @@ public class MachineResource extends AbstractResource
         service.removeMachine(machineId);
     }
 
-    @GET
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
-    public VirtualMachinesDto getVirtualMachines(
-        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @PathParam(MachineResource.SYNC) final Boolean sync, @Context final IRESTBuilder restBuilder)
-        throws Exception
-    {
-        Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
-
-        Collection<VirtualMachine> vms = vmService.findByHypervisor(hypervisor);
-
-        List<VirtualAppliance> vapps = new ArrayList<VirtualAppliance>();
-        VirtualMachinesDto vmDto = new VirtualMachinesDto();
-        for (VirtualMachine vm : vms)
-        {
-            if (vm.getEnterprise() != null)
-            {
-                Collection<VirtualDatacenter> vdcs =
-                    vdcService.getVirtualDatacenters(vm.getEnterprise(), vm.getHypervisor()
-                        .getMachine().getDatacenter());
-                for (VirtualDatacenter vdc : vdcs)
-                {
-                    vapps = vappService.getVirtualAppliancesByVirtualDatacenter(vdc.getId());
-                    for (VirtualAppliance vapp : vapps)
-                    {
-                        List<VirtualMachine> all = vmService.findByVirtualAppliance(vapp);
-
-                        if (all != null && !all.isEmpty())
-                        {
-                            for (VirtualMachine v : all)
-                            {
-                                if (v.equals(vm))
-                                {
-                                    vmDto.add(VirtualMachinesResource
-                                        .createCloudAdminTransferObject(v, vapp
-                                            .getVirtualDatacenter().getId(), vapp.getId(),
-                                            restBuilder));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                vmDto.add(VirtualMachinesResource.createAdminTransferObjects(vm, restBuilder));
-            }
-        }
-        return vmDto;
-    }
-
-    @DELETE
-    @Path(MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES)
-    public void deleteVirtualMachinesNotManaged(
-        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MachineResource.MACHINE) final Integer machineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        Hypervisor hypervisor = getHypervisor(datacenterId, rackId, machineId);
-
-        vmService.deleteNotManagedVirtualMachines(hypervisor, true);
-        infraService.updateUsedResourcesByMachine(machineId);
-    }
-
     // protected methods
-
     protected Hypervisor getHypervisor(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {

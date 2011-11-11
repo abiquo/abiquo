@@ -895,4 +895,47 @@ public class InfrastructureService extends DefaultApiService
         }
         return errors;
     }
+
+    /**
+     * Returns a single virtual machine based on its infrastructure properties and its id.
+     * 
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the physical machine
+     * @param vmId identifier of the virtual machine
+     * @return the object {@link VirtualMachine} found.
+     */
+    public VirtualMachine getVirtualMachineFromInfrastructure(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer vmId)
+    {
+        /** check if the machine exists. */
+        Machine pm = repo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return virtualMachineService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
+    }
+
+    /**
+     * Returns the list of virtual machines based on its infrastructure deployment site.
+     * 
+     * @param datacenterId identifier of the datacenter.
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machin
+     * @return the list of {@link VirtualMachine} deployed in the physical machine.
+     */
+    public List<VirtualMachine> getVirtualMachinesFromInfrastructure(final Integer datacenterId,
+        final Integer rackId, final Integer machineId)
+    {
+        /** check if the machine exists. */
+        Machine pm = repo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return (List<VirtualMachine>) virtualMachineService.findByHypervisor(pm.getHypervisor());
+    }
 }
