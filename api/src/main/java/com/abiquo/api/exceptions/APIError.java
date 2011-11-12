@@ -238,7 +238,9 @@ public enum APIError
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"),
+        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER(
+        "VM-16", "The provided virtual images isn't available in the virtual appliance datacenter"), VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED(
+        "VM-17", "The provided virtual image can not be used in the current enterprise"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

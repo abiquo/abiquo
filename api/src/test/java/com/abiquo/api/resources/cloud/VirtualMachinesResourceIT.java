@@ -22,6 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -45,6 +46,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -55,6 +57,8 @@ import com.abiquo.server.core.infrastructure.Machine;
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 {
     protected Enterprise ent;
+
+    protected DatacenterLimits dcallowed;
 
     protected Datacenter datacenter;
 
@@ -69,22 +73,24 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     {
         ent = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
+        dcallowed = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
-        vImage = virtualImageGenerator.createInstance(ent);
+        vImage = virtualImageGenerator.createInstance(ent, datacenter);
     }
 
     @BeforeMethod
     public void setupSysadmin()
     {
-        Enterprise sysEnterprise = enterpriseGenerator.createUniqueInstance();
-        Role r = roleGenerator.createInstanceSysAdmin();
-        User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
+        final Enterprise sysEnterprise = enterpriseGenerator.createUniqueInstance();
+        final Role r = roleGenerator.createInstanceSysAdmin();
+        final User u = userGenerator.createInstance(sysEnterprise, r, "sysadmin", "sysadmin");
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
+        final List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(sysEnterprise);
-        for (Privilege p : r.getPrivileges())
+        for (final Privilege p : r.getPrivileges())
         {
             entitiesToSetup.add(p);
         }
@@ -102,37 +108,38 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualMachinesTest()
     {
         // Create a virtual machine
-        VirtualMachine vm = vmGenerator.createInstance(ent);
-        VirtualMachine vm2 = vmGenerator.createInstance(ent);
+        final VirtualMachine vm = vmGenerator.createInstance(ent);
+        final VirtualMachine vm2 = vmGenerator.createInstance(ent);
 
-        Machine machine = vm.getHypervisor().getMachine();
+        final Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
 
-        Machine machine2 = vm2.getHypervisor().getMachine();
+        final Machine machine2 = vm2.getHypervisor().getMachine();
         machine2.setDatacenter(vdc.getDatacenter());
         machine2.setRack(null);
 
-        VirtualAppliance vapp2 = vappGenerator.createInstance(vdc);
+        final VirtualAppliance vapp2 = vappGenerator.createInstance(vdc);
 
         // Asociate it to the created virtual appliance
-        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-        NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
+        final NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+        final NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
         vm.getVirtualImage().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         vm2.getVirtualImage().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
 
-        List<Object> entitiesToSetup = new ArrayList<Object>();
+        final List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(ent);
         entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(dcallowed);
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);
         entitiesToSetup.add(vapp2);
 
-        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        for (final Privilege p : vm.getUser().getRole().getPrivileges())
         {
             entitiesToSetup.add(p);
         }
@@ -147,7 +154,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm);
         entitiesToSetup.add(nvi);
 
-        for (Privilege p : vm2.getUser().getRole().getPrivileges())
+        for (final Privilege p : vm2.getUser().getRole().getPrivileges())
         {
             entitiesToSetup.add(p);
         }
@@ -189,9 +196,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualApplianceId()
     {
-        setup(ent, datacenter, vdc, vapp);
+        setup(ent, datacenter, dcallowed, vdc, vapp);
 
-        ClientResponse response =
+        final ClientResponse response =
             get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
@@ -203,27 +210,145 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualDatacenterId()
     {
-        setup(ent, datacenter, vdc, vapp);
+        setup(ent, datacenter, dcallowed, vdc, vapp);
 
-        ClientResponse response =
+        final ClientResponse response =
             get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     /**
-     * Creates a virtual machine. Disabled until the VirtualImage resource is done
+     * Creates a virtual machine.
      */
-    @Test(enabled = false)
+    @Test
     public void createVirtualMachine()
     {
-        setup(ent, datacenter, vdc, vapp);
-        setup(vImage);
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(vImage.getRepository(), vImage.getCategory(), vImage);
 
-        VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
-        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
-        ClientResponse response =
+        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+    }
+
+    /**
+     * Attempt to create a virtual machine with a virtual image not in the same repository
+     */
+    @Test
+    public void createVirtualMachineInvalidVirtualImageDifferentDatacenter()
+    {
+        Datacenter otherDc = datacenterGenerator.createUniqueInstance();
+        VirtualImage otherVimage = virtualImageGenerator.createInstance(ent, otherDc);
+
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(otherDc, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
+    }
+
+    /**
+     * Attempt to create a virtual machine with a virtual image not in the same enterprise
+     */
+    @Test
+    public void createVirtualMachineInvalidVirtualImageDifferentEnterprise()
+    {
+        Enterprise otherEnt = enterpriseGenerator.createUniqueInstance();
+        VirtualImage otherVimage = virtualImageGenerator.createInstance(otherEnt, datacenter);
+
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(otherEnt, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
+    }
+
+    /**
+     * Create a virtual machine with a virtual image not in the same enterprise but shared
+     */
+    @Test
+    public void createVirtualMachineSharedVirtualImageDifferentEnterprise()
+    {
+        Enterprise otherEnt = enterpriseGenerator.createUniqueInstance();
+        VirtualImage otherVimage = virtualImageGenerator.createInstance(otherEnt, datacenter);
+        otherVimage.setShared(true);
+
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(otherEnt, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+    }
+
+    /**
+     * Attempts to create a virtual machine for a non existent virtual image
+     */
+    @Test
+    public void createVirtualMachine404VirtualImageNotFound()
+    {
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+
+        tearDown("virtualimage");
+
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Attempts to create a virtual machine using a malformed virtual image link
+     */
+    @Test
+    public void createVirtualMachine404VirtualImageMissingLink()
+    {
+        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        for (RESTLink vimagerLink : dto.getLinks())
+        {
+            if (vimagerLink.getRel().equalsIgnoreCase("virtualimage"))
+            {
+                vimagerLink.setHref("http://i/m/dummy/user");
+            }
+        }
+
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Attempts to create a virtual machine for a datacenter not allowed (in the vimage)
+     */
+    @Test
+    public void createVirtualMachine409VirtualImageInDatacenterNotAllowed()
+    {
+        setup(ent, datacenter, vdc, vapp); // dcallowed
+        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+
+        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+
+        final ClientResponse response =
+            post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
+        assertEquals(response.getStatusCode(), Status.CONFLICT.getStatusCode());
     }
 
     /**
@@ -234,9 +359,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     {
         setup(ent, datacenter, vdc, vapp);
 
-        VirtualMachine vm = vmGenerator.createInstance(ent);
-        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
-        ClientResponse response =
+        final VirtualMachine vm = vmGenerator.createInstance(ent);
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
             post(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()), dto, "sysadmin",
                 "sysadmin");
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
@@ -250,9 +375,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     {
         setup(ent, datacenter, vdc, vapp);
 
-        VirtualMachine vm = vmGenerator.createInstance(ent);
-        VirtualMachineDto dto = fromVirtualMachineToDto(vm);
-        ClientResponse response =
+        final VirtualMachine vm = vmGenerator.createInstance(ent);
+        final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
+        final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()), dto, "sysadmin",
                 "sysadmin");
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
@@ -260,7 +385,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
     private VirtualMachineDto fromVirtualMachineToDto(final VirtualMachine vm)
     {
-        VirtualMachineDto dto = new VirtualMachineDto();
+        final VirtualMachineDto dto = new VirtualMachineDto();
         dto.setCpu(vm.getCpu());
         dto.setDescription(vm.getDescription());
         dto.setHd(vm.getHdInBytes());
@@ -272,12 +397,14 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         dto.setRam(vm.getRam());
         dto.setVdrpIP(vm.getVdrpIP());
         dto.setVdrpPort(vm.getVdrpPort());
-        RESTLink enterpriseLink =
+        final RESTLink enterpriseLink =
             new RESTLink("enterprise", resolveEnterpriseURI(vm.getEnterprise().getId()));
         dto.addLink(enterpriseLink);
 
-        RESTLink vImageLink =
-            new RESTLink("virtualimage", resolveEnterpriseURI(vm.getVirtualImage().getId()));
+        final RESTLink vImageLink =
+            new RESTLink("virtualimage", resolveVirtualImageURI(vm.getVirtualImage()
+                .getEnterprise().getId(), vm.getVirtualImage().getRepository().getDatacenter()
+                .getId(), vm.getVirtualImage().getId()));
         dto.addLink(vImageLink);
 
         return dto;

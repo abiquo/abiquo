@@ -24,6 +24,7 @@ package com.abiquo.api.services.cloud;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -44,6 +45,7 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -121,6 +123,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected InfrastructureRep infRep;
+
+    @Autowired
+    protected VirtualImageService vimageService;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -375,16 +380,21 @@ public class VirtualMachineService extends DefaultApiService
         final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
         final Integer vappId)
     {
+        // generates the random identifier
+        virtualMachine.setUuid(UUID.randomUUID().toString());
+
+        // We need the Enterprise
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         virtualMachine.setEnterprise(enterprise);
 
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
         // We need the VirtualImage
-        VirtualImage virtualImage = repo.getVirtualImage(vImageId);
+        VirtualImage virtualImage =
+            vimageService.getVirtualImage(enterpriseId, virtualAppliance.getVirtualDatacenter()
+                .getDatacenter().getId(), vImageId);
+        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
         virtualMachine.setVirtualImage(virtualImage);
-
-        // We need the Enterprise
 
         // We check for a suitable conversion (PREMIUM)
         attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(),
@@ -401,6 +411,23 @@ public class VirtualMachineService extends DefaultApiService
         // is the sum (pondered) of the states of its virtual machines
 
         return repo.createVirtualMachine(virtualMachine);
+    }
+
+    /** Checks correct datacenter and enterprise. */
+    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    {
+        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
+            .getDatacenter().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+        }
+
+        if (!vimage.isShared() && (vimage.getEnterprise().getId() != vapp.getEnterprise().getId()))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+        }
+
+        flushErrors();
     }
 
     /**
