@@ -19,35 +19,26 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services;
-
-import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
-import static com.abiquo.am.services.OVFPackageConventions.cleanOVFurlOnOldRepo;
+package com.abiquo.am.services.filesystem;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
-import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
-import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 
 public class EnterpriseRepositoryFileSystem
 {
@@ -59,15 +50,11 @@ public class EnterpriseRepositoryFileSystem
     private final static Integer FS_TIMOUT_MS = AMConfigurationManager.getInstance()
         .getAMConfiguration().getFsTimeoutMs();
 
-    private static Map<String, List<String>> cachedpackages = new HashMap<String, List<String>>();
-
     /**
      * Check if it exist or create it.
      */
     public static void validateEnterpirseRepositoryPathFile(final String enterpriseRepositoryPath)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         File enterpriseRepositoryFile = new File(enterpriseRepositoryPath);
 
         if (!enterpriseRepositoryFile.exists())
@@ -75,10 +62,8 @@ public class EnterpriseRepositoryFileSystem
             if (!enterpriseRepositoryFile.mkdirs())
             {
                 throw new AMException(AMError.REPO_NOT_ACCESSIBLE, enterpriseRepositoryPath);
-
             }
         }
-
         if (!(enterpriseRepositoryFile.exists() && enterpriseRepositoryFile.canWrite() && enterpriseRepositoryFile
             .isDirectory()))
         {
@@ -86,24 +71,20 @@ public class EnterpriseRepositoryFileSystem
         }
     }
 
-    public static List<String> getAllOVF(final String enterpriseRepositoryPath,
+    public static List<OVFPackageInstanceStateDto> getAllOVF(final String enterpriseRepositoryPath,
         final boolean includeBundeles)
     {
+        List<OVFPackageInstanceStateDto> availableOvs = null;
 
-        /**
-         * TODO caching results
-         */
-        File enterpriseRepositoryFile = new File(enterpriseRepositoryPath);
+        // TODO consider global thread limit
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        TimeoutFSUtils.getInstance().canUseRepository();
-
-        List<String> availableOvs = null;
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        final Future<List<String>> futureAvailable =
-            executor.submit(new EnterpriseRepositoryRefreshWithTimeout(enterpriseRepositoryFile
-                .getAbsolutePath(), new String(), includeBundeles, false));
+        final Future<List<OVFPackageInstanceStateDto>> futureAvailable =
+            executor.submit(new EnterpriseRepositoryRefreshWithTimeout(//
+            new File(enterpriseRepositoryPath).getAbsolutePath(),
+                new String(),
+                includeBundeles,
+                false)); // do not clean downloading packages
 
         try
         {
@@ -112,6 +93,8 @@ public class EnterpriseRepositoryFileSystem
         catch (TimeoutException e)
         {
             futureAvailable.cancel(true);
+            LOG.warn("Timeout while refresh the repository folder " + enterpriseRepositoryPath, e);
+
         }
         catch (Exception e)
         {
@@ -122,50 +105,36 @@ public class EnterpriseRepositoryFileSystem
             executor.shutdownNow();
         }
 
-        if (availableOvs != null)
-        {
-            cachedpackages.put(enterpriseRepositoryPath, availableOvs);
-        }
-        else if (cachedpackages.containsKey(enterpriseRepositoryPath))
-        {
-            LOG.warn("Slow file system, can't list folder [{}] content (timout), "
-                + "using cached result.", enterpriseRepositoryPath);
-
-            availableOvs = cachedpackages.get(enterpriseRepositoryPath);
-        }
-        else
+        if (availableOvs == null)
         {
             throw new AMException(AMError.REPO_TIMEOUT_REFRESH, enterpriseRepositoryPath);
         }
 
-        List<String> cleanovfids = new LinkedList<String>();
-
-        for (String ovfid : availableOvs)
-        {
-            cleanovfids.add(cleanOVFurlOnOldRepo(ovfid));
-        }
-
-        return cleanovfids;
+        return availableOvs;
     }
 
-    public static Long getUsedMb(String enterpriseRepositoryPath)
-    {
-        TimeoutFSUtils.getInstance().canUseRepository();
+    /***/
 
+    /** ############### REPOSITORY USAGE ############### */
+
+    public static boolean isEnoughtSpaceOn(final String enterpriseRepositoryPath,
+        final Long expected)
+    {
+        return new File(enterpriseRepositoryPath).getFreeSpace() > expected;
+    }
+
+    public static Long getUsedMb(final String enterpriseRepositoryPath)
+    {
         return sizeOfDirectory(new File(enterpriseRepositoryPath)) / (1024 * 1024);
     }
 
     public static Long getCapacityMb()
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         return new File(BASE_REPO_PATH).getTotalSpace() / (1024 * 1024);
     }
 
     public static Long getFreeMb()
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         return new File(BASE_REPO_PATH).getFreeSpace() / (1024 * 1024);
     }
 
@@ -191,61 +160,78 @@ public class EnterpriseRepositoryFileSystem
         }
     }
 
-    public static String createBundle(final String packagePath, final String snapshot,
-        final String packageName, EnvelopeType envelopeBundle)
+    /** ############### DOWNLOADING FILE ############### */
+
+    /**
+     * A prefix to add at ''destinationPath'' to indicate the file is being download (see
+     * ''takeFile'' and ''releaseFile'').
+     */
+    private final static String FILE_MARK = ".download";
+
+    /**
+     * Check the target file is not being download by another package.
+     * 
+     * @return null if the destination file is being download by another package.
+     * @throws FileNotFoundException
+     */
+    public static FileOutputStream takeFile(final String destinationPath)
     {
+        File destination = new File(destinationPath);
+        File destinationMark = new File(destinationPath + FILE_MARK);
 
-        final String snapshotMark = snapshot + OVF_BUNDLE_PATH_IDENTIFIER;
-        final String bundlePath = packagePath + snapshotMark + packageName;
-
-        File envelopeBundleFile = new File(bundlePath);
-        if (envelopeBundleFile.exists())
+        if (destination.exists())
         {
-            throw new AMException(AMError.OVFPI_SNAPSHOT_ALREADY_EXIST, bundlePath);
+            if (destinationMark.exists())
+            {
+                throw new AMException(AMError.OVF_INSTALL_ALREADY, destinationPath);
+            }
         }
 
-        FileOutputStream bundleEnvelopeStream = null;
         try
         {
-            envelopeBundleFile.createNewFile();
-            bundleEnvelopeStream = new FileOutputStream(envelopeBundleFile);
+            File parent = destinationMark.getParentFile();
+            if (!parent.exists())
+            {
+                if (!parent.mkdirs())
+                {
+                    LOG.error("Can't create file folder at " + parent.getAbsolutePath());
+                }
+            }
+
+            destinationMark.createNewFile();
         }
-        catch (Exception e1)
+        catch (IOException e)
         {
-            throw new AMException(AMError.OVFPI_SNAPSHOT_ALREADY_EXIST, bundlePath);
+            LOG.error(String.format("Can't create the destination mark for [%s]", destinationPath));
+            e.printStackTrace();
         }
 
-            envelopeBundle =
-                OVFPackageInstanceToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot,
-                    packagePath);
-        
         try
         {
-            OVFSerializer.getInstance().writeXML(envelopeBundle, bundleEnvelopeStream);
+            return new FileOutputStream(destination);
         }
-        catch (XMLException e)
+        catch (FileNotFoundException e)
         {
-            throw new AMException(AMError.OVFPI_SNAPSHOT_CREATE, bundlePath, e);
+            throw new AMException(AMError.OVF_INSTALL, e);
         }
-        finally
-        {
-            try
-            {
-                bundleEnvelopeStream.close();
-            }
-            catch (IOException e)
-            {
-                final String cause = String.format("Can not close the stream to [%s]", bundlePath);
-                LOG.error(cause);
-            }
-        }// close envelope write stream
-
-        return snapshotMark;
     }
 
-    public static boolean isEnoughtSpaceOn(final String enterpriseRepositoryPath,
-        final Long expected)
+    /**
+     * Ends a file download transaction.
+     */
+    public static void releaseFile(final String destinationPath)
     {
-        return new File(enterpriseRepositoryPath).getFreeSpace() > expected;
+        File destinationMark = new File(destinationPath + FILE_MARK);
+
+        if (destinationMark.exists())
+        {
+            destinationMark.delete();
+        }
+        else
+        {
+            final String msg =
+                String.format("The destination file [%s] was not bbeing download", destinationPath);
+            LOG.error(msg);
+        }
     }
 }

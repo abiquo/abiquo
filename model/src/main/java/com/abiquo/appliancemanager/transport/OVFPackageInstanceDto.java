@@ -99,7 +99,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return diskFilePath;
     }
 
-    public void setDiskFilePath(String diskFilePath)
+    public void setDiskFilePath(final String diskFilePath)
     {
         this.diskFilePath = diskFilePath;
     }
@@ -110,7 +110,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return masterDiskFilePath;
     }
 
-    public void setMasterDiskFilePath(String masterDiskFilePath)
+    public void setMasterDiskFilePath(final String masterDiskFilePath)
     {
         this.masterDiskFilePath = masterDiskFilePath;
     }
@@ -130,19 +130,21 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return diskFileFormat;
     }
 
-    public void setDiskFileFormat(DiskFormatType diskFileFormat)
+    public void setDiskFileFormat(final DiskFormatType diskFileFormat)
     {
         this.diskFileFormat = diskFileFormat;
         this.setDiskFormatTypeUri(diskFileFormat.uri);
         // TODO FIXME once OVFPackageDto work with Enum
     }
 
+    @Override
     public String getIconPath()
     {
         return iconPath;
     }
 
-    public void setIconPath(String iconPath)
+    @Override
+    public void setIconPath(final String iconPath)
     {
         this.iconPath = iconPath;
     }
@@ -152,21 +154,19 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return categoryName;
     }
 
-    public void setCategoryName(String categoryName)
+    public void setCategoryName(final String categoryName)
     {
         this.categoryName = StringUtils.strip(categoryName);
     }
 
-    @Deprecated
-    /** Use the EnterpriseRepository link Identifier*/
+    /** TODO get from the EnterpriseRepository link */
     public Integer getIdEnterprise()
     {
         return idEnterprise;
     }
 
-    @Deprecated
-    /** Use the EnterpriseRepository link Identifier*/
-    public void setIdEnterprise(Integer idEnterprise)
+    /** TODO set to the EnterpriseRepository link */
+    public void setIdEnterprise(final Integer idEnterprise)
     {
         this.idEnterprise = idEnterprise;
     }
@@ -180,7 +180,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
 
     @Deprecated
     // TODO not being used
-    public void setIdUser(Integer idUser)
+    public void setIdUser(final Integer idUser)
     {
         this.idUser = idUser;
     }
@@ -196,7 +196,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return cpu;
     }
 
-    public void setCpu(Integer cpu)
+    public void setCpu(final Integer cpu)
     {
         this.cpu = cpu;
     }
@@ -206,7 +206,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return ram;
     }
 
-    public void setRam(Long ram)
+    public void setRam(final Long ram)
     {
         this.ram = ram;
     }
@@ -216,7 +216,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return hd;
     }
 
-    public void setHd(Long hd)
+    public void setHd(final Long hd)
     {
         this.hd = hd;
     }
@@ -227,7 +227,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return ramSizeUnit != null ? ramSizeUnit : MemorySizeUnit.MEGABYTE;
     }
 
-    public void setRamSizeUnit(MemorySizeUnit ramSizeUnit)
+    public void setRamSizeUnit(final MemorySizeUnit ramSizeUnit)
     {
         this.ramSizeUnit = ramSizeUnit;
     }
@@ -238,7 +238,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         return hdSizeUnit != null ? hdSizeUnit : MemorySizeUnit.MEGABYTE;
     }
 
-    public void setHdSizeUnit(MemorySizeUnit hdSizeUnit)
+    public void setHdSizeUnit(final MemorySizeUnit hdSizeUnit)
     {
         this.hdSizeUnit = hdSizeUnit;
     }

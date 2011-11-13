@@ -233,6 +233,7 @@ public class ApplianceManagerIT
         expectedEvents(ERROR, NOT_DOWNLOAD);
     }
 
+    @Test(enabled = false)
     public void test_CreateBundle() throws Exception
     {
         final String snapshot = "SnapshotUUID";

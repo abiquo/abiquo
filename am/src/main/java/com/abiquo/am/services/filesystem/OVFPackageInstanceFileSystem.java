@@ -19,14 +19,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services;
+package com.abiquo.am.services.filesystem;
 
 import static com.abiquo.am.services.OVFPackageConventions.END_OF_FILE_MARK;
 import static com.abiquo.am.services.OVFPackageConventions.FORMATS_PATH;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_IMPORTED_PREFIX;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_STATUS_DOWNLOADING_MARK;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_STATUS_ERROR_MARK;
-import static com.abiquo.am.services.OVFPackageConventions.cleanOVFurlForOldRepo;
 import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.getBundleMasterOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.getBundleSnapshot;
@@ -49,9 +48,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.util.BundleImageFileFilter;
-import com.abiquo.am.services.util.FormatsFilter;
-import com.abiquo.am.services.util.TimeoutFSUtils;
+import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.filesystem.filters.BundleImageFileFilter;
+import com.abiquo.am.services.filesystem.filters.FormatsFilter;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
@@ -68,7 +67,6 @@ public class OVFPackageInstanceFileSystem
      */
     public static EnvelopeType getEnvelope(final String enterpriseRepositoryPath, final String ovfId)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
 
         EnvelopeType envelope;
 
@@ -77,17 +75,7 @@ public class OVFPackageInstanceFileSystem
 
         if (!ovfFile.exists())
         {
-            // for pre 1.6 repository file system structure
-            final String oldOvfId = cleanOVFurlForOldRepo(ovfId);
-
-            if (!oldOvfId.equalsIgnoreCase(ovfId))
-            {
-                return getEnvelope(enterpriseRepositoryPath, oldOvfId);
-            }
-            else
-            {
-                throw new AMException(AMError.OVF_NOT_FOUND, ovfId);
-            }
+            throw new AMException(AMError.OVF_NOT_FOUND, ovfId);
         }
 
         FileInputStream fileIs = null;
@@ -130,8 +118,6 @@ public class OVFPackageInstanceFileSystem
             state.setErrorCause(AMError.OVF_INVALID_LOCATION.toString());
             return state;
         }
-
-        TimeoutFSUtils.getInstance().canUseRepository();
 
         final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
         final String ovfEnvelopePath =

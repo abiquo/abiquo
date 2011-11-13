@@ -29,11 +29,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Random;
 
-import org.apache.commons.io.FilenameUtils;
-
 import junit.framework.Assert;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.OVFPackageConventions;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
@@ -47,7 +48,7 @@ import com.abiquo.testng.TestServerListener;
 public class ApplianceManagerAsserts
 {
 
-    private ApplianceManagerResourceStubImpl stub;
+    private final ApplianceManagerResourceStubImpl stub;
 
     protected final static String idEnterprise = ApplianceManagerIT.idEnterprise;
 
@@ -57,7 +58,7 @@ public class ApplianceManagerAsserts
 
     private final static Long UPLOAD_FILE_SIZE_BYTES = (1024 * 1024) * 1l;
 
-    public ApplianceManagerAsserts(ApplianceManagerResourceStubImpl stub)
+    public ApplianceManagerAsserts(final ApplianceManagerResourceStubImpl stub)
     {
         this.stub = stub;
     }
@@ -154,14 +155,14 @@ public class ApplianceManagerAsserts
     protected static void createBundleDiskFile(final String ovfId, final String snapshot)
         throws Exception
     {
-        EnterpriseRepositoryService er = EnterpriseRepositoryService.getRepo(idEnterprise);
+        EnterpriseRepositoryService er = ErepoFactory.getRepo(idEnterprise);
 
         final String ovfpath = OVFPackageConventions.getRelativePackagePath(ovfId);
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         // final String diskFilePathRel = diskFilePath.substring(diskFilePath.lastIndexOf('/'));
 
         final String path =
-            FilenameUtils.concat(FilenameUtils.concat(er.getEnterpriseRepositoryPath(), ovfpath),
+            FilenameUtils.concat(FilenameUtils.concat(er.path(), ovfpath),
                 (snapshot + "-snapshot-" + diskFilePathRel));
 
         // "/opt/testvmrepo/1/rs.bcn.abiquo.com/m0n0wall/000snap000-snapshot-m0n0wall-1.3b18-i386-flat.vmdk"
@@ -202,7 +203,7 @@ public class ApplianceManagerAsserts
         // final String bundleOVFid =
         // ovfId.substring(0, ovfId.lastIndexOf('.')) + "-snapshot-" + snapshot + ".ovf";
 
-        EnterpriseRepositoryService er = EnterpriseRepositoryService.getRepo(idEnterprise);
+        EnterpriseRepositoryService er = ErepoFactory.getRepo(idEnterprise);
 
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         final String diskPath = ("-snapshot-" + diskFilePathRel);
