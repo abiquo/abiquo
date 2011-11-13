@@ -40,6 +40,9 @@ public class AppsLibraryRep extends DefaultRepBase
     private VirtualImageDAO virtualImageDAO;
 
     @Autowired
+    private VirtualImageConversionDAO conversionDAO;
+
+    @Autowired
     private CategoryDAO categoryDAO;
 
     @Autowired
@@ -56,6 +59,7 @@ public class AppsLibraryRep extends DefaultRepBase
         this.virtualImageDAO = new VirtualImageDAO(em);
         this.categoryDAO = new CategoryDAO(em);
         this.iconDAO = new IconDAO(em);
+        this.conversionDAO = new VirtualImageConversionDAO(em);
     }
 
     // Category
@@ -274,5 +278,15 @@ public class AppsLibraryRep extends DefaultRepBase
     public boolean isMaster(final VirtualImage vImage)
     {
         return virtualImageDAO.isMaster(vImage);
+    }
+
+    /**
+     * @see com.abiquo.server.core.cloud.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
+     *      com.abiquo.model.enumerator.HypervisorType)
+     */
+    public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
+        final HypervisorType hypervisorType)
+    {
+        return conversionDAO.compatilbeConversions(virtualImage, hypervisorType);
     }
 }

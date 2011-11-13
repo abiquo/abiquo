@@ -397,8 +397,7 @@ public class VirtualMachineService extends DefaultApiService
         virtualMachine.setVirtualImage(virtualImage);
 
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(),
-            virtualMachine.getVirtualImage(), virtualMachine);
+        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual image is VirtualImageNode
@@ -477,12 +476,11 @@ public class VirtualMachineService extends DefaultApiService
      * premium to the {@link VirtualMachine}.
      * 
      * @param virtualDatacenter from where we retrieve the hypervisor type.
-     * @param virtualImage to prepare.
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
     public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
-        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
         logger.debug("attachVirtualImageConversion community edition");

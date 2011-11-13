@@ -54,9 +54,9 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return Restrictions.eq(VirtualImageConversion.VIRTUAL_IMAGE_PROPERTY, image);
     }
 
-    private static Criterion sameTargetFormat(final DiskFormatType format)
+    private static Criterion targetFormatIn(final DiskFormatType... formats)
     {
-        return Restrictions.eq(VirtualImageConversion.TARGET_TYPE_PROPERTY, format);
+        return Restrictions.in(VirtualImageConversion.TARGET_TYPE_PROPERTY, formats);
     }
 
     private static Criterion sourceFormatNull()
@@ -65,43 +65,36 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     }
 
     /**
-     * This is used in {@link VirtualImageDAO} to determine if an image is compatible
+     * Get all the provided hypervisor compatible {@link VirtualImageConversion} for a given {@link HypervisorType}
+     * <p>
+     * Before calling this method assure the virtualImage format IS NOT the hypervisorType base
+     * format or compatible (conversion not needed). @see
+     * {@link VirtualMachineServicePremium#shouldFindConversion}
      * 
-     * @deprecated use {@link VirtualImageDAO#findBy}
+     * @return the list of all compatible {@link VirtualImageConversion} in <b>ANY state</b>.
+     *         {@link VirtualMachineServicePremium#selectConversion} will check the state and pick
+     *         the most suitable format.
      */
-    @Deprecated
-    public static Criterion compatibleConversion(final VirtualImage virtualImage,
+    @SuppressWarnings("unchecked")
+    public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
         final HypervisorType hypervisorType)
     {
-        return Restrictions.and(sameImage(virtualImage),
-            compatibleConversion(hypervisorType.compatibles()));
+        final Criterion compat =
+            Restrictions.and(sameImage(virtualImage),
+                targetFormatIn(hypervisorType.compatibilityTable));
+
+        return createCriteria(compat).list();
     }
 
-    private static Criterion compatibleConversion(final DiskFormatType... types)
-    {
-        if (types.length == 1)
-        {
-            return sameTargetFormat(types[0]);
-        }
-        else
-        {
-            Criterion compatible = sameTargetFormat(types[0]);
-            for (DiskFormatType type : types)
-            {
-                compatible = Restrictions.or(compatible, sameTargetFormat(type));
-            }
-
-            return compatible;
-        }
-    }
-
+    @Deprecated
+    // use selectConversion TODO delthis
     @SuppressWarnings("unchecked")
     public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
         final DiskFormatType format)
     {
         // There can be no images
         List<VirtualImageConversion> conversions =
-            createCriteria(sameImage(image)).add(sameTargetFormat(format)).add(sourceFormatNull())
+            createCriteria(sameImage(image)).add(targetFormatIn(format)).add(sourceFormatNull())
                 .list();
         // Are there any?
         if (conversions != null && !conversions.isEmpty())
