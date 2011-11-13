@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -231,6 +233,11 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+
+        String vimageUrl =
+            resolveVirtualImageURI(vImage.getEnterprise().getId(), vImage.getRepository()
+                .getDatacenter().getId(), vImage.getId());
+        assertLinkExist(dto, vimageUrl, VirtualImageResource.VIRTUAL_IMAGE);
     }
 
     /**

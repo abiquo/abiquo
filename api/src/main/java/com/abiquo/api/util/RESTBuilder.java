@@ -795,6 +795,21 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, virtualImageId.toString());
+
+        return builder.buildRestLink(VirtualImageResource.class,
+            VirtualImageResource.VIRTUAL_IMAGE, params);
+    }
+
+    @Override
     public List<RESTLink> buildPaggingLinks(final String absolutePath, final PagedList< ? > list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();

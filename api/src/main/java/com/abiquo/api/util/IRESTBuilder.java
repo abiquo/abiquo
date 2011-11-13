@@ -113,6 +113,9 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
         final VirtualImage image, final VirtualImage master);
 
+    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId);
+
     /*
      * Premium methods
      */

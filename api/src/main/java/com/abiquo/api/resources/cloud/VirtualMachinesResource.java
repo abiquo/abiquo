@@ -50,6 +50,7 @@ import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -128,6 +129,9 @@ public class VirtualMachinesResource extends AbstractResource
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
+        final VirtualImage vimage = vm.getVirtualImage();
+        vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+            .getRepository().getDatacenter().getId(), vimage.getId()));
         return vmDto;
     }
 
@@ -147,8 +151,13 @@ public class VirtualMachinesResource extends AbstractResource
     {
         final VirtualMachineDto vmDto =
             VirtualMachineResource.createTransferObject(v, vdcId, vappId, restBuilder);
+
         vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId(),
             v.isChefEnabled()));
+        final VirtualImage vimage = v.getVirtualImage();
+        vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+            .getRepository().getDatacenter().getId(), vimage.getId()));
+
         return vmDto;
     }
 
@@ -211,7 +220,7 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
-    /** Do not include the virtual image param, will be added later.**/
+    /** Do not include the virtual image param, will be added later. **/
     private String virtualImageTemplatePath()
     {
         return buildPath(EnterprisesResource.ENTERPRISES_PATH,

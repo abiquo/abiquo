@@ -22,6 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineStateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
@@ -59,6 +60,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -277,6 +279,12 @@ public class VirtualMachineResourceIT extends TestPopulate
             VirtualMachineNetworkConfigurationResource.NIC);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");
+        assertLinkExist(
+            vmDto,
+            resolveVirtualImageURI(vm.getVirtualImage().getEnterprise().getId(), vm
+                .getVirtualImage().getRepository().getDatacenter().getId(), vm.getVirtualImage()
+                .getId()), VirtualImageResource.VIRTUAL_IMAGE);
+
         assertNotNull(vmDto);
 
         // Check for vm2
@@ -286,6 +294,12 @@ public class VirtualMachineResourceIT extends TestPopulate
         resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId());
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
             "edit");
+        assertLinkExist(
+            vmDto,
+            resolveVirtualImageURI(vm2.getVirtualImage().getEnterprise().getId(), vm2
+                .getVirtualImage().getRepository().getDatacenter().getId(), vm2.getVirtualImage()
+                .getId()), VirtualImageResource.VIRTUAL_IMAGE);
+
         assertNotNull(vmDto);
     }
 
