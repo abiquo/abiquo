@@ -50,14 +50,17 @@ import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
@@ -757,7 +760,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * In community there are no statful image.
+     * In community there are no statful image. If some {@link VirtualImageConversion} attached use
+     * his properties when defining the {@link PrimaryDisk}, else ue the {@link VirtualImage}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -785,10 +789,18 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
             flushErrors();
         }
-        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(virtualMachine.getVirtualImage()
-            .getDiskFormatType().name()), virtualMachine.getVirtualImage().getDiskFileSize(),
-            virtualMachine.getVirtualImage().getRepository().getUrl(), virtualMachine
-                .getVirtualImage().getPath(), datastore, repositoryManager.getUri());
+
+        final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
+
+        final DiskFormatType format =
+            conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
+        final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
+        final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+
+        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
+            virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
+            repositoryManager.getUri());
     }
 
     private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,

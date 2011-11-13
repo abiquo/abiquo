@@ -74,8 +74,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachine
-                .getId());
+            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
 
         ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
 
@@ -105,8 +105,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
-                MediaType.APPLICATION_XML).post(null);
+            vmachineResource.contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML).post(null);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -117,6 +117,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
+    @Deprecated
     public void checkEdit(final UserSession userSession, final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
         final int newram) throws HardLimitExceededException, SoftLimitExceededException,
@@ -135,8 +136,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         Resource vmachineResource = resource(vmachineUrl);
 
         ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML).accept(
-                MediaType.APPLICATION_XML).put(newRequirements);
+            vmachineResource.contentType(MediaType.APPLICATION_XML)
+                .accept(MediaType.APPLICATION_XML).put(newRequirements);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 
@@ -147,6 +148,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
+    @Deprecated
     public void allocate(final UserSession userSession, final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId,
         final boolean forceEnterpirseLimits) throws HardLimitExceededException,
@@ -180,6 +182,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
+    @Deprecated
     public void deallocate(final UserSession userSession, final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
