@@ -23,12 +23,12 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
-import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.EnterpriseGenerator;
-import com.softwarementors.bzngine.entities.PersistentEntity;
-import com.softwarementors.bzngine.entities.PersistentVersionedEntityBase;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -36,55 +36,48 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
 {
     private VirtualImageGenerator virtualImageGenerator;
 
-    private EnterpriseGenerator enterpriseGenerator;
-
     public VirtualImageConversionGenerator(final SeedGenerator seed)
     {
         super(seed);
         virtualImageGenerator = new VirtualImageGenerator(seed);
-        enterpriseGenerator = new EnterpriseGenerator(seed);
     }
 
     @Override
     public void assertAllPropertiesEqual(final VirtualImageConversion obj1,
         final VirtualImageConversion obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, PersistentEntity.ID_PROPERTY,
-            PersistentVersionedEntityBase.VERSION_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
+            VirtualImageConversion.SOURCE_TYPE_PROPERTY,
+            VirtualImageConversion.TARGET_TYPE_PROPERTY,
+            VirtualImageConversion.SOURCE_PATH_PROPERTY,
+            VirtualImageConversion.TARGET_PATH_PROPERTY, VirtualImageConversion.STATE_PROPERTY,
+            VirtualImageConversion.SIZE_PROPERTY);
     }
 
     @Override
     public VirtualImageConversion createUniqueInstance()
     {
+        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
 
-        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        VirtualImage i = virtualImageGenerator.createInstance(enterprise);
+        VirtualImageConversion virtualImageConversion =
+            new VirtualImageConversion(virtualImage, DiskFormatType.UNKNOWN, newString(nextSeed(),
+                VirtualImageConversion.TARGET_PATH_LENGTH_MIN,
+                VirtualImageConversion.TARGET_PATH_LENGTH_MAX));
 
-        VirtualImageConversion img =
-            new VirtualImageConversion(i, DiskFormatType.VMDK_FLAT, "[DEFAULT]");
-        img.setSize(i.getDiskFileSize());
-        return img;
+        return virtualImageConversion;
     }
 
-    public VirtualImageConversion create(final VirtualImage image,
-        final DiskFormatType targetFormat, final String targetPath)
+    /** FINISHED */
+    public VirtualImageConversion createInstance(final VirtualImage vimage,
+        final DiskFormatType targetFormat)
     {
+        VirtualImageConversion virtualImageConversion =
+            new VirtualImageConversion(vimage, targetFormat, newString(nextSeed(),
+                VirtualImageConversion.TARGET_PATH_LENGTH_MIN,
+                VirtualImageConversion.TARGET_PATH_LENGTH_MAX));
 
-        VirtualImageConversion img = new VirtualImageConversion(image, targetFormat, targetPath);
-        img.setSize(image.getDiskFileSize());
-        return img;
-    }
-
-    public VirtualImageConversion create(final VirtualImage image,
-        final DiskFormatType targetFormat, final String targetPath,
-        final DiskFormatType sourceFormat, final String sourcePath)
-    {
-
-        VirtualImageConversion img = new VirtualImageConversion(image, targetFormat, targetPath);
-        img.setSourceType(sourceFormat);
-        img.setSourcePath(sourcePath);
-        img.setSize(image.getDiskFileSize());
-        return img;
+        virtualImageConversion.setState(ConversionState.FINISHED);
+        return virtualImageConversion;
     }
 
     @Override
@@ -93,13 +86,9 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualImage image = entity.getImage();
-
-        entitiesToPersist.add(image);
-        Enterprise enterprise = entity.getImage().getEnterprise();
-        enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
-        entitiesToPersist.add(enterprise);
-
+        VirtualImage virtualImage = entity.getVirtualImage();
+        virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+        entitiesToPersist.add(virtualImage);
     }
 
 }

@@ -25,10 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -36,6 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.ConflictException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
@@ -44,12 +49,14 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachineStateDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
 
 @Parent(MachinesResource.class)
@@ -71,6 +78,10 @@ public class MachineResource extends AbstractResource
     public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
 
     public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
+
+    public static final String MACHINE_ACTION_CHECK = "action/checkState";
+
+    public static final String MACHINE_CHECK = "checkState";
 
     @Autowired
     MachineService service;
@@ -232,9 +243,9 @@ public class MachineResource extends AbstractResource
         Integer port = dto.getPort();
         String user = dto.getUser();
         String password = dto.getPassword();
-        Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
-        hypervisor.setId(null);
-        // machine.setHypervisor(hypervisor);
+
+        // usused Hypervisor
+        machine.createHypervisor(type, ip, ipService, port, user, password);
 
         // Set the datastores
         for (DatastoreDto datastoreDto : dto.getDatastores().getCollection())
@@ -268,5 +279,16 @@ public class MachineResource extends AbstractResource
         }
 
         return machinesDto;
+    }
+
+    /**
+     * Translates the Node Collector client exception into a {@link WebApplicationException}.
+     * 
+     * @param e The Exception to transform.
+     * @return The transformed Exception.
+     */
+    protected APIException translateException(final Exception e)
+    {
+        return new ConflictException(APIError.NODECOLLECTOR_ERROR);
     }
 }

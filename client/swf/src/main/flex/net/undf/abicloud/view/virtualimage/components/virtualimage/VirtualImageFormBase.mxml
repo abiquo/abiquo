@@ -304,6 +304,8 @@
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
+                    virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    virtualImageEvent.datacenterId = applianceManager.idDataCenter;
                     virtualImageEvent.virtualImage = _virtualImage;
                     virtualImageEvent.viUpdatedValues = updatedValues;
                     dispatchEvent(virtualImageEvent);
@@ -326,7 +328,7 @@
                     ovfPackageInstanceDTO.description = descriptionInput.text;
                     ovfPackageInstanceDTO.idEnterprise = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
                     ovfPackageInstanceDTO.idUser = AbiCloudModel.getInstance().loginManager.user.id;
-                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).alias;
+                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).name;
                     ovfPackageInstanceDTO.categoryName = Category(categoryInput.selectedItem).name;
                     if (iconsList.selectedIndex > -1)
                         ovfPackageInstanceDTO.iconPath = Icon(iconsList.selectedItem).path;

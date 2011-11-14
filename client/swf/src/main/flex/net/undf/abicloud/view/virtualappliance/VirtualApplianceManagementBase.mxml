@@ -1062,6 +1062,7 @@
                         click="onClickHideButton()"/>
 
                     <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
+                    	type="VAPP"
                         width="100%"
                         top="10" bottom="0"
                         virtualDatacenter="{_currentVirtualDataCenter}"

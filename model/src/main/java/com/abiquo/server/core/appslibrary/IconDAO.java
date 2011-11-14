@@ -21,23 +21,38 @@
 
 package com.abiquo.server.core.appslibrary;
 
-public class IconDAO
+import javax.persistence.EntityManager;
+
+import org.hibernate.Query;
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+
+@Repository("jpaIconDAO")
+/* package */class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
+    private static final String VIRTUALIMAGES_BY_ICON =
+        "FROM com.abiquo.server.core.appslibrary.VirtualImage WHERE icon = :icon";
 
+    public IconDAO()
+    {
+        super(Icon.class);
+    }
+
+    public IconDAO(final EntityManager entityManager)
+    {
+        super(Icon.class, entityManager);
+    }
+
+    public Icon findByPath(final String path)
+    {
+        return findUniqueByProperty(Icon.PATH_PROPERTY, path);
+    }
+
+    public boolean iconInUseByVirtualImages(final Icon icon)
+    {
+        Query query = getSession().createQuery(VIRTUALIMAGES_BY_ICON);
+        query.setParameter("icon", icon);
+        return !query.list().isEmpty();
+    }
 }
-
-// @Repository("jpaIconDAO")
-// public class IconDAO extends DefaultDAOBase<Integer, Icon>
-// {
-// public IconDAO()
-// {
-// super(Icon.class);
-// }
-//
-// public IconDAO(EntityManager entityManager)
-// {
-// super(Icon.class, entityManager);
-// }
-//
-//      
-// }

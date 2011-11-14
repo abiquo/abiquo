@@ -31,6 +31,10 @@ import junit.framework.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -50,6 +54,12 @@ public class NodeVirtualImageDAOTest extends
 
     private VirtualMachine vmachine;
 
+    private VirtualImageGenerator virtualImageGenerator;
+
+    private VirtualImage vimage;
+
+    private CategoryGenerator categoryGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -58,11 +68,21 @@ public class NodeVirtualImageDAOTest extends
 
         virtualMachineGenerator = new VirtualMachineGenerator(getSeed());
         virtualApplianceGenerator = new VirtualApplianceGenerator(getSeed());
+        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        categoryGenerator = new CategoryGenerator(getSeed());
 
+        vimage = virtualImageGenerator.createUniqueInstance();
         vapp = virtualApplianceGenerator.createUniqueInstance();
-        vmachine = virtualMachineGenerator.createUniqueInstance();
+        vmachine = virtualMachineGenerator.createInstance(vimage);
 
         saveVirtualAppliance(vapp);
+        // List<Object> entitiesToSetup = new ArrayList<Object>();
+        //
+        // entitiesToSetup.add(vimage.getCategory());
+        // entitiesToSetup.add(vimage);
+        // entitiesToSetup.add(vmachine);
+        // ds().persistAll(entitiesToSetup.toArray());
+        // saveVirtualImage(vimage);
         saveVirtualMachine(vmachine);
     }
 
@@ -115,6 +135,13 @@ public class NodeVirtualImageDAOTest extends
         NodeVirtualImage nvi2 = nodeVImageGenerator.createInstance(vAppliance, vm2);
         NodeVirtualImage nvi3 = nodeVImageGenerator.createInstance(vAppliance2, vm3);
 
+        vm1.getVirtualImage().getRepository()
+            .setDatacenter(vm1.getHypervisor().getMachine().getRack().getDatacenter());
+        vm2.getVirtualImage().getRepository()
+            .setDatacenter(vm2.getHypervisor().getMachine().getRack().getDatacenter());
+        vm3.getVirtualImage().getRepository()
+            .setDatacenter(vm3.getHypervisor().getMachine().getRack().getDatacenter());
+
         // ds().persistAll(enterprise, enterprise2, vm1.getUser().getRole(), vm1.getUser(),
         // vm1.getHypervisor().getMachine().getDatacenter(),
         // vm1.getHypervisor().getMachine().getRack().getDatacenter(),
@@ -155,7 +182,8 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm1.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm1.getHypervisor().getMachine());
         entitiesToSetup.add(vm1.getHypervisor());
-
+        entitiesToSetup.add(vm1.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm1.getVirtualImage().getCategory());
         entitiesToSetup.add(vm1.getVirtualImage());
         entitiesToSetup.add(vm1);
         entitiesToSetup.add(nvi);
@@ -171,6 +199,8 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm2.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm2.getHypervisor().getMachine());
         entitiesToSetup.add(vm2.getHypervisor());
+        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
         entitiesToSetup.add(vm2.getVirtualImage());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(nvi2);
@@ -186,6 +216,8 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm3.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm3.getHypervisor().getMachine());
         entitiesToSetup.add(vm3.getHypervisor());
+        entitiesToSetup.add(vm3.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm3.getVirtualImage().getCategory());
         entitiesToSetup.add(vm3.getVirtualImage());
         entitiesToSetup.add(vm3);
         entitiesToSetup.add(nvi3);
@@ -227,7 +259,7 @@ public class NodeVirtualImageDAOTest extends
     @Test
     public void testFindByVirtualMachine()
     {
-        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine);
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine, vimage);
         ds().persistAll(nodeVirtualImage);
 
         NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
@@ -235,7 +267,7 @@ public class NodeVirtualImageDAOTest extends
         NodeVirtualImage result = nodeVirtualImageDAO.findByVirtualMachine(vmachine);
 
         assertNotNull(result);
-        assertAllEntityPropertiesEqual(result, nodeVirtualImage);
+        assertEquals(result.getId(), nodeVirtualImage.getId());
     }
 
     @Test
@@ -282,5 +314,12 @@ public class NodeVirtualImageDAOTest extends
         List<Object> entitiesToPersist = new ArrayList<Object>();
         virtualMachineGenerator.addAuxiliaryEntitiesToPersist(virtualMachine, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, virtualMachine);
+    }
+
+    private void saveCategory(final Category category)
+    {
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, category);
     }
 }

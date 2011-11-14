@@ -31,6 +31,9 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -48,25 +51,50 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
 
     private static Criterion sameImage(final VirtualImage image)
     {
-        return Restrictions.eq("image", image);
+        return Restrictions.eq(VirtualImageConversion.VIRTUAL_IMAGE_PROPERTY, image);
     }
 
-    private static Criterion sameTargetFormat(final DiskFormatType format)
+    private static Criterion targetFormatIn(final DiskFormatType... formats)
     {
-        return Restrictions.eq("targetType", format);
+        return Restrictions.in(VirtualImageConversion.TARGET_TYPE_PROPERTY, formats);
     }
 
     private static Criterion sourceFormatNull()
     {
-        return Restrictions.isNull("sourceType");
+        return Restrictions.isNull(VirtualImageConversion.SOURCE_TYPE_PROPERTY);
     }
 
+    /**
+     * Get all the provided hypervisor compatible {@link VirtualImageConversion} for a given {@link HypervisorType}
+     * <p>
+     * Before calling this method assure the virtualImage format IS NOT the hypervisorType base
+     * format or compatible (conversion not needed). @see
+     * {@link VirtualMachineServicePremium#shouldFindConversion}
+     * 
+     * @return the list of all compatible {@link VirtualImageConversion} in <b>ANY state</b>.
+     *         {@link VirtualMachineServicePremium#selectConversion} will check the state and pick
+     *         the most suitable format.
+     */
+    @SuppressWarnings("unchecked")
+    public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
+        final HypervisorType hypervisorType)
+    {
+        final Criterion compat =
+            Restrictions.and(sameImage(virtualImage),
+                targetFormatIn(hypervisorType.compatibilityTable));
+
+        return createCriteria(compat).list();
+    }
+
+    @Deprecated
+    // use selectConversion TODO delthis
+    @SuppressWarnings("unchecked")
     public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
         final DiskFormatType format)
     {
         // There can be no images
         List<VirtualImageConversion> conversions =
-            createCriteria(sameImage(image)).add(sameTargetFormat(format)).add(sourceFormatNull())
+            createCriteria(sameImage(image)).add(targetFormatIn(format)).add(sourceFormatNull())
                 .list();
         // Are there any?
         if (conversions != null && !conversions.isEmpty())

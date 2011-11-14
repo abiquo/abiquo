@@ -74,7 +74,9 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-9", "Missing link to the enterprise"),
+        "ENTERPRISE-9", "Missing link to the enterprise"), ENTERPRISE_NOT_ALLOWED_DATACENTER(
+        "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
+        "ENTERPRISE-11", "Invalid Enterprise identifier in the Enterprise link"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -139,7 +141,7 @@ public enum APIError
         "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
         "VLAN-27",
         "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
-            + "configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+            + "its VLAN configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
         "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
@@ -171,6 +173,15 @@ public enum APIError
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"),
 
+    // VIRTUAL CONVERSION
+    NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
+        "The requested stateful conversion does not exist"), INVALID_VASC_STATE("VASC-1",
+        "Invalid expected state"),
+
+    // NODE VIRTUAL IMAGE STATEFUL CONVERSION
+    NON_EXISTENT_NODE_VIRTUALIMAGE_STATEFULCONVERSION("NVISC-0",
+        "The requested node virtual image stateful conversion does not exist"),
+
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
@@ -196,7 +207,7 @@ public enum APIError
         "The IQN of the target Physical Machine is not set"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
-        "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
+        "Invalid hypervisor IP. There is already a hypervisor with this IP address"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
         "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"), HYPERVISOR_TYPE_MISSING(
         "HYPERVISOR-3", "The Hypervisor technology of the target Hypervisor is not set."),
@@ -227,7 +238,12 @@ public enum APIError
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"),
+        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER(
+        "VM-16", "The provided virtual images isn't available in the virtual appliance datacenter"), VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED(
+        "VM-17", "The provided virtual image can not be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
+        "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
+        "VM-19",
+        "The virtual image have some compatible conversion but aren't ready (in progress or failed)"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -283,7 +299,30 @@ public enum APIError
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_OVF_PACKAGE_LIST(
-        "OVF-PACKAGE-1", "The requested OVF package list does not exist"),
+        "OVF-PACKAGE-1", "The requested OVF package list does not exist"), OVF_PACKAGE_CANNOT_TRANSFORM(
+        "OVF-PACKAGE-2", "Cannot return the OVFPackage"), INVALID_OVF_INDEX_XML("OVF-PACKAGE-3",
+        "Can not find the RepositorySpace"), NON_EXISTENT_REPOSITORY_SPACE("OVF-PACKAGE-4",
+        "The requested RepositorySpace does not exist"),
+    // VIRTUAL IMAGE
+    VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
+        "Virtual image can not be added due invalid allocation units"), VIMAGE_SYNCH_DC_REPO(
+        "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Can't obtain downloaded OVF in the datacenter."), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
+        "DATACENTER-REPOSITORY-NOT-CREATED",
+        "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VIMAGE_REPOSITORY_CHANGED(
+        "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
+        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
+        "VIMAGE-0", "The requested virtual image does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
+        "Provided virtual image is not a bundle"), INVALID_VIMAGE_LINK("VIMAGE-2",
+        "Invalid Virtual Image identifier in the Virtual Image link"), INVALID_DATACENTER_RESPOSITORY_LINK(
+        "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED(
+        "VIMAGE-4", "Change in Enterprise of the Virtual Image is not allowed"), VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
+        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Image is not allowed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED(
+        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED(
+        "VIMAGE-7",
+        "The requested virtual image is a master image, master images cannot be deleted"), VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED(
+        "VIMAGE-8", "Cannot delete a stateful image"), VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE(
+        "VIMAGE-9",
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -387,7 +426,8 @@ public enum APIError
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-19",
-        "Could not get the Storage Manager remote service"),
+        "Could not get the Storage Manager remote service"), NON_EXISTENT_VOLUME_MAPPING("VOL-20",
+        "The requested initiator mapping does not exist"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -422,6 +462,19 @@ public enum APIError
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check out documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
         "LNK-1", "Number of links invalid: This resource only accepts a single link"),
+    
+    // CATEGORY
+    NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
+        "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
+        "This category is not erasable"), INVALID_CATEGORY_LINK("CATEGORY-4",
+        "Invalid Category identifier in the Category link"),
+
+    // ICONS
+    ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISTENT_ICON("ICON-2",
+        "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
+        "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
+        "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
+        "ICON-5", "Invalid Icon identifier in the Icon link")
 
     ;
 

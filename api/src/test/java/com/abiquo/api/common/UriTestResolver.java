@@ -52,10 +52,18 @@ import com.abiquo.api.resources.appslibrary.EnterpriseRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.EnterpriseRepositoryResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageInstanceResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageInstancesResource;
+import com.abiquo.api.resources.appslibrary.CategoriesResource;
+import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.IconResource;
+import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -322,6 +330,24 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
+    public static String resolveDatacenterURIActionDiscoverHypervidor(final Integer datacenterId,
+        final String ip)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE + "?ip=" + ip;
+    }
+
+    public static String resolveDatacenterURIActionDiscover(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/" + DatacenterResource.ACTION_DISCOVER_SINGLE;
+    }
+
+    public static String resolveDatacenterURIActionDiscoverMultiple(final Integer datacenterId)
+    {
+        return resolveDatacenterURI(datacenterId) + "/"
+            + DatacenterResource.ACTION_DISCOVER_MULTIPLE;
+    }
+
     /**
      * Creates something like
      * http://example.com/admin/datacenters/{$datacenterId}/racks/{$rackId}/machines
@@ -408,47 +434,47 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveOVFPackageInstancesURI(final Integer datacenterId,
-        final String remoteServiceType, final Integer enterpriseId)
-    {
-
-        String template =
-            buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
-                RemoteServicesResource.REMOTE_SERVICES_PATH,
-                RemoteServiceResource.REMOTE_SERVICE_PARAM,
-                EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
-                EnterpriseRepositoryResource.ENTERPRISE_PARAM,
-                OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH);
-
-        Map<String, String> values = new HashMap<String, String>();
-        values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
-        values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
-        values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
-
-        return resolveURI(template, values);
-    }
-
-    public static String resolveOVFPackageInstanceURI(final Integer datacenterId,
-        final String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
-    {
-
-        String template =
-            buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
-                RemoteServicesResource.REMOTE_SERVICES_PATH,
-                RemoteServiceResource.REMOTE_SERVICE_PARAM,
-                EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
-                EnterpriseRepositoryResource.ENTERPRISE_PARAM,
-                OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH,
-                OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE_PARAM);
-
-        Map<String, String> values = new HashMap<String, String>();
-        values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
-        values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
-        values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE, ovfUrl);
-
-        return resolveURI(template, values);
-    }
+    // public static String resolveOVFPackageInstancesURI(final Integer datacenterId,
+    // final String remoteServiceType, final Integer enterpriseId)
+    // {
+    //
+    // String template =
+    // buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
+    // RemoteServicesResource.REMOTE_SERVICES_PATH,
+    // RemoteServiceResource.REMOTE_SERVICE_PARAM,
+    // EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
+    // EnterpriseRepositoryResource.ENTERPRISE_PARAM,
+    // OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH);
+    //
+    // Map<String, String> values = new HashMap<String, String>();
+    // values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
+    // values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
+    // values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
+    //
+    // return resolveURI(template, values);
+    // }
+    //
+    // public static String resolveOVFPackageInstanceURI(final Integer datacenterId,
+    // final String remoteServiceType, final Integer enterpriseId, final String ovfUrl)
+    // {
+    //
+    // String template =
+    // buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
+    // RemoteServicesResource.REMOTE_SERVICES_PATH,
+    // RemoteServiceResource.REMOTE_SERVICE_PARAM,
+    // EnterpriseRepositoriesResource.ENTERPRISE_REP_PATH,
+    // EnterpriseRepositoryResource.ENTERPRISE_PARAM,
+    // OVFPackageInstancesResource.OVF_PACKAGE_INSTANCES_PATH,
+    // OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE_PARAM);
+    //
+    // Map<String, String> values = new HashMap<String, String>();
+    // values.put(DatacenterResource.DATACENTER, String.valueOf(datacenterId));
+    // values.put(RemoteServiceResource.REMOTE_SERVICE, remoteServiceType);
+    // values.put(EnterpriseRepositoryResource.ENTERPRISE, String.valueOf(enterpriseId));
+    // values.put(OVFPackageInstanceResource.OVF_PACKAGE_INSTANCE, ovfUrl);
+    //
+    // return resolveURI(template, values);
+    // }
 
     public static String resolveOVFPackageURI(final Integer enterpriseId, final Integer ovfPackageId)
     {
@@ -785,6 +811,110 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
+    /**
+     * Creates something like
+     * http://example.com/admin/enterprises/{enterpriseId}/datacenterrepositories/{datacenterId}/
+     */
+    public static String resolveDatacenterRepositoryURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        return resolveURI(template, values);
+    }
+
+    public static String resolveVirtualImagesURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        return resolveURI(template, values);
+    }
+
+    public static String resolveStatefulVirtualImagesURI(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {"true"});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveStatefulVirtualImagesURIWithCategory(final Integer enterpriseId,
+        final Integer datacenterId, final Integer categoryId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
+            new String[] {String.valueOf(categoryId)});
+        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+            new String[] {"true"});
+
+        return resolveURI(template, values, queryParams);
+    }
+
+    public static String resolveVirtualImageURI(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualImageId)
+    {
+        String template =
+            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
+                VirtualImagesResource.VIRTUAL_IMAGES_PATH, VirtualImageResource.VIRTUAL_IMAGE_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        values
+            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+        values.put(VirtualImageResource.VIRTUAL_IMAGE, String.valueOf(virtualImageId));
+
+        return resolveURI(template, values);
+    }
+
     public static String resolveSystemPropertiesURI()
     {
         String uri =
@@ -827,6 +957,38 @@ public class UriTestResolver
     public static String resolveLoginURI()
     {
         return resolveURI(LoginResource.LOGIN_PATH, new HashMap<String, String>());
+    }
+
+    /**
+     * Creates something like http://example.com/config/categories/${categoryId}
+     * 
+     * @param categoryId identifier of the category
+     * @return the an URI-like string to call the 'ips' action.
+     */
+    public static String resolveCategoryURI(final Integer categoryId)
+    {
+        String template =
+            buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
+
+        return resolveURI(template,
+            Collections.singletonMap(CategoryResource.CATEGORY, categoryId.toString()));
+    }
+
+    public static String resolveCategoriesURI()
+    {
+        String uri = resolveURI(CategoriesResource.CATEGORIES_PATH, new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveIconURI(final Integer iconId)
+    {
+        String template = buildPath(IconsResource.ICONS_PATH, IconResource.ICON_PARAM);
+        return resolveURI(template, Collections.singletonMap(IconResource.ICON, iconId.toString()));
+    }
+
+    public static String resolveIconsURI()
+    {
+        return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
     }
 
 }

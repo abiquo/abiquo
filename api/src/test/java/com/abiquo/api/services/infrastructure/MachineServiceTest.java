@@ -37,11 +37,11 @@ import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -50,6 +50,7 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
 
@@ -67,25 +68,27 @@ public class MachineServiceTest extends AbstractUnitTest
     @BeforeMethod
     public void setupSysadmin()
     {
+    }
+
+    @Test
+    public void testDeleteMachineWithVirtualMachinesDeployed()
+    {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
         Role r = roleGenerator.createInstance();
         User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
         setup(e, r, u);
 
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
-    }
-
-    @Test
-    public void testDeleteMachineWithVirtualMachinesDeployed()
-    {
 
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
 
-        Machine machine = machineGenerator.createMachine(datacenter);
+        Rack rack = rackGenerator.createInstance(datacenter);
+
+        Machine machine = machineGenerator.createMachine(datacenter, rack);
 
         Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
 
-        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter);
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, e);
         RemoteService rm =
             remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 datacenter);
@@ -93,30 +96,34 @@ public class MachineServiceTest extends AbstractUnitTest
         VirtualImage image = virtualImageGenerator.createInstance(vdc.getEnterprise());
         VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc);
         VirtualMachine vm =
-            vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, "vm_test");
+            vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, u, "vm_test");
         vm.setState(VirtualMachineState.ON);
 
         NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, vm);
 
-        // hypervisor.getMachine().setHypervisor(hypervisor);
+        hypervisor.getMachine().setHypervisor(hypervisor);
+        image.getRepository().setDatacenter(datacenter);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        entitiesToPersist.add(vdc.getEnterprise());
+        // entitiesToPersist.add(vdc.getEnterprise());
         entitiesToPersist.add(datacenter);
+        entitiesToPersist.add(rack);
         entitiesToPersist.add(machine);
         entitiesToPersist.add(rm);
         entitiesToPersist.add(hypervisor.getMachine().getRack());
         entitiesToPersist.add(hypervisor.getMachine());
         entitiesToPersist.add(hypervisor);
         entitiesToPersist.add(vdc);
+        entitiesToPersist.add(image.getRepository());
+        entitiesToPersist.add(image.getCategory());
         entitiesToPersist.add(image);
         entitiesToPersist.add(vapp);
-        for (Privilege p : vm.getUser().getRole().getPrivileges())
-        {
-            entitiesToPersist.add(p);
-        }
-        entitiesToPersist.add(vm.getUser().getRole());
-        entitiesToPersist.add(vm.getUser());
+        // for (Privilege p : vm.getUser().getRole().getPrivileges())
+        // {
+        // entitiesToPersist.add(p);
+        // }
+        // entitiesToPersist.add(vm.getUser().getRole());
+        // entitiesToPersist.add(vm.getUser());
         entitiesToPersist.add(vm);
         entitiesToPersist.add(node);
 
@@ -140,9 +147,9 @@ public class MachineServiceTest extends AbstractUnitTest
         {
             Machine m = service.getMachine(machineId);
         }
-        catch (NotFoundException e)
+        catch (NotFoundException ex)
         {
-            org.testng.Assert.assertEquals(e.getErrors().iterator().next().getMessage(),
+            org.testng.Assert.assertEquals(ex.getErrors().iterator().next().getMessage(),
                 "The requested machine does not exist");
         }
 

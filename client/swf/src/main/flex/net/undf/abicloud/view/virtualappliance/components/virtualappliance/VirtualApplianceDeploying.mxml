@@ -29,10 +29,11 @@
     paddingTop="15"
     styleName="VirtualApplianceDeployingSkin"
     show="checkVirtualApplianceState()"
-    xmlns:mx="http://www.adobe.com/2006/mxml">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*">
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
             import mx.controls.Alert;
@@ -125,7 +126,12 @@
             }        
         ]]>
     </mx:Script>
-
+    <mx:HBox width="100%" 
+    	horizontalAlign="right"
+    	includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_deployInfo.value != ''}"
+    	visible="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_deployInfo.value != ''}">
+    	<info:InfoIcon wikiUrl="{AbiCloudModel.getInstance().configurationManager.config.client_wiki_vm_deployInfo.value}"/>
+    </mx:HBox>
     <mx:HBox 
         width="100%" height="100%"
         verticalAlign="top">

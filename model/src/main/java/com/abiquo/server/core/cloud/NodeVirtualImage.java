@@ -30,6 +30,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity

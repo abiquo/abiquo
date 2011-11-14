@@ -21,47 +21,41 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import javax.persistence.EntityManager;
 
-public class AppsLibraryDAO
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.enterprise.Enterprise;
+
+@Repository("jpaAppsLibraryDAO")
+public class AppsLibraryDAO extends DefaultDAOBase<Integer, AppsLibrary>
 {
+    public AppsLibraryDAO()
+    {
+        super(AppsLibrary.class);
+    }
+
+    public AppsLibraryDAO(final EntityManager entityManager)
+    {
+        super(AppsLibrary.class, entityManager);
+    }
+
+    public AppsLibrary findByEnterprise(final Enterprise enterprise)
+    {
+        Criteria criteria = createCriteria(sameEnterprise(enterprise));
+        criteria.addOrder(Order.asc(AppsLibrary.ENTERPRISE_PROPERTY));
+
+        return (AppsLibrary) criteria.uniqueResult();
+    }
+
+    private static Criterion sameEnterprise(final Enterprise enterprise)
+    {
+        return Restrictions.eq(AppsLibrary.ENTERPRISE_PROPERTY, enterprise);
+    }
 
 }
-
-// @Repository("jpaAppsLibraryDAO")
-// public class AppsLibraryDAO extends DefaultDAOBase<Integer, AppsLibrary>
-// {
-// public AppsLibraryDAO()
-// {
-// super(AppsLibrary.class);
-// }
-//
-// public AppsLibraryDAO(EntityManager entityManager)
-// {
-// super(AppsLibrary.class, entityManager);
-// }
-//
-// private static Criterion sameEnterprise(Enterprise enterprise)
-// {
-// return Restrictions.eq(AppsLibrary.ENTERPRISE_PROPERTY, enterprise);
-// }
-//
-// public AppsLibrary findByEnterpriseOrCreate(Enterprise enterprise)
-// {
-// AppsLibrary appslib;
-//
-// Criteria criteria = createCriteria(sameEnterprise(enterprise));
-//
-// try
-// {
-// appslib = getSingleResult(criteria);
-// }
-// catch (Exception e)
-// {
-// appslib = new AppsLibrary(enterprise);
-//
-// persist(appslib);
-// }
-//
-// return appslib;
-// }
-// }

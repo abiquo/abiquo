@@ -47,7 +47,7 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
 {
     protected abstract VSMEventProcessor getEventingProcessor(EntityManager em);
 
-    protected void assertStage(VirtualMachineStage stage)
+    protected void assertStage(final VirtualMachineStage stage)
     {
         // List of entities to persist
         List<Object> entitiesToPersist = new ArrayList<Object>();
@@ -87,7 +87,6 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         vm.setEnterprise(enterprise);
         vm.setName(stage.getName());
         vm.setState(stage.getState());
-        vm.getVirtualImage().setIdCategory(null); // TODO remove
         vm.setDatastore(datastore);
 
         vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
@@ -127,7 +126,7 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         }
     }
 
-    protected void assertStageAndDestroyed(VirtualMachineStage stage)
+    protected void assertStageAndDestroyed(final VirtualMachineStage stage)
     {
         // List of entities to persist
         List<Object> entitiesToPersist = new ArrayList<Object>();
@@ -164,7 +163,6 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         vm.setHdInBytes(1000000);
         vm.setCpu(2);
         vm.setRam(1000);
-        vm.getVirtualImage().setIdCategory(null); // TODO remove
 
         Datastore datastore = datastoreGenerator.createInstance(hypervisor.getMachine());
         datastore.setDatastoreUUID(UUID.randomUUID().toString()); // TODO: UUID should be added to
@@ -191,7 +189,6 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
 
         vapp.addToNodeVirtualImages(node);
 
-
         // Persist all entities
         setup(entitiesToPersist.toArray());
 
@@ -211,7 +208,6 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
 
                 foundVM = processor.vmRepo.findByName(stage.getName());
 
-
                 // state is as NOT_ALLOCATED as expected
                 assertEquals(foundVM.getState(), stage.getExpected());
 
@@ -227,8 +223,8 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
         }
     }
 
-    protected VirtualSystemEvent buildEvent(String event, String virtualMachine,
-        String machineAddress, String machineType)
+    protected VirtualSystemEvent buildEvent(final String event, final String virtualMachine,
+        final String machineAddress, final String machineType)
     {
         VirtualSystemEvent notification = new VirtualSystemEvent();
 

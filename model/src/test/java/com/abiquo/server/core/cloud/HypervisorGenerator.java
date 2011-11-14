@@ -36,14 +36,14 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
 {
     private MachineGenerator machineGenerator;
 
-    public HypervisorGenerator(SeedGenerator seed)
+    public HypervisorGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.machineGenerator = new MachineGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Hypervisor obj1, Hypervisor obj2)
+    public void assertAllPropertiesEqual(final Hypervisor obj1, final Hypervisor obj2)
     {
         assertEquals(obj1.getId(), obj2.getId());
         assertEquals(obj1.getType(), obj2.getType());
@@ -62,20 +62,20 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
         return createInstance(machine);
     }
 
-    public Hypervisor createInstance(Machine machine)
+    public Hypervisor createInstance(final Machine machine)
     {
         HypervisorType type = newEnum(HypervisorType.class, nextSeed());
         return createInstance(machine, type);
     }
-    
-    public Hypervisor createReservedHypervisor(Enterprise enterprise)
+
+    public Hypervisor createReservedHypervisor(final Enterprise enterprise)
     {
         Machine machine = machineGenerator.createReservedMachine(enterprise);
-        
+
         return createInstance(machine);
     }
 
-    public Hypervisor createInstance(Machine machine, HypervisorType type)
+    public Hypervisor createInstance(final Machine machine, final HypervisorType type)
     {
         String ip = newString(nextSeed(), 0, 39);
         String ipService = newString(nextSeed(), 0, 39);
@@ -84,11 +84,13 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
         String user = newString(nextSeed(), 0, 255);
         String password = newString(nextSeed(), 0, 255);
 
-        return machine.createHypervisor(type, ip, ipService, port, user, password);
+        return new Hypervisor(machine, type, ip, ipService, port, user, password);
+        // return machine.createHypervisor(type, ip, ipService, port, user, password);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Hypervisor entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Hypervisor entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
         Machine machine = entity.getMachine();

@@ -123,7 +123,8 @@ CREATE TABLE  `kinton`.`category` (
   `isErasable` int(1) unsigned NOT NULL default '1',
   `isDefault` int(1) unsigned NOT NULL default '0',
   `version_c` int(11) default 0,
-  PRIMARY KEY  (`idCategory`)
+  PRIMARY KEY  (`idCategory`),
+  UNIQUE KEY (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
 --
@@ -1052,11 +1053,9 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `hd_required` bigint(20) default NULL,
   `ram_required` int(7) unsigned default NULL,
   `cpu_required` int(11) default NULL,
-  `idCategory` int(3) unsigned,
-  `treaty` int(1) NOT NULL COMMENT '0-No 1-Yes',
+  `idCategory` int(3) unsigned NOT NULL,
   `idRepository` int(3) unsigned default NULL,
   `idIcon` int(4) unsigned default NULL,
-  `deleted` int(1) unsigned NOT NULL COMMENT '0-No 1-Yes',
   `type` varchar(50) NOT NULL,
   `idMaster` int(4) unsigned default NULL,
   `idEnterprise` int(10) unsigned default null,
@@ -1066,12 +1065,14 @@ CREATE TABLE  `kinton`.`virtualimage` (
   `diskFileSize` BIGINT(20) UNSIGNED NOT NULL,
   `chefEnabled` boolean NOT NULL default false,
   `cost_code` varchar(50) default NULL,
+  `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `creation_user` varchar(128) NOT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`idImage`),
   KEY `fk_virtualimage_category` (`idCategory`),
   KEY `virtualImage_FK3` (`idRepository`),
   KEY `virtualImage_FK4` (`idIcon`),
-  CONSTRAINT `fk_virtualimage_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL,
+  CONSTRAINT `fk_virtualimage_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`),
   CONSTRAINT `virtualImage_FK3` FOREIGN KEY (`idRepository`) REFERENCES `repository` (`idRepository`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK4` FOREIGN KEY (`idIcon`) REFERENCES `icon` (`idIcon`) ON DELETE SET NULL,
   CONSTRAINT `virtualImage_FK8` FOREIGN KEY (`idMaster`) REFERENCES `virtualimage` (`idImage`) ON DELETE SET NULL,
@@ -1416,6 +1417,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.vm.createInstance","http://community.abiquo.com/display/ABI18/Create+Virtual+Machine+instances","Virtual Machine instance creation wiki"),
  ("client.wiki.vm.createStateful","http://community.abiquo.com/display/ABI18/Create+Persistent+Virtual+Machines","Virtual Machine stateful creation wiki"),
  ("client.wiki.vm.captureVirtualMachine","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-ImportaRetrievedVirtualMachine","Capture Virtual Machine wiki"),
+ ("client.wiki.vm.deployInfo","","Show more info when deploying"),
  ("client.wiki.apps.uploadVM","http://community.abiquo.com/display/ABI18/Adding+Virtual+Images+to+the+Appliance+Library#AddingVirtualImagestotheApplianceLibrary-UploadingfromtheLocalFilesystem","Virtual Image upload wiki"),
  ("client.wiki.user.createEnterprise","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-CreatingorEditinganEnterprise","Enterprise creation wiki"),
  ("client.wiki.user.dataCenterLimits","http://community.abiquo.com/display/ABI18/Manage+Enterprises#ManageEnterprises-RestrictingDatacenterAccess","Datacenter Limits wiki"),
@@ -1459,7 +1461,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package_list` (
   CONSTRAINT `fk_ovf_package_list_repository`
     FOREIGN KEY (`id_apps_library`)
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
   )
 ENGINE = InnoDB DEFAULT CHARSET=utf8;
@@ -1487,7 +1489,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   CONSTRAINT `fk_ovf_package_repository`
     FOREIGN KEY (`id_apps_library`)
     REFERENCES `kinton`.`apps_library` (`id_apps_library`)
-    ON DELETE NO ACTION,
+    ON DELETE CASCADE,
     -- ON UPDATE NO ACTION
   CONSTRAINT `fk_ovf_package_category` FOREIGN KEY (`idCategory`) REFERENCES `category` (`idCategory`) ON DELETE SET NULL,
     CONSTRAINT `fk_ovf_package_icon`    FOREIGN KEY (`idIcon`)   REFERENCES `icon` (`idIcon`) ON DELETE SET NULL
@@ -1506,7 +1508,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package_list_has_ovf_package` (
   CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package_list1`
     FOREIGN KEY (`id_ovf_package_list` )
     REFERENCES `kinton`.`ovf_package_list` (`id_ovf_package_list` )
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package1`
     FOREIGN KEY (`id_ovf_package` )
@@ -2408,45 +2410,6 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
 END IF;
 END;
-|
-CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
-FOR EACH ROW BEGIN
-DECLARE idDatacenter INT UNSIGNED;
-DECLARE machineState INT UNSIGNED;
-SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON da.idPhysicalMachine = da.idPhysicalMachine
-WHERE da.idDatastore = NEW.idDatastore;
-IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    IF OLD.enabled = 1 THEN
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        ELSEIF NEW.enabled = 0 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    ELSE
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    END IF;
-END IF;
-END
 --
 --
 -- ******************************************************************************************
@@ -3560,6 +3523,45 @@ CREATE TRIGGER `kinton`.`dclimit_deleted` AFTER DELETE ON `kinton`.`enterprise_l
             publicIPsReserved = publicIPsReserved - OLD.publicIPHard,
             vlanReserved = vlanReserved - OLD.vlanHard
         WHERE idDataCenter = OLD.idDataCenter;
+    END;
+|
+CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
+    FOR EACH ROW BEGIN
+	DECLARE idDatacenter INT UNSIGNED;
+	DECLARE machineState INT UNSIGNED;
+	SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
+	WHERE da.idDatastore = NEW.idDatastore;
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+	    IF OLD.enabled = 1 THEN
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		ELSEIF NEW.enabled = 0 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    ELSE
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    END IF;
+	END IF;
     END;
 |
 -- ******************************************************************************************

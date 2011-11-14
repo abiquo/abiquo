@@ -24,8 +24,9 @@ package com.abiquo.api.services.appslibrary;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
+
+import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -33,115 +34,138 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.api.persistence.impl.AppsLibraryDAO;
-import com.abiquo.api.persistence.impl.CategoryDAO;
-import com.abiquo.api.persistence.impl.IconDAO;
-import com.abiquo.api.persistence.impl.OVFPackageDAO;
-import com.abiquo.api.persistence.impl.OVFPackageListDAO;
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
-import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.enterprise.Enterprise;
 
 @Service
-@Transactional
-public class OVFPackageService
+public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClient
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
 
     @Autowired
-    OVFPackageDAO dao;
+    private OVFPackageRep repo;
 
     @Autowired
-    OVFPackageListDAO listDao;
+    private AppsLibraryRep appslibraryRep;
 
-    @Autowired
-    AppsLibraryDAO appsLibraryDao;
+    public OVFPackageService()
+    {
 
-    @Autowired
-    CategoryDAO categoryDao;
+    }
 
-    @Autowired
-    IconDAO iconDao;
+    public OVFPackageService(final EntityManager em)
+    {
+        repo = new OVFPackageRep(em);
+        entService = new EnterpriseService(em);
+        appslibraryRep = new AppsLibraryRep(em);
+    }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
     {
-        return dao.findByEnterprise(idEnterprise);
+        return repo.getOVFPackagesByEnterprise(idEnterprise);
     }
 
-    public OVFPackage addOVFPackage(OVFPackage ovfPackage, final Integer idEnterprise)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public OVFPackage getOVFPackage(final Integer id)
     {
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(idEnterprise);
-        ovfPackage.setAppsLibrary(appsLib);
-
-        try
+        OVFPackage ovfpackage = repo.getOVFPackage(id);
+        if (ovfpackage == null)
         {
-            dao.makePersistent(ovfPackage);
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE);
+            flushErrors();
         }
-        catch (Throwable ex)
-        {
-            LOGGER.error("Could not add package: " + ovfPackage.getUrl(), ex);
-        }
-
-        return ovfPackage;
+        return ovfpackage;
     }
 
-    public OVFPackage getOVFPackage(Integer id)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackage addOVFPackage(final OVFPackage ovfPackage, final Integer idEnterprise)
     {
-        return dao.findById(id);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
+        return repo.addOVFPackage(ovfPackage, ent);
     }
 
-    public OVFPackage modifyOVFPackage(Integer ovfPackageId, OVFPackage ovfPackage,
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackage modifyOVFPackage(final Integer ovfPackageId, final OVFPackage ovfPackage,
         final Integer idEnterprise)
     {
-        OVFPackage old = dao.findById(ovfPackageId);
-
-        // TODO - Apply changes and compare etags
-        old.setName(ovfPackage.getName());
-        old.setDescription(ovfPackage.getDescription());
-
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(idEnterprise);
-        ovfPackage.setAppsLibrary(appsLib);
-
-        old.setCategory(ovfPackage.getCategory());
-        old.setType(ovfPackage.getType());
-        old.setIcon(ovfPackage.getIcon());
-        old.setProductName(ovfPackage.getProductName());
-        old.setProductUrl(ovfPackage.getProductUrl());
-        old.setProductVendor(ovfPackage.getProductVendor());
-        old.setProductVersion(ovfPackage.getProductVersion());
-        old.setUrl(ovfPackage.getUrl());
-        old.setOvfPackageLists(ovfPackage.getOvfPackageLists());
-
-        return dao.makePersistent(old);
+        Enterprise enterprise = entService.getEnterprise(idEnterprise);
+        return repo.modifyOVFPackage(ovfPackageId, ovfPackage, enterprise);
     }
 
-    public void removeOVFPackage(Integer id)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void removeOVFPackage(final Integer id)
     {
-        OVFPackage ovfPackage = dao.findById(id);
-
-        // manually remove lists associated
-        // As OVFPackage<->OVFPackageLists is a Many-to-many relation, the delete operation
-        // must be done manually for the dependant (not owner) side in the relation: OVFPackage in
-        // this case
-        List<OVFPackageList> lists = ovfPackage.getOvfPackageLists();
-        for (Iterator iterator = lists.iterator(); iterator.hasNext();)
+        OVFPackage ovfpackage = repo.getOVFPackage(id);
+        if (ovfpackage == null)
         {
-            OVFPackageList ovfPackageList = (OVFPackageList) iterator.next();
-            ovfPackageList.getOvfPackages().remove(ovfPackage);
-            listDao.makePersistent(ovfPackageList);
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE);
+            flushErrors();
         }
-
-        dao.makeTransient(ovfPackage);
+        repo.removeOVFPackage(id);
     }
 
-    public OVFPackage ovfPackageFromOvfDescription(OVFDescription descr,
+    /** #################### ApplianceManager communications #################### */
+    /** #################### */
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public OVFPackageInstanceStateDto getOVFPackageState(final Integer id,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        return amClient.getCurrentOVFPackageInstanceStatus(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public void installOVFPackage(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
+    {
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        // checks the repository is writable
+        amClient.getRepository(String.valueOf(enterpriseId), true);
+
+        amClient.createOVFPackageInstance(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public void uninstallOVFPackage(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
+    {
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+
+        final String ovfUrl = getOVFPackage(id).getUrl();
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+
+        amClient.delete(String.valueOf(enterpriseId), ovfUrl);
+    }
+
+    /** #################### ovfindex.xml #################### */
+    /** #################### */
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public OVFPackage ovfPackageFromOvfDescription(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {
         String packageUrl = baseRepositorySpaceURL + descr.getOVFFile(); // TODO check not double //
@@ -171,14 +195,14 @@ public class OVFPackageService
             String iconPath = descr.getIcon().get(0).getFileRef();
             // TODO start with http://
 
-            Icon icon = findByIconPathOrCreateNew(iconPath);
+            Icon icon = appslibraryRep.findByIconPathOrCreateNew(iconPath);
             pack.setIcon(icon);
         }
 
         DiskFormatType format = findByDiskFormatNameOrUnknow(descr.getDiskFormat());
         pack.setType(format);
 
-        Category category = findByCategoryNameOrCreateNew(descr.getOVFCategories());
+        Category category = appslibraryRep.findByCategoryNameOrCreateNew(descr.getOVFCategories());
         pack.setCategory(category);
 
         Long diskSizeL = null;
@@ -192,7 +216,7 @@ public class OVFPackageService
             diskSizeL = getDiskFileSizeMbFromOvfId(packageUrl);
         }
 
-        pack.setDiskSizeMb(diskSizeL);
+        pack.setDiskFileSize(diskSizeL);
 
         return pack;
     }
@@ -217,8 +241,9 @@ public class OVFPackageService
         }
         catch (Exception e)
         {
-            // TODO logger can not obtain ....
-            return null;
+            LOGGER.debug("Cannot retrieve the size of OvfPackage with id " + ovfid
+                + " setting size 0");
+            return 0L;
         }
         finally
         {
@@ -260,55 +285,6 @@ public class OVFPackageService
         }
 
         return format;
-    }
-
-    private Icon findByIconPathOrCreateNew(final String iconPath)
-    {
-        if (iconPath == null)
-        {
-            return null;
-        }
-
-        Icon icon;
-
-        icon = iconDao.findByPath(iconPath);
-
-        if (icon == null)
-        {
-            icon = new Icon();
-            icon.setName("unname"); // TODO
-            icon.setPath(iconPath);
-
-            icon = iconDao.makePersistent(icon);
-        }
-
-        return icon;
-    }
-
-    private Category findByCategoryNameOrCreateNew(final String categoryName)
-    {
-        if (categoryName == null || categoryName.isEmpty())
-        {
-            return categoryDao.findDefault();
-        }
-
-        Category cat;
-
-        try
-        {
-            cat = categoryDao.findByName(categoryName);
-        }
-        catch (Exception e) // XXX if (cat == null)
-        {
-            cat = new Category();
-            cat.setName(categoryName);
-            cat.setIsDefault(0);
-            cat.setIsErasable(1);
-
-            cat = categoryDao.makePersistent(cat);
-        }
-
-        return cat;
     }
 
 }

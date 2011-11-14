@@ -52,22 +52,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.notify.AMNotifierFactory;
 import com.abiquo.am.services.util.OVFPackageInstanceFromOVFEnvelope;
 import com.abiquo.am.services.util.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
-import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
 import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionAlreadyPresentException;
@@ -88,39 +88,50 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     /** The constant logger object. */
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFPackageInstanceDownloader.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFPackageInstanceDownloader.class);
 
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout =
-        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getTimeout();
 
-    public OVFPackageInstanceService()
+    public void delete(final String erId, final String ovfId)
     {
-        super();
-    }
+        OVFStatusEnumType status =
+            EnterpriseRepositoryService.getRepo(erId).getOVFStatus(ovfId).getStatus();
 
-    public void delete(final String erId, final String ovfId) throws RepositoryException,
-        IdNotFoundException
-    {
-        OVFPackageInstanceStatusType status = getOVFStatus(erId, ovfId);
-
+        boolean requireNotifyError = true;
         switch (status)
         {
-            case DOWNLOADING:
-                downloader.cancelDeployOVFPackage(ovfId, erId);
-                break;
+            case NOT_DOWNLOAD:
+                return; // TODO status code
 
-            // TODO case error
+            case DOWNLOADING:
+
+                try
+                {
+                    downloader.cancelDeployOVFPackage(ovfId, erId);
+                    requireNotifyError = false;
+                }
+                catch (Exception e)
+                {
+                    logger.warn("not downloading (just download)", e);
+                }
+
             default:
                 EnterpriseRepositoryService.getRepo(erId).deleteOVF(ovfId);
                 break;
         }
 
+        if (!requireNotifyError)
+        {
+            return;
+        }
+
         try
         {
             AMNotifierFactory.getInstance().setOVFStatus(erId, ovfId,
-                OVFPackageInstanceStatusType.NOT_DOWNLOAD);
+                OVFStatusEnumType.NOT_DOWNLOAD);
             // ?
         }
         catch (Exception e)
@@ -132,8 +143,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
     }
 
-    public void startDownload(final String erId, final String ovfId) throws DownloadException,
-        RepositoryException
+    public void startDownload(final String erId, final String ovfId)
     {
         // first create the folder in order to allow the creation of ERROR marks.
         EnterpriseRepositoryService erep = EnterpriseRepositoryService.getRepo(erId);
@@ -148,8 +158,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         // sets the current state to start downloading
         try
         {
-            AMNotifierFactory.getInstance().setOVFStatus(erId, ovfId,
-                OVFPackageInstanceStatusType.DOWNLOADING);
+            AMNotifierFactory.getInstance()
+                .setOVFStatus(erId, ovfId, OVFStatusEnumType.DOWNLOADING);
         }
         catch (Exception e)
         {
@@ -160,18 +170,17 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile)
-        throws RepositoryException, IOException, IdNotFoundException, EventException
+        throws IOException, EventException
     {
         downloader.uploadOVFPackage(diskinfo, diskFile);
 
         // sets the current state to start downloading
         AMNotifierFactory.getInstance().setOVFStatus(String.valueOf(diskinfo.getIdEnterprise()),
-            diskinfo.getOvfUrl(), OVFPackageInstanceStatusType.DOWNLOAD);
+            diskinfo.getOvfId(), OVFStatusEnumType.DOWNLOAD);
 
     }
 
     public OVFPackageInstanceDto getOVFPackage(final String erId, final String ovfId)
-        throws IdNotFoundException
     {
         EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
 
@@ -179,12 +188,15 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
         if (!isBundleOvfId(ovfId))
         {
-            EnvelopeType envelope = erepo.getEnvelope(ovfId);
 
+            EnvelopeType envelope =
+                OVFPackageInstanceFileSystem
+                    .getEnvelope(erepo.getEnterpriseRepositoryPath(), ovfId);
+
+            String relativePackagePath = OVFPackageConventions.getRelativePackagePath(ovfId);
+            relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
             try
             {
-                String relativePackagePath = erepo.getRelativePackagePath(ovfId);
-                relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
 
                 packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
                 packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
@@ -201,10 +213,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
                     checkEnvelopeIsValid(envelope);
 
                     // TODO restore OVF Envelope on filesystem
-
-                    String relativePackagePath = erepo.getRelativePackagePath(ovfId);
-                    relativePackagePath = erId + '/' + relativePackagePath; // FIXME use
-                    // EnterpriseRepo
 
                     packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
                     packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
@@ -224,7 +232,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
                         logger.error(cause, e);
                     }
 
-                    throw new IdNotFoundException(String.format("Invalid OVF at %s", ovfId));
+                    throw new AMException(AMError.OVF_INVALID, String.format("Invalid OVF at %s",
+                        ovfId));
                 }
 
             }// try to change the envelope in order to make abiquo compatible.
@@ -234,9 +243,11 @@ public class OVFPackageInstanceService extends OVFPackageConventions
             final String masterOvf = getBundleMasterOvfId(ovfId);
             final String snapshot = getBundleSnapshot(ovfId);
 
-            EnvelopeType envelope = erepo.getEnvelope(masterOvf);
+            EnvelopeType envelope =
+                OVFPackageInstanceFileSystem.getEnvelope(erepo.getEnterpriseRepositoryPath(),
+                    masterOvf);
 
-            String relativePackagePath = erepo.getRelativePackagePath(masterOvf);
+            String relativePackagePath = OVFPackageConventions.getRelativePackagePath(masterOvf);
             relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
 
             packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(masterOvf, envelope);
@@ -251,7 +262,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
 
             packDto.setMasterDiskFilePath(masterDiskPath);
             packDto.setDiskFilePath(bundleDiskPath);
-            packDto.setOvfUrl(ovfId);
+            packDto.setOvfId(ovfId);
             // packDto.setDiskFileSize(diskFileSize); TODO change the disk size
         }
 
@@ -271,11 +282,10 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      *             repository.
      */
     public String createOVFBundle(final OVFPackageInstanceDto diskInfo, final String snapshot)
-        throws RepositoryException
     {
 
         final String erId = String.valueOf(diskInfo.getIdEnterprise());
-        final String ovfIdSnapshot = diskInfo.getOvfUrl();
+        final String ovfIdSnapshot = diskInfo.getOvfId();
 
         EnterpriseRepositoryService erepo = EnterpriseRepositoryService.getRepo(erId);
 
@@ -509,8 +519,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
-                .toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
+                e.toString()));
         }
 
         return envelope;
@@ -534,8 +544,8 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         }
         catch (Exception e)
         {
-            throw new DownloadException(String.format("Can not obtain file [%s] size", fileUrl
-                .toExternalForm()), e);
+            throw new DownloadException(String.format("Can not obtain file [%s] size",
+                fileUrl.toExternalForm()), e);
         }
     }
 
@@ -633,38 +643,32 @@ public class OVFPackageInstanceService extends OVFPackageConventions
      * @throws DownloadException if the state is DOWNLOADING (exist the file mark on the Enterprise
      *             Repository) but it isn't in the ''htCurrentTransfers'' structure.
      */
-    public OVFPackageInstanceStatusDto getOVFPackageStatusIncludeProgress(final String ovfId,
+    public OVFPackageInstanceStateDto getOVFPackageStatusIncludeProgress(final String ovfId,
         final String enterpriseId) throws DownloadException
     {
 
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(enterpriseId);
 
-        final OVFPackageInstanceStatusType status = enterpriseRepository.getOVFStatus(ovfId);
-
-        OVFPackageInstanceStatusDto statusDto = new OVFPackageInstanceStatusDto();
-        statusDto.setOvfId(ovfId);
-        statusDto.setOvfPackageStatus(status);
+        final OVFPackageInstanceStateDto state = enterpriseRepository.getOVFStatus(ovfId);
+        final OVFStatusEnumType status = state.getStatus();
 
         logger.debug("Status for [{}] : {}", ovfId, status.name());
 
-        if (status == OVFPackageInstanceStatusType.DOWNLOADING)
+        if (status == OVFStatusEnumType.DOWNLOADING)
         {
-            statusDto.setProgress(downloader.getDownloadProgress(ovfId));
-        }
-        else if (status == OVFPackageInstanceStatusType.ERROR)
-        {
-            statusDto.setErrorCause(status.getErrorCause());
+            final double progress = downloader.getDownloadProgress(ovfId);
+            state.setDownloadingProgress(progress);
         }
 
-        return statusDto;
+        return state;
     }
 
     public OVFPackageInstanceDto createBunlde(final OVFPackageInstanceDto master,
         final String snapshot)
     {
 
-        final String ovfId = master.getOvfUrl();
+        final String ovfId = master.getOvfId();
         final String bundleOvfId =
             ovfId.substring(0, ovfId.lastIndexOf('/') + 1) + snapshot + "-snapshot-"
                 + ovfId.substring(ovfId.lastIndexOf('/') + 1, ovfId.length());
@@ -685,7 +689,7 @@ public class OVFPackageInstanceService extends OVFPackageConventions
         // di.setImageSize(121212); // XXX not use
         // di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
         di.setMasterDiskFilePath(master.getDiskFilePath());
-        di.setOvfUrl(bundleOvfId);
+        di.setOvfId(bundleOvfId);
 
         di.setIdEnterprise(master.getIdEnterprise());
         // di.setIdUser(2);
@@ -721,11 +725,6 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     //
     // return fileLocations;
     // }
-
-    public OVFPackageInstanceStatusType getOVFStatus(final String erId, final String ovfId)
-    {
-        return EnterpriseRepositoryService.getRepo(erId).getOVFStatus(ovfId);
-    }
 
     /**
      * default is byte
@@ -801,19 +800,15 @@ public class OVFPackageInstanceService extends OVFPackageConventions
     }
 
     public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile, String errorMsg)
-        throws RepositoryException, IOException, IdNotFoundException, EventException
+        throws IOException, EventException
     {
 
-        upload(diskinfo, diskFile);
         if (!StringUtils.isBlank(errorMsg))
         {
-            // sets the current state to start downloading
-            AMNotifierFactory.getInstance().setOVFStatus(
-                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(),
-                OVFPackageInstanceStatusType.ERROR);
             AMNotifierFactory.getInstance().setOVFStatusError(
-                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfUrl(), errorMsg);
+                String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(), errorMsg);
         }
 
+        upload(diskinfo, diskFile);
     }
 }

@@ -58,15 +58,22 @@
                 <ref bean="virtualMachineNetworkConfigurationResource" />
                 <ref bean="virtualMachineStorageConfigurationResource" />
                 <!-- AM as REST Resource -->
-                <ref bean="AMResource" />
-                <ref bean="enterpriseRepositoryResource" />
-                <ref bean="OVFPackageInstancesResource" />
-                <ref bean="OVFPackageInstanceResource" />
+
+                <ref bean="datacenterRepositoryResource" />
+                <ref bean="datacenterRepositoriesResource" />
+                <ref bean="virtualImagesResource" />
+                <ref bean="virtualImageResource" />
+                
+                
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->
                 <ref bean="systemPropertiesResource" />
                 <ref bean="systemPropertyResource" />
+                <ref bean="categoriesResource" />
+                <ref bean="categoryResource" />
+                <ref bean="iconsResource" />
+                <ref bean="iconResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
                 <!--  -->
@@ -93,4 +100,5 @@
             </list>
         </property>
     </bean>
+    <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>
