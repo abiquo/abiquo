@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -68,6 +69,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         // Do not remove. This method must be in this class in order to properly handle TestNG
         // groups
         super.tearDown();
+    }
+
+    protected Resource resource(final String uri, final String username, final String password)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .header("Authorization", "Basic " + basicAuth);
     }
 
     protected ClientResponse get(final String uri)

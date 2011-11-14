@@ -43,6 +43,9 @@ import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
@@ -59,13 +62,31 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
     protected Icon icon;
 
+    private static final String SYSADMIN = "sysadmin";
+
     @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
-    public void setUp()
+    public void setUpUser()
     {
         enterprise = enterpriseGenerator.createUniqueInstance();
         datacenter = datacenterGenerator.createUniqueInstance();
         category = categoryGenerator.createUniqueInstance();
         icon = iconGenerator.createUniqueInstance();
+
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(datacenter);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
@@ -87,7 +108,8 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(ovfPackage);
 
         setup(entitiesToSetup.toArray());
-        ClientResponse response = get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+        ClientResponse response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -107,7 +129,6 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(enterprise);
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
@@ -125,10 +146,12 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         ovfPackageDto.setDescription("new_description");
 
         response =
-            put(resolveOVFPackageURI(enterprise.getId(), ovfPackageDto.getId()), ovfPackageDto);
+            put(resolveOVFPackageURI(enterprise.getId(), ovfPackageDto.getId()), ovfPackageDto,
+                SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
-        response = get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+        response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
         OVFPackageDto retrievedPackageDto = response.getEntity(OVFPackageDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
     }
@@ -144,7 +167,6 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(enterprise);
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
@@ -153,11 +175,12 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+            delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 204);
 
-        response = get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+        response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 404);
 
     }

@@ -270,4 +270,9 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         return virtualImageDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
     }
+
+    public boolean isMaster(final VirtualImage vImage)
+    {
+        return virtualImageDAO.isMaster(vImage);
+    }
 }

@@ -96,7 +96,8 @@ public enum EventType implements Serializable
         "VI_ADD", "Virtual Image added to the Appliance Library"), VI_DELETE(502, "VI_DELETE",
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
-        "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
+        "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
+        "Virtual Image updated"),
 
     // Stateful related events
     // Stateful related events

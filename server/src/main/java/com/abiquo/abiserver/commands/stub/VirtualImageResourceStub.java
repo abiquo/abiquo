@@ -43,4 +43,5 @@ public interface VirtualImageResourceStub
     DataResult<List<VirtualImage>> getVirtualImageByCategory(Integer idEnterprise,
         Integer datacenterId, Integer idCategory);
 
+    public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage);
 }

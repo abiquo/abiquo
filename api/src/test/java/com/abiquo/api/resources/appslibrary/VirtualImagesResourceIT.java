@@ -36,9 +36,13 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.enumerator.ConversionState;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -255,6 +259,63 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
         assertEquals(dto.getCollection().size(), 0);
+    }
+
+    @Test
+    public void testGetVirtualImagesCompatibles_compatibleConversionNoCompatible()
+    {
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        VirtualImage vi1 =
+            virtualImageGenerator.createInstance(ent, repository, DiskFormatType.VDI_FLAT,
+                "compatible-vbox");
+        VirtualImage vi2 =
+            virtualImageGenerator.createInstance(ent, repository,
+                DiskFormatType.VMDK_STREAM_OPTIMIZED, "No-compatible-vbox");
+
+        VirtualImageConversion conversion1 =
+            conversionGenerator.createInstance(vi1, DiskFormatType.VMDK_STREAM_OPTIMIZED);
+
+        setup(limits, vi1.getCategory(), vi1, vi2.getCategory(), vi2, conversion1);
+
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response =
+            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeId",
+                String.valueOf(HypervisorType.VBOX.id())).get();
+
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
+    }
+
+    @Test
+    public void testGetVirtualImagesCompatibles_NoCompatibleConversionCompatible()
+    {
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
+        VirtualImage vi1 =
+            virtualImageGenerator.createInstance(ent, repository,
+                DiskFormatType.VMDK_STREAM_OPTIMIZED, "compatible-vbox");
+        VirtualImage vi2 =
+            virtualImageGenerator.createInstance(ent, repository,
+                DiskFormatType.VMDK_STREAM_OPTIMIZED, "No-compatible-vbox");
+
+        VirtualImageConversion conversion1 =
+            conversionGenerator.createInstance(vi1, DiskFormatType.VDI_FLAT);
+        conversion1.setState(ConversionState.FINISHED);
+
+        setup(limits, vi1.getCategory(), vi1, vi2.getCategory(), vi2, conversion1);
+
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response =
+            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeId",
+                String.valueOf(HypervisorType.VBOX.id())).get();
+
+        assertEquals(response.getStatusCode(), 200);
+
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        assertEquals(dto.getCollection().size(), 1);
     }
 
 }

@@ -161,7 +161,6 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
         amClient.delete(String.valueOf(enterpriseId), ovfUrl);
     }
 
-
     /** #################### ovfindex.xml #################### */
     /** #################### */
 

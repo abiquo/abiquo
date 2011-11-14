@@ -32,7 +32,7 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.testng.annotations.Listeners;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
@@ -46,10 +46,15 @@ import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
 {
+
+    private static final String SYSADMIN = "sysadmin";
 
     protected Category category;
 
@@ -65,12 +70,34 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
 
     protected Icon icon;
 
+    @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
+    public void setUpUser()
+    {
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        datacenter = datacenterGenerator.createUniqueInstance();
+
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(datacenter);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+    }
+
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getOVFPackageList()
     {
         category = categoryGenerator.createUniqueInstance();
         icon = iconGenerator.createUniqueInstance();
-        enterprise = enterpriseGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
         ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
@@ -91,7 +118,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         list.setAppsLibrary(appsLibrary);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(appsLibrary.getEnterprise());
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
@@ -104,7 +130,7 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()));
+            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()), SYSADMIN, SYSADMIN);
 
         OVFPackageListsDto lists = response.getEntity(OVFPackageListsDto.class);
         assertNotNull(lists);
@@ -125,7 +151,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
 
         category = categoryGenerator.createUniqueInstance();
         icon = iconGenerator.createUniqueInstance();
-        enterprise = enterpriseGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
         ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
@@ -146,7 +171,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         list.setAppsLibrary(appsLibrary);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(appsLibrary.getEnterprise());
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
@@ -159,7 +183,7 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()));
+            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()), SYSADMIN, SYSADMIN);
 
         OVFPackageListsDto lists = response.getEntity(OVFPackageListsDto.class);
         assertNotNull(lists);
@@ -173,7 +197,8 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
             assertEquals(result.getName(), "ovfPackageList_1");
             result.setName("newName");
             response =
-                put(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()), result);
+                put(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()),
+                    result, SYSADMIN, SYSADMIN);
             result = response.getEntity(OVFPackageListDto.class);
             assertEquals(result.getName(), "newName");
         }
@@ -183,12 +208,12 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void modifyNonExistentOVFPackageListRises404()
     {
-        enterprise = enterpriseGenerator.createUniqueInstance();
         setup(enterprise);
 
         OVFPackageListDto list = new OVFPackageListDto();
         ClientResponse response =
-            put(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), 2), list);
+            put(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), 2), list, SYSADMIN,
+                SYSADMIN);
 
         assertError(response, 404, APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
     }
@@ -198,7 +223,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
     {
         category = categoryGenerator.createUniqueInstance();
         icon = iconGenerator.createUniqueInstance();
-        enterprise = enterpriseGenerator.createUniqueInstance();
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
         ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
@@ -219,7 +243,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         list.setAppsLibrary(appsLibrary);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(appsLibrary.getEnterprise());
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
@@ -232,7 +255,7 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()));
+            get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()), SYSADMIN, SYSADMIN);
 
         OVFPackageListsDto lists = response.getEntity(OVFPackageListsDto.class);
         assertNotNull(lists);
@@ -241,7 +264,8 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         for (OVFPackageListDto o : lists.getCollection())
         {
             response =
-                delete(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()));
+                delete(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()),
+                    SYSADMIN, SYSADMIN);
             assertEquals(response.getStatusCode(), 204);
         }
     }
@@ -252,7 +276,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
         {
             category = categoryGenerator.createUniqueInstance();
             icon = iconGenerator.createUniqueInstance();
-            enterprise = enterpriseGenerator.createUniqueInstance();
             appsLibrary = appsLibraryGenerator.createUniqueInstance();
             appsLibrary.setEnterprise(enterprise);
             ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
@@ -275,7 +298,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
             list.setAppsLibrary(appsLibrary);
             List<Object> entitiesToSetup = new ArrayList<Object>();
 
-            entitiesToSetup.add(appsLibrary.getEnterprise());
             entitiesToSetup.add(appsLibrary);
             entitiesToSetup.add(category);
             entitiesToSetup.add(icon);
@@ -288,18 +310,22 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
             setup(entitiesToSetup.toArray());
 
             ClientResponse response =
-                get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()));
+                get(UriTestResolver.resolveOVFPackageListsURI(enterprise.getId()), SYSADMIN,
+                    SYSADMIN);
 
             OVFPackageListsDto lists = response.getEntity(OVFPackageListsDto.class);
             assertNotNull(lists);
             assertEquals(lists.getCollection().size(), 1);
 
-            response = delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+            response =
+                delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN,
+                    SYSADMIN);
 
             for (OVFPackageListDto o : lists.getCollection())
             {
                 response =
-                    get(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()));
+                    get(UriTestResolver.resolveOVFPackageListURI(enterprise.getId(), o.getId()),
+                        SYSADMIN, SYSADMIN);
                 assertEquals(response.getStatusCode(), 200);
                 OVFPackageListDto result = response.getEntity(OVFPackageListDto.class);
                 assertNotNull(result);

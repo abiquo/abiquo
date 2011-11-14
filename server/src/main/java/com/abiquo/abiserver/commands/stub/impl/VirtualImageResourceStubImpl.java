@@ -31,6 +31,8 @@ import org.apache.wink.client.Resource;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
@@ -103,11 +105,32 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, "deleteNotManagedVirtualMachines");
+            populateErrors(response, result, "getVirtualImageByCategoryAndHypervisorCompatible");
         }
 
         return result;
 
+    }
+
+    public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualimageId)
+    {
+        BasicResult result = new BasicResult();
+
+        String uri = createVirtualImageLink(enterpriseId, datacenterId, virtualimageId);
+
+        ClientResponse response = delete(uri);
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(true);
+        }
+        else
+        {
+            populateErrors(response, result, "deleteVirtualImage");
+        }
+
+        return result;
     }
 
     private List<VirtualImage> transformToFlex(final VirtualImagesDto images)
@@ -132,8 +155,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setHdRequired(vi.getHdRequired());
         img.setRamRequired(vi.getRamRequired());
         img.setCpuRequired(vi.getCpuRequired());
-        img.setShared(vi.isShared() ? 1 : 0);
-        img.setStateful(vi.isShared() ? 1 : 0);
+        img.setShared(vi.isShared());
+        img.setStateful(vi.isShared());
         img.setOvfId(getLink("ovfpackage", vi.getLinks()).getHref());
         img.setDiskFileSize(vi.getDiskFileSize());
         img.setCostCode(vi.getCostCode());
@@ -205,5 +228,81 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
             }
         }
         return null; // TODO check error. i guess could be null
+    }
+
+    @Override
+    public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage)
+    {
+        final DataResult<VirtualImage> result = new DataResult<VirtualImage>();
+
+        String uri =
+            createVirtualImageLink(vimage.getIdEnterprise(), vimage.getRepository().getDatacenter()
+                .getId(), vimage.getId());
+
+        ClientResponse response = put(uri, createDtoObject(vimage));
+
+        if (response.getStatusCode() == 200)
+        {
+            VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+            result.setData(transformToFlex(dto));
+            result.setSuccess(Boolean.TRUE);
+        }
+        else
+        {
+            populateErrors(response, result, "editVirtualImage");
+        }
+
+        return result;
+    }
+
+    private VirtualImageDto createDtoObject(final VirtualImage vimage)
+    {
+
+        VirtualImageDto dto = new VirtualImageDto();
+
+        Integer enterpriseId = vimage.getIdEnterprise();
+        Integer datacenterId = vimage.getRepository().getId();
+
+        dto.setCostCode(vimage.getCostCode());
+        dto.setCpuRequired(vimage.getCpuRequired());
+        dto.setDescription(vimage.getDescription());
+        dto.setDiskFileSize(vimage.getDiskFileSize());
+        dto.setDiskFormatType(vimage.getDiskFormatType().toString());
+        dto.setHdRequired(vimage.getHdRequired());
+        dto.setId(vimage.getId());
+        dto.setName(vimage.getName());
+        dto.setPath(vimage.getPath());
+        dto.setRamRequired(vimage.getRamRequired());
+        dto.setShared(vimage.isShared());
+
+        RESTLink enterpriseLink = new RESTLink("enterprise", createEnterpriseLink(enterpriseId));
+        dto.addLink(enterpriseLink);
+
+        RESTLink datacenterRepoLink =
+            new RESTLink("datacenterrepository", createDatacenterRepositoryLink(enterpriseId,
+                datacenterId));
+        dto.addLink(datacenterRepoLink);
+
+        if (vimage.getMaster() != null)
+        {
+            RESTLink masterLink =
+                new RESTLink("master", createVirtualImageLink(enterpriseId, datacenterId, vimage
+                    .getMaster().getId()));
+            dto.addLink(masterLink);
+        }
+        if (vimage.getCategory() != null)
+        {
+            RESTLink categoryLink =
+                new RESTLink("category", createCategoryLink(vimage.getCategory().getId()));
+            dto.addLink(categoryLink);
+        }
+        if (vimage.getIcon() != null)
+
+        {
+            RESTLink iconLink = new RESTLink("icon", createIconLink(vimage.getIcon().getId()));
+            dto.addLink(iconLink);
+        }
+        return dto;
+
     }
 }

@@ -72,7 +72,7 @@ public class VirtualImageDecorator extends VirtualImage
         }
         decorator.setIdEnterprise(virtualImage.getIdEnterprise());
         decorator.setOvfId(virtualImage.getOvfId());
-        decorator.setStateful(virtualImage.getStateful());
+        decorator.setStateful(virtualImage.isStateful());
         decorator.setDiskFileSize(virtualImage.getDiskFileSize());
 
         return decorator;

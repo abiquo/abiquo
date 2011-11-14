@@ -108,6 +108,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
 
+    protected VirtualImageConversionGenerator conversionGenerator =
+        new VirtualImageConversionGenerator(seed);
+
     protected NodeVirtualImageGenerator nodeVirtualImageGenerator =
         new NodeVirtualImageGenerator(seed);
 

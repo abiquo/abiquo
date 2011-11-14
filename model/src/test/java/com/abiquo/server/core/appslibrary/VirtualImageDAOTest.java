@@ -190,7 +190,6 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         assertFalse(exists);
     }
 
-
     /** Virtual Image hypervisor compatible. */
 
     @Test
@@ -503,5 +502,49 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         List<VirtualImage> images =
             dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter);
         assertEquals(images.size(), 0);
+    }
+
+    @Test
+    public void testCheckAMasterVirtualImageIsMaster()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+        VirtualImage slave = eg().createSlaveImage(vi);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi, slave);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+
+        assertTrue(dao.isMaster(vi));
+    }
+
+    @Test
+    public void testCheckVirtualImageIsMaster()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.isMaster(vi));
+    }
+
+    @Test
+    public void testCheckSlaveVirtualImageIsMaster()
+    {
+        VirtualImage vi = eg().createUniqueInstance();
+        VirtualImage slave = eg().createSlaveImage(vi);
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vi, slave);
+
+        VirtualImageDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.isMaster(slave));
     }
 }
