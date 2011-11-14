@@ -162,7 +162,6 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         return appsLibraryRep.findVirtualImages(enterprise, repository, category, hypervisor);
     }
 
-
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualImage updateVirtualImage(final Integer enterpriseId, final Integer datacenterId,
         final Integer virtualImageId, final VirtualImageDto virtualImage)
@@ -183,6 +182,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setRamRequired(virtualImage.getRamRequired());
         old.setShared(virtualImage.isShared());
         old.setIcon(null);
+        old.setChefEnabled(virtualImage.isChefEnabled());
 
         // retrieve the links
         RESTLink categoryLink = virtualImage.searchLink(CategoryResource.CATEGORY);

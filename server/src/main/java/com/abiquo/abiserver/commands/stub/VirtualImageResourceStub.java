@@ -23,6 +23,7 @@ package com.abiquo.abiserver.commands.stub;
 
 import java.util.List;
 
+import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 
@@ -43,5 +44,9 @@ public interface VirtualImageResourceStub
     DataResult<List<VirtualImage>> getVirtualImageByCategory(Integer idEnterprise,
         Integer datacenterId, Integer idCategory);
 
-    public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage);
+    public DataResult<VirtualImage> editVirtualImage(final Integer idEnterprise,
+        final Integer idDatacenter, final VirtualImage vimage);
+
+    public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualimageId);
 }

@@ -30,7 +30,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualImage")
 @XmlType(propOrder = {"id", "name", "description", "path", "diskFormatType", "diskFileSize",
-"cpuRequired", "ramRequired", "hdRequired", "shared", "costCode", "creationDate", "creationUser"})
+"cpuRequired", "ramRequired", "hdRequired", "shared", "costCode", "creationDate", "creationUser",
+"chefEnabled"})
 public class VirtualImageDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
@@ -60,6 +61,18 @@ public class VirtualImageDto extends SingleResourceTransportDto
     private Date creationDate;
 
     private String creationUser;
+
+    private boolean chefEnabled;
+
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(final boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
+    }
 
     public Integer getId()
     {

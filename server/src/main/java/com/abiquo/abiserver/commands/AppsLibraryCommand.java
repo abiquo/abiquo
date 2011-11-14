@@ -38,12 +38,4 @@ public interface AppsLibraryCommand
 
     List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
 
-    /** Virtual images */
-
-    Void editVirtualImage(UserSession userSession, VirtualimageHB vimage)
-        throws AppsLibraryCommandException;
-
-    Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
-        throws AppsLibraryCommandException;
-
 }
