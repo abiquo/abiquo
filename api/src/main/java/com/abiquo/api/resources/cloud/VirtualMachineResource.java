@@ -259,7 +259,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @PUT
-    @Path("state")
+    @Path(VIRTUAL_MACHINE_STATE)
     public AcceptedRequestDto powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -286,7 +286,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path("state")
+    @Path(VIRTUAL_MACHINE_STATE)
     public VirtualMachineStateDto stateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -440,7 +440,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path("action/deploy")
+    @Path(VIRTUAL_MACHINE_ACTION_DEPLOY)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -483,7 +483,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path("action/deploy")
+    @Path(VIRTUAL_MACHINE_ACTION_DEPLOY)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -520,7 +520,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path("action/undeploy")
+    @Path(VIRTUAL_MACHINE_ACTION_UNDEPLOY)
     public AcceptedRequestDto<String> undeployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
