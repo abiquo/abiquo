@@ -438,7 +438,8 @@ public class HyperVCollector extends AbstractCollector
     }
 
     /**
-     * Gets the virtual disks attached to the virtual machine.
+     * Gets the virtual disks attached to the virtual machine. TODO: get Bus information (controller
+     * port) for attached Disks TODO: get bootOrder and setLabel(SYSTEM/OTHER)
      * 
      * @param virtualSystem The virtual machine.
      * @return The list of virtual disks.
@@ -459,6 +460,10 @@ public class HyperVCollector extends AbstractCollector
         // instances
         List<IJIDispatch> standardDiskSettings = diskSettings.get(STANDARD_DISKS_KEY);
         List<IJIDispatch> volumeDiskSettings = diskSettings.get(VOLUME_DISKS_KEY);
+
+        // TODO: get Boot Order and establish which disk is the main one disk.setLabel(SYSTEM);
+        // this could be done with Msvm_BIOSElement.BootOrder class and finding out the relations
+        // with IDE/SCSI Controllers associated and their disks
 
         for (IJIDispatch dispatch : standardDiskSettings)
         {
