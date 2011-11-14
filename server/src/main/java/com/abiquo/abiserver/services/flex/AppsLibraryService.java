@@ -94,14 +94,14 @@ public class AppsLibraryService
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
         final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
-        final Integer idCategory, final Integer idHypervisorType)
+        final Integer idCategory, final Integer idHypervisorType, final Integer idDatacenter)
     {
         final VirtualImageResourceStub vimageStub =
             APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
                 VirtualImageResourceStub.class);
 
         // idRepo == 0 --> stateful
-        final Integer datacenterId = idRepo == 0 ? null : getDatacenterIdByRepository(idRepo);
+        final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
         // idCategory == 0 indicate return all the categories
         final Integer categoryId = idCategory == 0 ? null : idCategory;
 
@@ -117,14 +117,15 @@ public class AppsLibraryService
      * @param idCategory, if 0 indicate return all the categories
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory)
+        final Integer idEnterprise, final Integer idRepo, final Integer idCategory,
+        final Integer idDatacenter)
     {
         final VirtualImageResourceStub vimageStub =
             APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
                 VirtualImageResourceStub.class);
 
         // idRepo == 0 --> stateful
-        final Integer datacenterId = idRepo == 0 ? null : getDatacenterIdByRepository(idRepo);
+        final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
         // idCategory == 0 indicate return all the categories
         final Integer categoryId = idCategory == 0 ? null : idCategory;
 
@@ -183,55 +184,44 @@ public class AppsLibraryService
     /** DC specific status. */
     public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListStatus(
         final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
-        final Integer idRepository)
+        final Integer idDatacenter)
     {
-
-        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
-
         return proxyStub(userSession).getOVFPackageListState(nameOVFPackageList, idEnterprise,
-            datacenterId);
+            idDatacenter);
     }
 
     public DataResult<List<OVFPackageInstanceStatus>> refreshOVFPackageStatus(
         final UserSession userSession, final List<String> ovfUrlsIn, final Integer idEnterprise,
-        final Integer idRepository)
+        final Integer idDatacenter)
     {
-
-        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
         final List<String> ovfUrls = ovfUrlsIn; // XXX cast to arraylist
 
-        return proxyStub(userSession).getOVFPackagesState(ovfUrls, idEnterprise, datacenterId);
+        return proxyStub(userSession).getOVFPackagesState(ovfUrls, idEnterprise, idDatacenter);
 
     }
 
     public DataResult<OVFPackageInstanceStatus> refreshOVFPackageInstanceStatus(
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
-        final Integer idRepository)
+        final Integer idDatacenter)
     {
-        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
-
-        return proxyStub(userSession).getOVFPackageState(ovfUrl, idEnterprise, datacenterId);
+        return proxyStub(userSession).getOVFPackageState(ovfUrl, idEnterprise, idDatacenter);
     }
 
     public BasicResult startDownloadOVFPackage(final UserSession userSession,
-        final List<String> idsOvfpackageIn, final Integer idEnterprise, final Integer idRepository)
+        final List<String> idsOvfpackageIn, final Integer idEnterprise, final Integer idDatacenter)
     {
         final List<String> ovfUrls = idsOvfpackageIn; // XXX cast to arraylist
 
-        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
-
         return proxyStub(userSession).installOVFPackagesInDatacenter(ovfUrls, idEnterprise,
-            datacenterId);
+            idDatacenter);
     }
 
     public DataResult<OVFPackageInstanceStatus> cancelDownloadOVFPackage(
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
-        final Integer idRepository)
+        final Integer idDatacenter)
     {
-        final Integer datacenterId = getDatacenterIdByRepository(idRepository);
-
         return proxyStub(userSession).uninstallOVFPackageInDatacenter(ovfUrl, idEnterprise,
-            datacenterId);
+            idDatacenter);
     }
 
     /**
@@ -307,18 +297,19 @@ public class AppsLibraryService
      * ################################# #################################
      */
 
-    public BasicResult editVirtualImage(final UserSession userSession, final VirtualImage vimage)
+    public BasicResult editVirtualImage(final UserSession userSession, final Integer idEnterprise,
+        final Integer idDatacenter, final VirtualImage vimage)
     {
 
         final VirtualImageResourceStub vimageStub =
             APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
                 VirtualImageResourceStub.class);
 
-        return vimageStub.editVirtualImage(vimage);
+        return vimageStub.editVirtualImage(idEnterprise, idDatacenter, vimage);
     }
 
     public BasicResult deleteVirtualImage(final UserSession userSession,
-        final Integer idVirtualImage)
+        final Integer idEnterprise, final Integer idDatacenter, final Integer idVirtualImage)
     {
         BasicResult result = new BasicResult();
 
