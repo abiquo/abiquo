@@ -32,10 +32,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -89,6 +89,7 @@ public class StorageRep extends DefaultRepBase
         this.volumeDAO = new VolumeManagementDAO(entityManager);
         this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
         this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
+        this.rasdDAO = new RasdDAO(entityManager);
     }
 
     public StorageDevice findDeviceById(final Integer datacenterId, final Integer deviceId)
@@ -127,7 +128,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.findById(volumeId);
     }
-    
+
     public VolumeManagement findVolumeByRasd(final Rasd rasd)
     {
         return volumeDAO.getVolumeByRasd(rasd);
@@ -174,7 +175,7 @@ public class StorageRep extends DefaultRepBase
     {
         return volumeDAO.getVolumesFromEnterprise(idEnterprise);
     }
-    
+
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
         return volumeDAO.getVolumeFromImage(idImage);
@@ -284,13 +285,13 @@ public class StorageRep extends DefaultRepBase
     {
         volumeDAO.flush();
     }
-    
+
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm);
     }
 
-    public void insertInitiatorMapping(InitiatorMapping imapping)
+    public void insertInitiatorMapping(final InitiatorMapping imapping)
     {
         initiatorMappingDAO.persist(imapping);
     }

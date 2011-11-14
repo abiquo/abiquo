@@ -57,8 +57,8 @@ public class VirtualApplianceStatefulConversionGenerator extends
 
         userGenerator.assertAllPropertiesEqual(obj1.getUser(), obj2.getUser());
 
-        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-            .getVirtualAppliance());
+        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
+            obj2.getVirtualAppliance());
     }
 
     @Override
@@ -69,6 +69,16 @@ public class VirtualApplianceStatefulConversionGenerator extends
         User user = userGenerator.createUniqueInstance();
         VirtualAppliance virtualAppliance = virtualApplianceGenerator.createUniqueInstance();
 
+        VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
+            new VirtualApplianceStatefulConversion(user, state, state, virtualAppliance);
+
+        return virtualApplianceStatefulConversion;
+    }
+
+    public VirtualApplianceStatefulConversion createInstance(final User user,
+        final VirtualAppliance virtualAppliance)
+    {
+        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
         VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
             new VirtualApplianceStatefulConversion(user, state, state, virtualAppliance);
 

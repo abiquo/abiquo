@@ -43,7 +43,10 @@ import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionGenerator;
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
@@ -136,6 +139,15 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
 
+    protected VirtualImageConversionGenerator virtualImageConversionGenerator =
+        new VirtualImageConversionGenerator(seed);
+
+    protected VirtualApplianceStatefulConversionGenerator virtualApplianceStatefulConversionGenerator =
+        new VirtualApplianceStatefulConversionGenerator(seed);
+
+    protected NodeVirtualImageStatefulConversionGenerator nodeVirtualImageStatefulConversionGenerator =
+        new NodeVirtualImageStatefulConversionGenerator(seed);
+
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
@@ -146,6 +158,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.persist(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     protected void update(final Object... entities)
@@ -158,6 +171,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.merge(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     @BeforeMethod
@@ -217,18 +231,17 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-
         return em;
     }
 
     protected EntityManager getEntityManager()
     {
         EntityManagerFactory emf = getEntityManagerFactory();
-        EntityManager em;
+        EntityManager em = null;
 
         if (TransactionSynchronizationManager.hasResource(emf))
         {
-            EntityManagerHolder emHolder = unbind(emf);
+            EntityManagerHolder emHolder = getResource(emf);
             em = emHolder.getEntityManager();
 
             if (!em.isOpen())
@@ -261,9 +274,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         }
     }
 
-    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    private EntityManagerHolder getResource(final EntityManagerFactory emf)
     {
-        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+        return (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
     }
 
 }

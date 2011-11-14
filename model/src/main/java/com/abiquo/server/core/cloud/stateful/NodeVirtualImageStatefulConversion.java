@@ -37,6 +37,7 @@ import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -71,6 +72,7 @@ public class NodeVirtualImageStatefulConversion extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -215,6 +217,28 @@ public class NodeVirtualImageStatefulConversion extends DefaultEntityBase
     public void setVirtualImageConversion(final VirtualImageConversion virtualImageConversion)
     {
         this.virtualImageConversion = virtualImageConversion;
+    }
+
+    public final static String VOLUME_PROPERTY = "volume";
+
+    private final static boolean VOLUME_REQUIRED = false;
+
+    private final static String VOLUME_ID_COLUMN = "idManagement";
+
+    @JoinColumn(name = VOLUME_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "idManagement_FK4")
+    private VolumeManagement volumeManagement;
+
+    @Required(value = VOLUME_REQUIRED)
+    public VolumeManagement getVolumeManagement()
+    {
+        return this.volumeManagement;
+    }
+
+    public void setVolumeManagement(final VolumeManagement volumeManagement)
+    {
+        this.volumeManagement = volumeManagement;
     }
 
 }

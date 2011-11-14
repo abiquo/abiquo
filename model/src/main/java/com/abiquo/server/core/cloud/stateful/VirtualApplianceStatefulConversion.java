@@ -69,6 +69,7 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -112,7 +113,7 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
         return this.subState;
     }
 
-    private void setSubState(final VirtualMachineState subState)
+    public void setSubState(final VirtualMachineState subState)
     {
         this.subState = subState;
     }
@@ -133,7 +134,7 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
         return this.state;
     }
 
-    private void setState(final VirtualMachineState state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }

@@ -71,6 +71,7 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
         this.vAppStatefulConversionDao = new VirtualApplianceStatefulConversionDAO(em);
         this.nodeVirtualImageStatefulConversioDao = new NodeVirtualImageStatefulConversionDAO(em);
+        this.diskStatefulConversionDao = new DiskStatefulConversionDAO(em);
         this.virtualImageConversionDao = new VirtualImageConversionDAO(em);
     }
 
@@ -94,12 +95,13 @@ public class VirtualApplianceRep extends DefaultRepBase
         return vAppStatefulConversionDao.findById(id);
     }
 
-    public NodeVirtualImageStatefulConversion findNodeStatefulConversionById(final Integer id)
+    public NodeVirtualImageStatefulConversion findNodeVirtualImageStatefulConversionById(
+        final Integer id)
     {
         return nodeVirtualImageStatefulConversioDao.findById(id);
     }
 
-    public Collection<NodeVirtualImageStatefulConversion> findNodeStatefulConversionsByVirtualImageConversion(
+    public Collection<NodeVirtualImageStatefulConversion> findNodeVirtualImageStatefulConversionsByVirtualImageConversion(
         final VirtualImageConversion virtualImageConversion)
     {
         return nodeVirtualImageStatefulConversioDao
@@ -147,6 +149,11 @@ public class VirtualApplianceRep extends DefaultRepBase
     public void deleteDiskStatefulConversion(final DiskStatefulConversion diskStatefulConversion)
     {
         diskStatefulConversionDao.remove(diskStatefulConversion);
+    }
+
+    public DiskStatefulConversion findDiskStatefulConversionById(final Integer id)
+    {
+        return diskStatefulConversionDao.findById(id);
     }
 
     public void deleteVirtualImageConversion(final VirtualImageConversion virtualImageConversion)
