@@ -372,7 +372,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), master.getId());
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 200);
+        assertEquals(response.getStatusCode(), 200, response.getEntity(String.class));
 
         response = delete(uri, SYSADMIN, SYSADMIN);
         assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED);
@@ -398,8 +398,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
         setup(limitss, am);
         String uri =
-            resolveVirtualImageURI(statefulVolume.getVirtualImage().getEnterprise().getId(), dc
-                .getId(), statefulVolume.getVirtualImage().getId());
+            resolveVirtualImageURI(statefulVolume.getVirtualImage().getEnterprise().getId(),
+                dc.getId(), statefulVolume.getVirtualImage().getId());
 
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
