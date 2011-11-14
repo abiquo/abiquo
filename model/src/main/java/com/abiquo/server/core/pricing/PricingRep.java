@@ -356,4 +356,10 @@ public class PricingRep extends DefaultRepBase
         return currencyDao.existAnyOtherCurrencyWithName(currency, name);
     }
 
+    public Collection<Currency> findAllCurrency(final String filter, final String orderBy,
+        final boolean desc, final Integer page, final Integer numResults)
+    {
+        return currencyDao.find(filter, orderBy, desc, page, numResults);
+    }
+
 }

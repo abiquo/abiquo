@@ -27,11 +27,16 @@ import org.testng.annotations.BeforeMethod;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class TierDAOTest extends DefaultDAOTestBase<TierDAO, Tier>
 {
+
+    private DatacenterGenerator datacenterGenerator;
+
+    private TierGenerator tierGenerator;
 
     @Override
     @BeforeMethod
@@ -63,5 +68,23 @@ public class TierDAOTest extends DefaultDAOTestBase<TierDAO, Tier>
     {
         return (TierGenerator) super.eg();
     }
+
+    // @Test
+    // public void testGetEnabledTiersByDatacenter()
+    // {
+    // datacenterGenerator = new DatacenterGenerator(getSeed());
+    // tierGenerator = new TierGenerator(getSeed());
+    //
+    // Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+    // Tier tier1 = tierGenerator.createInstance(datacenter1, "tier1");
+    // Tier tier2 = tierGenerator.createInstance(datacenter1, "tier2");
+    // tier2.setEnabled(false);
+    //
+    // ds().persistAll(datacenter1, tier1, tier2);
+    // TierDAO dao = createDaoForRollbackTransaction();
+    //
+    // Assert.assertEquals(dao.getEnableTiersByDatacenter(datacenter1.getId()).size(), 1);
+    //
+    // }
 
 }

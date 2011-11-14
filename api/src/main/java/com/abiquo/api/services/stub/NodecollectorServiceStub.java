@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -367,10 +366,6 @@ public class NodecollectorServiceStub extends DefaultApiService
 
         int ram = (int) (host.getRam() / MEGABYTE);
         int cpus = (int) host.getCpu();
-        if (!StringUtils.hasText(host.getDescription()))
-        {
-            host.setDescription(formatDn(host.getName()));
-        }
         Machine machine =
             new Machine(datacenter,
                 host.getName(),
@@ -419,34 +414,6 @@ public class NodecollectorServiceStub extends DefaultApiService
         switches = switches.substring(0, switches.lastIndexOf('/'));
         machine.setVirtualSwitch(switches);
         return machine;
-    }
-
-    private String formatDn(final String name)
-    {
-        if (!name.contains("/"))
-        {
-            return name;
-        }
-        String[] parts = name.split("/");
-        if (parts.length != 3)
-        {
-            // weird dn
-            return name;
-        }
-        String[] ch = parts[1].split("-");
-        if (ch.length != 2)
-        {
-            return name;
-        }
-        String[] bl = parts[2].split("-");
-        if (bl.length != 2)
-        {
-            return name;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(ch[0]).append(" ").append(ch[1]).append(" ").append("Slot").append(" ")
-            .append(bl[1]);
-        return WordUtils.capitalize(sb.toString());
     }
 
     /**
