@@ -97,7 +97,8 @@ public class UriTestResolver
     public static String resolveEnterpriseURI(final Integer enterpriseId)
     {
         String template =
-            buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+            buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
+                EnterpriseResource.ENTERPRISE_PARAM);
 
         return resolveURI(template,
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
