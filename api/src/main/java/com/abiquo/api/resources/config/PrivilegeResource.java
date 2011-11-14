@@ -20,6 +20,9 @@
  */
 package com.abiquo.api.resources.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -35,8 +38,10 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.Privileges;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.PrivilegeDto;
+import com.abiquo.server.core.enterprise.PrivilegesDto;
 import com.abiquo.server.core.enterprise.User;
 
 @Parent(PrivilegesResource.class)
@@ -99,4 +104,26 @@ public class PrivilegeResource extends AbstractResource
         return dto;
     }
 
+    public static PrivilegesDto addPrivilegesLinks(final IRESTBuilder restBuilder,
+        final List<Privilege> privileges)
+    {
+        PrivilegesDto ps = new PrivilegesDto();
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        for (Privilege p : privileges)
+        {
+            PrivilegeDto pDto = new PrivilegeDto(p.getId(), p.getName());
+            pDto = addPrivilegeLinks(restBuilder, pDto);
+            links.addAll(pDto.getLinks());
+        }
+        ps.setLinks(links);
+        return ps;
+    }
+
+    public static PrivilegeDto addPrivilegeLinks(final IRESTBuilder restBuilder,
+        final PrivilegeDto privilegeDto)
+    {
+        restBuilder.buildPrivilegeLink(privilegeDto);
+
+        return privilegeDto;
+    }
 }
