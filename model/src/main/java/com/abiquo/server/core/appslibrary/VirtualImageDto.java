@@ -61,6 +61,18 @@ public class VirtualImageDto extends SingleResourceTransportDto
 
     private String creationUser;
 
+    private boolean chefEnabled;
+
+    public boolean isChefEnabled()
+    {
+        return chefEnabled;
+    }
+
+    public void setChefEnabled(final boolean chefEnabled)
+    {
+        this.chefEnabled = chefEnabled;
+    }
+
     public Integer getId()
     {
         return id;
