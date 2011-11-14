@@ -122,7 +122,8 @@ public class PrivilegeResource extends AbstractResource
     public static PrivilegeDto addPrivilegeLinks(final IRESTBuilder restBuilder,
         final PrivilegeDto privilegeDto)
     {
-        restBuilder.buildPrivilegeLink(privilegeDto);
+        List<RESTLink> links = restBuilder.buildPrivilegeLink(privilegeDto);
+        privilegeDto.addLinks(links);
 
         return privilegeDto;
     }
