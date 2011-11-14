@@ -35,20 +35,19 @@ public class NetworkResolver
     /**
      * Specify all the masks user can choose
      */
-    private static String[] allMasks =
-        {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0", "255.240.0.0", "255.248.0.0",
-        "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0", "255.255.192.0",
-        "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0", "255.255.254.0",
-        "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
-        "255.255.255.240", "255.255.255.248", "255.255.255.252"};
+    private static String[] allMasks = {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0",
+    "255.240.0.0", "255.248.0.0", "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0",
+    "255.255.192.0", "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0",
+    "255.255.254.0", "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
+    "255.255.255.240", "255.255.255.248", "255.255.255.252"};
 
     /**
      * List of values from 0 to 255
      */
     private static List<String> possibleValues;
 
-    
-    static {
+    static
+    {
         possibleValues = new ArrayList<String>();
 
         for (int i = 0; i < 256; i++)
@@ -57,25 +56,27 @@ public class NetworkResolver
         }
     }
 
-   public static boolean isValidNetworkMask(IPAddress address, Integer mask)
-   {
-       String firstOctet = address.getFirstOctet();
-       String secondOctet = address.getSecondOctet();
-       String thirdOctet = address.getThirdOctet();
-       String fouthOctet = address.getFourthOctet();
-       
-       List<List<String>> listPossibleNetworks = resolvePossibleNetworks(Integer.parseInt(firstOctet), IPNetworkRang.transformIntegerMaskToIPMask(mask));
-       if (listPossibleNetworks.get(0).contains(firstOctet) 
-           && listPossibleNetworks.get(1).contains(secondOctet) 
-           && listPossibleNetworks.get(2).contains(thirdOctet)
-           && listPossibleNetworks.get(3).contains(fouthOctet))
-       {
-           return true;
-       }
-       return false;
-   }
-   
-   /**
+    public static boolean isValidNetworkMask(IPAddress address, Integer mask)
+    {
+        String firstOctet = address.getFirstOctet();
+        String secondOctet = address.getSecondOctet();
+        String thirdOctet = address.getThirdOctet();
+        String fouthOctet = address.getFourthOctet();
+
+        List<List<String>> listPossibleNetworks =
+            resolvePossibleNetworks(Integer.parseInt(firstOctet),
+                IPNetworkRang.transformIntegerMaskToIPMask(mask));
+        if (listPossibleNetworks.get(0).contains(firstOctet)
+            && listPossibleNetworks.get(1).contains(secondOctet)
+            && listPossibleNetworks.get(2).contains(thirdOctet)
+            && listPossibleNetworks.get(3).contains(fouthOctet))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param privateNetworkClassType
      * @param mask
      * @return
@@ -91,14 +92,13 @@ public class NetworkResolver
         List<String> fourthElement = new ArrayList<String>();
         String maskString = mask.toString();
 
-
         // After check if the mask is inside the array of the accepted masks
-        if ((firstOctet == 10 && !Arrays.asList(allMasks).subList(14,
-            allMasks.length).contains(maskString))
-            || (firstOctet == 172 && !Arrays.asList(allMasks).subList(
-                14, allMasks.length).contains(maskString))
-            || (firstOctet == 192 && !Arrays.asList(allMasks).subList(
-                16, allMasks.length).contains(maskString)))
+        if ((firstOctet == 10 && !Arrays.asList(allMasks).subList(14, allMasks.length)
+            .contains(maskString))
+            || (firstOctet == 172 && !Arrays.asList(allMasks).subList(14, allMasks.length)
+                .contains(maskString))
+            || (firstOctet == 192 && !Arrays.asList(allMasks).subList(16, allMasks.length)
+                .contains(maskString)))
         {
             return null;
         }

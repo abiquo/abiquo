@@ -47,6 +47,5 @@ public interface AppsLibraryStub
      * @param nameOVFPackageList
      * @return
      */
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
-        final String nameOVFPackageList);
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
 }

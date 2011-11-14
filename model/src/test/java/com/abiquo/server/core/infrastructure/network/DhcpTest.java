@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.infrastructure.network;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class DhcpTest extends DefaultEntityTestBase<Dhcp>
-  {
+public class DhcpTest extends DefaultEntityTestBase<Dhcp>
+{
 
-      @Override
-      protected InstanceTester<Dhcp> createEntityInstanceGenerator()
-      {
-          return new DhcpGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<Dhcp> createEntityInstanceGenerator()
+    {
+        return new DhcpGenerator(getSeed());
+    }
+}

@@ -94,8 +94,6 @@
                 ramInput.value = 0;
                 ramUnitsSelector.selectedIndex = 0;
                 cpuInput.value = cpuInput.minimum;
-                hdInput.value = 0;
-                hdUnitsSelector.selectedIndex = 3;
                 vswitchNameInput.text = "";
                 datastoreManagement.physicalMachine = newPhysicalMachine;
                 datastoreManagement.hypervisor = null;
@@ -125,7 +123,6 @@
                 newPhysicalMachine.description = descriptionInput.text;
                 newPhysicalMachine.cpu = cpuInput.value;
                 newPhysicalMachine.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion; //RAM is sent in MBytes
-                newPhysicalMachine.hd = hdInput.value * hdUnitsSelector.selectedItem.conversion; //HD is sent in bytes
                 newPhysicalMachine.vswitchName = vswitchNameInput.text;
 
                 //Creating a new Hypervisor for the new Physical Machine
@@ -249,7 +246,7 @@
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
             <mx:NumericStepper id="cpuInput"
                 width="100" height="20"
-                minimum="1" maximum="32" stepSize="1"/>
+                minimum="1" maximum="1024" stepSize="1"/>
         </mx:FormItem>
 
         <mx:FormItem 
@@ -267,23 +264,6 @@
                 labelField="label"
                 dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                 selectedIndex="0"/>
-        </mx:FormItem>
-
-        <mx:FormItem 
-            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
-            direction="horizontal">
-
-            <mx:NumericStepper id="hdInput"
-                width="100" height="20"
-                minimum="{hdUnitsSelector.selectedItem.minimum}"
-                maximum="{hdUnitsSelector.selectedItem.maximum}"
-                stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
-
-            <mx:ComboBox id="hdUnitsSelector"
-                width="80" height="18"
-                labelField="label"
-                dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
-                selectedIndex="3"/>
         </mx:FormItem>
 
         <mx:Spacer height="10"/>

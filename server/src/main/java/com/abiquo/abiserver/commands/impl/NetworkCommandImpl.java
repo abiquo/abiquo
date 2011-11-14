@@ -119,6 +119,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 nextIp.setVirtualDataCenter(vapp.getVirtualDataCenterHB());
                 nextIp.setMac(IPNetworkRang.requestRandomMacAddress(vapp.getVirtualDataCenterHB()
                     .getHypervisorType()));
+                nextIp.setName(nextIp.getMac().replace(":", "") + "_host");
                 rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
                 rasd.setResourceSubType("2");
             }

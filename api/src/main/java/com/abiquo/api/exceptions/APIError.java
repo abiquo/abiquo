@@ -50,7 +50,11 @@ public enum APIError
         "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
-        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"),
+        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
+        "GEN-7", "The property 'name', must not have whitespace at the beginning or the end."), WHITE_SYMBOL(
+        "GEN-8", "The property 'symbol', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
+        "GEN-9",
+        "The property 'description', must not have whitespace at the beginning or the end."),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -62,7 +66,9 @@ public enum APIError
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
-        "The current enterprise can't use this datacenter"),
+        "The current enterprise can't use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
+        "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -72,7 +78,9 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-9", "Missing link to the enterprise"),
+        "ENTERPRISE-9", "Missing link to the enterprise"), MISSING_PRICING_TEMPLATE_LINK(
+        "ENTERPRISE-10", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
+        "ENTERPRISE-11", "Missing pricing template parameter"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -137,7 +145,7 @@ public enum APIError
         "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
         "VLAN-27",
         "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
-            + "configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+            + "its VLAN configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
         "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
         "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
         "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
@@ -160,7 +168,9 @@ public enum APIError
         "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
         "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
         "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
-        "VLAN-44", "The requested IP object does not exist"),
+        "VLAN-44", "The requested IP object does not exist"), VLANS_ASSIGNED_TO_ANOTHER_VIRTUAL_DATACENTER(
+        "VLAN-45",
+        "Cannot change enterprise because this network is used as default by Virtual Datacenter"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
@@ -174,7 +184,8 @@ public enum APIError
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
-        "There is a problem with the details of the UCS Rack"),
+        "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -185,12 +196,14 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
+        "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
+        "Invalid ip range"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
-        "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
+        "Invalid hypervisor IP. There is already a hypervisor with this IP address"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. There is already a hypervisor with this service IP"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -380,6 +393,56 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
+    // PRICING TEMPLATE
+    CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
+        "PRICINGTEMPLATE-1", "Missing enterprise parameter"), PRICING_TEMPLATE_DUPLICATED_NAME(
+        "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
+        "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
+        "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
+        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
+        "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
+        "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
+        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
+
+    // CURRENCY
+    NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
+        "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
+        "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
+        "Cannot remove currency associated with a Pricing Model"), CURRENCY_NAME_NOT_FOUND(
+        "CURRENCY-4", "Currency name is required"), CURRENCY_SYMBOL_NOT_FOUND("CURRENCY-5",
+        "Currency symbol is required"), CURRENCY_NAME_LONG("CURRENCY-6",
+        "Currency name maximum lenght is 20 characters"), CURRENCY_SYMBOL_LONG("CURRENCY-7",
+        "Currency symbol maximum lenght is 10 characters"), CURRENCY_DIGIT_LONG("CURRENCY-8",
+        "Currency digit maximum value is 9"),
+
+    // COST CODE
+    NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
+        "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
+        "Duplicated name for Cost Code"), COSTCODE_NAME_NOT_FOUND("COSTCODE-3",
+        "Cost Code name is required"), COSTCODE_DESCRITPION_NOT_FOUND("COSTCODE-4",
+        "Cost Code description is required"), COSTCODE_NAME_LONG("COSTCODE-5",
+        "Cost Code name maximum lenght is 20 characters"), COSTCODE_DESCRIPTION_LONG("COSTCODE-6",
+        "Cost Code description maximum lenght is 100 characters"),
+
+    // COST CODE- CURRENCY
+    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
+        "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"), NOT_ASSIGNED_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"), NOT_ASSIGNED_COSTCODE_CURRENCY_PRICE(
+        "COSTCODE_CURRENCY-3", "Price is required"),
+
+    // PRICING - COST CODE
+    PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
+        "Duplicated value by Cost Code and PricingTemplate"), NON_EXISTENT_PRICING_COSTCODE(
+        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist"),
+
+    // PRICING - TIER
+    PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
+        "PRICING_TIER-2",
+        "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated")
+
     ;
 
     /**
@@ -431,8 +494,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

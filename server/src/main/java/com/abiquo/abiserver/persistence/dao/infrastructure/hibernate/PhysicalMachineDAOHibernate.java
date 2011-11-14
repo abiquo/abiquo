@@ -71,12 +71,14 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
         "PHYSICALMACHINE.GET_LIST_BY_RACK";
 
     private static final String FIRST_PASS_QUERY = "PHYSICALMACHINE.FIRST_PASS_QUERY";
-    
-    private static final String PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE= "PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE";
+
+    private static final String PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE =
+        "PHYSICALMACHINE.GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE";
 
     @Override
-    public List<PhysicalmachineHB> getByRackAndVirtualDatacenter(Integer idRack,
-        Integer idVirtualDatacenter, Long hdRequiredOnDatastore, EnterpriseHB enterprise)
+    public List<PhysicalmachineHB> getByRackAndVirtualDatacenter(final Integer idRack,
+        final Integer idVirtualDatacenter, final Long hdRequiredOnDatastore,
+        final EnterpriseHB enterprise)
     {
 
         // "(pm.ram - pm.ramUsed) >= " + vimage.getRamRequired() +
@@ -89,12 +91,12 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
         pmQuery.setLong("hdRequiredOnRepository", hdRequiredOnDatastore);
         pmQuery.setParameter("enterprise", enterprise);
 
-        return (List<PhysicalmachineHB>) pmQuery.list();
+        return pmQuery.list();
     }
 
     // implement extra functionality
     @Override
-    public Long getNumberOfDeployedVirtualMachines(PhysicalmachineHB pmHB)
+    public Long getNumberOfDeployedVirtualMachines(final PhysicalmachineHB pmHB)
     {
         Long numberOfDeployedMachines;
 
@@ -105,45 +107,50 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
 
         return numberOfDeployedMachines;
     }
-    
+
     @Override
-    public Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(PhysicalmachineHB pmHB, Integer idEnterprise)
+    public Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(
+        final PhysicalmachineHB pmHB, final Integer idEnterprise)
     {
         Long numberOfDeployedMachines;
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
-        Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE);
+        Query pmQuery =
+            session
+                .getNamedQuery(PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE);
         pmQuery.setInteger("idphysicalmachine", pmHB.getIdPhysicalMachine());
         pmQuery.setInteger("identerprise", idEnterprise);
-        List<Long> longList = (List<Long>) pmQuery.list();
-        numberOfDeployedMachines =  longList.get(0);
+
+        List<Long> longList = pmQuery.list();
+
+        numberOfDeployedMachines = longList.get(0);
         return numberOfDeployedMachines;
     }
 
     @Override
-    public List<VirtualmachineHB> getDeployedVirtualMachines(Integer machineId)
+    public List<VirtualmachineHB> getDeployedVirtualMachines(final Integer machineId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
         Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_DEPLOYED_VIRTUAL_MACHINES);
         pmQuery.setInteger("idphysicalmachine", machineId);
 
-        return (List<VirtualmachineHB>) pmQuery.list();
+        return pmQuery.list();
     }
 
     @Override
-    public List<VirtualmachineHB> getDeployedAbiquoVirtualMachines(Integer machineId)
+    public List<VirtualmachineHB> getDeployedAbiquoVirtualMachines(final Integer machineId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
         Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_DEPLOYED_ABIQUO_VIRTUAL_MACHINES);
         pmQuery.setInteger("idphysicalmachine", machineId);
 
-        return (List<VirtualmachineHB>) pmQuery.list();
+        return pmQuery.list();
     }
 
     @Override
-    public String getHypervisorIP(int machineId)
+    public String getHypervisorIP(final int machineId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -156,7 +163,7 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     }
 
     @Override
-    public void setPhysicalMachineState(Integer machineId, int idPhysicalMachineState)
+    public void setPhysicalMachineState(final Integer machineId, final int idPhysicalMachineState)
         throws PersistenceException
     {
         PhysicalmachineHB pm = findById(machineId);
@@ -167,7 +174,7 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     }
 
     @Override
-    public PhysicalmachineHB findByIp(String hypervisorIp, Integer idDataCenter)
+    public PhysicalmachineHB findByIp(final String hypervisorIp, final Integer idDataCenter)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -187,22 +194,22 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
 
         Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_ALL_HYPERVISOR_IP);
 
-        return (List<String>) pmQuery.list();
+        return pmQuery.list();
     }
 
     @Override
-    public List<VirtualmachineHB> getNotDeployedVirtualMachines(Integer hostId)
+    public List<VirtualmachineHB> getNotDeployedVirtualMachines(final Integer hostId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
         Query pmQuery = session.getNamedQuery(PHYSICALMACHINE_GET_NOT_MANAGED_VIRTUAL_MACHINES);
         pmQuery.setInteger("idphysicalmachine", hostId);
 
-        return (List<VirtualmachineHB>) pmQuery.list();
+        return pmQuery.list();
     }
 
     @Override
-    public List<PhysicalmachineHB> getPhysicalMachineListByDatastore(Integer datastoreId)
+    public List<PhysicalmachineHB> getPhysicalMachineListByDatastore(final Integer datastoreId)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
@@ -213,36 +220,38 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
     }
 
     @Override
-    public List<PhysicalmachineHB> getPhysicalMachineByRack(Integer rackId, String filters)
+    public List<PhysicalmachineHB> getPhysicalMachineByRack(final Integer rackId,
+        final String filters)
     {
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
 
-        String namedQuery = filters == null || filters.isEmpty() ? PHYSICALMACHINE_GET_LIST_BY_RACK :
-        	"PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE";
-        
+        String namedQuery =
+            filters == null || filters.isEmpty() ? PHYSICALMACHINE_GET_LIST_BY_RACK
+                : "PHYSICALMACHINE.GET_LIST_BY_RACK_AND_ENTERPRISE";
+
         Query pmQuery = session.getNamedQuery(namedQuery);
         pmQuery.setInteger("idRack", rackId);
         if (filters != null && !filters.isEmpty())
         {
-        	pmQuery.setString("filterLike", "%" + filters + "%");
+            pmQuery.setString("filterLike", "%" + filters + "%");
         }
 
         return pmQuery.list();
     }
 
     @Override
-    public void updateUsedResourcesByPhysicalMachine(Integer idPhysicalMachine)
+    public void updateUsedResourcesByPhysicalMachine(final Integer idPhysicalMachine)
     {
         final Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
         final String update =
             "update physicalmachine p, "
-                + "(SELECT hy.idPhysicalMachine, IFNULL(SUM(vm.ram),0) ram, IFNULL(SUM(vm.cpu),0) cpu, IFNULL(SUM(vm.hd),0) hd "
+                + "(SELECT hy.idPhysicalMachine, IFNULL(SUM(vm.ram),0) ram, IFNULL(SUM(vm.cpu),0) cpu"
                 + "FROM virtualmachine vm right join hypervisor hy on vm.idHypervisor = hy.id, "
                 + "physicalmachine pm "
                 + "WHERE (vm.state is null or vm.state != 'NOT_DEPLOYED') AND pm.idPhysicalMachine = hy.idPhysicalMachine "
                 + "AND pm.idPhysicalMachine = :idPhysicalMachine "
                 + "group by hy.idPhysicalMachine) x "
-                + "set p.ramused = x.ram, p.cpuused = x.cpu, p.hdused = x.hd where p.idPhysicalMachine = x.idPhysicalMachine ";
+                + "set p.ramused = x.ram, p.cpuused = x.cpu where p.idPhysicalMachine = x.idPhysicalMachine ";
         final Query pmQuery = session.createSQLQuery(update);
         pmQuery.setInteger("idPhysicalMachine", idPhysicalMachine);
         pmQuery.executeUpdate();

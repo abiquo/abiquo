@@ -31,8 +31,8 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 @Repository
 public class AppsLibraryDAO extends JpaDAO<AppsLibrary, Integer>
 {
-    private final static String QUERY_GET_BY_ENTER =
-        "FROM " + AppsLibrary.class.getName() + " WHERE " + "enterprise.id = :idEnterprise";
+    private final static String QUERY_GET_BY_ENTER = "FROM " + AppsLibrary.class.getName()
+        + " WHERE " + "enterprise.id = :idEnterprise";
 
     @Autowired
     EnterpriseRep enterpirseDao;
@@ -49,8 +49,8 @@ public class AppsLibraryDAO extends JpaDAO<AppsLibrary, Integer>
         try
         {
             appsLib =
-                (AppsLibrary) entityManager.createQuery(QUERY_GET_BY_ENTER).setParameter(
-                    "idEnterprise", idEnterprise).getSingleResult();
+                (AppsLibrary) entityManager.createQuery(QUERY_GET_BY_ENTER)
+                    .setParameter("idEnterprise", idEnterprise).getSingleResult();
         }
         catch (Throwable e)
         {

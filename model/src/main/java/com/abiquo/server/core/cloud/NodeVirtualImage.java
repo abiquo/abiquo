@@ -41,8 +41,8 @@ public class NodeVirtualImage extends Node
 
     public static final String TABLE_NAME = "nodevirtualimage";
 
-    public NodeVirtualImage(String name, VirtualAppliance virtualAppliance, VirtualImage virtualImage,
-        VirtualMachine virtualMachine)
+    public NodeVirtualImage(String name, VirtualAppliance virtualAppliance,
+        VirtualImage virtualImage, VirtualMachine virtualMachine)
     {
         super(DISCRIMINATOR);
 

@@ -23,6 +23,7 @@ package com.abiquo.model.transport.error;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -63,5 +64,19 @@ public class ErrorsDto extends WrapperDto<ErrorDto>
     public int hashCode()
     {
         return 31 * toString().hashCode();
+    }
+
+    public ErrorsDto()
+    {
+        super();
+    }
+
+    public ErrorsDto(final Set<CommonError> errors)
+    {
+        super();
+        for (CommonError commonError : errors)
+        {
+            this.getCollection().add(new ErrorDto(commonError.getCode(), commonError.getMessage()));
+        }
     }
 }

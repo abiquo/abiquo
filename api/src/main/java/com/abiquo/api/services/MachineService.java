@@ -38,19 +38,24 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStub;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.UcsRack;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
 @Transactional(readOnly = false)
@@ -68,7 +73,7 @@ public class MachineService extends DefaultApiService
     protected VsmServiceStub vsm;
 
     @Autowired
-    private InfrastructureService infrastructureService;
+    protected RemoteServiceService remoteServiceService;
 
     @Autowired
     protected VirtualMachineService virtualMachineService;
@@ -86,15 +91,21 @@ public class MachineService extends DefaultApiService
         repo = new InfrastructureRep(em);
         dataService = new DatastoreService(em);
         vsm = new VsmServiceStub();
-        infrastructureService = new InfrastructureService(em);
         virtualMachineService = new VirtualMachineService(em);
         virtualDatacenterRep = new VirtualDatacenterRep(em);
+        remoteServiceService = new RemoteServiceService(em);
+        tracer = new TracerLogger();
     }
 
     public List<Machine> getMachinesByRack(final Integer rackId)
     {
+        return getMachinesByRack(rackId, null);
+    }
+
+    public List<Machine> getMachinesByRack(final Integer rackId, final String filter)
+    {
         Rack rack = repo.findRackById(rackId);
-        List<Machine> machines = repo.findRackMachines(rack);
+        List<Machine> machines = repo.findRackMachines(rack, filter);
 
         // If it is an UCS rack, put the property 'belongsToManagedRack' as true.
         // If they belong to a managed rack, a new {@link RESTLink} will be created
@@ -130,7 +141,8 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
-    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public Machine getMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
 
@@ -145,6 +157,7 @@ public class MachineService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Machine modifyMachine(final Integer machineId, final MachineDto machineDto)
+        throws Exception
     {
         Machine old = getMachine(machineId);
 
@@ -153,17 +166,11 @@ public class MachineService extends DefaultApiService
         old.setState(machineDto.getState());
 
         old.setVirtualRamInMb(machineDto.getVirtualRamInMb());
-        old.setRealRamInMb(machineDto.getRealRamInMb());
         old.setVirtualRamUsedInMb(machineDto.getVirtualRamUsedInMb());
 
         old.setVirtualCpuCores(machineDto.getVirtualCpuCores());
-        old.setRealCpuCores(machineDto.getRealCpuCores());
         old.setVirtualCpusUsed(machineDto.getVirtualCpusUsed());
         old.setVirtualCpusPerCore(machineDto.getVirtualCpusPerCore());
-
-        old.setVirtualHardDiskInBytes(machineDto.getVirtualHardDiskInMb());
-        old.setRealHardDiskInBytes(machineDto.getRealHardDiskInMb());
-        old.setVirtualHardDiskUsedInBytes(machineDto.getVirtualHardDiskUsedInMb());
 
         isValidMachine(old);
 
@@ -177,6 +184,12 @@ public class MachineService extends DefaultApiService
         }
 
         repo.updateMachine(old);
+
+        tracer
+            .log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine "
+                + old.getName() + "[ ip: " + old.getHypervisor().getIp() + " type: "
+                + old.getHypervisor().getType() + " state: " + old.getState()
+                + "] created succesfully");
 
         return old;
     }
@@ -199,9 +212,15 @@ public class MachineService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public void removeMachine(final Integer id)
     {
+        removeMachine(id, true);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeMachine(final Integer id, final boolean force)
+    {
         Machine machine = repo.findMachineById(id);
         RemoteService vsmRS =
-            infrastructureService.getRemoteService(machine.getDatacenter().getId(),
+            remoteServiceService.getRemoteService(machine.getDatacenter().getId(),
                 RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
         Hypervisor hypervisor = machine.getHypervisor();
@@ -216,31 +235,64 @@ public class MachineService extends DefaultApiService
 
         Collection<VirtualMachine> virtualMachines =
             virtualMachineService.findByHypervisor(hypervisor);
-        for (VirtualMachine vm : virtualMachines)
+
+        if (virtualMachines != null && !virtualMachines.isEmpty())
         {
-            vm.setState(State.NOT_DEPLOYED);
-            vm.setDatastore(null);
-            vm.setHypervisor(null);
-
-            VirtualAppliance vapp = virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
-
-            State newState = State.NOT_DEPLOYED;
-            for (NodeVirtualImage node : vapp.getNodes())
+            for (VirtualMachine vm : virtualMachines)
             {
-                if (node.getVirtualMachine().getState() != State.NOT_DEPLOYED)
-                {
-                    newState = State.APPLY_CHANGES_NEEDED;
-                    break;
-                }
-            }
+                VirtualAppliance vapp =
+                    virtualDatacenterRep.findVirtualApplianceByVirtualMachine(vm);
 
-            vapp.setState(newState);
-            vapp.setSubState(newState);
-            virtualDatacenterRep.updateVirtualAppliance(vapp);
-            virtualMachineService.updateVirtualMachine(vm);
+                VirtualMachineState newState = VirtualMachineState.NOT_DEPLOYED;
+                for (NodeVirtualImage node : vapp.getNodes())
+                {
+                    if (node.getVirtualMachine().getState() != VirtualMachineState.NOT_DEPLOYED)
+                    {
+                        if (!force)
+                        {
+                            addConflictErrors(APIError.RACK_CANNOT_REMOVE_VMS);
+                            flushErrors();
+                        }
+                        else
+                        {
+                            newState = VirtualMachineState.APPLY_CHANGES_NEEDED;
+                            break;
+                        }
+                    }
+                }
+
+                vm.setState(VirtualMachineState.NOT_DEPLOYED);
+                vm.setDatastore(null);
+                vm.setHypervisor(null);
+
+                vapp.setState(newState);
+                vapp.setSubState(newState);
+                virtualDatacenterRep.updateVirtualAppliance(vapp);
+                virtualMachineService.updateVirtualMachine(vm);
+            }
+        }
+
+        deleteMachineLoadRulesFromMachine(machine);
+
+        if (machine.getDatastores() != null && !machine.getDatastores().isEmpty())
+        {
+            for (Datastore d : machine.getDatastores())
+            {
+                repo.deleteDatastore(d);
+            }
         }
 
         repo.deleteMachine(machine);
+
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE, "Machine "
+            + machine.getName() + "[ ip: " + machine.getHypervisor().getIp() + " type: "
+            + machine.getHypervisor().getType() + " state: " + machine.getState()
+            + "] deleted succesfully");
+    }
+
+    protected void deleteMachineLoadRulesFromMachine(final Machine machine)
+    {
+        // PREMIUM
     }
 
     public boolean isAssignedTo(final Integer datacenterId, final Integer rackId,

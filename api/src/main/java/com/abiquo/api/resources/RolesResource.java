@@ -41,6 +41,7 @@ import com.abiquo.api.services.RoleService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RolesDto;
 import com.abiquo.server.core.enterprise.User;
@@ -68,7 +69,8 @@ public class RolesResource extends AbstractResource
     UriInfo uriInfo;
 
     @GET
-    public RolesDto getRoles(@QueryParam("idEnterprise") final String enterpriseId,
+    public RolesDto getRoles(
+        @QueryParam(EnterpriseResource.ENTERPRISE_AS_PARAM) final String enterpriseId,
         @QueryParam("filter") final String filter, @QueryParam("orderBy") final String orderBy,
         @QueryParam("desc") final boolean desc, @QueryParam("page") Integer page,
         @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
@@ -95,9 +97,9 @@ public class RolesResource extends AbstractResource
         RolesDto roles = new RolesDto();
 
         // Can only get my role
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW_PRIVILEGES)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_ROLES)
-            && !securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_ROLES)
+            && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (all != null && !all.isEmpty())

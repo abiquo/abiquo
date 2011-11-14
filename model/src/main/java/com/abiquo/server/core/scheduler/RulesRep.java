@@ -150,6 +150,11 @@ public class RulesRep extends DefaultRepBase
         return this.machineLoadRuleDao.findById(id);
     }
 
+    public List<MachineLoadRule> findMachineLoadRuleByMachine(final Integer id)
+    {
+        return this.machineLoadRuleDao.findByMachine(id);
+    }
+
     public void deleteMachineLoadRule(final MachineLoadRule machineLoadRule)
     {
         if (machineLoadRule != null)

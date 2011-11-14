@@ -56,13 +56,12 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -78,14 +77,18 @@ public class EnterpriseResource extends AbstractResource
 {
     public static final String ENTERPRISE = "enterprise";
 
+    // enterprise as query param
+    public static final String ENTERPRISE_AS_PARAM = "identerprise";
+
     public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
 
-    public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
+    public static final String ENTERPRISE_ACTION_GET_IPS_PATH = "action/ips";
 
-    public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH =
+        "action/virtualmachines";
 
-    public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS =
-        "/action/virtualdatacenters";
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH =
+        "action/virtualdatacenters";
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
@@ -120,7 +123,7 @@ public class EnterpriseResource extends AbstractResource
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getEnterprise().getId().equals(enterpriseId))
@@ -130,7 +133,7 @@ public class EnterpriseResource extends AbstractResource
             }
             // We need to return the enterprise of the external VLAN to edit it,
             // and for that wee need to have DC_ENUMERATE privilege.
-            else if (securityService.hasPrivilege(SecurityService.ROLE_PHYS_DC_ENUMERATE))
+            else if (securityService.hasPrivilege(Privileges.PHYS_DC_ENUMERATE))
             {
                 Enterprise enterprise = service.getEnterprise(enterpriseId);
                 return createTransferObject(enterprise, restBuilder);
@@ -138,7 +141,7 @@ public class EnterpriseResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_VIEW);
             }
 
         }
@@ -166,7 +169,7 @@ public class EnterpriseResource extends AbstractResource
 
     @SuppressWarnings("unchecked")
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
@@ -210,7 +213,7 @@ public class EnterpriseResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -242,7 +245,7 @@ public class EnterpriseResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH)
     public VirtualDatacentersDto getVirtualDatacenters(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -291,8 +294,13 @@ public class EnterpriseResource extends AbstractResource
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
         dto.setIsReservationRestricted(e.getIsReservationRestricted());
+        if (e.getPricingTemplate() != null)
+        {
+            dto.setIdPricingTemplate(e.getPricingTemplate().getId());
+        }
 
         dto = addLinks(restBuilder, dto);
         return dto;
     }
+
 }

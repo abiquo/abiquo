@@ -28,47 +28,56 @@ import java.io.Serializable;
 
 /**
  * @author Administrador
- *
  */
-public class Machine implements Serializable {
+public class Machine implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -6681021267430777140L;
-	/**
+    private static final long serialVersionUID = -6681021267430777140L;
+
+    /**
 	 * 
 	 */
-	private String name;
-	private VirtualMachine virtualMachine;
+    private String name;
 
-	public Machine(String machineName) {
-		this.setName(machineName);
-	}
+    private VirtualMachine virtualMachine;
 
-	public static Machine machine(String machineName) {
-		return new Machine(machineName);
-	}
+    public Machine(String machineName)
+    {
+        this.setName(machineName);
+    }
 
-	public Machine virtualMachine(VirtualMachine machine) {
-		this.setVirtualMachine(machine);
-		return this;
-	}
+    public static Machine machine(String machineName)
+    {
+        return new Machine(machineName);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Machine virtualMachine(VirtualMachine machine)
+    {
+        this.setVirtualMachine(machine);
+        return this;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public void setVirtualMachine(VirtualMachine virtualMachine) {
-		this.virtualMachine = virtualMachine;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public VirtualMachine getVirtualMachine() {
-		return virtualMachine;
-	}
+    public void setVirtualMachine(VirtualMachine virtualMachine)
+    {
+        this.virtualMachine = virtualMachine;
+    }
+
+    public VirtualMachine getVirtualMachine()
+    {
+        return virtualMachine;
+    }
 
 }

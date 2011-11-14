@@ -28,6 +28,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.BadCredentialsException;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
 
@@ -61,6 +63,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      */
     private String apiUri;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
+
     /**
      * Factory of DAOs and transaction manager.
      */
@@ -71,8 +75,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     public AuthenticationManagerApi()
     {
@@ -104,8 +108,10 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 // The session does not exist, so is not valid
                 checkSessionResult.setResultCode(BasicResult.SESSION_INVALID);
-                errorManager
-                    .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                // logger.debug("The session is invalid. Please log in again. "); // log into the
+                // authentication.log
+                // errorManager
+                // .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
             }
             else
             {
@@ -125,8 +131,11 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     getUserSessionDAO().makeTransient(sessionToCheck);
 
                     checkSessionResult.setResultCode(BasicResult.SESSION_TIMEOUT);
-                    errorManager.reportError(resourceManger, checkSessionResult,
-                        "checkSession.expired");
+                    // logger.debug("The session is expired. Please log in again. "); // log into
+                    // the
+                    // authentication.log
+                    // errorManager.reportError(resourceManger, checkSessionResult,
+                    // "checkSession.expired");
                 }
 
             }
@@ -155,7 +164,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param login credentials.
      * @return BasicAuthSecurityHandler ready to be placed in the chain.
      */
-    private BasicAuthSecurityHandler createAuthenticationToken(Login login)
+    private BasicAuthSecurityHandler createAuthenticationToken(final Login login)
     {
         BasicAuthSecurityHandler basicAuthHandler = new BasicAuthSecurityHandler();
         basicAuthHandler.setUserName(login.getUser());
@@ -170,7 +179,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param login credentials.
      * @return Md5 hash of the credentials.
      */
-    private String createMd5encodedPassword(Login login)
+    private String createMd5encodedPassword(final Login login)
     {
         Md5PasswordEncoder encoder = new Md5PasswordEncoder();
         String passwordHash = encoder.encodePassword(login.getPassword(), null);
@@ -183,7 +192,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB DB user.
      * @return UserSession logged user.
      */
-    private UserSession createUserSession(UserHB userHB)
+    private UserSession createUserSession(final UserHB userHB)
     {
         UserSession userSession = new UserSession();
         userSession.setUser(userHB.getUser());
@@ -211,7 +220,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB
      * @param dataResult void
      */
-    private void deleteOldSessions(UserHB userHB, DataResult<LoginResult> dataResult)
+    private void deleteOldSessions(final UserHB userHB, final DataResult<LoginResult> dataResult)
     {
         // Looking for all existing active sessions of this user, ordered by when were
         getUserSessionDAO().deleteUserSessionsOlderThan(userHB.getName(), new Date());
@@ -224,7 +233,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @see com.abiquo.abiserver.business.authentication.IAuthenticationManager#doLogin(com.abiquo.abiserver.pojo.authentication.Login)
      */
     @Override
-    public DataResult<LoginResult> doLogin(Login login)
+    public DataResult<LoginResult> doLogin(final Login login)
 
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
@@ -278,7 +287,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param basicAuthHandler handler.
      * @return DataResult<UserDto>
      */
-    private DataResult<UserDto> apiLoginCall(Login login, BasicAuthSecurityHandler basicAuthHandler)
+    private DataResult<UserDto> apiLoginCall(final Login login,
+        final BasicAuthSecurityHandler basicAuthHandler)
     {
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.handlers(basicAuthHandler);
@@ -288,7 +298,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         return dataResultDto;
     }
 
-    private DataResult<LoginResult> login(Login login, UserDto userDto) throws Exception
+    private DataResult<LoginResult> login(final Login login, final UserDto userDto)
+        throws Exception
     {
         DataResult<LoginResult> dataResult;
         UserHB userHB;
@@ -338,7 +349,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * 
      * @param sessionToCheck current session void.
      */
-    private void extendSession(UserSession sessionToCheck)
+    private void extendSession(final UserSession sessionToCheck)
     {
         // The session is valid updating the expire Date
         int sessionTimeout = abiConfig.getSessionTimeout();
@@ -383,7 +394,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param dataResult
      * @param loginResult void
      */
-    private void generate(DataResult<LoginResult> dataResult, LoginResult loginResult)
+    private void generate(final DataResult<LoginResult> dataResult, final LoginResult loginResult)
     {
         // Generating the DataResult
         dataResult.setSuccess(true);
@@ -399,7 +410,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userSession logged user.
      * @return LoginResult pojo containing the data to login.
      */
-    private LoginResult generateLoginResult(UserHB userHB, UserSession userSession)
+    private LoginResult generateLoginResult(final UserHB userHB, final UserSession userSession)
     {
         // Generating the login result, with the user who has logged in and his session
         LoginResult loginResult = new LoginResult();
@@ -473,7 +484,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @return DB user.
      * @throws Exception UserHB.
      */
-    private UserHB getUserToPersistSession(Login login, UserDto userDto) throws Exception
+    private UserHB getUserToPersistSession(final Login login, final UserDto userDto)
+        throws Exception
     {
         // Get the user from the appropiate source
         UserHB userHB = null;
@@ -518,14 +530,16 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
-                    userHB.getPassword())
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
+                    .getPassword())
                     + userHB.getAuthType();
 
             if (!signature.equals(tokenSignature))
             {
                 return null;
             }
+            userHB.setEnterpriseHB(getFactory().getEnterpriseDAO().findById(
+                userHB.getEnterpriseHB().getIdEnterprise()));
         }
 
         return userHB;
@@ -547,7 +561,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userHB user.
      * @return DataResult<LoginResult>
      */
-    public DataResult<LoginResult> persistLogin(UserHB userHB)
+    public DataResult<LoginResult> persistLogin(final UserHB userHB)
     {
         DataResult<LoginResult> dataResult = new DataResult<LoginResult>();
         getFactory().beginConnection();
@@ -603,7 +617,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      * @param userDto user dto returned from the API.
      * @return db user, representation of an Hibernate pojo user.
      */
-    private UserHB userDtoToUserHB(UserDto userDto)
+    private UserHB userDtoToUserHB(final UserDto userDto)
     {
         UserHB userHB = new UserHB();
         userHB.setActive(userDto.isActive() ? 1 : 0);
@@ -617,14 +631,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         userHB.setSurname(userDto.getSurname());
         userHB.setUser(userDto.getNick());
         userHB.setAuthType(userDto.getAuthType());
-        EnterpriseHB enterpriseHB = getEnterpriseDAO().findById(userDto.getIdEnterprise());
+        EnterpriseHB enterpriseHB =
+            getEnterpriseDAO().findById(userDto.getIdFromLink("enterprise"));
 
-        RoleHB roleHB = getRoleDAO().findById(userDto.getIdRole());
+        RoleHB roleHB = getRoleDAO().findById(userDto.getIdFromLink("role"));
 
         userHB.setEnterpriseHB(enterpriseHB);
         userHB.setRoleHB(roleHB);
 
         return userHB;
     }
-
 }

@@ -44,6 +44,7 @@ public interface DHCPServiceDAO extends DAO<DHCPServiceHB, Integer>
      * @return an available {@link IpPoolManagement} object.
      * @throws PersistenceException if there is any problem trying to access to database.
      */
-    public IpPoolManagementHB getNextAvailableIp(Integer dhcpServiceId, String gateway) throws PersistenceException;
+    public IpPoolManagementHB getNextAvailableIp(Integer dhcpServiceId, String gateway)
+        throws PersistenceException;
 
 }

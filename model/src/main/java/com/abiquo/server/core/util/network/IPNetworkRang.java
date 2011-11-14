@@ -68,7 +68,7 @@ public class IPNetworkRang
         {
             return IPAddress.newIPAddress("255.255.255.255");
         }
-        
+
         switch (mask)
         {
             case 0:

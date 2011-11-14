@@ -54,7 +54,7 @@ public class EnterpriseRepositoriesResource extends AbstractResource
     @GET
     public EnterprisesDto getEnterpriseRepositories(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType, @Context IRESTBuilder restBuilder)
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType, @Context IRESTBuilder restBuilder)
         throws Exception
     {
 

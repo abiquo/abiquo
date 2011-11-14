@@ -42,7 +42,7 @@ import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.State;
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -141,7 +141,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -156,9 +156,8 @@ public class NetworkService extends DefaultApiService
 
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                IpPoolManagement.DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
+                .valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -198,7 +197,8 @@ public class NetworkService extends DefaultApiService
      * @return the created {@link VLANNetwork} object.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VLANNetwork createPrivateNetwork(final Integer vdcId, final VLANNetwork newVlan)
+    public VLANNetwork createPrivateNetwork(final Integer vdcId, final VLANNetwork newVlan,
+        final Boolean defaultVlan)
     {
 
         VirtualDatacenter virtualDatacenter = getVirtualDatacenter(vdcId);
@@ -253,6 +253,10 @@ public class NetworkService extends DefaultApiService
                     + "' has been created in " + virtualDatacenter.getName();
             tracer.log(SeverityType.INFO, ComponentType.NETWORK, EventType.VLAN_CREATED,
                 messageTrace);
+        }
+        if (defaultVlan != null && defaultVlan == true)
+        {
+            setInternalNetworkAsDefaultInVirtualDatacenter(vdcId, newVlan.getId());
         }
         return newVlan;
     }
@@ -442,8 +446,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -652,7 +656,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -670,22 +674,30 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
         Boolean found = Boolean.FALSE;
+        Integer configurationId = null;
         for (IpPoolManagement ip : ips)
         {
             if (!found)
             {
                 if (Integer.valueOf(ip.getRasd().getConfigurationName()).equals(nicOrder))
                 {
+
                     // if this ip is the used by configurate the network, raise an exception.
                     if (ip.getConfigureGateway() == Boolean.TRUE)
                     {
-                        addConflictErrors(APIError.VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION);
-                        flushErrors();
+                        if (repo.findIpsWithConfigurationIdInVirtualMachine(vm,
+                            ip.getVlanNetwork().getConfiguration().getId()).size() == 1)
+                        {
+                            addConflictErrors(APIError.VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION);
+                            flushErrors();
+                        }
+                        configurationId = ip.getVlanNetwork().getConfiguration().getId();
                     }
                     repo.deleteRasd(ip.getRasd());
                     // this is the object to release.
                     ip.setVirtualAppliance(null);
                     ip.setVirtualMachine(null);
+                    ip.setConfigureGateway(Boolean.FALSE);
                     if (ip.isExternalIp())
                     {
                         // set virtual datacenter as null when release an external IP.
@@ -734,6 +746,21 @@ public class NetworkService extends DefaultApiService
             }
         }
 
+        // Do the loop again to see if we can set the configuration gateway to another
+        // ip...
+        if (configurationId != null)
+        {
+            ips = repo.findIpsByVirtualMachine(vm);
+            for (IpPoolManagement ip : ips)
+            {
+                if (ip.getVlanNetwork().getConfiguration().getId().equals(configurationId))
+                {
+                    ip.setConfigureGateway(Boolean.TRUE);
+                    repo.updateIpManagement(ip);
+                }
+            }
+        }
+
         // if the found is FALSE it means any NIC matches with the URI! Throw a NotFound
         if (!found)
         {
@@ -766,7 +793,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -894,10 +921,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress()
-            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask()
-                .equals(newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
+            newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask().equals(
+                newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -910,8 +937,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway()
-            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
+            oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1003,12 +1030,13 @@ public class NetworkService extends DefaultApiService
         // Recover the virtual machine for trace purposes
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        // The user has the role for manage This. But... is the user from the same enterprise
+        // The user has the role for execute this action. But... is the user from the same
+        // enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(repo.findById(vdcId).getEnterprise());
 
         // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(State.NOT_DEPLOYED))
+        if (!vm.getState().equals(VirtualMachineState.NOT_DEPLOYED))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
@@ -1256,13 +1284,8 @@ public class NetworkService extends DefaultApiService
             }
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp,
-                    vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName(),
-                    type);
+                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
+                    .getName(), type);
 
             if (vdc != null)
             {

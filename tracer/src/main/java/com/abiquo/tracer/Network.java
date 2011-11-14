@@ -23,28 +23,34 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class Network implements Serializable {
+public class Network implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -9014596918048568375L;
+    private static final long serialVersionUID = -9014596918048568375L;
 
-	private String name;
+    private String name;
 
-	private Network(String network) {
-		this.setName(network);
-	}
+    private Network(String network)
+    {
+        this.setName(network);
+    }
 
-	public static Network network(String network) {
-		return new Network(network);
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
+    public static Network network(String network)
+    {
+        return new Network(network);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
 
 }
