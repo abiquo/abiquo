@@ -69,6 +69,11 @@
             {
             	this._type = value;
             }
+            
+            public function get type():String
+            {
+                return this._type;
+            }
 
             //The virtual machine that will be rendered
             [Bindable]
@@ -114,6 +119,7 @@
             
             public function set virtualDatacenter(value:VirtualDataCenter):void{
             	this._virtualDatacenter = value;
+            	dispatchEvent(new Event("virtualDatacenterChange"));
             }
             
             [Bindable(event="virtualDatacenterChange")]
@@ -128,6 +134,7 @@
             
             public function set virtualAppliance(value:VirtualAppliance):void{
                 this._virtualAppliance = value;
+                dispatchEvent(new Event("virtualApplianceChange"));
             }
             
             [Bindable(event="virtualApplianceChange")]
