@@ -25,8 +25,9 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -105,9 +106,9 @@ public class HyperVCollector extends AbstractCollector
     /** Folder mark perfix. */
     private static String DATASTORE_UUID_MARK = "abq_datastoreuuid_";
 
-    // Could this be at AbstractCollector? (XenServerIncompatible)
-    /** Pattern to match with the mark folder. */
-    private static String DATASTORE_UUID_MARK_PATTERN = DATASTORE_UUID_MARK + "*";
+    private static String STANDARD_DISKS_KEY = "STANDARD_DISKS";
+
+    private static String VOLUME_DISKS_KEY = "VOLUME_DISKS";
 
     @Override
     public void connect(final String user, final String password) throws ConnectionException,
@@ -252,7 +253,7 @@ public class HyperVCollector extends AbstractCollector
                     final VirtualSystemDto vm = new VirtualSystemDto();
                     vm.setUuid(uuid);
                     vm.setName(name);
-                    vm.getResources().addAll(getVirtualDisks(dispatch));
+                    vm.getResources().addAll(getDisksInfo(dispatch));
                     vm.setCpu(getVirtualProcessors(dispatch));
                     vm.setVport(0L);
                     vm.setStatus(vmStatus);
@@ -444,16 +445,22 @@ public class HyperVCollector extends AbstractCollector
      * @throws JIException If the list of virtual disks cannot be retrieved.
      * @throws CollectorException If disk information cannot be retrieved.
      */
-    private List<ResourceType> getVirtualDisks(final IJIDispatch virtualSystem) throws JIException,
+    private List<ResourceType> getDisksInfo(final IJIDispatch virtualSystem) throws JIException,
         CollectorException
     {
         List<ResourceType> disks = new ArrayList<ResourceType>();
         String virtualSystemPath = HyperVUtils.getDispatchPath(virtualSystem);
         MsvmImageManagementService imageManagementService =
             MsvmImageManagementService.getManagementService(virtService);
-        List<IJIDispatch> diskSettings = getDiskSettings(virtualSystemPath, virtService);
+        Map<String, List<IJIDispatch>> diskSettings =
+            getDiskSettings(virtualSystemPath, virtService);
 
-        for (IJIDispatch dispatch : diskSettings)
+        // Getting info on standard VHD and volume disks as Msvm_ResourceAllocationSettingData
+        // instances
+        List<IJIDispatch> standardDiskSettings = diskSettings.get(STANDARD_DISKS_KEY);
+        List<IJIDispatch> volumeDiskSettings = diskSettings.get(VOLUME_DISKS_KEY);
+
+        for (IJIDispatch dispatch : standardDiskSettings)
         {
 
             // Get disk image path
@@ -463,13 +470,21 @@ public class HyperVCollector extends AbstractCollector
             imagePath = imagePath.replace("\\\\", "\\");
             ResourceType disk = new ResourceType();
             disk.setAddress(imagePath);
-            disk.setResourceType(ResourceEnumType.HARD_DISK);
+
             disk.setConnection(getDatastoreFromFile(imagePath));
+
+            disk.setResourceType(ResourceEnumType.HARD_DISK);
+
+            // TODO: we should also try to get bus number (IDE or SCSI used port associated)
+            // disk.setAttachment({ControllerPort});
+
             try
             {
                 // Must be one element disk.setImagePath(imagePath);
                 // Get image size
                 String info = imageManagementService.getVirtualHardDiskInfo(imagePath);
+
+                LOGGER.info("getStandardDisks: " + info);
 
                 String imageSize = XPathUtils.getValue("//PROPERTY[@NAME='FileSize']/VALUE", info);
                 String typeString = XPathUtils.getValue("//PROPERTY[@NAME='Type']/VALUE", info);
@@ -514,12 +529,116 @@ public class HyperVCollector extends AbstractCollector
                 disk.setResourceSubType(VirtualDiskEnumType.VHD_SPARSE.value());
                 disk.setUnits(new Long(0));
             }
-            disks.add(disk);
 
+            disks.add(disk);
+        }
+
+        // INFO FOR VOLUME DISKS: we can get more info from Msvm_DiskDrive
+        // Previously we collect all Win32_DiskDrive available
+        Map<String, IJIDispatch> win32DiskDrives = getAllWin32DiskDrives();
+
+        for (IJIDispatch dispatch : volumeDiskSettings)
+        {
+
+            ResourceType disk = new ResourceType();
+            disk.setResourceType(ResourceEnumType.VOLUME_DISK);
+
+            JIArray hostResource = dispatch.get("HostResource").getObjectAsArray();
+            JIVariant[] array = (JIVariant[]) hostResource.getArrayInstance();
+            String deviceID = array[0].getObjectAsString2();
+
+            int diskDriveNumber = getDiskDriveNumberForDisk(deviceID);
+
+            // Now we may get Win32_DiskDrive and find the Number
+
+            // Parse \\.\PHYSICALDRIVE{DriveNumber} in Win32_DiskDrive collection
+            IJIDispatch diskDriveDispatch =
+                win32DiskDrives.get("\\\\.\\PHYSICALDRIVE" + diskDriveNumber);
+            if (diskDriveDispatch != null)
+            {
+                long sizeinBytes = 0;
+                try
+                {
+                    sizeinBytes =
+                        Long.parseLong(diskDriveDispatch.get("Size").getObjectAsString2());
+                }
+                catch (Exception sizeEx)
+                {
+                    LOGGER.error("Could not obtain size for diskDriveNumber " + diskDriveNumber,
+                        sizeEx);
+                }
+                disk.setUnits(sizeinBytes);
+            }
+
+            // TODO: we should also try to get bus number (IDE or SCSI used port associated)
+            // disk.setAttachment({ControllerPort});
+
+            disks.add(disk);
         }
 
         return disks;
 
+    }
+
+    /**
+     * Looks for DiskDriveNumber in Msvm_DiskDrive class associated to
+     * Msvm_ResourceAllocationSettingData (by DeviceID
+     * 
+     * @param deviceID
+     * @return
+     */
+    private int getDiskDriveNumberForDisk(String deviceID)
+    {
+        int diskDriveNumber = -1;
+        try
+        {
+            int deviceIDIndex = deviceID.indexOf("DeviceID=\"") + 10;
+            String parsedDeviceID =
+                deviceID.substring(deviceIDIndex, deviceID.indexOf("\"", deviceIDIndex));
+
+            List<IJIDispatch> results =
+                HyperVUtils.execQuery("Select * from Msvm_DiskDrive where DeviceID LIKE '%"
+                    + parsedDeviceID + "%'", virtService);
+            IJIDispatch dispatch = results.get(0);
+
+            diskDriveNumber = dispatch.get("DriveNumber").getObjectAsInt();
+
+        }
+        catch (Exception e)
+        {
+            LOGGER
+                .error(
+                    "Could not obtain DiskDrive Number (Msvm_DiskDrive) associated with this Virtual Machine",
+                    e);
+        }
+
+        return diskDriveNumber;
+    }
+
+    /**
+     * Get all Win32_DiskDrives objects mapped by DeviceID
+     * 
+     * @return
+     */
+    private Map<String, IJIDispatch> getAllWin32DiskDrives()
+    {
+        Map<String, IJIDispatch> result = new HashMap<String, IJIDispatch>();
+
+        List<IJIDispatch> win32DiskDrives;
+        try
+        {
+            win32DiskDrives = HyperVUtils.execQuery("Select * from Win32_DiskDrive", cimService);
+            for (IJIDispatch resourceDispatch : win32DiskDrives)
+            {
+                result.put(resourceDispatch.get("DeviceID").getObjectAsString2(), resourceDispatch);
+            }
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("Retrieving information on attached disks (Win32_DiskDrive) failed ", ex);
+        }
+
+        return result;
     }
 
     /**
@@ -551,7 +670,7 @@ public class HyperVCollector extends AbstractCollector
      * @throws JIException If settings cannot be retrieved.
      * @throws CollectorException If settings cannot be retrieved.
      */
-    private List<IJIDispatch> getDiskSettings(final String virtualSystemPath,
+    private Map<String, List<IJIDispatch>> getDiskSettings(final String virtualSystemPath,
         final SWbemServices service) throws JIException, CollectorException
     {
         // Get virtual machine settings
@@ -564,15 +683,28 @@ public class HyperVCollector extends AbstractCollector
                 + "AssocClass = Msvm_VirtualSystemSettingDataComponent "
                 + "ResultClass = Msvm_ResourceAllocationSettingData";
         List<IJIDispatch> results = HyperVUtils.execQuery(settingsQuery, service);
-        // Filter virtual hard disks
-        for (Iterator<IJIDispatch> it = results.iterator(); it.hasNext();)
+
+        List<IJIDispatch> standardDiskResults = new ArrayList<IJIDispatch>();
+        List<IJIDispatch> volumeDiskResults = new ArrayList<IJIDispatch>();
+
+        Map<String, List<IJIDispatch>> resultMap = new HashMap<String, List<IJIDispatch>>(2);
+
+        for (IJIDispatch ijiDispatch : results)
         {
-            if (!HyperVUtils.isVirtualHardDisk(it.next()))
+            if (HyperVUtils.isVolumeDisk(ijiDispatch))
             {
-                it.remove();
+                volumeDiskResults.add(ijiDispatch);
             }
+            if (HyperVUtils.isVirtualHardDisk(ijiDispatch))
+            {
+                standardDiskResults.add(ijiDispatch);
+            }
+
         }
-        return results;
+        resultMap.put(STANDARD_DISKS_KEY, standardDiskResults);
+        resultMap.put(VOLUME_DISKS_KEY, volumeDiskResults);
+
+        return resultMap;
     }
 
     /**
@@ -628,7 +760,7 @@ public class HyperVCollector extends AbstractCollector
         // Returning vswitch list
         List<ResourceType> resources = new ArrayList<ResourceType>();
         resources.addAll(filterNetworkList());
-        resources.addAll(getPhysicalDisks());
+        resources.addAll(getDatastoresAsWin32LogicalDisk());
         resources.addAll(getMappedLogicalDisks());
 
         return resources;
@@ -702,13 +834,14 @@ public class HyperVCollector extends AbstractCollector
     }
 
     /**
-     * Gets the physical disk list of the host.
+     * Gets All datastores enabled in Hyper-V machine as mapped network drives
      * 
-     * @return The physical disk list
+     * @return The Win32_LogicalDisk list
      * @throws JIException If disk size cannot be retrieved.
      * @throws CollectorException If Physical drive cannot be retrieved.
      */
-    private List<ResourceType> getPhysicalDisks() throws JIException, CollectorException
+    private List<ResourceType> getDatastoresAsWin32LogicalDisk() throws JIException,
+        CollectorException
     {
         List<IJIDispatch> results =
             HyperVUtils.execQuery("Select * from Win32_LogicalDisk", cimService);
