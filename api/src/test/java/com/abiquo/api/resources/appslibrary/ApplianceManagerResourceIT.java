@@ -21,10 +21,12 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
 import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObject;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
@@ -50,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.EnterpriseResource;
@@ -61,6 +64,7 @@ import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.appslibrary.VirtualImagesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
@@ -92,8 +96,8 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     // "http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
     // "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
 
-    protected final static String REPO_PATH = getParameter(
-        "abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
+    protected final static String REPO_PATH =
+        getParameter("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
 
     private RemoteServiceDto amDto()
     {
@@ -170,6 +174,152 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
         RemoteService am = createPersistenceObject(amDto());
         service.addRemoteService(am, datacenter.getId());
+    }
+
+    @Test(groups = {AM_INTEGRATION_TESTS})
+    public void deleteVirtualImage()
+    {
+
+        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+
+        boolean isdownloaded = false;
+        while (!isdownloaded)
+        {
+            OVFPackageInstanceStateDto status =
+                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+
+            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            {
+                isdownloaded = true;
+                assertNull(status.getErrorCause());
+            }
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            {
+                LOG.info("Download {}", DEFAULT_OVF);
+                isdownloaded = true;
+            }
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            {
+                LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
+                    DEFAULT_OVF);
+            }
+
+            try
+            {
+                Thread.sleep(100);
+            }
+            catch (InterruptedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+
+        for (VirtualImageDto vimage : dto.getCollection())
+        {
+            String uriVimage =
+                resolveVirtualImageURI(ent.getId(), datacenter.getId(), vimage.getId());
+            ClientResponse resp = get(uriVimage, SYSADMIN, SYSADMIN);
+            assertEquals(response.getStatusCode(), 200);
+
+            resp = delete(uriVimage, SYSADMIN, SYSADMIN);
+            assertEquals(resp.getStatusCode(), 200);
+
+            resp = get(uri, SYSADMIN, SYSADMIN);
+            assertEquals(resp.getStatusCode(), 404);
+
+        }
+
+    }
+
+    @Test(groups = {AM_INTEGRATION_TESTS})
+    public void deleteSharedImage()
+    {
+        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+
+        boolean isdownloaded = false;
+        while (!isdownloaded)
+        {
+            OVFPackageInstanceStateDto status =
+                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+
+            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            {
+                isdownloaded = true;
+                assertNull(status.getErrorCause());
+            }
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            {
+                LOG.info("Download {}", DEFAULT_OVF);
+                isdownloaded = true;
+            }
+            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            {
+                LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
+                    DEFAULT_OVF);
+            }
+
+            try
+            {
+                Thread.sleep(100);
+            }
+            catch (InterruptedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+
+        for (VirtualImageDto vimage : dto.getCollection())
+        {
+            String uriVimage =
+                resolveVirtualImageURI(ent.getId(), datacenter.getId(), vimage.getId());
+            ClientResponse resp = get(uriVimage, SYSADMIN, SYSADMIN);
+            assertEquals(response.getStatusCode(), 200);
+
+            VirtualImageDto vimageDto = resp.getEntity(VirtualImageDto.class);
+            vimageDto.setShared(Boolean.TRUE);
+
+            resp = put(uriVimage, vimageDto, SYSADMIN, SYSADMIN);
+            assertEquals(resp.getStatusCode(), 200);
+
+            resp = delete(uriVimage, SYSADMIN, SYSADMIN);
+            assertEquals(resp.getStatusCode(), 200);
+
+            resp = get(uri, SYSADMIN, SYSADMIN);
+            assertEquals(resp.getStatusCode(), 404);
+
+        }
     }
 
     @Test
@@ -282,8 +432,8 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
 
     private static String amEnterpriseRepositoryUrl(final Integer enterpriseId)
     {
-        return String.format("%s/erepos/%s", TestServerAndAMListener.AM_URI,
-            enterpriseId.toString());
+        return String.format("%s/erepos/%s", TestServerAndAMListener.AM_URI, enterpriseId
+            .toString());
     }
 
 }

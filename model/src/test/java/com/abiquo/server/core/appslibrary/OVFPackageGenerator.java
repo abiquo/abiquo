@@ -55,7 +55,7 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, OVFPackage.PRODUCT_VERSION_PROPERTY,
             OVFPackage.NAME_PROPERTY, OVFPackage.PRODUCT_VENDOR_PROPERTY,
             OVFPackage.PRODUCT_URL_PROPERTY, OVFPackage.URL_PROPERTY, OVFPackage.TYPE_PROPERTY,
-            OVFPackage.PRODUCT_NAME_PROPERTY, OVFPackage.DISK_SIZE_MB_PROPERTY,
+            OVFPackage.PRODUCT_NAME_PROPERTY, OVFPackage.DISK_FILE_SIZE_PROPERTY,
             OVFPackage.DESCRIPTION_PROPERTY);
     }
 

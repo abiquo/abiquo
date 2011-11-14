@@ -320,7 +320,9 @@ public enum APIError
         "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED(
         "VIMAGE-7",
         "The requested virtual image is a master image, master images cannot be deleted"), VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED(
-        "VIMAGE-8", "Cannot delete a stateful image"),
+        "VIMAGE-8", "Cannot delete a stateful image"), VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE(
+        "VIMAGE-9",
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",

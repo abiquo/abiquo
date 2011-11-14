@@ -78,7 +78,7 @@ public class OVFPackageInstanceToOVFEnvelope
         // final String packRelPath = getRelativePackagePath(disk.getOvfUrl(),
         // String.valueOf(disk.getIdEnterprise()));
 
-        final Long diskSize = disk.getDiskSizeMb();
+        final Long diskSize = disk.getDiskFileSize();
 
         // final String completPath = packRelPath +'/'+diskPath;
         // System.err.println(packRelPath);
@@ -117,7 +117,7 @@ public class OVFPackageInstanceToOVFEnvelope
     {
         DiskFormat format = DiskFormat.fromName(disk.getDiskFileFormat().name());
 
-        final Long diskSize = disk.getDiskSizeMb();
+        final Long diskSize = disk.getDiskFileSize();
 
         // TODO getHDUnits
         VirtualDiskDescType diskDesc =
@@ -137,8 +137,8 @@ public class OVFPackageInstanceToOVFEnvelope
         throws Exception
     {
         VirtualSystemType vsystem =
-            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(),
-                disk.getDescription());
+            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(), disk
+                .getDescription());
 
         VirtualHardwareSectionType vhs = createVirtualHardwareSection(disk);
 

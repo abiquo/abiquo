@@ -74,15 +74,15 @@ public class OVFPackageInstancesResource
     static OVFPackageInstanceService service;// TODO null
 
     @Resource(name = "ovfPackageInstanceService")
-    public void setService(OVFPackageInstanceService service)
+    public void setService(final OVFPackageInstanceService service)
     {
-        this.service = service;
+        OVFPackageInstancesResource.service = service;
     }
 
     //
     ApplicationContext ctx;
 
-    public void setApplicationContext(org.springframework.context.ApplicationContext ctx)
+    public void setApplicationContext(final org.springframework.context.ApplicationContext ctx)
     {
         this.ctx = ctx;
     }
@@ -99,12 +99,11 @@ public class OVFPackageInstancesResource
      */
     @GET
     public OVFPackageInstancesStateDto getOVFPackageInstancesStatus(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise)
     {
         List<String> availables =
-            EnterpriseRepositoryFileSystem.getAllOVF(
-                EnterpriseRepositoryService.getRepo(idEnterprise).getEnterpriseRepositoryPath(),
-                false);
+            EnterpriseRepositoryFileSystem.getAllOVF(EnterpriseRepositoryService.getRepo(
+                idEnterprise).getEnterpriseRepositoryPath(), false);
 
         OVFPackageInstancesStateDto list = new OVFPackageInstancesStateDto();
 
@@ -125,8 +124,8 @@ public class OVFPackageInstancesResource
      */
     @POST
     public void downloadOVFPackage(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        String ovfId)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        final String ovfId)
     {
         logger.debug("[deploy] {}", ovfId);
 
@@ -173,9 +172,9 @@ public class OVFPackageInstancesResource
 
     @POST
     @Consumes("multipart/form-data")
-    public Response uploadOVFPackage(@Context HttpHeaders headers,
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        InMultiPart mp, @Context Providers providers) throws IOException, EventException
+    public Response uploadOVFPackage(@Context final HttpHeaders headers,
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        final InMultiPart mp, @Context final Providers providers) throws IOException, EventException
     {
         OVFPackageInstanceDto diskInfo = null;
         String errorMsg = null;
@@ -213,14 +212,14 @@ public class OVFPackageInstancesResource
          * TODO check OVFid is in this hostname ..
          */
 
-        diskInfo.setDiskSizeMb(diskFile.length());
+        diskInfo.setDiskFileSize(diskFile.length());
         service.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getOvfId())).build();
     }
 
-    private OVFPackageInstanceDto readOVFPackageInstanceDtoFromMultipart(InPart diskInfoPart,
-        HttpHeaders headers, Providers providers) throws Exception
+    private OVFPackageInstanceDto readOVFPackageInstanceDtoFromMultipart(final InPart diskInfoPart,
+        final HttpHeaders headers, final Providers providers) throws Exception
     {
         fixMediaType(diskInfoPart);
 
@@ -249,7 +248,7 @@ public class OVFPackageInstancesResource
      * @param in string.
      * @return with no '\' characters.
      */
-    private String removeFakePath(String in)
+    private String removeFakePath(final String in)
     {
         // TODO this is a hack as the server adds the fake path somehow
         return in.replace("C:\\fakepath\\", "").replace("\\", "/");
@@ -261,7 +260,7 @@ public class OVFPackageInstancesResource
      * @param in a String that might contain control caracters.
      * @return same String that does not contains any control caracters.
      */
-    private String removeControlChar(String in)
+    private String removeControlChar(final String in)
     {
         StringBuilder sb = new StringBuilder();
         for (char c : in.toCharArray())
@@ -276,7 +275,7 @@ public class OVFPackageInstancesResource
 
     // CaseInsensitiveMultivaluedMap [map=[Content-Disposition=form-data; name="diskInfo";
     // filename="diskInfo.json",Content-Type=application/json]]
-    private void fixMediaType(InPart diskInfoPart)
+    private void fixMediaType(final InPart diskInfoPart)
     {
         if (diskInfoPart.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE) == null)
         {
@@ -284,7 +283,7 @@ public class OVFPackageInstancesResource
         }
     }
 
-    private void copy(InputStream fin, File destFile) throws IOException
+    private void copy(final InputStream fin, final File destFile) throws IOException
     {
         OutputStream fout = new FileOutputStream(destFile);
         try

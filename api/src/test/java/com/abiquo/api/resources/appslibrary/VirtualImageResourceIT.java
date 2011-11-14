@@ -65,6 +65,7 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.testng.TestServerAndAMListener;
 
 public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
@@ -84,6 +85,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         datacenter = datacenterGenerator.createUniqueInstance();
         repository = repositoryGenerator.createInstance(datacenter);
 
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+
         RemoteService am =
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, datacenter);
         am.setUri(TestServerAndAMListener.AM_URI);
@@ -94,6 +97,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(ent);
         entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(limits);
         entitiesToSetup.add(repository);
         entitiesToSetup.add(am);
 
@@ -105,13 +109,15 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(user);
 
         setup(entitiesToSetup.toArray());
+
     }
 
     @Test
     public void testGetVirtualImageRaises409WhenNoDatacenterLimits()
     {
+        ent = enterpriseGenerator.createUniqueInstance();
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        setup(virtualImage.getCategory(), virtualImage);
+        setup(ent, virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -146,8 +152,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void testGetVirtualImageRaises404WhenInvalidVirtualImage()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri =
             resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId() + 100);
@@ -159,8 +164,7 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualImage()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -175,9 +179,8 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
         VirtualImage slave = virtualImageGenerator.createSlaveImage(master);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
-        setup(limits, slave.getCategory(), master, slave);
+        setup(slave.getCategory(), master, slave);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), slave.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -191,11 +194,10 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualImageWithIcon()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         Icon icon = iconGenerator.createUniqueInstance();
 
         virtualImage.setIcon(icon);
-        setup(limits, virtualImage.getCategory(), icon, virtualImage);
+        setup(virtualImage.getCategory(), icon, virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -209,10 +211,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void getVirtualImageWithoutOVFId()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setOvfid(null);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -226,10 +227,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void editVirtualImage()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setOvfid(null);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -253,10 +253,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void editVirtualImageChangeEnterpriseRises409()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setOvfid(null);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -282,10 +281,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     public void editVirtualImageChangeDataCenterRepoRises409()
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setOvfid(null);
-        setup(limits, virtualImage.getCategory(), virtualImage);
+        setup(virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -314,12 +312,11 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
         VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setMaster(master);
 
         virtualImage.setOvfid(null);
-        setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
+        setup(master.getCategory(), master, virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -341,10 +338,9 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
         VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
-        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         virtualImage.setOvfid(null);
-        setup(limits, master.getCategory(), master, virtualImage.getCategory(), virtualImage);
+        setup(master.getCategory(), master, virtualImage.getCategory(), virtualImage);
 
         String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
@@ -360,6 +356,80 @@ public class VirtualImageResourceIT extends AbstractJpaGeneratorIT
         response = put(uri, dto, SYSADMIN, SYSADMIN);
 
         assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
+    }
+
+    @Test
+    public void deleteMasterImageRises409()
+    {
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+        VirtualImage master = virtualImageGenerator.createInstance(ent, repository);
+
+        virtualImage.setMaster(master);
+
+        virtualImage.setOvfid(null);
+        setup(master.getCategory(), master, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), master.getId());
+
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        response = delete(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED);
+    }
+
+    @Test
+    public void deleteStatefulImageRises409()
+    {
+
+        Datacenter dc = datacenterGenerator.createUniqueInstance();
+
+        VolumeManagement statefulVolume = volumeManagementGenerator.createStatefulInstance(dc);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        volumeManagementGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToSetup);
+
+        DatacenterLimits limitss =
+            datacenterLimitsGenerator.createInstance(statefulVolume.getVirtualImage()
+                .getEnterprise(), dc);
+        RemoteService am =
+            remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, dc);
+        am.setUri(TestServerAndAMListener.AM_URI);
+
+        setup(entitiesToSetup.toArray());
+        setup(limitss, am);
+        String uri =
+            resolveVirtualImageURI(statefulVolume.getVirtualImage().getEnterprise().getId(), dc
+                .getId(), statefulVolume.getVirtualImage().getId());
+
+        ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
+        assertEquals(response.getStatusCode(), 200);
+
+        response = delete(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED);
+    }
+
+    public void deleteSharedImageFromOtherEnterpriseRises409()
+    {
+
+        Enterprise ent1 = enterpriseGenerator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+
+        Repository rep = repositoryGenerator.createInstance(datacenter1);
+
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent1, datacenter1);
+
+        VirtualImage virtualImage = virtualImageGenerator.createInstance(ent, repository);
+
+        virtualImage.setShared(Boolean.TRUE);
+        virtualImage.setEnterprise(ent1);
+
+        virtualImage.setOvfid(null);
+        setup(ent1, datacenter1, rep, limits, virtualImage.getCategory(), virtualImage);
+
+        String uri = resolveVirtualImageURI(ent.getId(), datacenter.getId(), virtualImage.getId());
+
+        ClientResponse response = delete(uri, SYSADMIN, SYSADMIN);
+        assertError(response, 409, APIError.VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE);
     }
 
     // Do not make public to avoid TestNG run it as another test

@@ -185,7 +185,7 @@ public class OVFPackageInstanceFromOVFEnvelope
                     DiskFormatType ovfDiskFormat = DiskFormatType.valueOf(diskFormat.name());
 
                     diskInfo.setDiskFileFormat(ovfDiskFormat);
-                    diskInfo.setDiskSizeMb(fileSize);
+                    diskInfo.setDiskFileSize(fileSize);
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space

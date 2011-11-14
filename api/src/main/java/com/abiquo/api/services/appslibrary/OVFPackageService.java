@@ -216,7 +216,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
             diskSizeL = getDiskFileSizeMbFromOvfId(packageUrl);
         }
 
-        pack.setDiskSizeMb(diskSizeL);
+        pack.setDiskFileSize(diskSizeL);
 
         return pack;
     }

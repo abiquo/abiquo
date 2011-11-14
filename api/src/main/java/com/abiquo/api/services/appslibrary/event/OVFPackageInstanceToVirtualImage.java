@@ -53,8 +53,8 @@ import com.abiquo.tracer.User;
 @Service
 public class OVFPackageInstanceToVirtualImage
 {
-    private final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceToVirtualImage.class);
+    private final static Logger logger =
+        LoggerFactory.getLogger(OVFPackageInstanceToVirtualImage.class);
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -131,8 +131,8 @@ public class OVFPackageInstanceToVirtualImage
 
             if (enterprise != null)
             {
-                if (!appslibraryRep.existImageWithSamePath(enterprise, repository,
-                    disk.getDiskFilePath()))
+                if (!appslibraryRep.existImageWithSamePath(enterprise, repository, disk
+                    .getDiskFilePath()))
                 {
                     notInsertedDisks.add(disk);
                 }
@@ -154,8 +154,8 @@ public class OVFPackageInstanceToVirtualImage
         if (disk.getMasterDiskFilePath() != null)
         {
             master =
-                appslibraryRep.findVirtualImageByPath(enterprise, repository,
-                    disk.getDiskFilePath());
+                appslibraryRep.findVirtualImageByPath(enterprise, repository, disk
+                    .getDiskFilePath());
 
             diskFormat = master.getDiskFormatType();
         }
@@ -167,12 +167,8 @@ public class OVFPackageInstanceToVirtualImage
         Category category = getCategory(disk);
 
         VirtualImage vimage =
-            new VirtualImage(enterprise,
-                disk.getName(),
-                diskFormat,
-                disk.getDiskFilePath(),
-                disk.getDiskSizeMb(),
-                category);
+            new VirtualImage(enterprise, disk.getName(), diskFormat, disk.getDiskFilePath(), disk
+                .getDiskFileSize(), category);
 
         vimage.setIcon(getIcon(disk));
         vimage.setDescription(getDescription(disk));

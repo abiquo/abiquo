@@ -332,28 +332,28 @@ public class OVFPackage extends DefaultEntityBase
         this.productName = productName;
     }
 
-    public final static String DISK_SIZE_MB_PROPERTY = "diskSizeMb";
+    public final static String DISK_FILE_SIZE_PROPERTY = "diskFileSize";
 
-    private final static boolean DISK_SIZE_MB_REQUIRED = false;
+    private final static boolean DISK_FILE_SIZE_REQUIRED = false;
 
-    private final static String DISK_SIZE_MB_COLUMN = "diskSizeMb";
+    private final static String DISK_FILE_SIZE_COLUMN = "diskSizeMb";
 
-    private final static long DISK_SIZE_MB_MIN = Long.MIN_VALUE;
+    private final static long DISK_FILE_SIZE_MIN = Long.MIN_VALUE;
 
-    private final static long DISK_SIZE_MB_MAX = Long.MAX_VALUE;
+    private final static long DISK_FILE_SIZE_MAX = Long.MAX_VALUE;
 
-    @Column(name = DISK_SIZE_MB_COLUMN, nullable = !DISK_SIZE_MB_REQUIRED)
-    @Range(min = DISK_SIZE_MB_MIN, max = DISK_SIZE_MB_MAX)
-    private long diskSizeMb;
+    @Column(name = DISK_FILE_SIZE_COLUMN, nullable = !DISK_FILE_SIZE_REQUIRED)
+    @Range(min = DISK_FILE_SIZE_MIN, max = DISK_FILE_SIZE_MAX)
+    private long diskFileSize;
 
-    public long getDiskSizeMb()
+    public long getDiskFileSize()
     {
-        return this.diskSizeMb;
+        return this.diskFileSize;
     }
 
-    public void setDiskSizeMb(final long diskSizeMb)
+    public void setDiskFileSize(final long diskFileSize)
     {
-        this.diskSizeMb = diskSizeMb;
+        this.diskFileSize = diskFileSize;
     }
 
     public final static String DESCRIPTION_PROPERTY = "description";
@@ -428,14 +428,14 @@ public class OVFPackage extends DefaultEntityBase
 
     public OVFPackage(final String name, final String productName, final String productUrl,
         final String productVendor, final String productVersion, final DiskFormatType type,
-        final String url, final long diskSizeMb)
+        final String url, final long diskFileSize)
     {
         setName(name);
         setProductName(productName);
         setProductUrl(productUrl);
         setProductVendor(productVendor);
         setProductVersion(productVersion);
-        setDiskSizeMb(diskSizeMb);
+        setDiskFileSize(diskFileSize);
         setUrl(url);
         setType(type);
     }
