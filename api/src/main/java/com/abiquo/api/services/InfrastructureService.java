@@ -311,9 +311,7 @@ public class InfrastructureService extends DefaultApiService
         // Get the remote service to monitor the machine
         RemoteService vsmRS =
             getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-        vsmServiceStub.monitor(vsmRS.getUri(), machine.getHypervisor().getIp(), machine
-            .getHypervisor().getPort(), machine.getHypervisor().getType().name(), machine
-            .getHypervisor().getUser(), machine.getHypervisor().getPassword());
+        vsmServiceStub.monitor(vsmRS, machine.getHypervisor());
 
         tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
             + machine.getName() + "' has been created succesfully");

@@ -216,7 +216,7 @@ public class MachineService extends DefaultApiService
         Hypervisor hypervisor = machine.getHypervisor();
         try
         {
-            vsm.shutdownMonitor(vsmRS.getUri(), hypervisor.getIp(), hypervisor.getPort());
+            vsm.shutdownMonitor(vsmRS, hypervisor);
         }
         catch (InternalServerErrorException e)
         {

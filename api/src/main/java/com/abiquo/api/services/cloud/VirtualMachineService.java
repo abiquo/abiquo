@@ -302,8 +302,18 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
+            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
+                virtualMachine.getId());
             producer.openChannel();
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: channel opened successfully",
+                virtualMachine.getId());
+            logger.trace("Deploying of the virtual machine id {} to tarantino: publishing to amqp",
+                virtualMachine.getId());
             producer.publish(reconfigureTask);
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: published successfully",
+                virtualMachine.getId());
             logger.info("Deploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_RECONFIGURE,
@@ -608,10 +618,27 @@ public class VirtualMachineService extends DefaultApiService
         if (!virtualMachine.getState().equals(VirtualMachineState.NOT_ALLOCATED)
             && !virtualMachine.getState().equals(VirtualMachineState.UNKNOWN))
         {
+            logger
+                .error(
+                    "Delete virtual machine error, the State must be NOT_ALLOCATED or UNKNOWN but was {}",
+                    virtualMachine.getState().name());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
+                "Delete of the virtual appliance with name " + virtualMachine.getName()
+                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
+                    + virtualMachine.getState().name());
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
         }
+        logger.debug("Deleting the virtual machine with UUID {}", virtualMachine.getUuid());
         repo.deleteVirtualMachine(virtualMachine);
+        tracer
+            .log(
+                SeverityType.INFO,
+                ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DELETE,
+                "Delete of the virtual appliance with name "
+                    + virtualMachine.getName()
+                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
     }
 
     /**
@@ -785,11 +812,7 @@ public class VirtualMachineService extends DefaultApiService
         RemoteService vsmRS = findRemoteServiceWithTypeInDatacenter(virtualDatacenter);
         try
         {
-            machineService.getVsm().monitor(vsmRS.getUri(), virtualMachine.getHypervisor().getIp(),
-                virtualMachine.getHypervisor().getPort(),
-                virtualMachine.getHypervisor().getType().name(),
-                virtualMachine.getHypervisor().getUser(),
-                virtualMachine.getHypervisor().getPassword());
+            machineService.getVsm().subscribe(vsmRS, virtualMachine);
             logger.debug("Machine registered!");
 
             logger.debug("Creating the DatacenterTask");
@@ -830,9 +853,18 @@ public class VirtualMachineService extends DefaultApiService
             deployTask.getJobs().add(stateJob);
 
             producer = new TarantinoRequestProducer(virtualDatacenter.getDatacenter().getName());
-
+            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
+                virtualMachine.getId());
             producer.openChannel();
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: channel open sucessfully",
+                virtualMachine.getId());
+            logger.trace("Deploying of the virtual machine id {} to tarantino: publishing to amqp",
+                virtualMachine.getId());
             producer.publish(deployTask);
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: published successfully",
+                virtualMachine.getId());
 
             logger.info("Deploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
@@ -866,8 +898,7 @@ public class VirtualMachineService extends DefaultApiService
             // We need to unsuscribe the machine
             logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
                 + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
-            machineService.getVsm().shutdownMonitor(vsmRS.getUri(),
-                virtualMachine.getHypervisor().getIp(), virtualMachine.getHypervisor().getPort());
+            machineService.getVsm().unsubscribe(vsmRS, virtualMachine);
 
             // There is no point in continue
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -1301,8 +1332,18 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
+            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
+                virtualMachine.getId());
             producer.openChannel();
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: channel opened successfully",
+                virtualMachine.getId());
+            logger.trace("Deploying of the virtual machine id {} to tarantino: publishing to amqp",
+                virtualMachine.getId());
             producer.publish(deployTask);
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: published successfully",
+                virtualMachine.getId());
         }
         catch (Exception e)
         {
@@ -1426,8 +1467,7 @@ public class VirtualMachineService extends DefaultApiService
         // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
         RemoteService vsmRS = findRemoteServiceWithTypeInDatacenter(virtualDatacenter);
-        machineService.getVsm().shutdownMonitor(vsmRS.getUri(),
-            virtualMachine.getHypervisor().getIp(), virtualMachine.getHypervisor().getPort());
+        machineService.getVsm().unsubscribe(vsmRS, virtualMachine);
         logger.debug("Machine registered!");
 
         logger.debug("Creating the DatacenterTask");
@@ -1465,8 +1505,17 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
+            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
+                virtualMachine.getId());
             producer.openChannel();
+            logger.trace("Deploying of the virtual machine id {} to tarantino: channel opened",
+                virtualMachine.getId());
+            logger.trace("Deploying of the virtual machine id {} to tarantino: published to amqp",
+                virtualMachine.getId());
             producer.publish(deployTask);
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: published successfully",
+                virtualMachine.getId());
         }
         catch (Exception e)
         {
@@ -1599,8 +1648,17 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
+            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
+                virtualMachine.getId());
             producer.openChannel();
+            logger.trace("Deploying of the virtual machine id {} to tarantino: channel opened",
+                virtualMachine.getId());
+            logger.trace("Deploying of the virtual machine id {} to tarantino: publishing to amqp",
+                virtualMachine.getId());
             producer.publish(deployTask);
+            logger.trace(
+                "Deploying of the virtual machine id {} to tarantino: published successfully",
+                virtualMachine.getId());
         }
         catch (Exception e)
         {
