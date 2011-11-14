@@ -26,6 +26,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.slf4j.Logger;
@@ -80,14 +81,14 @@ public class RoleResource extends AbstractResource
     SecurityService securityService;
 
     @GET
-    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
+    @Produces( {MediaType.APPLICATION_XML, AbstractResource.LINK_MEDIA_TYPE})
     public RoleDto getRole(@PathParam(ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         User currentUser = userService.getCurrentUser();
         Role role = null;
-        
-	if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
+
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW_PRIVILEGES)
             && !securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             if (currentUser.getRole().getId().equals(roleId))
@@ -105,8 +106,8 @@ public class RoleResource extends AbstractResource
         else
         {
             role = service.getRole(roleId);
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
-                role.getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
+                .getPrivileges());
         }
 
         return createTransferObject(role, restBuilder);
@@ -122,7 +123,7 @@ public class RoleResource extends AbstractResource
      */
     @GET
     @Path(RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH)
-    @Produces({MediaType.APPLICATION_XML, RolesResource.LINK_MEDIA_TYPE})
+    @Produces( {MediaType.APPLICATION_XML, AbstractResource.LINK_MEDIA_TYPE})
     public PrivilegesDto getPrivileges(@PathParam(RoleResource.ROLE) final Integer roleId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -137,8 +138,8 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
-                role.getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
+                .getPrivileges());
         }
 
         return PrivilegeResource.addPrivilegesLinks(restBuilder, role.getPrivileges());
@@ -169,8 +170,8 @@ public class RoleResource extends AbstractResource
         else
         {
             User currentUser = userService.getCurrentUser();
-            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(),
-                role.getPrivileges());
+            service.checkHasSameOrLessPrivileges(currentUser.getRole().getPrivileges(), role
+                .getPrivileges());
         }
 
         return PrivilegesResource.createAdminTransferObjects(role.getPrivileges(), restBuilder);
