@@ -343,8 +343,8 @@ public enum APIError
     // TIERS
     NON_EXISTENT_TIER("TIER-0", "The requested tier does not exist"), NULL_TIER("TIER-1",
         "Embedded Tier of the StoragePool can not be null"), MISSING_TIER_LINK("TIER-2",
-        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_DATACENTER_PARAM_NOT_FOUND(
-        "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
+        "Missing link to the tier"), TIER_PARAM_NOT_FOUND("TIER-3", "Missing tiers parameter"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND(
+        "TIER-4", "VirtualDatacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
         "TIER-6", "Can not disable a Tier with associated Storage Pools"), TIER_DISABLED("TIER-7",
