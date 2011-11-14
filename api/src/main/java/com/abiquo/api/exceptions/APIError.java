@@ -169,7 +169,8 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"),
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is deployed"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(

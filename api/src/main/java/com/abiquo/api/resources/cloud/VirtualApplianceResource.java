@@ -23,6 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -318,5 +319,23 @@ public class VirtualApplianceResource
             RESTLink link = new RESTLink("status", url);
             dto.addLink(link);
         }
+    }
+
+    /**
+     * Delete the virtual appliance if exists.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param restBuilder to build the links
+     * @throws Exception
+     */
+    @DELETE
+    public void deleteVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
+        throws Exception
+    {
+        service.deleteVirtualAppliance(vdcId, vappId);
+
     }
 }

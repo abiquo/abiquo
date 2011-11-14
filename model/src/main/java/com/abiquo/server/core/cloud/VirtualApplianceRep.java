@@ -45,7 +45,7 @@ public class VirtualApplianceRep extends DefaultRepBase
 
     }
 
-    public VirtualApplianceRep(EntityManager em)
+    public VirtualApplianceRep(final EntityManager em)
     {
         this.entityManager = em;
 
@@ -54,18 +54,23 @@ public class VirtualApplianceRep extends DefaultRepBase
         this.nodeVirtualImageDao = new NodeVirtualImageDAO(em);
     }
 
-    public VirtualAppliance findVirtualApplianceByVirtualMachine(VirtualMachine virtualMachine)
+    public VirtualAppliance findVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return nodeVirtualImageDao.findVirtualAppliance(virtualMachine);
     }
 
-    public VirtualAppliance findById(Integer id)
+    public VirtualAppliance findById(final Integer id)
     {
         return virtualApplianceDao.findById(id);
     }
 
-    public void updateVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void updateVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         this.virtualApplianceDao.flush();
+    }
+
+    public void deleteVirtualAppliance(final VirtualAppliance appliance)
+    {
+        this.virtualApplianceDao.remove(appliance);
     }
 }

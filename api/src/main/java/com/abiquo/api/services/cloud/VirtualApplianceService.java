@@ -26,10 +26,13 @@ package com.abiquo.api.services.cloud;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -61,6 +64,9 @@ import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 import com.sun.ws.management.client.Resource;
 import com.sun.ws.management.client.ResourceFactory;
 
@@ -100,6 +106,9 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualMachineService vmService;
+
+    /** The logger object **/
+    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
     public VirtualApplianceService()
     {
@@ -240,6 +249,8 @@ public class VirtualApplianceService extends DefaultApiService
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
+        logger.debug("Create virtual appliance with name {}", dto.getName());
+        // Only empty virtual appliances can be created
         VirtualAppliance vapp =
             new VirtualAppliance(vdc.getEnterprise(),
                 vdc,
@@ -252,13 +263,36 @@ public class VirtualApplianceService extends DefaultApiService
 
         if (!vapp.isValid())
         {
+            StringBuilder sb = extractErrorsInAString(vapp);
+            logger.error(
+                "Error create virtual appliance with name {} due to validation errors: {}",
+                dto.getName(), sb.toString());
+            tracer
+                .log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
+                    "Delete of the virtual appliance with name " + dto.getName());
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_CREATE,
+                "Delete of the virtual appliance with name " + dto.getName(),
+                new Exception(sb.toString()));
             addValidationErrors(vapp.getValidationErrors());
             flushErrors();
         }
-
+        logger.debug("Add virtual appliance to Abiquo with name {}", dto.getName());
         repo.insertVirtualAppliance(vapp);
-
+        logger.debug("Created virtual appliance with name {} !", dto.getName());
         return vapp;
+    }
+
+    private StringBuilder extractErrorsInAString(VirtualAppliance vapp)
+    {
+        Set<CommonError> errors = vapp.getValidationErrors();
+        StringBuilder sb = new StringBuilder();
+        for (CommonError e : errors)
+        {
+            sb.append("Error code: ").append(e.getCode()).append(", Message: ")
+                .append(e.getMessage());
+        }
+        return sb;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -376,5 +410,70 @@ public class VirtualApplianceService extends DefaultApiService
             // The virtual appliance is in an unknown state
         }
         return dto;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        userService.checkCurrentEnterpriseForPostMethods(virtualAppliance.getEnterprise());
+        logger.debug("Deleting the virtual appliance name {} ", virtualAppliance.getName());
+        if (!virtualApplianceStateAllowsDelete(virtualAppliance))
+        {
+            logger.error(
+                "Delete virtual appliance error, the State must be NOT_DEPLOYED but was {}",
+                virtualAppliance.getState().name());
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VAPP_DELETE, "Delete of the virtual appliance with name "
+                    + virtualAppliance.getName()
+                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
+                    + virtualAppliance.getState().name());
+            tracer
+                .systemError(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VAPP_CREATE,
+                    "Delete of the virtual appliance with name " + virtualAppliance.getName()
+                        + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
+                        + virtualAppliance.getState().name(),
+                    new Exception(" failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
+                        + virtualAppliance.getState().name()));
+            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
+            flushErrors();
+        }
+
+        // We must delete all of its virtual machines
+        for (NodeVirtualImage n : virtualAppliance.getNodes())
+        {
+            logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
+                .getName());
+            vmService.deleteVirtualMachine(n.getVirtualMachine().getId(), virtualAppliance.getId(),
+                n.getVirtualAppliance().getVirtualDatacenter().getId());
+            logger.trace("Deleting the virtual machine with name {}", n.getVirtualMachine()
+                .getName() + " successful!");
+        }
+        virtualApplianceRepo.deleteVirtualAppliance(virtualAppliance);
+        logger.debug("Deleting the virtual appliance name {} ok!", virtualAppliance.getName());
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_DELETE,
+            "Delete of the virtual appliance with name " + virtualAppliance.getName()
+                + " succeeded");
+    }
+
+    private boolean virtualApplianceStateAllowsDelete(final VirtualAppliance virtualAppliance)
+    {
+        switch (virtualAppliance.getState())
+        {
+            case LOCKED:
+            case UNKNOWN:
+            case DEPLOYED:
+            case NEEDS_SYNC:
+            {
+                return false;
+            }
+            default:
+            {
+                return true;
+            }
+        }
     }
 }
