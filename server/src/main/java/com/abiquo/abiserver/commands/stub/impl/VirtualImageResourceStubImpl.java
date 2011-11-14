@@ -231,13 +231,12 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<VirtualImage> editVirtualImage(final VirtualImage vimage)
+    public DataResult<VirtualImage> editVirtualImage(final Integer idEnterprise,
+        final Integer idDatacenter, final VirtualImage vimage)
     {
         final DataResult<VirtualImage> result = new DataResult<VirtualImage>();
 
-        String uri =
-            createVirtualImageLink(vimage.getIdEnterprise(), vimage.getRepository().getDatacenter()
-                .getId(), vimage.getId());
+        String uri = createVirtualImageLink(idEnterprise, idDatacenter, vimage.getId());
 
         ClientResponse response = put(uri, createDtoObject(vimage));
 

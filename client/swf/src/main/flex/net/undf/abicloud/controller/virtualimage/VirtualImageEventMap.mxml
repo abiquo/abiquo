@@ -451,7 +451,7 @@
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.enterprise.id,
             event.datacenterId,
-            event.viUpdatedValues.id]}">
+            event.viUpdatedValues]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
