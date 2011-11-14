@@ -97,7 +97,8 @@ public class UriTestResolver
     public static String resolveEnterpriseURI(final Integer enterpriseId)
     {
         String template =
-            buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+            buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
+                EnterpriseResource.ENTERPRISE_PARAM);
 
         return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
             enterpriseId.toString()));
@@ -105,7 +106,8 @@ public class UriTestResolver
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId) + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH;
     }
 
     public static String resolveEnterpriseActionGetVirtualMachinesURI(final Integer entId)
