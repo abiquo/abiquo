@@ -32,8 +32,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.enumerator.LinkOrder;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.SingleResourceTransportDto.LinkOrder;
 import com.abiquo.model.util.CompositeComparator;
 
 /**

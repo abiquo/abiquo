@@ -33,6 +33,8 @@ public interface ApplianceManagerPaths
 
     public static final String OVFPI_PATH = "ovfs";
 
+    public static final String OVFLIST_PATH = "list";
+
     public static final String DISK_FILE_PATH = "diskfile";
 
 }

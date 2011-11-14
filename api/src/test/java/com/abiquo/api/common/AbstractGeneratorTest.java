@@ -34,11 +34,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
+import com.abiquo.server.core.appslibrary.CategoryGenerator;
+import com.abiquo.server.core.appslibrary.IconGenerator;
+import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
+import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -52,6 +57,7 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.MachineGenerator;
 import com.abiquo.server.core.infrastructure.RackGenerator;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.RepositoryGenerator;
 import com.abiquo.server.core.infrastructure.UcsRackGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
@@ -100,6 +106,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
 
+    protected VirtualImageConversionGenerator conversionGenerator =
+        new VirtualImageConversionGenerator(seed);
+
     protected NodeVirtualImageGenerator nodeVirtualImageGenerator =
         new NodeVirtualImageGenerator(seed);
 
@@ -120,6 +129,16 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected PrivilegeGenerator privilegeGenerator = new PrivilegeGenerator(seed);
 
     protected RoleLdapGenerator roleLdapGenerator = new RoleLdapGenerator(seed);
+
+    protected CategoryGenerator categoryGenerator = new CategoryGenerator(seed);
+
+    protected OVFPackageGenerator ovfPackageGenerator = new OVFPackageGenerator(seed);
+
+    protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
+
+    protected IconGenerator iconGenerator = new IconGenerator(seed);
+
+    protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
 
     protected void setup(final Object... entities)
     {
@@ -161,11 +180,11 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             {"ip_pool_management", "volume_management", "diskstateful_conversions",
             "initiator_mapping", "rasd_management", "rasd", "nodevirtualimage", "nodenetwork",
             "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage",
-            "virtualimage_conversions", "node_virtual_image_stateful_conversions",
+            "category", "virtualimage_conversions", "node_virtual_image_stateful_conversions",
             "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
-            "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
-            "remote_service", "datastore_assignment", "datastore", "hypervisor",
+            "network_configuration", "chef_runlist", "dhcp_service", "storage_pool", "tier",
+            "storage_device", "remote_service", "datastore_assignment", "datastore", "hypervisor",
             "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter",
             "repository", "workload_fit_policy_rule", "network", "session", "user",
             "roles_privileges", "role_ldap", "role", "privilege", "enterprise",
@@ -173,7 +192,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
             "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
             "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register"};
+            "metering", "tasks", "alerts", "heartbeatlog", "icon", "repository", "register"};
 
         tearDown(entities);
     }

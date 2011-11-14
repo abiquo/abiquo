@@ -260,7 +260,7 @@ public class PopulateInfrastructure extends PopulateConstants
             dcRep.insertHypervisor(hyper);
 
             machine.setName(mName);
-            machine.setHypervisor(hyper);
+            // machine.setHypervisor(hyper);
 
             long cpu = DEF_MACHINE_CPU, ram = DEF_MACHINE_RAM, hd = DEF_MACHINE_HD;
 

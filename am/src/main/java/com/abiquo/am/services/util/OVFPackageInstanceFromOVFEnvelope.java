@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response.Status;
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
@@ -44,11 +43,11 @@ import org.dmtf.schemas.ovf.envelope._1.VirtualSystemType;
 import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettingdata.ResourceType;
 import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
-import com.abiquo.appliancemanager.transport.OVFPackageDiskFormat;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.EmptyEnvelopeException;
@@ -172,22 +171,18 @@ public class OVFPackageInstanceFromOVFEnvelope
 
                 if (diskIdToVSs.size() != 1)
                 {
-                    final String cause =
-                        String.format(
-                            "There are more than one virtual system on the OVF Envelope [%s]",
-                            ovfId);
-                    throw new AMException(Status.PRECONDITION_FAILED, cause);
+                    throw new AMException(AMError.OVF_INVALID, String.format(
+                        "There are more than one virtual system on the OVF Envelope [%s]", ovfId));
                 }
 
                 for (String vssName : diskIdToVSs.get(diskId))
                 {
                     diskInfo = new OVFPackageInstanceDto();
                     diskInfo.setName(vssName);
-                    diskInfo.setOvfUrl(ovfId);
+                    diskInfo.setOvfId(ovfId);
 
                     DiskFormat diskFormat = DiskFormat.fromValue(format);
-                    OVFPackageDiskFormat ovfDiskFormat =
-                        OVFPackageDiskFormat.valueOf(diskFormat.name());
+                    DiskFormatType ovfDiskFormat = DiskFormatType.valueOf(diskFormat.name());
 
                     diskInfo.setDiskFileFormat(ovfDiskFormat);
                     diskInfo.setDiskFileSize(fileSize);
@@ -228,19 +223,17 @@ public class OVFPackageInstanceFromOVFEnvelope
         catch (EmptyEnvelopeException e)
         {
             String msg = "No VirtualSystem or VirtualSystemCollection exists for this OVF package";
-
-            throw new AMException(Status.NO_CONTENT, msg, e);
+            throw new AMException(AMError.OVF_INVALID, msg, e);
         }
         catch (Exception e)
         {
-            throw new AMException(Status.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+            throw new AMException(AMError.OVF_INVALID, e);
         }
 
         if (diskInfo == null)
         {
-            final String msg =
-                "No VirtualSystem or VirtualSystemCollection exists for this OVF package";
-            throw new AMException(Status.NO_CONTENT, msg);
+            String msg = "No VirtualSystem or VirtualSystemCollection exists for this OVF package";
+            throw new AMException(AMError.OVF_INVALID, msg);
         }
 
         return diskInfo;

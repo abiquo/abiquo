@@ -20,9 +20,6 @@
  */
 package com.abiquo.am.resources;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -41,8 +38,6 @@ import org.springframework.util.Assert;
 
 import com.abiquo.am.services.DiskFileService;
 import com.abiquo.appliancemanager.diskfile.DiskFile;
-import com.abiquo.appliancemanager.exceptions.CopyOperationException;
-import com.abiquo.appliancemanager.exceptions.DiskFileNotFoundException;
 
 /**
  * Resource representation of the Disk Image files.
@@ -70,8 +65,8 @@ public class DiskFileResourceImpl implements DiskFileResource, InitializingBean
     public static final String DISK_FILE_PARAM = "{" + DISK_FILE + ": .*}"; // FIXME take care of .*
 
     /** The resource path. */
-    public static final String DISK_FILE_PATH =
-        ApplianceManagerPaths.DISK_FILE_PATH + "/" + DISK_FILE_PARAM;
+    public static final String DISK_FILE_PATH = ApplianceManagerPaths.DISK_FILE_PATH + "/"
+        + DISK_FILE_PARAM;
 
     /** The Disk File Manager Service */
     @Autowired
@@ -85,43 +80,25 @@ public class DiskFileResourceImpl implements DiskFileResource, InitializingBean
 
     @Override
     @GET
-    @Produces( {MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    @Produces({MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public DiskFile getDiskFile(@PathParam(DISK_FILE) final String srcPath)
     {
         DiskFile diskFile = new DiskFile();
 
-        try
-        {
-            diskFile.setLocation(diskFileService.get(srcPath));
-        }
-        catch (FileNotFoundException e)
-        {
-            throw new DiskFileNotFoundException();
-        }
+        diskFile.setLocation(diskFileService.get(srcPath));
 
         return diskFile;
     }
 
     @Override
     @PUT
-    @Consumes( {MediaType.APPLICATION_XML, MediaType.TEXT_XML})
-    @Produces( {MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    @Consumes({MediaType.APPLICATION_XML, MediaType.TEXT_XML})
+    @Produces({MediaType.APPLICATION_XML, MediaType.TEXT_XML})
     public DiskFile copyDiskFile(final DiskFile diskfile, @PathParam(DISK_FILE) final String src)
     {
         LOGGER.debug("Copy opperation requested for Disk File {}", src);
 
-        try
-        {
-            diskFileService.copy(src, diskfile.getLocation());
-        }
-        catch (FileNotFoundException ex)
-        {
-            throw new DiskFileNotFoundException();
-        }
-        catch (IOException ex)
-        {
-            throw new CopyOperationException(ex);
-        }
+        diskFileService.copy(src, diskfile.getLocation());
 
         return diskfile;
     }

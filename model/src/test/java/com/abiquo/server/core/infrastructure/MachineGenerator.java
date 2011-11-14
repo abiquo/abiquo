@@ -90,6 +90,8 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
     }
 
+    @Deprecated
+    // set the rack
     public Machine createMachine(final Datacenter datacenter)
     {
         int seed = nextSeed();

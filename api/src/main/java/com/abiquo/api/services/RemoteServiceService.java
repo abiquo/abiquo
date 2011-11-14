@@ -66,7 +66,7 @@ public class RemoteServiceService extends DefaultApiService
     public static final String CHECK_RESOURCE = "check";
 
     @Autowired
-    InfrastructureRep infrastrucutreRepo;
+    InfrastructureRep infrastructureRepo;
 
     public RemoteServiceService()
     {
@@ -75,24 +75,24 @@ public class RemoteServiceService extends DefaultApiService
 
     public RemoteServiceService(final EntityManager em)
     {
-        infrastrucutreRepo = new InfrastructureRep(em);
+        infrastructureRepo = new InfrastructureRep(em);
     }
 
     public List<RemoteService> getRemoteServices()
     {
-        return infrastrucutreRepo.findAllRemoteServices();
+        return infrastructureRepo.findAllRemoteServices();
     }
 
     public List<RemoteService> getRemoteServicesByDatacenter(final Integer datacenterId)
     {
-        Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
+        Datacenter datacenter = infrastructureRepo.findById(datacenterId);
         if (datacenter == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
             flushErrors();
         }
 
-        return infrastrucutreRepo.findRemoteServicesByDatacenter(datacenter);
+        return infrastructureRepo.findRemoteServicesByDatacenter(datacenter);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
@@ -135,7 +135,7 @@ public class RemoteServiceService extends DefaultApiService
                 configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
             }
 
-            infrastrucutreRepo.insertRemoteService(remoteService);
+            infrastructureRepo.insertRemoteService(remoteService);
 
             responseDto = createTransferObject(remoteService);
             if (!configurationErrors.isEmpty())
@@ -156,7 +156,7 @@ public class RemoteServiceService extends DefaultApiService
             flushErrors();
         }
 
-        Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
+        Datacenter datacenter = infrastructureRepo.findById(datacenterId);
         if (datacenter == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
@@ -186,7 +186,7 @@ public class RemoteServiceService extends DefaultApiService
             configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
         }
 
-        infrastrucutreRepo.insertRemoteService(remoteService);
+        infrastructureRepo.insertRemoteService(remoteService);
 
         responseDto = createTransferObject(remoteService);
         if (!configurationErrors.isEmpty())
@@ -210,7 +210,7 @@ public class RemoteServiceService extends DefaultApiService
         int previousStatus = remoteService.getStatus();
 
         ErrorsDto configurationErrors = new ErrorsDto();
-        if (infrastrucutreRepo.isRepositoryBeingUsed(datacenter))
+        if (infrastructureRepo.isRepositoryBeingUsed(datacenter))
         {
             remoteService.setStatus(STATUS_ERROR);
 
@@ -230,7 +230,7 @@ public class RemoteServiceService extends DefaultApiService
 
                 try
                 {
-                    repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+                    repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
                 }
                 catch (ApplianceManagerStubException amEx)
                 {
@@ -243,7 +243,7 @@ public class RemoteServiceService extends DefaultApiService
 
                 }
 
-                if (infrastrucutreRepo.existRepositoryInOtherDatacenter(datacenter,
+                if (infrastructureRepo.existRepositoryInOtherDatacenter(datacenter,
                     repositoryLocation))
                 {
                     remoteService.setStatus(STATUS_ERROR);
@@ -253,10 +253,10 @@ public class RemoteServiceService extends DefaultApiService
                     return configurationErrors;
                 }
 
-                if (!infrastrucutreRepo.existRepositoryInSameDatacenter(datacenter,
+                if (!infrastructureRepo.existRepositoryInSameDatacenter(datacenter,
                     repositoryLocation))
                 {
-                    infrastrucutreRepo.createRepository(datacenter, repositoryLocation);
+                    infrastructureRepo.createRepository(datacenter, repositoryLocation);
                 }
             }
             catch (WebApplicationException e)
@@ -275,12 +275,12 @@ public class RemoteServiceService extends DefaultApiService
 
     public RemoteService getRemoteService(final Integer id)
     {
-        return infrastrucutreRepo.findRemoteServiceById(id);
+        return infrastructureRepo.findRemoteServiceById(id);
     }
 
     public RemoteService getRemoteService(final Integer datacenterId, final RemoteServiceType type)
     {
-        Datacenter datacenter = infrastrucutreRepo.findById(datacenterId);
+        Datacenter datacenter = infrastructureRepo.findById(datacenterId);
         if (datacenter == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
@@ -288,7 +288,7 @@ public class RemoteServiceService extends DefaultApiService
         }
 
         List<RemoteService> services =
-            infrastrucutreRepo.findRemoteServiceWithTypeInDatacenter(datacenter, type);
+            infrastructureRepo.findRemoteServiceWithTypeInDatacenter(datacenter, type);
         RemoteService remoteService = null;
 
         if (!services.isEmpty())
@@ -324,7 +324,7 @@ public class RemoteServiceService extends DefaultApiService
         old.setType(dto.getType());
         old.setStatus(dto.getStatus());
 
-        infrastrucutreRepo.updateRemoteService(old);
+        infrastructureRepo.updateRemoteService(old);
 
         RemoteServiceDto responseDto = createTransferObject(old);
 
@@ -345,17 +345,17 @@ public class RemoteServiceService extends DefaultApiService
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(dto.getUri());
 
-        if (infrastrucutreRepo.isRepositoryBeingUsed(old.getDatacenter()))
+        if (infrastructureRepo.isRepositoryBeingUsed(old.getDatacenter()))
         {
             if (dto.getStatus() == STATUS_SUCCESS)
             {
                 try
                 {
                     String newRepositoryLocation =
-                        amStub.getAMConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getRepositoryLocation();
 
                     Repository oldRepository =
-                        infrastrucutreRepo.findRepositoryByDatacenter(old.getDatacenter());
+                        infrastructureRepo.findRepositoryByDatacenter(old.getDatacenter());
 
                     String oldRepositoryLocation = oldRepository.getUrl();
 
@@ -377,14 +377,14 @@ public class RemoteServiceService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getAMConfiguration().getRepositoryLocation();
+            String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
 
-            infrastrucutreRepo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
+            infrastructureRepo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
         }
         else
         // the old repository is not being used and the new am is not properly configured
         {
-            infrastrucutreRepo.deleteRepository(old.getDatacenter());
+            infrastructureRepo.deleteRepository(old.getDatacenter());
         }
 
         // ABICLOUDPREMIUM-719 Do not allow the appliance manager modification if the repository is
@@ -400,14 +400,14 @@ public class RemoteServiceService extends DefaultApiService
 
         checkRemoteServiceStatusBeforeRemoving(remoteService);
 
-        infrastrucutreRepo.deleteRemoteService(remoteService);
+        infrastructureRepo.deleteRemoteService(remoteService);
     }
 
     protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
     {
         if (remoteService.getType() == RemoteServiceType.APPLIANCE_MANAGER)
         {
-            if (infrastrucutreRepo.isRepositoryBeingUsed(remoteService.getDatacenter()))
+            if (infrastructureRepo.isRepositoryBeingUsed(remoteService.getDatacenter()))
             {
                 addConflictErrors(APIError.APPLIANCE_MANAGER_REPOSITORY_IN_USE);
                 flushErrors();
@@ -416,7 +416,7 @@ public class RemoteServiceService extends DefaultApiService
         if (remoteService.getType() == RemoteServiceType.DHCP_SERVICE
             || remoteService.getType() == RemoteServiceType.VIRTUAL_SYSTEM_MONITOR)
         {
-            if (infrastrucutreRepo.existDeployedVirtualMachines(remoteService.getDatacenter()))
+            if (infrastructureRepo.existDeployedVirtualMachines(remoteService.getDatacenter()))
             {
                 addConflictErrors(APIError.REMOTE_SERVICE_IS_BEING_USED);
                 flushErrors();
@@ -502,7 +502,7 @@ public class RemoteServiceService extends DefaultApiService
         {
             try
             {
-                if (infrastrucutreRepo.existAnyRemoteServiceWithUri(remoteService.getUri()))
+                if (infrastructureRepo.existAnyRemoteServiceWithUri(remoteService.getUri()))
                 {
                     APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
@@ -526,7 +526,7 @@ public class RemoteServiceService extends DefaultApiService
                 }
             }
         }
-        else if (infrastrucutreRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
+        else if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
             remoteService.getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;

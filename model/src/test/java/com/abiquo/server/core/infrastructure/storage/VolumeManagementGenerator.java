@@ -24,9 +24,13 @@ package com.abiquo.server.core.infrastructure.storage;
 import java.util.List;
 import java.util.UUID;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -40,12 +44,15 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     private VirtualDatacenterGenerator vdcGenerator;
 
+    private VirtualImageGenerator virtualImageGenerator;
+
     public VolumeManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         poolGenerator = new StoragePoolGenerator(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        virtualImageGenerator = new VirtualImageGenerator(seed);
     }
 
     @Override
@@ -76,13 +83,25 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     public VolumeManagement createInstance(final StoragePool pool)
     {
-        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        VirtualDatacenter vdc = vdcGenerator.createInstance(pool.getDevice().getDatacenter());
         return createInstance(pool, vdc);
+    }
+
+    public VolumeManagement createInstance(final Datacenter datacenter)
+    {
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter);
+        return createInstance(vdc);
+    }
+
+    public VolumeManagement createInstance(final Datacenter datacenter, final Enterprise enterprise)
+    {
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
+        return createInstance(vdc);
     }
 
     public VolumeManagement createInstance(final VirtualDatacenter vdc)
     {
-        StoragePool pool = poolGenerator.createUniqueInstance();
+        StoragePool pool = poolGenerator.createInstance(vdc.getDatacenter());
         return createInstance(pool, vdc);
     }
 
@@ -104,6 +123,26 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         return new VolumeManagement(uuid, name, sizeInMB, idSCSI, pool, vdc);
     }
 
+    public VolumeManagement createStatefulInstance()
+    {
+        VolumeManagement volume = createUniqueInstance();
+        return addStatefulImageToVolume(volume, volume.getStoragePool().getDevice().getDatacenter());
+    }
+
+    public VolumeManagement createStatefulInstance(final Datacenter datacenter)
+    {
+        VolumeManagement volume = createInstance(datacenter);
+        return addStatefulImageToVolume(volume, datacenter);
+    }
+
+    private VolumeManagement addStatefulImageToVolume(final VolumeManagement volume,
+        final Datacenter datacenter)
+    {
+        VirtualImage image = virtualImageGenerator.createInstance(datacenter);
+        volume.setVirtualImage(image);
+        return volume;
+    }
+
     @Override
     public void addAuxiliaryEntitiesToPersist(final VolumeManagement entity,
         final List<Object> entitiesToPersist)
@@ -115,6 +154,13 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         entitiesToPersist.add(storagePool);
 
         rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
+
+        if (entity.getVirtualImage() != null)
+        {
+            VirtualImage virtualImage = entity.getVirtualImage();
+            virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+            entitiesToPersist.add(virtualImage);
+        }
     }
 
 }

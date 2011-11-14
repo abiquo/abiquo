@@ -1,3 +1,9 @@
+Packages of single FileInfo
+--deprecate alreadybeing download
+
+Getting started guide.
+
+
 Appliance Manager
 
 is the remote service that allow the management of the virtual image repository on a datacenter.
@@ -18,7 +24,7 @@ is the remote service that allow the management of the virtual image repository 
 + repositoryLocation
 
 
-== repository structure ==
+== repository structure from wiki ==
 
 === whats on the package ===
 ==== status marks ====

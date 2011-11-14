@@ -39,7 +39,7 @@ public class RepositoryDAO extends
     DefaultDAOBase<Integer, com.abiquo.server.core.infrastructure.Repository>
 {
     public RepositoryDAO()
-    {
+    {        
         super(com.abiquo.server.core.infrastructure.Repository.class);
     }
 

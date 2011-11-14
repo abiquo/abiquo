@@ -32,6 +32,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatacenterHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.DatastoreHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
@@ -65,6 +66,8 @@ import com.abiquo.abiserver.business.hibernate.pojohb.workload.FitPolicyRuleHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.workload.MachineLoadRuleHB;
 import com.abiquo.abiserver.persistence.DAO;
 import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.dao.authorization.OneTimeTokenSessionDAO;
+import com.abiquo.abiserver.persistence.dao.authorization.hibernate.OneTimeTokenSessionDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DatastoreDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.HyperVisorDAO;
@@ -588,5 +591,12 @@ public class HibernateDAOFactory implements DAOFactory
     public UserSessionDAO getUserSessionDAO()
     {
         return (UserSessionDAO) instantiateDAO(UserSessionDAOHibernate.class, UserSession.class);
+    }
+
+    @Override
+    public OneTimeTokenSessionDAO getOneTimeTokenSessionDAO()
+    {
+        return (OneTimeTokenSessionDAO) instantiateDAO(OneTimeTokenSessionDAOHibernate.class,
+            OneTimeTokenSessionHB.class);
     }
 }

@@ -97,7 +97,7 @@
             private function onInitialize():void
             {
                 //Check privileges
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE,"removeChild",downloadButton,downloadBox);
+                //SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE,"removeChild",downloadButton,downloadBox);
                 
                 //Initializing timer to check OVFPackages download progress
                 this.downloadingOVFPackagesTimer = new Timer(AbiCloudModel.getInstance().configurationManager.config.client_applibrary_ovfpackagesDownloadingProgressUpdateInterval.value * 1000,

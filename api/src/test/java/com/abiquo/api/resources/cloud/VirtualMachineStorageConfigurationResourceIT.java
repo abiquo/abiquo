@@ -38,6 +38,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
@@ -76,7 +77,10 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         vdc = vdcGenerator.createInstance(e);
         vapp = vappGenerator.createInstance(vdc);
         vapp.setState(VirtualApplianceState.NOT_DEPLOYED);
-        vm = vmGenerator.createInstance(e);
+
+        VirtualImage vimage = virtualImageGenerator.createInstance(e, vdc.getDatacenter());
+        vm = vmGenerator.createInstance(vimage);
+
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
@@ -86,8 +90,9 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         vm.getHypervisor().getMachine().getRack().setDatacenter(vdc.getDatacenter());
         vm.setUser(u);
 
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage(), vm.getHypervisor()
-            .getMachine().getRack(), vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vimage.getRepository(),
+            vimage.getCategory(), vimage, vm.getEnterprise(), vm.getHypervisor().getMachine()
+                .getRack(), vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
     }
 
     @Override

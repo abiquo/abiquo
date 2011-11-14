@@ -21,6 +21,7 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -44,12 +45,14 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 {
+    private HypervisorGenerator hypervisorGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+        hypervisorGenerator = new HypervisorGenerator(getSeed());
     }
 
     @Override
@@ -332,57 +335,57 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Hypervisor hyp1 = hypervisorGenerator.createUniqueInstance();
         hyp1.setType(HypervisorType.VMX_04);
         hyp1.setMachine(machine1);
-        machine1.setHypervisor(hyp1);
+        // machine1.setHypervisor(hyp1);
 
         Hypervisor hyp2 = hypervisorGenerator.createUniqueInstance();
         hyp2.setType(HypervisorType.VMX_04);
         hyp2.setMachine(machine2);
-        machine2.setHypervisor(hyp2);
+        // machine2.setHypervisor(hyp2);
 
         Hypervisor hyp3 = hypervisorGenerator.createUniqueInstance();
         hyp3.setType(HypervisorType.VMX_04);
         hyp3.setMachine(machine3);
-        machine3.setHypervisor(hyp3);
+        // machine3.setHypervisor(hyp3);
 
         Hypervisor hyp4 = hypervisorGenerator.createUniqueInstance();
         hyp4.setType(HypervisorType.VMX_04);
         hyp4.setMachine(machine4);
-        machine4.setHypervisor(hyp4);
+        // machine4.setHypervisor(hyp4);
 
         Hypervisor hyp5 = hypervisorGenerator.createUniqueInstance();
         hyp5.setType(HypervisorType.VMX_04);
         hyp5.setMachine(machine5);
-        machine5.setHypervisor(hyp5);
+        // machine5.setHypervisor(hyp5);
 
         Hypervisor hyp6 = hypervisorGenerator.createUniqueInstance();
         hyp6.setType(HypervisorType.VMX_04);
         hyp6.setMachine(machine6);
-        machine6.setHypervisor(hyp6);
+        // machine6.setHypervisor(hyp6);
 
         Hypervisor hyp7 = hypervisorGenerator.createUniqueInstance();
         hyp7.setType(HypervisorType.VMX_04);
         hyp7.setMachine(machine7);
-        machine7.setHypervisor(hyp7);
+        // machine7.setHypervisor(hyp7);
 
         Hypervisor hyp8 = hypervisorGenerator.createUniqueInstance();
         hyp8.setType(HypervisorType.VMX_04);
         hyp8.setMachine(machine8);
-        machine8.setHypervisor(hyp8);
+        // machine8.setHypervisor(hyp8);
 
         Hypervisor hyp9 = hypervisorGenerator.createUniqueInstance();
         hyp9.setType(HypervisorType.VMX_04);
         hyp9.setMachine(machine9);
-        machine9.setHypervisor(hyp9);
+        // machine9.setHypervisor(hyp9);
 
         Hypervisor hyp10 = hypervisorGenerator.createUniqueInstance();
         hyp10.setType(HypervisorType.VMX_04);
         hyp10.setMachine(machine10);
-        machine10.setHypervisor(hyp10);
+        // machine10.setHypervisor(hyp10);
 
         Hypervisor hyp11 = hypervisorGenerator.createUniqueInstance();
         hyp11.setType(HypervisorType.XENSERVER);
         hyp11.setMachine(machine11);
-        machine11.setHypervisor(hyp11);
+        // machine11.setHypervisor(hyp11);
 
         ds().persistAll(datacenter, rack, machine1, machine2, machine3, machine4, machine5,
             machine6, machine7, machine8, machine9, machine10, machine11, hyp1, hyp2, hyp3, hyp4,
@@ -560,5 +563,40 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Assert.assertEquals(candidates.get(0).getId(), machine1_2.getId());
 
         EntityManagerHelper.commitAndClose(dao.getEntityManager());
+    }
+
+    @Test
+    public void test_findbyIP()
+    {
+        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, hypervisor);
+
+        Datacenter datacenter = hypervisor.getMachine().getDatacenter();
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+
+        Machine result = dao.findByIp(datacenter, hypervisor.getIp());
+        assertNotNull(result);
+    }
+
+
+    @Test
+    public void test_findbyIP_notFound()
+    {
+        Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, hypervisor);
+
+        Datacenter datacenter = hypervisor.getMachine().getDatacenter();
+
+        MachineDAO dao = createDaoForRollbackTransaction();
+
+        Machine result = dao.findByIp(datacenter, "NOT_EXISTING_IP");
+        assertNull(result);
     }
 }

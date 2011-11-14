@@ -9,6 +9,7 @@
     <orm:entity class="com.abiquo.server.core.enterprise.User"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.DatacenterLimits"></orm:entity>
     <orm:entity class="com.abiquo.server.core.enterprise.Session"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.enterprise.OneTimeTokenSession"/>
     <!-- end: enterprise -->
     <!-- physical infrastructure -->
     <orm:entity class="com.abiquo.server.core.infrastructure.Datacenter"></orm:entity>
@@ -33,11 +34,11 @@
     <orm:entity class="com.abiquo.server.core.cloud.Hypervisor"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.VirtualMachine"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.VirtualDatacenter"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.cloud.VirtualImage"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.cloud.VirtualImageConversion"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.Node"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.NodeVirtualImage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.cloud.VirtualAppliance"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.cloud.chef.RunlistElement"></orm:entity>
+    
     <!-- end: cloud infrastructure -->
     <!-- configuration -->
     <orm:entity class="com.abiquo.server.core.config.License"></orm:entity>
@@ -70,8 +71,10 @@
     <!-- end: statistics -->
     <!-- appliance manager -->
     <orm:entity class="com.abiquo.server.core.appslibrary.AppsLibrary"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.appslibrary.Category"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.Icon"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.Category"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.VirtualImage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.VirtualImageConversion"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end: appliance manager -->

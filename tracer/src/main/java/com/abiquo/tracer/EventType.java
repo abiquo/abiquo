@@ -99,7 +99,8 @@ public enum EventType implements Serializable
         "VI_ADD", "Virtual Image added to the Appliance Library"), VI_DELETE(502, "VI_DELETE",
         "Virtual Image deleted from the Appliance Library"), DISK_CONVERSION(503,
         "DISK_CONVERSION", "Disc conversion started"), RAW_IMPORT_CONVERSION(504,
-        "RAW_IMPORT_CONVERSION", "Raw import conversion started"),
+        "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
+        "Virtual Image updated"),
 
     // Stateful related events
     // Stateful related events
@@ -176,7 +177,25 @@ public enum EventType implements Serializable
     // STORAGE DEVICE
     STORAGE_DEVICE_CREATED(1600, "STORAGE DEVICE CREATED", "Storage device created"), STORAGE_DEVICE_MODIFIED(
         1601, "STORAGE DEVICE MODIFIED", "Storage device modified"), STORAGE_DEVICE_DELETED(1602,
-        "STORAGE DEVICE DELETED", "Storage device deleted");
+        "STORAGE DEVICE DELETED", "Storage device deleted"),
+
+    // CHEF
+    CHEF_RUNLIST_ADD(1510, "CHEF_RUNLIST_ADD", "Add an element to the runlist"), CHEF_RUNLIST_DELETE(
+        1511, "CHEF_RUNLIST_DELETE", "Remove an element from the runlist"), CHEF_NODE_UPDATE(1512,
+        "CHEF_NODE_UPDATE", "Update a Chef node update"), CHEF_RUNLIST_UPDATE(1513,
+        "CHEF_RUNLIST_UPDATE", "Chef runlist update"), CHEF_CONNECTION(1513, "CHEF_SERVER_CONNECT",
+        "Chef Server connect"),
+
+    // CATEGORY
+    CATEGORY_CREATED(1700, "CATEGORY CREATED", "Category created"), CATEGORY_MODIFIED(1701,
+        "CATEGORY MODIFIED", "Category modified"), CATEGORY_DELETED(1702, "CATEGORY DELETED",
+        "Category deleted"),
+
+    // OVF PACKAGES LISTS
+    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), OVF_PACKAGES_LIST_DELETED(
+        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), OVF_PACKAGES_LIST_MODIFIED(
+        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified") //
+    ;
 
     private final int event;
 

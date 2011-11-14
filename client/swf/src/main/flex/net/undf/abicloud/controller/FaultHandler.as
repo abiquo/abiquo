@@ -56,17 +56,14 @@ package net.undf.abicloud.controller
                     //was due network problems or server unreachable
                     AbiCloudModel.getInstance().notificationManager.isServerUnreachable = true;
                 }
-                else
-                {
-                    //Since user is still not logged in, we cannot use the NotificationManager
-                    AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
-                                                                                    "ALERT_ERROR_TITLE_LABEL"),
-                                            ResourceManager.getInstance().getString("Common",
-                                                                                    "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
-                                            ResourceManager.getInstance().getString("Common",
-                                                                                    "ALERT_NO_CONNECTION_TEXT"),
-                                            Alert.OK);
-                }
+                
+                AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_ERROR_TITLE_LABEL"),
+                                        ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_ERROR_SERVER_RESPONSE_HEADER"),
+                                        ResourceManager.getInstance().getString("Common",
+                                                                                "ALERT_NO_CONNECTION_TEXT"),
+                                        Alert.OK);
 
             }
             else if(fault.faultCode == "Server.Processing"){

@@ -35,6 +35,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -184,7 +185,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         // Create an enterprise with a user and an enterprise admin
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
+        Role entRole = roleGenerator.createInstanceEnterpriseAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
@@ -228,7 +229,7 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Enterprise ent2 = enterpriseGenerator.createUniqueInstance();
         Role userRole = roleGenerator.createInstance();
-        Role entRole = roleGenerator.createInstanceEnterprisAdmin();
+        Role entRole = roleGenerator.createInstanceEnterpriseAdmin();
         User entUser = userGenerator.createInstance(ent, entRole, ENTADMIN, ENTADMIN);
         User user = userGenerator.createInstance(ent, userRole, USER, USER);
 
@@ -295,9 +296,21 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
+        Privilege pToRemove = null;
         for (Privilege p : user.getRole().getPrivileges())
         {
-            entitiesToSetup.add(p);
+            if (!p.getName().equals(Privileges.USERS_PROHIBIT_VDC_RESTRICTION.name()))
+            {
+                entitiesToSetup.add(p);
+            }
+            else
+            {
+                pToRemove = p;
+            }
+        }
+        if (pToRemove != null)
+        {
+            user.getRole().getPrivileges().remove(pToRemove);
         }
         entitiesToSetup.add(user.getRole());
         entitiesToSetup.add(user.getEnterprise());

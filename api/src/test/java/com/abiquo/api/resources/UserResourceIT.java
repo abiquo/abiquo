@@ -387,6 +387,9 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
     {
         VirtualMachine vm = vmGenerator.createUniqueInstance();
 
+        vm.getVirtualImage().getRepository()
+            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
+
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(vm.getEnterprise());
@@ -400,7 +403,9 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm.getVirtualImage().getRepository());
         entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
         entitiesToSetup.add(vm.getVirtualImage());
         entitiesToSetup.add(vm);
 

@@ -56,6 +56,7 @@ import com.abiquo.api.services.cloud.VirtualDatacenterService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -120,7 +121,7 @@ public class EnterpriseResource extends AbstractResource
     public EnterpriseDto getEnterprise(@PathParam(ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = userService.getCurrentUser();
             if (currentUser.getEnterprise().getId().equals(enterpriseId))
@@ -130,7 +131,7 @@ public class EnterpriseResource extends AbstractResource
             }
             // We need to return the enterprise of the external VLAN to edit it,
             // and for that wee need to have DC_ENUMERATE privilege.
-            else if (securityService.hasPrivilege(SecurityService.ROLE_PHYS_DC_ENUMERATE))
+            else if (securityService.hasPrivilege(Privileges.PHYS_DC_ENUMERATE))
             {
                 Enterprise enterprise = service.getEnterprise(enterpriseId);
                 return createTransferObject(enterprise, restBuilder);
@@ -138,7 +139,7 @@ public class EnterpriseResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_VIEW);
             }
 
         }
@@ -290,6 +291,11 @@ public class EnterpriseResource extends AbstractResource
         dto.setStorageSoft(e.getStorageSoft());
         dto.setRepositorySoft(e.getRepositorySoft());
         dto.setRepositoryHard(e.getRepositoryHard());
+        dto.setChefURL(e.getChefURL());
+        dto.setChefClient(e.getChefClient());
+        dto.setChefValidator(e.getChefValidator());
+        dto.setChefClientCertificate(e.getChefClientCertificate());
+        dto.setChefValidatorCertificate(e.getChefValidatorCertificate());
         dto.setIsReservationRestricted(e.getIsReservationRestricted());
 
         dto = addLinks(restBuilder, dto);

@@ -21,126 +21,167 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListURI;
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageURI;
+import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.resources.AbstractResourceIT;
-import com.abiquo.api.services.appslibrary.OVFPackageService;
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.AppsLibrary;
+
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.Role;
+import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 
-public class OVFPackageResourceIT extends AbstractResourceIT
+public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 {
+    protected Category category;
 
-    private String validOVFPackage = resolveOVFPackageURI(1, 1);
+    protected Enterprise enterprise;
 
-    @Autowired
-    OVFPackageService service;
+    protected Datacenter datacenter;
 
-    @Override
-    protected List<String> data()
+    protected OVFPackage ovfPackage;
+
+    protected AppsLibrary appsLibrary;
+
+    protected Icon icon;
+
+    private static final String SYSADMIN = "sysadmin";
+
+    @BeforeMethod(groups = {APPS_INTEGRATION_TESTS})
+    public void setUpUser()
     {
-        // return Collections.singletonList("/data/ovfpackage.xml");
-        return Collections.singletonList("/data/ovfpackagelist.xml");
+        enterprise = enterpriseGenerator.createUniqueInstance();
+        datacenter = datacenterGenerator.createUniqueInstance();
+        category = categoryGenerator.createUniqueInstance();
+        icon = iconGenerator.createUniqueInstance();
+
+        Role role = roleGenerator.createInstanceSysAdmin();
+        User user = userGenerator.createInstance(enterprise, role, SYSADMIN, SYSADMIN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+        entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(datacenter);
+
+        for (Privilege p : role.getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(role);
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
     }
 
-    @Test
+    @Test(groups = {APPS_INTEGRATION_TESTS})
     public void getOVFPackage() throws ClientWebException
     {
-        OVFPackageDto ovfPackageDto = getValidOVFPackage();
+        appsLibrary = appsLibraryGenerator.createUniqueInstance();
+        appsLibrary.setEnterprise(enterprise);
+        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
+        ovfPackage.setDescription("ovfPackage_1");
+        category.setName("category_1");
+        ovfPackage.setType(DiskFormatType.UNKNOWN);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(enterprise);
+        entitiesToSetup.add(appsLibrary);
+        entitiesToSetup.add(category);
+        entitiesToSetup.add(icon);
+        entitiesToSetup.add(ovfPackage);
+
+        setup(entitiesToSetup.toArray());
+        ClientResponse response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+
+        assertEquals(response.getStatusCode(), 200);
+
+        OVFPackageDto ovfPackageDto = response.getEntity(OVFPackageDto.class);
         assertNotNull(ovfPackageDto);
         assertEquals(ovfPackageDto.getDescription(), "ovfPackage_1");
-        assertEquals(ovfPackageDto.getDiskFormatTypeUri(), "http://diskFormat");
-        assertEquals(ovfPackageDto.getCategoryName(), "category_1");
+        assertEquals(ovfPackageDto.getDiskFormatTypeUri(), "http://unknown");
+        assertEquals(ovfPackageDto.getName(), "category_1");
     }
 
-    private OVFPackageDto getValidOVFPackage()
-    {
-        RestClient client = new RestClient();
-        Resource resource = client.resource(validOVFPackage);
-
-        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
-        assertEquals(response.getStatusCode(), 200);
-        return response.getEntity(OVFPackageDto.class);
-    }
-
-    @Test
+    @Test(groups = {APPS_INTEGRATION_TESTS})
     public void modifyOVFPackage() throws ClientWebException
     {
-        OVFPackageDto ovfPackageDto = getValidOVFPackage();
+        appsLibrary = appsLibraryGenerator.createUniqueInstance();
+        appsLibrary.setEnterprise(enterprise);
+        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(appsLibrary);
+        entitiesToSetup.add(category);
+        entitiesToSetup.add(icon);
+        entitiesToSetup.add(ovfPackage);
+
+        setup(entitiesToSetup.toArray());
+        ClientResponse response = get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+
+        assertEquals(response.getStatusCode(), 200);
+
+        OVFPackageDto ovfPackageDto = response.getEntity(OVFPackageDto.class);
         assertNotNull(ovfPackageDto);
 
         // modifications
         ovfPackageDto.setDescription("new_description");
-        // TODO: Add more fields
 
-        Resource resource = client.resource(validOVFPackage);
-        ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).put(
-                ovfPackageDto);
+        response =
+            put(resolveOVFPackageURI(enterprise.getId(), ovfPackageDto.getId()), ovfPackageDto,
+                SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
-
-        OVFPackageDto retrievedPackageDto = getValidOVFPackage();
-        assertNotNull(retrievedPackageDto);
+        response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+        OVFPackageDto retrievedPackageDto = response.getEntity(OVFPackageDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
-        assertEquals(retrievedPackageDto.getDiskFormatTypeUri(), "http://diskFormat");
     }
 
-    @Test
+    @Test(groups = {APPS_INTEGRATION_TESTS})
     public void deleteOVFPackage() throws ClientWebException
     {
+        appsLibrary = appsLibraryGenerator.createUniqueInstance();
+        appsLibrary.setEnterprise(enterprise);
+        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
+        ovfPackage.setDescription("ovfPackage_1");
+        ovfPackage.setType(DiskFormatType.UNKNOWN);
 
-        Resource resource = client.resource(validOVFPackage);
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(appsLibrary);
+        entitiesToSetup.add(category);
+        entitiesToSetup.add(icon);
+        entitiesToSetup.add(ovfPackage);
+
+        setup(entitiesToSetup.toArray());
+
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
-                .delete();
+            delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+
         assertEquals(response.getStatusCode(), 204);
 
-        response = resource.accept(MediaType.APPLICATION_XML).get();
+        response =
+            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 404);
 
-        // Checks if item is removed from list
-        resource =
-            client.resource(resolveOVFPackageListURI(1, 1)).accept(MediaType.APPLICATION_XML);
-        response = resource.get();
-        assertEquals(response.getStatusCode(), 200);
-
-        OVFPackageListDto entity = response.getEntity(OVFPackageListDto.class);
-        assertNotNull(entity);
-        assertNotNull(entity.getOvfPackages());
-        assertEquals(entity.getOvfPackages().size(), 2);
     }
-
-    @Test
-    public void installOVFPackage()
-    {
-        String installPackageAction =
-            UriHelper.appendPathToBaseUri(resolveOVFPackageURI(1, 1),
-                OVFPackageResource.INSTALL_ACTION);
-
-        Resource resource =
-            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML).queryParam(
-                OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, 1);
-
-        ClientResponse response = resource.post(null);
-        assertEquals(201, response.getStatusCode());
-
-    }
-
 }

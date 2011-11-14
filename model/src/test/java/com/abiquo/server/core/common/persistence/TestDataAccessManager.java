@@ -24,13 +24,18 @@ package com.abiquo.server.core.common.persistence;
 import java.util.List;
 
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.appslibrary.Icon;
+import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion;
@@ -38,6 +43,7 @@ import com.abiquo.server.core.config.License;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.OneTimeTokenSession;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
@@ -80,8 +86,8 @@ public class TestDataAccessManager
 {
     private static JpaEntityManagerFactoryForTesting factory;
 
-    private static List<String> associationTablesInAssociationDeletionOrder =
-        ListUtils.createList();
+    private static List<String> associationTablesInAssociationDeletionOrder = ListUtils
+        .createList();
 
     private static List<PersistentClassRemovalInformation<PersistentEntity< ? >, ? >> persistentClassesInEntityDeletionOrder =
         ListUtils.createList();
@@ -135,26 +141,22 @@ public class TestDataAccessManager
          */
         addPersistentClassesToCleanInRemovalOrder(NetworkAssignment.class, NodeVirtualImage.class,
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
-            VirtualAppResources.class, VirtualAppliance.class, VirtualMachine.class,
-            AppsLibrary.class, VolumeManagement.class, VirtualImageConversion.class,
-            VirtualImage.class, IpPoolManagement.class, RasdManagement.class, VLANNetwork.class,
-            NetworkConfiguration.class, Dhcp.class, VirtualDatacenterResources.class,
-            VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
-            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
-            EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
-            Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
-            RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
-            Network.class, SystemProperty.class, Rasd.class, License.class, Task.class,
-            NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
-            VirtualApplianceStatefulConversion.class);
-
-        // XXX after virtualmachine -- OVFPackageList.class, OVFPackage.class,
-        // AppsLibrary.class,
-        // Icon.class,
-        // XXX last -- Category.class
+            VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class,
+            VirtualMachine.class, OVFPackageList.class, OVFPackage.class, AppsLibrary.class,
+            VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
+            Category.class, Icon.class, IpPoolManagement.class, RasdManagement.class,
+            VLANNetwork.class, NetworkConfiguration.class, Dhcp.class,
+            VirtualDatacenterResources.class, VirtualDatacenter.class, DatacenterResources.class,
+            DatacenterLimits.class, Session.class, User.class, RoleLdap.class, Role.class,
+            Privilege.class, EnterpriseResources.class, Enterprise.class, Hypervisor.class,
+            Datastore.class, Machine.class, Rack.class, StoragePool.class, Tier.class,
+            StorageDevice.class, RemoteService.class, Repository.class, CloudUsage.class,
+            Datacenter.class, Network.class, SystemProperty.class, Rasd.class, License.class,
+            Task.class, NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
+            VirtualApplianceStatefulConversion.class, OneTimeTokenSession.class);
 
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
-            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE
-        /* , OVFPackageList.ASSOCIATION_TABLE */);
+            DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE,
+            OVFPackageList.OVF_PACKAGE_TABLE);
     }
 }

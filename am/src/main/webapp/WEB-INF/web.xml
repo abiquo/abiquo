@@ -7,8 +7,8 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value> 
-		classpath:springresources/applicationContext.xml</param-value>
-    </context-param>
+		classpath:springresources/applicationContext-am.xml</param-value>
+    </context-param>    
     <!-- classpath:META-INF/server/wink-core-context.xml -->
     <listener>
         <listener-class>com.abiquo.appliancemanager.web.listener.LicenseContextListener</listener-class>

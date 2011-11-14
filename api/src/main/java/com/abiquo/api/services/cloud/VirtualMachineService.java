@@ -24,18 +24,17 @@ package com.abiquo.api.services.cloud;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
@@ -47,28 +46,29 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.StorageService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.ovf.OVFGeneratorService;
+import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
+import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
-import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ConfigureVirtualMachineOp;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtualMachineOp;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
@@ -79,23 +79,17 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
-import com.sun.ws.management.client.Resource;
-import com.sun.ws.management.client.ResourceFactory;
 
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService extends DefaultApiService
 {
-    private static final String RESOURCE_URI =
-        "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
-
     @Autowired
     protected VirtualMachineRep repo;
 
@@ -104,9 +98,6 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected VirtualApplianceService vappService;
-
-    @Autowired
-    protected OVFGeneratorService ovfService;
 
     @Autowired
     protected RemoteServiceService remoteServiceService;
@@ -138,6 +129,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     protected InfrastructureRep infRep;
 
+    @Autowired
+    protected VirtualImageService vimageService;
+
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
@@ -159,7 +153,6 @@ public class VirtualMachineService extends DefaultApiService
         this.infRep = new InfrastructureRep(em);
         this.storageRep = new StorageRep(em);
         vdcService = new VirtualDatacenterService(em);
-        this.ovfService = new OVFGeneratorService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -219,6 +212,7 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void addVirtualMachine(final VirtualMachine virtualMachine)
     {
         repo.insert(virtualMachine);
@@ -270,11 +264,15 @@ public class VirtualMachineService extends DefaultApiService
         DatacenterTasks reconfigureTask = new DatacenterTasks();
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+
         // Tasks needs the definition of the virtual machine and the new one
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
         VirtualMachineDescriptionBuilder newVmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         // The id identifies this job and is neede to create the ids of the items. It is
         // hyerarchic
@@ -470,104 +468,6 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Changes the state of the VirtualMachine to the state passed
-     * 
-     * @param vappId Virtual Appliance Id
-     * @param vdcId VirtualDatacenter Id
-     * @param state The state to which change
-     * @throws Exception
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void changeVirtualMachineState(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final VirtualMachineState state)
-    {
-        VirtualMachine vm = getVirtualMachine(vdcId, vappId, vmId);
-        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
-        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
-        // the if(!hypervisor)
-        if (VirtualMachineState.NOT_ALLOCATED.equals(vm.getState()))
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
-            flushErrors();
-        }
-        if (sameState(vm, state))
-        {
-            // The state is the same, we warn the user and do nothing
-            return;
-        }
-        // TODO revisar
-        checkPauseAllowed(vm, state);
-
-        VirtualMachineState old = vm.getState();
-
-        validMachineStateChange(vm, state);
-
-        blockVirtualMachine(vm);
-
-        try
-        {
-            Integer datacenterId = vm.getHypervisor().getMachine().getDatacenter().getId();
-
-            VirtualAppliance vapp = contanerVirtualAppliance(vm);
-            EnvelopeType envelop = ovfService.createVirtualApplication(vapp);
-
-            Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
-
-            RemoteService vf =
-                remoteServiceService.getRemoteService(datacenterId,
-                    RemoteServiceType.VIRTUAL_FACTORY);
-
-            long timeout = Long.valueOf(System.getProperty("abiquo.server.timeout", "0"));
-
-            Resource resource =
-                ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                    ResourceFactory.LATEST);
-
-            changeState(resource, envelop, state.toResourceState());
-        }
-        catch (Exception e)
-        {
-            restoreVirtualMachineState(vm, old);
-            addConflictErrors(APIError.VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR);
-            flushErrors();
-
-        }
-
-    }
-
-    private void restoreVirtualMachineState(final VirtualMachine vm, final VirtualMachineState old)
-    {
-        vm.setState(old);
-        updateVirtualMachine(vm);
-    }
-
-    @Deprecated
-    private VirtualAppliance contanerVirtualAppliance(final VirtualMachine vmachine)
-    {
-
-        VirtualDatacenter vdc =
-            new VirtualDatacenter(vmachine.getEnterprise(),
-                null,
-                new Network("uuid"),
-                HypervisorType.VMX_04,
-                "name");
-
-        // TODO do not set VDC network
-        VirtualAppliance vapp =
-            new VirtualAppliance(vmachine.getEnterprise(),
-                vdc,
-                "haVapp",
-                VirtualApplianceState.NOT_DEPLOYED);
-
-        NodeVirtualImage nvi =
-            new NodeVirtualImage("haNodeVimage", vapp, vmachine.getVirtualImage(), vmachine);
-
-        vapp.addToNodeVirtualImages(nvi);
-
-        return vapp;
-    }
-
-    /**
      * Compare the state of vm with the state passed through parameter
      * 
      * @param vm VirtualMachine to which compare the state
@@ -578,16 +478,6 @@ public class VirtualMachineService extends DefaultApiService
     {
         String actual = vm.getState().toOVF();// OVFGeneratorService.getActualState(vm);
         return state.toOVF().equalsIgnoreCase(actual);
-    }
-
-    public void changeState(final Resource resource, final EnvelopeType envelope,
-        final String machineState) throws Exception
-    {
-        EnvelopeType envelopeRunning = ovfService.changeStateVirtualMachine(envelope, machineState);
-        Document docEnvelopeRunning =
-            OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
-
-        resource.put(docEnvelopeRunning);
     }
 
     public void checkPauseAllowed(final VirtualMachine vm, final VirtualMachineState state)
@@ -651,20 +541,24 @@ public class VirtualMachineService extends DefaultApiService
         final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
         final Integer vappId)
     {
+        // generates the random identifier
+        virtualMachine.setUuid(UUID.randomUUID().toString());
+
+        // We need the Enterprise
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         virtualMachine.setEnterprise(enterprise);
 
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
         // We need the VirtualImage
-        VirtualImage virtualImage = repo.getVirtualImage(vImageId);
+        VirtualImage virtualImage =
+            vimageService.getVirtualImage(enterpriseId, virtualAppliance.getVirtualDatacenter()
+                .getDatacenter().getId(), vImageId);
+        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
         virtualMachine.setVirtualImage(virtualImage);
 
-        // We need the Enterprise
-
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(),
-            virtualMachine.getVirtualImage(), virtualMachine);
+        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual image is VirtualImageNode
@@ -677,6 +571,23 @@ public class VirtualMachineService extends DefaultApiService
         // is the sum (pondered) of the states of its virtual machines
 
         return repo.createVirtualMachine(virtualMachine);
+    }
+
+    /** Checks correct datacenter and enterprise. */
+    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    {
+        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
+            .getDatacenter().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+        }
+
+        if (!vimage.isShared() && vimage.getEnterprise().getId() != vapp.getEnterprise().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+        }
+
+        flushErrors();
     }
 
     /**
@@ -726,12 +637,11 @@ public class VirtualMachineService extends DefaultApiService
      * premium to the {@link VirtualMachine}.
      * 
      * @param virtualDatacenter from where we retrieve the hypervisor type.
-     * @param virtualImage to prepare.
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
     public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
-        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
         logger.debug("attachVirtualImageConversion community edition");
@@ -822,8 +732,10 @@ public class VirtualMachineService extends DefaultApiService
             DatacenterTasks deployTask = new DatacenterTasks();
 
             // Tasks needs the definition of the virtual machine
+            VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
             VirtualMachineDescriptionBuilder vmDesc =
-                createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+                createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                    virtualAppliance);
 
             // The id identifies this job and is neede to create the ids of the items. It is
             // hyerarchic
@@ -837,7 +749,7 @@ public class VirtualMachineService extends DefaultApiService
             logger.debug("Hypervisor connection configuration done");
 
             logger.debug("Configuration job");
-            ConfigureVirtualMachineOp configJob =
+            ApplyVirtualMachineStateOp configJob =
                 configureJobConfiguration(virtualMachine, deployTask, vmDesc, hypervisorConnection);
             logger.debug("Configuration job done with id {}", configJob.getId());
 
@@ -1008,14 +920,15 @@ public class VirtualMachineService extends DefaultApiService
         return stateJob;
     }
 
-    private ConfigureVirtualMachineOp configureJobConfiguration(
+    private ApplyVirtualMachineStateOp configureJobConfiguration(
         final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
         final VirtualMachineDescriptionBuilder vmDesc,
         final HypervisorConnection hypervisorConnection)
     {
-        ConfigureVirtualMachineOp configJob = new ConfigureVirtualMachineOp();
+        ApplyVirtualMachineStateOp configJob = new ApplyVirtualMachineStateOp();
         configJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
         configJob.setHypervisorConnection(hypervisorConnection);
+        configJob.setTransaction(StateTransition.CONFIGURE);
         configJob.setId(deployTask.getId() + "." + virtualMachine.getUuid() + "configure");
         return configJob;
     }
@@ -1049,7 +962,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * In community there are no statful image.
+     * In community there are no statful image. If some {@link VirtualImageConversion} attached use
+     * his properties when defining the {@link PrimaryDisk}, else ue the {@link VirtualImage}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -1077,10 +991,18 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
             flushErrors();
         }
-        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(virtualMachine.getVirtualImage()
-            .getDiskFormatType().name()), virtualMachine.getVirtualImage().getDiskFileSize(),
-            virtualMachine.getVirtualImage().getRepository().getUrl(), virtualMachine
-                .getVirtualImage().getPathName(), datastore, repositoryManager.getUri());
+
+        final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
+
+        final DiskFormatType format =
+            conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
+        final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
+        final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+
+        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
+            virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
+            repositoryManager.getUri());
     }
 
     private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
@@ -1093,9 +1015,10 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (i.getConfigureGateway())
             {
-                logger.debug("Network configuration with gateway");
                 // This interface is the one that configures the Network parameters.
                 // We force the forward mode to BRIDGED
+                logger.debug("Network configuration with gateway");
+
                 NetworkConfiguration configuration = i.getVlanNetwork().getConfiguration();
                 vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor()
                     .getMachine().getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork()
@@ -1114,6 +1037,14 @@ public class VirtualMachineService extends DefaultApiService
                 null, null, null, null, null, null, null,
                 Integer.valueOf(i.getRasd().getConfigurationName()));
         }
+    }
+
+    protected void bootstrapConfiguration(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder vmDesc, final VirtualDatacenter virtualDatacenter,
+        final VirtualAppliance virtualAppliance)
+    {
+        // PREMIUM
+        logger.debug("bootstrap community implementation");
     }
 
     /**
@@ -1293,12 +1224,14 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Remote services are ok!");
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
 
         DatacenterTasks deployTask = new DatacenterTasks();
 
         // Tasks needs the definition of the virtual machine
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
         // so Task 1 and its job would be 1.1, another 1.2
@@ -1481,8 +1414,10 @@ public class VirtualMachineService extends DefaultApiService
         deployTask.setId(virtualMachine.getUuid());
 
         // Tasks needs the definition of the virtual machine
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         VirtualMachineDescriptionBuilder vmDesc =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
 
         logger.debug("Configure the hypervisor connection");
         // Hypervisor connection related configuration
@@ -1559,7 +1494,8 @@ public class VirtualMachineService extends DefaultApiService
      * @return VirtualMachineDescriptionBuilder
      */
     private VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
-        final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter)
+        final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter,
+        final VirtualAppliance virtualAppliance)
     {
         VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
         logger.debug("Creating disk information");
@@ -1575,6 +1511,10 @@ public class VirtualMachineService extends DefaultApiService
         // Network related configuration
         vnicDefinitionConfiguration(virtualMachine, vmDesc);
         logger.debug("Network configuration done!");
+
+        logger.debug("Creating the bootstrap configuration");
+        bootstrapConfiguration(virtualMachine, vmDesc, virtualDatacenter, virtualAppliance);
+        logger.debug("Bootstrap configuration done!");
 
         logger.debug("Configure secondary iSCSI volumes");
         secondaryScsiDefinition(virtualMachine, vmDesc);
@@ -1618,8 +1558,10 @@ public class VirtualMachineService extends DefaultApiService
         blockVirtualMachine(virtualMachine);
 
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
+        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
         VirtualMachineDescriptionBuilder machineDescriptionBuilder =
-            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter);
+            createVirtualMachineDefinitionBuilder(virtualMachine, virtualDatacenter,
+                virtualAppliance);
         DatacenterTasks deployTask = new DatacenterTasks();
 
         // The id identifies this job and is neede to create the ids of the items. It is

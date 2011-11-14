@@ -30,6 +30,7 @@
         <jackson.version>1.6.1</jackson.version>
         <catalina.version>6.0.29</catalina.version>
         <testng.version>5.12.1</testng.version>
+        <commonsamqp.version>2.0-tarantino-SNAPSHOT</commonsamqp.version>
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
@@ -39,10 +40,8 @@
         <module>am</module>
         <module>server</module>
         <module>client</module>
-        <module>virtualfactory</module>
         <module>api</module>
         <module>nodecollector</module>
-        <module>commons-amqp</module>
     </modules>
     <!-- -->
     <!-- PROJECT INFORMATION -->
@@ -322,7 +321,6 @@
                 <module>task-service</module>
                 <module>model</module>
                 <module>aimstub</module>
-                <module>commons-amqp</module>
                 <module>system-properties</module>
             </modules>
         </profile>

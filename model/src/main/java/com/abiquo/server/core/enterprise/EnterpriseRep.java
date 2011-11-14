@@ -29,9 +29,7 @@ import javax.persistence.EntityManager;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.server.core.cloud.VirtualImageDAO;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.User.AuthType;
@@ -40,7 +38,6 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
 
 @Repository
-@Transactional
 public class EnterpriseRep extends DefaultRepBase
 {
 
@@ -52,9 +49,6 @@ public class EnterpriseRep extends DefaultRepBase
 
     @Autowired
     private EnterpriseDAO enterpriseDAO;
-
-    @Autowired
-    private VirtualImageDAO virtualImageDAO;
 
     @Autowired
     private PrivilegeDAO privilegeDAO;
@@ -74,6 +68,9 @@ public class EnterpriseRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO limitsDAO;
 
+    @Autowired
+    private OneTimeTokenSessionDAO ottSessionDAO;
+
     public EnterpriseRep()
     {
 
@@ -86,9 +83,9 @@ public class EnterpriseRep extends DefaultRepBase
 
         this.entityManager = entityManager;
         this.enterpriseDAO = new EnterpriseDAO(entityManager);
-        virtualImageDAO = new VirtualImageDAO(entityManager);
         userDAO = new UserDAO(entityManager);
         roleDAO = new RoleDAO(entityManager);
+        ottSessionDAO = new OneTimeTokenSessionDAO(entityManager);
         privilegeDAO = new PrivilegeDAO(entityManager);
         roleLdapDAO = new RoleLdapDAO(entityManager);
     }
@@ -408,6 +405,28 @@ public class EnterpriseRep extends DefaultRepBase
     {
         limitsDAO.remove(limit);
     }
+    
+    /**
+     * Consumes the token. After a successful execution the token will be invalidated.
+     * 
+     * @param token token.
+     * @return boolean true if there was token. False otherwise.
+     */
+    public boolean existOneTimeToken(String token)
+    {
+        return ottSessionDAO.consumeToken(token) > 0;
+    }
+    
+    /**
+     * The uniqueness of users is granted by Login + AuthType.
+     * 
+     * @param token token to persist.
+     */
+    public void persistToken(String token)
+    {
+        OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
+        ottSessionDAO.persist(ottSession);
+    }
 
     /**
      * {@see UserDAO#getAbiquoUserByLogin(String)}
@@ -436,4 +455,5 @@ public class EnterpriseRep extends DefaultRepBase
     {
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }
+
 }

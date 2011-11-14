@@ -21,15 +21,49 @@
 
 package com.abiquo.server.core.cloud;
 
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
 public class VirtualMachineTest extends DefaultEntityTestBase<VirtualMachine>
 {
+    private VirtualImageGenerator virtualImageGenerator;
+
+    private EnterpriseGenerator enterpriseGenerator;
 
     @Override
     protected InstanceTester<VirtualMachine> createEntityInstanceGenerator()
     {
         return new VirtualMachineGenerator(getSeed());
+    }
+
+    @Override
+    @BeforeMethod
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        enterpriseGenerator = new EnterpriseGenerator(getSeed());
+    }
+
+    @Test
+    public void testIsNotChefEnabled()
+    {
+        VirtualMachine nochef = eg().createUniqueInstance();
+        assertFalse(nochef.isChefEnabled());
+
+        Enterprise enterprise = enterpriseGenerator.createChefInstance();
+        VirtualImage image = virtualImageGenerator.createInstance(enterprise);
+        image.setChefEnabled(true);
+
+        VirtualMachine chef =
+            ((VirtualMachineGenerator) eg()).createInstance(image, enterprise, "Test");
+        assertTrue(chef.isChefEnabled());
     }
 }

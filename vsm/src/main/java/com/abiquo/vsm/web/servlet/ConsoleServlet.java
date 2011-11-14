@@ -87,8 +87,8 @@ public class ConsoleServlet extends HttpServlet
 
         config.put("Redis host", redisHost);
         config.put("Redis port", redisPort);
-        config.put("RabbitMQ host", VSMConfiguration.getInstance().getRabbitMQHost());
-        config.put("RabbitMQ port", VSMConfiguration.getInstance().getRabbitMQPort());
+        config.put("RabbitMQ host", VSMConfiguration.getHost());
+        config.put("RabbitMQ port", VSMConfiguration.getPort());
 
         request.setAttribute("config", config);
 
