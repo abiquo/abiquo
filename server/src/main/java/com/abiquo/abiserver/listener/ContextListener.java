@@ -194,5 +194,4 @@ public class ContextListener implements ServletContextListener
 
         LOGGER.info("The context [" + contextName + "] has been destroyed");
     }
-
 }

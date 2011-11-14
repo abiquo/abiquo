@@ -22,22 +22,34 @@
 package com.abiquo.api.resources;
 
 import static com.abiquo.testng.TestConfig.ALL_INTEGRATION_TESTS;
+import static com.abiquo.testng.TestConfig.DEFAULT_SERVER_PORT;
+import static com.abiquo.testng.TestConfig.getParameter;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.wink.client.ClientResponse;
+import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.testng.TestConfig;
 
 @Test(groups = ALL_INTEGRATION_TESTS)
 public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 {
-    protected static final String API_URI = "http://localhost:9009/api";
+    protected static final String API_URI = "http://localhost:"
+        + String.valueOf(getEmbededServerPort()) + "/api";
+
+    protected static final String WEBAPP_PORT = "webapp.port";
+
+    protected static int getEmbededServerPort()
+    {
+        return Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
+    }
 
     protected RestClient client = new RestClient();
 
@@ -59,6 +71,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         super.tearDown();
     }
 
+    protected Resource resource(final String uri, final String username, final String password)
+    {
+        String basicAuth = basicAuth(username, password);
+
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .header("Authorization", "Basic " + basicAuth);
+    }
+
     protected ClientResponse get(final String uri)
     {
         return client.resource(uri).accept(MediaType.APPLICATION_XML).get();
@@ -68,8 +88,8 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).header("Authorization",
-            "Basic " + basicAuth).get();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .header("Authorization", "Basic " + basicAuth).get();
     }
 
     protected ClientResponse get(final String uri, final String mediaType)
@@ -97,8 +117,8 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 
     protected ClientResponse post(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
@@ -111,8 +131,9 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).post(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String username,
@@ -120,14 +141,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(mediaType).contentType(mediaType).header(
-            "Authorization", "Basic " + basicAuth).post(dto);
+        return client.resource(uri).accept(mediaType).contentType(mediaType)
+            .header("Authorization", "Basic " + basicAuth).post(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String username,
@@ -135,8 +156,9 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).put(dto);
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String username,
@@ -157,8 +179,9 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
     {
         String basicAuth = basicAuth(username, password);
 
-        return client.resource(uri).accept(MediaType.APPLICATION_XML).contentType(
-            MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth).delete();
+        return client.resource(uri).accept(MediaType.APPLICATION_XML)
+            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
+            .delete();
     }
 
     protected ClientResponse delete(final String uri, final String username, final String password,

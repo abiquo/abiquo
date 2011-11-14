@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+import static com.abiquo.api.util.URIResolver.resolveFromURI;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -33,23 +36,35 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.apache.wink.server.handlers.MessageContext;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
+import com.abiquo.model.rest.RESTLink;
+
 public abstract class AbstractResource
 {
     public static final String FLAT_MEDIA_TYPE = "application/flat+xml";
+
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
-    
+
     public static final String START_WITH = "startwith";
+
     public static final String BY = "by";
+
     public static final String FILTER = "has";
+
     public static final String LIMIT = "limit";
+
     public static final String ASC = "asc";
+
     public static final Integer DEFAULT_PAGE_LENGTH = 25;
+
     public static final String DEFAULT_PAGE_LENGTH_STRING = "25";
 
     private static Collection<Class> REST = new ArrayList<Class>()
@@ -64,11 +79,11 @@ public abstract class AbstractResource
     };
 
     @OPTIONS
-    public Response options(@Context MessageContext context)
+    public Response options(@Context final MessageContext context)
     {
-        ResponseBuilder builder = new ResponseBuilderImpl();
+        final ResponseBuilder builder = new ResponseBuilderImpl();
 
-        String methodsAllowed = getMethodsAllowed();
+        final String methodsAllowed = getMethodsAllowed();
 
         builder.header("Allow", methodsAllowed);
 
@@ -77,10 +92,10 @@ public abstract class AbstractResource
 
     protected String getMethodsAllowed()
     {
-        Collection<String> allowed = new LinkedHashSet<String>();
-        for (Method method : this.getClass().getMethods())
+        final Collection<String> allowed = new LinkedHashSet<String>();
+        for (final Method method : this.getClass().getMethods())
         {
-            for (Annotation anno : method.getAnnotations())
+            for (final Annotation anno : method.getAnnotations())
             {
                 if (REST.contains(anno.annotationType()))
                 {
@@ -92,4 +107,33 @@ public abstract class AbstractResource
         return allowed.toString();
     }
 
+    /**
+     * Extracts an Id from the link with the given rel.
+     * 
+     * @param link where the id.
+     * @param path the resource.
+     * @param param the parameter.
+     * @param key the rel.
+     * @param error what do we output.
+     * @return Integer
+     */
+    protected Integer getLinkId(final RESTLink link, final String path, final String param,
+        final String key, final APIError error)
+    {
+        if (link == null)
+        {
+            throw new NotFoundException(error);
+        }
+
+        final String buildPath = buildPath(path, param);
+        final MultivaluedMap<String, String> values = resolveFromURI(buildPath, link.getHref());
+
+        if (values == null || !values.containsKey(key))
+        {
+            throw new NotFoundException(error);
+        }
+
+        return Integer.valueOf(values.getFirst(key));
+    }
+    
 }

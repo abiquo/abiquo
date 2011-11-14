@@ -33,7 +33,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +42,7 @@ import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -62,26 +62,25 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 @Service
-@Transactional(readOnly = true)
 public class EnterpriseService extends DefaultApiService
 {
     @Autowired
-    EnterpriseRep repo;
+    protected EnterpriseRep repo;
 
     @Autowired
-    VirtualDatacenterRep vdcRepo;
+    private VirtualDatacenterRep vdcRepo;
 
     @Autowired
-    MachineService machineService;
+    private MachineService machineService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    DatacenterService datacenterService;
+    private DatacenterService datacenterService;
 
     @Autowired
-    SecurityService securityService;
+    private SecurityService securityService;
 
     public EnterpriseService()
     {
@@ -97,41 +96,21 @@ public class EnterpriseService extends DefaultApiService
         datacenterService = new DatacenterService(em);
     }
 
-    /**
-     * Based on the spring authentication context.
-     * 
-     * @see SecurityContextHolder
-     */
-    // public Enterprise getCurrentEnterprise()
-    // {
-    // // AbiquoUserDetails currentUserInfo = (AbiquoUserDetails)
-    // SecurityContextHolder.getContext().getAuthentication();
-    //
-    // User user = userService.getCurrentUser();
-    //
-    // return user.getEnterprise();
-    //
-    // // Enterprise enterprise = repo.findById(id);
-    // // if (enterprise == null)
-    // // {
-    // // throw new NotFoundException(APIError.NON_EXISTENT_ENTERPRISE);
-    // // }
-    //
-    // }
-
+    @Transactional(readOnly = true)
     public Enterprise getCurrentEnterprise()
     {
         return userService.getCurrentUser().getEnterprise();
     }
 
+    @Transactional(readOnly = true)
     public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
         final Integer numResults)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTRPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
         }
@@ -174,6 +153,7 @@ public class EnterpriseService extends DefaultApiService
         return enterprise;
     }
 
+    @Transactional(readOnly = true)
     public Enterprise getEnterprise(final Integer id)
     {
         Enterprise enterprise = repo.findById(id);
@@ -199,7 +179,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !userEnt.equals(dto.getId()))
         {
             throw new AccessDeniedException("");
@@ -302,6 +282,7 @@ public class EnterpriseService extends DefaultApiService
         repo.deleteRole(role);
     }
 
+    @Transactional(readOnly = true)
     public List<Machine> findReservedMachines(final Integer enterpriseId)
     {
         return repo.findReservedMachines(getEnterprise(enterpriseId));
@@ -337,6 +318,7 @@ public class EnterpriseService extends DefaultApiService
         repo.releaseMachine(machine);
     }
 
+    @Transactional(readOnly = true)
     public DatacenterLimits findLimitsByEnterpriseAndIdentifier(final Integer enterpriseId,
         final Integer limitId)
     {
@@ -345,6 +327,7 @@ public class EnterpriseService extends DefaultApiService
         return findLimitsByEnterpriseAndIdentifier(enterprise, limitId);
     }
 
+    @Transactional(readOnly = true)
     private DatacenterLimits findLimitsByEnterpriseAndIdentifier(final Enterprise enterprise,
         final Integer limitId)
     {
@@ -359,6 +342,7 @@ public class EnterpriseService extends DefaultApiService
         return limit;
     }
 
+    @Transactional(readOnly = true)
     public Collection<DatacenterLimits> findLimitsByEnterprise(final Integer enterpriseId)
     {
         Enterprise enterprise = getEnterprise(enterpriseId);
@@ -366,6 +350,11 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterprise(enterprise);
     }
 
+    /**
+     * Checks enterprise and datacenter exists and have a limits relation (datacenter allowed by
+     * enterprise).
+     */
+    @Transactional(readOnly = true)
     public DatacenterLimits findLimitsByEnterpriseAndDatacenter(final Integer enterpriseId,
         final Integer datacenterId)
     {
@@ -375,6 +364,7 @@ public class EnterpriseService extends DefaultApiService
         return repo.findLimitsByEnterpriseAndDatacenter(enterprise, datacenter);
     }
 
+    @Transactional(readOnly = true)
     public Collection<DatacenterLimits> findLimitsByDatacenter(final Integer datacenterId)
     {
         Datacenter datacenter = datacenterService.getDatacenter(datacenterId);
@@ -487,6 +477,7 @@ public class EnterpriseService extends DefaultApiService
         repo.deleteLimit(limit);
     }
 
+    @Transactional(readOnly = true)
     private Datacenter getDatacenter(final DatacenterLimitsDto dto)
     {
         RESTLink datacenterLink = dto.searchLink("datacenter");
@@ -523,11 +514,13 @@ public class EnterpriseService extends DefaultApiService
         flushErrors();
     }
 
+    @Transactional(readOnly = true)
     public Collection<Privilege> findAllPrivileges()
     {
         return repo.findAllPrivileges();
     }
 
+    @Transactional(readOnly = true)
     public Privilege getPrivilege(final Integer id)
     {
         Privilege privilege = repo.findPrivilegeById(id);
@@ -540,14 +533,16 @@ public class EnterpriseService extends DefaultApiService
         return privilege;
     }
 
+    @Transactional(readOnly = true)
     public Collection<Privilege> getAllPrivileges()
     {
         return repo.findAllPrivileges();
     }
 
-    public RoleLdap getRoleLdap(final String role_ldap)
+    @Transactional(readOnly = true)
+    public RoleLdap getRoleLdap(final String roleLdap)
     {
-        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(role_ldap);
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
         if (list == null || list.isEmpty())
         {
             addNotFoundErrors(APIError.NON_EXISTENT_ROLELDAP);
@@ -559,6 +554,31 @@ public class EnterpriseService extends DefaultApiService
             flushErrors();
         }
         return list.get(0);
+    }
+
+    @Transactional(readOnly = true)
+    public RoleLdap getRoleLdapOrNull(final String roleLdap)
+    {
+        List<RoleLdap> list = repo.findRoleLdapByRoleLdap(roleLdap);
+        if (list.size() > 1)
+        {
+            addConflictErrors(APIError.MULTIPLE_ENTRIES_ROLELDAP);
+            flushErrors();
+        }
+
+        return list == null || list.isEmpty() ? null : list.get(0);
+    }
+
+    @Transactional(readOnly = true)
+    public Role findRoleById(final Integer id)
+    {
+        return repo.findRoleById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Privilege> findPrivilegesByRole(final Role role)
+    {
+        return repo.findPrivilegesByRole(role);
     }
 
     protected void isValidEnterpriseLimit(final Enterprise old)

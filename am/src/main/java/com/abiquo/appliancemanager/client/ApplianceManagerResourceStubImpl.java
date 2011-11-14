@@ -23,17 +23,19 @@ package com.abiquo.appliancemanager.client;
 import java.io.File;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
+import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 
-import com.abiquo.appliancemanager.transport.AMConfigurationDto;
+import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusListDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 //@Service
 // @Transactional
@@ -91,7 +93,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         return response.getEntity(OVFPackageInstanceDto.class);
     }
 
-    public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(final String idEnterprise,
+    public OVFPackageInstanceStateDto getOVFPackageInstanceStatus(final String idEnterprise,
         final String ovfId)
     {
         Resource resource = ovfPackage(idEnterprise, ovfId);
@@ -100,7 +102,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         checkResponse(response);
 
-        return response.getEntity(OVFPackageInstanceStatusDto.class);
+        return response.getEntity(OVFPackageInstanceStateDto.class);
     }
 
     public EnvelopeType getOVFPackageInstanceEnvelope(final String idEnterprise, final String ovfId)
@@ -131,7 +133,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         return response.getEntity(File.class);
     }
 
-    public OVFPackageInstanceStatusListDto getOVFPackagInstanceStatusList(final String idEnterprise)
+    public OVFPackageInstancesStateDto getOVFPackagInstanceStatusList(final String idEnterprise)
     {
         Resource resource = ovfPackagesTimeout(idEnterprise);
 
@@ -139,10 +141,10 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         checkResponse(response);
 
-        return response.getEntity(OVFPackageInstanceStatusListDto.class);
+        return response.getEntity(OVFPackageInstancesStateDto.class);
     }
 
-    public AMConfigurationDto getAMConfiguration()
+    public RepositoryConfigurationDto getRepositoryConfiguration()
     {
         Resource resource = repositories();
 
@@ -150,7 +152,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         checkResponse(response);
 
-        return response.getEntity(AMConfigurationDto.class);
+        return response.getEntity(RepositoryConfigurationDto.class);
     }
 
     public void checkService() throws ApplianceManagerStubException
@@ -202,6 +204,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
             resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
         checkResponse(response);
+
     }
 
     public String preBundleOVFPackage(final String idEnterprise, final String name)
@@ -241,11 +244,11 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * Current status, eval if uploading.
      * 
      * @param idsOvfpackageIn Name of the item to refresh.
-     * @param idEnterprise Id of  Enterprise to which this {@link OVFPackage} belongs.
+     * @param idEnterprise Id of Enterprise to which this {@link OVFPackage} belongs.
      * @return OVFPackageInstanceStatusDto
      */
-    public OVFPackageInstanceStatusDto getCurrentOVFPackageInstanceStatus(
-        final String idEnterprise, final String ovfId)
+    public OVFPackageInstanceStateDto getCurrentOVFPackageInstanceStatus(final String idEnterprise,
+        final String ovfId)
     {
         Resource resource = ovfPackage(idEnterprise, ovfId);
 
@@ -254,7 +257,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         final int httpStatus = response.getStatusCode();
         if (httpStatus == 200)
         {
-            return response.getEntity(OVFPackageInstanceStatusDto.class);
+            return response.getEntity(OVFPackageInstanceStateDto.class);
         }
         if (httpStatus == 404)
         {
@@ -263,7 +266,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         checkErrorStatusResponse(response, httpStatus);
 
-        return response.getEntity(OVFPackageInstanceStatusDto.class);
+        return response.getEntity(OVFPackageInstanceStateDto.class);
     }
 
     /**
@@ -272,17 +275,18 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * @param ovfId id {@link OVFPackage}.
      * @return OVFPackageInstanceStatusDto
      */
-    private OVFPackageInstanceStatusDto uploading(final String ovfId)
+    private OVFPackageInstanceStateDto uploading(final String ovfId)
     {
-        OVFPackageInstanceStatusDto statusUploading = new OVFPackageInstanceStatusDto();
+        OVFPackageInstanceStateDto statusUploading = new OVFPackageInstanceStateDto();
         statusUploading.setOvfId(ovfId);
-        statusUploading.setProgress(0d);
-        statusUploading.setOvfPackageStatus(OVFPackageInstanceStatusType.DOWNLOAD);
+        statusUploading.setDownloadingProgress(0d);
+        statusUploading.setStatus(OVFStatusEnumType.DOWNLOAD);
         return statusUploading;
     }
 
     /**
      * Returns the proper error.
+     * 
      * @param response response.
      * @param httpStatus code.
      */
@@ -297,7 +301,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         {
             cause = response.getMessage();
 
-            }
+        }
 
         throw new ApplianceManagerStubException(String.format("%d - %s\n %s", httpStatus,
             response.getMessage(), cause));

@@ -40,10 +40,10 @@ import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -157,7 +157,8 @@ public class Allocator implements IAllocator
 
     private VirtualImage getVirtualImage(final VirtualMachineRequirements increaseRequirements)
     {
-        VirtualImage vimage = new VirtualImage(null); // doesn't care about the enterprise
+        // We only need the CPU and RAM requirement fields
+        VirtualImage vimage = new VirtualImage(null, null, null, null, 0L, null);
         vimage.setCpuRequired(increaseRequirements.getCpu().intValue());
         vimage.setRamRequired(increaseRequirements.getRam().intValue());
         return vimage;
@@ -267,12 +268,12 @@ public class Allocator implements IAllocator
     protected VirtualImage getVirtualImageWithVirtualMachineResourceRequirements(
         final VirtualMachine vmachine)
     {
-        VirtualImage vimage = new VirtualImage(null); // doesn't care about enterprise
-
+        // We only need the CPU and RAM requirement fields
+        VirtualImage vimage = new VirtualImage(null, null, null, null, 0L, null);
         vimage.setCpuRequired(vmachine.getCpu());
         vimage.setRamRequired(vmachine.getRam());
 
-        if (vmachine.getVirtualImage().getStateful() == 0)
+        if (!vmachine.getVirtualImage().isStateful())
         {
             vimage.setHdRequiredInBytes(vmachine.getHdInBytes());
         }

@@ -21,10 +21,10 @@
 
 package com.abiquo.am.resources;
 
-import java.io.UnsupportedEncodingException;
+import static com.abiquo.am.services.OVFPackageConventions.ovfUrl;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -48,25 +48,34 @@ import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.OVFPackageInstanceFileSystem;
 import com.abiquo.am.services.OVFPackageInstanceService;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
-import com.abiquo.appliancemanager.exceptions.RepositoryException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStatusType;
-import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 @Parent(OVFPackageInstancesResource.class)
-@Path(OVFPackageInstanceResource.OVFPI_PARAM)
+@Path(OVFPackageInstanceResource.OVFPI_PATH)
 @Controller(value = "ovfPackageInstanceResource")
 public class OVFPackageInstanceResource extends AbstractResource
 {
 
     public static final String OVFPI = ApplianceManagerPaths.OVFPI;
 
-    public static final String OVFPI_PARAM = "{" + OVFPI + "}";
+    /**
+     * The resource parameter matching configuration.
+     * <p>
+     * Must override default regular expression in order to be able to match complete URIs as the
+     * OVFPackageInstance identifier.
+     */
+    public static final String OVFPI_PARAM = "{" + OVFPI + ": .*}"; // FIXME take care of .*
+
+    /** The resource path. */
+    public static final String OVFPI_PATH = OVFPI_PARAM;
 
     private final static String HEADER_PROGRESS = "progress";
 
@@ -80,24 +89,12 @@ public class OVFPackageInstanceResource extends AbstractResource
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
         @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn) throws DownloadException
     {
-        String ovfId1;
-        String ovfId;
-        try
-        {
-            // FIXME ABICLOUDPREMIUM-1798
-                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
-                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
-        }
-        
-        OVFPackageInstanceStatusDto status =
+        final String ovfId = ovfUrl(ovfIdIn);
+
+        OVFPackageInstanceStateDto status =
             service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
 
-        switch (status.getOvfPackageStatus())
+        switch (status.getStatus())
         {
             case NOT_DOWNLOAD:
                 return Response.status(Status.NOT_FOUND).build();
@@ -106,7 +103,7 @@ public class OVFPackageInstanceResource extends AbstractResource
                 return Response.status(Status.CREATED).build(); // TODO location(arg0);
 
             case DOWNLOADING:
-                final String progress = String.valueOf(status.getProgress());
+                final String progress = String.valueOf(status.getDownloadingProgress());
                 return Response.status(Status.ACCEPTED).header(HEADER_PROGRESS, progress).build();
 
             case ERROR:
@@ -116,7 +113,7 @@ public class OVFPackageInstanceResource extends AbstractResource
                 // XXX deleted
             default:
                 return Response.status(Status.NOT_FOUND)
-                    .entity("UNKNOW STATUS:" + status.getOvfPackageStatus().name()).build();
+                    .entity("UNKNOW STATUS:" + status.getStatus().name()).build();
         }
     }
 
@@ -128,19 +125,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     {
         // XXX can specify the media type
 
-        String ovfId1;
-        String ovfId;
-        try
-        {
-            // FIXME ABICLOUDPREMIUM-1798
-                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
-                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
-        }
+        final String ovfId = ovfUrl(ovfIdIn);
 
         if (format == null || format.isEmpty() || format.equals("ovfpi"))
         {
@@ -186,9 +171,9 @@ public class OVFPackageInstanceResource extends AbstractResource
      */
     private Response evalStatus(String idEnterprise, String ovfId)
     {
-        OVFPackageInstanceStatusDto ovfPackageInstanceStatus =
-            getOVFPackageInstanceStatus(idEnterprise, ovfId); 
-        
+        OVFPackageInstanceStateDto ovfPackageInstanceStatus =
+            getOVFPackageInstanceStatus(idEnterprise, ovfId);
+
         if (ovfPackageInstanceStatus == null)
         {
             return Response.status(Status.NOT_FOUND).build();
@@ -197,39 +182,32 @@ public class OVFPackageInstanceResource extends AbstractResource
         {
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFPackageInstanceStatusType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
+        if (OVFStatusEnumType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
+            .getStatus()))
         {
-            ovfPackageInstanceStatus.setProgress(0d);
+            ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFPackageInstanceStatusType.ERROR.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
+        if (OVFStatusEnumType.ERROR.equals(ovfPackageInstanceStatus
+            .getStatus()))
         {
-            ovfPackageInstanceStatus.setProgress(0d);
+            ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        
-        if (OVFPackageInstanceStatusType.DOWNLOADING.equals(ovfPackageInstanceStatus
-            .getOvfPackageStatus()))
+
+        if (OVFStatusEnumType.DOWNLOADING.equals(ovfPackageInstanceStatus
+            .getStatus()))
         {
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        
-        
-        ovfPackageInstanceStatus.setProgress(100d);
+
+        ovfPackageInstanceStatus.setDownloadingProgress(100d);
         return Response.ok(ovfPackageInstanceStatus).build();
     }
 
     /**
-     * 
-     * */
-    /*
-     * create methods
+     * create bundle methods
      */
-    /**
-     * 
-     * */
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
@@ -260,204 +238,49 @@ public class OVFPackageInstanceResource extends AbstractResource
             bundleOVFId = service.createOVFBundle(diskInfo, snapshot);
             bundleUri = new URI(bundleOVFId);
         }
-        catch (RepositoryException e)
-        {
-            throw new AMException(e);
-        }
         catch (URISyntaxException e)
         {
             final String cause = String.format("The Bundle URI is not valid [%s]", bundleOVFId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
+            throw new AMException(AMError.OVF_BOUNDLE, cause, e);
         }
 
         return Response.created(bundleUri).type(MediaType.TEXT_PLAIN).build(); // XXX location
     }
 
     /**
-     * 
-     * */
-    /*
      * delete
      */
-    /**
-     * 
-     * */
-
     @DELETE
     public void deleteOVF(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
         @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn)
     {
+        final String ovfId = ovfUrl(ovfIdIn);
 
-        String ovfId1;
-        String ovfId;
-        try
-        {
-            // FIXME ABICLOUDPREMIUM-1798
-                ovfId1 = URLDecoder.decode(ovfIdIn, "UTF-8");                
-                ovfId = URLDecoder.decode(ovfId1, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                .entity("Malformed URL of the ovfid " + ovfIdIn).build());
-        }
-        
-
-        try
-        {
-            service.delete(idEnterprise, ovfId);
-        }
-        catch (IdNotFoundException e)
-        {
-            throw new AMException(Status.NOT_FOUND, e.getLocalizedMessage());
-        }
-        catch (RepositoryException e)
-        {
-            throw new AMException(Status.PRECONDITION_FAILED, e.getLocalizedMessage());
-        }
+        service.delete(idEnterprise, ovfId);
     }
 
     /*
      * NOT EXPOSED *
      */
-    // @GET
     // @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
-    // public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(
-    // @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-    // @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId)
-    //
-    OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(String idEnterprise, String ovfId)
-
+    private OVFPackageInstanceStateDto getOVFPackageInstanceStatus(String idEnterprise,
+        String ovfId)
     {
-
-        try
-        {
-            return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
-        }
-        catch (DownloadException e)
-        {
-            throw new AMException(Status.NOT_FOUND, "OVF Package Instance not found or "
-                + "can't obtain the status", e);
-        }
+        return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
     }
 
-    // OVFPackageInstanceDto getOVFPackageInstance(
-    // @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-    // @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId)
-
-    OVFPackageInstanceDto getOVFPackageInstance(String idEnterprise, String ovfId)
+    private OVFPackageInstanceDto getOVFPackageInstance(String idEnterprise, String ovfId)
     {
-
-        try
-        {
-            return service.getOVFPackage(idEnterprise, ovfId);
-        }
-        catch (IdNotFoundException e)
-        {
-            final String cause =
-                String.format("Can not obtain the OVF Package Instance of OVF [%s]", ovfId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
-        }
-        //
-        // EnvelopeType envelope = getOVFEnvelope(ovfId, idEnterprise);
-        //
-        // OVFPackageInstanceDto packDto = OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId,
-        // idEnterprise, envelope);
-        // packDto.setIdEnterprise(Integer.valueOf(idEnterprise));
-        //
-        // return packDto;
+        return service.getOVFPackage(idEnterprise, ovfId);
     }
 
-    // @GET
-    // @Produces("xml/ovfenvelope")
-    // public EnvelopeType getOVFEnvelope(
-    // @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-    // @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId)
-    public EnvelopeType getOVFEnvelope(String idEnterprise, String ovfId)
-
+    private EnvelopeType getOVFEnvelope(String idEnterprise, String ovfId)
     {
         EnterpriseRepositoryService enterpriseRepository =
             EnterpriseRepositoryService.getRepo(idEnterprise);
 
-        try
-        {
-            final EnvelopeType envelop = enterpriseRepository.getEnvelope(ovfId);
-
-            return envelop;
-        }
-        catch (IdNotFoundException e)
-        {
-            final String cause =
-                String.format("Can not obtain the Envelope document of OVF [%s]", ovfId);
-            throw new AMException(Status.NOT_FOUND, cause, e);
-        }
+        return OVFPackageInstanceFileSystem.getEnvelope(
+            enterpriseRepository.getEnterpriseRepositoryPath(), ovfId);
     }
-
-    // @GET
-    // @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    // public File downloadOVFDiskFile(
-    // @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-    // @PathParam(OVFPackageInstanceResource.OVFPI) String ovfId)
-    // {
-    //
-    // try
-    // {
-    // ovfId = URLDecoder.decode(ovfId, "UTF-8");
-    // }
-    // catch (UnsupportedEncodingException e)
-    // {
-    // throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-    // .entity("Malformed URL of the ovfid " + ovfId).build());
-    // }
-    //
-    //
-    // // FIXME
-    // //
-    // http://www.jarvana.com/jarvana/view/org/apache/wink/apache-wink/1.0-incubating/apache-wink-1.0-incubating-src.tar.gz!/apache-wink-1.0-incubating-src/wink-common/src/test/java/org/apache/wink/common/internal/providers/multipart/TestMultiPartProvider.java?format=ok
-    // // FIXME
-    // //
-    // http://svn.apache.org/repos/asf/incubator/wink/tags/wink-1.1.2-incubating/wink-examples/ext/MultiPart/src/main/java/org/apache/wink/example/multipart/MultiPartResource.java
-    // EnterpriseRepositoryService enterpriseRepository =
-    // EnterpriseRepositoryService.getRepo(idEnterprise);
-    // try
-    // {
-    // return enterpriseRepository.getOVFDiskFile(ovfId);
-    //
-    // // final String enterpriseRepositoryPath =
-    // // enterpriseRepository.getEnterpriseRepositoryPath();
-    // // final String relativeDiskFilePath =
-    // // diskFile.getAbsolutePath().substring(enterpriseRepositoryPath.length());
-    // //
-    // // FileInputStream diskFileStream = new FileInputStream(diskFile);
-    // // BufferedInputStream bis = new BufferedInputStream(diskFileStream);
-    // //
-    // // return new Attachment(bis, AMHTTPHeadersUtils.createAttachmentHeaders(
-    // // relativeDiskFilePath, diskFile.length()));
-    // }
-    // catch (Exception e)// IdNotFound or FileNotFoundException
-    // {
-    // final String cause = String.format("Can not obtain the disk file for OVF [%s]", ovfId);
-    // throw new AMException(Status.NOT_FOUND, cause, e);
-    // }
-    // }
-    //
-    // public class FileOutPart extends OutPart
-    // {
-    // String resource;
-    //
-    // public FileOutPart(String resource)
-    // {
-    // this.resource = resource;
-    // }
-    //
-    // // @Override
-    // // void writePart(OutputStream os, Providers providers) {
-    // // InputStream in = getClass().getResourceAsStream(resource);
-    // // int b;
-    // // while ((b = in.read()) != -1) {
-    // // os.write(b);
-    // // }
-    // // }
-    // }
 }

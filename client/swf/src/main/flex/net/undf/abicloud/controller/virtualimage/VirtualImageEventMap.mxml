@@ -129,7 +129,7 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getCategories"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -163,7 +163,7 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="createCategory"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id, event.category.name]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.category.name]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -234,7 +234,7 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getIcons"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -268,7 +268,7 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="createIcon"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id, event.icon]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.icon]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"

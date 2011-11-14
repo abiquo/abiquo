@@ -43,11 +43,11 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.ovf.OVFGeneratorService;
 import com.abiquo.api.util.EventingSupport;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
+import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -55,7 +55,6 @@ import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
-import com.abiquo.server.core.cloud.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineChangeStateResultDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -82,9 +81,6 @@ public class VirtualApplianceService extends DefaultApiService
 
     @Autowired
     VirtualDatacenterService vdcService;
-
-    @Autowired
-    OVFGeneratorService ovfService;
 
     @Autowired
     RemoteServiceService remoteServiceService;
@@ -164,73 +160,13 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void startVirtualAppliance(final Integer vdcId, final Integer vappId)
-    {
-        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-        Datacenter datacenter = virtualAppliance.getVirtualDatacenter().getDatacenter();
-
-        try
-        {
-            if (virtualAppliance.getState() == VirtualApplianceState.DEPLOYED)
-            {
-                allocate(virtualAppliance);
-
-                virtualAppliance.setState(VirtualApplianceState.DEPLOYED);
-                repo.updateVirtualAppliance(virtualAppliance);
-
-                EnvelopeType envelop = ovfService.createVirtualApplication(virtualAppliance);
-
-                Document docEnvelope = OVFSerializer.getInstance().bindToDocument(envelop, false);
-
-                RemoteService vsm =
-                    remoteServiceService.getRemoteService(datacenter.getId(),
-                        RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-
-                RemoteService vf =
-                    remoteServiceService.getRemoteService(datacenter.getId(),
-                        RemoteServiceType.VIRTUAL_FACTORY);
-
-                long timeout = Long.valueOf(ConfigService.getServerTimeout());
-
-                Resource resource =
-                    ResourceFactory.create(vf.getUri(), RESOURCE_URI, timeout, docEnvelope,
-                        ResourceFactory.LATEST);
-
-                EventingSupport.subscribeToAllVA(virtualAppliance, vsm.getUri());
-
-                changeState(resource, envelop, VirtualMachineState.ON.toResourceState());
-            }
-        }
-        catch (Exception e)
-        {
-            // XXX
-        }
-    }
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void addImage(final Integer virtualDatacenterId, final Integer virtualApplianceId,
         final VirtualImageDto image)
     {
 
-    }
-
-    private void allocate(final VirtualAppliance virtualAppliance)
-    {
-        for (NodeVirtualImage node : virtualAppliance.getNodes())
-        {
-            allocatorService.allocateVirtualMachine(node.getVirtualMachine().getId(),
-                virtualAppliance.getId(), false);
-        }
-    }
-
-    private void changeState(final Resource resource, final EnvelopeType envelope,
-        final String machineState) throws Exception
-    {
-        EnvelopeType envelopeRunning = ovfService.changeStateVirtualMachine(envelope, machineState);
-        Document docEnvelopeRunning =
-            OVFSerializer.getInstance().bindToDocument(envelopeRunning, false);
-
-        resource.put(docEnvelopeRunning);
+        /**
+         * TODO
+         */
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -273,56 +209,6 @@ public class VirtualApplianceService extends DefaultApiService
         repo.updateVirtualAppliance(vapp);
 
         return vapp;
-    }
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<VirtualMachineChangeStateResultDto> changeVirtualAppMachinesState(
-        final Integer vdcId, final Integer vappId, final VirtualMachineState state)
-    {
-        VirtualAppliance vapp = getVirtualAppliance(vdcId, vappId);
-        if (vapp.getState().equals(VirtualMachineState.NOT_ALLOCATED))
-        {
-            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_DEPLOYED);
-            flushErrors();
-        }
-        if (!vapp.getState().equals(VirtualMachineState.ALLOCATED))
-        {
-            addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
-            flushErrors();
-        }
-        List<VirtualMachine> vmachines = vmService.findByVirtualAppliance(vapp);
-        List<VirtualMachineChangeStateResultDto> results =
-            new ArrayList<VirtualMachineChangeStateResultDto>();
-        for (VirtualMachine vm : vmachines)
-        {
-            try
-            {
-                if (!vmService.sameState(vm, state))
-                {
-                    vmService.changeVirtualMachineState(vm.getId(), vappId, vdcId, state);
-                }
-                VirtualMachineChangeStateResultDto result =
-                    new VirtualMachineChangeStateResultDto();
-                result.setId(vm.getId());
-                result.setName(vm.getName());
-                result.setSuccess(true);
-                results.add(result);
-            }
-            catch (ConflictException e)
-            {
-                VirtualMachineChangeStateResultDto result =
-                    new VirtualMachineChangeStateResultDto();
-                result.setId(vm.getId());
-                result.setName(vm.getName());
-                result.setSuccess(false);
-                for (CommonError er : e.getErrors())
-                {
-                    result.setMessage(er.getMessage());
-                }
-                results.add(result);
-            }
-        }
-        return results;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

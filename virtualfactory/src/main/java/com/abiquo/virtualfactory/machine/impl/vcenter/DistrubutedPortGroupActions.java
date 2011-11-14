@@ -41,6 +41,7 @@ import com.vmware.vim25.ObjectContent;
 import com.vmware.vim25.ObjectSpec;
 import com.vmware.vim25.PropertyFilterSpec;
 import com.vmware.vim25.PropertySpec;
+import com.vmware.vim25.StringPolicy;
 import com.vmware.vim25.VMwareDVSPortSetting;
 import com.vmware.vim25.VMwareDVSPortgroupPolicy;
 import com.vmware.vim25.VimPortType;
@@ -52,6 +53,7 @@ import com.vmware.vim25.VirtualEthernetCardDistributedVirtualPortBackingInfo;
 import com.vmware.vim25.VirtualMachineConfigSpec;
 import com.vmware.vim25.VirtualMachineConnectionState;
 import com.vmware.vim25.VmwareDistributedVirtualSwitchVlanIdSpec;
+import com.vmware.vim25.VmwareUplinkPortTeamingPolicy;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.DistributedVirtualSwitch;
 import com.vmware.vim25.mo.Folder;
@@ -74,6 +76,12 @@ public class DistrubutedPortGroupActions
 
     private ServiceInstance serviceInstance;
 
+    private final static String TEAMING_POLICY_DEFAULT = "loadbalance_srcid";
+
+    private final static Integer PORTS_BY_PORT_GROUP_DEFAULT = 128;
+
+    private final static Integer MAX_PORTS_BY_PORT_GROUP_DEFAULT = 3192;
+
     /**
      * Public construction.
      * 
@@ -82,169 +90,6 @@ public class DistrubutedPortGroupActions
     public DistrubutedPortGroupActions(final ServiceInstance serviceInstance)
     {
         this.serviceInstance = serviceInstance;
-    }
-
-    /**
-     * Create a new port group with port settings IdSpec.
-     * 
-     * @param dvsName name of the switch were the port group will be attached.
-     * @param networkName distinctive name of the port group.
-     * @param vlanTag tag that the port group will use.
-     * @return the port group name.
-     * @throws VirtualMachineException
-     * @throws Exception
-     */
-    public String createPortGroupInDVS(final String dvsName, final String networkName,
-        final Integer vlanTag) throws VirtualMachineException
-    {
-        String portGroupName = networkName + "_" + vlanTag;
-
-        try
-        {
-
-            // Check if the port group already exists
-            DistributedVirtualPortgroup aux = this.getPortGroup(dvsName, portGroupName);
-            if (aux != null)
-            {
-                throw new VirtualMachineException("The distributed port group with name '"
-                    + portGroupName + "' already exists.");
-            }
-
-            Folder fold = serviceInstance.getRootFolder();
-            DistributedVirtualSwitch dvs =
-                (DistributedVirtualSwitch) new InventoryNavigator(fold).searchManagedEntity(
-                    "DistributedVirtualSwitch", dvsName);
-
-            if (dvs == null)
-            {
-                throw new VirtualMachineException("The dvSwitch with name '" + dvsName
-                    + "' does not exist.");
-            }
-
-            // Allow VLAN overriding
-            VMwareDVSPortgroupPolicy portGroupPolicy = new VMwareDVSPortgroupPolicy();
-            portGroupPolicy.setBlockOverrideAllowed(Boolean.TRUE);
-            portGroupPolicy.setPortConfigResetAtDisconnect(Boolean.TRUE);
-
-            // Set the VLAN Tag
-            VmwareDistributedVirtualSwitchVlanIdSpec vlanSpec =
-                new VmwareDistributedVirtualSwitchVlanIdSpec();
-            vlanSpec.setInherited(Boolean.FALSE);
-            vlanSpec.setVlanId(vlanTag);
-
-            VMwareDVSPortSetting dvsPortSettings = new VMwareDVSPortSetting();
-            dvsPortSettings.setVlan(vlanSpec);
-
-            // Define the port group
-            DVPortgroupConfigSpec dvPortGroup = new DVPortgroupConfigSpec();
-            dvPortGroup.setName(portGroupName);
-            dvPortGroup.setNumPorts(128);
-            dvPortGroup.setType(DistributedVirtualPortgroupPortgroupType.earlyBinding.name());
-            dvPortGroup.setPolicy(portGroupPolicy);
-            dvPortGroup.setDefaultPortConfig(dvsPortSettings);
-
-            DVPortgroupConfigSpec[] portGroups = new DVPortgroupConfigSpec[] {dvPortGroup};
-
-            // Attach the port grup to the DVS.
-            serviceInstance.getServerConnection().getVimService()
-                .addDVPortgroup_Task(dvs.getMOR(), portGroups);
-
-            LOGGER.info("Port group '" + portGroupName + "' created into dvSwitch with name '"
-                + dvsName + "'.");
-            return portGroupName;
-        }
-        catch (Exception e)
-        {
-            String message =
-                "Could not create the port group '" + portGroupName + "' into dvSwitch with name '"
-                    + dvsName + "' because of:" + e.getMessage();
-
-            LOGGER.error(message);
-            throw new VirtualMachineException(message, e);
-        }
-
-    }
-
-    /**
-     * Get the port group into a Distributed Virtual Switch.
-     * 
-     * @param dvsName name of the Distributed Virtual Switch.
-     * @param portGroupName PortGroup name we search for.
-     * @return a {@link DistributedVirtualPortgroup} instance.
-     * @throws VirtualMachineException
-     * @throws Exception
-     */
-    public DistributedVirtualPortgroup getPortGroup(final String dvsName, final String portGroupName)
-        throws VirtualMachineException
-    {
-        try
-        {
-            Folder fold = serviceInstance.getRootFolder();
-
-            DistributedVirtualPortgroup dvPortGroup =
-                (DistributedVirtualPortgroup) new InventoryNavigator(fold).searchManagedEntity(
-                    "DistributedVirtualPortgroup", portGroupName);
-
-            if (dvPortGroup == null)
-            {
-                return null;
-            }
-
-            DVPortgroupConfigInfo portGroupInfo = dvPortGroup.getConfig();
-
-            // Get its DistributedVirtualSwitch ManagedObjectReference and check if the
-            // name is the same than the informed one.
-            ManagedObjectReference dvSwitch = portGroupInfo.distributedVirtualSwitch;
-            ObjectContent dvSwitchContent = getObjectProperties(null, dvSwitch, new String[] {})[0];
-            String dvSwitchName = (String) getDynamicProperty(dvSwitchContent, "name");
-
-            if (!dvSwitchName.equalsIgnoreCase(dvsName))
-            {
-                String message =
-                    "The port group with name '" + portGroupName
-                        + "' does not exist into the dvSwitch '" + dvsName
-                        + "' but in the dvSwitch with name '" + dvSwitchName + "'.";
-                LOGGER.error(message);
-                throw new VirtualMachineException(message);
-            }
-
-            return dvPortGroup;
-        }
-        catch (Exception e)
-        {
-            String message =
-                "Could not retrieve the port group '" + portGroupName
-                    + "' into dvSwitch with name '" + dvsName + "' because of: " + e.getMessage();
-
-            LOGGER.error(message);
-            throw new VirtualMachineException(message, e);
-        }
-    }
-
-    /**
-     * Delete a {@link DistributedVirtualPortgroup}.
-     * 
-     * @param portGroup
-     * @throws VirtualMachineException
-     * @throws Exception
-     */
-    public void deletePortGroup(final DistributedVirtualPortgroup portGroup)
-        throws VirtualMachineException
-    {
-        try
-        {
-            portGroup.destroy_Task();
-            LOGGER.info("Port group with name '" + portGroup.getName() + "' deleted.");
-        }
-        catch (Exception e)
-        {
-            String message =
-                "Could not delete the port group '" + portGroup.getName() + "' because of: "
-                    + e.getMessage();
-
-            LOGGER.error(message);
-            throw new VirtualMachineException(message, e);
-        }
     }
 
     /**
@@ -362,6 +207,242 @@ public class DistrubutedPortGroupActions
         }
     }
 
+    /**
+     * Create a new port group with port settings IdSpec.
+     * 
+     * @param dvsName name of the switch were the port group will be attached.
+     * @param networkName distinctive name of the port group.
+     * @param vlanTag tag that the port group will use.
+     * @return the port group name.
+     * @throws VirtualMachineException
+     * @throws Exception
+     */
+    public String createPortGroupInDVS(final String dvsName, final String networkName,
+        final Integer vlanTag) throws VirtualMachineException
+    {
+        String portGroupName = networkName + "_" + vlanTag;
+
+        try
+        {
+
+            // Check if the port group already exists
+            DistributedVirtualPortgroup aux = this.getPortGroup(dvsName, portGroupName);
+            if (aux != null)
+            {
+                throw new VirtualMachineException("The distributed port group with name '"
+                    + portGroupName + "' already exists.");
+            }
+
+            Folder fold = serviceInstance.getRootFolder();
+            DistributedVirtualSwitch dvs =
+                (DistributedVirtualSwitch) new InventoryNavigator(fold).searchManagedEntity(
+                    "DistributedVirtualSwitch", dvsName);
+
+            if (dvs == null)
+            {
+                throw new VirtualMachineException("The dvSwitch with name '" + dvsName
+                    + "' does not exist.");
+            }
+
+            // Allow VLAN overriding
+            VMwareDVSPortgroupPolicy portGroupPolicy = new VMwareDVSPortgroupPolicy();
+            portGroupPolicy.setBlockOverrideAllowed(Boolean.TRUE);
+            portGroupPolicy.setPortConfigResetAtDisconnect(Boolean.TRUE);
+
+            // Set the VLAN Tag
+            VmwareDistributedVirtualSwitchVlanIdSpec vlanSpec =
+                new VmwareDistributedVirtualSwitchVlanIdSpec();
+            vlanSpec.setInherited(Boolean.FALSE);
+            vlanSpec.setVlanId(vlanTag);
+
+            VmwareUplinkPortTeamingPolicy uplinkPolicy = new VmwareUplinkPortTeamingPolicy();
+            StringPolicy sp = new StringPolicy();
+            sp.setValue(getTeamingPolicy());
+            uplinkPolicy.policy = sp;
+
+            VMwareDVSPortSetting dvsPortSettings = new VMwareDVSPortSetting();
+            dvsPortSettings.setVlan(vlanSpec);
+            dvsPortSettings.uplinkTeamingPolicy = uplinkPolicy;
+
+            // Define the port group
+            DVPortgroupConfigSpec dvPortGroup = new DVPortgroupConfigSpec();
+            dvPortGroup.setName(portGroupName);
+            dvPortGroup.setNumPorts(getNumPorts());
+            dvPortGroup.setType(DistributedVirtualPortgroupPortgroupType.earlyBinding.name());
+            dvPortGroup.setPolicy(portGroupPolicy);
+            dvPortGroup.setDefaultPortConfig(dvsPortSettings);
+
+            DVPortgroupConfigSpec[] portGroups = new DVPortgroupConfigSpec[] {dvPortGroup};
+
+            // Attach the port grup to the DVS.
+            serviceInstance.getServerConnection().getVimService()
+                .addDVPortgroup_Task(dvs.getMOR(), portGroups);
+
+            LOGGER.info("Port group '" + portGroupName + "' created into dvSwitch with name '"
+                + dvsName + "'.");
+            return portGroupName;
+        }
+        catch (Exception e)
+        {
+            String message =
+                "Could not create the port group '" + portGroupName + "' into dvSwitch with name '"
+                    + dvsName + "' because of:" + e.getMessage();
+
+            LOGGER.error(message);
+            throw new VirtualMachineException(message, e);
+        }
+
+    }
+
+    /**
+     * Delete a {@link DistributedVirtualPortgroup}.
+     * 
+     * @param portGroup
+     * @throws VirtualMachineException
+     * @throws Exception
+     */
+    public void deletePortGroup(final DistributedVirtualPortgroup portGroup)
+        throws VirtualMachineException
+    {
+        try
+        {
+            portGroup.destroy_Task();
+            LOGGER.info("Port group with name '" + portGroup.getName() + "' deleted.");
+        }
+        catch (Exception e)
+        {
+            String message =
+                "Could not delete the port group '" + portGroup.getName() + "' because of: "
+                    + e.getMessage();
+
+            LOGGER.error(message);
+            throw new VirtualMachineException(message, e);
+        }
+    }
+
+    /**
+     * Get the port group into a Distributed Virtual Switch.
+     * 
+     * @param dvsName name of the Distributed Virtual Switch.
+     * @param portGroupName PortGroup name we search for.
+     * @return a {@link DistributedVirtualPortgroup} instance.
+     * @throws VirtualMachineException
+     * @throws Exception
+     */
+    public DistributedVirtualPortgroup getPortGroup(final String dvsName, final String portGroupName)
+        throws VirtualMachineException
+    {
+        try
+        {
+            Folder fold = serviceInstance.getRootFolder();
+
+            DistributedVirtualPortgroup dvPortGroup =
+                (DistributedVirtualPortgroup) new InventoryNavigator(fold).searchManagedEntity(
+                    "DistributedVirtualPortgroup", portGroupName);
+
+            if (dvPortGroup == null)
+            {
+                return null;
+            }
+
+            DVPortgroupConfigInfo portGroupInfo = dvPortGroup.getConfig();
+
+            // Get its DistributedVirtualSwitch ManagedObjectReference and check if the
+            // name is the same than the informed one.
+            ManagedObjectReference dvSwitch = portGroupInfo.distributedVirtualSwitch;
+            ObjectContent dvSwitchContent = getObjectProperties(null, dvSwitch, new String[] {})[0];
+            String dvSwitchName = (String) getDynamicProperty(dvSwitchContent, "name");
+
+            if (!dvSwitchName.equalsIgnoreCase(dvsName))
+            {
+                String message =
+                    "The port group with name '" + portGroupName
+                        + "' does not exist into the dvSwitch '" + dvsName
+                        + "' but in the dvSwitch with name '" + dvSwitchName + "'.";
+                LOGGER.error(message);
+                throw new VirtualMachineException(message);
+            }
+
+            return dvPortGroup;
+        }
+        catch (Exception e)
+        {
+            String message =
+                "Could not retrieve the port group '" + portGroupName
+                    + "' into dvSwitch with name '" + dvsName + "' because of: " + e.getMessage();
+
+            LOGGER.error(message);
+            throw new VirtualMachineException(message, e);
+        }
+    }
+
+    /**
+     * Return the property of the ObjectContent with name 'propertyName'
+     * 
+     * @param obj object content to get its properties
+     * @param propertyName property name to retrieve
+     * @return
+     * @throws Exception
+     */
+    private Object getDynamicProperty(final ObjectContent obj, final String propertyName)
+    {
+        if (obj != null)
+        {
+            DynamicProperty[] dynamicProperties = obj.getPropSet();
+            if (dynamicProperties != null)
+            {
+                for (DynamicProperty currentProp : dynamicProperties)
+                {
+                    if (currentProp.getName().equalsIgnoreCase(propertyName))
+                    {
+                        return currentProp.getVal();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return
+     */
+    private Integer getNumPorts()
+    {
+        if (System.getProperty("abiquo.dvs.portgroup.maxsize") != null)
+        {
+            try
+            {
+                Integer numPorts =
+                    Integer.valueOf(System.getProperty("abiquo.dvs.portgroup.maxsize").trim());
+
+                if (numPorts < 1 || numPorts > 3192)
+                {
+                    LOGGER
+                        .info("Property 'abiquo.dvs.portgroup.maxsize' to configure new DVS's port group invalid. Valid range in [1, 3192]. "
+                            + "Using default value '" + PORTS_BY_PORT_GROUP_DEFAULT + "'");
+                    return PORTS_BY_PORT_GROUP_DEFAULT;
+                }
+
+                return numPorts;
+            }
+            catch (Exception e)
+            {
+                LOGGER
+                    .info("Property 'abiquo.dvs.portgroup.maxsize' to configure new DVS's port group invalid. Using default value '"
+                        + PORTS_BY_PORT_GROUP_DEFAULT + "'");
+                return PORTS_BY_PORT_GROUP_DEFAULT;
+            }
+        }
+        else
+        {
+            LOGGER
+                .info("Property 'abiquo.dvs.portgroup.maxsize' to configure new DVS's port group does not exist. Using default value '"
+                    + PORTS_BY_PORT_GROUP_DEFAULT + "'");
+            return PORTS_BY_PORT_GROUP_DEFAULT;
+        }
+    }
+
     private ObjectContent[] getObjectProperties(final ManagedObjectReference collector,
         final ManagedObjectReference mobj, final String[] properties) throws RemoteException
     {
@@ -396,31 +477,34 @@ public class DistrubutedPortGroupActions
     }
 
     /**
-     * Return the property of the ObjectContent with name 'propertyName'
+     * Get the teaming policy from system properties. If the property is null or invalid, use the
+     * default one.
      * 
-     * @param obj object content to get its properties
-     * @param propertyName property name to retrieve
-     * @return
-     * @throws Exception
+     * @return the teming policy.
      */
-    private Object getDynamicProperty(final ObjectContent obj, final String propertyName)
+    private String getTeamingPolicy()
     {
-        if (obj != null)
+        if (System.getProperty("abiquo.dvs.portgroup.loadsharingmechanism") != null)
         {
-            DynamicProperty[] dynamicProperties = obj.getPropSet();
-            if (dynamicProperties != null)
+            String sharingMechanism =
+                System.getProperty("abiquo.dvs.portgroup.loadsharingmechanism").trim();
+            if (!sharingMechanism.equals("loadbalance_ip")
+                && !sharingMechanism.equals(TEAMING_POLICY_DEFAULT))
             {
-                for (DynamicProperty currentProp : dynamicProperties)
-                {
-                    if (currentProp.getName().equalsIgnoreCase(propertyName))
-                    {
-                        return currentProp.getVal();
-                    }
-                }
+                LOGGER
+                    .info("Property 'abiquo.dvs.portgroup.loadsharingmechanism' to configure new DVS's port group invalid. Using default value '"
+                        + TEAMING_POLICY_DEFAULT + "'");
+                return TEAMING_POLICY_DEFAULT;
             }
+            return sharingMechanism;
         }
-
-        return null;
+        else
+        {
+            LOGGER
+                .info("Property 'abiquo.dvs.portgroup.loadsharingmechanism' to configure new DVS's port group does not exist. Using default value '"
+                    + TEAMING_POLICY_DEFAULT + "'");
+            return TEAMING_POLICY_DEFAULT;
+        }
     }
 
 }
