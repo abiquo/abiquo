@@ -39,7 +39,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
@@ -622,10 +621,12 @@ public class Machine extends DefaultEntityBase
         return this.hypervisor;
     }
 
-    // public void setHypervisor(final Hypervisor hypervisor)
-    // {
-    // this.hypervisor = hypervisor;
-    // }
+    @Deprecated
+    // use machine.createHypervisor
+    public void setHypervisor(final Hypervisor hypervisor)
+    {
+        this.hypervisor = hypervisor;
+    }
 
     // code in Machine
     public static final String DATASTORES_ASSOCIATION_TABLE = "datastore_assignment";
@@ -743,7 +744,9 @@ public class Machine extends DefaultEntityBase
     public Hypervisor createHypervisor(final HypervisorType type, final String ip,
         final String ipService, final int port, final String user, final String password)
     {
-        return new Hypervisor(this, type, ip, ipService, port, user, password);
+        Hypervisor h = new Hypervisor(this, type, ip, ipService, port, user, password);
+        this.hypervisor = h;
+        return h;
     }
 
     public boolean hasFencingCapabilities()

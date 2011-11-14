@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaDatacenterLimitsDAO")
 public class DatacenterLimitsDAO extends DefaultDAOBase<Integer, DatacenterLimits>
@@ -40,45 +41,46 @@ public class DatacenterLimitsDAO extends DefaultDAOBase<Integer, DatacenterLimit
         super(DatacenterLimits.class);
     }
 
-    public DatacenterLimitsDAO(EntityManager entityManager)
+    public DatacenterLimitsDAO(final EntityManager entityManager)
     {
         super(DatacenterLimits.class, entityManager);
     }
 
-    private Criterion sameEnterprise(Enterprise enterprise)
+    private Criterion sameEnterprise(final Enterprise enterprise)
     {
         return Restrictions.eq(DatacenterLimits.ENTERPRISE_PROPERTY, enterprise);
     }
 
-    private Criterion sameDatacenter(Datacenter datacenter)
+    private Criterion sameDatacenter(final Datacenter datacenter)
     {
         return Restrictions.eq(DatacenterLimits.DATACENTER_PROPERTY, datacenter);
     }
 
-    private Criterion sameId(Integer id)
+    private Criterion sameId(final Integer id)
     {
-        return Restrictions.eq(DatacenterLimits.ID_PROPERTY, id);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
-    public Collection<DatacenterLimits> findByDatacenter(Datacenter datacenter)
+    public Collection<DatacenterLimits> findByDatacenter(final Datacenter datacenter)
     {
         return findByCriterions(sameDatacenter(datacenter));
     }
 
-    public Collection<DatacenterLimits> findByEnterprise(Enterprise enterprise)
+    public Collection<DatacenterLimits> findByEnterprise(final Enterprise enterprise)
     {
-        return findByCriterions(sameEnterprise(enterprise), Restrictions
-            .isNotNull(DatacenterLimits.DATACENTER_PROPERTY));
+        return findByCriterions(sameEnterprise(enterprise),
+            Restrictions.isNotNull(DatacenterLimits.DATACENTER_PROPERTY));
     }
 
-    public DatacenterLimits findByEnterpriseAndDatacenter(Enterprise enterprise,
-        Datacenter datacenter)
+    public DatacenterLimits findByEnterpriseAndDatacenter(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         return (DatacenterLimits) createCriteria(sameEnterprise(enterprise),
             sameDatacenter(datacenter)).uniqueResult();
     }
 
-    public DatacenterLimits findByEnterpriseAndIdentifier(Enterprise enterprise, Integer limitId)
+    public DatacenterLimits findByEnterpriseAndIdentifier(final Enterprise enterprise,
+        final Integer limitId)
     {
         return (DatacenterLimits) createCriteria(sameEnterprise(enterprise), sameId(limitId))
             .uniqueResult();

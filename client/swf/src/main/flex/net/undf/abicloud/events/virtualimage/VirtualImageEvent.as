@@ -108,6 +108,8 @@ package net.undf.abicloud.events.virtualimage
         public var ovfInstanceId:String;
         
         public var virtualImageMiniature:VirtualImageMiniature;
+        
+        public var datacenterId:int;
 
         /* ------------- Constructor ------------- */
         public function VirtualImageEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

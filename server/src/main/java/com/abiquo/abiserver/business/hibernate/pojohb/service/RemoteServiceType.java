@@ -27,11 +27,10 @@ import java.util.Comparator;
 public enum RemoteServiceType
 {
     VIRTUAL_FACTORY("Virtualization Manager", "virtualfactory", "http://", 80), STORAGE_SYSTEM_MONITOR(
-        "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager",
-        "vsm", "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://",
-        80), DHCP_SERVICE("DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE(
-        "Business Process Manager", "bpm", "tcp://", 61616), APPLIANCE_MANAGER("Appliance Manager",
-        "am", "http://", 80);
+        "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm",
+        "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), DHCP_SERVICE(
+        "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager", "bpm",
+        "http://", 80), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
 
     String name;
 
@@ -87,7 +86,7 @@ public enum RemoteServiceType
 
     public boolean canBeChecked()
     {
-        return this != BPM_SERVICE && this != DHCP_SERVICE;
+        return this != DHCP_SERVICE;
     }
 
     private static class RemoteServiceTypeComparator implements Comparator<RemoteServiceType>

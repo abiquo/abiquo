@@ -24,6 +24,8 @@ package com.abiquo.server.core.cloud;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;

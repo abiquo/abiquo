@@ -1,11 +1,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="AM all integration tests" verbose="1">
-    <listeners>
-        <listener class-name="com.abiquo.testng.TestServerListener" />
-    </listeners>
-    <test name="All integration tests">
-        <packages>
-            <package name="com.abiquo.appliancemanager.*" />
-        </packages>
-    </test>
+	<listeners>
+		<listener class-name="com.abiquo.testng.AMRepositoryListener" />
+		<listener class-name="com.abiquo.testng.TestServerListener" />
+		<listener class-name="com.abiquo.testng.OVFRemoteRepositoryListener" />
+		<listener class-name="com.abiquo.appliancemanager.AMConsumerTestListener" />
+	</listeners>
+	<test name="AppsLibrary integration tests">
+		<classes>
+			<class name="com.abiquo.appliancemanager.ApplianceManagerUploadIT"></class>
+			<class name="com.abiquo.appliancemanager.ApplianceManagerIT"></class>
+		</classes>
+	</test>
+
 </suite>

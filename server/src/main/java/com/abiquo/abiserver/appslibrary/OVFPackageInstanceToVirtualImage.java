@@ -45,18 +45,19 @@ import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 public class OVFPackageInstanceToVirtualImage
 {
-    private final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceToVirtualImage.class);
+    private final static Logger logger =
+        LoggerFactory.getLogger(OVFPackageInstanceToVirtualImage.class);
 
     public static List<VirtualimageHB> insertVirtualDiskOnDatabase(
-        List<OVFPackageInstanceDto> disks, RepositoryHB repo) throws VirtualImageException
+        final List<OVFPackageInstanceDto> disks, final RepositoryHB repo)
+        throws VirtualImageException
     {
 
         DAOFactory daoF = HibernateDAOFactory.instance();
 
         List<OVFPackageInstanceDto> disksToInsert =
-            filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(disks,
-                repo.getIdRepository());
+            filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(disks, repo
+                .getIdRepository());
         List<VirtualimageHB> images = new LinkedList<VirtualimageHB>();
 
         // first masters
@@ -124,7 +125,7 @@ public class OVFPackageInstanceToVirtualImage
     }
 
     private static List<OVFPackageInstanceDto> filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(
-        List<OVFPackageInstanceDto> disks, final Integer idRepo)
+        final List<OVFPackageInstanceDto> disks, final Integer idRepo)
     {
 
         Session session = HibernateUtil.getSession();
@@ -136,8 +137,8 @@ public class OVFPackageInstanceToVirtualImage
 
             boolean enter = isEnterpriseOnDB(session, disk.getIdEnterprise().longValue());
             boolean inserted =
-                isAlreadyInsertedVirtualImagePath(session, disk.getDiskFilePath(),
-                    Long.valueOf(disk.getIdEnterprise()).intValue(), idRepo);
+                isAlreadyInsertedVirtualImagePath(session, disk.getDiskFilePath(), Long.valueOf(
+                    disk.getIdEnterprise()).intValue(), idRepo);
 
             if (enter && !inserted)
             {
@@ -150,7 +151,7 @@ public class OVFPackageInstanceToVirtualImage
         return notInsertedDisks;
     }
 
-    private static VirtualimageHB imageFromDisk(OVFPackageInstanceDto disk,
+    private static VirtualimageHB imageFromDisk(final OVFPackageInstanceDto disk,
         final Integer idRepository) throws VirtualImageException
     {
 
@@ -172,7 +173,7 @@ public class OVFPackageInstanceToVirtualImage
         }
         else
         {
-            category = findCategoryOnOVFPackage(disk.getOvfUrl(), session);
+            category = findCategoryOnOVFPackage(disk.getOvfId(), session);
 
             if (category == null)
             {
@@ -224,7 +225,7 @@ public class OVFPackageInstanceToVirtualImage
         String iconPath = disk.getIconPath();
         if (iconPath == null)
         {
-            iconPath = findIconOnOVFPackage(disk.getOvfUrl(), session);
+            iconPath = findIconOnOVFPackage(disk.getOvfId(), session);
         }
 
         if (iconPath != null)
@@ -233,9 +234,7 @@ public class OVFPackageInstanceToVirtualImage
             vimage.setIcon(icon);
         }
 
-        vimage.setTreaty(0);
-
-        vimage.setOvfId(disk.getOvfUrl());
+        vimage.setOvfId(disk.getOvfId());
 
         DiskFormatType diskFormat;
 
@@ -245,8 +244,8 @@ public class OVFPackageInstanceToVirtualImage
             {
 
                 VirtualimageHB master =
-                    getVirtualImageIdFromPath(session, disk.getMasterDiskFilePath(),
-                        disk.getIdEnterprise(), idRepository);
+                    getVirtualImageIdFromPath(session, disk.getMasterDiskFilePath(), disk
+                        .getIdEnterprise(), idRepository);
                 // getDiskFormatTypeFromUri(session, disk.getImageType()).getId()
 
                 vimage.setMaster(master);
@@ -266,6 +265,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setType(diskFormat);
 
         vimage.setDiskFileSize(disk.getDiskFileSize());
+        vimage.setCreationUser("SYSTEM"); // TODO
 
         // XXX daoF.endConnection();
         // TODO transaction.commit();
@@ -276,7 +276,7 @@ public class OVFPackageInstanceToVirtualImage
     /**
      * NOTE: don't do in you home.
      */
-    private static String findIconOnOVFPackage(String ovfUrl, Session session)
+    private static String findIconOnOVFPackage(final String ovfUrl, final Session session)
     {
 
         List<String> iconPaths =
@@ -294,7 +294,7 @@ public class OVFPackageInstanceToVirtualImage
         }
     }
 
-    private static String findCategoryOnOVFPackage(String ovfUrl, Session session)
+    private static String findCategoryOnOVFPackage(final String ovfUrl, final Session session)
     {
         List<String> categories =
             session.createSQLQuery(
@@ -311,7 +311,7 @@ public class OVFPackageInstanceToVirtualImage
         }
     }
 
-    private static boolean isEnterpriseOnDB(Session session, Long idEnterprise)
+    private static boolean isEnterpriseOnDB(final Session session, final Long idEnterprise)
     {
         /**
          * TODO use DAO
@@ -333,8 +333,9 @@ public class OVFPackageInstanceToVirtualImage
         }
     }
 
-    public static VirtualimageHB getVirtualImageIdFromPath(Session session, String imagePath,
-        final Integer idEnterprise, final Integer idRepository) throws IdNotFoundException
+    public static VirtualimageHB getVirtualImageIdFromPath(final Session session,
+        final String imagePath, final Integer idEnterprise, final Integer idRepository)
+        throws IdNotFoundException
     {
         /**
          * TODO use DAO
@@ -365,8 +366,8 @@ public class OVFPackageInstanceToVirtualImage
     /**
      * XXX unused idDiskFormat
      */
-    private static boolean isAlreadyInsertedVirtualImagePath(Session session, String imagePath,
-        Integer idEnterprise, final Integer idRepo)
+    private static boolean isAlreadyInsertedVirtualImagePath(final Session session,
+        final String imagePath, final Integer idEnterprise, final Integer idRepo)
     {
         /**
          * TODO use DAO
@@ -377,14 +378,14 @@ public class OVFPackageInstanceToVirtualImage
                     "SELECT COUNT(*) FROM com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB WHERE "
                         + "pathName= :pathName"
                         + " AND (idEnterprise= :idEnterprise OR idEnterprise=NULL)"
-                        + " AND repository.idRepository= :idRepo")
-                .setParameter("pathName", imagePath).setParameter("idEnterprise", idEnterprise)
-                .setParameter("idRepo", idRepo).uniqueResult();
+                        + " AND repository.idRepository= :idRepo").setParameter("pathName",
+                    imagePath).setParameter("idEnterprise", idEnterprise).setParameter("idRepo",
+                    idRepo).uniqueResult();
 
         return count != 0;
     }
 
-    private static CategoryHB getCategory(Session session, String category)
+    private static CategoryHB getCategory(final Session session, final String category)
         throws HibernateException
     {
         /**
@@ -415,7 +416,7 @@ public class OVFPackageInstanceToVirtualImage
 
     // Helper method to createVirtualImageDownloadedFromRepositorySpace
     // If the icon doesn't exist it creates a new entry in the database
-    private static IconHB getIcon(String user, Session session, String iconPath)
+    private static IconHB getIcon(final String user, final Session session, final String iconPath)
         throws HibernateException
     {
         /**
@@ -461,7 +462,7 @@ public class OVFPackageInstanceToVirtualImage
      * @param alloctionUnit, bytes by default but can be Kb, Mb, Gb or Tb.
      * @return capacity on bytes
      **/
-    private static BigInteger getBytes(String capacity, String allocationUnits)
+    private static BigInteger getBytes(final String capacity, final String allocationUnits)
         throws VirtualImageException
     {
         BigInteger capa = new BigInteger(capacity);

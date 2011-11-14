@@ -33,6 +33,9 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
 import com.abiquo.commons.amqp.impl.vsm.VSMConsumer;
+import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceStatusEventProcessor;
+import com.abiquo.commons.amqp.impl.am.AMCallback;
+import com.abiquo.commons.amqp.impl.am.AMConsumer;
 
 /**
  * Set up connections to AMQP broker using commons-amqp facilities.
@@ -44,12 +47,16 @@ public class AmqpConsumerContextListener implements ServletContextListener
     /** The RabbitMQ consumer for VSM */
     protected VSMConsumer eventsConsumer;
 
+    /** The RabbitMQ consumer for AM **/
+    protected AMConsumer amconsumer;
+
     @Override
-    public void contextInitialized(ServletContextEvent sce)
+    public void contextInitialized(final ServletContextEvent sce)
     {
         try
         {
             initializeEventsConsumer(sce);
+            initializeAMListener(sce);
         }
         catch (IOException e)
         {
@@ -58,11 +65,12 @@ public class AmqpConsumerContextListener implements ServletContextListener
     }
 
     @Override
-    public void contextDestroyed(ServletContextEvent arg0)
+    public void contextDestroyed(final ServletContextEvent arg0)
     {
         try
         {
             shutdownEventsConsumer();
+            shutdownAMListener();
         }
         catch (IOException e)
         {
@@ -76,7 +84,7 @@ public class AmqpConsumerContextListener implements ServletContextListener
      * 
      * @throws IOException When there is some network error.
      */
-    protected void initializeEventsConsumer(ServletContextEvent sce) throws IOException
+    protected void initializeEventsConsumer(final ServletContextEvent sce) throws IOException
     {
         eventsConsumer = new VSMConsumer(VSMConfiguration.EVENT_SYNK_QUEUE);
 
@@ -96,5 +104,36 @@ public class AmqpConsumerContextListener implements ServletContextListener
     protected void shutdownEventsConsumer() throws IOException
     {
         eventsConsumer.stop();
+    }
+
+    /**
+     * Creates an instance of {@link AMConsumer}, add all the needed listeners
+     * {@link OVFPackageInstanceStatusEventProcessor} and starts the consuming.
+     * 
+     * @throws IOException When there is some network error.
+     */
+    protected void initializeAMListener(final ServletContextEvent sce) throws IOException
+    {
+        // AMCallback processor =
+        // WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+        // .getBean("ovfPackageInstanceStatusEventProcessor", AMCallback.class);
+
+        AMCallback processor =
+            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+                .getBean("OVFPackageInstanceStatusEventProcessor", AMCallback.class);
+
+        amconsumer = new AMConsumer();
+        amconsumer.addCallback(processor);
+        amconsumer.start();
+    }
+
+    /**
+     * Stops the {@link AMConsumer}.
+     * 
+     * @throws IOException When there is some network error.
+     */
+    private void shutdownAMListener() throws IOException
+    {
+        amconsumer.stop();
     }
 }

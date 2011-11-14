@@ -28,6 +28,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "appslibrary")
 public class AppsLibraryDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()
@@ -35,9 +37,21 @@ public class AppsLibraryDto extends SingleResourceTransportDto
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
+    }
+
+    private int idAppsLibrary;
+
+    public int getIdAppsLibrary()
+    {
+        return idAppsLibrary;
+    }
+
+    public void setIdAppsLibrary(final int idAppsLibrary)
+    {
+        this.idAppsLibrary = idAppsLibrary;
     }
 
 }

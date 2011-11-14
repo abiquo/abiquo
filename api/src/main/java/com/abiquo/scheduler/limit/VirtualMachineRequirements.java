@@ -70,7 +70,7 @@ public class VirtualMachineRequirements
         this.cpu = Long.valueOf(vmachine.getCpu());
         this.ram = Long.valueOf(vmachine.getRam());
         this.hd =
-            vmachine.getVirtualImage().getStateful() == 1 ? 0 : Long.valueOf(vmachine.getHdInBytes());
+            vmachine.getVirtualImage().isStateful() ? 0 : Long.valueOf(vmachine.getHdInBytes());
 
         this.repository = vmachine.getVirtualImage().getDiskFileSize();
 
@@ -79,8 +79,8 @@ public class VirtualMachineRequirements
         this.publicVLAN = 0l;
     }
 
-    public VirtualMachineRequirements(Long cpu, Long ram, Long hd, Long repository, Long storage,
-        Long publicVLAN, Long publicIP)
+    public VirtualMachineRequirements(final Long cpu, final Long ram, final Long hd,
+        final Long repository, final Long storage, final Long publicVLAN, final Long publicIP)
     {
         super();
         this.cpu = cpu;

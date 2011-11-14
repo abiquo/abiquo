@@ -24,6 +24,8 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 import java.util.UUID;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -161,13 +163,13 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
         entitiesToPersist.add(hypervisor);
 
-        VirtualImage vimage = entity.getVirtualImage();
-        vImageGenerator.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
-        entitiesToPersist.add(vimage);
-
         Enterprise enterprise = entity.getEnterprise();
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
+
+        VirtualImage vimage = entity.getVirtualImage();
+        vImageGenerator.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
+        entitiesToPersist.add(vimage);
 
         User user = entity.getUser();
         userGenerator.addAuxiliaryEntitiesToPersist(user, entitiesToPersist);

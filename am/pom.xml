@@ -1,330 +1,335 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <!-- -->
-    <!-- POM RELATIONSHIPS -->
-    <!-- -->
-    <!-- Maven coordinates -->
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>am</artifactId>
-    <packaging>war</packaging>
-    <!-- Inheritances -->
-    <parent>
-        <groupId>com.abiquo.abicloud</groupId>
-        <artifactId>platform</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
-    <!-- Dependences -->
-    <dependencies>
-        <!-- ABIQUO DEPENDENCIES -->
-        <!-- TODO remove depends on SingleResourceTransportDto -->
-        <dependency>
-            <groupId>com.abiquo.abicloud</groupId>
-            <artifactId>ovfmanager</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.abiquo</groupId>
-            <artifactId>model</artifactId>
-            <classifier>transport</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.abiquo</groupId>
-            <artifactId>commons-amqp</artifactId>
-            <version>${commonsamqp.version}</version>
-        </dependency>
-        <!-- REST -->
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-client</artifactId>
-            <version>1.1.2-incubating</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-json-provider</artifactId>
-            <version>1.1.2-incubating</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-spring-support</artifactId>
-            <version>1.1.2-incubating</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-server</artifactId>
-            <version>1.1.2-incubating</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.wink</groupId>
-            <artifactId>wink-common</artifactId>
-            <version>1.1.2-incubating</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- HTTP server / client -->
-        <!--
-            <dependency> <groupId>org.jboss.netty</groupId>
-            <artifactId>netty</artifactId> <version>3.2.3.Final</version>
-            </dependency>
-        -->
-        <dependency>
-            <groupId>com.ning</groupId>
-            <artifactId>async-http-client</artifactId>
-            <version>1.6.5</version>
-            <!--
-                <exclusions>
-                <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                </exclusion>
-                </exclusions>
-            -->
-        </dependency>
-        <!-- LOGGER -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.5.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.5.11</version>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- COMMON INTERFACES -->
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>catalina</artifactId>
-            <version>${catalina.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-            <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <!-- JSON -->
-        <!-- TODO use jackson.version -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-xc</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
-            <version>1.6.1</version>
-        </dependency>
-        <!-- SPRING DEPENDENCIES -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <!-- test -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty</artifactId>
-            <version>6.1.24</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.abiquo</groupId>
-            <artifactId>model</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    <!-- -->
-    <!-- PROJECT INFORMATION -->
-    <!-- -->
-    <name>Appliance Manager</name>
-    <url>http://www.abiquo.com</url>
-    <inceptionYear>2009</inceptionYear>
-    <licenses>
-        <license>
-            <name>LGPL</name>
-            <url>http://www.gnu.org/licenses/lgpl.html</url>
-        </license>
-    </licenses>
-    <!-- -->
-    <!-- BUILD SETTINGS -->
-    <!-- -->
-    <build>
-        <finalName>am</finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <webapp.context>/am</webapp.context>
-                        <webapp.dir>${basedir}/src/main/webapp</webapp.dir>
-                        <abiquo.appliancemanager.repositoryLocation>nfs-test:/test/repostiory</abiquo.appliancemanager.repositoryLocation>
-                        <abiquo.appliancemanager.localRepositoryPath>/tmp/testrepo</abiquo.appliancemanager.localRepositoryPath>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <!--
-                Generate the jar with the test classes to allow premium test cases
-                inherit from community ones
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>classes</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>classes</classifier>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/client/*</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>classes-client</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>client</classifier>
-                            <includes>
-                                <include>**/client/*</include>
-                                <include>**/appliancemanager/util/*</include>
-                                <!--
-                                    <include>**/transport/*</include>
-                                    <include>**/ApplianceManagerResourceConstants.class</include>
-                                -->
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        <!--
-            Properties filters <filters>
-            <filter>../system-properties/src/main/filters/${env}-${env.family}.properties</filter>
-            </filters> <resources> <resource>
-            <directory>src/main/resources</directory> <filtering>true</filtering>
-            </resource> </resources>
-        -->
-    </build>
-    <!-- -->
-    <!-- ENVIRONMENT SETTINGS -->
-    <!-- -->
-    <!-- Community URLs -->
-    <issueManagement>
-        <system>JIRA</system>
-        <url>http://jira.abicloud.org/browse/ABICLOUD/component/10021</url>
-    </issueManagement>
-    <ciManagement>
-        <system>Hudson</system>
-        <url>http://hudson.abicloud.org</url>
-    </ciManagement>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<!-- -->
+	<!-- POM RELATIONSHIPS -->
+	<!-- -->
+	<!-- Maven coordinates -->
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>am</artifactId>
+	<packaging>war</packaging>
+	<!-- Inheritances -->
+	<parent>
+		<groupId>com.abiquo.abicloud</groupId>
+		<artifactId>platform</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
+	<!-- Dependences -->
+	<dependencies>
+		<!-- JETTY html tests -->
+		<!-- <dependency> <groupId>javax.activation</groupId> <artifactId>activation</artifactId> 
+			<version>1.1</version> </dependency> <dependency> <groupId>javax.mail</groupId> 
+			<artifactId>mail</artifactId> <version>1.4</version> </dependency> -->
+
+		<!-- ABIQUO DEPENDENCIES -->
+		<!-- TODO remove depends on SingleResourceTransportDto -->
+		<dependency>
+			<groupId>com.abiquo.abicloud</groupId>
+			<artifactId>ovfmanager</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.abiquo</groupId>
+			<artifactId>model</artifactId>
+			<!-- TODO <classifier>transport</classifier> -->
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.abiquo</groupId>
+			<artifactId>commons-amqp</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+		<!-- REST -->
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-client</artifactId>
+			<version>1.1.2-incubating</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-json-provider</artifactId>
+			<version>1.1.2-incubating</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-spring-support</artifactId>
+			<version>1.1.2-incubating</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-server</artifactId>
+			<version>1.1.2-incubating</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.wink</groupId>
+			<artifactId>wink-common</artifactId>
+			<version>1.1.2-incubating</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-jdk14</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- HTTP server / client -->
+		<!-- <dependency> <groupId>org.jboss.netty</groupId> <artifactId>netty</artifactId> 
+			<version>3.2.3.Final</version> </dependency> -->
+		<dependency>
+			<groupId>com.ning</groupId>
+			<artifactId>async-http-client</artifactId>
+			<version>1.6.2</version>
+			<!-- <version>1.0.0</version> -->
+
+			<!-- <exclusions> <exclusion> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
+				</exclusion> </exclusions> -->
+		</dependency>
+		<!-- LOGGER -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>0.9.11</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>0.9.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.5.11</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- COMMON INTERFACES -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>catalina</artifactId>
+			<version>${catalina.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<!-- JSON -->
+		<!-- TODO use jackson.version -->
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-xc</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-jaxrs</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<!-- SPRING DEPENDENCIES -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<!-- test -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>${testng.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.24</version>
+		</dependency>
+		<dependency>
+			<groupId>com.abiquo</groupId>
+			<artifactId>model</artifactId>
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<!-- -->
+	<!-- PROJECT INFORMATION -->
+	<!-- -->
+	<name>Appliance Manager</name>
+	<url>http://www.abiquo.com</url>
+	<inceptionYear>2009</inceptionYear>
+	<licenses>
+		<license>
+			<name>LGPL</name>
+			<url>http://www.gnu.org/licenses/lgpl.html</url>
+		</license>
+	</licenses>
+	<!-- -->
+	<!-- BUILD SETTINGS -->
+	<!-- -->
+	<build>
+		<finalName>am</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+
+			</plugin>
+
+			<!-- Generate the jar with the test classes to allow premium test cases 
+				inherit from community ones -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>classes</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>classes</classifier>
+							<includes>
+								<include>**</include>
+							</includes>
+							<excludes>
+								<exclude>**/client/*</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>classes-client</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>client</classifier>
+							<includes>
+								<include>**/client/*</include>
+								<include>**/appliancemanager/util/*</include>
+								<!-- <include>**/transport/*</include> <include>**/ApplianceManagerResourceConstants.class</include> -->
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<webapp.context>/am</webapp.context>
+						<webapp.dir>${basedir}/src/main/webapp</webapp.dir>
+						<rs.basedir>${basedir}</rs.basedir>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<version>6.1.24</version>
+				<configuration>
+					<contextPath>/am</contextPath>
+					<connectors>
+						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+							<port>8080</port>
+							<maxIdleTime>60000</maxIdleTime>
+						</connector>
+					</connectors>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- -->
+	<!-- ENVIRONMENT SETTINGS -->
+	<!-- -->
+	<!-- Community URLs -->
+	<issueManagement>
+		<system>JIRA</system>
+		<url>http://jira.abicloud.org/browse/ABICLOUD/component/10021</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Hudson</system>
+		<url>http://hudson.abicloud.org</url>
+	</ciManagement>
 </project>

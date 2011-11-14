@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xsi:schemaLocation="http://schemas.dmtf.org/ovf/envelope/1 ../dsp8023.xsd">
+    
+    
+    <!-- References to all external files -->
+    <References>
+        <File ovf:id="vmdk" ovf:href="filenotfound" ovf:size="10485760"/>
+    </References>
+
+    <!-- Describes meta-information about all virtual disks in the package.  
+         This example is encoded as a delta-disk hierarchy.
+     -->
+    <DiskSection>
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="base" ovf:fileRef="vmdk" ovf:capacity="27262976" ovf:populatedSize="27262976" ovf:format="http://www.vmware.com/technical-resources/interfaces/vmdk_access.html#monolithic_flat"/>      
+    </DiskSection>
+    <!-- Describes all networks used in the package -->
+    <NetworkSection>
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="VM Network">
+            <Description ovf:msgid="network.description">The network that the service
+                will be available on</Description>
+        </Network>
+    </NetworkSection>
+    <!-- Deployment options for the packages -->
+    <DeploymentOptionSection>
+        <Info>List of deployment options available in the package</Info>
+        <Configuration ovf:id="minimal">
+            <Label ovf:msgid="minimal.label">Minimal</Label>
+            <Description ovf:msgid="minimal.description">Deploy service with minimal
+                resource use</Description>
+        </Configuration>
+        <Configuration ovf:id="standard" ovf:default="true">
+            <Label ovf:msgid="standard.label">Standard</Label>
+            <Description ovf:msgid="standard.description">Deploy service with standard
+                resource use</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+   
+    <VirtualSystem ovf:id="m0n0wall">
+        <Info>Single-VM Virtual appliance with a m0n0wall</Info>
+       <Name>M0n0wall appliance</Name>
+        <!-- Overall information about the product -->
+
+        <ProductSection>
+	    <Info>m0n0wall</Info>
+            <Product>m0n0wall</Product>
+            <Vendor>m0n0wall</Vendor>
+            <Version>m0n0wall</Version>
+            <ProductUrl>http://m0n0.ch/wall/</ProductUrl>
+       </ProductSection>
+
+
+        <OperatingSystemSection ovf:id="36">
+            <Info>Guest Operating System</Info>
+            <Description>Linux 2.6.x</Description>
+        </OperatingSystemSection>
+        <VirtualHardwareSection>
+            <Info>Virtual Hardware Requirements: 512MB, 1 CPU, 1 disk, 1 NIC</Info>
+            <System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+            </System>
+            <Item>
+                <rasd:Description>Number of virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+            </Item>
+            <Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>128 MB of memory</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>128</rasd:VirtualQuantity>
+            </Item>
+            <Item>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Connection>VM Network</rasd:Connection>
+                <rasd:ElementName>Ethernet adapter on "VM Network"</rasd:ElementName>
+                <rasd:InstanceID>3</rasd:InstanceID>
+                <rasd:ResourceType>10</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:ElementName>SCSI Controller 0 - LSI Logic</rasd:ElementName>
+                <rasd:InstanceID>4</rasd:InstanceID>
+                <rasd:ResourceSubType>LsiLogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:ElementName>Harddisk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/base</rasd:HostResource>
+                <rasd:InstanceID>5</rasd:InstanceID>
+                <rasd:Parent>4</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>
