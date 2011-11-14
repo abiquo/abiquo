@@ -311,28 +311,13 @@ public class AppsLibraryService
     public BasicResult deleteVirtualImage(final UserSession userSession,
         final Integer idEnterprise, final Integer idDatacenter, final Integer idVirtualImage)
     {
-        BasicResult result = new BasicResult();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            proxyService.deleteVirtualImage(userSession, idVirtualImage);
+        final VirtualImageResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
+                VirtualImageResourceStub.class);
 
-            result.setSuccess(true);
-        }
-        catch (AppsLibraryCommandException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
+        return vimageStub.deleteVirtualImage(idEnterprise, idDatacenter, idVirtualImage);
 
-        return result;
     }
 
     /**

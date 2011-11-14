@@ -112,6 +112,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
 
     }
 
+    @Override
     public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
         final Integer virtualimageId)
     {
@@ -273,6 +274,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         dto.setPath(vimage.getPath());
         dto.setRamRequired(vimage.getRamRequired());
         dto.setShared(vimage.isShared());
+        dto.setChefEnabled(vimage.isChefEnabled());
 
         RESTLink enterpriseLink = new RESTLink("enterprise", createEnterpriseLink(enterpriseId));
         dto.addLink(enterpriseLink);
