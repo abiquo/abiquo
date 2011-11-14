@@ -657,8 +657,6 @@ DELIMITER ;
 -- *************************************************
 
 
-<<<<<<< HEAD
-=======
   TRUNCATE cloud_usage_stats;
 
   dept_loop:WHILE(no_more_dcs=0) DO
@@ -1507,8 +1505,3 @@ DELIMITER ;
 CALL `kinton`.`CalculateCloudUsageStats`();
 CALL `kinton`.`CalculateEnterpriseResourcesStats`();
 CALL `kinton`.`CalculateVdcEnterpriseStats`();
-
-<<<<<<< HEAD
-=======
-DELIMITER ;
->>>>>>> CHANGE_LINKS
