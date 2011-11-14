@@ -133,6 +133,16 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolById(deviceId, poolId);
     }
 
+    public List<InitiatorMapping> getInitiatorMappings(final Integer idVolume)
+    {
+        return initiatorMappingDAO.findByVolumeId(idVolume);
+    }
+
+    public InitiatorMapping getInitiatorMapping(final Integer mappingId)
+    {
+        return initiatorMappingDAO.findById(mappingId);
+    }
+
     public StoragePool findPoolByName(final Integer deviceId, final String name)
     {
         return poolDAO.findPoolByName(deviceId, name);
@@ -188,6 +198,18 @@ public class StorageRep extends DefaultRepBase
     public List<VolumeManagement> getStatefulCandidates(final VirtualDatacenter vdc)
     {
         return volumeDAO.getStatefulCandidates(vdc);
+    }
+
+    public List<VolumeManagement> getAvailableVolumes(final VirtualDatacenter vdc,
+        final FilterOptions filterOptions) throws Exception
+    {
+        return volumeDAO.getAvailableVolumes(vdc, filterOptions);
+    }
+
+    public List<VolumeManagement> getVolumesAttachedToVirtualMachine(final VirtualDatacenter vdc,
+        final VirtualMachine vm, final FilterOptions filterOptions) throws Exception
+    {
+        return volumeDAO.getVolumesAttachedToVirtualMachine(vdc, vm, filterOptions);
     }
 
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)

@@ -267,8 +267,8 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        vmService.deployVirtualMachine(vmId, vappId, vdcId,
-            forceSoftLimits.isForeceEnterpriseSoftLimits());
+        vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
+            .isForeceEnterpriseSoftLimits());
 
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink("http://status");
