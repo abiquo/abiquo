@@ -129,7 +129,7 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getCategories"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
