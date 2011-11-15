@@ -121,7 +121,7 @@
             	if(!_virtualDatacenter.network){
             		_virtualDatacenter.network = new Network();
             	}
-            	_virtualDatacenter.network.networks.addAll(networks);
+            	_virtualDatacenter.network.networks = networks;
             }
 
             private function cleanFilteringOptions():void

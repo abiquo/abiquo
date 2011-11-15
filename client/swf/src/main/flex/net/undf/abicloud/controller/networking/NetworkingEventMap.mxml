@@ -271,7 +271,10 @@
 
         <RemoteObjectInvoker instance="{services.networkingService}"
             method="getNetworkPoolInfoByVDC"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualDatacenter.id, event.listRequest]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualDatacenter.id, 
+            event.listRequest,
+            event.networkName]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"

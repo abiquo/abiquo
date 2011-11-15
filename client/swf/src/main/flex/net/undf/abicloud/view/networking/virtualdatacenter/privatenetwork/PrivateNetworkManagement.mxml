@@ -351,7 +351,8 @@
         verticalGap="-1"
         title="@Resource(bundle='Networking', key='LABEL_PRIVATE_IPS')">
 
-        <privateip:PrivateIPList id="privateIPList"/>
+        <privateip:PrivateIPList id="privateIPList" 
+        	vlanType="{this._vlanType}"/>
 
     </general:GeneralSubPanel>
 </mx:HBox>
