@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.appslibrary;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -28,6 +29,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
+/**
+ * Wrapper class anotation for class {@link VirtualImageDto} object
+ */
 @XmlRootElement(name = "virtualImages")
 public class VirtualImagesDto extends WrapperDto<VirtualImageDto>
 {
@@ -37,6 +41,10 @@ public class VirtualImagesDto extends WrapperDto<VirtualImageDto>
     @XmlElement(name = "virtualImage")
     public List<VirtualImageDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<VirtualImageDto>();
+        }
         return collection;
     }
 }

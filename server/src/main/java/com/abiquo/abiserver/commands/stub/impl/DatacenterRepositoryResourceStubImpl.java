@@ -26,6 +26,7 @@ import org.apache.wink.client.Resource;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
@@ -66,9 +67,14 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
         return result;
     }
 
-    private Repository transformToFlex(DatacenterRepositoryDto repo)
+    private Repository transformToFlex(final DatacenterRepositoryDto repo)
     {
         Repository r = new Repository();
+
+        DataCenter datacenter = new DataCenter();
+        datacenter.setId(repo.getIdFromLink("datacenter"));
+        r.setDatacenter(datacenter);
+
         // XXX used ? remove this!
         // r.setDatacenter(datacenter);
         // r.setRepositoryEnterpriseUsedMb(repo.get);

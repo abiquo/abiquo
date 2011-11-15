@@ -81,6 +81,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
+    public static final String VIRTUAL_MACHINE_ACTION_VOLUMES = "/action/volumes";
+
     @Autowired
     VirtualMachineService vmService;
 
