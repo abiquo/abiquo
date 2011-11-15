@@ -60,10 +60,8 @@ import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -79,14 +77,18 @@ public class EnterpriseResource extends AbstractResource
 {
     public static final String ENTERPRISE = "enterprise";
 
+    // enterprise as query param
+    public static final String ENTERPRISE_AS_PARAM = "identerprise";
+
     public static final String ENTERPRISE_PARAM = "{" + ENTERPRISE + "}";
 
-    public static final String ENTERPRISE_ACTION_GET_IPS = "/action/ips";
+    public static final String ENTERPRISE_ACTION_GET_IPS_PATH = "action/ips";
 
-    public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH =
+        "action/virtualmachines";
 
-    public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS =
-        "/action/virtualdatacenters";
+    public static final String ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH =
+        "action/virtualdatacenters";
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseResource.class);
 
@@ -167,7 +169,7 @@ public class EnterpriseResource extends AbstractResource
 
     @SuppressWarnings("unchecked")
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByEnterprise(@PathParam(ENTERPRISE) @Min(0) final Integer id,
         @QueryParam(START_WITH) @DefaultValue("0") @Min(0) final Integer startwith,
         @QueryParam(BY) @DefaultValue("ip") final String orderBy,
@@ -211,7 +213,7 @@ public class EnterpriseResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -243,7 +245,7 @@ public class EnterpriseResource extends AbstractResource
      * @throws Exception
      */
     @GET
-    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS)
+    @Path(EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH)
     public VirtualDatacentersDto getVirtualDatacenters(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @Context final IRESTBuilder restBuilder) throws Exception

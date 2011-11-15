@@ -147,5 +147,4 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
 
         return dto;
     }
-
 }

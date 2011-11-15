@@ -64,7 +64,7 @@ public class EnterpriseRepositoryResource extends AbstractResource
     @GET
     public EnterpriseRepositoryDto getEnterpriseRepository(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @Context IRESTBuilder restBuilder)
     {
