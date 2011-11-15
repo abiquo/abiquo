@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.services.config.SystemPropertyService;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -74,9 +75,11 @@ public class VirtualMachineFactory
     SystemPropertyService systemPropertyService;
 
     /** The remote desktop min port **/
-    public final static int MIN_REMOTE_DESKTOP_PORT = 5900;
+    public final static int MIN_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService
+        .getSystemProperty(ConfigService.MIN_REMOTE_DESKTOP_PORT, "5900"));
 
-    public final static int MAX_REMOTE_DESKTOP_PORT = 65534;
+    public final static int MAX_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService
+        .getSystemProperty(ConfigService.MAX_REMOTE_DESKTOP_PORT, "65534"));
 
     protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
