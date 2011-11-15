@@ -10,18 +10,31 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
     /* ------------- Public atributes ------------- */
     private int id;
 
+    /**
+     * Dhcp option number.
+     */
+
     private int option;
 
-    private String description;
+    /**
+     * The IP address of the gateway.
+     */
+    private String gateway;
 
-    /* ------------- Constructor ------------- */
-    public DhcpOption()
-    {
-        id = 0;
-        option = 0;
-        description = "";
+    /**
+     * The network that defines the address.
+     */
+    private String networkAddress;
 
-    }
+    /**
+     * The mask value in the integer way (/24)
+     */
+    private Integer mask;
+
+    /**
+     * The mask value in IP way (255.255.255.0)
+     */
+    private String netmask;
 
     public int getId()
     {
@@ -43,14 +56,44 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
         this.option = option;
     }
 
-    public String getDescription()
+    public String getGateway()
     {
-        return description;
+        return gateway;
     }
 
-    public void setDescription(final String description)
+    public void setGateway(final String gateway)
     {
-        this.description = description;
+        this.gateway = gateway;
+    }
+
+    public String getNetworkAddress()
+    {
+        return networkAddress;
+    }
+
+    public void setNetworkAddress(final String networkAddress)
+    {
+        this.networkAddress = networkAddress;
+    }
+
+    public Integer getMask()
+    {
+        return mask;
+    }
+
+    public void setMask(final Integer mask)
+    {
+        this.mask = mask;
+    }
+
+    public String getNetmask()
+    {
+        return netmask;
+    }
+
+    public void setNetmask(final String netmask)
+    {
+        this.netmask = netmask;
     }
 
     @Override
@@ -59,7 +102,9 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
         DhcpOptionHB dhcpOptionHB = new DhcpOptionHB();
 
         dhcpOptionHB.setIdDhcpOption(id);
-        dhcpOptionHB.setDescription(description);
+        dhcpOptionHB.setMask(mask);
+        dhcpOptionHB.setNetmask(netmask);
+        dhcpOptionHB.setNetworkAddress(networkAddress);
         dhcpOptionHB.setOption(option);
 
         return dhcpOptionHB;
@@ -69,7 +114,9 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
     {
         DhcpOption dhcpOption = new DhcpOption();
         dhcpOption.setId(dto.getId());
-        dhcpOption.setDescription(dto.getDescription());
+        dhcpOption.setMask(dto.getMask());
+        dhcpOption.setNetmask(dto.getNetmask());
+        dhcpOption.setNetworkAddress(dto.getNetworkAddress());
         dhcpOption.setOption(dto.getOption());
 
         return dhcpOption;

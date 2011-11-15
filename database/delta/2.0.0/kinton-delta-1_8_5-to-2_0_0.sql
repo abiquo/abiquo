@@ -21,7 +21,10 @@
 CREATE TABLE `kinton`.`dhcpOption` (
   `idDhcpOption` int(10) unsigned NOT NULL AUTO_INCREMENT ,
   `option` int(20) NOT NULL ,
-  `description` varchar(100) NOT NULL ,
+   `gateway` varchar(40),
+  `network_address` varchar(40) NOT NULL,
+  `mask` int(4) NOT NULL,
+  `netmask` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idDhcpOption`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
@@ -72,10 +75,6 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 
-INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-(121,"");
-INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-(249,"");
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --
 -- ---------------------------------------------- --

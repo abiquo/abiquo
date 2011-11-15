@@ -1390,6 +1390,7 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.wiki.config.registration","http://community.abiquo.com/display/ABI18/Configuration+view#Configurationview-ProductRegistration","Registration wiki"),
  ("client.wiki.infra.discoverBlades","http://community.abiquo.com/display/ABI18/Manage+Racks+and+Physical+Machines#ManageRacksandPhysicalMachines-DiscoveringBladesonManagedRacks","discover UCS blades wiki");
 UNLOCK TABLES;
+
 /*!40000 ALTER TABLE `system_properties` ENABLE KEYS */;
 
 
@@ -1799,17 +1800,15 @@ CREATE TABLE  `kinton`.`license` (
 CREATE TABLE `kinton`.`dhcpOption` (
   `idDhcpOption` int(10) unsigned NOT NULL AUTO_INCREMENT ,
   `option` int(20) NOT NULL ,
-  `description` varchar(100) NOT NULL ,
+   `gateway` varchar(40),
+  `network_address` varchar(40) NOT NULL,
+  `mask` int(4) NOT NULL,
+  `netmask` varchar(20) NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY (`idDhcpOption`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-LOCK TABLES `kinton`.`dhcpOption` WRITE;
-INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-(121,"");
-INSERT INTO `kinton`.`dhcpOption` (`option`, `description`) VALUES
-(249,"");
-UNLOCK TABLES;
+
 --
 -- Definition of table `kinton`.`vlans_dhcpOption`
 --

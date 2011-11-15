@@ -492,7 +492,7 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
-            VlanNetworkHB vlanHB = vlanDAO.findById(vlanId);
+            VlanNetworkHB vlanHB = (VlanNetworkHB) vlan;// vlanDAO.findById(vlanId);
 
             DHCPServiceHB service = (DHCPServiceHB) vlan.getConfiguration().getDhcpService();
 

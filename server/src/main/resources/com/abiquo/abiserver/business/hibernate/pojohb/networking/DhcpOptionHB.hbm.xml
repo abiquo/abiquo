@@ -10,8 +10,17 @@
         <property name="option" type="java.lang.Integer">
             <column name="option" />
         </property>
-        <property name="description" type="string">
-            <column length="20" name="description" not-null="true" />
+        <property name="gateway" type="string">
+            <column length="40" name="gateway" />
+        </property>
+        <property name="networkAddress" type="string">
+            <column length="40" name="network_address" />
+        </property>
+        <property name="mask" type="java.lang.Integer">
+            <column name="mask" />
+        </property>
+        <property name="netmask" type="string">
+            <column length="20" name="netmask" />
         </property>
     </class>
 </hibernate-mapping>
