@@ -99,14 +99,25 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
         if (vm.getIdType() == 0)
         {
-        	vmDto.setType("NOT_MANAGED");
+            vmDto.setType("NOT_MANAGED");
         }
         else
         {
-        	vmDto.setType("MANAGED");
+            vmDto.setType("MANAGED");
+        }
+        Integer enterpriseId = null;
+        Integer userId = null;
+
+        if (vm.getEnterprise() != null)
+        {
+            enterpriseId = vm.getEnterprise().getId();
+        }
+        if (vm.getUser() != null)
+        {
+            userId = vm.getUser().getId();
         }
         vmDto.setLinks(restBuilder.buildVirtualMachineAdminLinks(datacenterId, rackId, machineId,
-            null, null));
+            enterpriseId, userId));
         return vmDto;
     }
 }

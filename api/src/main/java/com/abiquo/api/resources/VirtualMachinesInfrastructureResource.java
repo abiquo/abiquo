@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -100,5 +101,15 @@ public class VirtualMachinesInfrastructureResource extends AbstractResource
                     machineId, vm, restBuilder));
         }
         return dto;
+    }
+
+    @DELETE
+    public void deleteVirtualMachinesNotManaged(
+        @PathParam(DatacenterResource.DATACENTER) @NotNull @Min(1) final Integer datacenterId,
+        @PathParam(RackResource.RACK) @NotNull @Min(1) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) @NotNull @Min(1) final Integer machineId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        service.deleteNotManagedVirtualMachines(datacenterId, rackId, machineId);
     }
 }

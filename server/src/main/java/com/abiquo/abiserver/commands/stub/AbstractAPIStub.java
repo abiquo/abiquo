@@ -998,9 +998,8 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(
-            apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/virtualmachines",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines",
             params);
     }
 

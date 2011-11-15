@@ -36,7 +36,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
     public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
-        uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
+        uri = UriHelper.appendPathToBaseUri(uri, "/virtualmachines");
 
         BasicResult result = new BasicResult();
 

@@ -243,7 +243,8 @@ public enum APIError
         "VM-17", "The provided virtual image can not be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
         "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
         "VM-19",
-        "The virtual image have some compatible conversion but aren't ready (in progress or failed)"),
+        "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
+        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -462,7 +463,7 @@ public enum APIError
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check out documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
         "LNK-1", "Number of links invalid: This resource only accepts a single link"),
-    
+
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
@@ -474,9 +475,7 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link")
-
-    ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
 
     /**
      * Internal error code
