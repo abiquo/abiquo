@@ -100,6 +100,7 @@ public class PrivilegeResource extends AbstractResource
         PrivilegeDto dto = new PrivilegeDto();
         dto.setName(systemProperty.getName());
         dto.setId(systemProperty.getId());
+        dto = addPrivilegeLinks(builder, dto);
 
         return dto;
     }
@@ -120,10 +121,9 @@ public class PrivilegeResource extends AbstractResource
     }
 
     public static PrivilegeDto addPrivilegeLinks(final IRESTBuilder restBuilder,
-        final PrivilegeDto privilegeDto)
+        PrivilegeDto privilegeDto)
     {
-        List<RESTLink> links = restBuilder.buildPrivilegeLink(privilegeDto);
-        privilegeDto.addLinks(links);
+        privilegeDto.setLinks(restBuilder.buildPrivilegeLink(privilegeDto));
 
         return privilegeDto;
     }
