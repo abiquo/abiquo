@@ -50,7 +50,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = VolumeManagement.TABLE_NAME)
 @DiscriminatorValue(VolumeManagement.DISCRIMINATOR)
-@NamedQueries( {
+@NamedQueries({
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_VDC, query = VolumeManagement.BY_VDC),
 @NamedQuery(name = VolumeManagement.VOLUMES_BY_POOL, query = VolumeManagement.BY_POOL)})
 public class VolumeManagement extends RasdManagement
@@ -67,20 +67,20 @@ public class VolumeManagement extends RasdManagement
 
     public static final String VOLUMES_BY_POOL = "VOLUMES_BY_POOL";
 
-    public static final String BY_VDC =
-        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
-            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.virtualDatacenter.id = :vdcId "
-            + "AND (" + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
-            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String BY_VDC = "SELECT vol FROM VolumeManagement vol "
+        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
+        + "WHERE vol.virtualDatacenter.id = :vdcId " + "AND ("
+        + "vol.rasd.elementName like :filterLike " + "OR vm.name like :filterLike "
+        + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
+        + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
-    public static final String BY_POOL =
-        "SELECT vol FROM VolumeManagement vol " + "LEFT JOIN vol.virtualMachine vm "
-            + "LEFT JOIN vol.virtualAppliance vapp " + "WHERE vol.storagePool.idStorage = :poolId "
-            + "AND (" + "vol.rasd.elementName like :filterLike "
-            + "OR vol.rasd.id like :filterLike " + "OR vm.name like :filterLike "
-            + "OR vapp.name like :filterLike " + "OR vol.virtualDatacenter.name like :filterLike "
-            + "OR vol.storagePool.tier.name like :filterLike " + ")";
+    public static final String BY_POOL = "SELECT vol FROM VolumeManagement vol "
+        + "LEFT JOIN vol.virtualMachine vm " + "LEFT JOIN vol.virtualAppliance vapp "
+        + "WHERE vol.storagePool.idStorage = :poolId " + "AND ("
+        + "vol.rasd.elementName like :filterLike " + "OR vol.rasd.id like :filterLike "
+        + "OR vm.name like :filterLike " + "OR vapp.name like :filterLike "
+        + "OR vol.virtualDatacenter.name like :filterLike "
+        + "OR vol.storagePool.tier.name like :filterLike " + ")";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code

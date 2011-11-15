@@ -24,30 +24,36 @@ package com.abiquo.abiserver.pojo.result;
 import java.util.List;
 
 /**
- * Object used to return a subset of a list of elements, where a variable containing the total number of elements
- * is usually needed
+ * Object used to return a subset of a list of elements, where a variable containing the total
+ * number of elements is usually needed
+ * 
  * @author Oliver
- *
  * @param <E>
  */
-public class ListResponse<E> {
+public class ListResponse<E>
+{
 
-	private List<E> list;
-	private int totalNumEntities;
-	
-	public List<E> getList() {
-		return list;
-	}
-	
-	public void setList(List<E> list) {
-		this.list = list;
-	}
-	
-	public int getTotalNumEntities() {
-		return totalNumEntities;
-	}
-	
-	public void setTotalNumEntities(int totalNumEntities) {
-		this.totalNumEntities = totalNumEntities;
-	}
+    private List<E> list;
+
+    private int totalNumEntities;
+
+    public List<E> getList()
+    {
+        return list;
+    }
+
+    public void setList(List<E> list)
+    {
+        this.list = list;
+    }
+
+    public int getTotalNumEntities()
+    {
+        return totalNumEntities;
+    }
+
+    public void setTotalNumEntities(int totalNumEntities)
+    {
+        this.totalNumEntities = totalNumEntities;
+    }
 }

@@ -184,15 +184,16 @@ public class RepositorySpaceXML
     /**
      * XXX
      */
-    public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL) throws XMLException
+    public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL)
+        throws XMLException
     {
         RepositorySpace repo;
 
         try
         {
             URL rsUrl = new URL(repositorySpaceURL);
-            InputStream isRs = rsUrl.openStream(); 
-            
+            InputStream isRs = rsUrl.openStream();
+
             repo = readAsXML(isRs);
         }
         catch (XMLException e) // XMLStreamException or JAXBException
@@ -210,7 +211,7 @@ public class RepositorySpaceXML
             final String msg = "Can not open a connection to : " + repositorySpaceURL;
             throw new XMLException(msg, e);
         }
-        
+
         repo.setRepositoryURI(repositorySpaceURL); // XXX
 
         return repo;

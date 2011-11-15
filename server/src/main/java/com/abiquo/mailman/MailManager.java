@@ -267,8 +267,8 @@ public class MailManager
                 catch (AddressException addEx)
                 {
                     final String cause =
-                        String.format("Invalid email address TO [%s] caused by [%s]", addr, addEx
-                            .getLocalizedMessage());
+                        String.format("Invalid email address TO [%s] caused by [%s]", addr,
+                            addEx.getLocalizedMessage());
                     errorBuilder.append(cause);
                 }
             }
@@ -289,9 +289,9 @@ public class MailManager
                     catch (AddressException addEx)
                     {
                         final String cause =
-                            String.format("Invalid email address CC [%s] caused by [%s]", addr, addEx
-                                .getLocalizedMessage());
-                        
+                            String.format("Invalid email address CC [%s] caused by [%s]", addr,
+                                addEx.getLocalizedMessage());
+
                         errorBuilder.append(cause);
                     }
                 }
@@ -373,17 +373,17 @@ public class MailManager
             {
 
                 // Setting the TO addresses of the receivers
-                myMessage.addRecipients(Message.RecipientType.TO, InternetAddress.parse(mailTo,
-                    STRICT_EMAIL_CHECK));
+                myMessage.addRecipients(Message.RecipientType.TO,
+                    InternetAddress.parse(mailTo, STRICT_EMAIL_CHECK));
 
             }
             // capture any malformed address
             catch (AddressException addEx)
             {
                 final String cause =
-                    String.format("Invalid email address TO [%s] caused by [%s]", mailTo, addEx
-                        .getLocalizedMessage());
-                
+                    String.format("Invalid email address TO [%s] caused by [%s]", mailTo,
+                        addEx.getLocalizedMessage());
+
                 errorBuilder.append(cause);
             }
 
@@ -392,16 +392,16 @@ public class MailManager
             {
                 try
                 {
-                    myMessage.addRecipients(Message.RecipientType.CC, InternetAddress.parse(mailCc,
-                        STRICT_EMAIL_CHECK));
+                    myMessage.addRecipients(Message.RecipientType.CC,
+                        InternetAddress.parse(mailCc, STRICT_EMAIL_CHECK));
                 }
                 // capture any malformed address
                 catch (AddressException addEx)
                 {
-                 
+
                     final String cause =
-                        String.format("Invalid email address CC [%s] caused by [%s]", mailCc, addEx
-                            .getLocalizedMessage());
+                        String.format("Invalid email address CC [%s] caused by [%s]", mailCc,
+                            addEx.getLocalizedMessage());
                     errorBuilder.append(cause).append(addEx.getLocalizedMessage());
                 }
 

@@ -35,13 +35,24 @@ public class EnterpriseResourcesGenerator extends DefaultEntityGenerator<Enterpr
     public EnterpriseResourcesGenerator(SeedGenerator seed)
     {
         super(seed);
-        
+
     }
 
     @Override
     public void assertAllPropertiesEqual(EnterpriseResources obj1, EnterpriseResources obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, EnterpriseResources.REPOSITORY_RESERVED_PROPERTY,EnterpriseResources.MEMORY_RESERVED_PROPERTY,EnterpriseResources.VLAN_RESERVED_PROPERTY,EnterpriseResources.PUBLIC_I_PS_USED_PROPERTY,EnterpriseResources.PUBLIC_I_PS_RESERVED_PROPERTY,EnterpriseResources.LOCAL_STORAGE_RESERVED_PROPERTY,EnterpriseResources.EXT_STORAGE_USED_PROPERTY,EnterpriseResources.VLAN_USED_PROPERTY,EnterpriseResources.EXT_STORAGE_RESERVED_PROPERTY,EnterpriseResources.LOCAL_STORAGE_USED_PROPERTY,EnterpriseResources.V_CPU_USED_PROPERTY,EnterpriseResources.V_CPU_RESERVED_PROPERTY,EnterpriseResources.REPOSITORY_USED_PROPERTY,EnterpriseResources.MEMORY_USED_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
+            EnterpriseResources.REPOSITORY_RESERVED_PROPERTY,
+            EnterpriseResources.MEMORY_RESERVED_PROPERTY,
+            EnterpriseResources.VLAN_RESERVED_PROPERTY,
+            EnterpriseResources.PUBLIC_I_PS_USED_PROPERTY,
+            EnterpriseResources.PUBLIC_I_PS_RESERVED_PROPERTY,
+            EnterpriseResources.LOCAL_STORAGE_RESERVED_PROPERTY,
+            EnterpriseResources.EXT_STORAGE_USED_PROPERTY, EnterpriseResources.VLAN_USED_PROPERTY,
+            EnterpriseResources.EXT_STORAGE_RESERVED_PROPERTY,
+            EnterpriseResources.LOCAL_STORAGE_USED_PROPERTY,
+            EnterpriseResources.V_CPU_USED_PROPERTY, EnterpriseResources.V_CPU_RESERVED_PROPERTY,
+            EnterpriseResources.REPOSITORY_USED_PROPERTY, EnterpriseResources.MEMORY_USED_PROPERTY);
     }
 
     @Override
@@ -51,17 +62,15 @@ public class EnterpriseResourcesGenerator extends DefaultEntityGenerator<Enterpr
 
         EnterpriseResources enterpriseResources = new EnterpriseResources();
 
-        
-
         return enterpriseResources;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(EnterpriseResources entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(EnterpriseResources entity,
+        List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
+
     }
 
 }

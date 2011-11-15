@@ -21,14 +21,17 @@
 
 package com.abiquo.tracer.server;
 
-public class TracerCollectorFactory {
+public class TracerCollectorFactory
+{
 
-	private static TracerCollector instance = null;
-	
-	public static synchronized TracerCollector getTracerCollector() {
-		if (instance==null) {
-			instance = new TracerCollector();
-		}
-		return instance;
-	}
+    private static TracerCollector instance = null;
+
+    public static synchronized TracerCollector getTracerCollector()
+    {
+        if (instance == null)
+        {
+            instance = new TracerCollector();
+        }
+        return instance;
+    }
 }

@@ -77,8 +77,8 @@ public class OVFPackagesResourceIT extends AbstractResourceIT
         p.setCategoryName("category_1"); // TODO: test this is a necessary field
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                p);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(p);
 
         assertEquals(response.getStatusCode(), 201);
 

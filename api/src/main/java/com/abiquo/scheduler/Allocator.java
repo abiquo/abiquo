@@ -217,12 +217,12 @@ public class Allocator implements IAllocator
                 }
                 catch (final NotEnoughResourcesException e)
                 {
-                    log.error("Discarded machine [{}] : Not Enough Resources [{}]", targetMachine
-                        .getName(), e);
+                    log.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                        targetMachine.getName(), e);
 
                     errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(), e
-                            .getMessage());
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            e.getMessage());
                     targetMachine = null;
                 }
             }
@@ -248,8 +248,8 @@ public class Allocator implements IAllocator
             throw new NotEnoughResourcesException(cause);
         }
 
-        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]", targetMachine
-            .getName(), vmachine.getName());
+        log.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
+            targetMachine.getName(), vmachine.getName());
 
         return vmachine;
     }
@@ -344,7 +344,8 @@ public class Allocator implements IAllocator
      *            for the datacenter repository)
      * @param resources, additional resources configuration
      */
-    protected VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
+    @Override
+    public VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
     {
         return new VirtualMachineRequirements(vmachine);
     }

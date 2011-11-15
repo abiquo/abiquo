@@ -41,18 +41,6 @@ public class DatacenterLimitsDto extends SingleResourceWithLimitsDto
         this.id = id;
     }
 
-    private int iddcEnterpriseStats;
-
-    public int getIdDCEnterpriseStats()
-    {
-        return iddcEnterpriseStats;
-    }
-
-    public void setIdDCEnterpriseStats(final int iddcEnterpriseStats)
-    {
-        this.iddcEnterpriseStats = iddcEnterpriseStats;
-    }
-
     private long repositorySoftLimitsInMb;
 
     @XmlElement(name = "repositorySoft")

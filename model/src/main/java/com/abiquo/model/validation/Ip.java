@@ -41,7 +41,7 @@ import com.abiquo.server.core.util.network.IPAddress;
 
 @Documented
 @Constraint(validatedBy = Ip.Validator.class)
-@Target( {METHOD, FIELD, PARAMETER})
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Ip
 {

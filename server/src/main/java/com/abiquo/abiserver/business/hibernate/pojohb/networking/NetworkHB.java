@@ -39,11 +39,10 @@ import com.abiquo.abiserver.pojo.networking.VlanNetwork;
 public class NetworkHB extends AbicloudNetworkType implements IPojoHB<Network>
 {
     /**
-     * Just a simple identifier. 
+     * Just a simple identifier.
      */
     private Integer networkId;
-    
- 
+
     /**
      * @param networkId the networkId to set
      */
@@ -64,7 +63,7 @@ public class NetworkHB extends AbicloudNetworkType implements IPojoHB<Network>
     public Network toPojo()
     {
         Network network = new Network();
-        
+
         network.setNetworkId(getNetworkId());
         network.setUuid(getUuid());
         network.setNetworks(new ArrayList<VlanNetwork>());
@@ -75,7 +74,7 @@ public class NetworkHB extends AbicloudNetworkType implements IPojoHB<Network>
                 network.getNetworks().add(((VlanNetworkHB) vlanHB).toPojo());
             }
         }
-        
+
         return network;
     }
 
@@ -83,7 +82,7 @@ public class NetworkHB extends AbicloudNetworkType implements IPojoHB<Network>
     {
         if (this.networks == null)
         {
-            this.networks = new ArrayList<OrgNetworkType>();            
+            this.networks = new ArrayList<OrgNetworkType>();
         }
         this.networks.clear();
         if (networks != null)

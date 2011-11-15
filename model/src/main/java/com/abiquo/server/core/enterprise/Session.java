@@ -136,7 +136,7 @@ public class Session extends DefaultEntityBase
     public String getAuthType()
     {
         return authType;
-   }
+    }
 
     private void setAuthType(String authType)
     {

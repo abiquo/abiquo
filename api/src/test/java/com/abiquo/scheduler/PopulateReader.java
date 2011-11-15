@@ -125,7 +125,7 @@ public class PopulateReader extends PopulateConstants
     {
         populateVirtualInfrastructure.removeVirtualMachine(virtualMachineId);
     }
-    
+
     public void runningVirtualMachine(Integer virtualMachineId)
     {
         populateVirtualInfrastructure.runningVirtualMachine(virtualMachineId);

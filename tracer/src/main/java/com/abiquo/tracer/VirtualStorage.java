@@ -23,42 +23,52 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class VirtualStorage implements Serializable {
+public class VirtualStorage implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 8685469436273472L;
-	private String name;
-	private StoragePool storagePool;
+    private static final long serialVersionUID = 8685469436273472L;
 
-	public VirtualStorage(String virtualStorage) {
-		this.setName(virtualStorage);
-	}
+    private String name;
 
-	public static VirtualStorage virtualStorage(String virtualStorage) {
-		return new VirtualStorage(virtualStorage);
-	}
+    private StoragePool storagePool;
 
-	public VirtualStorage storagePool(StoragePool storagePool) {
-		this.setStoragePool(storagePool);
-		return this;
-	}
+    public VirtualStorage(String virtualStorage)
+    {
+        this.setName(virtualStorage);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public static VirtualStorage virtualStorage(String virtualStorage)
+    {
+        return new VirtualStorage(virtualStorage);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public VirtualStorage storagePool(StoragePool storagePool)
+    {
+        this.setStoragePool(storagePool);
+        return this;
+    }
 
-	public void setStoragePool(StoragePool storagePool) {
-		this.storagePool = storagePool;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public StoragePool getStoragePool() {
-		return storagePool;
-	}
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setStoragePool(StoragePool storagePool)
+    {
+        this.storagePool = storagePool;
+    }
+
+    public StoragePool getStoragePool()
+    {
+        return storagePool;
+    }
 
 }

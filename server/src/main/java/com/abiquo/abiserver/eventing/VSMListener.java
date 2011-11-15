@@ -81,7 +81,7 @@ public class VSMListener implements VSMCallback
     public void onEvent(VirtualSystemEvent event)
     {
         try
-        {            
+        {
             updateEventOnDb(event);
         }
         catch (EventingException e)
@@ -124,15 +124,17 @@ public class VSMListener implements VSMCallback
             Query query = session.createQuery(VM_BY_UUID);
             query.setString("uuid", event.getVirtualSystemId());
             VirtualmachineHB virtualMachine = (VirtualmachineHB) query.uniqueResult();
-            
-            
-            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 - DISABLED_FOR_HA states
+
+            // We must ignore events coming from PhysicalMachines in 5 - HA_IN_PROGRESS or 6 -
+            // DISABLED_FOR_HA states
             if (virtualMachine.getState() == StateEnum.HA_IN_PROGRESS)
             {
-                logger.trace("Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process", virtualMachine.getIdVm(), virtualMachine.getState());
+                logger
+                    .trace(
+                        "Ignoring event from VM ID is: {} with VM state : {}, its Physical Machine is currently disabled or in progress by HA process",
+                        virtualMachine.getIdVm(), virtualMachine.getState());
                 return;
             }
-            
 
             // Checking if the VM is not null since the VM that we are receiving
             // the event was already deleted

@@ -60,11 +60,12 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         AssertEx.assertPropertiesEqualSilent(obj1, obj2,
             NodeVirtualImageStatefulConversion.NEW_NAME_PROPERTY);
 
-        nodeVirtualImageGenerator.assertAllPropertiesEqual(obj1.getNodeVirtualImage(), obj2
-            .getNodeVirtualImage());
+        nodeVirtualImageGenerator.assertAllPropertiesEqual(obj1.getNodeVirtualImage(),
+            obj2.getNodeVirtualImage());
         tierGenerator.assertAllPropertiesEqual(obj1.getTier(), obj2.getTier());
-        virtualApplianceStatefulConversionGenerator.assertAllPropertiesEqual(obj1
-            .getVirtualApplianceStatefulConversion(), obj2.getVirtualApplianceStatefulConversion());
+        virtualApplianceStatefulConversionGenerator.assertAllPropertiesEqual(
+            obj1.getVirtualApplianceStatefulConversion(),
+            obj2.getVirtualApplianceStatefulConversion());
     }
 
     @Override

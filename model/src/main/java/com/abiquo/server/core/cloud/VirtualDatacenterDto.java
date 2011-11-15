@@ -42,7 +42,6 @@ public class VirtualDatacenterDto extends SingleResourceWithLimitsDto
 
     private HypervisorType hypervisorType;
 
-    
     private VLANNetworkDto vlan;
 
     public Integer getId()
