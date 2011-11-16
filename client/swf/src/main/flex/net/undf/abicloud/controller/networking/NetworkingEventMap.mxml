@@ -123,7 +123,8 @@
             event.virtualDatacenter.id, 
             event.networkName, 
             event.networkConfiguration, 
-            event.defaultNetwork]}">
+            event.defaultNetwork,
+            event.staticRules]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
@@ -162,7 +163,8 @@
             event.vlanNetwork.vlanNetworkId, 
             event.networkName, 
             event.networkConfiguration, 
-            event.defaultNetwork]}">
+            event.defaultNetwork,
+            event.staticRules]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
