@@ -464,6 +464,8 @@ public class HyperVCollector extends AbstractCollector
         // TODO: get Boot Order and establish which disk is the main one disk.setLabel(SYSTEM);
         // this could be done with Msvm_BIOSElement.BootOrder class and finding out the relations
         // with IDE/SCSI Controllers associated and their disks
+        
+        boolean firstDiskFound = true;
 
         for (IJIDispatch dispatch : standardDiskSettings)
         {
@@ -479,6 +481,14 @@ public class HyperVCollector extends AbstractCollector
             disk.setConnection(getDatastoreFromFile(imagePath));
 
             disk.setResourceType(ResourceEnumType.HARD_DISK);
+            
+            // System Disk (1st bootable) is the 1st we find, until we get a solution for detecting BootOrder in HyperV machines  
+            if (firstDiskFound) {
+                disk.setLabel("SYSTEM DISK");
+                firstDiskFound = false;
+            } else {
+                disk.setLabel("EXTRA DISK");
+            }
 
             // TODO: we should also try to get bus number (IDE or SCSI used port associated)
             // disk.setAttachment({ControllerPort});
@@ -547,6 +557,13 @@ public class HyperVCollector extends AbstractCollector
 
             ResourceType disk = new ResourceType();
             disk.setResourceType(ResourceEnumType.VOLUME_DISK);
+            
+            if (firstDiskFound) {
+                disk.setLabel("SYSTEM DISK");
+                firstDiskFound = false;
+            } else {
+                disk.setLabel("EXTRA DISK");
+            }
 
             JIArray hostResource = dispatch.get("HostResource").getObjectAsArray();
             JIVariant[] array = (JIVariant[]) hostResource.getArrayInstance();
@@ -580,7 +597,7 @@ public class HyperVCollector extends AbstractCollector
 
             disks.add(disk);
         }
-
+        
         return disks;
 
     }
