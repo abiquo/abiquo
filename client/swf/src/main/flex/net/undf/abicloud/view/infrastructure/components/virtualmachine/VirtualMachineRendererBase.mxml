@@ -69,6 +69,14 @@
             {
             	this._physicalMachine = value;
             }
+            
+            protected var _hypervisor:HyperVisor;
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+            	this._hypervisor = value;
+            	this._virtualMachine.assignedTo = this._hypervisor;
+            }
 
             private var _type:String;
             
