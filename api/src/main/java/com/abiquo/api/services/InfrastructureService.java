@@ -66,6 +66,7 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.AddressingUtils;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -1005,7 +1006,7 @@ public class InfrastructureService extends DefaultApiService
      * @param candidateMachines machines that we retrieved.
      * @return List<Machine> that are not in Abiquo.
      */
-    private List<Machine> excludeAlreadyInAbiquo(final Integer datacenterId,
+    protected List<Machine> excludeAlreadyInAbiquo(final Integer datacenterId,
         final List<Machine> candidateMachines)
     {
         List<Machine> machines = new ArrayList<Machine>();
@@ -1029,7 +1030,7 @@ public class InfrastructureService extends DefaultApiService
      * @param candidateMachines candidate machines to be returned.
      * @param vswitch name of the switch to filter
      */
-    private List<Machine> filterByVSwitch(final List<Machine> candidateMachines,
+    protected List<Machine> filterByVSwitch(final List<Machine> candidateMachines,
         final String vswitch)
     {
         List<Machine> filteredVSwitch = new ArrayList<Machine>();
@@ -1112,5 +1113,92 @@ public class InfrastructureService extends DefaultApiService
             errors.addAll(checkRemoteServiceStatus);
         }
         return errors;
+    }
+
+    /**
+     * Returns a single virtual machine based on its infrastructure properties and its id.
+     * 
+     * @param datacenterId identifier of the datacenter
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the physical machine
+     * @param vmId identifier of the virtual machine
+     * @return the object {@link VirtualMachine} found.
+     */
+    public VirtualMachine getVirtualMachineFromInfrastructure(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer vmId)
+    {
+        /** check if the machine exists. */
+        Machine pm = repo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return virtualMachineService.getVirtualMachineByHypervisor(pm.getHypervisor(), vmId);
+    }
+
+    /**
+     * Returns the list of virtual machines based on its infrastructure deployment site.
+     * 
+     * @param datacenterId identifier of the datacenter.
+     * @param rackId identifier of the rack
+     * @param machineId identifier of the machin
+     * @return the list of {@link VirtualMachine} deployed in the physical machine.
+     */
+    public List<VirtualMachine> getVirtualMachinesFromInfrastructure(final Integer datacenterId,
+        final Integer rackId, final Integer machineId)
+    {
+        /** check if the machine exists. */
+        Machine pm = repo.findMachineByIds(datacenterId, rackId, machineId);
+        if (pm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+        return (List<VirtualMachine>) virtualMachineService.findByHypervisor(pm.getHypervisor());
+    }
+
+    /**
+     * Deletes machine non managed by abiquo.
+     * 
+     * @param datacenterId
+     * @param rackId
+     * @param machineId
+     * @param trace
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteNotManagedVirtualMachines(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
+    {
+
+        if (!machineService.isAssignedTo(datacenterId, rackId, machineId))
+        {
+            addNotFoundErrors(APIError.NOT_ASSIGNED_MACHINE_DATACENTER_RACK);
+            flushErrors();
+        }
+
+        Hypervisor hypervisor = machineService.getMachine(machineId).getHypervisor();
+
+        if (hypervisor == null)
+        {
+            addNotFoundErrors(APIError.VIRTUAL_MACHINE_WITHOUT_HYPERVISOR);
+            flushErrors();
+        }
+
+        deleteNotManagedVirtualMachines(hypervisor);
+        updateUsedResourcesByMachine(machineId);
+
+        if (tracer != null)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
+                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
+                "Virtual Machines not managed by host from '" + hypervisor.getIp()
+                    + "' have been deleted");
+        }
+    }
+
+    protected void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        repo.deleteNotManagedVirtualMachines(hypervisor);
     }
 }
