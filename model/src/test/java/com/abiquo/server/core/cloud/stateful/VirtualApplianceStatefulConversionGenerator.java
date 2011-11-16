@@ -57,8 +57,8 @@ public class VirtualApplianceStatefulConversionGenerator extends
 
         userGenerator.assertAllPropertiesEqual(obj1.getUser(), obj2.getUser());
 
-        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-            .getVirtualAppliance());
+        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
+            obj2.getVirtualAppliance());
     }
 
     @Override

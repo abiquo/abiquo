@@ -37,17 +37,17 @@ public class DatacenterDto extends SingleResourceTransportDto implements Seriali
     private Integer id;
 
     /**
-     * Name of the datacenter. 
+     * Name of the datacenter.
      */
     private String name;
-    
+
     /**
-     * Where the Datacenter is located. 
+     * Where the Datacenter is located.
      */
     private String location;
-    
+
     /**
-     * List of remote services of the datacenter. 
+     * List of remote services of the datacenter.
      */
     private RemoteServicesDto remoteServices;
 

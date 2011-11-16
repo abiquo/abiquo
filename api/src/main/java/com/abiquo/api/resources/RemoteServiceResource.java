@@ -26,7 +26,6 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -75,7 +74,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         return createTransferObject(remoteService, restBuilder);
@@ -104,7 +103,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService old = service.getRemoteService(datacenterId, type);
 
         RemoteServiceDto r = service.modifyRemoteService(old.getId(), remoteService);
@@ -121,7 +120,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         service.removeRemoteService(remoteService.getId());

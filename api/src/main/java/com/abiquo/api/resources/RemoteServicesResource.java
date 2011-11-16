@@ -47,7 +47,7 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 @Controller
 public class RemoteServicesResource extends AbstractResource
 {
-    public final static String REMOTE_SERVICES_PATH = "remoteServices";
+    public final static String REMOTE_SERVICES_PATH = "remoteservices";
 
     // @Autowired
     @Resource(name = "infrastructureService")

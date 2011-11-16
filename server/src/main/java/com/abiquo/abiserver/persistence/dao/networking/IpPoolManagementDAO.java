@@ -36,7 +36,6 @@ import com.abiquo.abiserver.persistence.DAO;
  */
 public interface IpPoolManagementDAO extends DAO<IpPoolManagementHB, Integer>
 {
-
     /**
      * Return the list of {@link IpPoolManagementHB} assigned to a virtual machine.
      * 

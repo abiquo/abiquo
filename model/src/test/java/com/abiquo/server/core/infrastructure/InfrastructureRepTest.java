@@ -340,7 +340,8 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
         }
         catch (AssertionError ae)
         {
-            Assert.assertEquals(ae.getMessage(), InfrastructureRep.BUG_INSERT_RACK_NAME_MUST_BE_UNIQUE);
+            Assert.assertEquals(ae.getMessage(),
+                InfrastructureRep.BUG_INSERT_RACK_NAME_MUST_BE_UNIQUE);
         }
     }
 
@@ -400,7 +401,8 @@ public class InfrastructureRepTest extends DefaultJpaDataAccessTestBase
         }
         catch (AssertionError e)
         {
-            Assert.assertEquals(e.getMessage(), InfrastructureRep.BUG_UPDATE_RACK_NAME_MUST_BE_UNIQUE);
+            Assert.assertEquals(e.getMessage(),
+                InfrastructureRep.BUG_UPDATE_RACK_NAME_MUST_BE_UNIQUE);
         }
     }
 

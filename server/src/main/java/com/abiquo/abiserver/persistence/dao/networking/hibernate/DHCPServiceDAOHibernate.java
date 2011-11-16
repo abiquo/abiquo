@@ -38,16 +38,19 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
  * 
  * @author jdevesa@abiquo.com
  */
-public class DHCPServiceDAOHibernate extends HibernateDAO<DHCPServiceHB, Integer> implements DHCPServiceDAO
+public class DHCPServiceDAOHibernate extends HibernateDAO<DHCPServiceHB, Integer> implements
+    DHCPServiceDAO
 {
 
     /**
      * Named Queries.
      */
-    private static String DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT = "DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT";
-    
+    private static String DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT =
+        "DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT";
+
     @Override
-    public IpPoolManagementHB getNextAvailableIp(Integer dhcpServiceId, String gateway) throws PersistenceException
+    public IpPoolManagementHB getNextAvailableIp(Integer dhcpServiceId, String gateway)
+        throws PersistenceException
     {
         try
         {
@@ -55,7 +58,7 @@ public class DHCPServiceDAOHibernate extends HibernateDAO<DHCPServiceHB, Integer
             Query query = session.getNamedQuery(DHCP_SERVICE_GET_AVAILABLE_IP_MANAGEMENT);
             query.setInteger("dhcpId", dhcpServiceId);
             query.setString("gateway", gateway);
-        
+
             if (query.list().size() > 0)
             {
                 return (IpPoolManagementHB) query.list().get(0);
@@ -69,7 +72,7 @@ public class DHCPServiceDAOHibernate extends HibernateDAO<DHCPServiceHB, Integer
         {
             throw new PersistenceException(e.getMessage(), e);
         }
-        
+
     }
 
 }

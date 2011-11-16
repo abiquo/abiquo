@@ -21,6 +21,7 @@
 package com.abiquo.abiserver.commands;
 
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.heartbeat.shared.dto.RegisterDTO;
 
 public interface ConfigurationCommand
@@ -63,7 +64,7 @@ public interface ConfigurationCommand
      * @return a BasicResult object, with success=true if the registration information was set
      *         successfully, or false otherwise
      */
-    public abstract BasicResult setRegistrationData(RegisterDTO registrationData);
+    public abstract DataResult<RegisterDTO> setRegistrationData(RegisterDTO registrationData);
 
     /**
      * Asks if client must show a window with the Heartbeat information

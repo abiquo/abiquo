@@ -799,7 +799,6 @@
     	id="actionTool"
         width="57" height="100%"
         right="0"
-        verticalAlign="middle"
         verticalGap="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
         enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.id != State.IN_PROGRESS &amp;&amp; (! this._editMode)}">

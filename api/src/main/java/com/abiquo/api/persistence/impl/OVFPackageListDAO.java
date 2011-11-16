@@ -45,8 +45,8 @@ public class OVFPackageListDAO extends JpaDAO<OVFPackageList, Integer>
 
     public List<OVFPackageList> findByEnterprise(final Integer idEnterprise)
     {
-        return entityManager.createQuery(FIND_BY_DATACENTER).setParameter("idEnterprise",
-            idEnterprise).getResultList();
+        return entityManager.createQuery(FIND_BY_DATACENTER)
+            .setParameter("idEnterprise", idEnterprise).getResultList();
     }
 
     public OVFPackageList findByName(final String name, final Integer idEnterprise)

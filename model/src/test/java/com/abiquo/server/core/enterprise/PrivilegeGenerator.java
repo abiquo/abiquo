@@ -23,14 +23,13 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.List;
 
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
 {
-
-    private static final String OTHER_ENTERPRISES_PRIVILEGE = "OTHER_ENTERPRISES_PRIVILEGE";
 
     public PrivilegeGenerator(final SeedGenerator seed)
     {
@@ -56,7 +55,7 @@ public class PrivilegeGenerator extends DefaultEntityGenerator<Privilege>
     public Privilege createInstance()
     {
 
-        Privilege privilege = new Privilege(OTHER_ENTERPRISES_PRIVILEGE);
+        Privilege privilege = new Privilege(Privileges.ENTERPRISE_ENUMERATE);
 
         return privilege;
     }

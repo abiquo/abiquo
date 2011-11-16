@@ -31,16 +31,17 @@ import com.abiquo.server.core.appslibrary.OVFPackage;
 @Repository
 public class OVFPackageDAO extends JpaDAO<OVFPackage, Integer>
 {
-    private static final String FIND_BY_DATACENTER = "from OVFPackage where appsLibrary.enterprise.id = :idEnterprise";
+    private static final String FIND_BY_DATACENTER =
+        "from OVFPackage where appsLibrary.enterprise.id = :idEnterprise";
 
     protected Class<OVFPackage> getPersistentClass()
     {
         return OVFPackage.class;
     }
-    
+
     public List<OVFPackage> findByEnterprise(final Integer idEnterprise)
     {
-        return entityManager.createQuery(FIND_BY_DATACENTER).setParameter("idEnterprise", idEnterprise)
-            .getResultList();
+        return entityManager.createQuery(FIND_BY_DATACENTER)
+            .setParameter("idEnterprise", idEnterprise).getResultList();
     }
 }

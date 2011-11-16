@@ -327,6 +327,7 @@ public class NetworkConfiguration extends DefaultEntityBase
     }
 
     // *************************** Mandatory constructors ***********************
+
     public NetworkConfiguration(final String address, final Integer mask, final String netmask,
         final String gateway, final String fenceMode)
     {

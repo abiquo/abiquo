@@ -140,7 +140,7 @@ public class VirtualImageDecorator extends VirtualImage
         String directoryPath = this.toPojoHB().getDirectoryPath();
 
         final String viPath = getBasePath();
-        final String viName = viPath.substring(viPath.lastIndexOf('/') + 1); 
+        final String viName = viPath.substring(viPath.lastIndexOf('/') + 1);
 
         if (this.getMaster() != null && !this.getMaster().isImageStateful())
         {

@@ -37,7 +37,7 @@ import javax.validation.Payload;
 
 @Documented
 @Constraint(validatedBy = Port.Validator.class)
-@Target( {METHOD, FIELD, PARAMETER})
+@Target({METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Port
 {
@@ -66,21 +66,21 @@ public @interface Port
             {
                 return true;
             }
-            
+
             if (port.required() && value == null)
             {
                 return false;
             }
 
             Boolean valid = value >= 0 && value <= 65535;
-            
+
             if (!valid)
             {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(port.message() + value)
                     .addConstraintViolation();
             }
-            
+
             return valid;
         }
 

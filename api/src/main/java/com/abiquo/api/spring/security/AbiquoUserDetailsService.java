@@ -52,7 +52,7 @@ import com.abiquo.server.core.enterprise.User.AuthType;
 public class AbiquoUserDetailsService implements UserDetailsService
 {
     /** The default role prefix to use. */
-    protected static final String DEFAULT_ROLE_PREFIX = "ROLE_";
+    public static final String DEFAULT_ROLE_PREFIX = "ROLE_";
 
     /** The default role. */
     protected static final String DEFAULT_ROLE = DEFAULT_ROLE_PREFIX + "AUTHENTICATED";

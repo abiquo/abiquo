@@ -106,15 +106,15 @@ public class Network implements Serializable, IPojo<NetworkHB>
     public NetworkHB toPojoHB()
     {
         NetworkHB networkHB = new NetworkHB();
-        
+
         networkHB.setNetworkId(getNetworkId());
         networkHB.setUuid(getUuid());
-        
+
         for (VlanNetwork vlan : getNetworks())
         {
             networkHB.getNetworks().add(vlan.toPojoHB());
         }
-        
+
         return null;
     }
 

@@ -19,17 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.cloud;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class NodeVirtualImageTest extends DefaultEntityTestBase<NodeVirtualImage>
-  {
+public class NodeVirtualImageTest extends DefaultEntityTestBase<NodeVirtualImage>
+{
 
-      @Override
-      protected InstanceTester<NodeVirtualImage> createEntityInstanceGenerator()
-      {
-          return new NodeVirtualImageGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<NodeVirtualImage> createEntityInstanceGenerator()
+    {
+        return new NodeVirtualImageGenerator(getSeed());
+    }
+}

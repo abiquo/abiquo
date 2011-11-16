@@ -75,20 +75,19 @@ public enum DiskFormatType
 
     public final DiskFormatTypeAlias alias;
 
-    public static final DiskFormatType[] VBOX_COMPATIBLES =
-        new DiskFormatType[] {VMDK_SPARSE, VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
+    public static final DiskFormatType[] VBOX_COMPATIBLES = new DiskFormatType[] {VMDK_SPARSE,
+    VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
 
-    public static final DiskFormatType[] KVM_COMPATIBLES =
-        new DiskFormatType[] {RAW, VMDK_SPARSE, VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT,
-        QCOW2_SPARSE};
+    public static final DiskFormatType[] KVM_COMPATIBLES = new DiskFormatType[] {RAW, VMDK_SPARSE,
+    VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT, QCOW2_SPARSE};
 
     public static final DiskFormatType[] XEN_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT};
 
     public static final DiskFormatType[] VMWARE_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT,
     VMDK_SPARSE};
 
-    public static final DiskFormatType[] HYPERV_COMPATIBLES =
-        new DiskFormatType[] {VHD_FLAT, VHD_SPARSE};
+    public static final DiskFormatType[] HYPERV_COMPATIBLES = new DiskFormatType[] {VHD_FLAT,
+    VHD_SPARSE};
 
     public static final DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
 

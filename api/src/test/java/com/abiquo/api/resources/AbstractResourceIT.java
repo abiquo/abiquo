@@ -41,17 +41,17 @@ public abstract class AbstractResourceIT extends AbstractJpaDBUnitTest
 
     protected RestClient client = new RestClient();
 
-//    @BeforeClass
-//    public static void setupServer() throws Exception
-//    {
-//        Jetty.start();
-//    }
-//
-//    @AfterClass
-//    public static void tearDownServer() throws Exception
-//    {
-//        Jetty.stop();
-//    }
+    // @BeforeClass
+    // public static void setupServer() throws Exception
+    // {
+    // Jetty.start();
+    // }
+    //
+    // @AfterClass
+    // public static void tearDownServer() throws Exception
+    // {
+    // Jetty.stop();
+    // }
 
     protected String prettyPrint(Resource resource) throws IOException
     {

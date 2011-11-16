@@ -72,7 +72,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
-    private String costCode;
+    private int costCode;
 
     /* ------------- Constructor ------------- */
     public VirtualImage()
@@ -86,7 +86,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         stateful = 0;
         deleted = false;
         shared = 0;
-        costCode = "";
+        costCode = 0;
     }
 
     public int getId()
@@ -264,7 +264,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return diskFileSize;
     }
 
-    public void setDiskFileSize(Long diskFileSize)
+    public void setDiskFileSize(final Long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
@@ -284,17 +284,17 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return shared;
     }
 
-    public void setShared(int shared)
+    public void setShared(final int shared)
     {
         this.shared = shared;
     }
 
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }
