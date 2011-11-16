@@ -78,6 +78,9 @@
             [Bindable]
             protected var _dataCenter:DataCenter;
             
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+            
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
             
@@ -293,6 +296,7 @@
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
+                	this._physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
                     //remove the selected virtual machine reference
                     if(!event.automaticUpdate){
                         virtualMachineList.selectedVirtualMachine = null;
@@ -676,6 +680,7 @@
 
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                 	type="INFRASTRUCTURE"
+                	physicalMachine="{this._physicalMachine}"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
              
