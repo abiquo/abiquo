@@ -131,6 +131,8 @@
                     cleanFilteringOptions();
                     if(VlanNetwork(vlanList.selectedItem).networkType != VlanNetwork.UNMANAGED){
 	                    requestIPAddresses();
+                    }else{
+                    	setAvailablePrivateIPAddresses(new ArrayCollection(),0);
                     }
                 }
             }
