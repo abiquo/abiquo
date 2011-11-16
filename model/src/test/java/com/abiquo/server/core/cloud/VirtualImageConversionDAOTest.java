@@ -140,4 +140,33 @@ public class VirtualImageConversionDAOTest extends
         Assert.assertEquals(DiskFormatType.VDI_SPARSE, virtualMachine.getVirtualImage()
             .getDiskFormatType());
     }
+
+    @Test
+    public void testIsConverted()
+    {
+        VirtualImageConversion imageConversion = eg().createUniqueInstance();
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(imageConversion, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, imageConversion);
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertTrue(dao.isConverted(imageConversion.getVirtualImage(), imageConversion
+            .getTargetType()));
+    }
+
+    @Test
+    public void testIsNotConverted()
+    {
+        VirtualImageConversion imageConversion = eg().createUniqueInstance();
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(imageConversion, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist);
+
+        VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
+
+        assertFalse(dao.isConverted(imageConversion.getVirtualImage(), imageConversion
+            .getTargetType()));
+    }
 }

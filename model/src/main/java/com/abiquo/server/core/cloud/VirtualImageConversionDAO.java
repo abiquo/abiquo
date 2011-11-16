@@ -65,7 +65,8 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     }
 
     /**
-     * Get all the provided hypervisor compatible {@link VirtualImageConversion} for a given {@link HypervisorType}
+     * Get all the provided hypervisor compatible {@link VirtualImageConversion} for a given
+     * {@link HypervisorType}
      * <p>
      * Before calling this method assure the virtualImage format IS NOT the hypervisorType base
      * format or compatible (conversion not needed). @see
@@ -102,12 +103,17 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             // This function should be returning the only object
             if (conversions.size() > 1)
             {
-                throw new NonUniqueObjectException("There is more than one conversion!",
-                    image.getId(),
-                    VirtualImageConversion.class.getSimpleName());
+                throw new NonUniqueObjectException("There is more than one conversion!", image
+                    .getId(), VirtualImageConversion.class.getSimpleName());
             }
             return conversions.get(0);
         }
         return null;
+    }
+
+    public boolean isConverted(final VirtualImage image, final DiskFormatType targetType)
+    {
+        final Criterion compat = Restrictions.and(sameImage(image), targetFormatIn(targetType));
+        return !createCriteria(compat).list().isEmpty();
     }
 }
