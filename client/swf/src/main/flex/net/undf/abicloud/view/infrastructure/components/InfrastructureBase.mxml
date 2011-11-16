@@ -318,6 +318,8 @@
 	                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
 	                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
 	                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+	                event.dataCenter = this._dataCenter;
+	                event.rackId = Rack(PhysicalMachine(infrastructureSelector.selectedInfrastructureElement).assignedTo).id;
 	                event.callback = setVirtualMachine;
 	                dispatchEvent(event);
                 }

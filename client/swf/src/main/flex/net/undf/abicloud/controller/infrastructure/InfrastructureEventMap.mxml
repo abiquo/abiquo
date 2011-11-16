@@ -907,7 +907,10 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="getVirtualMachineByPhysicalMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachine.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.dataCenter.id,
+            event.rackId,
+            event.physicalMachine.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"
