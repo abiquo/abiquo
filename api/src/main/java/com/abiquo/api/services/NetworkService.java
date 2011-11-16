@@ -21,12 +21,15 @@
 
 package com.abiquo.api.services;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -39,10 +42,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.cloud.DhcpOptionResource;
+import com.abiquo.api.resources.cloud.DhcpOptionsResource;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -54,8 +61,10 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
@@ -1385,6 +1394,66 @@ public class NetworkService extends DefaultApiService
         }
         return vm;
 
+    }
+
+    public Collection<DhcpOption> findAllDhcpOptions()
+    {
+        return datacenterRepo.findAllDhcp();
+    }
+
+    public DhcpOption getDhcpOption(final Integer id)
+    {
+        DhcpOption option = datacenterRepo.findDhcpOptionById(id);
+        if (option == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_DHCP_OPTION);
+            flushErrors();
+        }
+
+        return option;
+    }
+
+    public DhcpOption addDhcpOption(final DhcpOptionDto dto)
+    {
+        DhcpOption opt =
+            new DhcpOption(dto.getOption(),
+                dto.getNetworkAddress(),
+                dto.getMask(),
+                dto.getNetmask(),
+                dto.getGateway());
+
+        if (!opt.isValid())
+        {
+            addValidationErrors(opt.getValidationErrors());
+            flushErrors();
+        }
+
+        datacenterRepo.insertDhcpOption(opt);
+        return opt;
+    }
+
+    public List<Integer> getDhcpOptionIds(final VLANNetworkDto dto)
+    {
+        List<Integer> idList = new ArrayList<Integer>();
+        for (RESTLink rsl : dto.getLinks())
+        {
+            if (rsl.getRel().contains(DhcpOptionResource.DHCP_OPTION))
+            {
+                String buildPath =
+                    buildPath(DhcpOptionsResource.DHCP_OPTIONS_PATH,
+                        DhcpOptionResource.DHCP_OPTION_PARAM);
+                MultivaluedMap<String, String> values =
+                    URIResolver.resolveFromURI(buildPath, rsl.getHref());
+                if (values == null || !values.containsKey(DhcpOptionResource.DHCP_OPTION))
+                {
+                    addNotFoundErrors(APIError.DHCP_OPTION_PARAM_NOT_FOUND);
+                    flushErrors();
+                }
+                idList.add(Integer.valueOf(values.getFirst(DhcpOptionResource.DHCP_OPTION)));
+            }
+        }
+
+        return idList;
     }
 
 }

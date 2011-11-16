@@ -387,7 +387,9 @@ public enum APIError
         "It is expected one link with the rel attribute possible values (datacenter/rack/machine)"), INVALID_FPR(
         "RULE-6", "The load balance type indicated is null or invalid"),
 
-    ;
+    // DHCP_OPTION
+    NON_EXISTENT_DHCP_OPTION("DHCP_OPTION-0", "The requested dhcp option does not exist"), DHCP_OPTION_PARAM_NOT_FOUND(
+        "DHCP_OPTION-12", "Missing dhcp option parameter"), ;
 
     /**
      * Internal error code
@@ -438,8 +440,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
     }
 

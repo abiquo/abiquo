@@ -53,6 +53,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
 
     private NetworkType type;
 
+    private DhcpOptionsDto dhcpOptions;
+
     public Integer getId()
     {
         return id;
@@ -161,6 +163,16 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     public void setType(final NetworkType type)
     {
         this.type = type;
+    }
+
+    public DhcpOptionsDto getDhcpOptions()
+    {
+        return dhcpOptions;
+    }
+
+    public void setDhcpOptions(final DhcpOptionsDto dhcpOptions)
+    {
+        this.dhcpOptions = dhcpOptions;
     }
 
 }

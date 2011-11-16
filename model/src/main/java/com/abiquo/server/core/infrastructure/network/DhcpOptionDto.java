@@ -4,9 +4,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "dhcpOption")
+@XmlRootElement(name = "dhcpoption")
 public class DhcpOptionDto extends SingleResourceTransportDto
 {
+
+    public DhcpOptionDto(final Integer id, final int option, final String gateway,
+        final String networkAddress, final Integer mask, final String netmask)
+    {
+        super();
+        this.id = id;
+        this.option = option;
+        this.gateway = gateway;
+        this.networkAddress = networkAddress;
+        this.mask = mask;
+        this.netmask = netmask;
+    }
+
+    public DhcpOptionDto()
+    {
+        // TODO Auto-generated constructor stub
+    }
+
     private Integer id;
 
     private int option;

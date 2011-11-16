@@ -48,7 +48,6 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -358,8 +357,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
      */
     public static VLANNetworkDto createTransferObject(final VLANNetwork network) throws Exception
     {
-        VLANNetworkDto dto =
-            ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
+        VLANNetworkDto dto = new VLANNetworkDto();
+        // ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
 
         dto.setId(network.getId());
         dto.setAddress(network.getConfiguration().getAddress());

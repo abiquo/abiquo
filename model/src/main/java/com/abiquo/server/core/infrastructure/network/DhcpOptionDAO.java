@@ -1,23 +1,22 @@
-  package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.infrastructure.network;
 
-  import javax.persistence.EntityManager;
+import javax.persistence.EntityManager;
 
-  import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Repository;
 
-  import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-  @Repository("jpaDhcpOptionDAO")
-  public class DhcpOptionDAO extends DefaultDAOBase<Integer, DhcpOption>
-  {
-      public DhcpOptionDAO()
-      {
-          super(DhcpOption.class);
-      }
+@Repository("jpaDhcpOptionDAO")
+public class DhcpOptionDAO extends DefaultDAOBase<Integer, DhcpOption>
+{
+    public DhcpOptionDAO()
+    {
+        super(DhcpOption.class);
+    }
 
-      public DhcpOptionDAO(EntityManager entityManager)
-      {
-          super(DhcpOption.class, entityManager);
-      }
+    public DhcpOptionDAO(final EntityManager entityManager)
+    {
+        super(DhcpOption.class, entityManager);
+    }
 
-      
-  }
+}

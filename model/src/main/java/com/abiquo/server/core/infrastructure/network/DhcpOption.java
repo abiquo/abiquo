@@ -31,7 +31,7 @@ public class DhcpOption extends DefaultEntityBase
     }
 
     public DhcpOption(final Integer option, final String address, final Integer mask,
-        final String netmask, final String gateway, final String fenceMode)
+        final String netmask, final String gateway)
     {
         setAddress(address);
         setMask(mask);

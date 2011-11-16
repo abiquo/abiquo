@@ -809,4 +809,19 @@ public class InfrastructureRep extends DefaultRepBase
         return this.dhcpOptionDAO.findAll();
     }
 
+    public DhcpOption findDhcpOptionById(final Integer id)
+    {
+        return dhcpOptionDAO.findById(id);
+    }
+
+    public void insertDhcpOption(final DhcpOption opt)
+    {
+        assert opt != null;
+        assert !dhcpOptionDAO.isManaged(opt);
+
+        dhcpOptionDAO.persist(opt);
+        dhcpOptionDAO.flush();
+
+    }
+
 }
