@@ -2,6 +2,35 @@
 <%@ page import="javax.servlet.http.HttpUtils,java.util.Enumeration"%>
 <params>
 
+    <!-- Languages -->
+    <param>
+        <name>languages</name>
+        <value>
+            <languages>
+                <language>
+                    <name>English</name>
+                    <value>en_US</value>
+                </language>
+                <language>
+                    <name>Español</name>
+                    <value>es_ES</value>
+                </language>
+                <language>
+                    <name>日本語</name>
+                    <value>ja_JP</value>
+                </language>
+                <language>
+                    <name>中文</name>
+                    <value>zh_ZH</value>
+                </language>
+                <language>
+                    <name>Português</name>
+                    <value>pt_PT</value>
+                </language>
+            </languages>
+        </value>
+    </param>
+
 <param>
 	<!-- A valid KEY provided by Google is required to run the built in Google Maps API.
 			 To obtain a Google Maps Key please follow this link: http://code.google.com/apis/maps/signup.html -->
