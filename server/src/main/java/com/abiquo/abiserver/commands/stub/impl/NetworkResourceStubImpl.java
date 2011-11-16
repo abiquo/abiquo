@@ -1130,13 +1130,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId,
-        final Boolean onlypublic)
+    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId, final String type)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
         StringBuilder buildRequest = new StringBuilder(createPublicNetworksLink(datacenterId));
-        buildRequest.append("?onlypublic=" + (onlypublic ? "true" : "false"));
+        buildRequest.append("?type=" + type);
 
         ClientResponse response = get(buildRequest.toString());
 

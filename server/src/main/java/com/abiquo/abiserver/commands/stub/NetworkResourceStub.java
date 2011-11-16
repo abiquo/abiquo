@@ -125,7 +125,7 @@ public interface NetworkResourceStub
 
     public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
 
-    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, Boolean onlypublic);
+    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, String type);
 
     public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
 
