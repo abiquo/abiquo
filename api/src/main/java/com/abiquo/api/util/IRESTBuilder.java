@@ -91,6 +91,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPrivilegeLink(final PrivilegeDto privilege);
 
+    public List<RESTLink> buildPrivilegeListLink(PrivilegeDto privilege);
+
     public List<RESTLink> buildEnterpriseLinks(EnterpriseDto enterprise);
 
     public List<RESTLink> buildEnterprisePropertiesLinks(final Integer enterpriseId,
@@ -206,5 +208,4 @@ public interface IRESTBuilder
         PricingTierDto dto);
 
     public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
-
 }

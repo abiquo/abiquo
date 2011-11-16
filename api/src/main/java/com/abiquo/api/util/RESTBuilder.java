@@ -345,6 +345,20 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public List<RESTLink> buildPrivilegeListLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, "privilege", params));
+
+        return links;
+    }
+
+    @Override
     public List<RESTLink> buildRoleLinks(final RoleDto role)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
