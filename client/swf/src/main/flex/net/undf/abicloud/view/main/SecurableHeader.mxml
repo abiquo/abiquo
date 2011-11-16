@@ -126,6 +126,12 @@
 	                userLoggedInfo.addEventListener(MouseEvent.ROLL_OVER,function underline():void{userLoggedInfo.setStyle('textDecoration', 'underline')});
 	                userLoggedInfo.addEventListener(MouseEvent.ROLL_OUT,function underline():void{userLoggedInfo.setStyle('textDecoration', 'none')});
                 }
+                
+                //Allow/deny user to logout
+                if(AbiCloudModel.getInstance().configurationManager.config.client_main_allowLogout.value == 0)
+                {
+                	verticalVbox.removeChild(logoutButton);
+                }
 				
 				var fade:Fade = new Fade();
 				fade.duration = 600;
