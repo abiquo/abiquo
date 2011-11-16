@@ -48,4 +48,15 @@ public interface MachineResourceStub
 
     public BasicResult deletePhysicalMachine(PhysicalMachine machine);
 
+    /**
+     * Returns the list of virtual machines by the machine identifier.
+     * 
+     * @param datacenterId identifier of the datacenter.
+     * @param rackId identifier of the rack.
+     * @param machineId identifier of the machine.
+     * @return a {@link BasicResult} containing a list of Virtual Machines.
+     */
+    public BasicResult getVirtualMachinesFromMachine(final Integer datacenterId,
+        final Integer rackId, final Integer machineId);
+
 }

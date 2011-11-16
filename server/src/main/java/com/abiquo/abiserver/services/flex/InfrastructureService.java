@@ -22,12 +22,10 @@
 package com.abiquo.abiserver.services.flex;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -217,28 +215,7 @@ public class InfrastructureService
     public BasicResult getVirtualMachineByPhysicalMachine(final UserSession session,
         final Integer pmId)
     {
-        InfrastructureCommand command = proxyCommand(session);
-        DataResult<ArrayList<VirtualMachine>> result = new DataResult<ArrayList<VirtualMachine>>();
-        try
-        {
-            List<VirtualmachineHB> commandResult =
-                command.getVirtualMachinesByPhysicalMachine(session, pmId);
-
-            result.setData(new ArrayList<VirtualMachine>());
-            for (VirtualmachineHB singleResult : commandResult)
-            {
-                result.getData().add(singleResult.toPojo());
-            }
-            result.setSuccess(Boolean.TRUE);
-
-        }
-        catch (InfrastructureCommandException e)
-        {
-            result.setSuccess(Boolean.FALSE);
-            result.setMessage(e.getMessage());
-        }
-
-        return result;
+        return proxyMachineStub(session).getVirtualMachinesFromMachine(2, 2, pmId);
     }
 
     /**

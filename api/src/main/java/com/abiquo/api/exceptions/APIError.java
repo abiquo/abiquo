@@ -334,7 +334,8 @@ public enum APIError
         "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION(
         "NC-6",
         "Hypervisor information could not be discovered or retrieved. This error may be caused by misconfiguration of the platform or an error in the data provided. Please see the Event Log for more detail"), NC_UNAVAILABLE_EXCEPTION(
-        "NC-7", "The discovery manager currently is not available"),
+        "NC-7", "The discovery manager currently is not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
+        "NC-8", "The requested virtual machine not found in the remote hypervisor"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(

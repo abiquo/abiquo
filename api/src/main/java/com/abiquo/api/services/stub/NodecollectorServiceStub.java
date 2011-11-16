@@ -389,7 +389,72 @@ public class NodecollectorServiceStub extends DefaultApiService
         catch (UnprovisionedException e)
         {
             logger.debug(e.getMessage());
-            addConflictErrors(APIError.NC_NOT_FOUND_EXCEPTION);
+            addConflictErrors(APIError.NC_VIRTUAL_MACHINE_NOT_FOUND);
+        }
+        catch (CollectorException e)
+        {
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (CannotExecuteException e)
+        {
+            addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
+            flushErrors();
+        }
+
+        flushErrors();
+
+        return null;
+    }
+
+    /**
+     * Queries for a single virtual machine to the nodecollector based on its name.
+     * 
+     * @param nodecollector nodecollector remote service to call.
+     * @param hypervisorIp ip to the remote physical machine
+     * @param hypervisorType kind of hypervisor running
+     * @param user user to log in into the remote hypervisor.
+     * @param password password to authenticate to the remote hypervisor.
+     * @param aimport port to connect (libvirt based hypervisors only)
+     * @param name name of the virtual machine we look for.
+     * @return a {@link VirtualMachine} object with the requested machine.
+     */
+    public VirtualMachine getRemoteVirtualMachineByName(final RemoteService nodecollector,
+        final String hypervisorIp, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport, final String name)
+    {
+        NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
+
+        try
+        {
+            VirtualSystemDto vs =
+                restCli.getRemoteVirtualSystemByName(name, hypervisorIp, hypervisorType, user,
+                    password, aimport);
+
+            VirtualMachine vm = transportVSToVM(vs);
+
+            return vm;
+        }
+        catch (BadRequestException e)
+        {
+            // InternalServerError -> A Bad Request NEVER should be thrown from here.
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (LoginException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
+        }
+        catch (ConnectionException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_CONNECTION_EXCEPTION);
+        }
+        catch (UnprovisionedException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_VIRTUAL_MACHINE_NOT_FOUND);
         }
         catch (CollectorException e)
         {
