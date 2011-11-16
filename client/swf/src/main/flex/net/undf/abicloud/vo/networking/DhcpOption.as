@@ -21,44 +21,31 @@
 
 package net.undf.abicloud.vo.networking
 {
-	import mx.collections.ArrayCollection;
-	
-	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
-	
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.networking.VlanNetwork")]
+    import mx.collections.ArrayCollection;
+
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.networking.DhcpOption")]
     [Bindable]
-    public class VlanNetwork
+    public class DhcpOption
     {
+        public var id:int;
         
-        //CONST
-        public static const INTERNAL:String = "INTERNAL";
+        public var gateway:String;
         
-        public static const EXTERNAL:String = "EXTERNAL";
-        
-        public static const PUBLIC:String = "PUBLIC";
-        
-        
-        public var vlanNetworkId:int;
+        public var networkAddress:String;
+	    
+	    public var mask:int;
+	    
+	    public var netmask:String;
 
-        public var networkId:int;
-
-        public var defaultNetwork:Boolean;
-
-        public var networkName:String;
-
-        public var vlanTag:int;
-
-        public var configuration:NetworkConfiguration;
-        
-        public var networkType:String;
-        
-        public var virtualDatacenter:VirtualDataCenter;
-        
-        public var dhcpOptions:ArrayCollection;
-
-        public function VlanNetwork()
+        public function DhcpOption()
         {
+            id = 0;
+	        gateway = '';
+	        networkAddress = '';
+	        mask = 0;
+	        netmask = '';
         }
+
     }
 }
