@@ -91,7 +91,7 @@
 	                hyperTypeInput.selectedIndex = -1;
 	                hyperTypeInput.dataProvider = null;
 	                defaultPrivateNetworkRadioButton.selected = true;
-	                privateNetworkForm.init("default_network");
+	                privateNetworkForm.init("default_private_network");
                 }              
                 
 
@@ -192,7 +192,7 @@
             {
                 if (privateNetworkInput.selectedValue == "default")
                 {
-                    privateNetworkForm.init("default_network");
+                    privateNetworkForm.init("default_private_network");
                 }
             }
 
