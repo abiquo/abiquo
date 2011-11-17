@@ -179,25 +179,25 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {
-
         final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
 
         try
         {
             updateUsageDatastore(virtualMachine, true);
-
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
             virtualMachine.setState(State.NOT_DEPLOYED);
+            virtualMachine.setHypervisor(null);
+            virtualMachine.setDatastore(null);
+            virtualMachine.setVdrpIP(null);
+            virtualMachine.setVdrpPort(0);
+
             vmachineDao.flush();
         }
-        catch (final Exception e) // HibernateException NotEnoughResourcesException
-        // NoSuchObjectException
+        catch (final Exception e)
         {
-            throw new ResourceUpgradeUseException("Can not update resource utilization"
-                + e.getMessage());
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
     }
 
@@ -389,7 +389,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         if (virtual.getVirtualImage().getStateful() == 1)
         {
-            // statefull images doesn't update the datastore utilization.
+            // Stateful images doesn't update the datastore utilization.
             return;
         }
 
