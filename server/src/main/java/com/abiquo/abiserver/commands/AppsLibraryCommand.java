@@ -21,9 +21,6 @@
 
 package com.abiquo.abiserver.commands;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 
 /**
  * This command collects all actions related to Virtual Images
@@ -32,17 +29,5 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
  */
 public interface AppsLibraryCommand
 {
-
-<<<<<<< HEAD
-    List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
-=======
-    /** Virtual images */
-
-    Void editVirtualImage(UserSession userSession, VirtualimageHB vimage)
-        throws AppsLibraryCommandException;
-
-    Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
-        throws AppsLibraryCommandException;
->>>>>>> e124349... getDiskFormatTypes is now used in AppsLibraryService. Deleted from AppsLibraryCommand.
 
 }
