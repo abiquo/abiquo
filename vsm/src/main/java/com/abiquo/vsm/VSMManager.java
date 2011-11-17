@@ -134,7 +134,7 @@ public class VSMManager
         }
     }
 
-    private boolean isRabbitMQRunning()
+    public boolean isRabbitMQRunning()
     {
         try
         {
@@ -146,7 +146,7 @@ public class VSMManager
         }
     }
 
-    private boolean isRedisRunning()
+    public boolean isRedisRunning()
     {
         return RedisUtils.ping(redisHost, redisPort);
     }
@@ -194,7 +194,7 @@ public class VSMManager
             // RabbitMQ could be down
             if (!isRabbitMQRunning())
             {
-                logger.error("VSM can not ping RabbitMQ check if RabbitMQ is up and reset VSM.");
+                logger.error("VSM can not ping RabbitMQ check if RabbitMQ is up and restart VSM.");
                 initialized = false;
             }
 

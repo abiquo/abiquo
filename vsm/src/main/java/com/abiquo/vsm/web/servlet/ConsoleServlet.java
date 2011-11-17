@@ -38,13 +38,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
-import com.abiquo.commons.amqp.util.RabbitMQUtils;
 import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
 import com.abiquo.vsm.redis.dao.RedisDaoFactory;
-import com.abiquo.vsm.redis.util.RedisUtils;
 
 public class ConsoleServlet extends HttpServlet
 {
@@ -80,20 +78,8 @@ public class ConsoleServlet extends HttpServlet
         // Publish check status
         Map<String, Boolean> checks = new LinkedHashMap<String, Boolean>();
         checks.put("VSM check result", vsmManager.checkSystem());
-        checks.put("Redis listening", RedisUtils.ping(redisHost, redisPort));
-
-        boolean rabbitMQRunning = false;
-
-        try
-        {
-            rabbitMQRunning = RabbitMQUtils.pingRabbitMQ();
-        }
-        catch (Exception e)
-        {
-            rabbitMQRunning = false;
-        }
-
-        checks.put("RabbitMQ listening", rabbitMQRunning);
+        checks.put("Redis listening", vsmManager.isRedisRunning());
+        checks.put("RabbitMQ listening", vsmManager.isRabbitMQRunning());
 
         request.setAttribute("checks", checks);
 
