@@ -79,7 +79,8 @@ public @interface StringMap
                 return true;
             }
 
-            boolean valid = validKeys(value.keySet()) && validValues(value.values());
+            boolean valid =
+                value != null && validKeys(value.keySet()) && validValues(value.values());
 
             if (!valid)
             {
