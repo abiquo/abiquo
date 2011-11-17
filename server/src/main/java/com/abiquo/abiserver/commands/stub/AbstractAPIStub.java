@@ -703,19 +703,34 @@ public class AbstractAPIStub
                 + "actions/repositoryUninstall", params);
     }
 
+    protected String createDiskFormatTypeLink(final Integer diskFormatTypeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("diskformattype", valueOf(diskFormatTypeId));
+
+        return resolveURI(apiUri, "config/diskformattypes/{diskformattype}", params);
+    }
+
+    protected String createDiskFormatTypesLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/diskformattypes", params);
+    }
+
     protected String createIconLink(final Integer iconId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("icon", valueOf(iconId));
 
-        return resolveURI(apiUri, "admin/config/icons/{icon}", params);
+        return resolveURI(apiUri, "icons/{icon}", params);
     }
 
     protected String createIconsLink()
     {
         Map<String, String> params = new HashMap<String, String>();
 
-        return resolveURI(apiUri, "admin/config/icons", params);
+        return resolveURI(apiUri, "config/icons", params);
     }
 
     protected String createCategoryLink(final Integer categoryId)

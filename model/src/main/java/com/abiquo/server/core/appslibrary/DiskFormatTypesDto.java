@@ -19,30 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.commands;
+package com.abiquo.server.core.appslibrary;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
+import java.util.List;
 
-/**
- * This command collects all actions related to Virtual Images
- * 
- * @author apuig
- */
-public interface AppsLibraryCommand
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "diskformattypes")
+public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 717145703461179229L;
 
-<<<<<<< HEAD
-    List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
-=======
-    /** Virtual images */
-
-    Void editVirtualImage(UserSession userSession, VirtualimageHB vimage)
-        throws AppsLibraryCommandException;
-
-    Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
-        throws AppsLibraryCommandException;
->>>>>>> e124349... getDiskFormatTypes is now used in AppsLibraryService. Deleted from AppsLibraryCommand.
+    @Override
+    @XmlElement(name = "diskformattype")
+    public List<DiskFormatTypeDto> getCollection()
+    {
+        return collection;
+    }
 
 }

@@ -52,6 +52,8 @@ import com.abiquo.api.resources.appslibrary.CategoriesResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
+import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
@@ -973,6 +975,21 @@ public class UriTestResolver
     public static String resolveCategoriesURI()
     {
         String uri = resolveURI(CategoriesResource.CATEGORIES_PATH, new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveDiskFormatTypesURI()
+    {
+        String uri =
+            resolveURI(DiskFormatTypesResource.DISK_FORMAT_TYPES_PATH,
+                new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveHypervisorTypesURI()
+    {
+        String uri =
+            resolveURI(HypervisorTypesResource.HYPERVISOR_TYPES_PATH, new HashMap<String, String>());
         return uri;
     }
 

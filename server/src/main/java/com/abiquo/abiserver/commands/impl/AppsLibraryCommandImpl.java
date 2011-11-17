@@ -20,7 +20,6 @@
  */
 package com.abiquo.abiserver.commands.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,24 +49,6 @@ public class AppsLibraryCommandImpl extends BasicCommand implements AppsLibraryC
      */
 
     protected AppsLibraryRecovery recovery = new AppsLibraryRecovery();
-
-    @Override
-    public List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> getDiskFormatTypes(
-        final UserSession userSession)
-    {
-        /**
-         * TODO DiskFormatType API Resource
-         */
-        List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> diskFormats =
-            new ArrayList<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>();
-
-        for (DiskFormatType type : DiskFormatType.values())
-        {
-            diskFormats.add(new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(type));
-        }
-
-        return diskFormats;
-    }
 
     private void assignDefaultCategoryToVirtualImagesWithCategory(final Integer idCategory)
         throws AppsLibraryCommandException

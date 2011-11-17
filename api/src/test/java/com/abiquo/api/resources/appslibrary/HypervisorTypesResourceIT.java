@@ -19,30 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.commands;
+package com.abiquo.api.resources.appslibrary;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
+import static com.abiquo.api.common.UriTestResolver.resolveHypervisorTypesURI;
+import static org.testng.Assert.assertEquals;
 
-/**
- * This command collects all actions related to Virtual Images
- * 
- * @author apuig
- */
-public interface AppsLibraryCommand
+import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.Test;
+
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.HypervisorTypesDto;
+
+public class HypervisorTypesResourceIT extends AbstractJpaGeneratorIT
 {
+    @Test
+    public void getHypervisorTypes() throws Exception
+    {
+        String hypervisorTypesURI = resolveHypervisorTypesURI();
+        ClientResponse response = get(hypervisorTypesURI);
 
-<<<<<<< HEAD
-    List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
-=======
-    /** Virtual images */
-
-    Void editVirtualImage(UserSession userSession, VirtualimageHB vimage)
-        throws AppsLibraryCommandException;
-
-    Void deleteVirtualImage(UserSession userSession, Integer idVirtualImage)
-        throws AppsLibraryCommandException;
->>>>>>> e124349... getDiskFormatTypes is now used in AppsLibraryService. Deleted from AppsLibraryCommand.
+        HypervisorTypesDto dtos = response.getEntity(HypervisorTypesDto.class);
+        assertEquals(dtos.getCollection().size(), HypervisorType.getIdMax());
+    }
 
 }
