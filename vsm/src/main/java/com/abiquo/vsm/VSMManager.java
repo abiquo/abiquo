@@ -136,7 +136,14 @@ public class VSMManager
 
     private boolean isRabbitMQRunning()
     {
-        return RabbitMQUtils.pingRabbitMQ();
+        try
+        {
+            return RabbitMQUtils.pingRabbitMQ();
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     private boolean isRedisRunning()
@@ -187,7 +194,7 @@ public class VSMManager
             // RabbitMQ could be down
             if (!isRabbitMQRunning())
             {
-                logger.error("RabbitMQ is not listening. VSM is not properly initialized.");
+                logger.error("VSM can not ping RabbitMQ check if RabbitMQ is up and reset VSM.");
                 initialized = false;
             }
 

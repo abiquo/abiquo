@@ -81,7 +81,19 @@ public class ConsoleServlet extends HttpServlet
         Map<String, Boolean> checks = new LinkedHashMap<String, Boolean>();
         checks.put("VSM check result", vsmManager.checkSystem());
         checks.put("Redis listening", RedisUtils.ping(redisHost, redisPort));
-        checks.put("RabbitMQ listening", RabbitMQUtils.pingRabbitMQ());
+
+        boolean rabbitMQRunning = false;
+
+        try
+        {
+            rabbitMQRunning = RabbitMQUtils.pingRabbitMQ();
+        }
+        catch (Exception e)
+        {
+            rabbitMQRunning = false;
+        }
+
+        checks.put("RabbitMQ listening", rabbitMQRunning);
 
         request.setAttribute("checks", checks);
 
