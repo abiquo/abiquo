@@ -19,7 +19,8 @@
         <hypervisor>
             <address><c:out value="${pm.address}" /></address>
             <type><c:out value="${pm.type}" /></type>
-            <cache><c:forEach items="${pm.virtualMachines.cache}" var="cached"><entry><c:out value="${cached}" /></entry>
+            <cache><c:forEach items="${pm.virtualMachines.cache}" var="cached">
+                <entry><c:out value="${cached}" /></entry>
             </c:forEach></cache>
         </hypervisor></c:forEach>
     </hypervisors>
