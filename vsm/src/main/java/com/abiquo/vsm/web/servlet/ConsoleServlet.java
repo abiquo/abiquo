@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,34 +111,52 @@ public class ConsoleServlet extends HttpServlet
             request.setAttribute("vms", vms);
 
             // Duplicate VMs information
-            Map<String, List<String>> duplicates = new HashMap<String, List<String>>();
-            Set<String> allCaches = new HashSet<String>();
+            Map<String, Set<String>> hypervisorsByCacheEntry = new HashMap<String, Set<String>>();
+            Set<String> indexForDuplicates = new HashSet<String>();
+
             for (PhysicalMachine pm : pms)
             {
-                for (String cache : pm.getVirtualMachines().getCache())
+                for (String vm : pm.getVirtualMachines().getCache())
                 {
-                    if (!allCaches.contains(cache))
+                    if (hypervisorsByCacheEntry.containsKey(vm))
                     {
-                        allCaches.add(cache);
+                        indexForDuplicates.add(vm);
                     }
                     else
                     {
-                        // Add duplicate
-                        List<String> vmDuplicates = duplicates.get(cache);
-                        if (vmDuplicates == null)
-                        {
-                            vmDuplicates = new LinkedList<String>();
-                        }
-                        vmDuplicates.add(pm.getAddress());
-                        duplicates.put(cache, vmDuplicates);
+                        hypervisorsByCacheEntry.put(vm, new HashSet<String>());
                     }
+
+                    hypervisorsByCacheEntry.get(vm).add(pm.getAddress());
                 }
+            }
+
+            Map<String, Set<String>> duplicates = new HashMap<String, Set<String>>();
+
+            for (String index : indexForDuplicates)
+            {
+                duplicates.put(index, hypervisorsByCacheEntry.get(index));
             }
 
             request.setAttribute("duplicates", duplicates);
         }
 
-        getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);
+        String format = "html";
+
+        if (request.getParameterMap().containsKey("format"))
+        {
+            format = request.getParameter("format");
+        }
+
+        if (format.equalsIgnoreCase("xml"))
+        {
+            getServletContext().getRequestDispatcher("/jsp/console_xml.jsp").forward(request,
+                response);
+        }
+        else
+        {
+            getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);
+        }
     }
 
     @Override
