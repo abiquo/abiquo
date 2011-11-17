@@ -37,7 +37,6 @@ import org.testng.annotations.Test;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.OVFPackage;
@@ -101,7 +100,7 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(enterprise);
+        // entitiesToSetup.add(enterprise);
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);

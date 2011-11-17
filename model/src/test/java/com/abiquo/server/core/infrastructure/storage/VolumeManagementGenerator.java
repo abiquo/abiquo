@@ -105,6 +105,16 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         return createInstance(pool, vdc);
     }
 
+    public VolumeManagement createInstance(final StoragePool pool, final VirtualDatacenter vdc,
+        final String idIscsi)
+    {
+        String name =
+            newString(nextSeed(), Rasd.ELEMENT_NAME_LENGTH_MIN, Rasd.ELEMENT_NAME_LENGTH_MAX);
+        String uuid = UUID.randomUUID().toString();
+        long sizeInMB = nextSeed();
+        return new VolumeManagement(uuid, name, sizeInMB, idIscsi, pool, vdc);
+    }
+
     public VolumeManagement createInstance(final StoragePool pool, final VirtualDatacenter vdc)
     {
         String name =

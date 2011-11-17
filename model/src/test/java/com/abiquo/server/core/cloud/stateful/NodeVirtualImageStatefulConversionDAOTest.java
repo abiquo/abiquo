@@ -21,12 +21,19 @@
 
 package com.abiquo.server.core.cloud.stateful;
 
+import java.util.Collection;
+
 import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -65,4 +72,47 @@ public class NodeVirtualImageStatefulConversionDAOTest extends
         return (NodeVirtualImageStatefulConversionGenerator) super.eg();
     }
 
+    @Test
+    public void test_findNodeVirtualImageStatefulConversionsByVirtualAppliance()
+    {
+        NodeVirtualImageStatefulConversion nvisc = eg().createUniqueInstance();
+
+        // linking same entities (dc, ent, vapp)
+        VirtualApplianceStatefulConversion vasc = nvisc.getVirtualApplianceStatefulConversion();
+        Enterprise ent = vasc.getVirtualAppliance().getVirtualDatacenter().getEnterprise();
+        Datacenter dc = vasc.getVirtualAppliance().getVirtualDatacenter().getDatacenter();
+        VirtualImage vi = nvisc.getNodeVirtualImage().getVirtualImage();
+        VirtualMachine vm = nvisc.getNodeVirtualImage().getVirtualMachine();
+
+        vasc.getUser().setEnterprise(ent);
+        vi.setEnterprise(ent);
+        vm.setEnterprise(ent);
+        vasc.getUser().getRole().setEnterprise(ent);
+
+        nvisc.getTier().setDatacenter(dc);
+        vi.getRepository().setDatacenter(dc);
+
+        nvisc.getNodeVirtualImage().setVirtualAppliance(vasc.getVirtualAppliance());
+
+        vm.getHypervisor().getMachine().getRack().setDatacenter(dc);
+        vm.getHypervisor().getMachine().setDatacenter(dc);
+        vm.setUser(vasc.getUser());
+        vasc.getUser().getRole().setPrivileges(null);
+
+        // persist
+        ds().persistAll(dc, ent, vasc.getVirtualAppliance().getVirtualDatacenter(),
+            vasc.getVirtualAppliance(), vasc.getUser().getRole(), vasc.getUser(), vasc,
+            vi.getCategory(), vi.getRepository(), vi, vm.getHypervisor().getMachine().getRack(),
+            vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvisc.getNodeVirtualImage(),
+            nvisc.getTier(), nvisc);
+
+        NodeVirtualImageStatefulConversionDAO dao = createDaoForRollbackTransaction();
+
+        Collection<NodeVirtualImageStatefulConversion> list =
+            dao.findByVirtualAppliance(vasc.getVirtualAppliance());
+
+        assertTrue(!list.isEmpty());
+        assertSize(list, 1);
+        assertEquals(list.iterator().next().getId(), nvisc.getId());
+    }
 }
