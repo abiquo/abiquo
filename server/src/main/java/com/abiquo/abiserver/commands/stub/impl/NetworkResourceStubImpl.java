@@ -27,7 +27,9 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -40,6 +42,7 @@ import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
@@ -55,6 +58,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.NicDto;
@@ -91,7 +96,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setNetworkId(dto.getId());
         newNet.setNetworkType(dto.getType().toString());
         newNet.setDefaultNetwork(dto.getDefaultNetwork());
-
+        Set<DhcpOption> dhcpOptions = new HashSet<DhcpOption>();
+        for (DhcpOptionDto opt : dto.getDhcpOptions().getCollection())
+        {
+            dhcpOptions.add(DhcpOption.create(opt));
+        }
+        newNet.setDhcpOptions(dhcpOptions);
         return newNet;
     }
 
@@ -181,7 +191,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     @Override
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
-        final Integer vlanTag, final NetworkConfiguration configuration, final Enterprise enterprise)
+        final Integer vlanTag, final NetworkConfiguration configuration,
+        final Enterprise enterprise, final Set<DhcpOption> dhcpOptions)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
@@ -196,6 +207,21 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setSufixDNS(configuration.getSufixDNS());
         dto.setTag(vlanTag);
 
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+
+            dtoOpt.setOption(121);
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+
+            options.add(dtoOpt);
+        }
+
+        dto.setDhcpOptions(options);
         if (enterprise != null)
         {
             // It is an External network.

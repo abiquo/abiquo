@@ -32,7 +32,7 @@ public class DhcpOptionGenerator extends DefaultEntityGenerator<DhcpOption>
         String netmask = "255.255.255.0";
         Integer option = 121;
 
-        DhcpOption dhcpOption = new DhcpOption(option, address, mask, netmask, gateway);
+        DhcpOption dhcpOption = new DhcpOption(option, gateway, address, mask, netmask);
 
         return dhcpOption;
     }

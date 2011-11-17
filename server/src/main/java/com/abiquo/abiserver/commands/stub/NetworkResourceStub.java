@@ -25,10 +25,12 @@
 package com.abiquo.abiserver.commands.stub;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -47,7 +49,7 @@ public interface NetworkResourceStub
     public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
-        NetworkConfiguration configuration, Enterprise enterprise);
+        NetworkConfiguration configuration, Enterprise enterprise, Set<DhcpOption> dhcpOptions);
 
     public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
 

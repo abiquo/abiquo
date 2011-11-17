@@ -106,6 +106,7 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
         dhcpOptionHB.setNetmask(netmask);
         dhcpOptionHB.setNetworkAddress(networkAddress);
         dhcpOptionHB.setOption(option);
+        dhcpOptionHB.setGateway(gateway);
 
         return dhcpOptionHB;
     }
@@ -118,6 +119,7 @@ public class DhcpOption implements IPojo<DhcpOptionHB>
         dhcpOption.setNetmask(dto.getNetmask());
         dhcpOption.setNetworkAddress(dto.getNetworkAddress());
         dhcpOption.setOption(dto.getOption());
+        dhcpOption.setGateway(dto.getGateway());
 
         return dhcpOption;
     }

@@ -8,7 +8,7 @@
             <generator class="identity" />
         </id>
         <property name="option" type="java.lang.Integer">
-            <column name="option" />
+            <column name="dhcp_opt" />
         </property>
         <property name="gateway" type="string">
             <column length="40" name="gateway" />

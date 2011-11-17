@@ -47,7 +47,6 @@ import org.hibernate.validator.constraints.Length;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
-import com.abiquo.server.core.enterprise.Privilege;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -274,7 +273,7 @@ public class VLANNetwork extends DefaultEntityBase
 
     public final static String ASSOCIATION_TABLE = "vlans_dhcpOption";
 
-    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Privilege.class, cascade = CascadeType.DETACH)
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = DhcpOption.class, cascade = CascadeType.DETACH)
     @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idVlan"), inverseJoinColumns = @JoinColumn(name = "idDhcpOption"))
     private List<DhcpOption> dhcpOptions = new ArrayList<DhcpOption>();
 

@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
@@ -39,6 +42,7 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -153,6 +157,18 @@ public class PrivateNetworkResource extends AbstractResource
         vlan.getConfiguration().setPrimaryDNS(dto.getPrimaryDNS());
         vlan.getConfiguration().setSecondaryDNS(dto.getSecondaryDNS());
         vlan.getConfiguration().setSufixDNS(dto.getSufixDNS());
+        List<DhcpOption> opts = new ArrayList<DhcpOption>();
+        for (DhcpOptionDto dtoOpt : dto.getDhcpOptions().getCollection())
+        {
+            DhcpOption opt =
+                new DhcpOption(dtoOpt.getOption(),
+                    dtoOpt.getGateway(),
+                    dtoOpt.getNetworkAddress(),
+                    dtoOpt.getMask(),
+                    dtoOpt.getNetmask());
+            opts.add(opt);
+        }
+        vlan.setDhcpOption(opts);
 
         return vlan;
     }

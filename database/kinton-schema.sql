@@ -1799,7 +1799,7 @@ CREATE TABLE  `kinton`.`license` (
 --
 CREATE TABLE `kinton`.`dhcpOption` (
   `idDhcpOption` int(10) unsigned NOT NULL AUTO_INCREMENT ,
-  `option` int(20) NOT NULL ,
+  `dhcp_opt` int(20) NOT NULL ,
    `gateway` varchar(40),
   `network_address` varchar(40) NOT NULL,
   `mask` int(4) NOT NULL,

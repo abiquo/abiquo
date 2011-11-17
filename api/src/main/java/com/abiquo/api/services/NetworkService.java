@@ -1413,14 +1413,15 @@ public class NetworkService extends DefaultApiService
         return option;
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public DhcpOption addDhcpOption(final DhcpOptionDto dto)
     {
         DhcpOption opt =
             new DhcpOption(dto.getOption(),
+                dto.getGateway(),
                 dto.getNetworkAddress(),
                 dto.getMask(),
-                dto.getNetmask(),
-                dto.getGateway());
+                dto.getNetmask());
 
         if (!opt.isValid())
         {
