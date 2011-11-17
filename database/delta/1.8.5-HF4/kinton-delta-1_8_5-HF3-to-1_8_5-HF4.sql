@@ -22,6 +22,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 
 ALTER TABLE `kinton`.`physicalmachine` MODIFY COLUMN `vswitchName` varchar(200) NOT NULL;
 
+UPDATE `kinton`.`virtualmachine` SET vdrpIP = NULL, vdrpPort = 0 WHERE state = 'NOT_DEPLOYED';
+
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --
 -- ---------------------------------------------- --
