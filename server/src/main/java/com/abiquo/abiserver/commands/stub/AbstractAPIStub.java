@@ -1149,4 +1149,10 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
+
+    protected String createDhcpOptionLink(final int id)
+    {
+        return URIResolver.resolveURI(apiUri, "admin/dhcpoptions/{dhcpoption}",
+            Collections.singletonMap("dhcpoption", valueOf(id)));
+    }
 }

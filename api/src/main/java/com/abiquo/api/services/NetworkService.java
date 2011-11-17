@@ -21,8 +21,6 @@
 
 package com.abiquo.api.services;
 
-import static com.abiquo.api.util.URIResolver.buildPath;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -1441,7 +1439,7 @@ public class NetworkService extends DefaultApiService
             if (rsl.getRel().contains(DhcpOptionResource.DHCP_OPTION))
             {
                 String buildPath =
-                    buildPath(DhcpOptionsResource.DHCP_OPTIONS_PATH,
+                    URIResolver.buildPath(DhcpOptionsResource.DHCP_OPTIONS_PATH,
                         DhcpOptionResource.DHCP_OPTION_PARAM);
                 MultivaluedMap<String, String> values =
                     URIResolver.resolveFromURI(buildPath, rsl.getHref());

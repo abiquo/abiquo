@@ -212,13 +212,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         {
             DhcpOptionDto dtoOpt = new DhcpOptionDto();
 
-            dtoOpt.setOption(121);
             dtoOpt.setGateway(opt.getGateway());
             dtoOpt.setNetworkAddress(opt.getNetworkAddress());
             dtoOpt.setMask(opt.getMask());
             dtoOpt.setNetmask(opt.getNetmask());
-
             options.add(dtoOpt);
+
         }
 
         dto.setDhcpOptions(options);
@@ -349,7 +348,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult editPublicVlan(final Integer datacenterId, final Integer vlanNetworkId,
         final String vlanName, final Integer vlanTag, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork, final Enterprise enterprise)
+        final Boolean defaultNetwork, final Enterprise enterprise, final Set<DhcpOption> dhcpOptions)
     {
         BasicResult result = new BasicResult();
         String uri = createPublicNetworkLink(datacenterId, vlanNetworkId);
@@ -373,6 +372,25 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             entLink.setHref(createEnterpriseLink(enterprise.getId()));
             dto.addLink(entLink);
         }
+
+        // for (DhcpOption opt : dhcpOptions)
+        // {
+        // dto.addLink(new RESTLink("dhcpoption", createDhcpOptionLink(opt.getId())));
+        // }
+
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        dto.setDhcpOptions(options);
 
         ClientResponse response = put(uri, dto);
         if (response.getStatusCode() == 200)

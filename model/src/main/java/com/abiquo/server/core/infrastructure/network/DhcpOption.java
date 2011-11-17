@@ -1,9 +1,16 @@
 package com.abiquo.server.core.infrastructure.network;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -191,4 +198,9 @@ public class DhcpOption extends DefaultEntityBase
         this.netmask = netmask;
     }
 
+    public final static String ASSOCIATION_TABLE = "vlans_dhcpOption";
+
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = VLANNetwork.class, cascade = CascadeType.DETACH)
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idDhcpOption"), inverseJoinColumns = @JoinColumn(name = "idVlan"))
+    private List<DhcpOption> dhcpOptions;
 }

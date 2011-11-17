@@ -65,7 +65,7 @@ public interface NetworkResourceStub
 
     public BasicResult editPublicVlan(Integer datacenterId, Integer vlanNetworkId, String vlanName,
         Integer vlanTag, NetworkConfiguration configuration, Boolean defaultNetwork,
-        Enterprise enterprise);
+        Enterprise enterprise, Set<DhcpOption> dhcpOptions);
 
     public BasicResult getEnterpriseFromReservedVlanId(Integer datacenterId, Integer vlanId);
 

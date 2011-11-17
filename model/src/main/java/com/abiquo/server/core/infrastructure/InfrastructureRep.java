@@ -818,10 +818,19 @@ public class InfrastructureRep extends DefaultRepBase
     {
         assert opt != null;
         assert !dhcpOptionDAO.isManaged(opt);
-
         dhcpOptionDAO.persist(opt);
         dhcpOptionDAO.flush();
 
+    }
+
+    public void deleteAllDhcpOption(final Collection<DhcpOption> dhcpOption)
+    {
+        for (DhcpOption opt : dhcpOption)
+        {
+            this.dhcpOptionDAO.remove(opt);
+
+        }
+        this.dhcpOptionDAO.flush();
     }
 
 }
