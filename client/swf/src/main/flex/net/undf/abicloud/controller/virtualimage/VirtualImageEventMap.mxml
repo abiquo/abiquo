@@ -93,7 +93,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getDatacenterRepository"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.datacenter.id, event.enterprise.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.datacenter.id, 
+            event.enterprise.id,
+            event.refresh]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
