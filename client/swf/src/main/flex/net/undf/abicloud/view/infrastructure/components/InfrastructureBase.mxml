@@ -650,6 +650,7 @@
         title="@Resource(bundle='Infrastructure', key='LABEL_VM_UPPERCASE')">
 
         <virtualmachine:VirtualMachineList id="virtualMachineList"
+        	hypervisor="{physicalMachineRenderer.hypervisor}"
             width="100%" height="100%"
             label="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_VM_UPPERCASE')}"
             virtualMachineSelected="showVirtualMachine()"/>
@@ -681,6 +682,7 @@
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                 	type="INFRASTRUCTURE"
                 	physicalMachine="{this._physicalMachine}"
+                	hypervisor="{physicalMachineRenderer.hypervisor}"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
              

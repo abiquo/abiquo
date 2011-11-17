@@ -33,6 +33,11 @@
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml"
     xmlns:utils="net.undf.abicloud.utils.*">
+    
+    
+    <mx:Metadata>
+        [Event(name="hypervisorUpdated", type="flash.events.Event")]
+    </mx:Metadata>
 
     <mx:Script>
         <![CDATA[
@@ -83,6 +88,11 @@
             
             [Bindable]
             private var _hypervisor:HyperVisor;
+            
+            public function get hypervisor():HyperVisor
+            {
+            	return this._hypervisor;
+            }
 
             public function set physicalMachine(value:PhysicalMachine):void
             {
@@ -131,6 +141,7 @@
                 {                   
                     this._hypervisor = hypervisor;
                     this._hypervisorName = HyperVisorType.HYPERVISOR_NAMES[this._hypervisor.type.id];
+                    dispatchEvent(new Event("hypervisorUpdated"));
                 }
             }
 

@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import net.undf.abicloud.view.main.StateIcons;
@@ -69,11 +70,26 @@
             
             [Bindable]
             private var _vncIconEnable:Boolean;
+            
+            private var _hypervisor:HyperVisor;
+            
+            public function get hypervisor():HyperVisor
+            {
+            	return this._hypervisor
+            }
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+                this._hypervisor = value;
+                this._virtualMachine.assignedTo = this._hypervisor;
+            }
 
 
             override public function set data(value:Object):void
             {
                 super.data = value;
+                
+                BindingUtils.bindProperty(VirtualMachineList(parentDocument),"hypervisor",this,"hypervisor");
 
                 if (value && value is VirtualMachine){
                     virtualMachine = data as VirtualMachine;
