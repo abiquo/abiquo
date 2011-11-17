@@ -29,6 +29,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import mx.core.Application;
+        	import mx.managers.PopUpManager;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
         	import net.undf.abicloud.model.AbiCloudModel;
             import mx.utils.ObjectUtil;
@@ -38,6 +41,12 @@
             import net.undf.abicloud.vo.networking.Network;
             import net.undf.abicloud.vo.networking.NetworkConfiguration;
             import net.undf.abicloud.vo.networking.VlanNetwork;
+            
+            private static const netmasksCIDR:Object = { "255.0.0.0": 8, "255.128.0.0": 9, "255.192.0.0": 10, "255.224.0.0": 11, "255.240.0.0": 12,
+                    "255.248.0.0": 13, "255.252.0.0": 14, "255.254.0.0": 15, "255.255.0.0": 16, "255.255.128.0": 17, "255.255.192.0": 18, "255.255.224.0": 19,
+                    "255.255.240.0": 20, "255.255.248.0": 21, "255.255.252.0": 22, "255.255.254.0": 23, "255.255.255.0": 24, "255.255.255.128": 25,
+                    "255.255.255.192": 26, "255.255.255.224": 27, "255.255.255.240": 28, "255.255.255.248": 29, "255.255.255.252": 30, "255.255.255.254": 31,
+                    "255.255.255.255": 32 };
 
             //The VlanNetwork to edit
             [Bindable]
@@ -50,6 +59,13 @@
 
             [Bindable]
             private var _isFormValid:Boolean;
+            
+            //Static Rules for DHCP options
+            [Bindable]
+            private var _staticRules:StaticRulesForm;
+            
+            [Bindable]
+            private var netmaskDP:ArrayCollection;
 
             public function init(virtualDatacenter:VirtualDataCenter, vlanNetwork:VlanNetwork):void
             {
@@ -74,6 +90,11 @@
                 
                 //To close the form if the vlan is edited
                 AbiCloudModel.getInstance().networkingManager.addEventListener('vlanUpdated',closeForm);
+                
+                getAvailableNetmasks();
+                
+                this._staticRules = new StaticRulesForm();
+                this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
             }
 
             private function validateForm():void
@@ -95,6 +116,7 @@
                 	event = new NetworkingEvent(NetworkingEvent.SET_DEFAULT_VLAN);
                 }else{
                 	event = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
+                	event.staticRules = this._staticRules.staticRules;
                 }
                 
                 event.virtualDatacenter = _virtualDatacenter;
@@ -135,6 +157,38 @@
                     if (keyboardEvent.keyCode == 13 && acceptButton.enabled)
                         onAccept();
                 }
+            }
+            
+            private function getAvailableNetmasks():void
+            {
+                var networkingEvent:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_NETMASKS_BY_NETWORK_CLASS);
+                networkingEvent.networkClass = "A";
+                networkingEvent.callback = setNetmasks;
+                dispatchEvent(networkingEvent);
+            }
+
+            public function setNetmasks(netmasks:ArrayCollection):void
+            {
+                if (netmasks)
+                {
+                    netmaskDP = netmasks;
+                }
+            }
+            
+            private function openStaticRules():void
+            {
+                this._staticRules.netmaskDP = netmaskDP;
+                
+                PopUpManager.addPopUp(this._staticRules, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._staticRules);
+              
+                this._staticRules.init(this._vlanNetwork.dhcpOptions);
+            }
+            
+            private function closeStaticRulesPopUp(event:Event):void
+            {
+                PopUpManager.removePopUp(this._staticRules);
             }
         ]]>
     </mx:Script>
@@ -196,6 +250,13 @@
                 height="20"
                 maxChars="39"/>
         </mx:FormItem>
+        
+        <mx:FormItem 
+	        label="@Resource(bundle='Infrastructure', key='LABEL_STATIC_RULES')">
+	       <mx:Button label="@Resource(bundle='Infrastructure', key='LABEL_MANAGE')" id="StaticRulesButton"
+	            click="openStaticRules()"
+	            height="18"/>
+	    </mx:FormItem>
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_VDC_DEFAULT_NETWORK')">
             <mx:CheckBox id="defaultNetworkInput"/>

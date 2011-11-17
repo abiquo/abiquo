@@ -55,18 +55,18 @@
             
            	public function init(staticRules:ArrayCollection = null):void
            	{
-           	    this._staticRules = new ArrayCollection();
+           	    
            	    if(staticRules){
 	           	    this._staticRules = staticRules;	
            	    }
-           	    netmaskInput.selectedIndex = 0;
-           	    addressInput.text = '';
-           	    gatewayInput.text = '';
-           	    validateForm();
            	}		
             
             private function onCreationComplete():void{
-
+                 this._staticRules = new ArrayCollection();
+                 netmaskInput.selectedIndex = 0;
+                 addressInput.text = '';
+                 gatewayInput.text = '';
+                 validateForm();
             }
             
             [Bindable]
