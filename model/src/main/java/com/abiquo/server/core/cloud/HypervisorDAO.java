@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.cloud;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,42 +39,29 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         super(Hypervisor.class);
     }
 
-    public HypervisorDAO(EntityManager entityManager)
+    public HypervisorDAO(final EntityManager entityManager)
     {
         super(Hypervisor.class, entityManager);
     }
 
-    public boolean existsAnyWithIp(String ip)
+    public boolean existsAnyWithIp(final String ip)
     {
         assert !StringUtils.isEmpty(ip);
 
         return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_PROPERTY));
     }
 
-    public boolean existsAnyWithIpService(String ip)
+    public boolean existsAnyWithIpService(final String ip)
     {
         assert !StringUtils.isEmpty(ip);
 
         return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_SERVICE_PROPERTY));
     }
 
-    private Criterion sameIp(String ip, String propertyName)
+    private Criterion sameIp(final String ip, final String propertyName)
     {
         assert !StringUtils.isEmpty(ip);
         return Restrictions.eq(propertyName, ip);
-    }
-
-    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
-        "FROM com.abiquo.server.core.cloud.VirtualMachine vm, " + //
-        "com.abiquo.server.core.cloud.Hypervisor h " + //
-        "WHERE vm.hypervisor.id = :idHyper ";
-
-    public List<Integer> getUsedPorts(int idHyper)
-    {
-        Query query = getSession().createQuery(QUERY_USED_VDRP);
-        query.setParameter("idHyper", idHyper);
-
-        return query.list();
     }
 
     /**
@@ -94,7 +79,7 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
      * @return false is there is no other {@link Hypervisor} with same ip and same datacenter
      *         boolean
      */
-    public boolean existsAnyWithIpAndDatacenter(String ip, Integer datacenterId)
+    public boolean existsAnyWithIpAndDatacenter(final String ip, final Integer datacenterId)
     {
         Query query = getSession().createQuery(QUERY_SAME_IP_DATACENTER);
         query.setParameter("ip", ip);
