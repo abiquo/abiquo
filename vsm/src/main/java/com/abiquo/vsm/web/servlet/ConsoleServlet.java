@@ -25,9 +25,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -106,6 +110,33 @@ public class ConsoleServlet extends HttpServlet
             request.setAttribute("extended", Boolean.TRUE);
             request.setAttribute("pms", pms);
             request.setAttribute("vms", vms);
+
+            // Duplicate VMs information
+            Map<String, List<String>> duplicates = new HashMap<String, List<String>>();
+            Set<String> allCaches = new HashSet<String>();
+            for (PhysicalMachine pm : pms)
+            {
+                for (String cache : pm.getVirtualMachines().getCache())
+                {
+                    if (!allCaches.contains(cache))
+                    {
+                        allCaches.add(cache);
+                    }
+                    else
+                    {
+                        // Add duplicate
+                        List<String> vmDuplicates = duplicates.get(cache);
+                        if (vmDuplicates == null)
+                        {
+                            vmDuplicates = new LinkedList<String>();
+                        }
+                        vmDuplicates.add(pm.getAddress());
+                        duplicates.put(cache, vmDuplicates);
+                    }
+                }
+            }
+
+            request.setAttribute("duplicates", duplicates);
         }
 
         getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);

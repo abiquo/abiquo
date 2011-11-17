@@ -18,11 +18,29 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    <appender name="ESX" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/esx-monitor.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/esx-monitor-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
     <logger name="com.abiquo">
         <level value="DEBUG" />
     </logger>
     <logger name="org.jinterop">
         <level value="ERROR" />
+    </logger>
+    <logger name="com.abiquo.vsm.monitor.esxi">
+        <level value="TRACE" />
+        <appender-ref ref="ESX" />
+    </logger>
+    <logger name="com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier">
+        <level value="TRACE" />
+        <appender-ref ref="ESX" />
     </logger>
     <root>
         <level value="INFO" />
