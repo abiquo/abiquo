@@ -88,10 +88,10 @@ td {
             <th>Physical machines having it</th>
             <c:forEach items="${duplicates}" var="duplicate">
                 <tr>
-	                <td><c:out value="duplicate.key" /></td>
+	                <td><c:out value="${duplicate.key}" /></td>
 	                <td>
 	                    <c:forEach items="${duplicate.value}" var="pmdup" varStatus="status">
-	                        <c:out value="pmdup" /><c:if test="${not status.last}">, </c:if>
+	                        <c:out value="${pmdup}" /><c:if test="${not status.last}">, </c:if>
 	                    </c:forEach>
 	                </td>
                 </tr>
