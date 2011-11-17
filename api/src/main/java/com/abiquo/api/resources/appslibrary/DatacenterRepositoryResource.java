@@ -90,7 +90,7 @@ public class DatacenterRepositoryResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer dcId,
         @QueryParam(DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM) final boolean refresh,
-        @QueryParam(DATACENTER_REPOSITORY_GET_REFRESH_QUERY_PARAM) final boolean includeUsage,
+        @QueryParam(DATACENTER_REPOSITORY_GET_USAGE_QUERY_PARAM) final boolean includeUsage,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO check enterprise can use the datacenter
@@ -150,7 +150,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     }
 
     private static DatacenterRepositoryDto addLinks(final IRESTBuilder builder,
-        DatacenterRepositoryDto dto, final Integer enterpriseId, final Integer dcId,
+        final DatacenterRepositoryDto dto, final Integer enterpriseId, final Integer dcId,
         final Integer repoId, final String amUri)
     {
         dto.setLinks(builder.buildDatacenterRepositoryLinks(enterpriseId, dcId, repoId));
