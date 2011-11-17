@@ -88,9 +88,9 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static String MANAGEMENT_PORT_COLUMN = "management_port";
 
-    private final static int MANAGEMENT_PORT_MIN = Integer.MIN_VALUE;
+    private final static int MANAGEMENT_PORT_MIN = Port.MIN_VALUE;
 
-    private final static int MANAGEMENT_PORT_MAX = Integer.MAX_VALUE;
+    private final static int MANAGEMENT_PORT_MAX = Port.MAX_VALUE;
 
     @Column(name = MANAGEMENT_PORT_COLUMN, nullable = !MANAGEMENT_PORT_REQUIRED)
     @Range(min = MANAGEMENT_PORT_MIN, max = MANAGEMENT_PORT_MAX)
@@ -111,7 +111,7 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    /* package */final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 1;
 
     /* package */final static int NAME_LENGTH_MAX = 255;
 
@@ -244,9 +244,9 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static String ISCSI_PORT_COLUMN = "iscsi_port";
 
-    private final static int ISCSI_PORT_MIN = Integer.MIN_VALUE;
+    private final static int ISCSI_PORT_MIN = Port.MIN_VALUE;
 
-    private final static int ISCSI_PORT_MAX = Integer.MAX_VALUE;
+    private final static int ISCSI_PORT_MAX = Port.MAX_VALUE;
 
     @Column(name = ISCSI_PORT_COLUMN, nullable = !ISCSI_PORT_REQUIRED)
     @Range(min = ISCSI_PORT_MIN, max = ISCSI_PORT_MAX)
