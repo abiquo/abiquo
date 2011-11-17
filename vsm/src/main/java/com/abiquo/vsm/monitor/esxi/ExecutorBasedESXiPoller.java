@@ -105,7 +105,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     }
 
     @Override
-    public void publishState(String physicalMachineAddress, String virtualMachineName)
+    public void publishState(final String physicalMachineAddress, final String virtualMachineName)
         throws MonitorException
     {
         super.publishState(physicalMachineAddress, virtualMachineName);
@@ -136,12 +136,12 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      * @param pollInterval The polling execution interval.
      * @return The PeriodicalExecutor.
      */
-    private PeriodicalExecutor createExecutor(Poller poller, int pollInterval)
+    private PeriodicalExecutor createExecutor(final Poller poller, final int pollInterval)
     {
         return new PeriodicalExecutor(poller, pollInterval)
         {
             @Override
-            public void executionFailure(Throwable t)
+            public void executionFailure(final Throwable t)
             {
                 LOGGER.trace("An unexpected error occured while monitoring physical machine", t);
             }
@@ -246,7 +246,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
          * @param pm The physical machine being monitored.
          * @param currentVMs The current virtual machines in the hypervisor.
          */
-        private void propagateCreateAndDestroyEvents(PhysicalMachine pm, Set<String> currentVMs)
+        private void propagateCreateAndDestroyEvents(final PhysicalMachine pm,
+            final Set<String> currentVMs)
         {
             // Propagate DESTROY events
             Set<String> removedVMs = pm.getVirtualMachines().getCache();

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- Standard output -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</Pattern>
@@ -18,13 +19,44 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    <!-- Hypervisor specific output -->
     <appender name="ESX" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/esx-monitor.log</file>
+        <file>${catalina.base}/logs/vsm-esx.log</file>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
         </layout>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${catalina.base}/logs/esx-monitor-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${catalina.base}/logs/vsm-esx-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="HYPERV" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/vsm-hyperv.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/vsm-hyperv-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="VBOX" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/vsm-vbox.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/vsm-vbox-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+     <appender name="XENSERVER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${catalina.base}/logs/vsm-xenserver.log</file>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%date %level %logger{10} [%file:%line] %msg%n</Pattern>
+        </layout>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/vsm-xenserver-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
@@ -35,12 +67,27 @@
         <level value="ERROR" />
     </logger>
     <logger name="com.abiquo.vsm.monitor.esxi">
-        <level value="TRACE" />
+        <level value="OFF" />
         <appender-ref ref="ESX" />
     </logger>
+    <logger name="com.abiquo.vsm.monitor.hyperv">
+        <level value="OFF" />
+        <appender-ref ref="HYPERV" />
+    </logger>
+    <logger name="com.abiquo.vsm.monitor.vbox">
+        <level value="OFF" />
+        <appender-ref ref="VBOX" />
+    </logger>
+    <logger name="com.abiquo.vsm.monitor.xenserver">
+        <level value="OFF" />
+        <appender-ref ref="XENSERVER" />
+    </logger>
     <logger name="com.abiquo.vsm.redis.pubsub.notifier.GenericNotifier">
-        <level value="TRACE" />
+        <level value="OFF" />
         <appender-ref ref="ESX" />
+        <appender-ref ref="HYPERV" />
+        <appender-ref ref="VBOX" />
+        <appender-ref ref="XENSERVER" />
     </logger>
     <root>
         <level value="INFO" />
