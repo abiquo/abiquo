@@ -27,11 +27,9 @@ import java.util.List;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
-import com.abiquo.abiserver.pojo.infrastructure.State;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -119,7 +117,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
             List<VirtualMachine> vms = new ArrayList<VirtualMachine>();
             for (VirtualMachineDto dto : dtos.getCollection())
             {
-                VirtualMachine vm = createFlexObject(dto);
+                VirtualMachine vm = VirtualMachine.createFlexObject(dto);
                 vms.add(vm);
             }
             result.setData(vms);
@@ -131,31 +129,6 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         }
 
         return result;
-    }
-
-    public static VirtualMachine createFlexObject(final VirtualMachineDto dto)
-    {
-        VirtualMachine vm = new VirtualMachine();
-        vm.setId(dto.getId());
-        vm.setCpu(dto.getCpu());
-        vm.setHd(dto.getHd());
-        vm.setHighDisponibility(dto.getHighDisponibility() == 1 ? true : false);
-        vm.setDescription(dto.getDescription());
-        vm.setName(dto.getName());
-        vm.setRam(dto.getRam());
-        vm.setState(new State(StateEnum.valueOf(dto.getState().name())));
-        vm.setVdrpPort(dto.getVdrpPort());
-        if (dto.getType().equalsIgnoreCase("MANAGED"))
-        {
-            vm.setIdType(1);
-        }
-        else
-        {
-            vm.setIdType(0);
-        }
-        vm.setVirtualImage(null); // Set to null to avoid VirtualImage conversion fail to PojoHB and
-        // because we don't use it
-        return vm;
     }
 
 }

@@ -60,6 +60,10 @@ public interface MachinesResourceStub
     public DataResult<List<VirtualMachine>> getVirtualMachinesFromPM(Integer dcId, Integer rackId,
         Integer pmId);
 
+    public BasicResult importVirtualMachineToVirtualAppliance(final Integer dcId,
+        final Integer rackId, final Integer machineId, final Integer vmId, final Integer vdcId,
+        final Integer vappId);
+
     public DataResult<MachineState> checkPhysicalMachineState(Integer datacenterId, Integer rackId,
         Integer machineId, String ip, HypervisorType hypervisor, String user, String password,
         Integer port);
