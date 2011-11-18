@@ -21,12 +21,6 @@
 
 package com.abiquo.abiserver.commands;
 
-import java.util.List;
-
-import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
 
 /**
  * This command collects all actions related to Virtual Images
@@ -35,7 +29,5 @@ import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
  */
 public interface AppsLibraryCommand
 {
-
-    List<DiskFormatType> getDiskFormatTypes(UserSession userSession);
 
 }

@@ -47,10 +47,13 @@ import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
+import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoriesResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
+import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
@@ -357,7 +360,7 @@ public class UriTestResolver
         final Integer rackId, final Integer machineId)
     {
         return UriHelper.appendPathToBaseUri(resolveMachineURI(datacenterId, rackId, machineId),
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES);
+            VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM);
     }
 
     public static String resolveRemoteServicesURI(final Integer datacenterId)
@@ -972,6 +975,21 @@ public class UriTestResolver
     public static String resolveCategoriesURI()
     {
         String uri = resolveURI(CategoriesResource.CATEGORIES_PATH, new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveDiskFormatTypesURI()
+    {
+        String uri =
+            resolveURI(DiskFormatTypesResource.DISK_FORMAT_TYPES_PATH,
+                new HashMap<String, String>());
+        return uri;
+    }
+
+    public static String resolveHypervisorTypesURI()
+    {
+        String uri =
+            resolveURI(HypervisorTypesResource.HYPERVISOR_TYPES_PATH, new HashMap<String, String>());
         return uri;
     }
 

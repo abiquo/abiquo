@@ -116,16 +116,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.vdrpPort = vdrpPort;
     }
 
-    private String vdrpIp;
+    private String vdrpIP;
 
     public String getVdrpIP()
     {
-        return vdrpIp;
+        return vdrpIP;
     }
 
     public void setVdrpIP(final String vdrpIp)
     {
-        this.vdrpIp = vdrpIp;
+        this.vdrpIP = vdrpIp;
     }
 
     private int idState;
@@ -164,19 +164,17 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.highDisponibility = highDisponibility;
     }
 
-    private int idType;
+    private String type;
 
-    public int getIdType()
-    {
-        return idType;
-    }
+    public String getType() {
+		return type;
+	}
 
-    public void setIdType(final int idType)
-    {
-        this.idType = idType;
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-    private String password;
+	private String password;
 
     public String getPassword()
     {
@@ -221,16 +219,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         }
     }
 
-    private RunlistElementsDto runlist;
+    private RunlistElementsDto runlistElements;
 
     public RunlistElementsDto getRunlist()
     {
-        return runlist;
+        return runlistElements;
     }
 
-    public void setRunlist(final RunlistElementsDto runlist)
+    public void setRunlist(final RunlistElementsDto runlistElements)
     {
-        this.runlist = runlist;
+        this.runlistElements = runlistElements;
     }
 
 }

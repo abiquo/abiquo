@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.HyperVisor;
         	import mx.utils.ObjectUtil;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -51,6 +52,18 @@
 
             [ResourceBundle("Infrastructure")]
             private var rb:ResourceBundle;
+            
+            private var _hypervisor:HyperVisor;
+            
+            public function get hypervisor():HyperVisor
+            {
+            	return this._hypervisor;
+            }
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+            	this._hypervisor = value;
+            }
 
             //The VirtualMachine that is currently selected
             private var _selectedVirtualMachine:VirtualMachine = null;

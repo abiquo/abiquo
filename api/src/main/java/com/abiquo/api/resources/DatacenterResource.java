@@ -194,6 +194,7 @@ public class DatacenterResource extends AbstractResource
         Set<HypervisorType> types = service.getHypervisorTypes(datacenter);
 
         HypervisorTypesDto dto = new HypervisorTypesDto();
+
         dto.setCollection(new ArrayList<HypervisorType>(types));
 
         return dto;
@@ -239,14 +240,7 @@ public class DatacenterResource extends AbstractResource
     {
         validatePathParameters(datacenterId);
 
-        try
-        {
-            return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
-        }
-        catch (Exception e)
-        {
-            throw translateException(e);
-        }
+        return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
     }
 
     /**

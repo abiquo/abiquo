@@ -19,32 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services.notify;
+package com.abiquo.server.core.appslibrary;
 
-import java.io.IOException;
+import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-public class AMNotifierFactory
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "diskformattypes")
+public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
 {
-    private static AMNotifier instance;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 717145703461179229L;
 
-    public static synchronized AMNotifier getInstance() throws IOException
+    @Override
+    @XmlElement(name = "diskformattype")
+    public List<DiskFormatTypeDto> getCollection()
     {
-        if (instance == null)
-        {
-            instance = new AMNotifier();
-            instance.openChannel();
-        }
-
-        return instance;
+        return collection;
     }
 
-    public static synchronized void destroy() throws IOException
-    {
-        if (instance != null)
-        {
-            instance.closeChannel();
-        }
-    }
-    
 }

@@ -28,6 +28,15 @@ package com.abiquo.appliancemanager.config;
  */
 public class AMConfiguration
 {
+    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = 10;
+
+    public final static int HTTP_CONNECTION_TIMEOUT = 60 * 1000; // a minute
+
+    public final static int HTTP_IDLE_TIMEOUT = 10 * 60 * 1000; // ten minutes
+
+    public final static int HTTP_REQUEST_TIMEOUT = 24 * 60 * 60 * 1000; // a day
+
+    public final static int HTTP_MAX_CONNECTIONS = 10;
 
     /**
      * Where the ''repositoryLocation'' file system is mounted. Base path on the machine local file
@@ -62,7 +71,7 @@ public class AMConfiguration
      */
     private Integer fstimeoutMs;
 
-    public AMConfiguration(String repositoryPath, final String repositoryLocation)
+    public AMConfiguration(final String repositoryPath, final String repositoryLocation)
     {
         assert isValidRepositoryLocation(repositoryLocation);
         assert isValidRepositoryPath(repositoryPath);
@@ -88,12 +97,12 @@ public class AMConfiguration
     {
         return fstimeoutMs;
     }
-    
+
     public void setFsTimeoutMs(final Integer fstimeoutMs)
     {
         this.fstimeoutMs = fstimeoutMs;
     }
-    
+
     public String getRepositoryPath()
     {
         return repositoryPath;
@@ -119,35 +128,35 @@ public class AMConfiguration
         return deployBuffer;
     }
 
-    protected void setRepositoryPath(String repositoryPath)
+    protected void setRepositoryPath(final String repositoryPath)
     {
         assert isValidRepositoryPath(repositoryPath);
 
         this.repositoryPath = repositoryPath;
     }
 
-    protected void setRepositoryLocation(String repositoryLocation)
+    protected void setRepositoryLocation(final String repositoryLocation)
     {
         assert isValidRepositoryLocation(repositoryLocation);
 
         this.repositoryLocation = repositoryLocation;
     }
 
-    protected void setUpdateProgressInterval(Integer updateProgressInterval)
+    protected void setUpdateProgressInterval(final Integer updateProgressInterval)
     {
         assert updateProgressInterval > 0; // XXX
 
         this.updateProgressInterval = updateProgressInterval;
     }
 
-    protected void setDeployBuffer(Integer deployBuffer)
+    protected void setDeployBuffer(final Integer deployBuffer)
     {
         assert deployBuffer > 32; // XXX
 
         this.deployBuffer = deployBuffer;
     }
 
-    protected void setTimeout(Integer timeout)
+    protected void setTimeout(final Integer timeout)
     {
         assert timeout >= 0; // XXX
 

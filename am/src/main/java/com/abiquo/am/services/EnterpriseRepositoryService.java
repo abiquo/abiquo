@@ -21,7 +21,7 @@
 
 package com.abiquo.am.services;
 
-import static com.abiquo.am.services.EnterpriseRepositoryFileSystem.validateEnterpirseRepositoryPathFile;
+import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_LOCATION_PREFIX;
 import static com.abiquo.am.services.OVFPackageConventions.codifyBundleOVFId;
 import static com.abiquo.am.services.OVFPackageConventions.codifyEnterpriseRepositoryPath;
@@ -34,81 +34,110 @@ import static com.abiquo.am.services.OVFPackageConventions.getOVFPackagePath;
 import static com.abiquo.am.services.OVFPackageConventions.getRelativeOVFPath;
 import static com.abiquo.am.services.OVFPackageConventions.isBundleOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.isImportedBundleOvfId;
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getEnvelope;
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getFileByPath;
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.writeOVFFileToOVFPackageDir;
+import static com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem.validateEnterpirseRepositoryPathFile;
+import static com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem.getEnvelope;
+import static com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem.getFileByPath;
+import static com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem.writeOVFFileToOVFPackageDir;
 
 import java.io.File;
-import java.util.HashMap;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
-import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
-import org.dmtf.schemas.ovf.envelope._1.VirtualDiskDescType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.util.TimeoutFSUtils;
-import com.abiquo.api.service.DefaultApiService;
+import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
+import com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem;
+import com.abiquo.am.services.ovfformat.OVFPackageInstanceFromOVFEnvelope;
+import com.abiquo.am.services.ovfformat.OVFPackageInstanceToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
-import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
+import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
+import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 /**
  * Each enterprise have its own logical separation on the current physical Repository. This is
  * implemented using a folder (with the Enterprise identifier)
  */
-public class EnterpriseRepositoryService extends DefaultApiService
+public class EnterpriseRepositoryService
 {
+    private final static Logger LOG = LoggerFactory.getLogger(EnterpriseRepositoryService.class);
+
     private final static String BASE_REPO_PATH = AMConfigurationManager.getInstance()
         .getAMConfiguration().getRepositoryPath();
 
-    /** Immutable singelton instances base on its Enterprise Identifier. */
-    private static Map<String, EnterpriseRepositoryService> enterpriseHandlers =
-        new HashMap<String, EnterpriseRepositoryService>();
-
     /** Repository path particular of the current enterprise. */
-    private final String enterpriseRepositoryPath;
+    private final String erepoPath;
 
-    private EnterpriseRepositoryService(final String idEnterprise)
-    {
-        enterpriseRepositoryPath = codifyEnterpriseRepositoryPath(BASE_REPO_PATH, idEnterprise);
-
-        validateEnterpirseRepositoryPathFile(enterpriseRepositoryPath);
-    }
-
-    public String getEnterpriseRepositoryPath()
-    {
-        return enterpriseRepositoryPath;
-    }
+    private final String erId;
 
     /**
-     * Factory method, maitains a single object reference for each enterprise identifier.
+     * Created in {@link ErepoFactory}
      */
-    public static synchronized EnterpriseRepositoryService getRepo(final String idEnterprise)
+    protected EnterpriseRepositoryService(final String idEnterprise)
     {
-        return getRepo(idEnterprise, false);
+        this.erId = idEnterprise;
+        this.erepoPath = codifyEnterpriseRepositoryPath(BASE_REPO_PATH, idEnterprise);
+        validateEnterpirseRepositoryPathFile(erepoPath);
+
+        LOG.debug("Create repository index for {} ", erepoPath);
+        List<OVFPackageInstanceStateDto> availables =
+            EnterpriseRepositoryFileSystem.getAllOVF(erepoPath, false);
+
+        AMRedisDao dao = AMRedisDao.getDao();
+        dao.init(idEnterprise, availables);
+        AMRedisDao.returnDao(dao);
     }
 
-    public static synchronized EnterpriseRepositoryService getRepo(final String idEnterprise,
-        final boolean checkCanWrite)
+    public List<OVFPackageInstanceStateDto> getOVFStates()
     {
-        if (checkCanWrite)
-        {
-            TimeoutFSUtils.getInstance().canWriteRepository();
-        }
+        final List<OVFPackageInstanceStateDto> states;
 
-        if (!enterpriseHandlers.containsKey(idEnterprise))
-        {
-            enterpriseHandlers.put(idEnterprise, new EnterpriseRepositoryService(idEnterprise));
-        }
+        AMRedisDao dao = AMRedisDao.getDao();
+        states = dao.getAll(erId);
+        AMRedisDao.returnDao(dao);
 
-        return enterpriseHandlers.get(idEnterprise);
+        return states;
+    }
+
+    /** ########## OVF DIRECT ACCESS ########## **/
+
+    /**
+     * Create the folder and write to it the OVF.
+     * 
+     * @return the OVF envelope document obtained form the OVF location.
+     * @throws RepositoryException, if can not create any of the required folders on the Enterprise
+     *             Repository.
+     */
+    public EnvelopeType createOVFPackageFolder(final String ovfId, final EnvelopeType envelope)
+    {
+        final String envelopePath = erepoPath + getRelativeOVFPath(ovfId); // XXX
+
+        writeOVFFileToOVFPackageDir(envelopePath, envelope);
+
+        return envelope;
+    }
+
+    public void createOVFPackageFolder(final String ovfId)
+    {
+        OVFPackageInstanceFileSystem.createOVFPackageFolder(erepoPath, ovfId);
+    }
+
+    /** Transfer the upload content into the repository file system */
+    public void copyFileToOVFPackagePath(final String ovfid, final File file)
+    {
+        final String packagePAth = getOVFPackagePath(erepoPath, ovfid);
+
+        OVFPackageInstanceFileSystem.copyFileToOVFPackagePath(packagePAth, file);
     }
 
     /***
@@ -116,8 +145,6 @@ public class EnterpriseRepositoryService extends DefaultApiService
      */
     public void deleteOVF(final String ovfId)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         if (isImportedBundleOvfId(ovfId))
         {
             deleteImportedBundle(ovfId);
@@ -138,15 +165,17 @@ public class EnterpriseRepositoryService extends DefaultApiService
             return;
         }
 
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getOVFPackagePath(erepoPath, ovfId);
 
         OVFPackageInstanceFileSystem.deleteOVFPackage(packagePath);
     }
 
-    public void deleteBundle(final String ovfId)
+    public String path()
     {
-        OVFPackageInstanceFileSystem.deleteBundle(enterpriseRepositoryPath, ovfId);
+        return erepoPath;
     }
+
+    /** ########## DISC ########## */
 
     public String getDiskFilePath(final String ovfid)
     {
@@ -155,9 +184,9 @@ public class EnterpriseRepositoryService extends DefaultApiService
 
         FileType file = null;
 
-        envelope = getEnvelope(enterpriseRepositoryPath, ovfid);
+        envelope = getEnvelope(erepoPath, ovfid);
 
-        final String diskFileId = getDisk(envelope).getFileRef();
+        final String diskFileId = OVFPackageInstanceFromOVFEnvelope.getDisk(envelope).getFileRef();
 
         try
         {
@@ -165,43 +194,17 @@ public class EnterpriseRepositoryService extends DefaultApiService
         }
         catch (IdNotFoundException e)
         {
-            addError(new AMException(AMError.OVF_INVALID, "Disk id not found on the envelope"));
-            flushErrors();
+            throw new AMException(AMError.OVF_INVALID, "Disk id not found on the envelope");
         }
 
         return file.getHref();
-    }
-
-    private VirtualDiskDescType getDisk(EnvelopeType envelope)
-    {
-        DiskSectionType diskSection = null;
-        try
-        {
-            diskSection = OVFEnvelopeUtils.getSection(envelope, DiskSectionType.class);
-        }
-        catch (Exception e)// SectionNotPresentException InvalidSectionException
-        {
-            addError(new AMException(AMError.OVF_INVALID, "missing DiskSection"));
-            flushErrors();
-        }
-
-        List<VirtualDiskDescType> disks = diskSection.getDisk();
-
-        if (disks == null || disks.isEmpty() || disks.size() != 1)
-        {
-            addError(new AMException(AMError.OVF_INVALID, "multiple Disk not supported"));
-            flushErrors();
-        }
-
-        return disks.get(0);
-
     }
 
     public File getOVFDiskFile(final String ovfId)
     {
         boolean isBundle = isBundleOvfId(ovfId);
 
-        final String ovfPath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId);
+        final String ovfPath = erepoPath + getRelativeOVFPath(ovfId);
 
         String masterOvfId;
 
@@ -214,21 +217,8 @@ public class EnterpriseRepositoryService extends DefaultApiService
             masterOvfId = getBundleMasterOvfId(ovfId);
         }
 
-        final EnvelopeType envelope = getEnvelope(enterpriseRepositoryPath, masterOvfId);
-        final String fileId = getDisk(envelope).getFileRef();
-        FileType refFile = null;
+        final String relPath = getDiskFilePath(masterOvfId);
 
-        try
-        {
-            refFile = OVFReferenceUtils.getReferencedFile(envelope, fileId);
-        }
-        catch (IdNotFoundException e)
-        {
-            addError(new AMException(AMError.OVF_INVALID, "file reference not found in OVF"));
-            flushErrors();
-        }
-
-        final String relPath = refFile.getHref();
         final String ovfFolder = ovfPath.substring(0, ovfPath.lastIndexOf('/'));
         String filePath = ovfFolder + '/' + relPath;
 
@@ -241,89 +231,113 @@ public class EnterpriseRepositoryService extends DefaultApiService
         return getFileByPath(filePath);
     }
 
+    /** ######## BOUNDLE RELATED FUNCTIONS ######## */
+
     public String prepareBundle(final String name)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
 
         final String ovfId = OVF_LOCATION_PREFIX + "bundle/" + name + '/' + name + ".ovf";
 
-        final String packPath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packPath = getOVFPackagePath(erepoPath, ovfId);
 
         OVFPackageInstanceFileSystem.createOVFPackageFolder(packPath, ovfId);
 
         return ovfId;
     }
 
-    /**
-     * Create the folder and write to it the OVF.
-     * 
-     * @return the OVF envelope document obtained form the OVF location.
-     * @throws RepositoryException, if can not create any of the required folders on the Enterprise
-     *             Repository.
-     */
-    public EnvelopeType createOVFPackageFolder(final String ovfId, final EnvelopeType envelope)
-    {
-        final String envelopePath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId); // XXX
-
-        writeOVFFileToOVFPackageDir(envelopePath, envelope);
-
-        return envelope;
-    }
-
-    public void createOVFPackageFolder(final String ovfId)
-    {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
-        OVFPackageInstanceFileSystem.createOVFPackageFolder(enterpriseRepositoryPath, ovfId);
-    }
-
-    public void copyFileToOVFPackagePath(final String ovfid, final File file)
-    {
-        // Transfer the upload content into the repository file system
-        final String packagePAth = getOVFPackagePath(enterpriseRepositoryPath, ovfid);
-
-        OVFPackageInstanceFileSystem.copyFileToOVFPackagePath(packagePAth, file);
-    }
-
     public String createBundle(final String ovfId, final String snapshot,
-        EnvelopeType envelopeBundle)
+        final EnvelopeType envelopeBundle)
     {
-        TimeoutFSUtils.getInstance().canUseRepository();
-
         final String masterOvf = getMasterOVFPackage(ovfId);
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getOVFPackagePath(erepoPath, ovfId);
         // final String originalDiskPath = getDiskFilePath(masterOvf);
         final String packageName = getOVFPackageName(masterOvf);
 
         // write the new (bundle) OVF envelope with the file references changes
         final String snapshotMark =
-            EnterpriseRepositoryFileSystem.createBundle(packagePath, snapshot, packageName,
-                envelopeBundle);
+            createBundleInFolder(packagePath, snapshot, packageName, envelopeBundle);
 
         return codifyBundleOVFId(ovfId, snapshotMark, packageName);
     }
 
-    /**
-     * imported bundles do not use the ''enterpriserepopath''
-     */
-    public void deleteImportedBundle(final String ovfId)
+    private String createBundleInFolder(final String packagePath, final String snapshot,
+        final String packageName, EnvelopeType envelopeBundle)
+    {
+
+        final String snapshotMark = snapshot + OVF_BUNDLE_PATH_IDENTIFIER;
+        final String bundlePath = packagePath + snapshotMark + packageName;
+
+        File envelopeBundleFile = new File(bundlePath);
+        if (envelopeBundleFile.exists())
+        {
+            throw new AMException(AMError.OVFPI_SNAPSHOT_ALREADY_EXIST, bundlePath);
+        }
+
+        FileOutputStream bundleEnvelopeStream = null;
+        try
+        {
+            envelopeBundleFile.createNewFile();
+            bundleEnvelopeStream = new FileOutputStream(envelopeBundleFile);
+        }
+        catch (Exception e1)
+        {
+            throw new AMException(AMError.OVFPI_SNAPSHOT_ALREADY_EXIST, bundlePath);
+        }
+
+        envelopeBundle =
+            OVFPackageInstanceToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot,
+                packagePath);
+
+        try
+        {
+            OVFSerializer.getInstance().writeXML(envelopeBundle, bundleEnvelopeStream);
+        }
+        catch (XMLException e)
+        {
+            throw new AMException(AMError.OVFPI_SNAPSHOT_CREATE, bundlePath, e);
+        }
+        finally
+        {
+            try
+            {
+                bundleEnvelopeStream.close();
+            }
+            catch (IOException e)
+            {
+                final String cause = String.format("Can not close the stream to [%s]", bundlePath);
+                LOG.error(cause);
+            }
+        }// close envelope write stream
+
+        return snapshotMark;
+    }
+
+    private void deleteBundle(final String ovfId)
+    {
+        OVFPackageInstanceFileSystem.deleteBundle(erepoPath, ovfId);
+    }
+
+    /** Imported bundles do not use the ''enterpriserepopath'' */
+    private void deleteImportedBundle(final String ovfId)
     {
         OVFPackageInstanceFileSystem.deleteImportedBundle(BASE_REPO_PATH, ovfId);
     }
 
+    /** ######## REPOSITORY FILESYSTEM USAGE INFO ######## */
+
     public Long getUsedMb()
     {
-        return EnterpriseRepositoryFileSystem.getUsedMb(enterpriseRepositoryPath);
+        return EnterpriseRepositoryFileSystem.getUsedMb(erepoPath);
     }
 
     public OVFPackageInstanceStateDto getOVFStatus(final String ovfId)
     {
- 
-        return OVFPackageInstanceFileSystem.getOVFStatus(enterpriseRepositoryPath, ovfId);
+
+        return OVFPackageInstanceFileSystem.getOVFStatus(erepoPath, ovfId);
     }
 
     public boolean isEnoughtSpaceOn(final Long expected)
     {
-        return EnterpriseRepositoryFileSystem.isEnoughtSpaceOn(enterpriseRepositoryPath, expected);
+        return EnterpriseRepositoryFileSystem.isEnoughtSpaceOn(erepoPath, expected);
     }
 }

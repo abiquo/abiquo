@@ -49,9 +49,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.EnterpriseRepositoryService;
-import com.abiquo.am.services.OVFPackageInstanceFileSystem;
+import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.OVFPackageInstanceService;
+import com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem;
+import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
@@ -60,7 +61,7 @@ import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 @Parent(OVFPackageInstancesResource.class)
 @Path(OVFPackageInstanceResource.OVFPI_PATH)
-@Controller(value = "ovfPackageInstanceResource")
+@Controller
 public class OVFPackageInstanceResource extends AbstractResource
 {
 
@@ -86,8 +87,8 @@ public class OVFPackageInstanceResource extends AbstractResource
 
     @HEAD
     public Response getOVFPackageDeployProgress(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn) throws DownloadException
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn) throws DownloadException
     {
         final String ovfId = ovfUrl(ovfIdIn);
 
@@ -118,10 +119,10 @@ public class OVFPackageInstanceResource extends AbstractResource
     }
 
     @GET
-    public Response getOVFPackageInstance(@Context UriInfo uriInfo,
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn,
-        @QueryParam(QUERY_PARAM_GET_FORMAT) String format)
+    public Response getOVFPackageInstance(@Context final UriInfo uriInfo,
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn,
+        @QueryParam(QUERY_PARAM_GET_FORMAT) final String format)
     {
         // XXX can specify the media type
 
@@ -169,7 +170,7 @@ public class OVFPackageInstanceResource extends AbstractResource
      * @param idRepository Id of the Repository to which the OVFPackage belongs.
      * @return DataResult<OVFPackageInstanceStatus>@return Response
      */
-    private Response evalStatus(String idEnterprise, String ovfId)
+    private Response evalStatus(final String idEnterprise, final String ovfId)
     {
         OVFPackageInstanceStateDto ovfPackageInstanceStatus =
             getOVFPackageInstanceStatus(idEnterprise, ovfId);
@@ -182,21 +183,18 @@ public class OVFPackageInstanceResource extends AbstractResource
         {
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFStatusEnumType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus
-            .getStatus()))
+        if (OVFStatusEnumType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus.getStatus()))
         {
             ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
-        if (OVFStatusEnumType.ERROR.equals(ovfPackageInstanceStatus
-            .getStatus()))
+        if (OVFStatusEnumType.ERROR.equals(ovfPackageInstanceStatus.getStatus()))
         {
             ovfPackageInstanceStatus.setDownloadingProgress(0d);
             return Response.ok(ovfPackageInstanceStatus).build();
         }
 
-        if (OVFStatusEnumType.DOWNLOADING.equals(ovfPackageInstanceStatus
-            .getStatus()))
+        if (OVFStatusEnumType.DOWNLOADING.equals(ovfPackageInstanceStatus.getStatus()))
         {
             return Response.ok(ovfPackageInstanceStatus).build();
         }
@@ -213,21 +211,19 @@ public class OVFPackageInstanceResource extends AbstractResource
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     public Response preBundleOVFPackage(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        String name)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        final String name)
     {
-        EnterpriseRepositoryService enterpriseRepository =
-            EnterpriseRepositoryService.getRepo(idEnterprise);
-
-        final String ovfId = enterpriseRepository.prepareBundle(name);
+        final String ovfId = ErepoFactory.getRepo(idEnterprise).prepareBundle(name);
 
         return Response.status(Status.ACCEPTED).entity(ovfId).type(MediaType.TEXT_PLAIN).build();
     }
 
     @POST
     public Response bundleOVFPackage(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String snapshot, OVFPackageInstanceDto diskInfo)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @PathParam(OVFPackageInstanceResource.OVFPI) final String snapshot,
+        final OVFPackageInstanceDto diskInfo)
     {
         // TODO check diskInfo.getEnvelopeId is equals to idEnterprise
 
@@ -252,8 +248,8 @@ public class OVFPackageInstanceResource extends AbstractResource
      */
     @DELETE
     public void deleteOVF(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) String ovfIdIn)
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn)
     {
         final String ovfId = ovfUrl(ovfIdIn);
 
@@ -264,23 +260,21 @@ public class OVFPackageInstanceResource extends AbstractResource
      * NOT EXPOSED *
      */
     // @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
-    private OVFPackageInstanceStateDto getOVFPackageInstanceStatus(String idEnterprise,
-        String ovfId)
+    private OVFPackageInstanceStateDto getOVFPackageInstanceStatus(final String idEnterprise,
+        final String ovfId)
     {
         return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
     }
 
-    private OVFPackageInstanceDto getOVFPackageInstance(String idEnterprise, String ovfId)
+    private OVFPackageInstanceDto getOVFPackageInstance(final String idEnterprise,
+        final String ovfId)
     {
         return service.getOVFPackage(idEnterprise, ovfId);
     }
 
-    private EnvelopeType getOVFEnvelope(String idEnterprise, String ovfId)
+    private EnvelopeType getOVFEnvelope(final String idEnterprise, final String ovfId)
     {
-        EnterpriseRepositoryService enterpriseRepository =
-            EnterpriseRepositoryService.getRepo(idEnterprise);
-
-        return OVFPackageInstanceFileSystem.getEnvelope(
-            enterpriseRepository.getEnterpriseRepositoryPath(), ovfId);
+        return OVFPackageInstanceFileSystem.getEnvelope(ErepoFactory.getRepo(idEnterprise).path(),
+            ovfId);
     }
 }
