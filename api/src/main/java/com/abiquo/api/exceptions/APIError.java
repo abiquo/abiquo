@@ -438,7 +438,8 @@ public enum APIError
         "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
         "VOL-25", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-26",
         "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_RECONFIGURE_ERROR(
-        "VOL-27", "An unexpected error occured while reconfiguring storage"),
+        "VOL-27", "An unexpected error occured while reconfiguring storage"), NON_EXISTENT_VOLUME_MAPPING(
+        "VOL-28", "The requested mapping does not exist for the given volume"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

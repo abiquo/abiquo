@@ -61,6 +61,8 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 @Test(groups = {STORAGE_UNIT_TESTS})
 public class DiskManagementServiceTest extends AbstractUnitTest
 {
+    private static long MEGABYTE = 1048576;
+
     /** Service we are testing */
     protected StorageService service;
 
@@ -83,6 +85,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vapp.setState(VirtualApplianceState.NOT_DEPLOYED);
         vm = vmGenerator.createInstance(e);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+        nvi.getVirtualImage().setDiskFileSize(2000000);
 
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
 
@@ -447,7 +450,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
 
         // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(), Long.valueOf(vm.getVirtualImage().getDiskFileSize()));
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }
@@ -507,7 +511,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
 
         // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(), Long.valueOf(vm.getVirtualImage().getDiskFileSize()));
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }

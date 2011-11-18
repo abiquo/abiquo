@@ -1,4 +1,4 @@
-package com.abiquo.api.util;
+package com.abiquo.api.services.stub;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;

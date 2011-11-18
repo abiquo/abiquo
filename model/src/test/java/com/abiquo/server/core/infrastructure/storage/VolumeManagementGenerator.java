@@ -28,7 +28,6 @@ import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
-import com.abiquo.server.core.cloud.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -145,7 +144,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
     private VolumeManagement addStatefulImageToVolume(final VolumeManagement volume,
         final Datacenter datacenter)
     {
-        VirtualImage image = virtualImageGenerator.createInstance(datacenter);
+        VirtualImage image = imageGenerator.createInstance(datacenter);
         volume.setVirtualImage(image);
         return volume;
     }
@@ -165,7 +164,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         if (entity.getVirtualImage() != null)
         {
             VirtualImage virtualImage = entity.getVirtualImage();
-            virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+            imageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
             entitiesToPersist.add(virtualImage);
         }
     }
