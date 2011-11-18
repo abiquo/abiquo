@@ -208,7 +208,6 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {APPS_INTEGRATION_TESTS})
     public void modifyNonExistentOVFPackageListRises404()
     {
-        setup(enterprise);
 
         OVFPackageListDto list = new OVFPackageListDto();
         ClientResponse response =
