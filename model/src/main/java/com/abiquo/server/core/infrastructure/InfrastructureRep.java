@@ -257,6 +257,11 @@ public class InfrastructureRep extends DefaultRepBase
         return types;
     }
 
+    public Collection<HypervisorType> findHypervisorsType(final Datacenter datacenter)
+    {
+        return hypervisorDao.findTypesfromDatacenter(datacenter.getId());
+    }
+
     public List<Enterprise> findEnterprisesByDataCenter(final Datacenter datacenter,
         final Boolean network, final Integer firstElem, final Integer numElem)
     {

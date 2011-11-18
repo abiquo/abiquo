@@ -23,9 +23,22 @@
             </bean>
         </property>
     </bean>
+    
+    <bean id="jedisPoolConfig" class="org.apache.commons.pool.impl.GenericObjectPool">
+		<property name="testOnBorrow" value="true" />
+    </bean>
+    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+    	<constructor-arg>
+    		<ref bean="jedisPoolConfig" />
+    	</constructor-arg>
+    	<constructor-arg type="String" value="${abiquo.redis.host}" />
+        <constructor-arg type="int" value="${abiquo.redis.port}" />
+    </bean>
+    
     <!-- load the configuration file -->
     <import resource="persistencebeans.xml" />
     <import resource="mock-beans.xml" />
     <import resource="security-abiquo-beans.xml" />
     <import resource="security-beans-test.xml" />
+    <import resource="redis-beans-test.xml" />
 </beans>

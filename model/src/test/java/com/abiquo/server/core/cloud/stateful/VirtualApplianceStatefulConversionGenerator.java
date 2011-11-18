@@ -23,14 +23,12 @@ package com.abiquo.server.core.cloud.stateful;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualApplianceStatefulConversionGenerator extends
     DefaultEntityGenerator<VirtualApplianceStatefulConversion>
@@ -51,26 +49,29 @@ public class VirtualApplianceStatefulConversionGenerator extends
     public void assertAllPropertiesEqual(final VirtualApplianceStatefulConversion obj1,
         final VirtualApplianceStatefulConversion obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
-            VirtualApplianceStatefulConversion.SUB_STATE_PROPERTY,
-            VirtualApplianceStatefulConversion.STATE_PROPERTY);
-
         userGenerator.assertAllPropertiesEqual(obj1.getUser(), obj2.getUser());
 
-        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-            .getVirtualAppliance());
+        virtualApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
+            obj2.getVirtualAppliance());
     }
 
     @Override
     public VirtualApplianceStatefulConversion createUniqueInstance()
     {
-        VirtualMachineState state = newEnum(VirtualMachineState.class, nextSeed());
-
         User user = userGenerator.createUniqueInstance();
         VirtualAppliance virtualAppliance = virtualApplianceGenerator.createUniqueInstance();
 
         VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
-            new VirtualApplianceStatefulConversion(user, state, state, virtualAppliance);
+            new VirtualApplianceStatefulConversion(user, virtualAppliance);
+
+        return virtualApplianceStatefulConversion;
+    }
+
+    public VirtualApplianceStatefulConversion createInstance(final User user,
+        final VirtualAppliance virtualAppliance)
+    {
+        VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
+            new VirtualApplianceStatefulConversion(user, virtualAppliance);
 
         return virtualApplianceStatefulConversion;
     }

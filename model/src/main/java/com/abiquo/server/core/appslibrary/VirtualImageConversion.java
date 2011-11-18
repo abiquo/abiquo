@@ -67,6 +67,19 @@ public class VirtualImageConversion extends DefaultEntityBase
         this.state = ConversionState.ENQUEUED;
     }
 
+    public VirtualImageConversion(final VirtualImage image, final ConversionState state,
+        final DiskFormatType sourceType, final DiskFormatType targetType, final String sourcePath,
+        final String targetPath)
+    {
+        this.virtualImage = image;
+        this.targetType = targetType;
+        this.targetPath = targetPath;
+        this.timestamp = new Date();
+        this.state = state;
+        this.sourceType = sourceType;
+        this.sourcePath = sourcePath;
+    }
+
     private final static String ID_COLUMN = "id";
 
     @Id

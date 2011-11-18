@@ -31,22 +31,16 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualAppliance>
 {
+    private EnterpriseGenerator enterpriseGenerator;
 
-    EnterpriseGenerator enterpriseGenerator;
-
-    VirtualDatacenterGenerator virtualDatacenterGenerator;
-
-    // NodeVirtualImageGenerator nodeGenerator;
+    private VirtualDatacenterGenerator virtualDatacenterGenerator;
 
     public VirtualApplianceGenerator(final SeedGenerator seed)
     {
         super(seed);
 
         enterpriseGenerator = new EnterpriseGenerator(seed);
-
         virtualDatacenterGenerator = new VirtualDatacenterGenerator(seed);
-
-        // nodeGenerator = new NodeVirtualImageGenerator(seed);
     }
 
     @Override

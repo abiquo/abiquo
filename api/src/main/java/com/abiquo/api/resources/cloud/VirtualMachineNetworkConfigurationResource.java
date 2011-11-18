@@ -301,7 +301,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
             return createNICTransferObject(ip, restBuilder);
         }
 
-        // if any link has been found, then raise a BadRequestException
+        // if no link has been found, then raise a BadRequestException
         throw new BadRequestException(APIError.VLANS_PRIVATE_IP_INVALID_LINK);
     }
 

@@ -50,6 +50,9 @@ import com.softwarementors.validation.constraints.Required;
 @DiscriminatorColumn(name = "idResourceType", discriminatorType = DiscriminatorType.STRING)
 public class RasdManagement extends DefaultEntityBase
 {
+    /** The first attachment sequence number to be used. */
+    public static final int FIRST_ATTACHMENT_SEQUENCE = 1;
+
     public static final String TABLE_NAME = "rasd_management";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
@@ -218,6 +221,12 @@ public class RasdManagement extends DefaultEntityBase
 
     public void setAttachmentOrder(final long order)
     {
+        if (order < FIRST_ATTACHMENT_SEQUENCE)
+        {
+            throw new IllegalArgumentException("Attachment order should be greater or equal to "
+                + FIRST_ATTACHMENT_SEQUENCE);
+        }
+
         getRasd().setGeneration(order < 0 ? 0L : order);
     }
 }
