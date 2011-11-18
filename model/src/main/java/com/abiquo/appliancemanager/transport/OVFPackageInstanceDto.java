@@ -21,57 +21,50 @@
 
 package com.abiquo.appliancemanager.transport;
 
-import java.io.Serializable;
-
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+import org.apache.commons.lang.StringUtils;
 
-//    
-// OVFUrl - URL Descarga
-// Name -> OVFPackage.ProductName
-// SO - Produ
-// Path -> Physical Disk File Path (.vmdk)
-// ImageType -> DiskFormatType Name
-// ImageSize -> Disk File Size
-// IconPath -> ...
-// CategoryName ->...
-// Description -> OVFPackage.ProductInfo
-// CPU
-// RAM
-// HD
-// RAMunits -> Enum
-// HDunits -> Enum
-// EnterpriseId -> REST url path
-// UserId -> not used
-// MasterPath -> (only for bundles) -> imageBundledMaster
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.OVFPackageDto;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.Datacenter;
 
 /**
- * Identified by idEnterprise + ovfURL
+ * The materialization of an {@link OVFPackage} of a given {@link Datacenter} and {@link Enterprise}
+ * .
  */
-@XmlRootElement
-@XmlType(name = "OVFPackageInstance")
-public class OVFPackageInstanceDto extends SingleResourceTransportDto implements Serializable
+@XmlRootElement(name = "ovfInstance")
+@XmlType
+public class OVFPackageInstanceDto extends OVFPackageDto
 {
+    private static final long serialVersionUID = 6994372893155355385L;
 
     /**
-     * OVFEnvelope's URL. Identifies a OVFPackageInstanceDto uniquely for an enterprise
+     * Original location of the {@link OVFPackage}. Identify the entity combined with the
+     * {@link Enterprise} identifier (id of the ApplianceManager EnterpriseRepository). Datacenter
+     * identifier is implicit in the ApplianceManager context.
      */
-    private String ovfUrl;
+    private String ovfId;
 
-    /**
-     * 
-     */
-    private String name;
-
-    private String description;
-
+    /** Virtual disk file (.vmdk) path relative to the repository */
     private String diskFilePath;
 
-    private OVFPackageDiskFormat diskFileFormat;
+    /** Optional. Only for vimages instances (bundles) */
+    private String masterDiskFilePath;
 
-    private Long diskFileSize;
+    /** ############################## */
+    /**
+     * Descriptive attributes. Deprecated attributes (should use the {@link OVFPackageDto} links :
+     * TODO remove them
+     */
+    /**
+     * ##############################
+     */
+
+    private DiskFormatType diskFileFormat;
 
     private Integer cpu;
 
@@ -87,43 +80,18 @@ public class OVFPackageInstanceDto extends SingleResourceTransportDto implements
 
     private Integer idUser;
 
-    /**
-     * Only for bundles
-     */
-    private String masterDiskFilePath;
-
     private String iconPath;
 
     private String categoryName;
 
-    public String getOvfUrl()
+    public String getOvfId()
     {
-        return ovfUrl;
+        return ovfId;
     }
 
-    public void setOvfUrl(String ovfUrl)
+    public void setOvfId(final String ovfId)
     {
-        this.ovfUrl = ovfUrl;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
+        this.ovfId = ovfId;
     }
 
     public String getDiskFilePath()
@@ -131,117 +99,52 @@ public class OVFPackageInstanceDto extends SingleResourceTransportDto implements
         return diskFilePath;
     }
 
-    public void setDiskFilePath(String diskFilePath)
+    public void setDiskFilePath(final String diskFilePath)
     {
         this.diskFilePath = diskFilePath;
     }
 
-    public OVFPackageDiskFormat getDiskFileFormat()
-    {
-        return diskFileFormat;
-    }
-
-    public void setDiskFileFormat(OVFPackageDiskFormat diskFileFormat)
-    {
-        this.diskFileFormat = diskFileFormat;
-    }
-
-    public Long getDiskFileSize()
-    {
-        return diskFileSize;
-    }
-
-    public void setDiskFileSize(Long diskFileSize)
-    {
-        this.diskFileSize = diskFileSize;
-    }
-
-    public Integer getCpu()
-    {
-        return cpu;
-    }
-
-    public void setCpu(Integer cpu)
-    {
-        this.cpu = cpu;
-    }
-
-    public Long getRam()
-    {
-        return ram;
-    }
-
-    public void setRam(Long ram)
-    {
-        this.ram = ram;
-    }
-
-    public Long getHd()
-    {
-        return hd;
-    }
-
-    public void setHd(Long hd)
-    {
-        this.hd = hd;
-    }
-
-    public MemorySizeUnit getRamSizeUnit()
-    {
-        return ramSizeUnit != null ? ramSizeUnit : MemorySizeUnit.MEGABYTE;
-    }
-
-    public void setRamSizeUnit(MemorySizeUnit ramSizeUnit)
-    {
-        this.ramSizeUnit = ramSizeUnit;
-    }
-
-    public MemorySizeUnit getHdSizeUnit()
-    {
-        return hdSizeUnit != null ? hdSizeUnit : MemorySizeUnit.MEGABYTE;
-    }
-
-    public void setHdSizeUnit(MemorySizeUnit hdSizeUnit)
-    {
-        this.hdSizeUnit = hdSizeUnit;
-    }
-
-    public Integer getIdEnterprise()
-    {
-        return idEnterprise;
-    }
-
-    public void setIdEnterprise(Integer idEnterprise)
-    {
-        this.idEnterprise = idEnterprise;
-    }
-
-    public Integer getIdUser()
-    {
-        return idUser;
-    }
-
-    public void setIdUser(Integer idUser)
-    {
-        this.idUser = idUser;
-    }
-
+    /** Optional. Only for vimages instances (bundles) */
     public String getMasterDiskFilePath()
     {
         return masterDiskFilePath;
     }
 
-    public void setMasterDiskFilePath(String masterDiskFilePath)
+    public void setMasterDiskFilePath(final String masterDiskFilePath)
     {
         this.masterDiskFilePath = masterDiskFilePath;
     }
 
+    /** ############################## */
+    /**
+     * Deprecated attributes (should use the {@link OVFPackageDto} links : TODO remove them
+     */
+    /**
+     * ##############################
+     */
+
+    @Deprecated
+    /** Use {@link OVFPackageDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the OVFPackageDto*/
+    public DiskFormatType getDiskFileFormat()
+    {
+        return diskFileFormat;
+    }
+
+    public void setDiskFileFormat(final DiskFormatType diskFileFormat)
+    {
+        this.diskFileFormat = diskFileFormat;
+        this.setDiskFormatTypeUri(diskFileFormat.uri);
+        // TODO FIXME once OVFPackageDto work with Enum
+    }
+
+    @Override
     public String getIconPath()
     {
         return iconPath;
     }
 
-    public void setIconPath(String iconPath)
+    @Override
+    public void setIconPath(final String iconPath)
     {
         this.iconPath = iconPath;
     }
@@ -251,9 +154,93 @@ public class OVFPackageInstanceDto extends SingleResourceTransportDto implements
         return categoryName;
     }
 
-    public void setCategoryName(String categoryName)
+    public void setCategoryName(final String categoryName)
     {
-        this.categoryName = categoryName;
+        this.categoryName = StringUtils.strip(categoryName);
+    }
+
+    /** TODO get from the EnterpriseRepository link */
+    public Integer getIdEnterprise()
+    {
+        return idEnterprise;
+    }
+
+    /** TODO set to the EnterpriseRepository link */
+    public void setIdEnterprise(final Integer idEnterprise)
+    {
+        this.idEnterprise = idEnterprise;
+    }
+
+    @Deprecated
+    // TODO not being used
+    public Integer getIdUser()
+    {
+        return idUser;
+    }
+
+    @Deprecated
+    // TODO not being used
+    public void setIdUser(final Integer idUser)
+    {
+        this.idUser = idUser;
+    }
+
+    /** ############################## */
+    /**
+     * {@link VirtualImage} hardware requirements : TODO move them to OVFPackageDto
+     */
+    /** ############################## */
+
+    public Integer getCpu()
+    {
+        return cpu;
+    }
+
+    public void setCpu(final Integer cpu)
+    {
+        this.cpu = cpu;
+    }
+
+    public Long getRam()
+    {
+        return ram;
+    }
+
+    public void setRam(final Long ram)
+    {
+        this.ram = ram;
+    }
+
+    public Long getHd()
+    {
+        return hd;
+    }
+
+    public void setHd(final Long hd)
+    {
+        this.hd = hd;
+    }
+
+    /** default MB */
+    public MemorySizeUnit getRamSizeUnit()
+    {
+        return ramSizeUnit != null ? ramSizeUnit : MemorySizeUnit.MEGABYTE;
+    }
+
+    public void setRamSizeUnit(final MemorySizeUnit ramSizeUnit)
+    {
+        this.ramSizeUnit = ramSizeUnit;
+    }
+
+    /** default MB */
+    public MemorySizeUnit getHdSizeUnit()
+    {
+        return hdSizeUnit != null ? hdSizeUnit : MemorySizeUnit.MEGABYTE;
+    }
+
+    public void setHdSizeUnit(final MemorySizeUnit hdSizeUnit)
+    {
+        this.hdSizeUnit = hdSizeUnit;
     }
 
 }

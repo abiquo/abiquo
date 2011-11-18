@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.pojo.virtualimage;
 
+import java.util.Date;
+
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.pojo.IPojo;
 
@@ -53,19 +55,17 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
     private Icon icon;
 
-    private Boolean deleted;
-
     private DiskFormatType diskFormatType;
 
     private VirtualImage master;
 
     private Integer idEnterprise;
 
-    private int shared;
+    private boolean shared;
 
     private String ovfId;
 
-    private int stateful;
+    private boolean stateful;
 
     private boolean chefEnabled;
 
@@ -73,6 +73,10 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     private Long diskFileSize;
 
     private String costCode;
+
+    private String creationUser;
+
+    private Date creationDate;
 
     /* ------------- Constructor ------------- */
     public VirtualImage()
@@ -83,9 +87,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         category = new Category();
         repository = new Repository();
         ovfId = "";
-        stateful = 0;
-        deleted = false;
-        shared = 0;
+        stateful = false;
+        shared = false;
         costCode = "";
     }
 
@@ -189,16 +192,6 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.icon = icon;
     }
 
-    public Boolean getDeleted()
-    {
-        return deleted;
-    }
-
-    public void setDeleted(final Boolean deleted)
-    {
-        this.deleted = deleted;
-    }
-
     public DiskFormatType getDiskFormatType()
     {
         return diskFormatType;
@@ -239,12 +232,12 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.ovfId = ovfId;
     }
 
-    public int getStateful()
+    public boolean isStateful()
     {
         return stateful;
     }
 
-    public void setStateful(final int stateful)
+    public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
     }
@@ -254,14 +247,14 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return diskFileSize;
     }
 
-    public void setDiskFileSize(Long diskFileSize)
+    public void setDiskFileSize(final Long diskFileSize)
     {
         this.diskFileSize = diskFileSize;
     }
 
     public boolean isImageStateful()
     {
-        return getStateful() != 0;
+        return isStateful();
     }
 
     public boolean isManaged()
@@ -269,12 +262,12 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return getRepository() != null;
     }
 
-    public int getShared()
+    public boolean isShared()
     {
         return shared;
     }
 
-    public void setShared(int shared)
+    public void setShared(final boolean shared)
     {
         this.shared = shared;
     }
@@ -284,7 +277,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return chefEnabled;
     }
 
-    public void setChefEnabled(boolean chefEnabled)
+    public void setChefEnabled(final boolean chefEnabled)
     {
         this.chefEnabled = chefEnabled;
     }
@@ -294,9 +287,29 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return costCode;
     }
 
-    public void setCostCode(String costCode)
+    public void setCostCode(final String costCode)
     {
         this.costCode = costCode;
+    }
+
+    public String getCreationUser()
+    {
+        return creationUser;
+    }
+
+    public void setCreationUser(final String creationUser)
+    {
+        this.creationUser = creationUser;
+    }
+
+    public Date getCreationDate()
+    {
+        return creationDate;
+    }
+
+    public void setCreationDate(final Date creationDate)
+    {
+        this.creationDate = creationDate;
     }
 
     @Override
@@ -329,12 +342,11 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         virtualImageHB.setHdRequired(hdRequired);
         virtualImageHB.setRamRequired(ramRequired);
         virtualImageHB.setCpuRequired(cpuRequired);
-        virtualImageHB.setDeleted(deleted ? 1 : 0);
         virtualImageHB.setType(diskFormatType.toEnum());
-        virtualImageHB.setStateful(stateful);
+        virtualImageHB.setStateful(isStateful());
         virtualImageHB.setDiskFileSize(diskFileSize);
-        virtualImageHB.setShared(shared);
         virtualImageHB.setChefEnabled(chefEnabled);
+        virtualImageHB.setShared(isShared());
 
         if (master != null)
         {
@@ -348,6 +360,8 @@ public class VirtualImage implements IPojo<VirtualimageHB>
 
         virtualImageHB.setOvfId(ovfId);
         virtualImageHB.setCostCode(costCode);
+        virtualImageHB.setCreationUser(creationUser);
+        virtualImageHB.setCreationDate(creationDate);
 
         return virtualImageHB;
     }

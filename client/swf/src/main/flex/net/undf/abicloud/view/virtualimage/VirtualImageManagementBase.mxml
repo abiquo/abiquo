@@ -236,7 +236,7 @@
                 dispatchEvent(event);
             }
 
-            private function onClickDatacenterList():void
+            public function onClickDatacenterList(refresh:Boolean = false):void
             {
                 //clean the virtual images list when selecting the datacenter
 				//virtualImageList.removeAllChildren();
@@ -244,7 +244,7 @@
                 if (datacenterList.selectedIndex > -1)
                 {
                     selectedDatacenter = datacenterList.selectedItem as DataCenter;
-                    requestRepositoryFormDatacenter(selectedDatacenter);
+                    requestRepositoryFormDatacenter(selectedDatacenter,refresh);
                 }
                 else
                 {
@@ -252,7 +252,7 @@
                 }
             }
 
-            private function requestRepositoryFormDatacenter(datacenter:DataCenter):void
+            private function requestRepositoryFormDatacenter(datacenter:DataCenter,refresh:Boolean):void
             {
                 //Clean old info
                 AbiCloudModel.getInstance().virtualImageManager.repository = null;
@@ -261,6 +261,7 @@
                 var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_DATACENTER_REPOSITORY);
                 event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                 event.datacenter = datacenter;
+                event.refresh = refresh;
                 dispatchEvent(event);
             }
 
@@ -552,6 +553,7 @@
 	            	if(VirtualImage(virtualImageList[i]).master != null){
 	            		if(VirtualImage(virtualImageList[i]).master.id == this._virtualImage.id){
 	            			virtualImageMiniature = new VirtualImageMiniature();
+	            			virtualImageMiniature.datacenter = selectedDatacenter;
 		                    virtualImageMiniature.virtualImage = VirtualImage(virtualImageList[i]);
 		                    virtualImageMiniature.sizeMultiplier = 1.5;
 		                    virtualImageMiniature.editable = true;

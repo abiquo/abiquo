@@ -1,4 +1,11 @@
-use kinton;
+-- WARNING
+-- Please maintain order of delta when merging or adding new lines
+-- 1st -> alter existing schema tables
+-- 2st -> new created schema tables
+-- 3rd -> insert/update data
+-- 4th -> Triggers
+-- 5th -> SQL Procedures
+
 -- ---------------------------------------------- --
 --                  TABLE DROP                    --
 -- ---------------------------------------------- --
@@ -45,6 +52,20 @@ CREATE TABLE  `kinton`.`virtualmachinetrackedstate` (
 --         CONSTRAINTS (alter table, etc)         --
 -- ---------------------------------------------- --
 
+ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `treaty`;
+ALTER TABLE `kinton`.`virtualimage` DROP COLUMN `deleted`;
+
+ALTER TABLE `kinton`.`virtualimage` ADD COLUMN `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `cost_code`,
+ ADD COLUMN `creation_user` varchar(128) NOT NULL AFTER `creation_date`;
+
+ALTER TABLE `kinton`.`ovf_package_list_has_ovf_package`
+ DROP FOREIGN KEY `fk_ovf_package_list_has_ovf_package_ovf_package1`;
+
+ALTER TABLE `kinton`.`ovf_package_list_has_ovf_package` ADD CONSTRAINT `fk_ovf_package_list_has_ovf_package_ovf_package1` FOREIGN KEY `fk_ovf_package_list_has_ovf_package_ovf_package1` (`id_ovf_package`)
+    REFERENCES `ovf_package` (`id_ovf_package`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION;
+
 ALTER TABLE `kinton`.`physicalmachine` DROP COLUMN realram, DROP COLUMN realcpu, DROP COLUMN realStorage, DROP COLUMN hd, DROP COLUMN hdUsed;
 ALTER TABLE `kinton`.`vlan_network` ADD COLUMN `networktype` varchar(15) DEFAULT 'internal';
 ALTER TABLE `kinton`.`virtualdatacenter` ADD COLUMN `default_vlan_network_id` int(11) unsigned DEFAULT NULL; 
@@ -73,6 +94,8 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
 -- First I need to update some rows before to delete the `default_network` field
 UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
+
+UPDATE `kinton`.`virtualimage` set creation_user = 'ABIQUO-BEFORE-2.0', creation_date = CURRENT_TIMESTAMP;
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --
@@ -796,50 +819,47 @@ IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
     END IF;
 END IF;
 END;
-
 --
 |
 --
-
 CREATE TRIGGER `kinton`.`update_datastore_update_stats` AFTER UPDATE ON `kinton`.`datastore`
-FOR EACH ROW BEGIN
-DECLARE idDatacenter INT UNSIGNED;
-DECLARE machineState INT UNSIGNED;
-SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON da.idPhysicalMachine = da.idPhysicalMachine
-WHERE da.idDatastore = NEW.idDatastore;
-IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
-    IF OLD.enabled = 1 THEN
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        ELSEIF NEW.enabled = 0 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
-                cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    ELSE
-        IF NEW.enabled = 1 THEN
-            IF machineState IN (2, 6, 7) THEN
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
-                WHERE cus.idDatacenter = idDatacenter;
-            ELSE
-                UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
-                cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
-            END IF;
-        END IF;
-    END IF;
-END IF;
-END
-
+    FOR EACH ROW BEGIN
+	DECLARE idDatacenter INT UNSIGNED;
+	DECLARE machineState INT UNSIGNED;
+	SELECT pm.idDatacenter, pm.idState INTO idDatacenter, machineState FROM physicalmachine pm LEFT OUTER JOIN datastore_assignment da ON pm.idPhysicalMachine = da.idPhysicalMachine
+	WHERE da.idDatastore = NEW.idDatastore;
+	IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
+	    IF OLD.enabled = 1 THEN
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		ELSEIF NEW.enabled = 0 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal - OLD.size,
+		        cus.vStorageUsed = cus.vStorageUsed - OLD.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    ELSE
+		IF NEW.enabled = 1 THEN
+		    IF machineState IN (2, 6, 7) THEN
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size
+		        WHERE cus.idDatacenter = idDatacenter;
+		    ELSE
+		        UPDATE IGNORE cloud_usage_stats cus SET cus.vStorageTotal = cus.vStorageTotal + NEW.size,
+		        cus.vStorageUsed = cus.vStorageUsed + NEW.usedSize WHERE cus.idDatacenter = idDatacenter;
+		    END IF;
+		END IF;
+	    END IF;
+	END IF;
+    END;
 --
 |
 --

@@ -21,63 +21,82 @@
 
 package com.abiquo.api.services.appslibrary;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.PersistenceException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.persistence.EntityManager;
 
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.APIException;
-import com.abiquo.api.persistence.impl.AppsLibraryDAO;
-import com.abiquo.api.persistence.impl.OVFPackageListDAO;
-import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.EnterpriseService;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
+import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
 import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
+import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 @Service
-@Transactional(readOnly = true)
-public class OVFPackageListService extends DefaultApiService
+public class OVFPackageListService extends DefaultApiServiceWithApplianceManagerClient
 {
-    @Autowired
-    OVFPackageListDAO dao;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageListService.class);
 
     @Autowired
-    AppsLibraryDAO appsLibraryDao;
+    protected AppsLibraryDAO appsLibraryDao;
 
     @Autowired
-    OVFPackageService ovfPackageService;
+    protected OVFPackageRep repo;
 
+    @Autowired
+    protected OVFPackageService ovfPackageService;
+
+    public OVFPackageListService()
+    {
+    }
+
+    public OVFPackageListService(final EntityManager em)
+    {
+        repo = new OVFPackageRep(em);
+        entService = new EnterpriseService(em);
+        appsLibraryDao = new AppsLibraryDAO(em);
+        ovfPackageService = new OVFPackageService(em);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<OVFPackageList> getOVFPackageLists()
     {
-        return dao.findAll();
+        return repo.getAllOVFPackageLists();
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList addOVFPackageList(OVFPackageList ovfPackageList, Integer idEnterprise)
+    public OVFPackageList addOVFPackageList(final OVFPackageList ovfPackageList,
+        final Integer idEnterprise)
     {
         final String name = ovfPackageList.getName();
 
         OVFPackageList prevlist = null;
-
-        try
-        {
-            prevlist = dao.findByName(name, idEnterprise);
-        }
-        catch (PersistenceException e)
-        {
-
-        }
+        Enterprise ent = entService.getEnterprise(idEnterprise);
+        prevlist = repo.findOVFPackageListByNameAndEnterprise(name, ent);
 
         if (prevlist != null) // TODO name unique on BBDD
         {
@@ -85,83 +104,156 @@ public class OVFPackageListService extends DefaultApiService
             flushErrors();
         }
 
-        AppsLibrary appsLibrary = appsLibraryDao.findByEnterprise(idEnterprise);
+        AppsLibrary appsLibrary = appsLibraryDao.findByEnterprise(ent);
 
         ovfPackageList.setAppsLibrary(appsLibrary);
 
+        repo.persistList(ovfPackageList);
+
         for (OVFPackage ovfPackage : ovfPackageList.getOvfPackages())
         {
+            ovfPackage.addToOvfPackageLists(ovfPackageList);
             ovfPackageService.addOVFPackage(ovfPackage, idEnterprise);
         }
 
-        dao.makePersistent(ovfPackageList);
+        repo.updateList(ovfPackageList);
 
         return ovfPackageList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList addOVFPackageList(String repositorySpaceURL, Integer idEnterprise)
+    public OVFPackageList addOVFPackageList(final String repositorySpaceURL,
+        final Integer idEnterprise)
     {
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(idEnterprise); // TODO remove
-
+        // Enterprise ent = entRepo.findById(idEnterprise);
+        // AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         OVFPackageList ovfPackageList =
             obtainOVFPackageListFromRepositorySpaceLocation(repositorySpaceURL);
 
         return addOVFPackageList(ovfPackageList, idEnterprise);
     }
 
-    public OVFPackageList getOVFPackageList(Integer id)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackageList getOVFPackageList(final Integer id)
     {
-        return dao.findById(id);
+        OVFPackageList ovfPackageList = repo.getOVFPackageList(id);
+        if (ovfPackageList == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
+        Hibernate.initialize(ovfPackageList.getOvfPackages());
+        return ovfPackageList;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OVFPackageInstancesStateDto getOVFPackageListInstanceStatus(final Integer id,
+        final Integer datacenterId, final Integer enterpriseId)
+    {
+        checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
+
+        final OVFPackageList ovfPackageList = getOVFPackageList(id);
+        final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
+        final OVFPackageInstancesStateDto stateList = new OVFPackageInstancesStateDto();
+
+        for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
+        {
+            try
+            {
+                stateList.add(amClient.getCurrentOVFPackageInstanceStatus(String
+                    .valueOf(enterpriseId), ovfPack.getUrl()));
+            }
+            catch (Exception e)
+            {
+                OVFPackageInstanceStateDto error = new OVFPackageInstanceStateDto();
+                error.setOvfId(ovfPack.getUrl());
+                error.setStatus(OVFStatusEnumType.ERROR);
+                error.setErrorCause(e.toString());
+
+                stateList.add(error);
+
+                LOGGER.error("Can not obtain the status of the list.{}", e);
+            }
+        }
+
+        return stateList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OVFPackageList updateOVFPackageList(final Integer idEnterprise, final Integer idList)
     {
-        OVFPackageList oldList = dao.findById(idList);
+        OVFPackageList oldList = repo.getOVFPackageList(idList);
 
-        final String listUrl = oldList.getUrl();
-        if (listUrl == null)
+        if (oldList == null)
         {
-            // it can not be updated
-            return oldList;
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
         }
-
-        dao.makeTransient(oldList);
+        final String listUrl = oldList.getUrl();
+        repo.updateList(oldList);
 
         OVFPackageList newList = obtainOVFPackageListFromRepositorySpaceLocation(listUrl);
         return addOVFPackageList(newList, idEnterprise);
     }
 
-    public List<OVFPackageList> getOVFPackageListsByEnterprise(Integer idEnterprise)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<OVFPackageList> getOVFPackageListsByEnterprise(final Integer idEnterprise)
     {
 
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(idEnterprise); // TODO remove
+        Enterprise ent = entService.getEnterprise(idEnterprise);
+        if (ent == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
 
-        return dao.findByEnterprise(idEnterprise);
+        List<OVFPackageList> ovfPackageList = new ArrayList<OVFPackageList>();
+        ovfPackageList = repo.getOVFPackageListsByEnterprise(idEnterprise);
+        return ovfPackageList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList modifyOVFPackageList(Integer ovfPackageListId,
-        OVFPackageList ovfPackageList, Integer idEnterprise)
+    public OVFPackageList modifyOVFPackageList(final Integer ovfPackageListId,
+        final OVFPackageList ovfPackageList, final Integer idEnterprise)
     {
-        OVFPackageList old = dao.findById(ovfPackageListId);
+        OVFPackageList old = repo.getOVFPackageList(ovfPackageListId);
+
+        if (old == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
 
         // TODO - Apply changes and compare etags
         old.setName(ovfPackageList.getName());
         old.setOvfPackages(ovfPackageList.getOvfPackages());
 
-        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(idEnterprise);
+        Enterprise ent = entService.getEnterprise(idEnterprise);
+        AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
+        repo.updateList(old);
 
-        return dao.makePersistent(old);
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_MODIFIED,
+            "OVFPackage list " + ovfPackageList.getName() + " updated");
+        return old;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeOVFPackageList(Integer id)
+    public void removeOVFPackageList(final Integer id)
     {
-        OVFPackageList ovfPackageList = dao.findById(id);
-        dao.makeTransient(ovfPackageList);
+        OVFPackageList ovfPackageList = repo.getOVFPackageList(id);
+
+        if (ovfPackageList == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            flushErrors();
+        }
+
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_DELETED,
+            "Removing ovf package list " + ovfPackageList.getName());
+
+        repo.removeOVFPackageList(ovfPackageList);
+
     }
 
     private OVFPackageList obtainOVFPackageListFromRepositorySpaceLocation(String repositorySpaceURL)
@@ -180,7 +272,7 @@ public class OVFPackageListService extends DefaultApiService
 
         OVFPackageList list = new OVFPackageList();
 
-        RepositorySpace repo;
+        RepositorySpace repo = null;
 
         try
         {
@@ -188,11 +280,28 @@ public class OVFPackageListService extends DefaultApiService
         }
         catch (XMLException e)
         {
-            // TODO
             final String cause =
                 String.format("Can not find the RepositorySpace at [%s]", repositorySpaceURL);
-            final Response response = Response.status(Status.NOT_FOUND).entity(cause).build();
-            throw new WebApplicationException(response);
+            LOGGER.debug(cause);
+            addValidationErrors(APIError.INVALID_OVF_INDEX_XML);
+            flushErrors();
+        }
+        catch (MalformedURLException e)
+        {
+            final String cause =
+                String.format("Invalid repository space identifier : [%s]", repositorySpaceURL);
+            LOGGER.debug(cause);
+            addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
+            flushErrors();
+        }
+
+        catch (IOException e)
+        {
+            final String cause =
+                String.format("Can not open a connection to : [%s]", repositorySpaceURL);
+            LOGGER.debug(cause);
+            addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
+            flushErrors();
         }
 
         final String baseRepositorySpaceURL =
@@ -200,18 +309,12 @@ public class OVFPackageListService extends DefaultApiService
 
         for (OVFDescription description : repo.getOVFDescription())
         {
-            try
-            {
-                OVFPackage pack =
-                    ovfPackageService.ovfPackageFromOvfDescription(description,
-                        baseRepositorySpaceURL);
 
-                list.getOvfPackages().add(pack);
-            }
-            catch (Exception e)
-            {
-                // TODO can not add the ovfpackage
-            }
+            OVFPackage pack =
+                ovfPackageService.ovfPackageFromOvfDescription(description, baseRepositorySpaceURL);
+
+            list.getOvfPackages().add(pack);
+
         }
 
         list.setName(repo.getRepositoryName());
@@ -219,4 +322,5 @@ public class OVFPackageListService extends DefaultApiService
 
         return list;
     }
+
 }

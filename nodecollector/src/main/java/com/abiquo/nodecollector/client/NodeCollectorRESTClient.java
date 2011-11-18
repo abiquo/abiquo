@@ -139,6 +139,11 @@ public class NodeCollectorRESTClient
     protected static String byUUIDPath = "by_uuid";
 
     /**
+     * Path value to filter a virtual system by its name.
+     */
+    protected static String byNamePath = "by_name";
+
+    /**
      * Constructor of the REST client.
      * 
      * @param remoteServiceURI IP Address where the NodeCollector is deployed.
@@ -572,6 +577,65 @@ public class NodeCollectorRESTClient
     {
         String uri =
             appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byUUIDPath, uuid);
+        Resource resource =
+            client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
+                .queryParam(userKey, user).queryParam(passwordKey, password);
+
+        if (aimport != null)
+        {
+            resource.queryParam(AIMPORT, aimport);
+        }
+
+        try
+        {
+            ClientResponse response = resource.accept(MediaType.APPLICATION_XML_TYPE).get();
+
+            if (response.getStatusCode() != 200)
+            {
+                throwAppropiateException(response);
+            }
+
+            return response.getEntity(VirtualSystemDto.class);
+        }
+        catch (ClientRuntimeException e)
+        {
+            if (e.getCause().getCause() instanceof SocketTimeoutException)
+            {
+                throw new ConnectionException(NodeCollectorRESTClient.TIMEOUT);
+            }
+            // Mostly caused by ConnectException
+            throw new ConnectionException(NodeCollectorRESTClient.UNREACHABLE);
+        }
+    }
+
+    /**
+     * Get a unique and known remote Virtual Machine information based on its name.
+     * 
+     * @param name name of the remote virtual machine.
+     * @param hypervisorIP IP address of the remote machine.
+     * @param hypervisorType {@link HypervisorEnumTypeDto} object containgin Hypervisor is running
+     *            remotely.
+     * @param user user to login to the Hypervisor.
+     * @param password password to authenticate to the Hypervisor.
+     * @param aimport port of the aim
+     * @return the Virtual Machine information encapsulated into the {@link VirtualSystemDto}
+     *         object.
+     * @throws BadRequestException if any parameter is missing, wrong or null.
+     * @throws LoginException if the provided user and password don't match with any Hypervisor
+     *             user.
+     * @throws ConnectionException if the remote machine doesn't run the provided hypervisorType
+     *             parameter.
+     * @throws UnprovisionedException if the machine doesn't respond.
+     * @throws CollectorException for unexpected exceptions.
+     * @throws CannotExecuteException
+     */
+    public VirtualSystemDto getRemoteVirtualSystemByName(final String name,
+        final String hypervisorIP, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport) throws BadRequestException, LoginException,
+        ConnectionException, UnprovisionedException, CollectorException, CannotExecuteException
+    {
+        String uri =
+            appendPathToBaseUri(remoteServiceURI, hypervisorIP, virtualSystemPath, byNamePath, name);
         Resource resource =
             client.resource(uri).queryParam(hypervisorKey, hypervisorType.getValue())
                 .queryParam(userKey, user).queryParam(passwordKey, password);

@@ -28,6 +28,8 @@
     creationComplete="onCreationComplete()"
     implements="net.undf.abicloud.view.main.IBodyComponentChildren"
     xmlns:mx="http://www.adobe.com/2006/mxml"
+    hide="onHide()"
+    show="onShow()"
     xmlns:components="net.undf.abicloud.view.infrastructure.components.*"
     xmlns:virtualmachine="net.undf.abicloud.view.infrastructure.components.virtualmachine.*"
     xmlns:physicalmachine="net.undf.abicloud.view.infrastructure.components.physicalmachine.*"
@@ -76,8 +78,23 @@
             [Bindable]
             protected var _dataCenter:DataCenter;
             
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+            
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
+            
+            private function onHide():void
+            {
+            	//Stop Background process
+            	stopBackgroundUpdates();
+            }
+            
+            private function onShow():void
+            {
+            	//Start background process
+            	startBackgroundUpdates();
+            }
 
             public function cleanView():void
             {
@@ -279,6 +296,7 @@
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
+                	this._physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
                     //remove the selected virtual machine reference
                     if(!event.automaticUpdate){
                         virtualMachineList.selectedVirtualMachine = null;
@@ -299,11 +317,16 @@
             
             private function getVirtualMachine(eventInfra:Event = null):void{
             	
-                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
-                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
-                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
-                event.callback = setVirtualMachine;
-                dispatchEvent(event);
+                if(infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is PhysicalMachine)
+                {
+	                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
+	                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
+	                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+	                event.dataCenter = this._dataCenter;
+	                event.rackId = Rack(PhysicalMachine(infrastructureSelector.selectedInfrastructureElement).assignedTo).id;
+	                event.callback = setVirtualMachine;
+	                dispatchEvent(event);
+                }
             }
             
             private function setVirtualMachine(value:ArrayCollection):void{
@@ -575,7 +598,8 @@
              */
             public function checkInfrastructure(event:Event = null):void
             {
-                getRacksByDatacenter();
+                //getRacksByDatacenter();
+                getVirtualMachine();
             }
         ]]>
     </mx:Script>
@@ -626,6 +650,7 @@
         title="@Resource(bundle='Infrastructure', key='LABEL_VM_UPPERCASE')">
 
         <virtualmachine:VirtualMachineList id="virtualMachineList"
+        	hypervisor="{physicalMachineRenderer.hypervisor}"
             width="100%" height="100%"
             label="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_VM_UPPERCASE')}"
             virtualMachineSelected="showVirtualMachine()"/>
@@ -655,6 +680,9 @@
                     physicalMachine="{(infrastructureSelector.selectedInfrastructureElement &amp;&amp; infrastructureSelector.selectedInfrastructureElement is PhysicalMachine) ? infrastructureSelector.selectedInfrastructureElement as PhysicalMachine : null}"/>
 
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
+                	type="INFRASTRUCTURE"
+                	physicalMachine="{this._physicalMachine}"
+                	hypervisor="{physicalMachineRenderer.hypervisor}"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
              

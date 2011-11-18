@@ -32,6 +32,8 @@ package net.undf.abicloud.events
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
     import net.undf.abicloud.vo.service.RemoteService;
+    import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+    import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 
     public class InfrastructureEvent extends Event
     {
@@ -119,13 +121,21 @@ package net.undf.abicloud.events
         
         public static const GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE:String = "getVirtualMachineByPhysicalMachineInfrastructureEvent";
 
-        public static const START_VIRTUALMACHINE:String = "startVirtualMachineInfrastructureElementEvent";
+        public static const START_VIRTUALMACHINE_IN_INFRASTRUCTURE:String = "startVirtualMachineInInfrastructureEvent";
+        
+        public static const START_VIRTUALMACHINE_IN_VAPP:String = "startVirtualMachineInVappInfrastructureEvent";
 
-        public static const PAUSE_VIRTUALMACHINE:String = "pauseVirtualMachineInfrastructureElementEvent";
+        public static const PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE:String = "pauseVirtualMachineInInfrastructureInfrastructureEvent";
+        
+        public static const PAUSE_VIRTUALMACHINE_IN_VAPP:String = "pauseVirtualMachineInVappInfrastructureEvent";
 
-        public static const REBOOT_VIRTUALMACHINE:String = "rebootVirtualMachineInfrastructureElementEvent";
+        public static const REBOOT_VIRTUALMACHINE_IN_INFRASTRUCTURE:String = "rebootVirtualMachineInInfrastructureEvent";
+        
+        public static const REBOOT_VIRTUALMACHINE_IN_VAPP:String = "rebootVirtualMachineInVappInfrastructureEvent";
 
-        public static const SHUTDOWN_VIRTUALMACHINE:String = "shutdownVirtualMachineInfrastructureElementEvent";
+        public static const SHUTDOWN_VIRTUALMACHINE_IN_INFRASTRUCTURE:String = "shutdownVirtualMachineInInfrastructureEvent";
+        
+        public static const SHUTDOWN_VIRTUALMACHINE_IN_VAPP:String = "shutdownVirtualMachineInVappInfrastructureEvent";
 
         public static const FORCE_REFRESH_VIRTUAL_MACHINE_STATE:String = "forceResfreshVirtualMachineStateInfrastructureEvent";
 
@@ -178,6 +188,10 @@ package net.undf.abicloud.events
         public var branch:CustomTreeNode;
         
         public var automaticUpdate:Boolean;
+        
+        public var virtualAppliance:VirtualAppliance;
+        
+        public var virtualDatacenter:VirtualDataCenter;
 
         /* ------------- Constructor ------------- */
         public function InfrastructureEvent(type:String, bubbles:Boolean = true,

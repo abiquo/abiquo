@@ -45,6 +45,8 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         vmGenerator = new VirtualMachineGenerator(getSeed());
     }
 
+    private VirtualImageGenerator virtualImageGenerator;
+
     @Override
     protected InstanceTester<VolumeManagement> createEntityInstanceGenerator()
     {
@@ -156,7 +158,9 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         volume.setVirtualImage(null);
         assertFalse(volume.isStateful());
 
-        volume.setVirtualImage(new VirtualImage(null));
+        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        volume.setVirtualImage(virtualImage);
         assertTrue(volume.isStateful());
     }
 }

@@ -21,74 +21,33 @@
 
 package com.abiquo.appliancemanager.exceptions;
 
+import com.abiquo.am.exceptions.AMError;
 
 /**
  * Thrown when some OVFPackage download fail.
  * 
  * @author apuig
  */
-public class DownloadException extends RepositoryException
+public class DownloadException extends AMException
 {
 
     /** auto-generated serial UID. */
     private static final long serialVersionUID = 5639547252306480733L;
 
-    /** The OVF package ID being download. */
-    protected String ovfId;
-
-    /** The File on the OVF package causing this exception. */
-    protected String file;
-
     public DownloadException(String ovfId, String file, String message)
     {
-        super(message);
-        this.file = file;
-        this.ovfId = ovfId;
+        super(AMError.OVF_DOWNLOAD, String.format("File [%s] on package [%s] failed.\n%s", file,
+            ovfId, message));
     }
 
     public DownloadException(String ovfId, String file, Throwable cause)
     {
-        super(cause);
-        this.file = file;
-        this.ovfId = ovfId;
+        super(AMError.OVF_DOWNLOAD, String.format("File [%s] on package [%s] failed", file, ovfId),
+            cause);
     }
-
 
     public DownloadException(String message, Throwable cause)
     {
-        super(message, cause);
+        super(AMError.OVF_DOWNLOAD, message, cause);
     }
-
-    /**
-     * Gets the OVF package ID being download.
-     */
-    public String getOvfId()
-    {
-        return ovfId;
-    }
-
-    /**
-     * Gets the File on the OVF package causing this exception
-     */
-    public String getFile()
-    {
-        return file;
-    }
-
-    @Override
-    public String toString()
-    {
-    	String cause;
-    	if(getMessage() == null)
-    	{
-    		cause = getCause().getMessage();
-    	}
-    	else
-    	{
-    		cause = getMessage();
-    	}
-
-        return "File [" + file + "] on package [" + ovfId + "] failed duet " + cause;
-    }
-
 }

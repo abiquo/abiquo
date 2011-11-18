@@ -62,7 +62,33 @@
             public static const USED_BY_INFRASTRUCTURE_MANAGEMENT:int = 1;
 
             public static const USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT:int = 2;
+            
+            protected var _physicalMachine:PhysicalMachine;
+            
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+            	this._physicalMachine = value;
+            }
+            
+            protected var _hypervisor:HyperVisor;
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+            	this._hypervisor = value;
+            	this._virtualMachine.assignedTo = this._hypervisor;
+            }
 
+            private var _type:String;
+            
+            public function set type(value:String):void
+            {
+            	this._type = value;
+            }
+            
+            public function get type():String
+            {
+                return this._type;
+            }
 
             //The virtual machine that will be rendered
             [Bindable]
@@ -108,6 +134,7 @@
             
             public function set virtualDatacenter(value:VirtualDataCenter):void{
             	this._virtualDatacenter = value;
+            	dispatchEvent(new Event("virtualDatacenterChange"));
             }
             
             [Bindable(event="virtualDatacenterChange")]
@@ -122,6 +149,7 @@
             
             public function set virtualAppliance(value:VirtualAppliance):void{
                 this._virtualAppliance = value;
+                dispatchEvent(new Event("virtualApplianceChange"));
             }
             
             [Bindable(event="virtualApplianceChange")]
@@ -229,7 +257,16 @@
 
             private function powerOnVirtualMachine():void
             {
-                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+                var event:InfrastructureEvent;
+                if(this._type == "INFRASTRUCTURE")
+                {
+                	event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+                }else
+                {
+                	event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP);
+                	event.virtualAppliance = this._virtualAppliance;
+                	event.virtualDatacenter = this._virtualDatacenter;
+                }
 
                 event.infrastructureElement = this._virtualMachine;
                 dispatchEvent(event);
@@ -241,8 +278,16 @@
                 if (!closeEvent || closeEvent.detail == Alert.YES)
                 {
                     //No confirmation required or user confirmed the power off
-                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE);
-
+                    var event:InfrastructureEvent;
+                    if(this._type == "INFRASTRUCTURE")
+	                {
+	                    event = new InfrastructureEvent(InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+	                }else
+	                {
+	                    event = new InfrastructureEvent(InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_VAPP);
+	                    event.virtualAppliance = this._virtualAppliance;
+	                    event.virtualDatacenter = this._virtualDatacenter;
+	                }
                     event.infrastructureElement = this._virtualMachine;
                     dispatchEvent(event);
                     updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
@@ -273,12 +318,28 @@
                     if (_virtualMachine.state.description == State.PAUSED)
                     {
                         //The virtual machine is paused. We proceed to resume it
-                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE);
+                        if(this._type == "INFRASTRUCTURE")
+	                    {
+	                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+	                    }else
+	                    {
+	                        event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP);
+	                        event.virtualAppliance = this._virtualAppliance;
+	                        event.virtualDatacenter = this._virtualDatacenter;
+	                    }
                     }
                     else if (_virtualMachine.state.description == State.ON)
                     {
                         //The virtual machine is running. We procced to pause it
-                        event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE);
+                        if(this._type == "INFRASTRUCTURE")
+                        {
+                            event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+                        }else
+                        {
+                            event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP);
+                            event.virtualAppliance = this._virtualAppliance;
+                            event.virtualDatacenter = this._virtualDatacenter;
+                        }
                     }
 
                     event.infrastructureElement = this._virtualMachine;
@@ -310,7 +371,16 @@
                 if (!closeEvent || closeEvent.detail == Alert.YES)
                 {
                     //No confirmation required or user confirmed the reboot
-                    var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE);
+                    var event:InfrastructureEvent;
+                    if(this._type == "INFRASTRUCTURE")
+                    {
+                        event = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_INFRASTRUCTURE);
+                    }else
+                    {
+                        event = new InfrastructureEvent(InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_VAPP);
+                        event.virtualAppliance = this._virtualAppliance;
+                        event.virtualDatacenter = this._virtualDatacenter;
+                    }
                     event.infrastructureElement = this._virtualMachine;
                     dispatchEvent(event);
                     updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
@@ -799,7 +869,6 @@
     	id="actionTool"
         width="57" height="100%"
         right="0"
-        verticalAlign="middle"
         verticalGap="0"
         verticalScrollPolicy="off" horizontalScrollPolicy="off"
         enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; this._virtualMachine.state.description != State.LOCKED &amp;&amp; (! this._editMode)}">

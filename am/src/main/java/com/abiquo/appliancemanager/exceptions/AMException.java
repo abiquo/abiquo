@@ -24,29 +24,68 @@
  */
 package com.abiquo.appliancemanager.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import com.abiquo.am.exceptions.AMError;
 
-public class AMException extends WebApplicationException
+public class AMException extends RuntimeException
 {
-    private static final long serialVersionUID = -7905368963874709865L;
 
-    public AMException(final Status status, final String message)
+    final AMError error;
+
+    public AMError getError()
     {
-        super(Response.status(status).entity(message).build());
+        return error;
     }
 
-    public AMException(final Status status, final String message, Throwable cause)
+    public AMException(final AMError error)
     {
-        super(cause, Response.status(status).entity(message).build());
+        super(error.getMessage());
+        this.error = error;
     }
 
-    /***
-     * Internal server error
-     */
-    public AMException(final RepositoryException repoException)
+    public AMException(final AMError error, final String msg)
     {
-        super(Response.status(Status.INTERNAL_SERVER_ERROR).entity(repoException.getLocalizedMessage()).build()); 
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg));
+        this.error = error;
     }
+
+    public AMException(final AMError error, final String msg, final Throwable th)
+    {
+        super(String.format("%s\nDetail:\n%s", error.getMessage(), msg), th);
+        this.error = error;
+    }
+
+    public AMException(final AMError error, final Throwable th)
+    {
+        super(error.getMessage(), th);
+        this.error = error;
+    }
+    
+    
+    
+
+    public static String getErrorMessage(final Integer statusCode, final String fileUrl)
+    {
+
+        if (statusCode == 401)
+        {
+            return String.format("[Unauthorized] You might not have permissions to read "
+                + "the file or folder at the following location: %s", fileUrl);
+        }
+        else if (statusCode == 403)
+        {
+            return String.format("[Forbidden] You might not have permissions to read "
+                + "the file or folder at the following location: %s", fileUrl);
+        }
+        else if (statusCode == 404)
+        {
+            return String.format(
+                "[Not Found] The file or folder at the location: %s does not exist", fileUrl);
+        }
+        else
+        {
+            return String.format("%d -  at : %s", statusCode, fileUrl);
+        }
+    }
+    
+
 }

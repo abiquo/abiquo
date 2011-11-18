@@ -22,31 +22,85 @@ package com.abiquo.abiserver.appslibrary.stub;
 
 import java.util.List;
 
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualimage.Category;
+import com.abiquo.abiserver.pojo.virtualimage.Icon;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
+import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 public interface AppsLibraryStub
 {
 
-    List<String> getOVFPackageListName(final Integer idEnterprise);
+    /**
+     * OVFPackages
+     */
+    public DataResult<List<String>> getOVFPackageListName(final Integer idEnterprise);
 
-    OVFPackageListDto getOVFPackageList(final Integer idEnterprise, final String nameOVFPackageList);
+    DataResult<OVFPackageList> getOVFPackageList(final Integer idEnterprise,
+        final String nameOVFPackageList);
 
-    OVFPackageListDto createOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> createOVFPackageList(final Integer idEnterprise,
         final String ovfpackageListURL);
 
-    OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> refreshOVFPackageList(final Integer idEnterprise,
         final String nameOvfpackageList);
 
-    void deleteOVFPackageList(final Integer idEnterprise, final String nameOvfpackageList);
+    public BasicResult deleteOVFPackageList(final Integer idEnterprise,
+        final String nameOvfpackageList);
+
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
 
     /**
-     * Recupera la
-     * 
-     * @param idEnterprise
-     * @param nameOVFPackageList
-     * @return
+     * ICONS
      */
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
-        final String nameOVFPackageList);
+
+    public DataResult<List<Icon>> getIcons();
+
+    public DataResult<Icon> createIcon(final IconDto icon);
+
+    public BasicResult editIcon(final Icon icon);
+
+    public BasicResult deleteIcon(final Integer idIcon);
+
+    /**
+     * CATEGORIES
+     */
+
+    public DataResult<List<Category>> getCategories();
+
+    public DataResult<Category> createCategory(final CategoryDto categoryDto);
+
+    public BasicResult deleteCategory(final Integer idCategory);
+
+    /* 
+     * DISK FORMMAT TYPES
+     */
+
+    public DataResult<List<DiskFormatType>> getDiskFormatTypes();
+
+    /**
+     * API will update the {@link OVFPackageInstanceStateDto} the creation state in the provided
+     * datacenter of the (AM datacenter communication)
+     */
+
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
+        String nameOVFPackageList, Integer idEnterprise, Integer datacenterId);
+
+    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(List<String> ovfUrls,
+        Integer idEnterprise, Integer datacenterId);
+
+    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId);
+
+    public BasicResult installOVFPackagesInDatacenter(List<String> ovfUrls, Integer idEnterprise,
+        Integer datacenterId);
+
+    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
+        Integer idEnterprise, Integer datacenterId);
 }

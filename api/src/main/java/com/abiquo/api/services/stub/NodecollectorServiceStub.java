@@ -19,27 +19,6 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * Abiquo premium edition
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.api.services.stub;
 
 import java.util.ArrayList;
@@ -67,8 +46,8 @@ import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -277,7 +256,7 @@ public class NodecollectorServiceStub extends DefaultApiService
         Hypervisor hypervisor =
             machine.createHypervisor(hypType, hypervisorIp.toString(), hypervisorIp.toString(),
                 port, user, password);
-        machine.setHypervisor(hypervisor);
+        // machine.setHypervisor(hypervisor);
 
         return machine;
 
@@ -343,7 +322,133 @@ public class NodecollectorServiceStub extends DefaultApiService
         flushErrors();
 
         return null;
+    }
 
+    /**
+     * Return kind of hypervisor API the remote machine through the
+     * {@link NodeCollectorPremiumRESTClient} client.
+     * 
+     * @param nodecollector object nodecollector used in the datacenter.
+     * @param hypervisorIp ip address of the hypervisor.
+     * @return hypType kind of hypervisor API of remote machine.
+     * @throws LoginException
+     */
+    public VirtualMachine getRemoteVirtualMachineByUUID(final RemoteService nodecollector,
+        final String hypervisorIp, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport, final String uuid)
+    {
+        NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
+
+        try
+        {
+            VirtualSystemDto vs =
+                restCli.getRemoteVirtualSystemByUUID(uuid, hypervisorIp, hypervisorType, user,
+                    password, aimport);
+
+            VirtualMachine vm = transportVSToVM(vs);
+
+            return vm;
+        }
+        catch (BadRequestException e)
+        {
+            // InternalServerError -> A Bad Request NEVER should be thrown from here.
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (LoginException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
+        }
+        catch (ConnectionException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_CONNECTION_EXCEPTION);
+        }
+        catch (UnprovisionedException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_VIRTUAL_MACHINE_NOT_FOUND);
+        }
+        catch (CollectorException e)
+        {
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (CannotExecuteException e)
+        {
+            addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
+            flushErrors();
+        }
+
+        flushErrors();
+
+        return null;
+    }
+
+    /**
+     * Queries for a single virtual machine to the nodecollector based on its name.
+     * 
+     * @param nodecollector nodecollector remote service to call.
+     * @param hypervisorIp ip to the remote physical machine
+     * @param hypervisorType kind of hypervisor running
+     * @param user user to log in into the remote hypervisor.
+     * @param password password to authenticate to the remote hypervisor.
+     * @param aimport port to connect (libvirt based hypervisors only)
+     * @param name name of the virtual machine we look for.
+     * @return a {@link VirtualMachine} object with the requested machine.
+     */
+    public VirtualMachine getRemoteVirtualMachineByName(final RemoteService nodecollector,
+        final String hypervisorIp, final HypervisorType hypervisorType, final String user,
+        final String password, final Integer aimport, final String name)
+    {
+        NodeCollectorRESTClient restCli = initializeRESTClient(nodecollector);
+
+        try
+        {
+            VirtualSystemDto vs =
+                restCli.getRemoteVirtualSystemByName(name, hypervisorIp, hypervisorType, user,
+                    password, aimport);
+
+            VirtualMachine vm = transportVSToVM(vs);
+
+            return vm;
+        }
+        catch (BadRequestException e)
+        {
+            // InternalServerError -> A Bad Request NEVER should be thrown from here.
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (LoginException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_BAD_CREDENTIALS_TO_MACHINE);
+        }
+        catch (ConnectionException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_CONNECTION_EXCEPTION);
+        }
+        catch (UnprovisionedException e)
+        {
+            logger.debug(e.getMessage());
+            addConflictErrors(APIError.NC_VIRTUAL_MACHINE_NOT_FOUND);
+        }
+        catch (CollectorException e)
+        {
+            logger.error(e.getMessage());
+            addUnexpectedErrors(APIError.NC_UNEXPECTED_EXCEPTION);
+        }
+        catch (CannotExecuteException e)
+        {
+            addConflictErrors(new CommonError(APIError.STATUS_CONFLICT.getCode(), e.getMessage()));
+            flushErrors();
+        }
+
+        flushErrors();
+
+        return null;
     }
 
     public Boolean isStonithUp(final RemoteService nodecollector, final String ip,
@@ -440,7 +545,7 @@ public class NodecollectorServiceStub extends DefaultApiService
 
     /**
      * Transform the NodeCollector's enum state {@link HostStatusEnumType} to Server enum state
-     * {@link State}
+     * {@link MachineState}
      * 
      * @param status status of the nodecollector's retrieval.
      * @return
@@ -473,62 +578,84 @@ public class NodecollectorServiceStub extends DefaultApiService
      */
     private List<VirtualMachine> transportVSCollectionToVMs(final VirtualSystemCollectionDto vsc)
     {
-        long MEGABYTE = 1024L * 1024L;
 
         List<VirtualMachine> vms = new ArrayList<VirtualMachine>();
 
         for (VirtualSystemDto vs : vsc.getVirtualSystems())
         {
-            VirtualMachine vm =
-                new VirtualMachine(vs.getName(), null, null, null, null, UUID.fromString(vs
-                    .getUuid()), VirtualMachine.NOT_MANAGED);
+            vms.add(transportVSToVM(vs));
 
-            vm.setCpu(new Long(vs.getCpu()).intValue());
-            vm.setRam(new Long(vs.getRam() / MEGABYTE).intValue());
-            vm.setVdrpPort(new Long(vs.getVport()).intValue());
-            vm.setState(VirtualMachineState.valueOf(vs.getStatus().value()));
-            vm.setDisks(new ArrayList<DiskManagement>());
-            for (ResourceType rt : vs.getResources())
+        }
+
+        return vms;
+    }
+
+    /**
+     * Returns a single virtual machine from a virtual system.
+     * 
+     * @param vs NodeCollector's Virtual System.
+     * @return the transformed {@link VirtualMachine} object.
+     */
+    protected VirtualMachine transportVSToVM(final VirtualSystemDto vs)
+    {
+
+        long MEGABYTE = 1024L * 1024L;
+
+        VirtualMachine vm =
+            new VirtualMachine(vs.getName(),
+                null,
+                null,
+                null,
+                null,
+                UUID.fromString(vs.getUuid()),
+                VirtualMachine.NOT_MANAGED);
+
+        vm.setCpu(new Long(vs.getCpu()).intValue());
+        vm.setRam(new Long(vs.getRam() / MEGABYTE).intValue());
+        vm.setVdrpPort(new Long(vs.getVport()).intValue());
+        vm.setState(VirtualMachineState.valueOf(vs.getStatus().value()));
+        vm.setDisks(new ArrayList<DiskManagement>());
+        for (ResourceType rt : vs.getResources())
+        {
+            if (rt.getLabel().equals("SYSTEM DISK"))
             {
-                if (rt.getLabel().equals("SYSTEM DISK"))
+                long bytesHD = rt.getUnits();
+                vm.setHdInBytes(bytesHD);
+
+                if (StringUtils.hasText(rt.getAddress()) && StringUtils.hasText(rt.getConnection()))
                 {
-                    long bytesHD = rt.getUnits();
-                    vm.setHdInBytes(bytesHD);
-
-                    if (StringUtils.hasText(rt.getAddress())
-                        && StringUtils.hasText(rt.getConnection()))
-                    {
-                        Datastore ds = new Datastore();
-                        ds.setDirectory(rt.getAddress());
-                        ds.setRootPath(rt.getConnection());
-                        ds.setName(rt.getElementName());
-                        vm.setDatastore(ds);
-                    }
-
-                    VirtualImage vi = new VirtualImage(null);
-                    VirtualDiskEnumType diskFormatType =
-                        VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
-                    vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
-                    if (diskFormatType.equals(VirtualDiskEnumType.STATEFUL))
-                    {
-                        vi.setStateful(1);
-                    }
-                    vm.setVirtualImage(vi);
-                    vm.setHdInBytes(rt.getUnits());
+                    Datastore ds = new Datastore();
+                    ds.setDirectory(rt.getAddress());
+                    ds.setRootPath(rt.getConnection());
+                    ds.setName(rt.getElementName());
+                    vm.setDatastore(ds);
                 }
-                else
+
+                VirtualImage vi = new VirtualImage(); // XXX this is not stored in the DDBB
+                VirtualDiskEnumType diskFormatType =
+                    VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
+                vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
+                vi.setPath(rt.getAddress());
+                if (diskFormatType.equals(VirtualDiskEnumType.STATEFUL))
                 {
                     DiskManagement disky =
                         new DiskManagement.SystemDisk(null, rt.getUnits() * MEGABYTE);
                     disky.setSizeInMb(rt.getUnits() * MEGABYTE);
                     vm.getDisks().add(disky);
                 }
+                vi.setDiskFileSize(rt.getUnits());
+                vm.setVirtualImage(vi);
+                vm.setHdInBytes(rt.getUnits());
             }
-
-            vms.add(vm);
+            else
+            {
+                DiskManagement disky =
+                    new DiskManagement(null, null, null, rt.getUnits() * MEGABYTE, 0);
+                disky.setSizeInMb(rt.getUnits() * MEGABYTE);
+                vm.getDisks().add(disky);
+            }
         }
 
-        return vms;
+        return vm;
     }
-
 }

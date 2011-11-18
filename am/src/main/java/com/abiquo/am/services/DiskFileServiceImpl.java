@@ -20,22 +20,20 @@
  */
 package com.abiquo.am.services;
 
+import static com.abiquo.am.services.OVFPackageConventions.customEncode;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.abiquo.am.services.DiskFileService;
-import com.abiquo.appliancemanager.config.AMConfiguration;
+import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
 
 /**
  * Default implementation of the {@link DiskFileService}.
@@ -43,66 +41,67 @@ import com.abiquo.appliancemanager.config.AMConfigurationManager;
  * @author ibarrera
  */
 @Service
-public class DiskFileServiceImpl extends OVFPackageConventions implements DiskFileService
+public class DiskFileServiceImpl implements DiskFileService
 {
     /** The logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskFileServiceImpl.class);
 
-    /** The module configuration. */
-    private AMConfiguration config;
-
     /** The path to the local repository. */
-    private String repositoryPath;
+    private final String repositoryPath = AMConfigurationManager.getInstance().getAMConfiguration()
+        .getRepositoryPath();
 
     /**
      * Creates the service.
      */
     public DiskFileServiceImpl()
     {
-        this.config = AMConfigurationManager.getInstance().getAMConfiguration();
-        this.repositoryPath = this.config.getRepositoryPath();
-
-        if (!this.repositoryPath.endsWith("/"))
-        {
-            this.repositoryPath += "/";
-        }
     }
 
     @Override
-    public String get(final String path) throws FileNotFoundException
+    public String get(final String path)
     {
-        File file = new File(repositoryPath + path);
-
-        if (!file.exists())
-        {
-            throw new FileNotFoundException();
-        }
-
-        return file.getPath();
+        return getFile(path).getPath();
     }
 
     @Override
-    public void copy(String source, final String destination) throws FileNotFoundException,
-        IOException
+    public void copy(String source, final String destination)
     {
         source = customEncode(source); // source is automatic decoded ( :9000 -> %3A9000)
 
         LOGGER.info("Copying disk file from [{}] to [{}]", source, destination);
 
-        FileUtils.copyFile(new File(repositoryPath + source),
-            new File(repositoryPath + destination));
+        final File sourceFile = getFile(source);
+        final File destinationFile = new File(repositoryPath + destination);
+
+        if (destinationFile.exists())
+        {
+            throw new AMException(AMError.DISK_FILE_ALREADY_EXIST, destination);
+        }
+
+        try
+        {
+            FileUtils.copyFile(sourceFile, destinationFile);
+        }
+        catch (IOException e)
+        {
+            throw new AMException(AMError.DISK_FILE_COPY_ERROR, e);
+        }
 
         LOGGER.info("Copy process finished");
     }
 
     /**
-     * Gets the config.
-     * 
-     * @return the config
+     * Or return DISK_FILE_NOT_FOUND
      */
-    public AMConfiguration getConfig()
+    private File getFile(final String path)
     {
-        return config;
-    }
+        File file = new File(FilenameUtils.concat(repositoryPath, path));
 
+        if (!file.exists())
+        {
+            throw new AMException(AMError.DISK_FILE_NOT_FOUND, path);
+        }
+
+        return file;
+    }
 }

@@ -21,36 +21,27 @@
 
 package com.abiquo.api.services.cloud;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.security.context.SecurityContextHolder;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractUnitTest;
 import com.abiquo.api.common.SysadminAuthentication;
-import com.abiquo.api.spring.security.SecurityService;
-import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualMachineState;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
-import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
-import com.abiquo.server.core.infrastructure.Datacenter;
 
+@Deprecated
+// Old WS-MAN communication
 public class VirtualMachineServiceTest extends AbstractUnitTest
 {
     @BeforeMethod
     public void setupSysadmin()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
-        Privilege p1 = new Privilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES);
-        Privilege p2 = new Privilege(SecurityService.USERS_MANAGE_USERS);
+        Privilege p1 = new Privilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES);
+        Privilege p2 = new Privilege(Privileges.USERS_MANAGE_USERS);
         Role role = roleGenerator.createInstance(p1, p2);
         User user = userGenerator.createInstance(e, role, "sysadmin", "sysadmin");
 
@@ -59,41 +50,41 @@ public class VirtualMachineServiceTest extends AbstractUnitTest
         SecurityContextHolder.getContext().setAuthentication(new SysadminAuthentication());
 
     }
-
-    @Test(enabled = false)
-    public void changeState()
-    {
-        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
-        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        VirtualMachine virtualMachine = vmGenerator.createInstance(enterprise);
-        virtualMachine.setState(VirtualMachineState.ON);
-
-        Role role = roleGenerator.createInstance();
-        User user = userGenerator.createInstance(enterprise, role);
-
-        VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, enterprise);
-        VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc1);
-
-        VirtualImage image = virtualImageGenerator.createInstance(vdc1.getEnterprise());
-
-        virtualMachine.getHypervisor().getMachine().setDatacenter(datacenter);
-        virtualMachine.getHypervisor().getMachine().getRack().setDatacenter(datacenter);
-        virtualMachine.setUser(user);
-        NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, virtualMachine);
-
-        setup(enterprise, user.getRole(), user, datacenter, vdc1, virtualMachine.getHypervisor()
-            .getMachine().getRack(), virtualMachine.getHypervisor().getMachine(),
-            virtualMachine.getHypervisor(), virtualMachine.getVirtualImage(), virtualMachine, vapp,
-            image, node);
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        VirtualMachineService service = new VirtualMachineService(em);
-
-        service.changeVirtualMachineState(virtualMachine.getId(), vapp.getId(), vdc1.getId(),
-            VirtualMachineState.OFF);
-
-        VirtualMachine vm = service.getVirtualMachine(virtualMachine.getId());
-        Assert.assertEquals(vm.getState(), VirtualMachineState.OFF);
-    }
+    //
+    // @Test(enabled = false)
+    // public void changeState()
+    // {
+    // Datacenter datacenter = datacenterGenerator.createUniqueInstance();
+    // Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+    // VirtualMachine virtualMachine = vmGenerator.createInstance(enterprise);
+    // virtualMachine.setState(VirtualMachineState.ON);
+    //
+    // Role role = roleGenerator.createInstance();
+    // User user = userGenerator.createInstance(enterprise, role);
+    //
+    // VirtualDatacenter vdc1 = vdcGenerator.createInstance(datacenter, enterprise);
+    // VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc1);
+    //
+    // VirtualImage image = virtualImageGenerator.createInstance(vdc1.getEnterprise());
+    //
+    // virtualMachine.getHypervisor().getMachine().setDatacenter(datacenter);
+    // virtualMachine.getHypervisor().getMachine().getRack().setDatacenter(datacenter);
+    // virtualMachine.setUser(user);
+    // NodeVirtualImage node = new NodeVirtualImage("node_test", vapp, image, virtualMachine);
+    //
+    // setup(enterprise, user.getRole(), user, datacenter, vdc1, virtualMachine.getHypervisor()
+    // .getMachine().getRack(), virtualMachine.getHypervisor().getMachine(),
+    // virtualMachine.getHypervisor(), virtualMachine.getVirtualImage(), virtualMachine, vapp,
+    // image, node);
+    //
+    // EntityManager em = getEntityManagerWithAnActiveTransaction();
+    // VirtualMachineService service = new VirtualMachineService(em);
+    //
+    // service.changeVirtualMachineState(virtualMachine.getId(), vapp.getId(), vdc1.getId(),
+    // VirtualMachineState.OFF);
+    //
+    // VirtualMachine vm = service.getVirtualMachine(virtualMachine.getId());
+    // Assert.assertEquals(vm.getState(), VirtualMachineState.OFF);
+    // }
 
 }

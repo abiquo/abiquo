@@ -387,7 +387,8 @@ public class InfrastructureRep extends DefaultRepBase
 
     public Machine findMachineByIp(final Integer datacenterId, final String ip)
     {
-        return this.machineDao.findByIp(datacenterId, ip);
+        Datacenter datacenter = findById(datacenterId);
+        return this.machineDao.findByIp(datacenter, ip);
     }
 
     public void insertMachine(final Machine machine)
@@ -426,32 +427,36 @@ public class InfrastructureRep extends DefaultRepBase
     public void insertHypervisor(final Hypervisor hypervisor)
     {
         assert hypervisor != null;
+        assert hypervisor.getMachine() != null;
+        assert hypervisor.getMachine().getDatacenter() != null;
         assert !hypervisorDao.isManaged(hypervisor);
-        assert !existAnyHypervisorWithIp(hypervisor.getIp());
-        assert !existAnyHypervisorWithIpService(hypervisor.getIpService());
+        assert !existAnyHypervisorWithIpServiceInDatacenter(hypervisor.getIp(), hypervisor
+            .getMachine().getDatacenter().getId());
+        assert !existAnyHypervisorWithIpServiceInDatacenter(hypervisor.getIpService(), hypervisor
+            .getMachine().getDatacenter().getId());
 
         hypervisorDao.persist(hypervisor);
         hypervisorDao.flush();
 
-        Machine machine = hypervisor.getMachine();
-
-        machine.setHypervisor(hypervisor);
-        updateMachine(machine);
+        // Machine machine = hypervisor.getMachine();
+        //
+        // machine.setHypervisor(hypervisor);
+        // updateMachine(machine);
     }
 
-    public boolean existAnyHypervisorWithIp(final String ip)
-    {
-        assert !StringUtils.isEmpty(ip);
-
-        return hypervisorDao.existsAnyWithIp(ip);
-    }
-
-    public boolean existAnyHypervisorWithIpService(final String ipService)
-    {
-        assert !StringUtils.isEmpty(ipService);
-
-        return hypervisorDao.existsAnyWithIpService(ipService);
-    }
+    // public boolean existAnyHypervisorWithIp(final String ip)
+    // {
+    // assert !StringUtils.isEmpty(ip);
+    //
+    // return hypervisorDao.existsAnyWithIp(ip);
+    // }
+    //
+    // public boolean existAnyHypervisorWithIpService(final String ipService)
+    // {
+    // assert !StringUtils.isEmpty(ipService);
+    //
+    // return hypervisorDao.existsAnyWithIpService(ipService);
+    // }
 
     public List<Datastore> findMachineDatastores(final Machine machine)
     {
@@ -663,6 +668,12 @@ public class InfrastructureRep extends DefaultRepBase
         return repositoryDao.findByDatacenter(datacenter);
     }
 
+    public com.abiquo.server.core.infrastructure.Repository findRepositoryByLocation(
+        final String location)
+    {
+        return repositoryDao.findByRepositoryLocation(location);
+    }
+
     public boolean existDeployedVirtualMachines(final Datacenter datacenter)
     {
         assert datacenter != null;
@@ -735,6 +746,12 @@ public class InfrastructureRep extends DefaultRepBase
         return hypervisorDao.existsAnyWithIpAndDatacenter(ip, datacenterId);
     }
 
+    public boolean existAnyHypervisorWithIpServiceInDatacenter(final String ip,
+        final Integer datacenterId)
+    {
+        return hypervisorDao.existsAnyWithIpServiceAndDatacenter(ip, datacenterId);
+    }
+
     /**
      * Return all the public VLANs by Datacenter.
      * 
@@ -796,6 +813,17 @@ public class InfrastructureRep extends DefaultRepBase
     public void updateLimits(final DatacenterLimits dclimits)
     {
         datacenterLimitDao.flush();
+    }
+
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        virtualMachineDao.deleteNotManagedVirtualMachines(hypervisor);
+    }
+
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer vmId)
+    {
+        return virtualMachineDao.findVirtualMachineByHypervisor(hypervisor, vmId);
     }
 
 }

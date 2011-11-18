@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.abiquo.server.core.cloud.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
 

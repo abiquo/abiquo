@@ -45,6 +45,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.DataCenter;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
             import mx.controls.Alert;
@@ -139,6 +140,18 @@
                 this._zoomEffect.zoomWidthTo = 1.2;
 
             }
+            
+            private var _datacenter:DataCenter;
+            
+            public function set datacenter(value:DataCenter):void
+            {
+                this._datacenter = value;
+            }
+
+            public function get datacenter():DataCenter
+            {
+                return this._datacenter;
+            }
 
             public function set virtualImage(vI:VirtualImage):void
             {
@@ -214,6 +227,8 @@
                 {
                     //Announcing that user wants to delete a Virtual Image
                     var event:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.DELETE_VIRTUAL_IMAGE);
+                    event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    event.datacenterId = this._datacenter.id;
                     event.virtualImage = this._virtualImage;
                     dispatchEvent(event);
                 }

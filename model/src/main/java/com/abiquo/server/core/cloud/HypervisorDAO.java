@@ -41,26 +41,12 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         super(Hypervisor.class);
     }
 
-    public HypervisorDAO(EntityManager entityManager)
+    public HypervisorDAO(final EntityManager entityManager)
     {
         super(Hypervisor.class, entityManager);
     }
 
-    public boolean existsAnyWithIp(String ip)
-    {
-        assert !StringUtils.isEmpty(ip);
-
-        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_PROPERTY));
-    }
-
-    public boolean existsAnyWithIpService(String ip)
-    {
-        assert !StringUtils.isEmpty(ip);
-
-        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_SERVICE_PROPERTY));
-    }
-
-    private Criterion sameIp(String ip, String propertyName)
+    private Criterion sameIp(final String ip, final String propertyName)
     {
         assert !StringUtils.isEmpty(ip);
         return Restrictions.eq(propertyName, ip);
@@ -71,7 +57,7 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         "com.abiquo.server.core.cloud.Hypervisor h " + //
         "WHERE vm.hypervisor.id = :idHyper ";
 
-    public List<Integer> getUsedPorts(int idHyper)
+    public List<Integer> getUsedPorts(final int idHyper)
     {
         Query query = getSession().createQuery(QUERY_USED_VDRP);
         query.setParameter("idHyper", idHyper);
@@ -94,9 +80,33 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
      * @return false is there is no other {@link Hypervisor} with same ip and same datacenter
      *         boolean
      */
-    public boolean existsAnyWithIpAndDatacenter(String ip, Integer datacenterId)
+    public boolean existsAnyWithIpAndDatacenter(final String ip, final Integer datacenterId)
     {
         Query query = getSession().createQuery(QUERY_SAME_IP_DATACENTER);
+        query.setParameter("ip", ip);
+        query.setParameter("datacenterId", datacenterId);
+
+        return !query.list().isEmpty();
+    }
+
+    /**
+     * Returns {@link Hypervisor} with same ipService and in the same datacenter.
+     */
+    private final String QUERY_SAME_IP_SERVICE_DATACENTER = "SELECT h " + //
+        "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE h.ipService = :ip AND h.machine.datacenter.id = :datacenterId";
+
+    /**
+     * {@link Hypervisor} with same ipService and in the same datacenter.
+     * 
+     * @param ip {@link Hypervisor} ip.
+     * @param datacenterId {@link Hypervisor} machines datacenter.
+     * @return false is there is no other {@link Hypervisor} with same ipService and same datacenter
+     *         boolean
+     */
+    public boolean existsAnyWithIpServiceAndDatacenter(final String ip, final Integer datacenterId)
+    {
+        Query query = getSession().createQuery(QUERY_SAME_IP_SERVICE_DATACENTER);
         query.setParameter("ip", ip);
         query.setParameter("datacenterId", datacenterId);
 

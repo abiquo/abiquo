@@ -51,9 +51,6 @@ public class VirtualMachineRep extends DefaultRepBase
     private RasdManagementDAO rasdDao;
 
     @Autowired
-    private VirtualImageDAO imageDao;
-
-    @Autowired
     private RunlistElementDAO chefDao;
 
     public VirtualMachineRep()
@@ -117,6 +114,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findById(vmId);
     }
 
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer virtualMachineId)
+    {
+        return dao.findVirtualMachineByHypervisor(hypervisor, virtualMachineId);
+    }
+
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         dao.deleteNotManagedVirtualMachines(hypervisor);
@@ -152,18 +155,6 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         this.dao.persist(virtualMachine);
         return virtualMachine;
-    }
-
-    /**
-     * Retrieve a {@link VirtualImage}.
-     * 
-     * @param virtualImage id.
-     * @return
-     */
-    public VirtualImage getVirtualImage(final Integer id)
-    {
-
-        return this.imageDao.findById(id);
     }
 
     public void insert(final VirtualMachine virtualMachine)

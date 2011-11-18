@@ -46,10 +46,16 @@ import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
+import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
+import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -64,8 +70,11 @@ import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -158,6 +167,15 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_SINGLE, DatacenterResource.ACTION_DISCOVER_REL,
+            params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE,
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
+            DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -192,6 +210,13 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
         final Boolean managedRack, final MachineDto machine)
     {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return this.buildMachineLinks(datacenterId, rackId, managedRack, machine, builder);
+    }
+
+    public List<RESTLink> buildMachineLinks(final Integer datacenterId, final Integer rackId,
+        final Boolean managedRack, final MachineDto machine, final AbiquoLinkBuilder builder)
+    {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
         Map<String, String> params = new HashMap<String, String>();
@@ -199,14 +224,14 @@ public class RESTBuilder implements IRESTBuilder
         params.put(RackResource.RACK, rackId.toString());
         params.put(MachineResource.MACHINE, machine.getId().toString());
 
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RackResource.class, RackResource.RACK, params));
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
+        links.add(builder.buildRestLink(VirtualMachinesInfrastructureResource.class,
+            VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM, params));
         links.add(builder.buildActionLink(MachineResource.class,
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+            MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
 
         if (managedRack)
         {
@@ -392,7 +417,8 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageList.getId().toString());
 
-        links.add(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT, params));
+        ovfPackageList.addEditLink(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT,
+            params));
 
         return links;
     }
@@ -411,8 +437,7 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(OVFPackageResource.OVF_PACKAGE, ovfPackage.getId().toString());
-
-        links.add(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+        ovfPackage.addEditLink(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
 
         return links;
     }
@@ -596,12 +621,24 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildSystemPropertyLinks(final SystemPropertyDto systemProperty)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
-
         Map<String, String> params = new HashMap<String, String>();
         params.put(SystemPropertyResource.SYSTEM_PROPERTY, systemProperty.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(SystemPropertyResource.class, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildIconLinks(final IconDto icon)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(IconResource.ICON, icon.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(IconResource.class, REL_EDIT, params));
 
         return links;
     }
@@ -664,6 +701,112 @@ public class RESTBuilder implements IRESTBuilder
         links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled));
 
         return links;
+    }
+
+    @Override
+    public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer repoId)
+    {
+
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> paramsDc = new HashMap<String, String>();
+        paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
+        links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
+            paramsDc));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, repoId.toString());
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(VirtualImagesResource.class,
+            VirtualImagesResource.VIRTUAL_IMAGES_PATH, params));
+
+        return links;
+    }
+
+    protected List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualImage image, final VirtualImage master, final AbiquoLinkBuilder builder)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> paramsDc = new HashMap<String, String>();
+        paramsDc.put(DatacenterResource.DATACENTER, dcId.toString());
+
+        links.add(builder.buildRestLink(DatacenterResource.class, DatacenterResource.DATACENTER,
+            paramsDc));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
+            params));
+
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
+            DatacenterRepositoryResource.DATACENTER_REPOSITORY, params));
+
+        params.put(CategoryResource.CATEGORY, image.getCategory().getId().toString());
+        RESTLink categoryLink =
+            builder.buildRestLink(CategoryResource.class, CategoryResource.CATEGORY, params);
+        categoryLink.setTitle(image.getCategory().getName());
+        links.add(categoryLink);
+
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, image.getId().toString());
+        RESTLink imageLink = builder.buildRestLink(VirtualImageResource.class, REL_EDIT, params);
+        imageLink.setTitle(image.getName());
+        links.add(imageLink);
+
+        if (image.getIcon() != null)
+        {
+            params.put(IconResource.ICON, image.getIcon().getId().toString());
+            RESTLink iconLink =
+                builder.buildRestLink(IconResource.class, IconResource.ICON, params);
+            iconLink.setTitle(image.getIcon().getPath()); // TODO do not use title (altRef)
+            links.add(iconLink);
+        }
+
+        // TODO: How to build a link for an imported one??
+
+        if (master != null)
+        {
+            // Master's enterprise may differ from the current virtual image.
+            // Datacenter repository id will be the same (the id of the datacenter)
+            params.put(EnterpriseResource.ENTERPRISE, master.getEnterprise().getId().toString());
+            params.put(VirtualImageResource.VIRTUAL_IMAGE, master.getId().toString());
+            RESTLink masterLink =
+                builder.buildRestLink(VirtualImageResource.class, "master", params);
+            masterLink.setTitle(master.getName());
+            links.add(masterLink);
+        }
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualImage image, final VirtualImage master)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return buildVirtualImageLinks(enterpriseId, dcId, image, master, builder);
+    }
+
+    @Override
+    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, virtualImageId.toString());
+
+        return builder.buildRestLink(VirtualImageResource.class,
+            VirtualImageResource.VIRTUAL_IMAGE, params);
     }
 
     @Override
@@ -946,8 +1089,7 @@ public class RESTBuilder implements IRESTBuilder
             .toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, ip.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getRasd()
-            .getConfigurationName());
+        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getId().toString());
         params.put(IpAddressesResource.IP_ADDRESS, ip.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
@@ -1005,6 +1147,20 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH + "/"
                 + VirtualMachineStorageConfigurationResource.DISK_PARAM, REL_EDIT, params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildCategoryLinks(final CategoryDto categorydto)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(CategoryResource.CATEGORY, categorydto.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        RESTLink editLink = builder.buildRestLink(CategoryResource.class, REL_EDIT, params);
+        links.add(editLink);
 
         return links;
     }

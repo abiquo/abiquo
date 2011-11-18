@@ -26,8 +26,11 @@ import java.util.List;
 import org.apache.wink.server.utils.LinkBuilders;
 
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -103,6 +106,15 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildPublicNetworkLinks(final Integer datacenterId,
         final VLANNetwork network);
+
+    public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
+        final Integer dcId, final Integer repoId);
+
+    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualImage image, final VirtualImage master);
+
+    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId);
 
     /*
      * Premium methods
@@ -185,4 +197,8 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
         final Integer vappId);
+    
+    public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
+
+    public List<RESTLink> buildIconLinks(final IconDto icon);
 }

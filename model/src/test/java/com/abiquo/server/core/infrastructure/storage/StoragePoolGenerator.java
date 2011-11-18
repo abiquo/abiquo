@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.abiquo.server.core.common.GenericEntityGenerator;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -63,6 +64,12 @@ public class StoragePoolGenerator extends GenericEntityGenerator<StoragePool>
     {
         Tier tier = tierGenerator.createInstance(device.getDatacenter());
         return createInstance(device, tier);
+    }
+
+    public StoragePool createInstance(final Datacenter datacenter)
+    {
+        StorageDevice device = deviceGenerator.createInstance(datacenter);
+        return createInstance(device);
     }
 
     public StoragePool createInstance(final Tier tier)

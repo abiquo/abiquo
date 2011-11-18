@@ -36,6 +36,7 @@ public class OVFPackageListsDto extends WrapperDto<OVFPackageListDto>
 {
     private static final long serialVersionUID = 3611309393863764211L;
 
+    @Override
     @XmlElement(name = "ovfPackageList")
     public List<OVFPackageListDto> getCollection()
     {

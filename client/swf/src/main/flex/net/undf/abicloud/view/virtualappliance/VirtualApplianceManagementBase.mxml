@@ -266,6 +266,7 @@
                     var virtualImageEvent:VirtualImageEvent = new VirtualImageEvent(VirtualImageEvent.GET_DATACENTER_REPOSITORY);
                     virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
                     virtualImageEvent.datacenter = virtualApplianceDatacenter;
+                    virtualImageEvent.refresh = false;
                     dispatchEvent(virtualImageEvent);
                 }
                 displayVirtualImage();
@@ -1062,6 +1063,7 @@
                         click="onClickHideButton()"/>
 
                     <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
+                    	type="VAPP"
                         width="100%"
                         top="10" bottom="0"
                         virtualDatacenter="{_currentVirtualDataCenter}"

@@ -574,6 +574,180 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
+    protected String createVirtualImagesLink(final Integer enterpriseId, final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}/virtualimages", params);
+
+        return uri;
+    }
+
+    protected String createVirtualImageLink(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualimageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+        params.put("virtualimage", valueOf(virtualimageId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}/virtualimages/{virtualimage}",
+                params);
+
+        return uri;
+    }
+
+    protected String createDatacenterRepositoryLink(final Integer enterpriseId,
+        final Integer datacenterId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", valueOf(enterpriseId));
+        params.put("datacenterrepository", valueOf(datacenterId));
+
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
+                + "datacenterrepositories/{datacenterrepository}", params);
+
+        return uri;
+    }
+
+    protected String createOVFPackagesLink(final String enterpriseId)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackages",
+                Collections.singletonMap("enterprise", enterpriseId));
+        return uri;
+    }
+
+    protected String createOVFPackageListLink(final String enterpriseId,
+        final String ovfPackageListId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackageList", ovfPackageListId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}", params);
+    }
+
+    protected String createOVFPackageListStatusLink(final String enterpriseId,
+        final String ovfPackageListId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackageList", ovfPackageListId);
+
+        return resolveURI(
+            apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}/actions/repositoryStatus",
+            params);
+    }
+
+    protected String createOVFPackageListsLink(final String enterpriseId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+
+        return resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackagelists", params);
+    }
+
+    protected String createOVFPackageLink(final String enterpriseId, final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}", params);
+    }
+
+    protected String createOVFPackageStateLink(final String enterpriseId, final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(
+            apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/actions/repositoryStatus",
+            params);
+    }
+
+    protected String createOVFPackageInstallLink(final String enterpriseId,
+        final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+                + "actions/repositoryInstall", params);
+    }
+
+    protected String createOVFPackageUninstallLink(final String enterpriseId,
+        final String ovfPackageId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+                + "actions/repositoryUninstall", params);
+    }
+
+    protected String createDiskFormatTypeLink(final Integer diskFormatTypeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("diskformattype", valueOf(diskFormatTypeId));
+
+        return resolveURI(apiUri, "config/diskformattypes/{diskformattype}", params);
+    }
+
+    protected String createDiskFormatTypesLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/diskformattypes", params);
+    }
+
+    protected String createIconLink(final Integer iconId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("icon", valueOf(iconId));
+
+        return resolveURI(apiUri, "icons/{icon}", params);
+    }
+
+    protected String createIconsLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/icons", params);
+    }
+
+    protected String createCategoryLink(final Integer categoryId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("category", valueOf(categoryId));
+
+        return resolveURI(apiUri, "config/categories/{category}", params);
+    }
+
+    protected String createCategoriesLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/categories", params);
+    }
+
     protected String createUserLink(final int enterpriseId, final int userId)
     {
         return createUserLink(valueOf(enterpriseId), userId);
@@ -679,6 +853,21 @@ public class AbstractAPIStub
         params.put("vdcid", vdcId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
+    }
+
+    protected String createVirtualAppliancesLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
+    }
+
+    protected String createVirtualApplianceLink(final Integer vdcId, final Integer vappId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vapp", vappId.toString());
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vapp}", params);
     }
 
     protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
@@ -834,9 +1023,22 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(
-            apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/virtualmachines",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines",
+            params);
+    }
+
+    protected String createMachineLinkVm(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}",
             params);
     }
 
@@ -866,10 +1068,13 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
         if (includeMachineId)
         {
-            uri += "{machine}/";
+            uri += "{machine}/action/checkState?sync=true";
         }
-        uri +=
-            "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+        else
+        {
+            uri +=
+                "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+        }
 
         return resolveURI(apiUri, uri, params);
     }
@@ -899,9 +1104,12 @@ public class AbstractAPIStub
         String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
         if (includeMachineId)
         {
-            uri += "{machine}/";
+            uri += "{machine}/action/checkIpmi";
         }
-        uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+        else
+        {
+            uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+        }
 
         return resolveURI(apiUri, uri, params);
     }
@@ -921,7 +1129,7 @@ public class AbstractAPIStub
 
         String uri = "admin/datacenters/{datacenter}/";
         uri +=
-            "action/discover?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
+            "action/discoversingle?ip={ip}&user={user}&password={password}&hypervisor={hypervisor}&port={port}";
 
         return resolveURI(apiUri, uri, params);
     }
@@ -938,26 +1146,14 @@ public class AbstractAPIStub
         return resolveURI(apiUri, uri, params);
     }
 
-    protected String createMachinesLinkMultiplePost(final Integer datacenterId,
-        final Integer rackId, final String ipFrom, final String ipTo, final String hypervisor,
-        final String user, final String password, final Integer port, final String vSwitch)
+    protected String createMachinesLinkMultiplePost(final Integer datacenterId, final Integer rackId)
     {
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
         params.put("rack", rackId.toString());
-        params.put("ipFrom", ipFrom);
-        params.put("ipTo", ipTo);
-        params.put("hypervisor", hypervisor);
-        params.put("user", user);
-        params.put("password", password);
-        params.put("port", port.toString());
-        params.put("vSwitch", vSwitch);
 
-        String uri =
-            "admin/datacenters/{datacenter}/racks/{rack}/machines"
-                + "?ipFrom={ipFrom}&ipTo={ipTo}&hypervisor={hypervisor}&user={user}"
-                + "&password={password}&port={port}&vSwitch={vSwitch}";
+        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines";
 
         return resolveURI(apiUri, uri, params);
     }

@@ -21,60 +21,60 @@
 
 package com.abiquo.appliancemanager.web.listener;
 
+import java.io.IOException;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.abiquo.am.services.util.TimeoutFSUtils;
-import com.abiquo.am.services.notify.AMNotifierFactory;
+import com.abiquo.am.services.notify.AMNotifier;
+import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.commons.amqp.impl.am.AMProducer;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
 /**
- * Application Lifecycle Listener implementation class ContextListener
+ * Application Lifecycle Listener implementation class ContextListener.
+ * <p>
+ * It opens the {@link AMProducer} AMQP channel
  */
 public class ContextListener implements ServletContextListener
 {
-
-    public static final Logger logger = LoggerFactory.getLogger(ContextListener.class);
-
-    @Override
-    public void contextInitialized(ServletContextEvent sce)
-    {
-
-        logger.info("Initializing the context [" + sce.getServletContext().getServletContextName()
-            + "] ...");
-
-        OVFSerializer.getInstance().setValidateXML(false);
-
-        // TODO check the AMProducer can be created
-
-        logger.info("The context [" + sce.getServletContext().getServletContextName()
-            + "] initialized!");
-
-    }
+    public static final Logger LOG = LoggerFactory.getLogger(ContextListener.class);
 
     @Override
-    public void contextDestroyed(ServletContextEvent sce)
+    public void contextInitialized(final ServletContextEvent sce)
     {
 
-        logger.info("Destroying the context  [" + sce.getServletContext().getServletContextName()
-            + "] ... ");
+        OVFSerializer.getInstance().setValidateXML(false); // TODO delme
 
         try
         {
-            AMNotifierFactory.destroy();
+            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+                .getBean("AMNotifier", AMNotifier.class).openChannel();
+            LOG.debug("AM amqp producer channel open");
+        }
+        catch (IOException e)
+        {
+            LOG.error("Can not open the AMQP channel ", e);
+            AMConfigurationManager.getInstance().addConfigurationError(e.getLocalizedMessage());
+        }
+    }
+
+    @Override
+    public void contextDestroyed(final ServletContextEvent sce)
+    {
+        try
+        {
+            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+                .getBean("AMNotifier", AMNotifier.class).closeChannel();
+            LOG.debug("AM amqp producer channel closed");
         }
         catch (Exception e)
         {
-            logger.error("Can not close AMQP channel ", e);
-
+            LOG.error("Can not close the AMQP channel ", e);
         }
-
-        // TimeoutFSUtils.getInstance().destroyExecutor();
-
-        logger.info("The context [" + sce.getServletContext().getServletContextName()
-            + "] has been destroyed");
     }
 }

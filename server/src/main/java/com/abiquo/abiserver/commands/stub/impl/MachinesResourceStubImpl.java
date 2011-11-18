@@ -47,6 +47,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.MachinesDto;
+import com.abiquo.server.core.infrastructure.MachinesToCreateDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 
 public class MachinesResourceStubImpl extends AbstractAPIStub implements MachinesResourceStub
@@ -224,13 +225,14 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
             rackResult.setData(rack);
 
             // creating machines
-            String uri =
-                createMachinesLinkMultiplePost(datacenterId, rackId, ipFrom.toString(),
-                    ipTo.toString(), HypervisorType.fromId(hypervisorType).getValue(), user,
-                    password, port, vSwitch);
+            String uri = createMachinesLinkMultiplePost(datacenterId, rackId);
+
+            MachinesToCreateDto dto =
+                new MachinesToCreateDto(ipFrom.toString(), ipTo.toString(), HypervisorType.fromId(
+                    hypervisorType).getValue(), user, password, port, vSwitch);
 
             ClientResponse response =
-                post(uri, null, MachinesResourceStubImpl.MULTIPLE_MACHINES_MIME_TYPE);
+                post(uri, dto, MachinesResourceStubImpl.MULTIPLE_MACHINES_MIME_TYPE);
 
             if (response.getStatusCode() == 201)
             {
@@ -347,6 +349,15 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         }
 
         return result;
+    }
+
+    @Override
+    public BasicResult importVirtualMachineToVirtualAppliance(final Integer dcId,
+        final Integer rackId, final Integer machineId, final Integer vmId, final Integer vdcId,
+        final Integer vappId)
+    {
+        // PREMIUM
+        return null;
     }
 
 }

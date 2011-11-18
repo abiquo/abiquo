@@ -329,6 +329,8 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
     }
 
     /**
+     * TODO: modify this!!
+     * 
      * <pre>
      * Identifiers of the NICs are ordered values that correspond to its ETHX value when the 
      * Virtual Machine is deployed. In this way, the NIC with nicOrder O will correspond to ETH0, nicOrder 1 will correspond to ETH1, and so on.
@@ -456,6 +458,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
         NicDto dto = ModelTransformer.transportFromPersistence(NicDto.class, ip);
+        dto.setSequence(Integer.valueOf(ip.getRasd().getConfigurationName()));
         dto.setLinks(restBuilder.buildNICLinks(ip));
         return dto;
     }

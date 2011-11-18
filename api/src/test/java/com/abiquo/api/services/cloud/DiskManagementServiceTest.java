@@ -91,8 +91,11 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vm.getHypervisor().getMachine().getRack().setDatacenter(vdc.getDatacenter());
         vm.setUser(u);
 
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage(), vm.getHypervisor()
-            .getMachine().getRack(), vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
+        // TODO vdc datacenter and virutal image datacenter ARE NOT THE SAME
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage().getCategory(), vm
+            .getVirtualImage().getRepository().getDatacenter(), vm.getVirtualImage()
+            .getRepository(), vm.getVirtualImage(), vm.getHypervisor().getMachine().getRack(), vm
+            .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }

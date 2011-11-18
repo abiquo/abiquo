@@ -33,8 +33,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualImageConversion;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;

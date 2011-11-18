@@ -21,6 +21,11 @@
 
 package com.abiquo.model.enumerator;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlType(name = "diskFormatType")
+@XmlEnum
 public enum DiskFormatType
 {
     /* 0 */
@@ -75,28 +80,47 @@ public enum DiskFormatType
 
     public final DiskFormatTypeAlias alias;
 
-    public static final DiskFormatType[] VBOX_COMPATIBLES =
-        new DiskFormatType[] {VMDK_SPARSE, VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
+    public static final DiskFormatType[] VBOX_COMPATIBLES = new DiskFormatType[] {VMDK_SPARSE,
+    VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
 
-    public static final DiskFormatType[] KVM_COMPATIBLES =
-        new DiskFormatType[] {RAW, VMDK_SPARSE, VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT,
-        QCOW2_SPARSE};
+    public static final DiskFormatType[] KVM_COMPATIBLES = new DiskFormatType[] {RAW, VMDK_SPARSE,
+    VMDK_FLAT, VHD_FLAT, VHD_SPARSE, QCOW2_FLAT, QCOW2_SPARSE};
 
     public static final DiskFormatType[] XEN_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT};
 
     public static final DiskFormatType[] VMWARE_COMPATIBLES = new DiskFormatType[] {VMDK_FLAT,
     VMDK_SPARSE};
 
-    public static final DiskFormatType[] HYPERV_COMPATIBLES =
-        new DiskFormatType[] {VHD_FLAT, VHD_SPARSE};
+    public static final DiskFormatType[] HYPERV_COMPATIBLES = new DiskFormatType[] {VHD_FLAT,
+    VHD_SPARSE};
 
     public static final DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
 
-    private DiskFormatType(String uri, String description, DiskFormatTypeAlias alias)
+    /* package */final static int ID_MIN = 0;
+
+    /* package */private final static int ID_MAX = 11;
+
+    private DiskFormatType(final String uri, final String description,
+        final DiskFormatTypeAlias alias)
     {
         this.uri = uri;
         this.description = description;
         this.alias = alias;
+    }
+
+    public DiskFormatTypeAlias getAlias()
+    {
+        return alias;
+    }
+
+    public String getUri()
+    {
+        return uri;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 
     public int id()
@@ -104,12 +128,12 @@ public enum DiskFormatType
         return ordinal();
     }
 
-    public static DiskFormatType fromId(int id)
+    public static DiskFormatType fromId(final int id)
     {
         return values()[id];
     }
 
-    public static DiskFormatType fromURI(String URI)
+    public static DiskFormatType fromURI(final String URI)
     {
         for (DiskFormatType type : values())
         {
@@ -119,5 +143,15 @@ public enum DiskFormatType
             }
         }
         return null;
+    }
+
+    public static DiskFormatType fromValue(final String v)
+    {
+        return valueOf(v);
+    }
+
+    public static int getIdMax()
+    {
+        return ID_MAX;
     }
 }

@@ -102,7 +102,7 @@ public class RepositorySpaceXML
      * @param os, the destination of the XML document.
      * @throws OVFSchemaException, any XML problem.
      */
-    public void writeAsXML(RepositorySpace rs, OutputStream os) throws XMLException
+    public void writeAsXML(final RepositorySpace rs, final OutputStream os) throws XMLException
     {
         XMLStreamWriter writer = null;
         Marshaller marshall;
@@ -146,7 +146,7 @@ public class RepositorySpaceXML
      * @return the RepositorySpace read from source.
      * @throws XMLException, if it is not a RepositorySpace type or any XML problem.
      */
-    public RepositorySpace readAsXML(InputStream is) throws XMLException
+    public RepositorySpace readAsXML(final InputStream is) throws XMLException
     {
         XMLStreamReader reader = null;
 
@@ -184,15 +184,16 @@ public class RepositorySpaceXML
     /**
      * XXX
      */
-    public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL) throws XMLException
+    public RepositorySpace obtainRepositorySpace(final String repositorySpaceURL)
+        throws XMLException, IOException, MalformedURLException
     {
         RepositorySpace repo;
 
         try
         {
             URL rsUrl = new URL(repositorySpaceURL);
-            InputStream isRs = rsUrl.openStream(); 
-            
+            InputStream isRs = rsUrl.openStream();
+
             repo = readAsXML(isRs);
         }
         catch (XMLException e) // XMLStreamException or JAXBException
@@ -203,14 +204,14 @@ public class RepositorySpaceXML
         catch (MalformedURLException e)
         {
             final String msg = "Invalid repository space identifier : " + repositorySpaceURL;
-            throw new XMLException(msg, e);
+            throw new MalformedURLException(msg);
         }
         catch (IOException e)
         {
             final String msg = "Can not open a connection to : " + repositorySpaceURL;
-            throw new XMLException(msg, e);
+            throw new IOException(msg);
         }
-        
+
         repo.setRepositoryURI(repositorySpaceURL); // XXX
 
         return repo;

@@ -29,8 +29,10 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaNodeVirtualImageDAO")
 public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImage>
@@ -48,7 +50,7 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
     private Criteria sameVirtualMachine(final VirtualMachine vmachine)
     {
         Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY);
-        crit.add(Restrictions.eq(VirtualMachine.ID_PROPERTY, vmachine.getId()));
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, vmachine.getId()));
         return crit;
     }
 
@@ -71,7 +73,7 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         Criteria crit =
             createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY,
                 VirtualMachine.ENTERPRISE_PROPERTY);
-        crit.add(Restrictions.eq(Enterprise.ID_PROPERTY, enterprise.getId()));
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterprise.getId()));
         return crit;
     }
 
@@ -94,7 +96,7 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
     private Criteria sameVirtualImage(final VirtualImage virtualImage)
     {
         Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_IMAGE_PROPERTY);
-        crit.add(Restrictions.eq(VirtualImage.ID_PROPERTY, virtualImage.getId()));
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualImage.getId()));
         return crit;
     }
 }
