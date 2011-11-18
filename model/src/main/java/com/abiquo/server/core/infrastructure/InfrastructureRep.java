@@ -815,4 +815,15 @@ public class InfrastructureRep extends DefaultRepBase
         datacenterLimitDao.flush();
     }
 
+    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    {
+        virtualMachineDao.deleteNotManagedVirtualMachines(hypervisor);
+    }
+
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer vmId)
+    {
+        return virtualMachineDao.findVirtualMachineByHypervisor(hypervisor, vmId);
+    }
+
 }

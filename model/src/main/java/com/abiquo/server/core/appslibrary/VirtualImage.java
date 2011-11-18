@@ -176,8 +176,9 @@ public class VirtualImage extends DefaultEntityBase
         return this.stateful;
     }
 
-    // This method should be only called from VolumeManagement.setVirtualImage()
-
+    /**
+     * This method should be only called from VolumeManagement.setVirtualImage()
+     */
     public void setStateful(final boolean stateful)
     {
         this.stateful = stateful;
@@ -591,7 +592,7 @@ public class VirtualImage extends DefaultEntityBase
 
     // Creation date does not have a setter, since it will be auto generated.
 
-    /* *********************** Helper methods ************************* */
+    /*  *********************** Helper methods ************************* */
 
     public void setRequirements(final int cpu, final int ram, final long hd)
     {

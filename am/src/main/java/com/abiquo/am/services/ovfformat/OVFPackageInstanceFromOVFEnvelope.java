@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services.util;
+package com.abiquo.am.services.ovfformat;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -61,6 +61,31 @@ import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 public class OVFPackageInstanceFromOVFEnvelope
 {
 
+    
+
+    public static VirtualDiskDescType getDisk(final EnvelopeType envelope)
+    {
+        DiskSectionType diskSection = null;
+        try
+        {
+            diskSection = OVFEnvelopeUtils.getSection(envelope, DiskSectionType.class);
+        }
+        catch (Exception e)// SectionNotPresentException InvalidSectionException
+        {
+            throw new AMException(AMError.OVF_INVALID, "missing DiskSection");
+        }
+
+        List<VirtualDiskDescType> disks = diskSection.getDisk();
+
+        if (disks == null || disks.isEmpty() || disks.size() != 1)
+        {
+            throw new AMException(AMError.OVF_INVALID, "multiple Disk not supported");
+        }
+
+        return disks.get(0);
+
+    }
+    
     /**
      * TODO re-DOC <br>
      * REQUIRE THE OVFID IS PLACED ON A REMOTE LOCATION (WARINING on generation)<BR>
@@ -185,7 +210,7 @@ public class OVFPackageInstanceFromOVFEnvelope
                     DiskFormatType ovfDiskFormat = DiskFormatType.valueOf(diskFormat.name());
 
                     diskInfo.setDiskFileFormat(ovfDiskFormat);
-                    diskInfo.setDiskSizeMb(fileSize);
+                    diskInfo.setDiskFileSize(fileSize);
 
                     // Note that getHRef() will now return the relative path
                     // of the file at the downloaded repository space

@@ -198,22 +198,4 @@ public class VirtualDatacentersResource extends AbstractResource
         return enterprise;
     }
 
-    private Integer getLinkId(final RESTLink link, final String path, final String param,
-        final String key, final APIError error)
-    {
-        if (link == null)
-        {
-            throw new NotFoundException(error);
-        }
-
-        String buildPath = buildPath(path, param);
-        MultivaluedMap<String, String> values = resolveFromURI(buildPath, link.getHref());
-
-        if (values == null || !values.containsKey(key))
-        {
-            throw new NotFoundException(error);
-        }
-
-        return Integer.valueOf(values.getFirst(key));
-    }
 }

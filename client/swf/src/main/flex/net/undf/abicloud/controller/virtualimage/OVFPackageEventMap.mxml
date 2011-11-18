@@ -220,7 +220,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getOVFPackageListStatus"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ovfPackageList.name, event.enterprise.id, event.repository.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.ovfPackageList.name, 
+            event.enterprise.id, 
+            event.repository.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{OVFPackageResultHandler}"
@@ -254,7 +257,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="startDownloadOVFPackage"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ovfPackageURLList, event.enterprise.id, event.repository.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.ovfPackageURLList, 
+            event.enterprise.id, 
+            event.repository.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{OVFPackageResultHandler}"
@@ -284,7 +290,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="refreshOVFPackageStatus"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ovfPackageURLList, event.enterprise.id, event.repository.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.ovfPackageURLList, 
+            event.enterprise.id, 
+            event.repository.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{OVFPackageResultHandler}"
@@ -313,7 +322,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="cancelDownloadOVFPackage"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ovfPackage.url, event.enterprise.id, event.repository.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.ovfPackage.url, 
+            event.enterprise.id, 
+            event.repository.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{OVFPackageResultHandler}"

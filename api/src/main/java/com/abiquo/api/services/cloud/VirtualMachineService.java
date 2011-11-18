@@ -24,6 +24,7 @@ package com.abiquo.api.services.cloud;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -44,18 +45,22 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
@@ -121,6 +126,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected InfrastructureRep infRep;
+
+    @Autowired
+    protected VirtualImageService vimageService;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -198,9 +206,21 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    public VirtualMachine getVirtualMachineByHypervisor(final Hypervisor hyp, final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineByHypervisor(hyp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+        return vm;
+    }
+
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void addVirtualMachine(final VirtualMachine virtualMachine)
     {
+        validate(virtualMachine);
         repo.insert(virtualMachine);
     }
 
@@ -259,26 +279,6 @@ public class VirtualMachineService extends DefaultApiService
             }
         }
         return false;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
-    {
-        repo.deleteNotManagedVirtualMachines(hypervisor);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
-    {
-        this.deleteNotManagedVirtualMachines(hypervisor);
-
-        if (trace)
-        {
-            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
-                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
-                "Virtual Machines not managed by host from '" + hypervisor.getIp()
-                    + "' have been deleted");
-        }
     }
 
     /**
@@ -375,20 +375,24 @@ public class VirtualMachineService extends DefaultApiService
         final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
         final Integer vappId)
     {
+        // generates the random identifier
+        virtualMachine.setUuid(UUID.randomUUID().toString());
+
+        // We need the Enterprise
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         virtualMachine.setEnterprise(enterprise);
 
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
         // We need the VirtualImage
-        VirtualImage virtualImage = repo.getVirtualImage(vImageId);
+        VirtualImage virtualImage =
+            vimageService.getVirtualImage(enterpriseId, virtualAppliance.getVirtualDatacenter()
+                .getDatacenter().getId(), vImageId);
+        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
         virtualMachine.setVirtualImage(virtualImage);
 
-        // We need the Enterprise
-
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(),
-            virtualMachine.getVirtualImage(), virtualMachine);
+        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual image is VirtualImageNode
@@ -401,6 +405,23 @@ public class VirtualMachineService extends DefaultApiService
         // is the sum (pondered) of the states of its virtual machines
 
         return repo.createVirtualMachine(virtualMachine);
+    }
+
+    /** Checks correct datacenter and enterprise. */
+    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    {
+        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
+            .getDatacenter().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+        }
+
+        if (!vimage.isShared() && vimage.getEnterprise().getId() != vapp.getEnterprise().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+        }
+
+        flushErrors();
     }
 
     /**
@@ -450,12 +471,11 @@ public class VirtualMachineService extends DefaultApiService
      * premium to the {@link VirtualMachine}.
      * 
      * @param virtualDatacenter from where we retrieve the hypervisor type.
-     * @param virtualImage to prepare.
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
     public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
-        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
         logger.debug("attachVirtualImageConversion community edition");
@@ -732,7 +752,8 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * In community there are no statful image.
+     * In community there are no statful image. If some {@link VirtualImageConversion} attached use
+     * his properties when defining the {@link PrimaryDisk}, else ue the {@link VirtualImage}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -760,10 +781,18 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
             flushErrors();
         }
-        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(virtualMachine.getVirtualImage()
-            .getDiskFormatType().name()), virtualMachine.getVirtualImage().getDiskFileSize(),
-            virtualMachine.getVirtualImage().getRepository().getUrl(), virtualMachine
-                .getVirtualImage().getPath(), datastore, repositoryManager.getUri());
+
+        final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
+
+        final DiskFormatType format =
+            conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
+        final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
+        final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+
+        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
+            virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
+            repositoryManager.getUri());
     }
 
     private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
@@ -1381,4 +1410,5 @@ public class VirtualMachineService extends DefaultApiService
 
         return errors;
     }
+
 }

@@ -33,14 +33,17 @@ public interface VirtualMachineResourceStub
 
 {
 
+    @Deprecated
     void allocate(UserSession userSession, Integer virtualDatacenterId, Integer virtualApplianceId,
         Integer virtualMachineId, boolean forceEnterpirseLimits) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
 
+    @Deprecated
     void deallocate(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
 
+    @Deprecated
     void checkEdit(UserSession userSession, Integer virtualDatacenterId,
         Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,

@@ -238,7 +238,13 @@ public enum APIError
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"),
+        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER(
+        "VM-16", "The provided virtual images isn't available in the virtual appliance datacenter"), VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED(
+        "VM-17", "The provided virtual image can not be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
+        "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
+        "VM-19",
+        "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
+        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -315,7 +321,9 @@ public enum APIError
         "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED(
         "VIMAGE-7",
         "The requested virtual image is a master image, master images cannot be deleted"), VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED(
-        "VIMAGE-8", "Cannot delete a stateful image"),
+        "VIMAGE-8", "Cannot delete a stateful image"), VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE(
+        "VIMAGE-9",
+        "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
 
     // NODE COLLECTOR
     NON_EXISTENT_IP("NC-0", "The requested IP does not exist"), MISSING_IP_PARAMETER("NC-1",
@@ -326,7 +334,8 @@ public enum APIError
         "NC-5", "There is any machine running in the given IP"), NC_UNEXPECTED_EXCEPTION(
         "NC-6",
         "Hypervisor information could not be discovered or retrieved. This error may be caused by misconfiguration of the platform or an error in the data provided. Please see the Event Log for more detail"), NC_UNAVAILABLE_EXCEPTION(
-        "NC-7", "The discovery manager currently is not available"),
+        "NC-7", "The discovery manager currently is not available"), NC_VIRTUAL_MACHINE_NOT_FOUND(
+        "NC-8", "The requested virtual machine not found in the remote hypervisor"),
 
     // STORAGE POOL
     MISSING_REQUIRED_QUERY_PARAMETER_IQN("SP-1", "Missing query parameter iqn"), CONFLICT_STORAGE_POOL(
@@ -452,6 +461,10 @@ public enum APIError
         "The virtual machine can not use Chef. "
             + "Please, verify that the image is Chef enabled and the Enterprise can use Chef"),
 
+    // Parsing links
+    LINKS_INVALID_LINK("LNK-0", "Invalid link. Check out documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
+        "LNK-1", "Number of links invalid: This resource only accepts a single link"),
+
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
@@ -463,9 +476,7 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link")
-
-    ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
 
     /**
      * Internal error code

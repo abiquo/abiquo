@@ -76,6 +76,9 @@
                 <ref bean="iconResource" />
                 <!-- Login -->
                 <ref bean="loginResource" />
+                <!--  -->
+                <ref bean="virtualMachinesInfrastructureResource" />
+                <ref bean="virtualMachineInfrastructureResource" />
             </set>
         </property>
     </bean>

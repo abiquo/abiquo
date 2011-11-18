@@ -132,16 +132,16 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.productName = StringUtils.strip(productName);
     }
 
-    private long diskSizeMb;
+    private long diskFileSize;
 
-    public long getDiskSizeMb()
+    public long getDiskFileSize()
     {
-        return diskSizeMb;
+        return diskFileSize;
     }
 
-    public void setDiskSizeMb(final long diskSizeMb)
+    public void setDiskFileSize(final long diskFileSize)
     {
-        this.diskSizeMb = diskSizeMb;
+        this.diskFileSize = diskFileSize;
     }
 
     private String description;

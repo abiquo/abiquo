@@ -45,8 +45,8 @@ import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
 
 public class OVFPackageInstanceToVirtualImage
 {
-    private final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceToVirtualImage.class);
+    private final static Logger logger =
+        LoggerFactory.getLogger(OVFPackageInstanceToVirtualImage.class);
 
     public static List<VirtualimageHB> insertVirtualDiskOnDatabase(
         final List<OVFPackageInstanceDto> disks, final RepositoryHB repo)
@@ -56,8 +56,8 @@ public class OVFPackageInstanceToVirtualImage
         DAOFactory daoF = HibernateDAOFactory.instance();
 
         List<OVFPackageInstanceDto> disksToInsert =
-            filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(disks,
-                repo.getIdRepository());
+            filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(disks, repo
+                .getIdRepository());
         List<VirtualimageHB> images = new LinkedList<VirtualimageHB>();
 
         // first masters
@@ -137,8 +137,8 @@ public class OVFPackageInstanceToVirtualImage
 
             boolean enter = isEnterpriseOnDB(session, disk.getIdEnterprise().longValue());
             boolean inserted =
-                isAlreadyInsertedVirtualImagePath(session, disk.getDiskFilePath(),
-                    Long.valueOf(disk.getIdEnterprise()).intValue(), idRepo);
+                isAlreadyInsertedVirtualImagePath(session, disk.getDiskFilePath(), Long.valueOf(
+                    disk.getIdEnterprise()).intValue(), idRepo);
 
             if (enter && !inserted)
             {
@@ -244,8 +244,8 @@ public class OVFPackageInstanceToVirtualImage
             {
 
                 VirtualimageHB master =
-                    getVirtualImageIdFromPath(session, disk.getMasterDiskFilePath(),
-                        disk.getIdEnterprise(), idRepository);
+                    getVirtualImageIdFromPath(session, disk.getMasterDiskFilePath(), disk
+                        .getIdEnterprise(), idRepository);
                 // getDiskFormatTypeFromUri(session, disk.getImageType()).getId()
 
                 vimage.setMaster(master);
@@ -264,7 +264,7 @@ public class OVFPackageInstanceToVirtualImage
 
         vimage.setType(diskFormat);
 
-        vimage.setDiskFileSize(disk.getDiskSizeMb());
+        vimage.setDiskFileSize(disk.getDiskFileSize());
         vimage.setCreationUser("SYSTEM"); // TODO
 
         // XXX daoF.endConnection();
@@ -378,9 +378,9 @@ public class OVFPackageInstanceToVirtualImage
                     "SELECT COUNT(*) FROM com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB WHERE "
                         + "pathName= :pathName"
                         + " AND (idEnterprise= :idEnterprise OR idEnterprise=NULL)"
-                        + " AND repository.idRepository= :idRepo")
-                .setParameter("pathName", imagePath).setParameter("idEnterprise", idEnterprise)
-                .setParameter("idRepo", idRepo).uniqueResult();
+                        + " AND repository.idRepository= :idRepo").setParameter("pathName",
+                    imagePath).setParameter("idEnterprise", idEnterprise).setParameter("idRepo",
+                    idRepo).uniqueResult();
 
         return count != 0;
     }

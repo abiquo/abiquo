@@ -907,7 +907,10 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="getVirtualMachineByPhysicalMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.physicalMachine.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.dataCenter.id,
+            event.rackId,
+            event.physicalMachine.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"
@@ -966,9 +969,9 @@
     </EventHandlers>
 
 
-    <!-- InfrastructureEvent.START_VIRTUALMACHINE ________________________________________________________________________ -->
+    <!-- InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE ________________________________________________________________________ -->
 
-    <EventHandlers type="{InfrastructureEvent.START_VIRTUALMACHINE}">
+    <EventHandlers type="{InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE}">
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.nonBlockingService}"
@@ -993,11 +996,42 @@
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
             arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
+    
+    <!-- InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="startVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualAppliance.id, 
+            event.virtualDatacenter.id,
+            event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+    </EventHandlers>
 
 
-    <!-- InfrastructureEvent.PAUSE_VIRTUALMACHINE ________________________________________________________________________ -->
+    <!-- InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE ________________________________________________________________________ -->
 
-    <EventHandlers type="{InfrastructureEvent.PAUSE_VIRTUALMACHINE}">
+    <EventHandlers type="{InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE}">
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.nonBlockingService}"
@@ -1022,11 +1056,42 @@
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
             arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
+    
+    <!-- InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="pauseVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualAppliance.id, 
+            event.virtualDatacenter.id,
+            event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+    </EventHandlers>
 
 
-    <!-- InfrastructureEvent.REBOOT_VIRTUALMACHINE ________________________________________________________________________ -->
+    <!-- InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_INFRASTRUCTURE ________________________________________________________________________ -->
 
-    <EventHandlers type="{InfrastructureEvent.REBOOT_VIRTUALMACHINE}">
+    <EventHandlers type="{InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_INFRASTRUCTURE}">
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.nonBlockingService}"
@@ -1051,15 +1116,77 @@
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
             arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
     </EventHandlers>
+    
+    <!-- InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
+
+    <EventHandlers type="{InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_VAPP}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="rebootVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualAppliance.id, 
+            event.virtualDatacenter.id,
+            event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+    </EventHandlers>
 
 
-    <!-- InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE ________________________________________________________________________ -->
-    <EventHandlers type="{InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE}">
+    <!-- InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_INFRASTRUCTURE ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_INFRASTRUCTURE}">
         <!-- Make call to the server here -->
 
         <RemoteObjectInvoker instance="{services.nonBlockingService}"
             method="shutdownVirtualMachine"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleVirtualMachineStateChanged"
+                    arguments="{[resultObject, event.infrastructureElement]}"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFaultInBackground"
+                    arguments="{[fault]}"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+        <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
+        <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
+            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+
+    </EventHandlers>
+    
+    <!-- InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.SHUTDOWN_VIRTUALMACHINE_IN_VAPP}">
+        <!-- Make call to the server here -->
+
+        <RemoteObjectInvoker instance="{services.nonBlockingService}"
+            method="shutdownVirtualMachine"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.virtualAppliance.id, 
+            event.virtualDatacenter.id,
+            event.infrastructureElement]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"

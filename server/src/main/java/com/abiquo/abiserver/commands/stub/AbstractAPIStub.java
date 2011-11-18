@@ -840,6 +840,21 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
     }
 
+    protected String createVirtualAppliancesLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
+    }
+
+    protected String createVirtualApplianceLink(final Integer vdcId, final Integer vappId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vapp", vappId.toString());
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vapp}", params);
+    }
+
     protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
         final Integer vappId, final Integer vmId)
     {
@@ -993,9 +1008,22 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(
-            apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/virtualmachines",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines",
+            params);
+    }
+
+    protected String createMachineLinkVm(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}",
             params);
     }
 

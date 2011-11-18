@@ -108,8 +108,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .post(ovfpackageListURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
+                ovfpackageListURL);
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -267,8 +267,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageUninstallLink(String.valueOf(idEnterprise),
-                String.valueOf(ovfPackageId));
+            createOVFPackageUninstallLink(String.valueOf(idEnterprise), String
+                .valueOf(ovfPackageId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -433,8 +433,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .put(null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
+                null);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -605,7 +605,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         }
         pack.setDescription(packDto.getDescription());
         pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatTypeUri()).name());
-        pack.setDiskSizeMb(packDto.getDiskSizeMb());
+        pack.setDiskSizeMb(packDto.getDiskFileSize());
         pack.setIconUrl(packDto.getIconPath());
         pack.setIdOVFPackage(packDto.getId());
         pack.setName(packDto.getProductName()); // XXX duplicated name

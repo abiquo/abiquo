@@ -304,6 +304,8 @@
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
+                    virtualImageEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                    virtualImageEvent.datacenterId = applianceManager.idDataCenter;
                     virtualImageEvent.virtualImage = _virtualImage;
                     virtualImageEvent.viUpdatedValues = updatedValues;
                     dispatchEvent(virtualImageEvent);

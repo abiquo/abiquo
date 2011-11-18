@@ -29,8 +29,6 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.appslibrary.AppsLibraryRep;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.cloud.chef.RunlistElementDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
@@ -51,9 +49,6 @@ public class VirtualMachineRep extends DefaultRepBase
 
     @Autowired
     private RasdManagementDAO rasdDao;
-
-    @Autowired
-    private AppsLibraryRep appsLibRep;
 
     @Autowired
     private RunlistElementDAO chefDao;
@@ -119,6 +114,12 @@ public class VirtualMachineRep extends DefaultRepBase
         return dao.findById(vmId);
     }
 
+    public VirtualMachine findVirtualMachineByHypervisor(final Hypervisor hypervisor,
+        final Integer virtualMachineId)
+    {
+        return dao.findVirtualMachineByHypervisor(hypervisor, virtualMachineId);
+    }
+
     public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         dao.deleteNotManagedVirtualMachines(hypervisor);
@@ -154,18 +155,6 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         this.dao.persist(virtualMachine);
         return virtualMachine;
-    }
-
-    /**
-     * Retrieve a {@link VirtualImage}.
-     * 
-     * @param virtualImage id.
-     * @return
-     */
-    public VirtualImage getVirtualImage(final Integer id)
-    {
-
-        return this.getVirtualImage(id);
     }
 
     public void insert(final VirtualMachine virtualMachine)

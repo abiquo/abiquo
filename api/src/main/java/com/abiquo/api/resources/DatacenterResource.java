@@ -239,14 +239,7 @@ public class DatacenterResource extends AbstractResource
     {
         validatePathParameters(datacenterId);
 
-        try
-        {
-            return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
-        }
-        catch (Exception e)
-        {
-            throw translateException(e);
-        }
+        return infraService.discoverRemoteHypervisorType(datacenterId, ip).getValue();
     }
 
     /**

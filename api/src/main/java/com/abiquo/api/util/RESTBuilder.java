@@ -46,6 +46,7 @@ import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
+import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
@@ -227,9 +228,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-        links.add(builder.buildActionLink(MachineResource.class,
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+        links.add(builder.buildRestLink(VirtualMachinesInfrastructureResource.class,
+            VirtualMachinesInfrastructureResource.VIRTUAL_MACHINES_INFRASTRUCTURE_PARAM, params));
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
 
@@ -795,6 +795,21 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+        final Integer virtualImageId)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
+        params.put(VirtualImageResource.VIRTUAL_IMAGE, virtualImageId.toString());
+
+        return builder.buildRestLink(VirtualImageResource.class,
+            VirtualImageResource.VIRTUAL_IMAGE, params);
+    }
+
+    @Override
     public List<RESTLink> buildPaggingLinks(final String absolutePath, final PagedList< ? > list)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -1074,8 +1089,7 @@ public class RESTBuilder implements IRESTBuilder
             .toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, ip.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getRasd()
-            .getConfigurationName());
+        params.put(VirtualMachineNetworkConfigurationResource.NIC, ip.getId().toString());
         params.put(IpAddressesResource.IP_ADDRESS, ip.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);

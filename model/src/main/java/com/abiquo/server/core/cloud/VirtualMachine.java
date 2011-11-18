@@ -46,8 +46,9 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -139,6 +140,31 @@ public class VirtualMachine extends DefaultEntityBase
     public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
+    }
+
+    //
+
+    public final static String VIRTUAL_IMAGE_CONVERSION_PROPERTY = "virtualImageConversion";
+
+    private final static boolean VIRTUAL_IMAGE_CONVERSION_REQUIRED = false;
+
+    private final static String VIRTUAL_IMAGE_CONVERSION_ID_COLUMN = "idConversion";
+
+    @JoinColumn(name = VIRTUAL_IMAGE_CONVERSION_ID_COLUMN, nullable = !VIRTUAL_IMAGE_CONVERSION_REQUIRED)
+    @ManyToOne(fetch = FetchType.LAZY)
+    // , cascade = CascadeType.ALL)
+    @ForeignKey(name = "FK_" + TABLE_NAME + "_conversion")
+    private VirtualImageConversion virtualImageConversion;
+
+    @Required(value = VIRTUAL_IMAGE_CONVERSION_REQUIRED)
+    public VirtualImageConversion getVirtualImageConversion()
+    {
+        return this.virtualImageConversion;
+    }
+
+    public void setVirtualImageConversion(final VirtualImageConversion virtualImageConversion)
+    {
+        this.virtualImageConversion = virtualImageConversion;
     }
 
     //

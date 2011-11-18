@@ -61,7 +61,7 @@ public class AppsLibraryTransformer
         dto.setProductVendor(ovfPackage.getProductVendor());
         dto.setProductVersion(ovfPackage.getProductVersion());
         dto.setUrl(ovfPackage.getUrl());
-        dto.setDiskSizeMb(ovfPackage.getDiskSizeMb());
+        dto.setDiskFileSize(ovfPackage.getDiskFileSize());
 
         if (ovfPackage.getCategory() != null)
         {
@@ -150,7 +150,7 @@ public class AppsLibraryTransformer
         pack.setProductUrl(ovfDto.getProductUrl());
         pack.setProductVendor(ovfDto.getProductVendor());
         pack.setProductVersion(ovfDto.getProductVersion());
-        pack.setDiskSizeMb(ovfDto.getDiskSizeMb());
+        pack.setDiskFileSize(ovfDto.getDiskFileSize());
 
         return pack;
     }

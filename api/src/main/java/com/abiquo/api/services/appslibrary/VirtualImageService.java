@@ -162,7 +162,6 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         return appsLibraryRep.findVirtualImages(enterprise, repository, category, hypervisor);
     }
 
-
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualImage updateVirtualImage(final Integer enterpriseId, final Integer datacenterId,
         final Integer virtualImageId, final VirtualImageDto virtualImage)
@@ -183,6 +182,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setRamRequired(virtualImage.getRamRequired());
         old.setShared(virtualImage.isShared());
         old.setIcon(null);
+        old.setChefEnabled(virtualImage.isChefEnabled());
 
         // retrieve the links
         RESTLink categoryLink = virtualImage.searchLink(CategoryResource.CATEGORY);
@@ -364,12 +364,19 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         {
             addConflictErrors(APIError.VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED);
             flushErrors();
-            // appsLibraryRep.findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter)
         }
 
+        if (vimageToDelete.isShared())
+        {
+            // assert if the enterprise is the enterprise of the virtual image
+            if (!vimageToDelete.getEnterprise().getId().equals(ent.getId()))
+            {
+                addConflictErrors(APIError.VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE);
+                flushErrors();
+            }
+        }
         // if the virtual image is shared only the users from same enterprise can delete
         // check if the user is for the same enterprise otherwise deny allegating permissions
-        userService.checkCurrentEnterpriseForPostMethods(ent);
 
         String viOvf = vimageToDelete.getOvfid();
 

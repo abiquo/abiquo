@@ -93,7 +93,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getDatacenterRepository"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.datacenter.id, event.enterprise.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.datacenter.id, 
+            event.enterprise.id,
+            event.refresh]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -371,7 +374,11 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getVirtualImageByCategory"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id, event.repository.id, event.category.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.enterprise.id, 
+            event.repository.id, 
+            event.category.id,
+            event.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -405,7 +412,12 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="getVirtualImageByCategoryAndHypervisorCompatible"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.enterprise.id, event.repository.id, event.category.id, event.hypervisorType.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.enterprise.id, 
+            event.repository.id, 
+            event.category.id, 
+            event.hypervisorType.id,
+            event.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -439,7 +451,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="editVirtualImage"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.viUpdatedValues]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.enterprise.id,
+            event.datacenterId,
+            event.viUpdatedValues]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -474,7 +489,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="deleteVirtualImage"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.virtualImage.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.enterprise.id,
+            event.datacenterId,
+            event.virtualImage.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"
@@ -506,7 +524,10 @@
 
         <RemoteObjectInvoker instance="{services.appsLibraryService}"
             method="refreshOVFPackageInstanceStatus"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.ovfInstanceId, event.enterprise.id, event.repository.id]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.ovfInstanceId, 
+            event.enterprise.id, 
+            event.repository.datacenter.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualImageResultHandler}"

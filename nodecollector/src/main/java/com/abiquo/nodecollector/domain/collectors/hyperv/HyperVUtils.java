@@ -178,11 +178,58 @@ public final class HyperVUtils
         if (type == HyperVConstants.VIRTUAL_DISK_RESOURCE_TYPE)
         {
             String subType = dispatch.get("ResourceSubType").getObjectAsString2();
-            return subType.equals(HyperVConstants.VIRTUAL_DISK_RESOURCE_SUBTYPE);
+            return subType.equalsIgnoreCase(HyperVConstants.VIRTUAL_DISK_RESOURCE_SUBTYPE);
         }
 
         return false;
     }
+
+    // /**
+    // * Checks if the specified object is a virtual hard disk.
+    // *
+    // * @param dispatch The object to be checked.
+    // * @return Boolean indicating if the specified object is a virtual hard disk.
+    // * @throws JIException If an error occurs.
+    // */
+    // public static boolean isDiskResourceType(final IJIDispatch dispatch) throws JIException
+    // {
+    // int type = dispatch.get("ResourceType").getObjectAsInt();
+    //
+    // return (type == HyperVConstants.DISK_RESOURCE_TYPE);
+    // }
+
+    /**
+     * Checks if the specified object is a virtual hard disk.
+     * 
+     * @param dispatch The object to be checked.
+     * @return Boolean indicating if the specified object is a virtual hard disk.
+     * @throws JIException If an error occurs.
+     */
+    public static boolean isVolumeDisk(final IJIDispatch dispatch) throws JIException
+    {
+        int type = dispatch.get("ResourceType").getObjectAsInt();
+
+        if (type == HyperVConstants.DISK_RESOURCE_TYPE)
+        {
+            String subType = dispatch.get("ResourceSubType").getObjectAsString2();
+            return subType.equalsIgnoreCase(HyperVConstants.DISKPHYSICAL);
+        }
+        return false;
+
+    }
+
+    /**
+     * Checks if the specified object is a virtual hard disk.
+     * 
+     * @param dispatch The object to be checked.
+     * @return Boolean indicating if the specified object is a virtual hard disk.
+     * @throws JIException If an error occurs.
+     */
+    // public static boolean isVirtualHardDisk(final IJIDispatch dispatch) throws JIException
+    // {
+    // String subType = dispatch.get("ResourceSubType").getObjectAsString2();
+    // return subType.equals(HyperVConstants.DISKSYNTHETIC);
+    // }
 
     /**
      * Translates an HyperV state code into an {@link VirtualMachineStateType}.

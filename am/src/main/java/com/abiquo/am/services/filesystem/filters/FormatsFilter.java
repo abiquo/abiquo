@@ -19,32 +19,23 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services.notify;
+package com.abiquo.am.services.filesystem.filters;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FilenameFilter;
 
-
-public class AMNotifierFactory
+public class FormatsFilter implements FilenameFilter
 {
-    private static AMNotifier instance;
+    final String baseFile;
 
-    public static synchronized AMNotifier getInstance() throws IOException
+    public FormatsFilter(final String baseFile)
     {
-        if (instance == null)
-        {
-            instance = new AMNotifier();
-            instance.openChannel();
-        }
-
-        return instance;
+        this.baseFile = baseFile;
     }
 
-    public static synchronized void destroy() throws IOException
+    @Override
+    public boolean accept(final File dir, final String name)
     {
-        if (instance != null)
-        {
-            instance.closeChannel();
-        }
+        return name.startsWith(baseFile);
     }
-    
 }

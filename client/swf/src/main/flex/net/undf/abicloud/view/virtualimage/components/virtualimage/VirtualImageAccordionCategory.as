@@ -164,6 +164,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 }
 
                 event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                event.datacenter = repository.datacenter;
                 event.repository = repository;
                 event.category = category;
                 event.callback = setVirtualImages;
