@@ -74,8 +74,16 @@
                 <ref bean="categoryResource" />
                 <ref bean="iconsResource" />
                 <ref bean="iconResource" />
+                <ref bean="diskFormatTypeResource" />
+                <ref bean="diskFormatTypesResource" />
+                <ref bean="hypervisorTypeResource" />
+                <ref bean="hypervisorTypesResource" />
+
                 <!-- Login -->
                 <ref bean="loginResource" />
+                <!--  -->
+                <ref bean="virtualMachinesInfrastructureResource" />
+                <ref bean="virtualMachineInfrastructureResource" />
             </set>
         </property>
     </bean>

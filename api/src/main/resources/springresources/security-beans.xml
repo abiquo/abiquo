@@ -181,12 +181,14 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/virtualmachines" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
-        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/virtualmachines" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/reenableafterha" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOn" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/powerOff" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkIpmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/virtualmachines/*/action/capture" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/action/checkState" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- PUBLIC NETWORKS -->
         <security:intercept-url pattern="/admin/datacenters/*/network" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
@@ -402,7 +404,17 @@
         <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-        
+        <!-- DISK FORMAT TYPES -->
+        <security:intercept-url pattern="/config/diskformattypes" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/diskformattypes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/diskformattypes/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/diskformattypes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- HYPERVISOR TYPES -->
+        <security:intercept-url pattern="/config/hypervisortypes" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/hypervisortypes" method="OPTIONS" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/hypervisortypes/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/hypervisortypes/*" method="OPTIONS" access="ROLE_SYSCONFIG_VIEW" />
+
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->

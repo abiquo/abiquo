@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.api.service.DefaultApiService;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 
@@ -42,13 +41,13 @@ import com.abiquo.appliancemanager.exceptions.AMException;
  * @author ibarrera
  */
 @Service
-public class DiskFileServiceImpl extends DefaultApiService implements DiskFileService
+public class DiskFileServiceImpl implements DiskFileService
 {
     /** The logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskFileServiceImpl.class);
 
     /** The path to the local repository. */
-    private String repositoryPath = AMConfigurationManager.getInstance().getAMConfiguration()
+    private final String repositoryPath = AMConfigurationManager.getInstance().getAMConfiguration()
         .getRepositoryPath();
 
     /**
@@ -76,8 +75,7 @@ public class DiskFileServiceImpl extends DefaultApiService implements DiskFileSe
 
         if (destinationFile.exists())
         {
-            addError(new AMException(AMError.DISK_FILE_ALREADY_EXIST, destination));
-            flushErrors();
+            throw new AMException(AMError.DISK_FILE_ALREADY_EXIST, destination);
         }
 
         try
@@ -86,8 +84,7 @@ public class DiskFileServiceImpl extends DefaultApiService implements DiskFileSe
         }
         catch (IOException e)
         {
-            addError(new AMException(AMError.DISK_FILE_COPY_ERROR, e));
-            flushErrors();
+            throw new AMException(AMError.DISK_FILE_COPY_ERROR, e);
         }
 
         LOGGER.info("Copy process finished");
@@ -102,8 +99,7 @@ public class DiskFileServiceImpl extends DefaultApiService implements DiskFileSe
 
         if (!file.exists())
         {
-            addError(new AMException(AMError.DISK_FILE_NOT_FOUND, path));
-            flushErrors();
+            throw new AMException(AMError.DISK_FILE_NOT_FOUND, path);
         }
 
         return file;

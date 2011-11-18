@@ -28,9 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
 
-import javax.annotation.Resource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -47,51 +45,42 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.wink.common.annotations.Parent;
 import org.apache.wink.common.model.multipart.InMultiPart;
 import org.apache.wink.common.model.multipart.InPart;
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.EnterpriseRepositoryFileSystem;
-import com.abiquo.am.services.EnterpriseRepositoryService;
+import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.OVFPackageConventions;
 import com.abiquo.am.services.OVFPackageInstanceService;
-import com.abiquo.am.services.notify.AMNotifierFactory;
+import com.abiquo.am.services.download.OVFDocumentFetch;
+import com.abiquo.am.services.notify.AMNotifier;
+import com.abiquo.am.services.ovfformat.OVFPackageInstanceFromOVFEnvelope;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 
 @Parent(EnterpriseRepositoryResource.class)
 @Path(OVFPackageInstancesResource.OVFPI_PATH)
-@Service(value = "ovfPackageInstancesResource")
+@Controller
 public class OVFPackageInstancesResource
 {
-    // @Autowired
-    static OVFPackageInstanceService service;// TODO null
-
-    @Resource(name = "ovfPackageInstanceService")
-    public void setService(final OVFPackageInstanceService service)
-    {
-        OVFPackageInstancesResource.service = service;
-    }
-
-    //
-    ApplicationContext ctx;
-
-    public void setApplicationContext(final org.springframework.context.ApplicationContext ctx)
-    {
-        this.ctx = ctx;
-    }
-
-    //
-
-    private final static Logger logger = LoggerFactory.getLogger(OVFPackageInstancesResource.class);
+    private final static Logger LOG = LoggerFactory.getLogger(OVFPackageInstancesResource.class);
 
     public static final String OVFPI_PATH = ApplianceManagerPaths.OVFPI_PATH;
+
+    @Autowired
+    AMNotifier notifier;
+
+    @Autowired
+    OVFPackageInstanceService ovfService;
+
+    @Autowired
+    OVFDocumentFetch validate;
 
     /**
      * include bundles <br>
@@ -101,20 +90,10 @@ public class OVFPackageInstancesResource
     public OVFPackageInstancesStateDto getOVFPackageInstancesStatus(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise)
     {
-        List<String> availables =
-            EnterpriseRepositoryFileSystem.getAllOVF(EnterpriseRepositoryService.getRepo(
-                idEnterprise).getEnterpriseRepositoryPath(), false);
+        // TODO add only DOWNLOADED
 
         OVFPackageInstancesStateDto list = new OVFPackageInstancesStateDto();
-
-        for (String ovf : availables)
-        {
-            OVFPackageInstanceStateDto stat = new OVFPackageInstanceStateDto();
-            stat.setOvfId(ovf);
-            stat.setStatus(OVFStatusEnumType.DOWNLOAD);
-
-            list.getCollection().add(stat);
-        }
+        list.getCollection().addAll(ErepoFactory.getRepo(idEnterprise).getOVFStates());
 
         return list;
     }
@@ -124,21 +103,25 @@ public class OVFPackageInstancesResource
      */
     @POST
     public void downloadOVFPackage(
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         final String ovfId)
     {
-        logger.debug("[deploy] {}", ovfId);
+        LOG.debug("[deploy] {}", ovfId);
 
         if (!OVFPackageConventions.isValidOVFLocation(ovfId))
         {
-            return;
+            throw new AMException(AMError.OVF_INVALID_LOCATION);
         }
 
-        switch (service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise).getStatus())
+        switch (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus())
         {
             case DOWNLOADING:
             case DOWNLOAD:
                 throw new AMException(AMError.OVF_INSTALL_ALREADY);
+
+            case ERROR:
+                ovfService.delete(erId, ovfId);
+                break;
             default:
                 break;
         }
@@ -151,19 +134,11 @@ public class OVFPackageInstancesResource
 
         try
         {
-            service.startDownload(idEnterprise, ovfId);
+            ovfService.startDownload(erId, ovfId);
         }
-        catch (Exception e) // TODO events in the service
+        catch (AMException e)
         {
-            try
-            {
-                AMNotifierFactory.getInstance().setOVFStatusError(idEnterprise, ovfId,
-                    e.getLocalizedMessage());
-            }
-            catch (Exception eStatus) // IdNotFoundException RepositoryException EventException
-            {
-                logger.error("Can not notify error ", eStatus);
-            }
+            notifier.setOVFStatusError(erId, ovfId, e.toString());
 
             // XXX the request ends successfully but the ovf package status is ERROR
             // throw new AMException(Status.BAD_REQUEST, cause);
@@ -173,8 +148,9 @@ public class OVFPackageInstancesResource
     @POST
     @Consumes("multipart/form-data")
     public Response uploadOVFPackage(@Context final HttpHeaders headers,
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
-        final InMultiPart mp, @Context final Providers providers) throws IOException, EventException
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
+        final InMultiPart mp, @Context final Providers providers) throws IOException,
+        EventException
     {
         OVFPackageInstanceDto diskInfo = null;
         String errorMsg = null;
@@ -198,8 +174,13 @@ public class OVFPackageInstancesResource
             diskInfo.setDiskFilePath(OVFPackageConventions.OVF_STATUS_ERROR_MARK);
         }
 
-        // AMNotifierFactory.getInstance().setOVFStatus(String.valueOf(diskInfo.getIdEnterprise()),
-        // diskInfo.getOvfId(), OVFStatusEnumType.DOWNLOADING);
+        // XXX notify DOWNLOADING
+
+        final String ovfId = diskInfo.getOvfId();
+        if (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus() == OVFStatusEnumType.ERROR)
+        {
+            ovfService.delete(erId, ovfId);
+        }
 
         InPart diskFilePart = mp.next();
 
@@ -213,9 +194,17 @@ public class OVFPackageInstancesResource
          */
 
         diskInfo.setDiskFileSize(diskFile.length());
-        service.upload(diskInfo, diskFile, errorMsg);
+        ovfService.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getOvfId())).build();
+    }
+
+    @POST
+    @Path("actions/validate")
+    public OVFPackageInstanceDto validate(final EnvelopeType envelope)
+    {
+        return OVFPackageInstanceFromOVFEnvelope.getDiskInfo("http://am/validation/OK.ovf",
+            validate.checkEnvelopeIsValid(envelope));
     }
 
     private OVFPackageInstanceDto readOVFPackageInstanceDtoFromMultipart(final InPart diskInfoPart,

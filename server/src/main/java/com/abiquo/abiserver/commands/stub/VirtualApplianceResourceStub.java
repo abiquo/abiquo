@@ -27,19 +27,34 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualma
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.util.ErrorManager;
 
 public interface VirtualApplianceResourceStub
 {
-
-    public VirtualmachineHB allocate(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final VirtualmachineHB vmachineRequ,
-        final List<ResourceManagementHB> resMans, final boolean forceEnterpirseLimits,
-        final ErrorManager errorManager) throws VirtualApplianceCommandException;
 
     public DataResult deployVirtualAppliance(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, Boolean forceEnterpriseLimit);
 
     public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
         final Integer virtualApplianceId);
+    /**
+     * Queries to allocate a new virtual machine
+     * 
+     * @param virtualDatacenterId
+     * @param virtualApplianceId
+     * @param vmachineRequ
+     * @param resMans
+     * @param forceEnterpirseLimits
+     * @param errorManager
+     * @return
+     */
+    public VirtualmachineHB allocate(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualmachineHB vmachineRequ,
+        final List<ResourceManagementHB> resMans, final boolean forceEnterpirseLimits,
+        final ErrorManager errorManager);
+
+    public BasicResult createVirtualAppliance(VirtualAppliance virtualAppliance);
+
 }

@@ -953,7 +953,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         // Forcing the state to IN PROGRESS for visual purposes
                         State state = new State(StateEnum.LOCKED);
                         virtualAppliance.setState(state);
-                        State applychangesState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                        State applychangesState = new State(StateEnum.NEEDS_SYNC);
                         virtualAppliance.setState(state);
                         // virtualAppliance.setSubState(applychangesState);
                     }
@@ -2557,7 +2557,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         // If virtual appliance has been started - create virtual machine for
         // the current node
         if (virtualAppliance.getState().toEnum() == StateEnum.DEPLOYED
-            || virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE)
+            || virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNC)
         {
             VirtualmachineHB virtualMachineHB = createEmptyVirtualMachine(nodeVIPojo, owner);
             nodeVIPojo.setVirtualMachineHB(virtualMachineHB);
@@ -3265,7 +3265,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         }
                         else
                         {
-                            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE
+                            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNC
                                 && nodeVi.getVirtualMachineHB().getState() == StateEnum.NOT_ALLOCATED)
                             {
                                 // Before deleting logic
@@ -3301,7 +3301,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 // Deleting from nodes list
                                 nodesPojoList.remove(nodePojo);
 
-                                State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                                State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                                 virtualAppliance.setState(changesNeededState);
                                 // virtualAppliance.setSubState(changesNeededState);
                                 virtualappHBPojo.setState(changesNeededState.toEnum());
@@ -3311,7 +3311,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                             {
                                 session.update(nodePojo);
                                 updatenodesList.add(node);
-                                State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                                State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                                 virtualAppliance.setState(changesNeededState);
                                 // virtualAppliance.setSubState(changesNeededState);
                                 virtualappHBPojo.setState(changesNeededState.toEnum());
@@ -3340,7 +3340,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     node = newNode.toPojo();
                     if (virtualAppliance.getState().toEnum() == StateEnum.DEPLOYED)
                     {
-                        State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                        State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                         virtualAppliance.setState(changesNeededState);
                         // virtualAppliance.setSubState(changesNeededState);
                         virtualappHBPojo.setState(changesNeededState.toEnum());

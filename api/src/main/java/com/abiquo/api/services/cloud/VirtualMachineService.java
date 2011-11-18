@@ -212,9 +212,21 @@ public class VirtualMachineService extends DefaultApiService
         return vm;
     }
 
+    public VirtualMachine getVirtualMachineByHypervisor(final Hypervisor hyp, final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineByHypervisor(hyp, vmId);
+        if (vm == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+        return vm;
+    }
+
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
     public void addVirtualMachine(final VirtualMachine virtualMachine)
     {
+        validate(virtualMachine);
         repo.insert(virtualMachine);
     }
 
@@ -408,26 +420,6 @@ public class VirtualMachineService extends DefaultApiService
             }
         }
         return false;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
-    {
-        repo.deleteNotManagedVirtualMachines(hypervisor);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor, final boolean trace)
-    {
-        this.deleteNotManagedVirtualMachines(hypervisor);
-
-        if (trace)
-        {
-            tracer.log(SeverityType.INFO, ComponentType.MACHINE,
-                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
-                "Virtual Machines not managed by host from '" + hypervisor.getIp()
-                    + "' have been deleted");
-        }
     }
 
     /**
@@ -1662,4 +1654,5 @@ public class VirtualMachineService extends DefaultApiService
 
         return errors;
     }
+
 }

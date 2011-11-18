@@ -78,6 +78,9 @@
             [Bindable]
             protected var _dataCenter:DataCenter;
             
+            [Bindable]
+            private var _physicalMachine:PhysicalMachine;
+            
             /////////////////////////////////////
             //IBodyComponentChildren implementation (in progress...)
             
@@ -293,6 +296,7 @@
             {
                 //If the Infrastructure Element selected is a Physical Machine, we can show more info about it
                 if (infrastructureSelector.selectedInfrastructureElement is PhysicalMachine){
+                	this._physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
                     //remove the selected virtual machine reference
                     if(!event.automaticUpdate){
                         virtualMachineList.selectedVirtualMachine = null;
@@ -318,6 +322,8 @@
 	                //GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE
 	                var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_VIRTUAL_MACHINE_BY_PHYSICAL_MACHINE);
 	                event.physicalMachine = infrastructureSelector.selectedInfrastructureElement as PhysicalMachine;
+	                event.dataCenter = this._dataCenter;
+	                event.rackId = Rack(PhysicalMachine(infrastructureSelector.selectedInfrastructureElement).assignedTo).id;
 	                event.callback = setVirtualMachine;
 	                dispatchEvent(event);
                 }
@@ -644,6 +650,7 @@
         title="@Resource(bundle='Infrastructure', key='LABEL_VM_UPPERCASE')">
 
         <virtualmachine:VirtualMachineList id="virtualMachineList"
+        	hypervisor="{physicalMachineRenderer.hypervisor}"
             width="100%" height="100%"
             label="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_VM_UPPERCASE')}"
             virtualMachineSelected="showVirtualMachine()"/>
@@ -674,6 +681,8 @@
 
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                 	type="INFRASTRUCTURE"
+                	physicalMachine="{this._physicalMachine}"
+                	hypervisor="{physicalMachineRenderer.hypervisor}"
                     width="100%" height="100%"
                     virtualMachine="{virtualMachineList.selectedVirtualMachine}"/>
              

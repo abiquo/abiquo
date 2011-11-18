@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services.util;
+package com.abiquo.am.services.ovfformat;
 
 import java.io.File;
 import java.math.BigInteger;

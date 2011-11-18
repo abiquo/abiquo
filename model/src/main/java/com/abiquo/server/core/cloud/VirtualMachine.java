@@ -121,7 +121,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = true;
+    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
 
     private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
 

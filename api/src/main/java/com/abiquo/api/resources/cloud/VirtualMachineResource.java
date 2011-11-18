@@ -389,7 +389,14 @@ public class VirtualMachineResource extends AbstractResource
         dto.setHighDisponibility(v.getHighDisponibility());
         dto.setId(v.getId());
         // dto.setIdState(v.getidState)
-        dto.setIdType(v.getIdType());
+        if (v.getIdType() == 0)
+        {
+        	dto.setType("NOT_MANAGED");
+        }
+        else
+        {
+        	dto.setType("MANAGED");
+        }
 
         dto.setName(v.getName());
         dto.setPassword(v.getPassword());

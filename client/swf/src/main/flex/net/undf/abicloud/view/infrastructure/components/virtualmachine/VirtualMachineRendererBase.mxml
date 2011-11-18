@@ -62,6 +62,21 @@
             public static const USED_BY_INFRASTRUCTURE_MANAGEMENT:int = 1;
 
             public static const USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT:int = 2;
+            
+            protected var _physicalMachine:PhysicalMachine;
+            
+            public function set physicalMachine(value:PhysicalMachine):void
+            {
+            	this._physicalMachine = value;
+            }
+            
+            protected var _hypervisor:HyperVisor;
+            
+            public function set hypervisor(value:HyperVisor):void
+            {
+            	this._hypervisor = value;
+            	this._virtualMachine.assignedTo = this._hypervisor;
+            }
 
             private var _type:String;
             

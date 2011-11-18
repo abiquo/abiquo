@@ -36,28 +36,56 @@ public class AMException extends RuntimeException
         return error;
     }
 
-    public AMException(AMError error)
+    public AMException(final AMError error)
     {
         super(error.getMessage());
         this.error = error;
     }
 
-    public AMException(AMError error, String msg)
+    public AMException(final AMError error, final String msg)
     {
         super(String.format("%s\nDetail:\n%s", error.getMessage(), msg));
         this.error = error;
     }
 
-    public AMException(AMError error, String msg, Throwable th)
+    public AMException(final AMError error, final String msg, final Throwable th)
     {
         super(String.format("%s\nDetail:\n%s", error.getMessage(), msg), th);
         this.error = error;
     }
 
-    public AMException(AMError error, Throwable th)
+    public AMException(final AMError error, final Throwable th)
     {
         super(error.getMessage(), th);
         this.error = error;
     }
+    
+    
+    
+
+    public static String getErrorMessage(final Integer statusCode, final String fileUrl)
+    {
+
+        if (statusCode == 401)
+        {
+            return String.format("[Unauthorized] You might not have permissions to read "
+                + "the file or folder at the following location: %s", fileUrl);
+        }
+        else if (statusCode == 403)
+        {
+            return String.format("[Forbidden] You might not have permissions to read "
+                + "the file or folder at the following location: %s", fileUrl);
+        }
+        else if (statusCode == 404)
+        {
+            return String.format(
+                "[Not Found] The file or folder at the location: %s does not exist", fileUrl);
+        }
+        else
+        {
+            return String.format("%d -  at : %s", statusCode, fileUrl);
+        }
+    }
+    
 
 }

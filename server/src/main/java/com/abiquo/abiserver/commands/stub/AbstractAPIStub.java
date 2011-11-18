@@ -703,19 +703,34 @@ public class AbstractAPIStub
                 + "actions/repositoryUninstall", params);
     }
 
+    protected String createDiskFormatTypeLink(final Integer diskFormatTypeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("diskformattype", valueOf(diskFormatTypeId));
+
+        return resolveURI(apiUri, "config/diskformattypes/{diskformattype}", params);
+    }
+
+    protected String createDiskFormatTypesLink()
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        return resolveURI(apiUri, "config/diskformattypes", params);
+    }
+
     protected String createIconLink(final Integer iconId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("icon", valueOf(iconId));
 
-        return resolveURI(apiUri, "admin/config/icons/{icon}", params);
+        return resolveURI(apiUri, "icons/{icon}", params);
     }
 
     protected String createIconsLink()
     {
         Map<String, String> params = new HashMap<String, String>();
 
-        return resolveURI(apiUri, "admin/config/icons", params);
+        return resolveURI(apiUri, "config/icons", params);
     }
 
     protected String createCategoryLink(final Integer categoryId)
@@ -838,6 +853,21 @@ public class AbstractAPIStub
         params.put("vdcid", vdcId.toString());
 
         return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/action/defaultvlan", params);
+    }
+
+    protected String createVirtualAppliancesLink(final Integer vdcId)
+    {
+        return createVirtualDatacenterLink(vdcId) + "/virtualappliances";
+    }
+
+    protected String createVirtualApplianceLink(final Integer vdcId, final Integer vappId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("vapp", vappId.toString());
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vapp}", params);
     }
 
     protected String createVirtualMachineConfigurationsLink(final Integer vdcId,
@@ -993,9 +1023,22 @@ public class AbstractAPIStub
         params.put("rack", rackId.toString());
         params.put("machine", machineId.toString());
 
-        return resolveURI(
-            apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/virtualmachines",
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines",
+            params);
+    }
+
+    protected String createMachineLinkVm(final Integer datacenterId, final Integer rackId,
+        final Integer machineId, final Integer vmId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("datacenter", datacenterId.toString());
+        params.put("rack", rackId.toString());
+        params.put("machine", machineId.toString());
+        params.put("vm", vmId.toString());
+
+        return resolveURI(apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}",
             params);
     }
 

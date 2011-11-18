@@ -28,6 +28,7 @@ import com.abiquo.abiserver.commands.UserCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.impl.UserCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -61,6 +62,8 @@ public class VirtualApplianceService
     protected UserCommand userCommand;
 
     protected VirtualApplianceResourceStub virtualApplianceResourceStub;
+    /** The stub used to connect to the API. */
+    private VirtualApplianceResourceStub vappStub;
 
     /**
      * Default constructor.
@@ -94,6 +97,8 @@ public class VirtualApplianceService
             userCommand = new UserCommandImpl();
         }
 
+        vappStub = new VirtualApplianceResourceStubImpl();
+
     }
 
     private VirtualApplianceCommand proxyCommand(final UserSession userSession)
@@ -105,6 +110,18 @@ public class VirtualApplianceService
     private UserCommand proxyCommand2(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, userCommand, UserCommand.class);
+    }
+
+    /**
+     * Proxies the stub to authenticate to the API.
+     * 
+     * @param userSession user session.
+     * @return the stub to call the API.
+     */
+    protected VirtualApplianceResourceStub proxyStub(final UserSession userSession)
+    {
+        return APIStubFactory
+            .getInstance(userSession, vappStub, VirtualApplianceResourceStub.class);
     }
 
     // /////////////////////////
@@ -270,13 +287,10 @@ public class VirtualApplianceService
      * @param virtualAppliance
      * @return A DataResult object containing the VirtualAppliance created in the Data Base
      */
-    public BasicResult createVirtualAppliance(final UserSession session,
+    public BasicResult createVirtualAppliance(final UserSession userSession,
         final VirtualAppliance virtualAppliance)
     {
-
-        VirtualApplianceCommand command = proxyCommand(session);
-
-        return command.createVirtualAppliance(session, virtualAppliance);
+        return proxyStub(userSession).createVirtualAppliance(virtualAppliance);
     }
 
     /**
@@ -381,4 +395,5 @@ public class VirtualApplianceService
         return command.forceRefreshVirtualApplianceState(virtualAppliance);
 
     }
+
 }

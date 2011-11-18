@@ -19,13 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services;
+package com.abiquo.api.resources.appslibrary;
 
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import static com.abiquo.api.common.UriTestResolver.resolveHypervisorTypesURI;
+import static org.testng.Assert.assertEquals;
 
-public interface OVFPackageInstanceNotifier
+import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.Test;
+
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.HypervisorTypesDto;
+
+public class HypervisorTypesResourceIT extends AbstractJpaGeneratorIT
 {
-    void setOVFStatus(final String erId, final String ovfId, OVFStatusEnumType status);
+    @Test
+    public void getHypervisorTypes() throws Exception
+    {
+        String hypervisorTypesURI = resolveHypervisorTypesURI();
+        ClientResponse response = get(hypervisorTypesURI);
 
-    void setOVFStatusError(final String erId, final String ovfId, final String errorMessage);
+        HypervisorTypesDto dtos = response.getEntity(HypervisorTypesDto.class);
+        assertEquals(dtos.getCollection().size(), HypervisorType.getIdMax());
+    }
+
 }
