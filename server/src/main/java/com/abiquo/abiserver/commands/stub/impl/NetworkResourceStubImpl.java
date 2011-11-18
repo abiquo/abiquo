@@ -373,11 +373,6 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             dto.addLink(entLink);
         }
 
-        // for (DhcpOption opt : dhcpOptions)
-        // {
-        // dto.addLink(new RESTLink("dhcpoption", createDhcpOptionLink(opt.getId())));
-        // }
-
         DhcpOptionsDto options = new DhcpOptionsDto();
         for (DhcpOption opt : dhcpOptions)
         {

@@ -136,7 +136,10 @@ public class PrivateNetworkResource extends AbstractResource
         DhcpOptionsDto dtos = new DhcpOptionsDto();
         for (DhcpOption opt : network.getDhcpOption())
         {
-            dtos.getCollection().add(DhcpOptionResource.createTransferObject(opt, restBuilder));
+            if (opt.getOption() == 121)
+            {
+                dtos.getCollection().add(DhcpOptionResource.createTransferObject(opt, restBuilder));
+            }
         }
 
         dto.setDhcpOptions(dtos);
@@ -158,16 +161,20 @@ public class PrivateNetworkResource extends AbstractResource
         vlan.getConfiguration().setSecondaryDNS(dto.getSecondaryDNS());
         vlan.getConfiguration().setSufixDNS(dto.getSufixDNS());
         List<DhcpOption> opts = new ArrayList<DhcpOption>();
-        for (DhcpOptionDto dtoOpt : dto.getDhcpOptions().getCollection())
+        if (dto.getDhcpOptions() != null)
         {
-            DhcpOption opt =
-                new DhcpOption(dtoOpt.getOption(),
-                    dtoOpt.getGateway(),
-                    dtoOpt.getNetworkAddress(),
-                    dtoOpt.getMask(),
-                    dtoOpt.getNetmask());
-            opts.add(opt);
+            for (DhcpOptionDto dtoOpt : dto.getDhcpOptions().getCollection())
+            {
+                DhcpOption opt =
+                    new DhcpOption(dtoOpt.getOption(),
+                        dtoOpt.getGateway(),
+                        dtoOpt.getNetworkAddress(),
+                        dtoOpt.getMask(),
+                        dtoOpt.getNetmask());
+                opts.add(opt);
+            }
         }
+
         vlan.setDhcpOption(opts);
 
         return vlan;

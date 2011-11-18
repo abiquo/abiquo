@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
@@ -40,14 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.resources.cloud.DhcpOptionResource;
-import com.abiquo.api.resources.cloud.DhcpOptionsResource;
 import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
-import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -62,7 +57,6 @@ import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
-import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
@@ -236,14 +230,23 @@ public class NetworkService extends DefaultApiService
         checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
             .getAddress()), newVlan.getConfiguration().getMask());
 
+        List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
+        for (DhcpOption dhcpOption : newVlan.getDhcpOption())
+        {
+            dhcpOption.setOption(121);
+            datacenterRepo.insertDhcpOption(dhcpOption);
+            DhcpOption dhcpOption2 =
+                new DhcpOption(249,
+                    dhcpOption.getGateway(),
+                    dhcpOption.getNetworkAddress(),
+                    dhcpOption.getMask(),
+                    dhcpOption.getNetmask());
+            datacenterRepo.insertDhcpOption(dhcpOption2);
+            opts.add(dhcpOption2);
+        }
+        newVlan.setDhcpOption(opts);
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
         // put the previous default one as non-default.
-        Collection<DhcpOption> dhcpOptions = datacenterRepo.findAllDhcp();
-        for (DhcpOption dhcpOption : dhcpOptions)
-        {
-            newVlan.addDhcpOption(dhcpOption);
-
-        }
         repo.insertNetworkConfig(newVlan.getConfiguration());
         repo.insertVlan(newVlan);
 
@@ -316,6 +319,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         repo.deleteVLAN(vlanToDelete);
+        datacenterRepo.deleteAllDhcpOption(vlanToDelete.getDhcpOption());
 
         if (tracer != null)
         {
@@ -992,6 +996,24 @@ public class NetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
+        // set the dhcp option
+        datacenterRepo.deleteAllDhcpOption(oldNetwork.getDhcpOption());
+        List<DhcpOption> opts = new ArrayList<DhcpOption>(newNetwork.getDhcpOption());
+        for (DhcpOption dhcpOption : newNetwork.getDhcpOption())
+        {
+            dhcpOption.setOption(121);
+            datacenterRepo.insertDhcpOption(dhcpOption);
+            DhcpOption dhcpOption2 =
+                new DhcpOption(249,
+                    dhcpOption.getGateway(),
+                    dhcpOption.getNetworkAddress(),
+                    dhcpOption.getMask(),
+                    dhcpOption.getNetmask());
+            datacenterRepo.insertDhcpOption(dhcpOption2);
+            opts.add(dhcpOption2);
+        }
+        oldNetwork.setDhcpOption(opts);
+
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
@@ -1429,30 +1451,6 @@ public class NetworkService extends DefaultApiService
 
         datacenterRepo.insertDhcpOption(opt);
         return opt;
-    }
-
-    public List<Integer> getDhcpOptionIds(final VLANNetworkDto dto)
-    {
-        List<Integer> idList = new ArrayList<Integer>();
-        for (RESTLink rsl : dto.getLinks())
-        {
-            if (rsl.getRel().contains(DhcpOptionResource.DHCP_OPTION))
-            {
-                String buildPath =
-                    URIResolver.buildPath(DhcpOptionsResource.DHCP_OPTIONS_PATH,
-                        DhcpOptionResource.DHCP_OPTION_PARAM);
-                MultivaluedMap<String, String> values =
-                    URIResolver.resolveFromURI(buildPath, rsl.getHref());
-                if (values == null || !values.containsKey(DhcpOptionResource.DHCP_OPTION))
-                {
-                    addNotFoundErrors(APIError.DHCP_OPTION_PARAM_NOT_FOUND);
-                    flushErrors();
-                }
-                idList.add(Integer.valueOf(values.getFirst(DhcpOptionResource.DHCP_OPTION)));
-            }
-        }
-
-        return idList;
     }
 
 }

@@ -22,6 +22,7 @@
 package com.abiquo.abiserver.services.flex;
 
 import java.util.List;
+import java.util.Set;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.commands.NetworkCommand;
@@ -32,6 +33,7 @@ import com.abiquo.abiserver.commands.stub.impl.NetworkResourceStubImpl;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
@@ -39,6 +41,8 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.ListRequest;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**
@@ -82,7 +86,7 @@ public class NetworkingService
      */
     public BasicResult createVLAN(final UserSession userSession, final Integer virtualdatacenterId,
         final String vlanName, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork)
+        final Boolean defaultNetwork, final Set<DhcpOption> dhcpOptions)
     {
         DataResult<VlanNetwork> dataResult = new DataResult<VlanNetwork>();
 
@@ -95,6 +99,20 @@ public class NetworkingService
         vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
         vlandto.setSufixDNS(configuration.getSufixDNS());
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        vlandto.setDhcpOptions(options);
         return proxyStub(userSession).createPrivateVlan(userSession, virtualdatacenterId, vlandto);
 
     }
@@ -127,7 +145,7 @@ public class NetworkingService
      */
     public BasicResult editVLAN(final UserSession userSession, final Integer vdcId,
         final Integer vlanId, final String vlanName, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork)
+        final Boolean defaultNetwork, final Set<DhcpOption> dhcpOptions)
     {
 
         VLANNetworkDto vlandto = new VLANNetworkDto();
@@ -139,6 +157,20 @@ public class NetworkingService
         vlandto.setPrimaryDNS(configuration.getPrimaryDNS());
         vlandto.setSecondaryDNS(configuration.getSecondaryDNS());
         vlandto.setSufixDNS(configuration.getSufixDNS());
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        vlandto.setDhcpOptions(options);
 
         BasicResult res = proxyStub(userSession).editPrivateVlan(vdcId, vlanId, vlandto);
         if (res.getSuccess() && defaultNetwork)
@@ -502,8 +534,8 @@ public class NetworkingService
         try
         {
             netComm =
-                (NetworkCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
+                (NetworkCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.NetworkingCommandPremiumImpl")
                     .newInstance();
         }
         catch (Exception e)

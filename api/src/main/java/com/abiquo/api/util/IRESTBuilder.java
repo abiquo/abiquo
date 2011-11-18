@@ -46,7 +46,6 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -175,5 +174,4 @@ public interface IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         IpPoolManagement ip);
 
-    public List<RESTLink> buildDhcpOptionLink(DhcpOptionDto dto);
 }

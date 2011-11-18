@@ -50,7 +50,6 @@ import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
 import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
-import com.abiquo.api.resources.cloud.DhcpOptionResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -84,7 +83,6 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.infrastructure.RackDto;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -938,20 +936,6 @@ public class RESTBuilder implements IRESTBuilder
         final IpPoolManagement ip)
     {
         return null;
-    }
-
-    @Override
-    public List<RESTLink> buildDhcpOptionLink(final DhcpOptionDto dto)
-    {
-        List<RESTLink> links = new ArrayList<RESTLink>();
-
-        Map<String, String> params =
-            Collections.singletonMap(DhcpOptionResource.DHCP_OPTION, dto.getId().toString());
-
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(DhcpOptionResource.class, REL_EDIT, params));
-
-        return links;
     }
 
 }
