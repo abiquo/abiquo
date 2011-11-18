@@ -3,6 +3,8 @@ package com.abiquo.api.services.stub;
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,18 @@ public class TarantinoService extends DefaultApiService
 
     @Autowired
     private VsmServiceStub vsm;
+
+    public TarantinoService()
+    {
+
+    }
+
+    public TarantinoService(final EntityManager em)
+    {
+        repo = new InfrastructureRep(em);
+        vmService = new VirtualMachineService(em);
+        vsm = new VsmServiceStub();
+    }
 
     /**
      * Creates and sends a reconfigure operation.
