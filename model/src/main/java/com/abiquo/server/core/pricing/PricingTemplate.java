@@ -42,6 +42,7 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.model.enumerator.PricingPeriod;
+import com.abiquo.model.validation.BigDec;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -246,9 +247,7 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal minimumChargePeriod;
 
     @Required(value = MINIMUM_CHARGE_PERIOD_REQUIRED)
-    // @Min(value = 0)
-    // @Max(value = 6)
-    // @BigDec
+    @BigDec
     public BigDecimal getMinimumChargePeriod()
     {
         return this.minimumChargePeriod;

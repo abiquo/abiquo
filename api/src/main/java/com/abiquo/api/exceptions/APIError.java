@@ -408,7 +408,8 @@ public enum APIError
         "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
-        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
+        "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
+        "PRICINGTEMPLATE-9", "Check Minimum Charge value is not null or wrong type"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -521,6 +522,7 @@ public enum APIError
         {
             System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
                 error.name()));
+
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
