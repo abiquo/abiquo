@@ -93,6 +93,7 @@ public class StorageRep extends DefaultRepBase
         this.diskStatefulConversionDAO = new DiskStatefulConversionDAO(entityManager);
         this.initiatorMappingDAO = new InitiatorMappingDAO(entityManager);
         this.diskManagementDAO = new DiskManagementDAO(entityManager);
+        this.rasdDAO = new RasdDAO(entityManager);
     }
 
     public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
