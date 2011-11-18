@@ -1,19 +1,38 @@
+/**
+ * Abiquo community edition
+ * cloud management application for hybrid clouds
+ * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+ *
+ * This application is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU LESSER GENERAL PUBLIC
+ * LICENSE as published by the Free Software Foundation under
+ * version 3 of the License
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 package com.abiquo.server.core.task;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
-import com.abiquo.model.redis.Transaction;
+import redis.clients.jedis.Transaction;
 
 @Component
 public class AsyncTaskRep
 {
-    // TODO singleton
-    protected static JedisPool pool = new JedisPool(new GenericObjectPool.Config(), "localhost");
+    @Autowired
+    protected static JedisPool jedisPool;
 
     @Autowired
     protected TaskDAO taskDao;
@@ -23,8 +42,9 @@ public class AsyncTaskRep
 
     public Task save(Task task)
     {
-        Jedis jedis = pool.getResource();
-        Transaction transaction = (Transaction) jedis.multi();
+        Jedis jedis = jedisPool.getResource();
+        Transaction transaction = jedis.multi();
+        boolean discard = true;
 
         try
         {
@@ -38,11 +58,16 @@ public class AsyncTaskRep
             taskDao.save(task, transaction);
 
             transaction.exec();
+            discard = false;
         }
         finally
         {
-            transaction.discardIfNeeded();
-            pool.returnResource(jedis);
+            if (discard)
+            {
+                transaction.discard();
+            }
+
+            jedisPool.returnResource(jedis);
         }
 
         return task;
@@ -50,18 +75,24 @@ public class AsyncTaskRep
 
     public Job save(Job job)
     {
-        Jedis jedis = pool.getResource();
-        Transaction transaction = (Transaction) jedis.multi();
+        Jedis jedis = jedisPool.getResource();
+        Transaction transaction = jedis.multi();
+        boolean discard = true;
 
         try
         {
             jobDao.save(job, transaction);
             transaction.exec();
+            discard = false;
         }
         finally
         {
-            transaction.discardIfNeeded();
-            pool.returnResource(jedis);
+            if (discard)
+            {
+                transaction.discard();
+            }
+
+            jedisPool.returnResource(jedis);
         }
 
         return job;
@@ -69,8 +100,9 @@ public class AsyncTaskRep
 
     public void delete(Task task)
     {
-        Jedis jedis = pool.getResource();
-        Transaction transaction = (Transaction) jedis.multi();
+        Jedis jedis = jedisPool.getResource();
+        Transaction transaction = jedis.multi();
+        boolean discard = true;
 
         try
         {
@@ -84,35 +116,44 @@ public class AsyncTaskRep
             taskDao.delete(task, transaction);
 
             transaction.exec();
+            discard = false;
         }
         finally
         {
-            transaction.discardIfNeeded();
-            pool.returnResource(jedis);
+            if (discard)
+            {
+                transaction.discard();
+            }
+
+            jedisPool.returnResource(jedis);
         }
     }
 
     public Task findTask(String taskId)
     {
-        Jedis jedis = pool.getResource();
+        Jedis jedis = jedisPool.getResource();
 
         try
         {
             Task task = taskDao.findById(taskId, jedis);
-            task.getJobs().addAll(
-                jobDao.findJobs(taskDao.getTaskJobsKey(task.getIdAsString()), jedis));
+
+            if (task != null)
+            {
+                task.getJobs().addAll(
+                    jobDao.findJobs(taskDao.getTaskJobsKey(task.getIdAsString()), jedis));
+            }
 
             return task;
         }
         finally
         {
-            pool.returnResource(jedis);
+            jedisPool.returnResource(jedis);
         }
     }
 
     public Job findJob(String jobId)
     {
-        Jedis jedis = pool.getResource();
+        Jedis jedis = jedisPool.getResource();
 
         try
         {
@@ -120,7 +161,7 @@ public class AsyncTaskRep
         }
         finally
         {
-            pool.returnResource(jedis);
+            jedisPool.returnResource(jedis);
         }
     }
 }
