@@ -27,7 +27,7 @@
     <parent>
         <artifactId>platform</artifactId>
         <groupId>com.abiquo.abicloud</groupId>
-        <version>1.8.5-HF4</version>
+        <version>1.8.5-HF5-SNAPSHOT</version>
     </parent>
     <!-- Aggregations -->
     <modules>
