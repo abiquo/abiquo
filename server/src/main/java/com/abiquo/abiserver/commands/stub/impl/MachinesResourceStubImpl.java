@@ -351,4 +351,13 @@ public class MachinesResourceStubImpl extends AbstractAPIStub implements Machine
         return result;
     }
 
+    @Override
+    public BasicResult importVirtualMachineToVirtualAppliance(final Integer dcId,
+        final Integer rackId, final Integer machineId, final Integer vmId, final Integer vdcId,
+        final Integer vappId)
+    {
+        // PREMIUM
+        return null;
+    }
+
 }

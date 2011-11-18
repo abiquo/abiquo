@@ -353,17 +353,28 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         return datastore;
     }
 
-    public static VirtualMachine create(final VirtualMachineDto dto)
+    public static VirtualMachine createFlexObject(final VirtualMachineDto dto)
     {
         VirtualMachine vm = new VirtualMachine();
-
-        vm.setCpu(dto.getCpu());
-        vm.setDescription(dto.getDescription());
-        vm.setHd(dto.getHd());
-        vm.setHighDisponibility(dto.getHighDisponibility() == com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
         vm.setId(dto.getId());
-        vm.setState(new State(dto.getIdState(), dto.getState().toString()));
-
+        vm.setCpu(dto.getCpu());
+        vm.setHd(dto.getHd());
+        vm.setHighDisponibility(dto.getHighDisponibility() == 1 ? true : false);
+        vm.setDescription(dto.getDescription());
+        vm.setName(dto.getName());
+        vm.setRam(dto.getRam());
+        vm.setState(new State(StateEnum.valueOf(dto.getState().name())));
+        vm.setVdrpPort(dto.getVdrpPort());
+        if (dto.getType().equalsIgnoreCase("MANAGED"))
+        {
+            vm.setIdType(1);
+        }
+        else
+        {
+            vm.setIdType(0);
+        }
+        vm.setVirtualImage(null); // Set to null to avoid VirtualImage conversion fail to PojoHB and
+        // because we don't use it
         return vm;
     }
 }

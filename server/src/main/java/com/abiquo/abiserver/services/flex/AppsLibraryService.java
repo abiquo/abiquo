@@ -34,7 +34,6 @@ import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.DatacenterRepositoryResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualImageResourceStubImpl;
-import com.abiquo.abiserver.exception.AppsLibraryCommandException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -54,8 +53,6 @@ public class AppsLibraryService
 {
     private AppsLibraryCommand appsLibraryCommand;
 
-    private final static boolean REPOSITORY_SYNCHRONIZE = true;
-
     private final static boolean REPOSITORY_INCLUDE_USAGE = true;
 
     public AppsLibraryService()
@@ -64,8 +61,8 @@ public class AppsLibraryService
         {
 
             appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
+                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
+                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
                     .newInstance();
         }
         catch (Exception e)
@@ -75,14 +72,15 @@ public class AppsLibraryService
     }
 
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
-        final Integer idDatacenter, final Integer idEnterprise) // TODO idEnterpise is not used
+        final Integer idDatacenter, final Integer idEnterprise, final Boolean refresh)
     {
+        // TODO idEnterpise is not used
         DatacenterRepositoryResourceStub dcRepoStub =
             APIStubFactory.getInstance(userSession, new DatacenterRepositoryResourceStubImpl(),
                 DatacenterRepositoryResourceStub.class);
 
         // refresh content and get
-        return dcRepoStub.getRepository(idDatacenter, idEnterprise, REPOSITORY_SYNCHRONIZE,
+        return dcRepoStub.getRepository(idDatacenter, idEnterprise, refresh,
             REPOSITORY_INCLUDE_USAGE);
     }
 
