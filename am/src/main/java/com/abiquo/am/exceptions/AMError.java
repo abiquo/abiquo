@@ -29,9 +29,13 @@ public enum AMError
 
     AM_CHECK("AM-CHECK",
         "Appliance Manager is not well configured. Check the repository filesystem"), //
+    AM_CHECK_REDIS("AM-CHECK-REDIS", "No connection to the redis server"), //
+    AM_NOTIFICATION("AM-NOTIFICATION", "Can not publish an outgoing status message"), //
     OVF_INVALID("OVF-INVALID", "Invalid OVF document"), //
-    OVF_INVALID_LOCATION("OVF-INVALID_LOC", "Invalid OVF location"), //
-    OVF_NOT_FOUND("OVF-NOT-FOUND", "OVF document not found in the repository"), //
+    OVF_INVALID_LOCATION("OVF-INVALID-LOC", "Invalid OVF location"), //
+    OVF_INVALID_MULTIPLE_FILES("OVF-INVALID-MULTIPLE-FILE",
+        "OVF document contains more than a single Referenced File, one none."), OVF_NOT_FOUND(
+        "OVF-NOT-FOUND", "OVF document not found in the repository"), //
     OVF_MALFORMED("OVF-MALFORMED", "OVF document can not be read"), //
     OVF_INSTALL("OVF-INSTALL", "Can't create the ovf package folder"), //
     OVF_INSTALL_ALREADY("OVF-INSTALL-ALREADY", "OVF already exist"), //
@@ -42,8 +46,8 @@ public enum AMError
     OVF_BOUNDLE("OVF-BOUNDLE", "Can't create the instance"), //
     OVF_UPLOAD("OVF-UPLOAD", "Can't upload the ovf package"), //
     REPO_NOT_ACCESSIBLE("REPO-NOT-ACCESSIBLE",
-        "Repository is not accessible. Check the exported location (propably NFS is stopped)"), //
-    REPO_NOT_WRITABLE("REPO-NOT-WRITABLE", "Repository is read only. Check the mount parameters."), //
+        "Repository is not accessible. Check the exported location (propably NFS is stopped), "
+            + "or havent write permision"), //
     REPO_TIMEOUT_REFRESH("REPO-TIMEOUT-REFRESH",
         "Timeout during repository file system synchronization."), //
     OVFPI_DELETE("OVFPI-DELETE", "Can't delete ovf package content"), //

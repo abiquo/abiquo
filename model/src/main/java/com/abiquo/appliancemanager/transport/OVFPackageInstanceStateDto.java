@@ -21,9 +21,7 @@
 
 package com.abiquo.appliancemanager.transport;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -51,8 +49,8 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
     protected String ovfId;
 
     /** Current status in the enterprise repository */
-    
-    //@XmlElement(name = "status")
+
+    // @XmlElement(name = "status")
     protected OVFStatusEnumType status;
 
     /**
@@ -66,12 +64,14 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
      */
     protected String errorCause;
 
+    protected String masterOvf;
+
     public String getOvfId()
     {
         return ovfId;
     }
 
-    public void setOvfId(String ovfId)
+    public void setOvfId(final String ovfId)
     {
         this.ovfId = ovfId;
     }
@@ -91,7 +91,7 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
         return downloadingProgress;
     }
 
-    public void setDownloadingProgress(Double downloadingProgress)
+    public void setDownloadingProgress(final Double downloadingProgress)
     {
         this.downloadingProgress = downloadingProgress;
     }
@@ -101,9 +101,19 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
         return errorCause;
     }
 
-    public void setErrorCause(String errorCause)
+    public void setErrorCause(final String errorCause)
     {
         this.errorCause = errorCause;
+    }
+
+    public String getMasterOvf()
+    {
+        return masterOvf;
+    }
+
+    public void setMasterOvf(final String masterOvf)
+    {
+        this.masterOvf = masterOvf;
     }
 
 }

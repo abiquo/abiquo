@@ -194,6 +194,7 @@ public class DatacenterResource extends AbstractResource
         Set<HypervisorType> types = service.getHypervisorTypes(datacenter);
 
         HypervisorTypesDto dto = new HypervisorTypesDto();
+
         dto.setCollection(new ArrayList<HypervisorType>(types));
 
         return dto;

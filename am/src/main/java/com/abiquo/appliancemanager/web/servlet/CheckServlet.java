@@ -20,20 +20,55 @@
  */
 package com.abiquo.appliancemanager.web.servlet;
 
-/**
- * Performs specific Appliance Manager checks.
- * 
- * @author ibarrera
- */
+import static com.abiquo.am.data.AMRedisDao.REDIS_POOL;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
+
+import com.abiquo.am.exceptions.AMError;
+import com.abiquo.appliancemanager.config.AMConfigurationManager;
+import com.abiquo.appliancemanager.exceptions.AMException;
+
+/** Performs specific Appliance Manager checks. */
 public class CheckServlet extends AbstractCheckServlet
 {
-    /** Serial UID. */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4320236147538190023L;
 
     @Override
     protected boolean check() throws Exception
     {
+
+        if (!AMConfigurationManager.getInstance().validateAMConfiguration())
+        {
+            throw new AMException(AMError.AM_CHECK, AMConfigurationManager.getInstance()
+                .getConfigurationError());
+        }
+
+        if (!checkRedis())
+        {
+            throw new AMException(AMError.AM_CHECK, "No connection to Redis server");
+        }
+
         return true;
     }
 
+    public static boolean checkRedis()
+    {
+        Jedis redis = null;
+        try
+        {
+            redis = REDIS_POOL.getResource();
+            return "PONG".equalsIgnoreCase(redis.ping());
+        }
+        catch (final JedisConnectionException e)
+        {
+            return false;
+        }
+        finally
+        {
+            if (redis != null)
+            {
+                REDIS_POOL.returnResource(redis);
+            }
+        }
+    }
 }

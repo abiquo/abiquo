@@ -100,7 +100,6 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        // entitiesToSetup.add(enterprise);
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
