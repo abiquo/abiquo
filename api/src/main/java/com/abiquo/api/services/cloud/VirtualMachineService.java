@@ -207,9 +207,7 @@ public class VirtualMachineService extends DefaultApiService
 
     public VirtualMachine getVirtualMachine(final Integer vmId)
     {
-        VirtualMachine vm = repo.findVirtualMachineById(vmId);
-
-        return vm;
+        return repo.findVirtualMachineById(vmId);
     }
 
     public VirtualMachine getVirtualMachineByHypervisor(final Hypervisor hyp, final Integer vmId)
@@ -835,7 +833,7 @@ public class VirtualMachineService extends DefaultApiService
         return vsmRS;
     }
 
-    private void closeProducerChannel(final TarantinoRequestProducer producer)
+    public void closeProducerChannel(final TarantinoRequestProducer producer)
     {
         try
         {
@@ -939,7 +937,7 @@ public class VirtualMachineService extends DefaultApiService
         return reconfigJob;
     }
 
-    private HypervisorConnection hypervisorConnectionConfiguration(
+    public HypervisorConnection hypervisorConnectionConfiguration(
         final VirtualMachine virtualMachine)
     {
         HypervisorConnection hypervisorConnection = new HypervisorConnection();
@@ -1485,7 +1483,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualDatacenter additional data.
      * @return VirtualMachineDescriptionBuilder
      */
-    private VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
+    public VirtualMachineDescriptionBuilder createVirtualMachineDefinitionBuilder(
         final VirtualMachine virtualMachine, final VirtualDatacenter virtualDatacenter,
         final VirtualAppliance virtualAppliance)
     {

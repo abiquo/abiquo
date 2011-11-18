@@ -44,6 +44,7 @@ import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.model.validation.IscsiPath;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
@@ -286,26 +287,40 @@ public class VolumeManagement extends RasdManagement
 
     // ********************************** Volume state transitions ********************************
 
-    public void associate()
+    public void attach(final int sequence, final VirtualMachine vm)
     {
         if (state != VolumeState.DETACHED)
         {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.DETACHED.name());
+            throw new IllegalStateException("Volume should be in " + VolumeState.DETACHED.name()
+                + " state");
         }
 
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
+
+        setAttachmentOrder(sequence);
+        setVirtualMachine(vm);
         setState(VolumeState.ATTACHED);
     }
 
-    public void disassociate()
+    public void detach()
     {
         if (state != VolumeState.ATTACHED)
         {
-            throw new IllegalStateException("Volume should be in state "
-                + VolumeState.ATTACHED.name());
+            throw new IllegalStateException("Volume should be in " + VolumeState.ATTACHED.name()
+                + " state");
         }
 
+        getRasd().setGeneration(null);
+        setVirtualMachine(null);
         setState(VolumeState.DETACHED);
+    }
+
+    public boolean isAttached()
+    {
+        return state == VolumeState.ATTACHED && getVirtualMachine() != null;
     }
 
     // ********************************** Others ********************************

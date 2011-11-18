@@ -73,13 +73,7 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
  * Resource that contains all the methods related to a Virtual Machine storage configuration. Exposes all
  * the methods inside the URI
  * http://{host}/api/cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappids
- * }/virtualmachines/{vmids}/storage
- * </pre>
- * 
- * <pre>
- * It has two sections: 
- * -disks: create and delete extra disks for the virtual machine. 
- * -volumes: TODO!.
+ * }/virtualmachines/{vmids}/storage/disks
  * </pre>
  * 
  * @author jdevesa@abiquo.com
@@ -103,7 +97,7 @@ public class VirtualMachineStorageConfigurationResource
 
     /** Autowired business logic service. */
     @Autowired
-    private StorageService service;
+    protected StorageService service;
 
     /**
      * Returns all the defined disks in the virtual machine.
@@ -131,7 +125,7 @@ public class VirtualMachineStorageConfigurationResource
 
         for (DiskManagement disk : disks)
         {
-            dtos.getCollection().add(createDiskTransferObject(disk, restBuilder));
+            dtos.getCollection().add(createDiskTransferObject(disk, vdcId, vappId, restBuilder));
         }
         return dtos;
     }
@@ -157,11 +151,10 @@ public class VirtualMachineStorageConfigurationResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-
         DiskManagement disk =
             service.createHardDiskIntoVM(vdcId, vappId, vmId, inputDto.getSizeInMb());
 
-        return createDiskTransferObject(disk, restBuilder);
+        return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }
 
     /**
@@ -185,10 +178,9 @@ public class VirtualMachineStorageConfigurationResource
         @PathParam(DISK) @NotNull @Min(0) final Integer diskOrder,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-
         DiskManagement disk = service.getHardDiskByVM(vdcId, vappId, vmId, diskOrder);
 
-        return createDiskTransferObject(disk, restBuilder);
+        return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }
 
     /**
@@ -226,11 +218,11 @@ public class VirtualMachineStorageConfigurationResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     public static DiskManagementDto createDiskTransferObject(final DiskManagement disk,
-        final IRESTBuilder restBuilder) throws Exception
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
         DiskManagementDto dto =
             ModelTransformer.transportFromPersistence(DiskManagementDto.class, disk);
-        dto.addLinks(restBuilder.buildDiskLinks(disk));
+        dto.addLinks(restBuilder.buildDiskLinks(disk, vdcId, vappId));
 
         return dto;
 

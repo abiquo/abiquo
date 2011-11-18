@@ -35,13 +35,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.StorageRep;
 
 /**
  * Implements all the business logic for storage features.
@@ -51,6 +54,8 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 @Service
 public class StorageService extends DefaultApiService
 {
+    private static long MEGABYTE = 1048576;
+
     @Autowired
     protected VirtualDatacenterRep vdcRepo;
 
@@ -58,7 +63,8 @@ public class StorageService extends DefaultApiService
     @Autowired
     protected UserService userService;
 
-    private static long MEGABYTE = 1048576;
+    @Autowired
+    protected StorageRep repo;
 
     /** Default constructor. */
     public StorageService()
@@ -76,6 +82,7 @@ public class StorageService extends DefaultApiService
     {
         vdcRepo = new VirtualDatacenterRep(em);
         userService = new UserService(em);
+        repo = new StorageRep(em);
     }
 
     /**
@@ -114,8 +121,8 @@ public class StorageService extends DefaultApiService
         }
 
         // create the new disk from the diskSize
-        Integer diskOrder = vdcRepo.findHardDisksByVirtualMachine(vm).size() + 1;
-        DiskManagement createdDisk = new DiskManagement(vdc, vapp, vm, diskSizeInMb, diskOrder);
+        int diskOrder = getFreeAttachmentSlot(vm);
+        DiskManagement createdDisk = new DiskManagement(vm, diskSizeInMb, diskOrder);
         validate(createdDisk);
 
         vdcRepo.insertHardDisk(createdDisk);
@@ -173,11 +180,12 @@ public class StorageService extends DefaultApiService
             }
             // disk already deleted, update the attachment order in the rest
             // if their order is bigger than the deleted one.
-            if (disk.getAttachmentOrder() > diskOrder)
-            {
-                disk.setAttachmentOrder(disk.getAttachmentOrder() - 1);
-                vdcRepo.updateDisk(disk);
-            }
+            // TODO: Jaume. Validate commenting this does not break anything
+            // if (disk.getAttachmentOrder() > diskOrder)
+            // {
+            // disk.setAttachmentOrder(disk.getAttachmentOrder() - 1);
+            // vdcRepo.updateDisk(disk);
+            // }
         }
     }
 
@@ -202,9 +210,7 @@ public class StorageService extends DefaultApiService
         if (diskOrder.equals(0))
         {
             VirtualImage vi = vm.getVirtualImage();
-            DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
-            // new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
-            return diskRO;
+            return new DiskManagement.SystemDisk(vm, vi.getDiskFileSize() / MEGABYTE);
         }
         else
         {
@@ -240,8 +246,7 @@ public class StorageService extends DefaultApiService
 
         // Insert the first hard disk, based on its virtual image
         VirtualImage vi = vm.getVirtualImage();
-        DiskManagement diskRO = new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize(), 0);
-        // new DiskManagement(vdc, vapp, vm, vi.getDiskFileSize() / MEGABYTE, 0);
+        DiskManagement diskRO = new DiskManagement.SystemDisk(vm, vi.getDiskFileSize() / MEGABYTE);
         disks.add(diskRO);
 
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
@@ -300,7 +305,38 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
         return vm;
-
     }
 
+    /**
+     * Get the next free attachment slot to be used to attach a disk or volume to the virtual
+     * machine.
+     * 
+     * @param vm The virtual machine where the disk will be attached.
+     * @return The free slot to use.
+     */
+    protected int getFreeAttachmentSlot(final VirtualMachine vm)
+    {
+        // The list is already ordered by attachment ascendent order
+        List< ? extends RasdManagement> attachments = repo.findDisksAndVolumesByVirtualMachine(vm);
+
+        // In Hyper-v only 2 attached volumes are allowed
+        if (vm.getHypervisor().getType() == HypervisorType.HYPERV_301 && attachments.size() >= 2)
+        {
+            addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
+            flushErrors();
+        }
+
+        // Find the first free slot
+        for (int i = 0; i < attachments.size(); i++)
+        {
+            long sequence = attachments.get(i).getAttachmentOrder();
+            if (sequence != i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE)
+            {
+                return i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE; // Found gap
+            }
+        }
+
+        // If no gap was found, use the next sequence
+        return attachments.size() + RasdManagement.FIRST_ATTACHMENT_SEQUENCE;
+    }
 }
