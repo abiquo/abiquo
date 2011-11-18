@@ -87,12 +87,11 @@ public class NodeVirtualImageStatefulConversionDAO extends
         return getResultList(criteria);
     }
 
-    private final String QUERY_BY_VIRTUAL_APPLIANCE =
-        "SELECT nvisc "
-            + "FROM com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion nvisc "
-            + "LEFT OUTER JOIN com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion vasc"
-            + "LEFT OUTER JOIN com.abiquo.server.core.cloud.VirtualAppliance vapp "
-            + "WHERE vapp.id = :idVirtualAppliance";
+    private final String QUERY_BY_VIRTUAL_APPLIANCE = "SELECT nvisc "
+        + "FROM com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion nvisc "
+        + ",com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversion vasc "
+        + "WHERE nvisc.virtualApplianceStatefulConversion.id = vasc.id "
+        + "AND vasc.virtualAppliance.id = :idVirtualAppliance";
 
     public Collection<NodeVirtualImageStatefulConversion> findByVirtualAppliance(
         final VirtualAppliance virtualAppliance)
