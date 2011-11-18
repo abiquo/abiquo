@@ -1028,8 +1028,8 @@ public class AbstractAPIStub
             params);
     }
 
-    protected String createMachineLinkVm(final Integer datacenterId, final Integer rackId,
-        final Integer machineId, final Integer vmId)
+    protected String createMachineLinkVmActionCapture(final Integer datacenterId,
+        final Integer rackId, final Integer machineId, final Integer vmId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
@@ -1037,8 +1037,9 @@ public class AbstractAPIStub
         params.put("machine", machineId.toString());
         params.put("vm", vmId.toString());
 
-        return resolveURI(apiUri,
-            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}",
+        return resolveURI(
+            apiUri,
+            "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/virtualmachines/{vm}/action/capture",
             params);
     }
 
