@@ -138,11 +138,19 @@ public class PrivateNetworkResource extends AbstractResource
         {
             if (opt.getOption() == 121)
             {
-                dtos.getCollection().add(DhcpOptionResource.createTransferObject(opt, restBuilder));
+                dtos.getCollection().add(createTransferObject(opt, restBuilder));
             }
         }
 
         dto.setDhcpOptions(dtos);
+        return dto;
+    }
+
+    private static DhcpOptionDto createTransferObject(final DhcpOption systemProperty,
+        final IRESTBuilder builder) throws Exception
+    {
+        DhcpOptionDto dto =
+            ModelTransformer.transportFromPersistence(DhcpOptionDto.class, systemProperty);
         return dto;
     }
 
