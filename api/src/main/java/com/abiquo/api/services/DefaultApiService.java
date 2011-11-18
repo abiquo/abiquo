@@ -115,17 +115,17 @@ public abstract class DefaultApiService
         return validationErrors;
     }
 
-    protected void addValidationErrors(Set<CommonError> errors)
+    protected void addValidationErrors(final Set<CommonError> errors)
     {
         getValidationErrors().addAll(errors);
     }
 
-    protected void addValidationErrors(CommonError error)
+    protected void addValidationErrors(final CommonError error)
     {
         getValidationErrors().add(error);
     }
 
-    protected void addValidationErrors(APIError apiError)
+    protected void addValidationErrors(final APIError apiError)
     {
         getValidationErrors().add(addAPIError(apiError));
     }
@@ -140,17 +140,17 @@ public abstract class DefaultApiService
         return notfoundErrors;
     }
 
-    protected void addNotFoundErrors(Set<CommonError> errors)
+    protected void addNotFoundErrors(final Set<CommonError> errors)
     {
         getNotfoundErrors().addAll(errors);
     }
 
-    protected void addNotFoundErrors(CommonError error)
+    protected void addNotFoundErrors(final CommonError error)
     {
         getNotfoundErrors().add(error);
     }
 
-    protected void addNotFoundErrors(APIError apiError)
+    protected void addNotFoundErrors(final APIError apiError)
     {
         getNotfoundErrors().add(addAPIError(apiError));
     }
@@ -165,17 +165,17 @@ public abstract class DefaultApiService
         return conflictErrors;
     }
 
-    protected void addConflictErrors(Set<CommonError> errors)
+    protected void addConflictErrors(final Set<CommonError> errors)
     {
         getConflictErrors().addAll(errors);
     }
 
-    protected void addConflictErrors(CommonError error)
+    protected void addConflictErrors(final CommonError error)
     {
         getConflictErrors().add(error);
     }
 
-    protected void addConflictErrors(APIError apiError)
+    protected void addConflictErrors(final APIError apiError)
     {
         getConflictErrors().add(addAPIError(apiError));
     }
@@ -190,17 +190,17 @@ public abstract class DefaultApiService
         return forbiddenErrors;
     }
 
-    protected void addForbiddenErrors(Set<CommonError> errors)
+    protected void addForbiddenErrors(final Set<CommonError> errors)
     {
         getForbiddenErrors().addAll(errors);
     }
 
-    protected void addForbiddenErrors(CommonError error)
+    protected void addForbiddenErrors(final CommonError error)
     {
         getForbiddenErrors().add(error);
     }
 
-    protected void addForbiddenErrors(APIError apiError)
+    protected void addForbiddenErrors(final APIError apiError)
     {
         getForbiddenErrors().add(addAPIError(apiError));
     }
@@ -215,17 +215,17 @@ public abstract class DefaultApiService
         return unexpectedErrors;
     }
 
-    protected void addUnexpectedErrors(Set<CommonError> errors)
+    protected void addUnexpectedErrors(final Set<CommonError> errors)
     {
         getUnexpectedErrors().addAll(errors);
     }
 
-    protected void addUnexpectedErrors(CommonError error)
+    protected void addUnexpectedErrors(final CommonError error)
     {
         getUnexpectedErrors().add(error);
     }
 
-    protected void addUnexpectedErrors(APIError apiError)
+    protected void addUnexpectedErrors(final APIError apiError)
     {
         getUnexpectedErrors().add(addAPIError(apiError));
     }
@@ -240,23 +240,24 @@ public abstract class DefaultApiService
         return serviceUnavailableErrors;
     }
 
-    protected void addServiceUnavailableErrors(Set<CommonError> errors)
+    protected void addServiceUnavailableErrors(final Set<CommonError> errors)
     {
         getServiceUnavailableErrors().addAll(errors);
     }
 
-    protected void addServiceUnavailableErrors(CommonError error)
+    protected void addServiceUnavailableErrors(final CommonError error)
     {
         getServiceUnavailableErrors().add(error);
     }
 
-    protected void addServiceUnavailableErrors(APIError apiError)
+    protected void addServiceUnavailableErrors(final APIError apiError)
     {
         getServiceUnavailableErrors().add(addAPIError(apiError));
     }
 
-    private CommonError addAPIError(APIError apiError)
+    private CommonError addAPIError(final APIError apiError)
     {
         return new CommonError(apiError.getCode(), apiError.getMessage());
     }
+
 }

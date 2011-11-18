@@ -53,6 +53,13 @@ public class PricingTierDAO extends DefaultDAOBase<Integer, PricingTier>
         return criteria.list();
     }
 
+    public Collection<PricingTier> findPricingTiers(final Tier tier)
+    {
+        Criteria criteria = createCriteria(sameTier(tier));
+
+        return criteria.list();
+    }
+
     public PricingTier findPricingTier(final Tier tier, final PricingTemplate pricing)
     {
         return (PricingTier) createCriteria(sameTier(tier), samePricing(pricing)).uniqueResult();

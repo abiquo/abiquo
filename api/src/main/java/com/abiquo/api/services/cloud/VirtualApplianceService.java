@@ -470,7 +470,7 @@ public class VirtualApplianceService extends DefaultApiService
                     virtualMachinesCost.put(
                         VirtualMachineCost.ADDITIONAL_VOLUME,
                         virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            pricingTier.getPrice()));
+                            pricingTier.getPrice()));// multiplicar por _MB
                 }
             }
         }

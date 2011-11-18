@@ -121,6 +121,7 @@ public class CurrencyDAO extends DefaultDAOBase<Integer, Currency>
         Disjunction filterDisjunction = Restrictions.disjunction();
 
         filterDisjunction.add(Restrictions.like(Currency.NAME_PROPERTY, '%' + filter + '%'));
+        filterDisjunction.add(Restrictions.like(Currency.SYMBOL_PROPERTY, '%' + filter + '%'));
 
         return filterDisjunction;
     }

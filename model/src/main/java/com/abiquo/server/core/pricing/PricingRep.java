@@ -189,6 +189,11 @@ public class PricingRep extends DefaultRepBase
         pricingTemplateDao.remove(pricingTemplate);
     }
 
+    public void deletePricingTier(final PricingTier pricingTier)
+    {
+        pricingTierDao.remove(pricingTier);
+    }
+
     public CostCode findCostCodeById(final Integer costCodeId)
     {
         return costCodeDao.findById(costCodeId);
@@ -344,6 +349,11 @@ public class PricingRep extends DefaultRepBase
     {
         pricingTierDao.flush();
 
+    }
+
+    public Collection<PricingTier> findPricingTierByTier(final Tier tier)
+    {
+        return pricingTierDao.findPricingTiers(tier);
     }
 
     public Tier findTierById(final Integer id)
