@@ -19,13 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.am.services;
+package com.abiquo.am.services.filesystem;
 
 import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_FILE_EXTENSION;
 import static com.abiquo.am.services.OVFPackageConventions.OVF_LOCATION_PREFIX;
 import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
 import static com.abiquo.am.services.OVFPackageConventions.customDencode;
+import static com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem.getOVFStatus;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -36,15 +37,15 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.abiquo.am.services.util.BundleImageFileFilter;
+import com.abiquo.am.services.filesystem.filters.BundleImageFileFilter;
+import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
-
-import static com.abiquo.am.services.OVFPackageInstanceFileSystem.getOVFStatus;
 
 /**
  * Run a folder list in another thread in order to cancel if it take too long
  */
-public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<String>>
+public class EnterpriseRepositoryRefreshWithTimeout implements
+    Callable<List<OVFPackageInstanceStateDto>>
 {
     private final static Logger LOG = LoggerFactory
         .getLogger(EnterpriseRepositoryRefreshWithTimeout.class);
@@ -57,8 +58,8 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
 
     final Boolean cleanDeploys;
 
-    public EnterpriseRepositoryRefreshWithTimeout(String erPath, String relativePath,
-        Boolean includeBundles, Boolean cleanDeploys)
+    public EnterpriseRepositoryRefreshWithTimeout(final String erPath, final String relativePath,
+        final Boolean includeBundles, final Boolean cleanDeploys)
     {
         this.erPath = erPath;
         this.relativePath = relativePath;
@@ -67,103 +68,92 @@ public class EnterpriseRepositoryRefreshWithTimeout implements Callable<List<Str
     }
 
     @Override
-    public List<String> call() throws Exception
+    public List<OVFPackageInstanceStateDto> call() throws Exception
     {
         return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys,
             erPath);
     }
 
     /**
+     * Returns DOWNLOAD Ovfs
+     * 
      * @param includeBundles, if true return also the OVF packages identifier for the bundled
      *            packages (only used on status = DOWNLOAD).
      * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
      */
-    private List<String> traverseOVFFolderStructure(final String erPath, final String relativePath,
-        final Boolean includeBundles, final Boolean cleanDeploys,
+    private List<OVFPackageInstanceStateDto> traverseOVFFolderStructure(final String erPath,
+        final String relativePath, final Boolean includeBundles, final Boolean cleanDeploys,
         final String enterpriseRepositoryPath)
     {
-        List<String> ovfids = new LinkedList<String>();
-        File enterpriseRepositoryFile = new File(erPath);
+        final List<OVFPackageInstanceStateDto> ovfids =
+            new LinkedList<OVFPackageInstanceStateDto>();
+        final File currentFile = new File(erPath);
 
-        if (!enterpriseRepositoryFile.exists() || !enterpriseRepositoryFile.isDirectory())
+        for (File file : currentFile.listFiles())
         {
-            return new LinkedList<String>();
-        }
+            // TODO assert inside a folder only one .ovf (to exactly know the bundle parent!)
 
-        for (File file : enterpriseRepositoryFile.listFiles())
-        {
-            /**
-             * TODO assert inside a folder only one .ovf (to exactly know the bundle parent!)
-             */
-            String recRelativePath;
-            if (relativePath.isEmpty())
+            final String recRelativePath =
+                relativePath.isEmpty() ? file.getName() : relativePath + '/' + file.getName();
+
+            if (file.isDirectory() && file.listFiles().length != 0)
             {
-
-                recRelativePath = file.getName();
+                // recursion
+                ovfids.addAll(traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
+                    includeBundles, cleanDeploys, enterpriseRepositoryPath));
             }
-            else
+            else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION))
             {
-                recRelativePath = relativePath + '/' + file.getName();
-            }
+                final String ovfId = OVF_LOCATION_PREFIX + customDencode(recRelativePath);
+                final OVFPackageInstanceStateDto status =
+                    getOVFStatus(enterpriseRepositoryPath, ovfId);
 
-            if (file.exists() && file.isDirectory() && file.listFiles().length != 0)
-            {
-                List<String> recOvfids =
-                    traverseOVFFolderStructure(file.getAbsolutePath(), recRelativePath,
-                        includeBundles, cleanDeploys, enterpriseRepositoryPath);
-
-                ovfids.addAll(recOvfids);
-            }
-            // else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION) &&
-            // file.getName().contains(OVF_BUNDLE_PATH_IDENTIFIER))
-            // { logger.debug("deleting [{}]", file.getName());
-            // file.delete();
-            // }
-            else if (file.exists() && file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION))
-            // an ovf
-            {
-                recRelativePath = customDencode(recRelativePath);
-
-                String ovfId = OVF_LOCATION_PREFIX + recRelativePath;
-
-                OVFStatusEnumType ovfStatus =
-                    getOVFStatus(enterpriseRepositoryPath, ovfId).getStatus();
-
-                if (cleanDeploys && ovfStatus == OVFStatusEnumType.DOWNLOADING)
+                if (cleanDeploys && status.getStatus() == OVFStatusEnumType.DOWNLOADING)
                 {
                     try
                     {
-                        FileUtils.deleteDirectory(enterpriseRepositoryFile);
+                        FileUtils.deleteDirectory(currentFile);
                     }
                     catch (Exception e)
                     {
                         LOG.error("Can not delete the interrupted download [{}], \n{}", ovfId, e);
                     }
                 }
-                else if (ovfStatus == OVFStatusEnumType.DOWNLOAD)
+                else
                 {
-                    ovfids.add(ovfId);
+                    ovfids.add(status);
 
                     if (includeBundles)
                     {
-                        for (String fileBund : enterpriseRepositoryFile
-                            .list(new BundleImageFileFilter()))
+                        for (String fileBund : currentFile.list(new BundleImageFileFilter()))
                         {
                             final String snapshot =
                                 fileBund.substring(0, fileBund.indexOf(OVF_BUNDLE_PATH_IDENTIFIER));
 
                             final String bundleOvfId = createBundleOvfId(ovfId, snapshot);
 
-                            ovfids.add(bundleOvfId);
+                            OVFPackageInstanceStateDto bundleState =
+                                new OVFPackageInstanceStateDto();
+
+                            bundleState.setOvfId(bundleOvfId);
+                            bundleState.setMasterOvf(ovfId);
+                            bundleState.setStatus(OVFStatusEnumType.DOWNLOAD);
+
+                            ovfids.add(bundleState);
                         }
                     }// includeBundles
+
                 }
+            }// its an Ovf
+             // else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION) &&
+             // file.getName().contains(OVF_BUNDLE_PATH_IDENTIFIER))
+             // { logger.debug("deleting [{}]", file.getName());
+             // file.delete();
+             // }
 
-            }// an OVF
-
-        }// files
+        }// all files in currentFile
 
         return ovfids;
     }
 
-}// traverse class
+}

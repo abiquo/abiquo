@@ -23,6 +23,7 @@ package com.abiquo.server.core.cloud.stateful;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -35,8 +36,11 @@ import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.State;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -71,6 +75,7 @@ public class NodeVirtualImageStatefulConversion extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -217,4 +222,69 @@ public class NodeVirtualImageStatefulConversion extends DefaultEntityBase
         this.virtualImageConversion = virtualImageConversion;
     }
 
+    public final static String VOLUME_PROPERTY = "volume";
+
+    private final static boolean VOLUME_REQUIRED = false;
+
+    private final static String VOLUME_ID_COLUMN = "idManagement";
+
+    @JoinColumn(name = VOLUME_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "idManagement_FK4")
+    private VolumeManagement volumeManagement;
+
+    @Required(value = VOLUME_REQUIRED)
+    public VolumeManagement getVolumeManagement()
+    {
+        return this.volumeManagement;
+    }
+
+    public void setVolumeManagement(final VolumeManagement volumeManagement)
+    {
+        this.volumeManagement = volumeManagement;
+    }
+
+    public final static String STATE_PROPERTY = "state";
+
+    private final static boolean STATE_REQUIRED = true;
+
+    private final static String STATE_COLUMN = "state";
+
+    private final static VirtualMachineState STATE_DEFAULT = VirtualMachineState.NOT_ALLOCATED;
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
+    private VirtualMachineState state = STATE_DEFAULT;
+
+    @Required(value = STATE_REQUIRED)
+    public VirtualMachineState getState()
+    {
+        return this.state;
+    }
+
+    public void setState(final VirtualMachineState state)
+    {
+        this.state = state;
+    }
+
+    public final static String SUB_STATE_PROPERTY = "subState";
+
+    private final static boolean SUB_STATE_REQUIRED = false;
+
+    private final static String SUB_STATE_COLUMN = "subState";
+
+    @Enumerated(value = javax.persistence.EnumType.STRING)
+    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    private State subState;
+
+    @Required(value = SUB_STATE_REQUIRED)
+    public State getSubState()
+    {
+        return this.subState;
+    }
+
+    public void setSubState(final State subState)
+    {
+        this.subState = subState;
+    }
 }

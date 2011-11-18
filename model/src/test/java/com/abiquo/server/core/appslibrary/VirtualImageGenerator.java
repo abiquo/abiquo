@@ -31,6 +31,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryGenerator;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -167,6 +168,42 @@ public class VirtualImageGenerator extends DefaultEntityGenerator<VirtualImage>
         vimage.setCreationUser(creationUser);
 
         return vimage;
+    }
+
+    public VirtualImage createInstanceGenericISCSI(final Enterprise enterprise,
+        final Datacenter datacenter, final VolumeManagement volman)
+    {
+        Repository repository = repositoryGenerator.createInstance(datacenter);
+        Category category = categoryGenerator.createUniqueInstance();
+
+        final String name =
+            newString(nextSeed(), VirtualImage.NAME_LENGTH_MIN, VirtualImage.NAME_LENGTH_MAX);
+        Long diskFileSize = newBigDecimal(nextSeed()).longValue();
+        final String pathName =
+            newString(nextSeed(), VirtualImage.PATH_LENGTH_MIN, VirtualImage.PATH_LENGTH_MAX);
+        String ovfid =
+            newString(nextSeed(), VirtualImage.OVFID_LENGTH_MIN, VirtualImage.OVFID_LENGTH_MAX);
+        String creationUser =
+            newString(nextSeed(), VirtualImage.CREATION_USER_LENGTH_MIN,
+                VirtualImage.CREATION_USER_LENGTH_MAX);
+
+        VirtualImage vi =
+            new VirtualImage(enterprise,
+                name,
+                DiskFormatType.RAW,
+                pathName,
+                diskFileSize,
+                category,
+                volman);
+
+        vi.setRepository(repository);
+        vi.setCpuRequired(0);
+        vi.setRamRequired(0);
+        vi.setHdRequiredInBytes(0);
+        vi.setOvfid(ovfid);
+        vi.setCreationUser(creationUser);
+
+        return vi;
     }
 
     public VirtualImage createSlaveImage(final VirtualImage master)

@@ -213,9 +213,9 @@ public class InfrastructureService
      * @return returns a DataResult, containing an Arraylist of virtualmachine
      */
     public BasicResult getVirtualMachineByPhysicalMachine(final UserSession session,
-        final Integer pmId)
+        final Integer datacenterId, final Integer rackId, final Integer pmId)
     {
-        return proxyMachineStub(session).getVirtualMachinesFromMachine(2, 2, pmId);
+        return proxyMachineStub(session).getVirtualMachinesFromMachine(datacenterId, rackId, pmId);
     }
 
     /**

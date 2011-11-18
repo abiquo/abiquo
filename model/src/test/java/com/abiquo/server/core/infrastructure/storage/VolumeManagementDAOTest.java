@@ -32,9 +32,12 @@ import org.testng.annotations.Test;
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -45,6 +48,8 @@ public class VolumeManagementDAOTest extends
 
     private StoragePoolGenerator poolGenerator;
 
+    private VirtualMachineGenerator vmGenerator;
+
     @Override
     @BeforeMethod
     protected void methodSetUp()
@@ -52,6 +57,7 @@ public class VolumeManagementDAOTest extends
         super.methodSetUp();
         vdcGenerator = new VirtualDatacenterGenerator(getSeed());
         poolGenerator = new StoragePoolGenerator(getSeed());
+        vmGenerator = new VirtualMachineGenerator(getSeed());
     }
 
     @Override
@@ -134,7 +140,10 @@ public class VolumeManagementDAOTest extends
     public void testGetStatefulCandidatesWithAssociatedState()
     {
         VolumeManagement volume = eg().createUniqueInstance();
-        volume.associate();
+        VirtualMachine vm =
+            vmGenerator.createInstance(volume.getVirtualDatacenter().getEnterprise());
+
+        volume.attach(RasdManagement.FIRST_ATTACHMENT_SEQUENCE, vm);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(volume, entitiesToPersist);
@@ -225,7 +234,7 @@ public class VolumeManagementDAOTest extends
         assertSize(results, 2);
     }
 
-	@Test
+    @Test
     public void testGetVolumesByRasd()
     {
         // Test without filtering
@@ -239,6 +248,6 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagement vol = dao.getVolumeByRasd(rasd);
 
-        eg().assertAllPropertiesEqual(vol,volume);
+        eg().assertAllPropertiesEqual(vol, volume);
     }
 }

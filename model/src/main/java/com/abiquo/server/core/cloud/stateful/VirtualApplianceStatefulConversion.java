@@ -23,7 +23,6 @@ package com.abiquo.server.core.cloud.stateful;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -33,7 +32,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.User;
@@ -53,12 +51,9 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public VirtualApplianceStatefulConversion(final User user, final VirtualMachineState state,
-        final VirtualMachineState subState, final VirtualAppliance vapp)
+    public VirtualApplianceStatefulConversion(final User user, final VirtualAppliance vapp)
     {
         setUser(user);
-        setState(state);
-        setSubState(subState);
         setVirtualAppliance(vapp);
     }
 
@@ -69,6 +64,7 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
     @Column(name = ID_COLUMN, nullable = false)
     private Integer id;
 
+    @Override
     public Integer getId()
     {
         return this.id;
@@ -96,47 +92,47 @@ public class VirtualApplianceStatefulConversion extends DefaultEntityBase
         this.virtualAppliance = virtualAppliance;
     }
 
-    public final static String SUB_STATE_PROPERTY = "subState";
-
-    private final static boolean SUB_STATE_REQUIRED = true;
-
-    private final static String SUB_STATE_COLUMN = "subState";
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
-    private VirtualMachineState subState;
-
-    @Required(value = SUB_STATE_REQUIRED)
-    public VirtualMachineState getSubState()
-    {
-        return this.subState;
-    }
-
-    private void setSubState(final VirtualMachineState subState)
-    {
-        this.subState = subState;
-    }
-
-    public final static String STATE_PROPERTY = "state";
-
-    private final static boolean STATE_REQUIRED = true;
-
-    private final static String STATE_COLUMN = "state";
-
-    @Enumerated(value = javax.persistence.EnumType.STRING)
-    @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
-    private VirtualMachineState state;
-
-    @Required(value = STATE_REQUIRED)
-    public VirtualMachineState getState()
-    {
-        return this.state;
-    }
-
-    private void setState(final VirtualMachineState state)
-    {
-        this.state = state;
-    }
+    // public final static String SUB_STATE_PROPERTY = "subState";
+    //
+    // private final static boolean SUB_STATE_REQUIRED = true;
+    //
+    // private final static String SUB_STATE_COLUMN = "subState";
+    //
+    // @Enumerated(value = javax.persistence.EnumType.STRING)
+    // @Column(name = SUB_STATE_COLUMN, nullable = !SUB_STATE_REQUIRED)
+    // private VirtualMachineState subState;
+    //
+    // @Required(value = SUB_STATE_REQUIRED)
+    // public VirtualMachineState getSubState()
+    // {
+    // return this.subState;
+    // }
+    //
+    // public void setSubState(final VirtualMachineState subState)
+    // {
+    // this.subState = subState;
+    // }
+    //
+    // public final static String STATE_PROPERTY = "state";
+    //
+    // private final static boolean STATE_REQUIRED = true;
+    //
+    // private final static String STATE_COLUMN = "state";
+    //
+    // @Enumerated(value = javax.persistence.EnumType.STRING)
+    // @Column(name = STATE_COLUMN, nullable = !STATE_REQUIRED)
+    // private VirtualMachineState state;
+    //
+    // @Required(value = STATE_REQUIRED)
+    // public VirtualMachineState getState()
+    // {
+    // return this.state;
+    // }
+    //
+    // public void setState(final VirtualMachineState state)
+    // {
+    // this.state = state;
+    // }
 
     public final static String USER_PROPERTY = "user";
 

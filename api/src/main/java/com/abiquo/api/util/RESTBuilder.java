@@ -1131,14 +1131,13 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildDiskLinks(final DiskManagement disk)
+    public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
+        final Integer vappId)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
-        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, disk.getVirtualDatacenter()
-            .getId().toString());
-        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, disk.getVirtualAppliance().getId()
-            .toString());
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
         params.put(VirtualMachineStorageConfigurationResource.DISK,

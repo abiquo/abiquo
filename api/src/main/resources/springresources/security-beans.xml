@@ -411,7 +411,17 @@
         <security:intercept-url pattern="/config/categories/*" method="DELETE" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
         <security:intercept-url pattern="/config/categories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/config/categories/*" method="PUT" access="ROLE_SYSCONFIG_ALLOW_MODIFY" />
-        
+        <!-- DISK FORMAT TYPES -->
+        <security:intercept-url pattern="/config/diskformattypes" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/diskformattypes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/diskformattypes/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/diskformattypes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- HYPERVISOR TYPES -->
+        <security:intercept-url pattern="/config/hypervisortypes" method="GET" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/hypervisortypes" method="OPTIONS" access="ROLE_SYSCONFIG_VIEW,ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/config/hypervisortypes/*" method="GET" access="ROLE_SYSCONFIG_VIEW" />
+        <security:intercept-url pattern="/config/hypervisortypes/*" method="OPTIONS" access="ROLE_SYSCONFIG_VIEW" />
+
         <!--=================================== -->
         <!--============= LOGIN =============== -->
         <!--=================================== -->

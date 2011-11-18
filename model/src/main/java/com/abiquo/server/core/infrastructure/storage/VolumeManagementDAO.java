@@ -432,12 +432,17 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
-        Criteria criteria = createCriteria(sameVirtualMachine(vm));
+        Criteria criteria = createCriteria(sameVirtualMachine(vm), sameState(VolumeState.ATTACHED));
         return getResultList(criteria);
     }
 
     private static Criterion sameVirtualMachine(final VirtualMachine vm)
     {
         return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm);
+    }
+
+    private static Criterion sameState(final VolumeState state)
+    {
+        return Restrictions.eq(VolumeManagement.STATE_PROPERTY, state);
     }
 }

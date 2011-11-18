@@ -23,51 +23,53 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
-import com.abiquo.server.core.cloud.VirtualAppliance;
-import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.DatastoreGenerator;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
-import com.softwarementors.commons.testng.AssertEx;
 
 public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManagement>
 {
     private RasdManagementGenerator rasdmGenerator;
 
-    private VirtualApplianceGenerator vappGenerator;
+    private DatastoreGenerator datastoreGenerator;
 
-    private NodeVirtualImageGenerator nviGenerator;
+    private VirtualMachineGenerator vmGenerator;
 
     public DiskManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
-        vappGenerator = new VirtualApplianceGenerator(seed);
-        nviGenerator = new NodeVirtualImageGenerator(seed);
+        datastoreGenerator = new DatastoreGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(final DiskManagement obj1, final DiskManagement obj2)
+    public void assertAllPropertiesEqual(final DiskManagement disk1, final DiskManagement disk2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2);
+        rasdmGenerator.assertAllPropertiesEqual(disk1, disk2);
 
-        rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
+        // Optional properties
+        if (disk1.getDatastore() != null)
+        {
+            datastoreGenerator.assertAllPropertiesEqual(disk1.getDatastore(), disk2.getDatastore());
+        }
     }
 
     @Override
     public DiskManagement createUniqueInstance()
     {
-        NodeVirtualImage nvi = nviGenerator.createUniqueInstance();
-        VirtualAppliance vapp = vappGenerator.createUniqueInstance();
-        vapp.addToNodeVirtualImages(nvi);
-        return new DiskManagement(vapp.getVirtualDatacenter(),
-            vapp,
-            nvi.getVirtualMachine(),
-            10000L,
-            0);
+        VirtualMachine vm = vmGenerator.createUniqueInstance();
+        return createInstance(vm);
+    }
 
+    public DiskManagement createInstance(final VirtualMachine vm)
+    {
+        return new DiskManagement(vm, (long) nextSeed(), RasdManagement.FIRST_ATTACHMENT_SEQUENCE
+            + nextSeed());
     }
 
     @Override

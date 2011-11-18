@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -31,6 +32,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaHypervisorDAO")
@@ -66,7 +68,7 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
     }
 
     /**
-     * Returns {@link Hypervisor} with same ip and in the same datacenter.
+     * Returns {@link Hypervisor} with same ip in the same datacenter.
      */
     private final String QUERY_SAME_IP_DATACENTER = "SELECT h " + //
         "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
@@ -90,7 +92,7 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
     }
 
     /**
-     * Returns {@link Hypervisor} with same ipService and in the same datacenter.
+     * Returns {@link Hypervisor} with same ipService in the same datacenter.
      */
     private final String QUERY_SAME_IP_SERVICE_DATACENTER = "SELECT h " + //
         "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
@@ -111,5 +113,26 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         query.setParameter("datacenterId", datacenterId);
 
         return !query.list().isEmpty();
+    }
+
+    /**
+     * Returns a list of {@link HypervisorType} from all hypervisors in a datacenter.
+     */
+    private final String QUERY_HTYPES_DATACENTER = "SELECT h.type " + //
+        "FROM com.abiquo.server.core.cloud.Hypervisor h " + //
+        "WHERE h.machine.datacenter.id = :datacenterId";
+
+    /**
+     * List of {@link HypervisorType} from all hypervisors in a datacenter.
+     * 
+     * @param datacenterId {@link Hypervisor} machines datacenter.
+     * @return list of {@link HypervisorType} from all hypervisors in a datacenter.
+     */
+    public Collection<HypervisorType> findTypesfromDatacenter(final Integer datacenterId)
+    {
+        Query query = getSession().createQuery(QUERY_HTYPES_DATACENTER);
+        query.setParameter("datacenterId", datacenterId);
+
+        return query.list();
     }
 }

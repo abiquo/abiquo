@@ -60,11 +60,12 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         AssertEx.assertPropertiesEqualSilent(obj1, obj2,
             NodeVirtualImageStatefulConversion.NEW_NAME_PROPERTY);
 
-        nodeVirtualImageGenerator.assertAllPropertiesEqual(obj1.getNodeVirtualImage(), obj2
-            .getNodeVirtualImage());
+        nodeVirtualImageGenerator.assertAllPropertiesEqual(obj1.getNodeVirtualImage(),
+            obj2.getNodeVirtualImage());
         tierGenerator.assertAllPropertiesEqual(obj1.getTier(), obj2.getTier());
-        virtualApplianceStatefulConversionGenerator.assertAllPropertiesEqual(obj1
-            .getVirtualApplianceStatefulConversion(), obj2.getVirtualApplianceStatefulConversion());
+        virtualApplianceStatefulConversionGenerator.assertAllPropertiesEqual(
+            obj1.getVirtualApplianceStatefulConversion(),
+            obj2.getVirtualApplianceStatefulConversion());
     }
 
     @Override
@@ -76,6 +77,24 @@ public class NodeVirtualImageStatefulConversionGenerator extends
         NodeVirtualImage nodeVirtualImage = nodeVirtualImageGenerator.createUniqueInstance();
         VirtualApplianceStatefulConversion virtualApplianceStatefulConversion =
             virtualApplianceStatefulConversionGenerator.createUniqueInstance();
+        Tier tier = tierGenerator.createUniqueInstance();
+
+        NodeVirtualImageStatefulConversion nodeVirtualImageStatefulConversion =
+            new NodeVirtualImageStatefulConversion(newName,
+                virtualApplianceStatefulConversion,
+                nodeVirtualImage,
+                tier);
+
+        return nodeVirtualImageStatefulConversion;
+    }
+
+    public NodeVirtualImageStatefulConversion createInstance(
+        final NodeVirtualImage nodeVirtualImage,
+        final VirtualApplianceStatefulConversion virtualApplianceStatefulConversion)
+    {
+        String newName =
+            newString(nextSeed(), NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MIN,
+                NodeVirtualImageStatefulConversion.NEW_NAME_LENGTH_MAX);
         Tier tier = tierGenerator.createUniqueInstance();
 
         NodeVirtualImageStatefulConversion nodeVirtualImageStatefulConversion =

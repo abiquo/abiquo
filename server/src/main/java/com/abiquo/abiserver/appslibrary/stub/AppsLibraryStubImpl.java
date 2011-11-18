@@ -45,11 +45,14 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 import com.abiquo.server.core.appslibrary.CategoriesDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
+import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.IconsDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
@@ -570,6 +573,43 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         icon.setPath(iconDto.getPath());
         icon.setId(iconDto.getId());
         return icon;
+    }
+
+    @Override
+    public DataResult<List<DiskFormatType>> getDiskFormatTypes()
+    {
+
+        DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
+
+        final String uri = createDiskFormatTypesLink();
+
+        ClientResponse response = get(uri);
+
+        if (response.getStatusCode() / 200 == 1)
+        {
+            result.setSuccess(Boolean.TRUE);
+            DiskFormatTypesDto diskFormatTypes = response.getEntity(DiskFormatTypesDto.class);
+
+            List<DiskFormatType> listDiskFormatType = new ArrayList<DiskFormatType>();
+            for (DiskFormatTypeDto diskFormatType : diskFormatTypes.getCollection())
+            {
+                listDiskFormatType.add(createFlexDiskFormatTypeObject(diskFormatType));
+            }
+            result.setData(listDiskFormatType);
+        }
+        else
+        {
+            populateErrors(response, result, "getDiskFormatTypes");
+        }
+
+        return result;
+
+    }
+
+    public static DiskFormatType createFlexDiskFormatTypeObject(
+        final DiskFormatTypeDto diskFormatTypeDto)
+    {
+        return DiskFormatType.fromId(diskFormatTypeDto.getId());
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final OVFPackageListDto listDto)

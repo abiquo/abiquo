@@ -266,8 +266,6 @@ public class MachineService extends DefaultApiService
                 vm.setDatastore(null);
                 vm.setHypervisor(null);
 
-                vapp.setState(newState);
-                virtualDatacenterRep.updateVirtualAppliance(vapp);
                 virtualMachineService.updateVirtualMachine(vm);
             }
         }

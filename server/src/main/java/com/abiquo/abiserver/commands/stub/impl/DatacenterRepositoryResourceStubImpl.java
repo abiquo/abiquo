@@ -70,14 +70,9 @@ public class DatacenterRepositoryResourceStubImpl extends AbstractAPIStub implem
     private Repository transformToFlex(final DatacenterRepositoryDto repo)
     {
         Repository r = new Repository();
-
         DataCenter datacenter = new DataCenter();
         datacenter.setId(repo.getIdFromLink("datacenter"));
         r.setDatacenter(datacenter);
-
-        // XXX used ? remove this!
-        // r.setDatacenter(datacenter);
-        // r.setRepositoryEnterpriseUsedMb(repo.get);
         r.setId(repo.getId());
         r.setName(repo.getName());
         r.setRepositoryCapacityMb(repo.getRepositoryCapacityMb());

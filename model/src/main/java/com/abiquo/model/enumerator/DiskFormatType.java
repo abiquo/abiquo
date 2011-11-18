@@ -96,11 +96,31 @@ public enum DiskFormatType
 
     public static final DiskFormatType[] XENSERVER_COMPATIBLES = HYPERV_COMPATIBLES;
 
-    private DiskFormatType(String uri, String description, DiskFormatTypeAlias alias)
+    /* package */final static int ID_MIN = 0;
+
+    /* package */private final static int ID_MAX = 11;
+
+    private DiskFormatType(final String uri, final String description,
+        final DiskFormatTypeAlias alias)
     {
         this.uri = uri;
         this.description = description;
         this.alias = alias;
+    }
+
+    public DiskFormatTypeAlias getAlias()
+    {
+        return alias;
+    }
+
+    public String getUri()
+    {
+        return uri;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 
     public int id()
@@ -108,12 +128,12 @@ public enum DiskFormatType
         return ordinal();
     }
 
-    public static DiskFormatType fromId(int id)
+    public static DiskFormatType fromId(final int id)
     {
         return values()[id];
     }
 
-    public static DiskFormatType fromURI(String URI)
+    public static DiskFormatType fromURI(final String URI)
     {
         for (DiskFormatType type : values())
         {
@@ -125,8 +145,13 @@ public enum DiskFormatType
         return null;
     }
 
-    public static DiskFormatType fromValue(String v)
+    public static DiskFormatType fromValue(final String v)
     {
         return valueOf(v);
+    }
+
+    public static int getIdMax()
+    {
+        return ID_MAX;
     }
 }

@@ -1792,8 +1792,6 @@ DROP TABLE IF EXISTS `kinton`.`vappstateful_conversions`;
 CREATE TABLE  `kinton`.`vappstateful_conversions` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `idVirtualApp` int(10) unsigned NOT NULL,
-  `state` varchar(50) NOT NULL,
-  `subState` varchar(50) NOT NULL,
   `idUser` int(1) unsigned NOT NULL,
   `version_c` int(11) default 0,
   PRIMARY KEY  (`id`),
@@ -1815,6 +1813,8 @@ CREATE TABLE  `kinton`.`node_virtual_image_stateful_conversions` (
   `idNodeVirtualImage` int(10) unsigned NOT NULL,
   `idVirtualImageConversion` int(1) unsigned,
   `idDiskStatefulConversion` int(1) unsigned,
+  `state` varchar(50) NOT NULL,
+  `subState` varchar(50) DEFAULT NULL,
   `version_c` int(11) default 0,
   `idTier` int(10) unsigned NOT NULL,
   `idManagement` int(10) unsigned,
