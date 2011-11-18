@@ -49,8 +49,6 @@
                 <ref bean="virtualDatacenterResource" />
                 <ref bean="privateNetworksResource" />
                 <ref bean="privateNetworkResource" />
-                <ref bean="dhcpOptionsResource" />
-                <ref bean="dhcpOptionResource" />
                 <ref bean="ipAddressesResource" />
                 <!-- -->
                 <ref bean="virtualAppliancesResource" />

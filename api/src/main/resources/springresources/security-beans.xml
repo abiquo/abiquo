@@ -161,7 +161,6 @@
         <security:intercept-url pattern="/admin/datacenters/*/network/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*" method="DELETE" access="ROLE_PHYS_DC_MANAGE" />
-          <security:intercept-url pattern="/admin/datacenters/*/network/*/action/dhcpoptions" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips" method="PUT" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/network/*/ips/*" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
@@ -245,14 +244,6 @@
         <security:intercept-url pattern="/admin/statistics/enterpriseresources/*" method="GET" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/statistics/enterpriseresources/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/statistics/enterpriseresources/actions/total" method="GET" access="ROLE_ENTERPRISE_RESOURCE_SUMMARY_ENT" />
-        <!-- DHCP_OPTION -->
-        <security:intercept-url pattern="/admin/dhcpoptions" method="POST" access="ROLE_VDC_MANAGE_NETWORK" />
-        <security:intercept-url pattern="/admin/dhcpoptions" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/admin/dhcpoptions" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/dhcpoptions/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/dhcpoptions/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />
-        <security:intercept-url pattern="/admin/dhcpoptions/*" method="PUT" access="ROLE_VDC_MANAGE_NETWORK" />
-        <security:intercept-url pattern="/admin/dhcpoptions/*" method="DELETE" access="ROLE_VDC_MANAGE_NETWORK" />
         <!--=================================== -->
         <!--============= CLOUD =============== -->
         <!--=================================== -->
