@@ -21,17 +21,21 @@
 
 package com.abiquo.server.core.infrastructure.management;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Repository("jpaRasdManagementDAO")
 public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
@@ -62,16 +66,34 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<RasdManagement> findByVirtualDatacenterAndResourceType(
+    public List<RasdManagement> findByVirtualDatacenterAndResourceType(
         final VirtualDatacenter virtualDatacenter, final String resourceType)
     {
         return createCriteria(sameVirtualDatacenter(virtualDatacenter),
             sameResourceType(resourceType)).list();
     }
 
-    public Collection<RasdManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
+    public List<RasdManagement> findByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return getResultList(createCriteria(sameVirtualMachine(virtualMachine)));
     }
 
+    public List<RasdManagement> findDisksAndVolumesByVirtualMachine(
+        final VirtualMachine virtualMachine)
+    {
+        Criteria crit = createCriteria();
+        crit.createAlias(RasdManagement.RASD_PROPERTY, "rasd");
+
+        // Add disk resource type filter
+        crit.add(Restrictions.in(RasdManagement.ID_RESOURCE_TYPE_PROPERTY, new String[] {
+        VolumeManagement.DISCRIMINATOR, DiskManagement.DISCRIMINATOR}));
+
+        // Add virtual machine filter
+        crit.add(sameVirtualMachine(virtualMachine));
+
+        // Order by generation (attachment order)
+        crit.addOrder(Order.asc("rasd." + Rasd.GENERATION_PROPERTY));
+
+        return getResultList(crit);
+    }
 }

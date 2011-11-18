@@ -19,21 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.transport;
+package com.abiquo.server.core.appslibrary;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * Just a single Dto with links to stablish relations.
- * 
- * @author jdevesa
- */
-@XmlRootElement(name = "links")
-public class LinksDto extends SingleResourceTransportDto
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "diskformattypes")
+public class DiskFormatTypesDto extends WrapperDto<DiskFormatTypeDto>
 {
-    private static final long serialVersionUID = -8659042159324422045L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 717145703461179229L;
+
+    @Override
+    @XmlElement(name = "diskformattype")
+    public List<DiskFormatTypeDto> getCollection()
+    {
+        return collection;
+    }
 
 }

@@ -19,21 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.transport;
+package com.abiquo.api.resources.appslibrary;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import static com.abiquo.api.common.UriTestResolver.resolveHypervisorTypesURI;
+import static org.testng.Assert.assertEquals;
 
-/**
- * Just a single Dto with links to stablish relations.
- * 
- * @author jdevesa
- */
-@XmlRootElement(name = "links")
-public class LinksDto extends SingleResourceTransportDto
+import org.apache.wink.client.ClientResponse;
+import org.testng.annotations.Test;
+
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.server.core.cloud.HypervisorTypesDto;
+
+public class HypervisorTypesResourceIT extends AbstractJpaGeneratorIT
 {
-    private static final long serialVersionUID = -8659042159324422045L;
+    @Test
+    public void getHypervisorTypes() throws Exception
+    {
+        String hypervisorTypesURI = resolveHypervisorTypesURI();
+        ClientResponse response = get(hypervisorTypesURI);
+
+        HypervisorTypesDto dtos = response.getEntity(HypervisorTypesDto.class);
+        assertEquals(dtos.getCollection().size(), HypervisorType.getIdMax());
+    }
 
 }

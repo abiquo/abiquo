@@ -11,7 +11,7 @@
             <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/kinton_test" />
             <property name="hibernate.connection.username" value="root" />
             <property name="hibernate.connection.password" value="root" />
-            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.show_sql" value="false" />
             <property name="hibernate.hbm2ddl.auto" value="validate" />
         </properties>
     </persistence-unit>

@@ -50,6 +50,7 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 
 /**
@@ -60,6 +61,8 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 @Test(groups = {STORAGE_UNIT_TESTS})
 public class DiskManagementServiceTest extends AbstractUnitTest
 {
+    private static long MEGABYTE = 1048576;
+
     /** Service we are testing */
     protected StorageService service;
 
@@ -82,6 +85,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vapp.setState(VirtualApplianceState.NOT_DEPLOYED);
         vm = vmGenerator.createInstance(e);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+        nvi.getVirtualImage().setDiskFileSize(2000000);
 
         DatacenterLimits dclimit = new DatacenterLimits(vdc.getEnterprise(), vdc.getDatacenter());
 
@@ -237,7 +241,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void deleteDiskTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
+        DiskManagement inputDisk1 =
+            new DiskManagement(vm, 7000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
         setup(inputDisk1.getRasd(), inputDisk1);
 
         // retrieve them
@@ -250,7 +255,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disks.size(), 2);
 
         // delete the first one
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(),
+            Long.valueOf(inputDisk1.getAttachmentOrder()).intValue());
 
         // Assert disk has been created
         disks = service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
@@ -444,7 +450,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
 
         // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(), Long.valueOf(vm.getVirtualImage().getDiskFileSize()));
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }
@@ -455,8 +462,10 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void getAllDisksTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 2);
+        DiskManagement inputDisk1 =
+            new DiskManagement(vm, 7000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE);
+        DiskManagement inputDisk2 =
+            new DiskManagement(vm, 9000L, RasdManagement.FIRST_ATTACHMENT_SEQUENCE + 1);
         setup(inputDisk1.getRasd(), inputDisk1, inputDisk2.getRasd(), inputDisk2);
 
         // retrieve them
@@ -502,7 +511,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
 
         // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(), Long.valueOf(vm.getVirtualImage().getDiskFileSize()));
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }
@@ -584,8 +594,8 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     @Test
     public void getExtraDisksTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, vapp, vm, 7000L, 1);
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 2);
+        DiskManagement inputDisk1 = new DiskManagement(vm, 7000L, 1);
+        DiskManagement inputDisk2 = new DiskManagement(vm, 9000L, 2);
         setup(inputDisk1.getRasd(), inputDisk1, inputDisk2.getRasd(), inputDisk2);
 
         // retrieve them

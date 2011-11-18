@@ -40,13 +40,13 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
-import com.abiquo.abiserver.pojo.virtualimage.DiskFormatType;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.IconDto;
 
 public class AppsLibraryService
@@ -235,24 +235,16 @@ public class AppsLibraryService
      */
     public DataResult<List<DiskFormatType>> getDiskFormatTypes(final UserSession userSession)
     {
-        DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
 
-        AppsLibraryCommand proxyService = proxyService(userSession);
-        try
-        {
-            List<DiskFormatType> disksFormat = proxyService.getDiskFormatTypes(userSession);
-
-            result.setData(disksFormat);
-            result.setSuccess(true);
-        }
-        catch (UserSessionException e)
-        {
-            result.setSuccess(false);
-            result.setMessage(e.getMessage());
-            result.setResultCode(e.getResult().getResultCode());
-        }
-
-        return result;
+        return proxyStub(userSession).getDiskFormatTypes();
+        /*
+         * DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
+         * AppsLibraryCommand proxyService = proxyService(userSession); try { List<DiskFormatType>
+         * disksFormat = proxyService.getDiskFormatTypes(userSession); result.setData(disksFormat);
+         * result.setSuccess(true); } catch (UserSessionException e) { result.setSuccess(false);
+         * result.setMessage(e.getMessage()); result.setResultCode(e.getResult().getResultCode()); }
+         * return result;
+         */
     }
 
     // todo con idRepo
