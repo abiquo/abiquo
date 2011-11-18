@@ -37,8 +37,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
@@ -249,8 +247,6 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal minimumChargePeriod;
 
     @Required(value = MINIMUM_CHARGE_PERIOD_REQUIRED)
-    @Min(value = 0)
-    @Max(value = 6)
     @BigDec
     public BigDecimal getMinimumChargePeriod()
     {
