@@ -498,6 +498,18 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
+        if (infrastrucutreRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
+            remoteService.getType()))
+        {
+            APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
+            configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
+                + " : " + error.getMessage()));
+            if (flushErrors)
+            {
+                addConflictErrors(error);
+            }
+        }
+
         if (remoteService.getType().checkUniqueness())
         {
             try
@@ -510,7 +522,6 @@ public class RemoteServiceService extends DefaultApiService
                     if (flushErrors)
                     {
                         addConflictErrors(error);
-                        flushErrors();
                     }
                 }
             }
@@ -522,22 +533,15 @@ public class RemoteServiceService extends DefaultApiService
                 if (flushErrors)
                 {
                     addValidationErrors(error);
-                    flushErrors();
                 }
             }
         }
-        else if (infrastrucutreRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
-            remoteService.getType()))
+
+        if (flushErrors)
         {
-            APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
-            configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
-                + " : " + error.getMessage()));
-            if (flushErrors)
-            {
-                addConflictErrors(error);
-                flushErrors();
-            }
+            flushErrors();
         }
+
         return configurationErrors;
     }
 }
