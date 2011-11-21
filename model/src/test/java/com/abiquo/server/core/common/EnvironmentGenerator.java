@@ -25,6 +25,8 @@ import java.util.List;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.StorageTechnologyType;
+import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -32,6 +34,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -43,10 +46,14 @@ import com.abiquo.server.core.enterprise.UserGenerator;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
+import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMapping;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.StorageDeviceGenerator;
 import com.abiquo.server.core.infrastructure.storage.StoragePool;
@@ -93,6 +100,12 @@ public class EnvironmentGenerator
 
     private VLANNetworkGenerator vlanGenerator;
 
+    private HypervisorGenerator hypervisorGenerator;
+
+    private DatastoreGenerator datastoreGenerator;
+
+    private InitiatorMappingGenerator initiatorMappingGenerator;
+
     /** The entities of the generated environment. */
     private List<Object> entities;
 
@@ -112,6 +125,9 @@ public class EnvironmentGenerator
         nodeVirtualImageGenerator = new NodeVirtualImageGenerator(seed);
         volumeGenerator = new VolumeManagementGenerator(seed);
         vlanGenerator = new VLANNetworkGenerator(seed);
+        hypervisorGenerator = new HypervisorGenerator(seed);
+        datastoreGenerator = new DatastoreGenerator(seed);
+        initiatorMappingGenerator = new InitiatorMappingGenerator(seed);
         entities = new ArrayList<Object>();
     }
 
@@ -147,7 +163,12 @@ public class EnvironmentGenerator
      * Generates and adds the following entities to the environment:
      * <ol>
      * <li>A datacenter (the given enterprise is allowed to use it)</li>
+     * <li>The AM remote service</li>
      * <li>The SSM remote service</li>
+     * <li>A rack in the generated datacenter</li>
+     * <li>A physical machine in the generated rack</li>
+     * <li>A datastore in the physical machine</li>
+     * <li>A hypervisor for the physical machine</li>
      * <li>A storage device in the generated datacenter</li>
      * <li>A storage tier in the generated datacenter</li>
      * <li>A storage pool in the generated tier and device</li>
@@ -160,17 +181,33 @@ public class EnvironmentGenerator
         // Entities that should be already added to the environment
         Enterprise enterprise = get(Enterprise.class);
 
+        // Datacenter
         Datacenter dc = datacenterGenerator.createUniqueInstance();
         DatacenterLimits dcLimits = datacenterLimitsGenerator.createInstance(enterprise, dc);
+        RemoteService am =
+            remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, dc);
         RemoteService ssm =
             remoteServiceGenerator.createInstance(RemoteServiceType.STORAGE_SYSTEM_MONITOR, dc);
+
+        // Compute
+        Hypervisor hypervisor = hypervisorGenerator.createInstance(dc);
+        Datastore datastore = datastoreGenerator.createInstance(hypervisor.getMachine());
+
+        // Storage
         StorageDevice device = deviceGenerator.createInstance(dc);
         device.setStorageTechnology(StorageTechnologyType.OPENSOLARIS);
         StoragePool pool = poolGenerator.createInstance(device);
 
         add(dc);
         add(dcLimits);
+        add(am);
         add(ssm);
+
+        add(hypervisor.getMachine().getRack());
+        add(hypervisor.getMachine());
+        add(datastore);
+        add(hypervisor);
+
         add(device);
         add(pool.getTier());
         add(pool);
@@ -226,7 +263,7 @@ public class EnvironmentGenerator
      * 
      * @return The environment entities.
      */
-    public List<Object> generateVirtualMachine()
+    public List<Object> generateNotAllocatedVirtualMachine()
     {
         // Entities that should be already added to the environment
         VirtualDatacenter vdc = get(VirtualDatacenter.class);
@@ -249,7 +286,40 @@ public class EnvironmentGenerator
     /**
      * Generates and adds the following entities to the environment.
      * <ol>
+     * <li>A virtual appliance in the generated virtual datacenter</li>
+     * <li>An image repository in the given datacenter and enterprise</li>
+     * <li>An image category</li>
+     * <li>A virtual image in the generated repository and category</li>
+     * <li>A NodeVirtualImage linking the generated image with the generated appliance</li>
+     * <li>A virtual machine linked to the generated NodeVirtualImage, belonging to the user in the
+     * environment, and allocated to the generated hypervisor and datastore</li>
+     * </ol>
+     * 
+     * @return The environment entities.
+     */
+    public List<Object> generateAllocatedVirtualMachine()
+    {
+        // Generated the not allocated virtual machine first
+        generateNotAllocatedVirtualMachine();
+
+        // Entities that should be already added to the environment
+        VirtualMachine vm = get(VirtualMachine.class);
+        Hypervisor hypervisor = get(Hypervisor.class);
+        Datastore datastore = get(Datastore.class);
+
+        // Allocate the virtual machine
+        vm.setHypervisor(hypervisor);
+        vm.setDatastore(datastore);
+        vm.setState(VirtualMachineState.OFF); // Allocated and powered off
+
+        return getEnvironment();
+    }
+
+    /**
+     * Generates and adds the following entities to the environment.
+     * <ol>
      * <li>A volume in the generated virtual datacenter and storage pool</li>
+     * <li>An initiator mapping for the generated volume</li>
      * </ol>
      * 
      * @return The environment entities.
@@ -261,9 +331,11 @@ public class EnvironmentGenerator
         VirtualDatacenter vdc = get(VirtualDatacenter.class);
 
         VolumeManagement volume = volumeGenerator.createInstance(pool, vdc);
+        InitiatorMapping mapping = initiatorMappingGenerator.createInstance(volume);
 
         add(volume.getRasd());
         add(volume);
+        add(mapping);
 
         return getEnvironment();
     }
