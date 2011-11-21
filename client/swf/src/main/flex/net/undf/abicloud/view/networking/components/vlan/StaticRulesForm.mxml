@@ -53,16 +53,24 @@
             [Bindable]
             private var _vlanNetwork:VlanNetwork;
             
+            [Bindable]
+            private var _networkIpIsValid:Boolean;
+            
+            [Bindable]
+            private var _gatewayIpIsValid:Boolean;
+            
            	public function init(staticRules:ArrayCollection = null):void
            	{
-           	    
            	    if(staticRules){
 	           	    this._staticRules = staticRules;	
+           	    }else{
+           	    	this._staticRules = new ArrayCollection();
            	    }
+           	    this._networkIpIsValid = false;
+           	    this._gatewayIpIsValid = false;
            	}		
             
             private function onCreationComplete():void{
-                 this._staticRules = new ArrayCollection();
                  netmaskInput.selectedIndex = 0;
                  addressInput.text = '';
                  gatewayInput.text = '';
@@ -162,7 +170,9 @@
             {
                 addButton.enabled = netmaskInput.selectedIndex > -1 
                                && addressInput.text.length > 0 
-                               && gatewayInput.text.length > 0;
+                               && gatewayInput.text.length > 0
+                               && this._gatewayIpIsValid
+                               && this._networkIpIsValid;
             }
             
             private function netmaskComboBoxLabelFunction(item:Object):String
@@ -176,6 +186,17 @@
                 return "/"+item.mask+" ("+item.netmask+")";
             }
             
+            private function changeTextColor(type:Boolean , textInput:TextInput):void{
+                if(type){
+                    textInput.setStyle("color","red");
+                    textInput.setStyle("fontWeight","bold");
+                }else{
+                    textInput.setStyle("color",closeButton.getStyle("color"));
+                    textInput.setStyle("fontWeight","normal");
+                } 
+                validateForm();         
+            }
+            
         ]]>
     </mx:Script>
 
@@ -186,6 +207,26 @@
         tweenStart="onResizeEffectStart()"
         tweenUpdate="onResizeEffectUpdate()"
         tweenEnd="onResizeEffectEnd()"/>
+    
+    <utils:IPValidator
+        id="networkIpValidator"
+        source="{addressInput}"
+        property="text" required="false"
+        trigger="{addressInput}"
+        triggerEvent="change"
+        allowLocalHost="false"
+        invalid="_networkIpIsValid = false ; changeTextColor(true , addressInput)"
+        valid="_networkIpIsValid = true ; changeTextColor(false , addressInput) "/>
+    
+    <utils:IPValidator
+        id="gatewayIpValidator"
+        source="{gatewayInput}"
+        property="text" required="false"
+        trigger="{gatewayInput}"
+        triggerEvent="change"
+        allowLocalHost="false"
+        invalid="_gatewayIpIsValid = false ; changeTextColor(true , gatewayInput)"
+        valid="_gatewayIpIsValid = true ; changeTextColor(false , gatewayInput) "/>
    
     <mx:VBox verticalGap="0" paddingTop="0" width="100%" horizontalAlign="right">    	
     
