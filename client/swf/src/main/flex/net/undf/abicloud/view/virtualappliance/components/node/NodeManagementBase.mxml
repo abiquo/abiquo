@@ -90,7 +90,7 @@
 
                 //For NodeVirtualImage, edition is only allowed when its VirtualMachine is NOT_ALLOCATED or OFF
                 var nodeVirtualImage:NodeVirtualImage = this._node as NodeVirtualImage;
-                if (nodeVirtualImage.virtualMachine && nodeVirtualImage.virtualMachine.state.description == State.NOT_ALLOCATED)
+                if (nodeVirtualImage.virtualMachine && nodeVirtualImage.virtualMachine.state.description == State.NOT_ALLOCATED.description)
                 {
                     this._isEditionAllowed = true
                 }

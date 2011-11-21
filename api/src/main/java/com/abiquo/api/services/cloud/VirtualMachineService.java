@@ -65,7 +65,6 @@ import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -110,9 +109,6 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected VirtualMachineAllocatorService vmAllocatorService;
-
-    @Autowired
-    protected NodeVirtualImageDAO nodeVirtualImageDAO;
 
     @Autowired
     protected VirtualDatacenterService vdcService;
@@ -188,6 +184,7 @@ public class VirtualMachineService extends DefaultApiService
         return repo.findByName(name);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualMachine getVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
@@ -550,17 +547,18 @@ public class VirtualMachineService extends DefaultApiService
         // We check for a suitable conversion (PREMIUM)
         attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
 
+        // At this stage the virtual machine is not associated with any hypervisor
+        virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
+
+        // A user can only create virtual machine
+        virtualMachine.setUser(userService.getCurrentUser());
+        repo.createVirtualMachine(virtualMachine);
+
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual image is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
 
-        // At this stage the virtual machine is not associated with any hypervisor
-        virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
-
-        // TODO update the virtual appliance according to the rules. As the virtual appliance state
-        // is the sum (pondered) of the states of its virtual machines
-
-        return repo.createVirtualMachine(virtualMachine);
+        return virtualMachine;
     }
 
     /** Checks correct datacenter and enterprise. */
@@ -618,7 +616,7 @@ public class VirtualMachineService extends DefaultApiService
                 virtualAppliance,
                 virtualMachine.getVirtualImage(),
                 virtualMachine);
-        nodeVirtualImageDAO.persist(nodeVirtualImage);
+        repo.insertNodeVirtualImage(nodeVirtualImage);
         logger.debug("Node virtual image created!");
     }
 
@@ -1525,7 +1523,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param state The state to which change
      * @throws Exception
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String applyVirtualMachineState(final Integer vmId, final Integer vappId,
         final Integer vdcId, final VirtualMachineState state)
     {
@@ -1653,4 +1651,46 @@ public class VirtualMachineService extends DefaultApiService
         return errors;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public NodeVirtualImage getNodeVirtualImage(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        if (vm == null || !isAssignedTo(vmId, vapp.getId()))
+        {
+            logger.error("Error retrieving the virtual machine: {} does not exist", vmId);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
+            flushErrors();
+        }
+        logger.debug("virtual machine {} found", vmId);
+
+        NodeVirtualImage nodeVirtualImage = repo.findNodeVirtualImageByVm(vm);
+        if (nodeVirtualImage == null)
+        {
+            logger.error("Error retrieving the node virtual image of machine: {} does not exist",
+                vmId);
+            addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
+            flushErrors();
+        }
+        return nodeVirtualImage;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<NodeVirtualImage> getNodeVirtualImages(final Integer vdcId, final Integer vappId)
+    {
+        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        if (vapp == null)
+        {
+            logger.error("Error retrieving the virtual appliance: {} does not exist", vappId);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        logger.debug("virtual appliance {} found", vappId);
+
+        return vapp.getNodes();
+    }
 }

@@ -131,13 +131,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult startVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.startVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.ON);
+        // return command.startVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -146,13 +148,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult pauseVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.pauseVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.PAUSED);
+        // return command.pauseVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -161,13 +165,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult rebootVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.rebootVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.ON);
+        // return command.rebootVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -176,14 +182,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult shutdownVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
         // InfrastructureCommand command =
         // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
         // InfrastructureCommand.class);
 
-        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(virtualMachine,
-            VirtualMachineState.OFF);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.OFF);
         // return command.shutdownVirtualMachine(session, virtualMachine);
     }
 
@@ -321,11 +328,12 @@ public class NonBlockingService
     public BasicResult checkVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.checkVirtualAppliance(virtualAppliance);
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
+        return proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
+        // return command.checkVirtualAppliance(virtualAppliance);
     }
 
     /**

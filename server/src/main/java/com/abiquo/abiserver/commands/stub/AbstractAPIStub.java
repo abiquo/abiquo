@@ -1442,4 +1442,59 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdc}/virtualappliances/{vapp}/virtualmachines/{vm}/config/runlist",
             params);
     }
+
+    protected String createVirtualMachinesUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
+                params);
+    }
+
+    protected String createVirtualMachineUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachineId", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}",
+                params);
+    }
+
+    protected String createVirtualApplianceUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}",
+            params);
+    }
+
+    protected String createVirtualApplianceMachinesUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
+                params);
+    }
 }

@@ -169,17 +169,19 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.highDisponibility = highDisponibility;
     }
 
-    private String type;
+    private int idType;
 
-    public String getType() {
-		return type;
-	}
+    public int getIdType()
+    {
+        return idType;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setIdType(final int idType)
+    {
+        this.idType = idType;
+    }
 
-	private String password;
+    private String password;
 
     public String getPassword()
     {

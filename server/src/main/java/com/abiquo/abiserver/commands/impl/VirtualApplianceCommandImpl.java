@@ -934,10 +934,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
 
-                        StateEnum currentStateEnum = StateEnum.ALLOCATED;
+                        StateEnum currentStateEnum = StateEnum.NOT_DEPLOYED; // ALLOCATED
                         if (virtualAppliance.getNodes().size() > 0)
                         {
-                            currentStateEnum = StateEnum.ON;
+                            currentStateEnum = StateEnum.DEPLOYED; // ON
                         }
                         State currentState = new State(currentStateEnum);
 

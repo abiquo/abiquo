@@ -402,11 +402,11 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         // dto.setIdState(v.getidState)
         if (vm.getIdType() == 0)
         {
-        	dto.setType("NOT_MANAGED");
+            dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
         }
         else
         {
-        	dto.setType("MANAGED");
+            dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
         }
         dto.setPassword(vm.getPassword());
         dto.setRam(vm.getRam());

@@ -154,7 +154,6 @@ public class VirtualApplianceResource
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());
-
         return dto;
     }
 

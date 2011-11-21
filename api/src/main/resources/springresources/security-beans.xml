@@ -140,7 +140,6 @@
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />

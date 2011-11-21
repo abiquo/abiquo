@@ -99,11 +99,11 @@ public class VirtualMachineInfrastructureResource extends AbstractResource
             ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vm);
         if (vm.getIdType() == 0)
         {
-            vmDto.setType("NOT_MANAGED");
+            vmDto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
         }
         else
         {
-            vmDto.setType("MANAGED");
+            vmDto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
         }
         Integer enterpriseId = null;
         Integer userId = null;

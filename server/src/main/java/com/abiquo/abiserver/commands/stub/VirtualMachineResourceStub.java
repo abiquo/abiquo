@@ -57,7 +57,17 @@ public interface VirtualMachineResourceStub
     public BasicResult deleteVirtualMachine(Integer virtualDatacenterId,
         Integer virtualApplianceId, VirtualMachine virtualMachine);
 
-    DataResult editVirtualMachineState(VirtualMachine virtualMachine,
+    DataResult editVirtualMachineState(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine,
         VirtualMachineState virtualMachineState);
+
+    DataResult powerOffVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult powerOnVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
+
+    DataResult pauseVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, VirtualMachine virtualMachine);
 
 }

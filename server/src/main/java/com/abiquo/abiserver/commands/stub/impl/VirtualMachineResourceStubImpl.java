@@ -312,13 +312,14 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult editVirtualMachineState(final VirtualMachine virtualMachine,
+    public DataResult editVirtualMachineState(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine,
         final VirtualMachineState virtualMachineState)
     {
         DataResult result = new DataResult();
         String url = "";
-        // createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
-        // virtualMachine.getId());
+        createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
+            virtualMachine.getId());
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
         dto.setPower(virtualMachineState.name());
         ClientResponse response = post(url, dto);
@@ -335,6 +336,30 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
 
         return result;
+    }
+
+    @Override
+    public DataResult powerOffVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.OFF);
+    }
+
+    @Override
+    public DataResult powerOnVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.ON);
+    }
+
+    @Override
+    public DataResult pauseVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.PAUSED);
     }
 
     // private VirtualMachineDto getVirtualMachine(Integer virtualMachineId) {
