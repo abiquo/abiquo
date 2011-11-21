@@ -112,6 +112,8 @@ public class RESTBuilder implements IRESTBuilder
 {
     public static final String REL_EDIT = "edit";
 
+    public static final String REL_SELF = "self";
+
     public static final String FIRST = "first";
 
     public static final String NEXT = "next";
@@ -281,7 +283,21 @@ public class RESTBuilder implements IRESTBuilder
             Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(PrivilegeResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(PrivilegeResource.class, REL_SELF, params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildPrivilegeListLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, "privilege", params));
 
         return links;
     }
@@ -297,7 +313,7 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, "privileges", params));
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGES, params));
 
         return links;
     }
@@ -316,7 +332,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
         links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE, params));
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGES, params));
 
         return links;
     }
