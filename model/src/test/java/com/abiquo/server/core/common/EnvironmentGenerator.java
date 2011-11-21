@@ -233,9 +233,8 @@ public class EnvironmentGenerator
         User user = get(User.class);
 
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
-        NodeVirtualImage node = nodeVirtualImageGenerator.createInstance(vapp);
+        NodeVirtualImage node = nodeVirtualImageGenerator.createInstance(vapp, user);
         VirtualMachine vm = node.getVirtualMachine();
-        vm.setUser(user);
 
         add(vapp);
         add(node.getVirtualImage().getRepository());

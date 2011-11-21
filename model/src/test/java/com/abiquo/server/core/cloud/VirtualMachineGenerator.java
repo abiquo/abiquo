@@ -134,6 +134,24 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     }
 
     public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+        final User user, final String name)
+    {
+        VirtualMachine virtualMachine =
+            new VirtualMachine(name, enterprise, user, vimage, UUID.randomUUID(), 0);
+        // Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
+
+        virtualMachine.setName(name);
+
+        // by default set the virtual image requirements
+        virtualMachine.setCpu(vimage.getCpuRequired());
+        virtualMachine.setRam(vimage.getRamRequired());
+        virtualMachine.setHdInBytes((int) vimage.getHdRequiredInBytes());
+        virtualMachine.setState(VirtualMachineState.ALLOCATED);
+
+        return virtualMachine;
+    }
+
+    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
         final String name)
     {
         User user = userGenerator.createInstance(enterprise);

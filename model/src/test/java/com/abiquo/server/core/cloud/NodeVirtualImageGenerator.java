@@ -26,6 +26,8 @@ import java.util.List;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.UserGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
@@ -37,12 +39,15 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
 
     private VirtualImageGenerator imageGenerator;
 
+    private UserGenerator userGenerator;
+
     public NodeVirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
         vappGenerator = new VirtualApplianceGenerator(seed);
         vmGenerator = new VirtualMachineGenerator(seed);
         imageGenerator = new VirtualImageGenerator(seed);
+        userGenerator = new UserGenerator(seed);
     }
 
     @Override
@@ -77,21 +82,29 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         VirtualAppliance vapp =
             vappGenerator.createInstance(image.getEnterprise(), image.getRepository()
                 .getDatacenter());
+        User user = userGenerator.createInstance(image.getEnterprise());
 
-        return createInstance(vapp, image);
+        return createInstance(vapp, user, image);
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance vapp)
     {
+        User user = userGenerator.createInstance(vapp.getEnterprise());
+        return createInstance(vapp, user);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user)
+    {
         VirtualImage image =
             imageGenerator.createInstance(vapp.getEnterprise(), vapp.getVirtualDatacenter()
                 .getDatacenter());
-        return createInstance(vapp, image);
+        return createInstance(vapp, user, image);
     }
 
-    public NodeVirtualImage createInstance(final VirtualAppliance vapp, final VirtualImage image)
+    public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user,
+        final VirtualImage image)
     {
-        VirtualMachine vm = vmGenerator.createInstance(image, vapp.getEnterprise(), "TestVM");
+        VirtualMachine vm = vmGenerator.createInstance(image, vapp.getEnterprise(), user, "TestVM");
         return createInstance(vapp, vm, image);
     }
 
