@@ -994,7 +994,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
     
     <!-- InfrastructureEvent.START_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
@@ -1025,7 +1025,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
 
 
@@ -1054,7 +1054,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
     
     <!-- InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
@@ -1085,7 +1085,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
 
 
@@ -1114,7 +1114,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
     
     <!-- InfrastructureEvent.REBOOT_VIRTUALMACHINE_IN_VAPP ________________________________________________________________________ -->
@@ -1145,7 +1145,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
     </EventHandlers>
 
 
@@ -1173,7 +1173,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
 
     </EventHandlers>
     
@@ -1204,7 +1204,7 @@
 
         <!-- Once the service is called, we set the virtual machine to State.LOCKED -->
         <InlineInvoker method="{AbiCloudModel.getInstance().infrastructureManager.changeVirtualMachineState}"
-            arguments="{[event.infrastructureElement, new State(State.LOCKED)]}"/>
+            arguments="{[event.infrastructureElement, new State(10, State.LOCKED.description)]}"/>
 
     </EventHandlers>
 

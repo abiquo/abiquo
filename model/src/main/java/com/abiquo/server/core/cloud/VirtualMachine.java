@@ -633,4 +633,39 @@ public class VirtualMachine extends DefaultEntityBase
         setIdType(typeId);
     }
 
+    /**
+     * This method is intended to clone a {@link VirtualMachine} that shares a reference to a
+     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualImage} . The
+     * {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}.
+     * 
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public VirtualMachine clone()
+    {
+        VirtualMachine virtualMachine = new VirtualMachine();
+        virtualMachine.setCpu(cpu);
+        // We are sharing the same reference
+        virtualMachine.setDatastore(datastore);
+        virtualMachine.setDescription(description);
+        // The enterprise cannot be modified
+        virtualMachine.setEnterprise(enterprise);
+        virtualMachine.setHdInBytes(hdInBytes);
+        virtualMachine.setHighDisponibility(highDisponibility);
+        // The hypervisor is selected by the allocator
+        virtualMachine.setHypervisor(hypervisor);
+        virtualMachine.setIdType(idType);
+        virtualMachine.setName(name);
+        virtualMachine.setPassword(password);
+        virtualMachine.setRam(ram);
+        virtualMachine.setState(state);
+        // Not editable
+        virtualMachine.setUser(user);
+        virtualMachine.setUuid(uuid);
+        virtualMachine.setVdrpIP(vdrpIP);
+        virtualMachine.setVdrpPort(vdrpPort);
+        // Not editable
+        virtualMachine.setVirtualImage(virtualImage);
+        return virtualMachine;
+    }
 }

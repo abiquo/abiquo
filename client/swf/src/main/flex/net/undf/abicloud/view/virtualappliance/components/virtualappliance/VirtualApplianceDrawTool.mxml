@@ -282,7 +282,7 @@
                                                                                     "ALERT_CHANGESTATE_VIRTUALAPPLIANCE_TEXT"),
                                             Alert.OK,
                                             null);
-                }else if(this._virtualAppliance.state.description == State.NEEDS_SYNC){
+                }else if(this._virtualAppliance.state.description == State.NEEDS_SYNC.description){
                 	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
@@ -344,7 +344,7 @@
                 //Since if a Virtual Appliance is Running, a non blocking service will be used
                 //to save it, we must set the virtual appliance as not modified, to let user get out
                 //from this screen without warning
-                if (this._virtualAppliance.state.description == State.ON)
+                if (this._virtualAppliance.state.description == State.DEPLOYED.description)
                 {
                     this._isVirtualApplianceModified = false;
                     dispatchEvent(new Event("isVirtualApplianceModifiedChange"));
@@ -509,7 +509,7 @@
                 {
                     var dispatch:Boolean;
                     //Added, saved, but no running
-                    if(NodeVirtualImage(nodeRendererToErase.node).virtualMachine.state.description != State.ON){	
+                    if(NodeVirtualImage(nodeRendererToErase.node).virtualMachine.state.description != State.ON.description){	
                     	dispatch = true;
                     }else{
                     	dispatch = false;
@@ -566,7 +566,7 @@
             {
                 //We only accept drop operations when we have a VirtualAppliance
                 if (this._virtualAppliance != null 
-                && this._virtualAppliance.state.description != State.LOCKED)
+                && this._virtualAppliance.state.description != State.LOCKED.description)
                 {
                     if (event.dragSource.hasFormat("VirtualImage"))
                     {
@@ -696,13 +696,13 @@
         paddingRight="0"
         verticalAlign="middle"
         verticalScrollPolicy="off"
-        enabled="{this._virtualAppliance.state.description != State.UNKNOWN ? true:false}"
+        enabled="{this._virtualAppliance.state.description != State.UNKNOWN.description ? true:false}"
         styleName="GeneralDataPanelTopFullSkin">
         
         <mx:Button id="saveButton"
             width="21" height="21"
             styleName="VirtualApplianceSaveButton"
-            enabled="{this._isVirtualApplianceModified &amp;&amp; this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description != State.LOCKED}"
+            enabled="{this._isVirtualApplianceModified &amp;&amp; this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description}"
             toolTip="@Resource(bundle='Common', key='BUTTON_SAVE_TOOLTIP')"
             click="onClickSaveButton()"/>
 
@@ -749,7 +749,7 @@
             height="16"
             label="@Resource(bundle='VirtualAppliance', key='BUTTON_LABEL_CREATE_BUNDLE')"
             enabled="{this._virtualAppliance != null &amp;&amp; 
-				   			 (this._virtualAppliance.state.description == State.ON || this._virtualAppliance.state.description == State.NEEDS_SYNC)}"
+				   			 (this._virtualAppliance.state.description == State.DEPLOYED.description || this._virtualAppliance.state.description == State.NEEDS_SYNC.description)}"
             styleName="VirtualApplianceEraseButton"
             click="onClickCreateBundleButton()"/>
 
@@ -762,10 +762,10 @@
 
         <mx:Button id="applyChangesButton"
             height="16"
-            includeInLayout="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC}"
+            includeInLayout="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC.description}"
             label="@Resource(bundle='VirtualAppliance', key='LABEL_APPLY_CHANGES')"
             styleName="VirtualApplianceEraseButton"
-            visible="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC}"
+            visible="{this._virtualAppliance != null &amp;&amp; this._virtualAppliance.state.description == State.NEEDS_SYNC.description}"
             click="onClickApplyChangesButton()"/>
 
         <mx:Spacer 
@@ -776,10 +776,10 @@
             right="1"
             top="1"
             bottom="1"
-            enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED
-				   			 &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN &amp;&amp; this._virtualAppliance.nodes.length != 0}"
+            enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description
+				   			 &amp;&amp; this._virtualAppliance.state.description != State.UNKNOWN.description &amp;&amp; this._virtualAppliance.nodes.length != 0}"
             styleName="VirtualApplianceDeployButton"
-            selected="{_virtualAppliance.state.description == State.PAUSED || _virtualAppliance.state.description == State.ON || _virtualAppliance.state.description == State.NEEDS_SYNC}"
+            selected="{_virtualAppliance.state.description == State.DEPLOYED.description || _virtualAppliance.state.description == State.NEEDS_SYNC.description}"
             toolTip="{powerOnOffButton.selected ? ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_UNDEPLOY') : 
 				  	 									 ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_DEPLOY')}"
             click="onClickPowerOnOffButton()"
@@ -787,7 +787,7 @@
             mouseChildren="false"
             buttonMode="true"/>
             
-            <!--enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED
+            <!--enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description
                              &amp;&amp; this._virtualAppliance.state.description != State.FAILED &amp;&amp; this._virtualAppliance.nodes.length != 0}"-->
             
     </mx:HBox>
@@ -807,7 +807,7 @@
 
             <mx:ViewStack id="nodesArea"
                 width="100%" height="100%"
-                enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED}"
+                enabled="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description != State.LOCKED.description}"
                 creationPolicy="all"
                 dragEnter="onDragEnterNodesArea(event)"
                 dragDrop="onDragDropNodesArea(event)">
@@ -826,7 +826,7 @@
         <componentsVA:VirtualApplianceDeploying 
             horizontalCenter="0"
             verticalCenter="-20"
-            visible="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description == State.LOCKED}"
+            visible="{this._virtualAppliance != null  &amp;&amp; this._virtualAppliance.state.description == State.LOCKED.description}"
             virtualAppliance="{this._virtualAppliance}"/>
     </mx:Canvas>
 

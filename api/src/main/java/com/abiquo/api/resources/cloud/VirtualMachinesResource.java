@@ -32,6 +32,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -52,10 +53,13 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
+import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -161,6 +165,32 @@ public class VirtualMachinesResource extends AbstractResource
         return vmDto;
     }
 
+    /**
+     * Converts to the transfer object for the VirtualMachine POJO when the request is from the
+     * /cloud URI
+     * 
+     * @param v virtual machine
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param restBuilder {@link IRESTBuilder} object injected by context.
+     * @return the generate {@link VirtualMachineDto} object.
+     * @throws Exception
+     */
+    public static VirtualMachineWithNodeDto createNodeCloudTransferObject(final NodeVirtualImage v,
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
+    {
+        final VirtualMachineWithNodeDto vmDto =
+            VirtualMachineResource.createNodeTransferObject(v, vdcId, vappId, restBuilder);
+
+        vmDto.addLinks(restBuilder.buildVirtualMachineCloudLinks(vdcId, vappId, v.getId(), v
+            .getVirtualMachine().isChefEnabled()));
+        final VirtualImage vimage = v.getVirtualImage();
+        vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+            .getRepository().getDatacenter().getId(), vimage.getId()));
+
+        return vmDto;
+    }
+
     public static VirtualMachineDto createCloudAdminTransferObject(final VirtualMachine vm,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
@@ -242,6 +272,27 @@ public class VirtualMachinesResource extends AbstractResource
     {
         return ModelTransformer.persistenceFromTransport(VirtualMachine.class, virtualMachineDto);
 
+    }
+
+    @GET
+    @Produces(VirtualMachineResource.VM_NODE_MEDIA_TYPE)
+    public VirtualMachinesWithNodeDto getVirtualMachinesWithNode(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        final VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+
+        final List<NodeVirtualImage> all = service.getNodeVirtualImages(vdcId, vappId);
+        final VirtualMachinesWithNodeDto vappsDto = new VirtualMachinesWithNodeDto();
+
+        for (final NodeVirtualImage n : all)
+        {
+            vappsDto.add(createNodeCloudTransferObject(n, vapp.getVirtualDatacenter().getId(),
+                vapp.getId(), restBuilder));
+        }
+
+        return vappsDto;
     }
 
 }

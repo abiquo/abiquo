@@ -45,7 +45,7 @@ import com.softwarementors.validation.constraints.Required;
 @Entity
 @Table(name = Node.TABLE_NAME)
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 class Node extends DefaultEntityBase
 {
 
@@ -56,7 +56,7 @@ class Node extends DefaultEntityBase
         setType(NodeVirtualImage.DISCRIMINATOR); // node virtual image
     }
 
-    public Node(String type)
+    public Node(final String type)
     {
         setType(type);
     }
@@ -95,7 +95,7 @@ class Node extends DefaultEntityBase
         return this.modified;
     }
 
-    protected void setModified(int modified)
+    protected void setModified(final int modified)
     {
         this.modified = modified;
     }
@@ -107,14 +107,14 @@ class Node extends DefaultEntityBase
 
     private final static boolean TYPE_REQUIRED = true;
 
-    private final static String TYPE_DEFAULT = "1"; // node virtual image
+    private final static String TYPE_DEFAULT = NodeVirtualImage.DISCRIMINATOR; // node virtual image
 
     private final static int TYPE_LENGTH_MIN = 1;
 
-    private final static int TYPE_LENGTH_MAX = 1;
+    private final static int TYPE_LENGTH_MAX = 100;
 
     @Column(name = TYPE_COLUMN, nullable = !TYPE_REQUIRED)
-    @Range(min = TYPE_LENGTH_MIN, max = TYPE_LENGTH_MAX)
+    @Length(min = TYPE_LENGTH_MIN, max = TYPE_LENGTH_MAX)
     private String type = TYPE_DEFAULT;
 
     public String getType()
@@ -122,7 +122,7 @@ class Node extends DefaultEntityBase
         return type;
     }
 
-    protected void setType(String type)
+    protected void setType(final String type)
     {
         this.type = type;
     }
@@ -150,7 +150,7 @@ class Node extends DefaultEntityBase
         return this.name;
     }
 
-    protected void setName(String name)
+    protected void setName(final String name)
     {
         this.name = name;
     }
@@ -172,9 +172,60 @@ class Node extends DefaultEntityBase
         return this.virtualAppliance;
     }
 
-    public void setVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void setVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         this.virtualAppliance = virtualAppliance;
     }
 
+    public final static String X_PROPERTY = "x";
+
+    private final static String X_COLUMN = "posX";
+
+    private final static boolean X_REQUIRED = true;
+
+    private final static int X_DEFAULT = 0;
+
+    private final static int X_MIN = Integer.MIN_VALUE;
+
+    private final static int X_MAX = Integer.MAX_VALUE;
+
+    @Column(name = X_COLUMN, nullable = !X_REQUIRED)
+    @Range(min = X_MIN, max = X_MAX)
+    private int x = X_DEFAULT;
+
+    public int getX()
+    {
+        return this.x;
+    }
+
+    protected void setX(final int x)
+    {
+        this.x = x;
+    }
+
+    public final static String Y_PROPERTY = "y";
+
+    private final static String Y_COLUMN = "posY";
+
+    private final static boolean Y_REQUIRED = true;
+
+    private final static int Y_DEFAULT = 0;
+
+    private final static int Y_MIN = Integer.MIN_VALUE;
+
+    private final static int Y_MAX = Integer.MAX_VALUE;
+
+    @Column(name = Y_COLUMN, nullable = !Y_REQUIRED)
+    @Range(min = Y_MIN, max = Y_MAX)
+    private int y = Y_DEFAULT;
+
+    public int getY()
+    {
+        return this.y;
+    }
+
+    protected void setY(final int y)
+    {
+        this.y = y;
+    }
 }

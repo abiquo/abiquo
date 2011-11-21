@@ -35,15 +35,15 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = NodeVirtualImage.TABLE_NAME)
-@DiscriminatorValue("1")
+@DiscriminatorValue(NodeVirtualImage.DISCRIMINATOR)
 public class NodeVirtualImage extends Node
 {
-    public static final String DISCRIMINATOR = "1";
+    public static final String DISCRIMINATOR = "VIRTUAL_IMAGE";
 
     public static final String TABLE_NAME = "nodevirtualimage";
 
-    public NodeVirtualImage(String name, VirtualAppliance virtualAppliance, VirtualImage virtualImage,
-        VirtualMachine virtualMachine)
+    public NodeVirtualImage(final String name, final VirtualAppliance virtualAppliance,
+        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
     {
         super(DISCRIMINATOR);
 
@@ -74,7 +74,7 @@ public class NodeVirtualImage extends Node
         return this.virtualImage;
     }
 
-    public void setVirtualImage(VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualImage virtualImage)
     {
         this.virtualImage = virtualImage;
     }
@@ -96,7 +96,7 @@ public class NodeVirtualImage extends Node
         return this.virtualMachine;
     }
 
-    public void setVirtualMachine(VirtualMachine virtualMachine)
+    public void setVirtualMachine(final VirtualMachine virtualMachine)
     {
         this.virtualMachine = virtualMachine;
     }

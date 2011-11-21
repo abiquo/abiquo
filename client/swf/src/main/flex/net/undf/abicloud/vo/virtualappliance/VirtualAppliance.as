@@ -73,7 +73,7 @@ package net.undf.abicloud.vo.virtualappliance
             id = 0;
             name = "";
             isPublic = false;
-            state = new State(State.NOT_DEPLOYED);
+            state = new State(1, State.NOT_DEPLOYED.description);
             highDisponibility = false;
             nodes = new ArrayCollection();
             nodeConnections = "<connections></connections>";
