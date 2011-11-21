@@ -78,7 +78,4 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end: appliance manager -->
-    <!-- tasks -->
-    <orm:entity class="com.abiquo.server.core.tasks.Task" />
-    <!-- end: tasks -->
 </orm:entity-mappings>
