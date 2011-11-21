@@ -51,7 +51,7 @@ public class AmqpConsumerContextListener implements ServletContextListener
     /** The RabbitMQ consumer for VSM */
     protected VSMConsumer eventsConsumer;
 
-    /** The RabbitMQ consumer for AM **/
+    /** The RabbitMQ consumer for AM */
     protected AMConsumer amConsumer;
 
     /** Keeps all instantiated consumers */
