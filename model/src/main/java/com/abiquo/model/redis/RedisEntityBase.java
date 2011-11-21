@@ -19,30 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+package com.abiquo.model.redis;
 
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
+public abstract class RedisEntityBase
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED;
+    protected abstract String getIdAsString();
 
-    public static NetworkType fromValue(final String orderBy)
+    public String getEntityKey()
     {
-        for (NetworkType currentOrder : NetworkType.values())
-        {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
-        }
-
-        return null;
+        return RedisEntityUtils.getEntityKey(this.getClass(), this.getIdAsString());
     }
 }

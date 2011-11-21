@@ -19,30 +19,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+package com.abiquo.model.redis;
 
 /**
- * All kind of VLAN networks.
+ * Helper class to build keys for redis models.
  * 
- * @author jdevesa@abiquo.com
+ * @author eruiz
  */
-public enum NetworkType
+public class KeyMaker
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED;
+    protected String namespace;
 
-    public static NetworkType fromValue(final String orderBy)
+    public KeyMaker(String namespace)
     {
-        for (NetworkType currentOrder : NetworkType.values())
+        this.namespace = namespace;
+    }
+
+    public KeyMaker(Class< ? > clazz)
+    {
+        this.namespace = clazz.getSimpleName();
+    }
+
+    public String make(String... namespaces)
+    {
+        StringBuilder builder = new StringBuilder(this.namespace);
+
+        for (String name : namespaces)
         {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
+            builder.append(":").append(name);
         }
 
-        return null;
+        return builder.toString();
     }
 }
