@@ -28,6 +28,11 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 
+/**
+ * Repository to manage the redis-based DAOs {@link TaskDAO} and {@link JobDAO}.
+ * 
+ * @author eruiz@abiquo.com
+ */
 @Component
 public class AsyncTaskRep
 {
@@ -51,12 +56,12 @@ public class AsyncTaskRep
             // Persist referenced Jobs
             for (Job job : task.getJobs())
             {
+                job.setParentTaskId(task.getTaskId());
                 jobDao.save(job, transaction);
             }
 
             // Persist task
             taskDao.save(task, transaction);
-
             transaction.exec();
             discard = false;
         }
@@ -114,7 +119,6 @@ public class AsyncTaskRep
 
             // Delete task
             taskDao.delete(task, transaction);
-
             transaction.exec();
             discard = false;
         }
@@ -144,6 +148,27 @@ public class AsyncTaskRep
             }
 
             return task;
+        }
+        finally
+        {
+            jedisPool.returnResource(jedis);
+        }
+    }
+
+    public Task findTaskByJobId(String jobId)
+    {
+        Jedis jedis = jedisPool.getResource();
+
+        try
+        {
+            Job job = findJob(jobId);
+
+            if (job == null)
+            {
+                return null;
+            }
+
+            return findTask(job.getParentTaskId());
         }
         finally
         {

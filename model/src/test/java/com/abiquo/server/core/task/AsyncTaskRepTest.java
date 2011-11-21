@@ -76,6 +76,26 @@ public class AsyncTaskRepTest
     }
 
     @Test
+    public void test_findTaskByJobId()
+    {
+        Task task = createUniqueTask();
+        Job j0 = createUniqueJob();
+        Job j1 = createUniqueJob();
+        Job j2 = createUniqueJob();
+
+        task.getJobs().add(j0);
+        task.getJobs().add(j1);
+        task.getJobs().add(j2);
+
+        repo.save(task);
+
+        assertSameTask(repo.findTaskByJobId(j0.getId()), task);
+        assertSameTask(repo.findTaskByJobId(j1.getId()), task);
+        assertSameTask(repo.findTaskByJobId(j2.getId()), task);
+        assertNull(repo.findTaskByJobId("blabla"), null);
+    }
+
+    @Test
     public void test_saveTaskWithNullFields()
     {
         Task task = createUniqueTask();
@@ -227,6 +247,7 @@ public class AsyncTaskRepTest
         job.setId(UUID.randomUUID().toString());
         job.setDescription("blablablabla");
         job.setType(JobType.CONFIGURE);
+        job.setParentTaskId(UUID.randomUUID().toString());
 
         return job;
     }
