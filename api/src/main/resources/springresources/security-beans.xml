@@ -140,7 +140,6 @@
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
-        <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/ovfpackagelists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
@@ -328,6 +327,8 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/ips" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweron" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/undeploy" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/deploy" method="POST" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweroff" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/pause" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/resume" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />

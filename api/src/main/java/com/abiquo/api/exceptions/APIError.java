@@ -171,7 +171,8 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"),
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is deployed"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -245,6 +246,8 @@ public enum APIError
         "VM-19",
         "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
         "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"),
+        NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS("VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
+        "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -427,9 +430,21 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-19",
-        "Could not get the Storage Manager remote service"), NON_EXISTENT_VOLUME_MAPPING("VOL-20",
-        "The requested initiator mapping does not exist"),
+        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-18",
+        "Could not get the Storage Manager remote service"), VOLUME_GRANT_ACCESS_ERROR("VOL-19",
+        "Could not add the initiators mappings"),
+        NON_EXISTENT_VOLUME_MAPPING("VOL-20", "The requested initiator mapping does not exist"),
+        VOLUME_NOT_ATTACHED("VOL-21",
+        "The volume is not attached to the virtual machine"), VOLUME_ATTACH_INVALID_LINK("VOL-22",
+        "Invalid link to the volume to attach"), VOLUME_ATTACH_INVALID_VDC_LINK("VOL-23",
+        "Invalid virtual datacenter in the link to the volume to attach"), VOLUME_ALREADY_ATTACHED(
+        "VOL-24", "The volume is already attached to a virtual machine"), VOLUME_TOO_MUCH_ATTACHMENTS(
+        "VOL-25", "The maximum number of attached disks and volumes has been reached"), VOLUME_ATTACH_ERROR(
+        "VOL-26",
+        "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
+        "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
+        "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_RECONFIGURE_ERROR(
+        "VOL-29", "An unexpected error occured while reconfiguring storage"), 
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

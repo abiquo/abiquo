@@ -44,7 +44,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     private VirtualDatacenterGenerator vdcGenerator;
 
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualImageGenerator imageGenerator;
 
     public VolumeManagementGenerator(final SeedGenerator seed)
     {
@@ -52,7 +52,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         poolGenerator = new StoragePoolGenerator(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
-        virtualImageGenerator = new VirtualImageGenerator(seed);
+        imageGenerator = new VirtualImageGenerator(seed);
     }
 
     @Override
@@ -63,6 +63,12 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
         poolGenerator.assertAllPropertiesEqual(obj1.getStoragePool(), obj2.getStoragePool());
         rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
+
+        // Optional properties
+        if (obj1.getVirtualImage() != null)
+        {
+            imageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
+        }
     }
 
     @Override
@@ -148,7 +154,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
     private VolumeManagement addStatefulImageToVolume(final VolumeManagement volume,
         final Datacenter datacenter)
     {
-        VirtualImage image = virtualImageGenerator.createInstance(datacenter);
+        VirtualImage image = imageGenerator.createInstance(datacenter);
         volume.setVirtualImage(image);
         return volume;
     }
@@ -168,7 +174,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         if (entity.getVirtualImage() != null)
         {
             VirtualImage virtualImage = entity.getVirtualImage();
-            virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+            imageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
             entitiesToPersist.add(virtualImage);
         }
     }

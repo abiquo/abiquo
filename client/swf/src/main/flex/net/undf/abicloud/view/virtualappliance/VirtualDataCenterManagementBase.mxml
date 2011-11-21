@@ -326,7 +326,7 @@
              */
             private function askVirtualApplianceDeletion(event:Event = null):void
             {
-                if(virtualApplianceList.selectedVirtualAppliance.state.description == State.NEEDS_SYNC){
+                if(virtualApplianceList.selectedVirtualAppliance.state.description == State.NEEDS_SYNC.description){
                 	AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                     "ALERT_TITLE_LABEL"),
                                             ResourceManager.getInstance().getString("VirtualAppliance",
@@ -365,7 +365,7 @@
                 var virtualApplianceToDelete:VirtualAppliance = virtualApplianceList.selectedVirtualAppliance;
                 var virtualApplianceEvent:VirtualApplianceEvent;
 
-                if (virtualApplianceToDelete.state.description == State.ON)
+                if (virtualApplianceToDelete.state.description == State.DEPLOYED.description)
                 {
                     virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE_NON_BLOCKING);
                     virtualApplianceEvent.virtualAppliance = ObjectUtil.copy(virtualApplianceToDelete) as VirtualAppliance;

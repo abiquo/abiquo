@@ -48,12 +48,14 @@ import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.util.network.IPAddress;
@@ -75,6 +77,9 @@ public class NetworkService extends DefaultApiService
     /** Autowired infrastructure DAO repository. */
     @Autowired
     protected InfrastructureRep datacenterRepo;
+
+    @Autowired
+    protected EnterpriseRep entRep;
 
     /** Autowired Virtual Infrastructure DAO repository. */
     @Autowired
@@ -107,6 +112,57 @@ public class NetworkService extends DefaultApiService
         repo = new VirtualDatacenterRep(em);
         datacenterRepo = new InfrastructureRep(em);
         userService = new UserService(em);
+    }
+
+    /**
+     * Assign the default NIC to a Virtual Machine. Depending on which vlan type is, we should do an
+     * action, or another one. This method will be only called from another services, so we
+     * understand we don't have to check the NotFound case.
+     * 
+     * @param vmId identifier of the Virtual Machine.
+     */
+    public void assignDefaultNICToVirtualMachine(final Integer vmId)
+    {
+        // Get the needed objects.
+        VirtualMachine vm = repo.findVirtualMachineById(vmId);
+        VirtualAppliance vapp = repo.findVirtualApplianceByVirtualMachine(vm);
+        VirtualDatacenter vdc = vapp.getVirtualDatacenter();
+
+        VLANNetwork vlan = vdc.getDefaultVlan();
+
+        IpPoolManagement ip = null;
+        switch (vlan.getType())
+        {
+            case INTERNAL:
+                // find next available IP to use.
+                ip =
+                    repo.findIpsByPrivateVLANAvailableFiltered(vdc.getId(), vlan.getId(), 0, 1,
+                        new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
+                break;
+
+            case EXTERNAL:
+            case UNMANAGED:
+                DatacenterLimits dcLimits =
+                    entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
+                        vdc.getDatacenter());
+                ip =
+                    repo.findExternalIpsByVlan(vdc.getEnterprise().getId(), dcLimits.getId(),
+                        vlan.getId(), 0, 1, new String(), OrderByEnum.IP, Boolean.TRUE,
+                        Boolean.TRUE).get(0);
+                ip.setVirtualDatacenter(vdc);
+                ip.setMac(IPNetworkRang.requestRandomMacAddress(vdc.getHypervisorType()));
+                ip.setName(ip.getMac() + "_host");
+        }
+
+        Rasd rasd = createRasdEntity(vm, ip);
+        repo.insertRasd(rasd);
+
+        ip.setRasd(rasd);
+        ip.setVirtualAppliance(vapp);
+        ip.setVirtualMachine(vm);
+        repo.updateIpManagement(ip);
+
+        return;
     }
 
     /**
@@ -155,21 +211,7 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
-        // create the Rasd object.
-        Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
-
-        rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
-        rasd.setConnection("");
-        rasd.setAllocationUnits("0");
-        rasd.setAutomaticAllocation(0);
-        rasd.setAutomaticDeallocation(0);
-        rasd.setAddress(ip.getMac());
-        rasd.setParent(ip.getNetworkName());
-        rasd.setResourceSubType(String.valueOf(IpPoolManagement.Type.PRIVATE.ordinal()));
-        // Configuration Name sets the order in the virtual machine, put it in the last place.
-        rasd.setConfigurationName(String.valueOf(repo.findIpsByVirtualMachine(vm).size()));
+        Rasd rasd = createRasdEntity(vm, ip);
         repo.insertRasd(rasd);
 
         ip.setRasd(rasd);
@@ -447,8 +489,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -922,10 +964,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -938,8 +980,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1285,8 +1327,13 @@ public class NetworkService extends DefaultApiService
             }
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(dhcp, vlan, macAddress, name, address.toString(), vlan
-                    .getName(), type);
+                new IpPoolManagement(dhcp,
+                    vlan,
+                    macAddress,
+                    name,
+                    address.toString(),
+                    vlan.getName(),
+                    type);
 
             if (vdc != null)
             {
@@ -1301,6 +1348,36 @@ public class NetworkService extends DefaultApiService
         vlan.getConfiguration().setDhcp(dhcp);
 
         return dhcp;
+    }
+
+    /**
+     * Prepares the {@link Rasd} entity regarding on the virtual machine and the ip we are
+     * assigning. It's up to the method that calls this entity either save the Rasd or not.
+     * 
+     * @param vm {@link VirtualMachine} entity where the IP will belong to.
+     * @param ip {@link IpPoolManagement} entity that will store this rasd.
+     * @return the created Rasd entity.
+     */
+    protected Rasd createRasdEntity(final VirtualMachine vm, final IpPoolManagement ip)
+    {
+        // create the Rasd object.
+        Rasd rasd =
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+
+        rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
+        rasd.setConnection("");
+        rasd.setAllocationUnits("0");
+        rasd.setAutomaticAllocation(0);
+        rasd.setAutomaticDeallocation(0);
+        rasd.setAddress(ip.getMac());
+        rasd.setParent(ip.getNetworkName());
+        rasd.setResourceSubType(String.valueOf(ip.getType().ordinal()));
+        // Configuration Name sets the order in the virtual machine, put it in the last place.
+        rasd.setConfigurationName(String.valueOf(repo.findIpsByVirtualMachine(vm).size()));
+
+        return rasd;
     }
 
     /**

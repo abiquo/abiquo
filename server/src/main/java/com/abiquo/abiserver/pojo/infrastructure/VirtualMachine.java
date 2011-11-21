@@ -365,7 +365,7 @@ public class VirtualMachine extends InfrastructureElement implements IPojo<Virtu
         vm.setRam(dto.getRam());
         vm.setState(new State(StateEnum.valueOf(dto.getState().name())));
         vm.setVdrpPort(dto.getVdrpPort());
-        if (dto.getType().equalsIgnoreCase("MANAGED"))
+        if (dto.getIdType() == com.abiquo.server.core.cloud.VirtualMachine.MANAGED)
         {
             vm.setIdType(1);
         }

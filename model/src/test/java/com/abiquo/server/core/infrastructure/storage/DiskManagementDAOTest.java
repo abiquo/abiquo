@@ -25,7 +25,6 @@ import javax.persistence.EntityManager;
 
 import org.testng.annotations.BeforeMethod;
 
-import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
@@ -33,17 +32,12 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class DiskManagementDAOTest extends DefaultDAOTestBase<DiskManagementDAO, DiskManagement>
 {
-    private VirtualDatacenterGenerator vdcGenerator;
-
-    private StoragePoolGenerator poolGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        vdcGenerator = new VirtualDatacenterGenerator(getSeed());
-        poolGenerator = new StoragePoolGenerator(getSeed());
     }
 
     @Override

@@ -152,7 +152,7 @@ public class VirtualApplianceDAOHibernate extends HibernateDAO<VirtualappHB, Int
                     .setParameterList(
                         "states",
                         new StateEnum[] {StateEnum.NOT_ALLOCATED, StateEnum.ALLOCATED,
-                        StateEnum.LOCKED});
+                        StateEnum.LOCKED, StateEnum.UNKNOWN});
 
             apps = query.list();
         }
