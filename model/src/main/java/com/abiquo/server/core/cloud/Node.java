@@ -131,9 +131,9 @@ class Node extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = false;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 0;
 
-    private final static int NAME_LENGTH_MAX = 255;
+    /* package */final static int NAME_LENGTH_MAX = 255;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
