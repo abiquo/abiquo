@@ -99,4 +99,17 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualImage.getId()));
         return crit;
     }
+
+    public List<NodeVirtualImage> findByVirtualAppliance(final VirtualAppliance virtualAppliance)
+    {
+        Criteria criteria = sameVirtualAppliance(virtualAppliance);
+        return getResultList(criteria);
+    }
+
+    private Criteria sameVirtualAppliance(final VirtualAppliance virtualAppliance)
+    {
+        Criteria crit = createNestedCriteria(Node.VIRTUAL_APPLIANCE_PROPERTY);
+        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualAppliance.getId()));
+        return crit;
+    }
 }

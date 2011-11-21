@@ -328,7 +328,7 @@ package net.undf.abicloud.controller.virtualappliance
                     else
                     {
                         //We try to make a local change to not block user
-                        if (_virtualAppliance.state.description == State.LOCKED)
+                        if (_virtualAppliance.state.description == State.LOCKED.description)
                             //The VirtualAppliance was APPLY_CHANGES_NEEDED. We leave as it was
                             AbiCloudModel.getInstance().virtualApplianceManager.setVirtualApplianceApplyChangesNeeded(_virtualAppliance);
                     }

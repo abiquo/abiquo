@@ -21,10 +21,9 @@
 
 package com.abiquo.abiserver.business.hibernate.pojohb.infrastructure;
 
-
 public enum StateEnum
 {
-    NOT_DEPLOYED, NOT_ALLOCATED, ALLOCATED, DEPLOYED, CONFIGURED, ON, PAUSED, OFF, NEEDS_SYNCHRONIZE, LOCKED, UNKNOWN;
+    NOT_DEPLOYED, NOT_ALLOCATED, ALLOCATED, DEPLOYED, CONFIGURED, ON, PAUSED, OFF, NEEDS_SYNC, LOCKED, UNKNOWN;
 
     public int id()
     {

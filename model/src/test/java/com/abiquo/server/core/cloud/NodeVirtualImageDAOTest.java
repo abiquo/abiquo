@@ -322,4 +322,17 @@ public class NodeVirtualImageDAOTest extends
         categoryGenerator.addAuxiliaryEntitiesToPersist(category, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, category);
     }
+
+    @Test
+    public void testFindByVirtualAppliance()
+    {
+        NodeVirtualImage nodeVirtualImage = eg().createInstance(vapp, vmachine, vimage);
+        ds().persistAll(nodeVirtualImage);
+
+        NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
+
+        List<NodeVirtualImage> result = nodeVirtualImageDAO.findByVirtualAppliance(vapp);
+
+        assertFalse(result.isEmpty(), "The list is emtpy!");
+    }
 }

@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
@@ -51,13 +54,12 @@ public class VsmServiceStub extends DefaultApiService
      * @param username The username used to connect to the hypervisor.
      * @param password The password used to connect to the hypervisor.
      */
-    public void monitor(String serviceUri, String physicalMachineIP, Integer physicalMachinePort,
-        String type, String username, String password)
+    public void monitor(final RemoteService service, final Hypervisor hypervisor)
     {
-        VSMClient vsmClient = initializeVSMClient(serviceUri);
+        VSMClient vsmClient = initializeVSMClient(service.getUri());
         try
         {
-            URL pmURL = new URL("http", physicalMachineIP, physicalMachinePort, "");
+            URL pmURL = new URL("http", hypervisor.getIp(), hypervisor.getPort(), "");
             String urlString = pmURL.toString();
 
             if (!urlString.endsWith("/"))
@@ -65,7 +67,8 @@ public class VsmServiceStub extends DefaultApiService
                 urlString += "/";
             }
 
-            vsmClient.monitor(urlString, type, username, password);
+            vsmClient.monitor(urlString, hypervisor.getType().name(), hypervisor.getUser(),
+                hypervisor.getPassword());
         }
         catch (Exception e)
         {
@@ -83,13 +86,12 @@ public class VsmServiceStub extends DefaultApiService
      * @param physicalMachinePort the physical machine port
      * @param type The hypervisor type of the physical machine.
      */
-    public void shutdownMonitor(String serviceUri, String physicalMachineIP,
-        Integer physicalMachinePort)
+    public void shutdownMonitor(final RemoteService service, final Hypervisor hypervisor)
     {
-        VSMClient vsmClient = initializeVSMClient(serviceUri);
+        VSMClient vsmClient = initializeVSMClient(service.getUri());
         try
         {
-            URL pmURL = new URL("http", physicalMachineIP, physicalMachinePort, "");
+            URL pmURL = new URL("http", hypervisor.getIp(), hypervisor.getPort(), "");
             vsmClient.shutdown(pmURL.toString());
         }
         catch (Exception e)
@@ -100,9 +102,72 @@ public class VsmServiceStub extends DefaultApiService
         }
 
     }
-    
-    protected VSMClient initializeVSMClient(String serviceURI)
+
+    protected VSMClient initializeVSMClient(final String serviceURI)
     {
         return new VSMClient(serviceURI);
+    }
+
+    /**
+     * Monitors the physical machine
+     * 
+     * @param serviceUri the vsm uri
+     * @param physicalMachineIP The physical machine to monitor.
+     * @param physicalMachinePort the physical machine port
+     * @param type The hypervisor type of the physical machine.
+     * @param username The username used to connect to the hypervisor.
+     * @param password The password used to connect to the hypervisor.
+     */
+    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine)
+    {
+
+        VSMClient vsmClient = initializeVSMClient(service.getUri());
+        try
+        {
+            URL pmURL =
+                new URL("http", virtualMachine.getHypervisor().getIp(), virtualMachine
+                    .getHypervisor().getPort(), "");
+            String urlString = pmURL.toString();
+
+            if (!urlString.endsWith("/"))
+            {
+                urlString += "/";
+            }
+
+            vsmClient.subscribe(urlString, virtualMachine.getHypervisor().getType().name(),
+                virtualMachine.getName());
+        }
+        catch (Exception e)
+        {
+            log.error(APIError.MONITOR_PROBLEM + e.getMessage());
+            addUnexpectedErrors(APIError.MONITOR_PROBLEM);
+            flushErrors();
+        }
+    }
+
+    /**
+     * Monitors the physical machine
+     * 
+     * @param serviceUri the vsm uri
+     * @param physicalMachineIP The physical machine to monitor.
+     * @param physicalMachinePort the physical machine port
+     * @param type The hypervisor type of the physical machine.
+     * @param username The username used to connect to the hypervisor.
+     * @param password The password used to connect to the hypervisor.
+     */
+    public void unsubscribe(final RemoteService service, final VirtualMachine virtualMachine)
+    {
+
+        VSMClient vsmClient = initializeVSMClient(service.getUri());
+        try
+        {
+            vsmClient.unsubscribe(virtualMachine.getName());
+        }
+        catch (Exception e)
+        {
+            log.error(APIError.MONITOR_PROBLEM + e.getMessage());
+            addUnexpectedErrors(APIError.MONITOR_PROBLEM);
+            flushErrors();
+        }
     }
 }

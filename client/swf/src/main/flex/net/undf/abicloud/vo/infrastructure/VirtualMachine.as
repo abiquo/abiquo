@@ -92,7 +92,7 @@ package net.undf.abicloud.vo.infrastructure
             vdrpPort = 0;
             vdrpIP = "";
             state = new State();
-            subState = new State(State.UNKNOWN);
+            subState = new State(11, State.UNKNOWN.description);
             highDisponibility = false;
             user = new User();
             idType = 0;

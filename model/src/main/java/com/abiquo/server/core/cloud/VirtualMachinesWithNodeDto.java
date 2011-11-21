@@ -19,26 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.tasks;
+package com.abiquo.server.core.cloud;
 
-import javax.persistence.EntityManager;
+import java.util.List;
 
-import org.springframework.stereotype.Repository;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.model.transport.WrapperDto;
 
-@Repository("jpaTasksDAO")
-public class TaskDAO extends DefaultDAOBase<Integer, Task>
+@XmlRootElement(name = "virtualmachineswithnode")
+public class VirtualMachinesWithNodeDto extends WrapperDto<VirtualMachineWithNodeDto>
 {
 
-    public TaskDAO()
-    {
-        super(Task.class);
-    }
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1891560795147901395L;
 
-    public TaskDAO(EntityManager entityManager)
+    @Override
+    @XmlElement(name = "virtualmachinewithnode")
+    public List<VirtualMachineWithNodeDto> getCollection()
     {
-        super(Task.class, entityManager);
+        return collection;
     }
-
 }

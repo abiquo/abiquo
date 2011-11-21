@@ -75,7 +75,6 @@ import com.abiquo.server.core.statistics.DatacenterResources;
 import com.abiquo.server.core.statistics.EnterpriseResources;
 import com.abiquo.server.core.statistics.VirtualAppResources;
 import com.abiquo.server.core.statistics.VirtualDatacenterResources;
-import com.abiquo.server.core.tasks.Task;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.JpaEntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.PersistentClassRemovalInformation;
@@ -152,7 +151,7 @@ public class TestDataAccessManager
             Datastore.class, Machine.class, Rack.class, StoragePool.class, Tier.class,
             StorageDevice.class, RemoteService.class, Repository.class, CloudUsage.class,
             Datacenter.class, Network.class, SystemProperty.class, Rasd.class, License.class,
-            Task.class, NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
+            NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
             VirtualApplianceStatefulConversion.class, OneTimeTokenSession.class);
 
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
