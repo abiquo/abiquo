@@ -108,6 +108,7 @@ public class Category implements IPojo<CategoryHB>
     public Category toPojo(final CategoryDto dto)
     {
         Category category = new Category();
+        category.setId(dto.getId());
         category.setName(dto.getName());
         category.setIsErasable(dto.isErasable());
         category.setIsDefault(dto.isDefaultCategory());

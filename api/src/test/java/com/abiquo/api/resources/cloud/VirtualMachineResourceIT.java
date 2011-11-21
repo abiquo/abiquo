@@ -76,6 +76,7 @@ import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
+import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
@@ -979,6 +980,57 @@ public class VirtualMachineResourceIT extends TestPopulate
             delete(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
                 "sysadmin");
         assertEquals(Status.CONFLICT.getStatusCode(), response.getStatusCode());
+
+    }
+
+    /**
+     * Create two virtual machines into a virtual appliance. Check the resources are addressable.
+     */
+    @Test
+    public void getVirtualMachineWithNodeTest()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+
+        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Asociate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Check for vm
+        ClientResponse response =
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()), "sysadmin",
+                "sysadmin", VirtualMachineResource.VM_NODE_MEDIA_TYPE);
+        VirtualMachineWithNodeDto vmDto = response.getEntity(VirtualMachineWithNodeDto.class);
+
+        assertNotNull(vmDto);
 
     }
 }

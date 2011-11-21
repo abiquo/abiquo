@@ -25,12 +25,22 @@ import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
+import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.util.ErrorManager;
 
 public interface VirtualApplianceResourceStub
 {
+
+    public DataResult deployVirtualAppliance(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, Boolean forceEnterpriseLimit);
+
+    public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId);
+    
     /**
      * Queries to allocate a new virtual machine
      * 
@@ -49,4 +59,11 @@ public interface VirtualApplianceResourceStub
 
     public BasicResult createVirtualAppliance(VirtualAppliance virtualAppliance);
 
+    public DataResult updateVirtualApplianceNodes(final Integer virtualDatacenterId,
+        final VirtualAppliance virtualAppliance);
+
+    public DataResult<VirtualAppliance> getVirtualApplianceNodes(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId);
+
+    public DataResult<List<Node>> getAppNodes(final VirtualAppliance entity);
 }

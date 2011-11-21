@@ -30,13 +30,20 @@ import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.impl.BundleCommandImpl;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 
 /**
  * This class defines a wide set of services that are considered "non-blocking services".
@@ -54,11 +61,18 @@ public class NonBlockingService
 
     VirtualApplianceCommand virtualAppCommand;
 
+    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
+
+    protected VirtualMachineResourceStub vmResourceStub;
+
     /**
      * Constructor The implemention of the BasicCommand
      */
     public NonBlockingService()
     {
+        virtualApplianceResourceStub = new VirtualApplianceResourceStubImpl();
+
+        vmResourceStub = new VirtualMachineResourceStubImpl();
         try
         {
             infrastructureCommand =
@@ -117,13 +131,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult startVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.startVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.ON);
+        // return command.startVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -132,13 +148,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult pauseVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.pauseVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.PAUSED);
+        // return command.pauseVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -147,13 +165,15 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult rebootVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
-
-        return command.rebootVirtualMachine(session, virtualMachine);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.ON);
+        // return command.rebootVirtualMachine(session, virtualMachine);
     }
 
     /**
@@ -162,13 +182,16 @@ public class NonBlockingService
      * @return A DataResult object, containing the new State for the virtualMachine
      */
     public BasicResult shutdownVirtualMachine(final UserSession session,
+        final Integer virtualApplianceId, final Integer virtualDatacenterId,
         final VirtualMachine virtualMachine)
     {
-        InfrastructureCommand command =
-            BusinessDelegateProxy.getInstance(session, infrastructureCommand,
-                InfrastructureCommand.class);
+        // InfrastructureCommand command =
+        // BusinessDelegateProxy.getInstance(session, infrastructureCommand,
+        // InfrastructureCommand.class);
 
-        return command.shutdownVirtualMachine(session, virtualMachine);
+        return proxyVirtualMachineResourceStub(session).editVirtualMachineState(
+            virtualDatacenterId, virtualApplianceId, virtualMachine, VirtualMachineState.OFF);
+        // return command.shutdownVirtualMachine(session, virtualMachine);
     }
 
     /* ______________________________ VIRTUAL APPLIANCE _______________________________ */
@@ -187,11 +210,26 @@ public class NonBlockingService
     public BasicResult startVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance, final Boolean force)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
+        //
+        // return command.beforeStartVirtualAppliance(session, virtualAppliance, force);
+        return deployVirtualAppliance(session, virtualAppliance);
+    }
 
-        return command.beforeStartVirtualAppliance(session, virtualAppliance, force);
+    /**
+     * @param session
+     * @param virtualAppliance
+     * @return BasicResult
+     */
+    public DataResult deployVirtualAppliance(final UserSession session,
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return proxyVirtualApplianceResourceStub(session).deployVirtualAppliance(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(),
+            Boolean.FALSE);
     }
 
     /**
@@ -205,11 +243,8 @@ public class NonBlockingService
     public BasicResult shutdownVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.shutdownVirtualAppliance(session, virtualAppliance);
+        return proxyVirtualApplianceResourceStub(session).undeployVirtualAppliance(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
     }
 
     /**
@@ -293,11 +328,12 @@ public class NonBlockingService
     public BasicResult checkVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.checkVirtualAppliance(virtualAppliance);
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
+        return proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
+        // return command.checkVirtualAppliance(virtualAppliance);
     }
 
     /**
@@ -350,5 +386,32 @@ public class NonBlockingService
                 VirtualApplianceCommand.class);
 
         return command.getVirtualApplianceLogs(userSession, virtualAppliance);
+    }
+
+    protected VirtualApplianceResourceStub proxyVirtualApplianceResourceStub(
+        final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, virtualApplianceResourceStub,
+            VirtualApplianceResourceStub.class);
+    }
+
+    protected VirtualMachineResourceStub proxyVirtualMachineResourceStub(
+        final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, vmResourceStub,
+            VirtualMachineResourceStub.class);
+    }
+
+    /**
+     * @param session
+     * @param virtualAppliance
+     * @return BasicResult
+     */
+    public DataResult undeployVirtualAppliance(final UserSession session,
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return proxyVirtualApplianceResourceStub(session).undeployVirtualAppliance(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
     }
 }

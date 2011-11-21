@@ -19,26 +19,36 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.tasks;
+package com.abiquo.model.redis;
 
-import javax.persistence.EntityManager;
-
-import org.springframework.stereotype.Repository;
-
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-
-@Repository("jpaTasksDAO")
-public class TaskDAO extends DefaultDAOBase<Integer, Task>
+/**
+ * Helper class to build keys for redis models.
+ * 
+ * @author eruiz
+ */
+public class KeyMaker
 {
+    protected String namespace;
 
-    public TaskDAO()
+    public KeyMaker(String namespace)
     {
-        super(Task.class);
+        this.namespace = namespace;
     }
 
-    public TaskDAO(EntityManager entityManager)
+    public KeyMaker(Class< ? > clazz)
     {
-        super(Task.class, entityManager);
+        this.namespace = clazz.getSimpleName();
     }
 
+    public String make(String... namespaces)
+    {
+        StringBuilder builder = new StringBuilder(this.namespace);
+
+        for (String name : namespaces)
+        {
+            builder.append(":").append(name);
+        }
+
+        return builder.toString();
+    }
 }
