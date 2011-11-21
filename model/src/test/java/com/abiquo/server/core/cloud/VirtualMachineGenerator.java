@@ -177,9 +177,13 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
+        // Only is set if VM is allocated
         Hypervisor hypervisor = entity.getHypervisor();
-        hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
-        entitiesToPersist.add(hypervisor);
+        if (hypervisor != null)
+        {
+            hypervisorGenerator.addAuxiliaryEntitiesToPersist(hypervisor, entitiesToPersist);
+            entitiesToPersist.add(hypervisor);
+        }
 
         Enterprise enterprise = entity.getEnterprise();
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
