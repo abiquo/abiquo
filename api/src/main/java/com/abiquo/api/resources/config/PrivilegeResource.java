@@ -46,6 +46,8 @@ public class PrivilegeResource extends AbstractResource
 {
     public static final String PRIVILEGE = "privilege";
 
+    public static final String PRIVILEGES = "privileges";
+
     public static final String PRIVILEGE_PARAM = "{" + PRIVILEGE + "}";
 
     @Autowired
