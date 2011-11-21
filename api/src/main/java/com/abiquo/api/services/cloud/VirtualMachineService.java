@@ -24,10 +24,12 @@ package com.abiquo.api.services.cloud;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,7 @@ import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
@@ -882,13 +885,19 @@ public class VirtualMachineService extends DefaultApiService
     {
         List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
         String datastore =
-            virtualMachine.getDatastore().getRootPath()
-                + virtualMachine.getDatastore().getDirectory();
+            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                .getDatastore().getDirectory());
+
+        DiskControllerType cntrlType =
+            getDiskController(virtualMachine.getHypervisor().getType(), false, false);
 
         Integer sequence = 1;
+
         for (DiskManagement imHard : hardDisks)
         {
-            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence, datastore);
+            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence, datastore,
+                cntrlType);
+
             sequence++;
         }
     }
@@ -951,7 +960,7 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * In community there are no statful image. If some {@link VirtualImageConversion} attached use
-     * his properties when defining the {@link PrimaryDisk}, else ue the {@link VirtualImage}
+     * his properties when defining the {@link PrimaryDisk}, else use the {@link VirtualImage}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -981,16 +990,75 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final HypervisorType htype = virtualMachine.getHypervisor().getType();
+
         final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
 
         final DiskFormatType format =
             conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
         final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
         final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+        final DiskControllerType cntrlType = getDiskController(htype, true, false);
+
+        if (cntrlType != null && cntrlType == DiskControllerType.SCSI
+            && format == DiskFormatType.VMDK_SPARSE)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER);
+            flushErrors();
+        }
 
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
             virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
-            repositoryManager.getUri());
+            repositoryManager.getUri(), cntrlType);
+    }
+
+    /**
+     * Only ESXi. Else return null.
+     * <p>
+     * Reads the ''abiquo.esxi.diskController'' properties or use the default: IDE for
+     * non-persistent primary disks and SCSI for aux disk and persistent primary.
+     * 
+     * @param hypervisorType, the target hypervisor type
+     * @param isPrimary, primary or secondary disk being added.
+     * @param aux disks always isStateful
+     */
+    protected DiskControllerType getDiskController(final HypervisorType hypervisorType,
+        final boolean isPrimary, final boolean isStateful)
+    {
+
+        if (hypervisorType != HypervisorType.VMX_04)
+        {
+            return null;
+        }
+        else
+        {
+            final String primaryOrSecondary = isPrimary ? "primary" : "secondary";
+
+            final String controllerProperty =
+                System.getProperty("abiquo.diskController." + primaryOrSecondary);
+
+            if (!StringUtils.isEmpty(controllerProperty))
+            {
+                try
+                {
+                    return DiskControllerType.valueOf(controllerProperty.toUpperCase());
+                }
+                catch (Exception e)
+                {
+                    logger.error("Invalid ''abiquo.diskController.{}'' property,"
+                        + "should use IDE/SCSI, but is {}", primaryOrSecondary, controllerProperty);
+                }
+            }
+
+            if (isStateful)
+            {
+                return DiskControllerType.SCSI;
+            }
+            else
+            {
+                return DiskControllerType.IDE;
+            }
+        }
     }
 
     private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,

@@ -21,10 +21,12 @@
 
 package com.abiquo.server.core.cloud;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Criteria;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
@@ -106,7 +108,7 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         Query query = getSession().createQuery(QUERY_IMAGE_CONVERTED);
         query.setParameter("idVirtualImage", vImageId);
 
-        return (Integer) query.uniqueResult() > 0;
+        return (Long) query.uniqueResult() > 0;
     }
 
     @Deprecated
@@ -132,5 +134,11 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             return conversions.get(0);
         }
         return null;
+    }
+
+    public Collection<VirtualImageConversion> findByVirtualImage(final VirtualImage virtualImage)
+    {
+        final Criteria criteria = createCriteria().add(sameImage(virtualImage));
+        return criteria.list();
     }
 }
