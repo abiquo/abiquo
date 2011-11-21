@@ -353,7 +353,10 @@ public enum APIError
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
         "TIER-6", "Can not disable a Tier with associated Storage Pools"), TIER_DISABLED("TIER-7",
-        "The requested tier is disabled"),
+        "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
+        "VirtualDatacenter param in tier link not found"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
+        "TIER-9",
+        "Tier's virtualdatacenter link does not match with the indicated virtualdatacenter"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -408,7 +411,8 @@ public enum APIError
         "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
-        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
+        "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
+        "PRICINGTEMPLATE-9", "Check Minimum Charge value is not null or wrong type"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -521,6 +525,7 @@ public enum APIError
         {
             System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
                 error.name()));
+
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
@@ -532,5 +537,4 @@ public enum APIError
 
         }
     }
-
 }
