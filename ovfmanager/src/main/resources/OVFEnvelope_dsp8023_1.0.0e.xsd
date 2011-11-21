@@ -360,7 +360,8 @@
         </xs:sequence>
     </xs:complexType>
      <xs:complexType name="DHCP_Option">
-        <xs:attribute name="value" type="xs:int" />
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute name="opt" type="xs:int" />
     </xs:complexType>
     <xs:complexType name="DHCP_Service_Type">
         <xs:sequence>

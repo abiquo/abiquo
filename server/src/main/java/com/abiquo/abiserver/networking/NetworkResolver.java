@@ -38,23 +38,24 @@ public class NetworkResolver
     /**
      * Specify all the masks user can choose
      */
-    private String[] allMasks =
-        {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0", "255.240.0.0", "255.248.0.0",
-        "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0", "255.255.192.0",
-        "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0", "255.255.254.0",
-        "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
-        "255.255.255.240", "255.255.255.248", "255.255.255.252"};
+    private String[] allMasks = {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0",
+    "255.240.0.0", "255.248.0.0", "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0",
+    "255.255.192.0", "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0",
+    "255.255.254.0", "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
+    "255.255.255.240", "255.255.255.248", "255.255.255.252"};
 
     /**
      * List of values from 0 to 255
      */
     private List<String> possibleValues;
-    
+
     /**
-     * Error messages 
+     * Error messages
      */
     private static String CLASSTYPE_CANNOT_BE_NULL = "Network class type can not be null.";
+
     private static String INVALID_CLASSTYPE = "Invalid private network ClassType.";
+
     private static String INVALID_NETWORK_MASK = "Network mask is invalid.";
 
     public NetworkResolver()
@@ -75,7 +76,7 @@ public class NetworkResolver
      * @throws InvalidPrivateNetworkClassTypeException if the privateNetworkClassType is not
      *             supported.
      */
-    public List<String> resolveMask(String privateNetworkClassType)
+    public List<String> resolveMask(final String privateNetworkClassType)
         throws InvalidPrivateNetworkClassTypeException
     {
 
@@ -88,12 +89,12 @@ public class NetworkResolver
 
         if (privateNetworkClassType.equalsIgnoreCase("A"))
         {
-            //masks = Arrays.asList(allMasks);
+            // masks = Arrays.asList(allMasks);
             masks = Arrays.asList(allMasks).subList(14, allMasks.length);
         }
         else if (privateNetworkClassType.equalsIgnoreCase("B"))
         {
-            //masks = Arrays.asList(allMasks).subList(8, allMasks.length);
+            // masks = Arrays.asList(allMasks).subList(8, allMasks.length);
             masks = Arrays.asList(allMasks).subList(14, allMasks.length);
         }
         else if (privateNetworkClassType.equalsIgnoreCase("C"))
@@ -115,8 +116,8 @@ public class NetworkResolver
      * @throws InvalidPrivateNetworkClassTypeException
      * @throws InvalidMaskException
      */
-    public List<List<String>> resolvePossibleNetworks(String privateNetworkClassType, IPAddress mask)
-        throws InvalidPrivateNetworkClassTypeException, InvalidMaskException
+    public List<List<String>> resolvePossibleNetworks(final String privateNetworkClassType,
+        final IPAddress mask) throws InvalidPrivateNetworkClassTypeException, InvalidMaskException
     {
         List<List<String>> networks = new ArrayList<List<String>>();
         List<String> firstElement = new ArrayList<String>();
@@ -129,7 +130,7 @@ public class NetworkResolver
 
         // First check if the class type is defined according with the standard network private
         // class types
-        if ((privateNetworkClassType == null) || !privateNetworkClassType.equalsIgnoreCase("A")
+        if (privateNetworkClassType == null || !privateNetworkClassType.equalsIgnoreCase("A")
             && !privateNetworkClassType.equalsIgnoreCase("B")
             && !privateNetworkClassType.equalsIgnoreCase("C"))
         {
@@ -137,12 +138,12 @@ public class NetworkResolver
         }
 
         // After check if the mask is inside the array of the accepted masks
-        if ((privateNetworkClassType.equalsIgnoreCase("A") && !Arrays.asList(allMasks).subList(
-            14, allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("B") && !Arrays.asList(allMasks).subList(
-                14, allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("C") && !Arrays.asList(allMasks).subList(
-                16, allMasks.length).contains(maskString)))
+        if (privateNetworkClassType.equalsIgnoreCase("A")
+            && !Arrays.asList(allMasks).subList(14, allMasks.length).contains(maskString)
+            || privateNetworkClassType.equalsIgnoreCase("B")
+            && !Arrays.asList(allMasks).subList(14, allMasks.length).contains(maskString)
+            || privateNetworkClassType.equalsIgnoreCase("C")
+            && !Arrays.asList(allMasks).subList(16, allMasks.length).contains(maskString))
         {
             throw new InvalidMaskException(INVALID_NETWORK_MASK);
         }
@@ -174,7 +175,7 @@ public class NetworkResolver
      * @param privateNetworkClassType
      * @return
      */
-    private String defineFirstList(String privateNetworkClassType)
+    private String defineFirstList(final String privateNetworkClassType)
     {
         if (privateNetworkClassType.equalsIgnoreCase("A"))
         {
@@ -190,7 +191,8 @@ public class NetworkResolver
         }
     }
 
-    private List<String> defineSecondList(String privateNetworkClassType, String nextToken)
+    private List<String> defineSecondList(final String privateNetworkClassType,
+        final String nextToken)
     {
         List<String> secondList = new ArrayList<String>();
 
@@ -220,7 +222,7 @@ public class NetworkResolver
      * @param mask value from 0 to 255
      * @return
      */
-    private List<String> defineListFromMask(String mask)
+    private List<String> defineListFromMask(final String mask)
     {
         int token = Integer.parseInt(mask);
         int numberOfValues = 256;
@@ -254,7 +256,7 @@ public class NetworkResolver
      * @return List of 'possibleValues' variable where its values are equal to 0 applying the
      *         module.
      */
-    private List<String> mapModule(Integer mod)
+    private List<String> mapModule(final Integer mod)
     {
         List<String> moduleZero = new ArrayList<String>();
 
@@ -269,4 +271,53 @@ public class NetworkResolver
         return moduleZero;
     }
 
+    public static String getDhcpOption(final String networkAddress, final Integer mask,
+        final String gateway)
+    {
+        IPAddress address = IPAddress.newIPAddress(networkAddress);
+
+        int firstOctet = Integer.valueOf(address.getFirstOctet());
+        int secondOctet = Integer.valueOf(address.getSecondOctet());
+        int thirdOctet = Integer.valueOf(address.getThirdOctet());
+        int fouthOctet = Integer.valueOf(address.getFourthOctet());
+
+        String encoding = "";
+        if (mask >= 1 && mask < 8)
+        {
+            encoding = toHex(mask) + ":" + toHex(firstOctet) + ":";
+        }
+        if (mask >= 8 && mask < 16)
+        {
+            encoding = toHex(mask) + ":" + toHex(firstOctet) + ":" + toHex(secondOctet);
+        }
+        if (mask >= 16 && mask < 24)
+        {
+            encoding =
+                toHex(mask) + ":" + toHex(firstOctet) + ":" + toHex(secondOctet) + ":"
+                    + toHex(thirdOctet);
+        }
+        if (mask >= 24)
+        {
+            encoding =
+                toHex(mask) + ":" + toHex(firstOctet) + ":" + toHex(secondOctet) + ":"
+                    + toHex(thirdOctet) + ":" + toHex(fouthOctet);
+        }
+
+        String[] gatewayIp = gateway.split("\\.");
+        for (String element : gatewayIp)
+        {
+            encoding = encoding + ":" + toHex(Integer.valueOf(element));
+        }
+        return encoding;
+    }
+
+    private static String toHex(final Integer val)
+    {
+        String valHex = Integer.toHexString(val).toUpperCase();
+        if (valHex.length() < 2)
+        {
+            valHex = "0" + valHex;
+        }
+        return valHex;
+    }
 }

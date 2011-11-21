@@ -69,6 +69,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualma
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
@@ -501,7 +502,9 @@ public class OVFModelFromVirtualAppliance
             for (DhcpOptionHB opHB : optionsHB)
             {
                 DHCPOption option = new DHCPOption();
-                option.setValue(opHB.getOption());
+                option.setValue(NetworkResolver.getDhcpOption(opHB.getNetworkAddress(),
+                    opHB.getMask(), opHB.getGateway()));
+                option.setOpt(opHB.getOption());
                 options.getOption().add(option);
             }
             vlan.setDhcpOptions(options);
