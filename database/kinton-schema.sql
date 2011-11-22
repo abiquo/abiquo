@@ -2059,7 +2059,6 @@ DROP TRIGGER IF EXISTS `kinton`.`delete_nodevirtualimage_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_created`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_updated`;
 DROP TRIGGER IF EXISTS `kinton`.`virtualdatacenter_deleted`;
-DROP TRIGGER IF EXISTS `kinton`.`create_rasd_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_rasd_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`create_volume_management_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_volume_management_update_stats`;
@@ -2721,29 +2720,46 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
 --  * Updates storageTotal
 --  * Register Storage Created Event for Accounting
 --
--- Fires: On an INSERT for the rasd_managment table
+-- Fires: On an INSERT for the volume_managment table
 --
 --
 -- ******************************************************************************************
 |
-CREATE TRIGGER `kinton`.`create_rasd_management_update_stats` AFTER INSERT ON `kinton`.`rasd_management`
+-- This Trigger was deleted in 2.0-> CREATE TRIGGER `kinton`.`create_rasd_management_update_stats` AFTER INSERT ON `kinton`.`rasd_management`
+CREATE TRIGGER `kinton`.`create_volume_management_update_stats` AFTER INSERT ON `kinton`.`volume_management`
     FOR EACH ROW BEGIN
         DECLARE idDataCenterObj INTEGER;
+        DECLARE idVirtualDataCenterObj INTEGER;
         DECLARE idThisEnterprise INTEGER;
         DECLARE limitResourceObj BIGINT;
+        DECLARE idResourceObj VARCHAR(50);
+        DECLARE idResourceTypeObj VARCHAR(5);
+	   DECLARE idStorageTier INTEGER;
         DECLARE resourceName VARCHAR(255);
-        SELECT vdc.idDataCenter, vdc.idEnterprise INTO idDataCenterObj, idThisEnterprise
-        FROM virtualdatacenter vdc
-        WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
-        SELECT elementName, limitResource INTO resourceName, limitResourceObj
-        FROM rasd r
-        WHERE r.instanceID = NEW.idResource;
+        SELECT vdc.idDataCenter, vdc.idEnterprise, vdc.idVirtualDataCenter INTO idDataCenterObj, idThisEnterprise, idVirtualDataCenterObj
+        FROM virtualdatacenter vdc, rasd_management rm
+        WHERE vdc.idVirtualDataCenter = rm.idVirtualDataCenter
+        AND NEW.idManagement = rm.idManagement;
+        --
+        SELECT r.elementName, r.limitResource, rm.idResource, rm.idResourceType INTO resourceName, limitResourceObj, idResourceObj, idResourceTypeObj
+        FROM rasd r, rasd_management rm
+        WHERE r.instanceID = rm.idResource
+        AND NEW.idManagement = rm.idManagement;
+        --
+        SELECT sp.idTier INTO idStorageTier
+        FROM storage_pool sp
+        WHERE sp.idStorage = NEW.idStorage;
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('Create VOL idDataCenterObj ',IFNULL(idDataCenterObj,'-')));
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('Create VOL limitResourceObj ',IFNULL(limitResourceObj,'-')));
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('Create VOL idResourceObj ',IFNULL(idResourceObj,'-')));
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('Create VOL idStorageTier ',IFNULL(idStorageTier,'-')));
+        -- INSERT INTO debug_msg (msg) VALUES (CONCAT('Create VOL resourceName: ',IFNULL(resourceName,'-')));
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN           
-            IF NEW.idResourceType='8' THEN 
+            IF idResourceTypeObj='8' THEN 
                 UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal+limitResourceObj WHERE idDataCenter = idDataCenterObj;
-                UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = NEW.idVirtualDataCenter;
+                UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated+1 WHERE idVirtualDataCenter = idVirtualDataCenterObj;
                 IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
-                    CALL AccountingStorageRegisterEvents('CREATE_STORAGE', NEW.idResource, resourceName, NEW.idVirtualDataCenter, idThisEnterprise, limitResourceObj);
+                    CALL AccountingStorageRegisterEvents('CREATE_STORAGE', idResourceObj, resourceName, idStorageTier, idVirtualDataCenterObj, idThisEnterprise, limitResourceObj);
                 END IF;               
             END IF;
         END IF;
@@ -2775,11 +2791,11 @@ CREATE TRIGGER `kinton`.`delete_rasd_management_update_stats` AFTER DELETE ON `k
                 UPDATE IGNORE cloud_usage_stats SET storageTotal = storageTotal-limitResourceObj WHERE idDataCenter = idDataCenterObj;
                 UPDATE IGNORE vdc_enterprise_stats SET volCreated = volCreated-1 WHERE idVirtualDataCenter = OLD.idVirtualDataCenter;
                 IF EXISTS( SELECT * FROM `information_schema`.ROUTINES WHERE ROUTINE_SCHEMA='kinton' AND ROUTINE_TYPE='PROCEDURE' AND ROUTINE_NAME='AccountingStorageRegisterEvents' ) THEN
-                    CALL AccountingStorageRegisterEvents('DELETE_STORAGE', OLD.idResource, resourceName, OLD.idVirtualDataCenter, idThisEnterprise, limitResourceObj);
+                    CALL AccountingStorageRegisterEvents('DELETE_STORAGE', OLD.idResource, resourceName, 0, OLD.idVirtualDataCenter, idThisEnterprise, limitResourceObj);
                 END IF;                  
             END IF;
         END IF;
-    END;    
+    END;       
 --
 -- Triggers on virtualdatacenter
 -- ******************************************************************************************
