@@ -34,6 +34,7 @@ import redis.clients.jedis.Transaction;
 import com.abiquo.model.redis.KeyMaker;
 import com.abiquo.model.redis.RedisDAOBase;
 import com.abiquo.model.redis.RedisEntityUtils;
+import com.abiquo.server.core.task.Task.TaskState;
 import com.abiquo.server.core.task.Task.TaskType;
 
 /**
@@ -45,6 +46,7 @@ import com.abiquo.server.core.task.Task.TaskType;
  * task.taskId = 0
  * task.userId = user0
  * task.type = DEPLOY
+ * task.state = STARTED
  * task.timestamp = 123456789
  * task.jobs = [Job0, Job1]
  * 
@@ -52,7 +54,7 @@ import com.abiquo.server.core.task.Task.TaskType;
  * <h3>Redis structure</h3>
  * 
  * <pre>
- * HMSET Task:0 "ownerId" "A" "taskId" "0" "userId" "user0" "type" "DEPLOY" "timestamp" "12346789" "jobs" "Task:0:jobs"
+ * HMSET Task:0 "ownerId" "A" "taskId" "0" "userId" "user0" "type" "DEPLOY" "state" "STARTED" "timestamp" "12346789" "jobs" "Task:0:jobs"
  * RPUSH Task:0:jobs Jobs:0
  * RPUSH Task:0:jobs Jobs:1
  * 
@@ -84,6 +86,7 @@ public class TaskDAO extends RedisDAOBase<Task>
         task.setTaskId(hashed.get("taskId"));
         task.setUserId(hashed.get("userId"));
         task.setType(TaskType.valueOf(hashed.get("type")));
+        task.setState(TaskState.valueOf(hashed.get("state")));
         task.setTimestamp(Long.parseLong(hashed.get("timestamp")));
 
         return task;
@@ -112,6 +115,7 @@ public class TaskDAO extends RedisDAOBase<Task>
         hashed.put("taskId", task.getTaskId());
         hashed.put("userId", task.getUserId());
         hashed.put("type", task.getType().name());
+        hashed.put("state", task.getState().name());
         hashed.put("timestamp", String.valueOf(RedisEntityUtils.getUnixtime()));
 
         // Hash job collection
