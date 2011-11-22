@@ -581,7 +581,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         machine.setEnterprise(e);
 
-        machine.setState(com.abiquo.server.core.infrastructure.Machine.State.MANAGED);
+        machine.setState(MachineState.MANAGED);
         machine.setVirtualSwitch(new BigInteger(1000, new Random()).toString(32));
         MachineDAO dao = createDaoForReadWriteTransaction();
         dao.persist(machine);
