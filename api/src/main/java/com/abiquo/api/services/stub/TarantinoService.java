@@ -168,7 +168,6 @@ public class TarantinoService extends DefaultApiService
      * @param datacenter The datacenter where the tasks are performed.
      * @param vm The virtual machine to unsubscribe.
      */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void ignoreVSMEventsIfNecessary(final Datacenter datacenter, final VirtualMachine vm)
     {
         HypervisorType type = vm.getHypervisor().getType();
