@@ -27,34 +27,37 @@ package net.undf.abicloud.vo.infrastructure
     public class State
     {
 
-        public static const ON:String = "ON"; // ON (VM) -> RUNNING:1
+        public static const ON:State = new State(6, "ON"); // ON (VM) -> RUNNING:1
 
-        public static const PAUSED:String = "PAUSED"; // PAUSED (VM)
+        public static const PAUSED:State = new State(7, "PAUSED"); // PAUSED (VM)
 
-        public static const OFF:String = "OFF"; // OFF (VM) -> OFF:int = 3
+        public static const OFF:State = new State(8, "OFF"); // OFF (VM) -> OFF:int = 3
 
-        public static const NOT_DEPLOYED:String = "NOT_DEPLOYED"; // NOT_DEPLOYED (VAPP) -> NOT_DEPLOYED:int = 5;
+        public static const NOT_DEPLOYED:State = new State(1, "NOT_DEPLOYED"); // NOT_DEPLOYED (VAPP) -> NOT_DEPLOYED:int = 5;
         
-        public static const NOT_ALLOCATED:String = "NOT_ALLOCATED"; // NOT_ALLOCATED (VM) -> NOT_DEPLOYED:int = 5;
+        public static const NOT_ALLOCATED:State = new State(2, "NOT_ALLOCATED"); // NOT_ALLOCATED (VM) -> NOT_DEPLOYED:int = 5;
 
-        public static const LOCKED:String = "LOCKED"; // LOCKED (VAPP) (VM) -> IN_PROGRESS:int = 6
+        public static const LOCKED:State = new State(10, "LOCKED"); // LOCKED (VAPP) (VM) -> IN_PROGRESS:int = 6
 
-        public static const NEEDS_SYNC:String = "NEEDS_SYNC"; // NEEDS_SYNC (VAPP) -> APPLY_CHANGES_NEEDED:int = 7;
+        public static const NEEDS_SYNC:State = new State(9, "NEEDS_SYNC"); // NEEDS_SYNC (VAPP) -> APPLY_CHANGES_NEEDED:int = 7;
 
         //public static const UPDATING_NODES:int = 8; // LOCKED (VAPP) -> UPDATING_NODES:int = 8;
 
         //public static const FAILED:int = 9; // UNKNOWN (VAPP) (VM) -> FAILED:int = 9;
 
-        public static const UNKNOWN:String = "UNKNOWN"; // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
+        public static const UNKNOWN:State = new State(11, "UNKNOWN"); // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
+        public static const ALLOCATED:State = new State(3, "ALLOCATED"); // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
+        public static const DEPLOYED:State = new State(4, "DEPLOYED"); // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
+        public static const CONFIGURED:State = new State(5, "CONFIGURED"); // UNKNOWN (VAPP) (VM) -> UNKNOWN:int = 15;
         
 
         public var id:int;
 
         public var description:String;
 
-        public function State(description:String = "")
+        public function State(id:int = 0, description:String = "")
         {
-            this.id = 0;
+            this.id = id;
             this.description = description;
         }
 

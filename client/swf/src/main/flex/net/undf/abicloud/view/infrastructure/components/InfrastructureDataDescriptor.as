@@ -256,7 +256,7 @@ package net.undf.abicloud.view.infrastructure.components
 
                     infrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
                     infrastructureEvent.infrastructureElement = elementChild;
-                    if (VirtualMachine(elementChild).state.description != State.LOCKED)
+                    if (VirtualMachine(elementChild).state.description != State.LOCKED.description)
                         Application.application.dispatchEvent(infrastructureEvent);
 
                     return true;

@@ -232,7 +232,7 @@
             {
                 if (event.detail == Alert.YES)
                 {
-                    if (this._virtualAppliance.state.description == State.LOCKED)
+                    if (this._virtualAppliance.state.description == State.LOCKED.description)
                         AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
                                                 ResourceManager.getInstance().getString("VirtualAppliance",

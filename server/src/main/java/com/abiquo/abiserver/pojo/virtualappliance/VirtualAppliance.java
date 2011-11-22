@@ -52,7 +52,7 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
 
     private State state;
 
-    private State subState;
+    // private State subState;
 
     private Boolean highDisponibility;
 
@@ -128,21 +128,21 @@ public class VirtualAppliance implements IPojo<VirtualappHB>
         this.state = state;
     }
 
-    /**
-     * @param subState the subState to set
-     */
-    public void setSubState(final State subState)
-    {
-        this.subState = subState;
-    }
-
-    /**
-     * @return the subState
-     */
-    public State getSubState()
-    {
-        return subState;
-    }
+    // /**
+    // * @param subState the subState to set
+    // */
+    // public void setSubState(final State subState)
+    // {
+    // this.subState = subState;
+    // }
+    //
+    // /**
+    // * @return the subState
+    // */
+    // public State getSubState()
+    // {
+    // return subState;
+    // }
 
     public Boolean getHighDisponibility()
     {

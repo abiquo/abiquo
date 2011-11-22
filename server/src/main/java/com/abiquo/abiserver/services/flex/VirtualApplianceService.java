@@ -53,6 +53,7 @@ import com.abiquo.tracer.SeverityType;
 
 public class VirtualApplianceService
 {
+
     /**
      * The command to invoke.
      */
@@ -60,6 +61,7 @@ public class VirtualApplianceService
 
     protected UserCommand userCommand;
 
+    protected VirtualApplianceResourceStub virtualApplianceResourceStub;
     /** The stub used to connect to the API. */
     private VirtualApplianceResourceStub vappStub;
 
@@ -68,7 +70,7 @@ public class VirtualApplianceService
      */
     public VirtualApplianceService()
     {
-        super();
+        virtualApplianceResourceStub = new VirtualApplianceResourceStubImpl();
         try
         {
             virtualApplianceCommand =
@@ -273,9 +275,9 @@ public class VirtualApplianceService
         final VirtualAppliance virtualAppliance)
     {
 
-        VirtualApplianceCommand command = proxyCommand(userSession);
-
-        return command.getVirtualApplianceNodes(virtualAppliance);
+        // VirtualApplianceCommand command = proxyCommand(userSession);
+        return proxyVirtualApplianceResourceStub(userSession).getAppNodes(virtualAppliance);
+        // return command.getVirtualApplianceNodes(virtualAppliance);
     }
 
     /**
@@ -299,15 +301,16 @@ public class VirtualApplianceService
      * @return A DataResult object, containing an ArrayList of Node, with the Virtual Appliance's
      *         Nodes updated
      */
-    public BasicResult editVirtualAppliance(final UserSession session,
+    public DataResult editVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
 
-        VirtualApplianceCommand command = proxyCommand(session);
+        // VirtualApplianceCommand command = proxyCommand(session);
+        return proxyVirtualApplianceResourceStub(session).updateVirtualApplianceNodes(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance);
+        // BasicResult result = command.editVirtualAppliance(session, virtualAppliance);
 
-        BasicResult result = command.editVirtualAppliance(session, virtualAppliance);
-
-        return result;
+        // return result;
 
     }
 
@@ -391,6 +394,13 @@ public class VirtualApplianceService
         VirtualApplianceCommand command = proxyCommand(session);
 
         return command.forceRefreshVirtualApplianceState(virtualAppliance);
+
     }
 
+    protected VirtualApplianceResourceStub proxyVirtualApplianceResourceStub(
+        final UserSession userSession)
+    {
+        return APIStubFactory.getInstance(userSession, virtualApplianceResourceStub,
+            VirtualApplianceResourceStub.class);
+    }
 }

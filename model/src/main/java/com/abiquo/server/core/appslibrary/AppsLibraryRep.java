@@ -280,6 +280,11 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualImageDAO.isMaster(vImage);
     }
 
+    public List<VirtualImage> findVirtualImagesByMaster(final VirtualImage master)
+    {
+        return virtualImageDAO.findByMaster(master);
+    }
+
     /**
      * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
      *      com.abiquo.model.enumerator.HypervisorType)

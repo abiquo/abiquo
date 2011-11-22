@@ -49,7 +49,7 @@ public class VirtualMachineDeployDto extends SingleResourceTransportDto implemen
      * <li><b>ON</b></li>
      * </ul>
      */
-    private Boolean foreceEnterpriseSoftLimits;
+    private Boolean forceEnterpriseSoftLimits;
 
     /**
      * Force the soft limits defined for the enterprise in the deploy. <br>
@@ -64,9 +64,9 @@ public class VirtualMachineDeployDto extends SingleResourceTransportDto implemen
      *         <li><b>ON</b></li>
      *         </ul>
      */
-    public Boolean isForeceEnterpriseSoftLimits()
+    public Boolean isForceEnterpriseSoftLimits()
     {
-        return foreceEnterpriseSoftLimits == null ? false : foreceEnterpriseSoftLimits;
+        return forceEnterpriseSoftLimits == null ? false : forceEnterpriseSoftLimits;
     }
 
     /**
@@ -83,8 +83,8 @@ public class VirtualMachineDeployDto extends SingleResourceTransportDto implemen
      *            </ul>
      *            void
      */
-    public void setForeceEnterpriseSoftLimits(final Boolean foreceEnterpriseSoftLimits)
+    public void setForceEnterpriseSoftLimits(final Boolean forceEnterpriseSoftLimits)
     {
-        this.foreceEnterpriseSoftLimits = foreceEnterpriseSoftLimits;
+        this.forceEnterpriseSoftLimits = forceEnterpriseSoftLimits;
     }
 }

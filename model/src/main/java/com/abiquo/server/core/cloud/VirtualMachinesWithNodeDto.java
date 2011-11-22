@@ -19,19 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.business.hibernate.pojohb.infrastructure;
+package com.abiquo.server.core.cloud;
 
-public enum StateEnum
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "virtualmachineswithnode")
+public class VirtualMachinesWithNodeDto extends WrapperDto<VirtualMachineWithNodeDto>
 {
-    NOT_DEPLOYED, NOT_ALLOCATED, ALLOCATED, DEPLOYED, CONFIGURED, ON, PAUSED, OFF, NEEDS_SYNC, LOCKED, UNKNOWN;
 
-    public int id()
-    {
-        return ordinal() + 1;
-    }
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1891560795147901395L;
 
-    public static StateEnum fromId(final int id)
+    @Override
+    @XmlElement(name = "virtualmachinewithnode")
+    public List<VirtualMachineWithNodeDto> getCollection()
     {
-        return StateEnum.values()[id - 1];
+        return collection;
     }
 }

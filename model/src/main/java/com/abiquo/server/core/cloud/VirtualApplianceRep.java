@@ -92,7 +92,7 @@ public class VirtualApplianceRep extends DefaultRepBase
     {
         this.virtualApplianceDao.flush();
     }
-
+    
     public VirtualApplianceStatefulConversion findConversionById(final Integer id)
     {
         return vAppStatefulConversionDao.findById(id);

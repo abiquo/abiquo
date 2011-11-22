@@ -815,7 +815,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         VirtualAppliance virtualappOld = null;
         // The VirtualAppliance's state that user sent
         State originalVirtualApplianceState = virtualAppliance.getState();
-        State originalVirtualApplianceSubState = virtualAppliance.getSubState();
+        // State originalVirtualApplianceSubState = virtualAppliance.getSubState();
 
         DAOFactory factory = HibernateDAOFactory.instance();
 
@@ -934,15 +934,15 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
 
-                        StateEnum currentStateEnum = StateEnum.ALLOCATED;
+                        StateEnum currentStateEnum = StateEnum.NOT_DEPLOYED; // ALLOCATED
                         if (virtualAppliance.getNodes().size() > 0)
                         {
-                            currentStateEnum = StateEnum.ON;
+                            currentStateEnum = StateEnum.DEPLOYED; // ON
                         }
                         State currentState = new State(currentStateEnum);
 
                         virtualAppliance.setState(currentState);
-                        virtualAppliance.setSubState(currentState);
+                        // virtualAppliance.setSubState(currentState);
                         virtualappHBPojo.setState(currentStateEnum);
                         // virtualappHBPojo.setSubState(currentStateEnum);
                         session.update("VirtualappHB", virtualappHBPojo);
@@ -953,9 +953,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         // Forcing the state to IN PROGRESS for visual purposes
                         State state = new State(StateEnum.LOCKED);
                         virtualAppliance.setState(state);
-                        State applychangesState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                        State applychangesState = new State(StateEnum.NEEDS_SYNC);
                         virtualAppliance.setState(state);
-                        virtualAppliance.setSubState(applychangesState);
+                        // virtualAppliance.setSubState(applychangesState);
                     }
 
                     // Log the event
@@ -1003,7 +1003,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     EventType.VAPP_MODIFY, userSession, null, virtualAppliance
                         .getVirtualDataCenter().getName(), e.getMessage(), virtualAppliance, null,
                     null, null, null);
-                virtualappOld.setSubState(new State(StateEnum.UNKNOWN));
+                // virtualappOld.setSubState(new State(StateEnum.UNKNOWN));
                 virtualAppliance =
                     updateOnlyStateInDB(virtualappOld, originalVirtualApplianceState.toEnum())
                         .getData();
@@ -1016,16 +1016,15 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             {
                 // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
                 return traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
-                    originalVirtualApplianceState, originalVirtualApplianceSubState, userHB,
-                    ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(), "createVirtualMachines", hl,
-                    BasicResult.HARD_LIMT_EXCEEDED);
+                    originalVirtualApplianceState, null, userHB, ComponentType.VIRTUAL_APPLIANCE,
+                    hl.getMessage(), "createVirtualMachines", hl, BasicResult.HARD_LIMT_EXCEEDED);
             }
             catch (SoftLimitExceededException sl)
             {
                 // undeployVirtualMachines(userSession, virtualAppliance, dataResult);
                 return traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
-                    originalVirtualApplianceState, originalVirtualApplianceSubState, userHB,
-                    ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(), "createVirtualMachines", sl,
+                    originalVirtualApplianceState, null, userHB, ComponentType.VIRTUAL_APPLIANCE,
+                    sl.getMessage(), "createVirtualMachines", sl,
                     EventType.WORKLOAD_HARD_LIMIT_EXCEEDED, BasicResult.SOFT_LIMT_EXCEEDED);
             }
             catch (NotEnoughResourcesException nl)
@@ -1037,7 +1036,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
                 dataResult =
                     traceErrorStartingVirtualAppliance(userSession, virtualAppliance,
-                        originalVirtualApplianceState, originalVirtualApplianceSubState, userHB,
+                        originalVirtualApplianceState, null, userHB,
                         ComponentType.VIRTUAL_APPLIANCE, cause, "startVirtualAppliance", nl); // ,
                 // BasicResult..CLOUD_LIMT_EXCEEDED
 
@@ -2005,7 +2004,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         DAOFactory daoFactory = HibernateDAOFactory.instance();
 
         State sourceState = vApp.getState();
-        State sourceSubState = vApp.getSubState();
+        // State sourceSubState = vApp.getSubState();
 
         // check the vapp state on database
         try
@@ -2076,7 +2075,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         logger.debug("Starting virtual appliance " + vApp.getId());
 
-        return startVirtualAppliance(userSession, userId, vApp, sourceState, sourceSubState, force);
+        return startVirtualAppliance(userSession, userId, vApp, sourceState, null, force);
     }
 
     protected DataResult<VirtualAppliance> traceErrorStartingVirtualAppliance(
@@ -2557,15 +2556,15 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
         // If virtual appliance has been started - create virtual machine for
         // the current node
-        if (virtualAppliance.getState().toEnum() == StateEnum.ON
-            || virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE)
+        if (virtualAppliance.getState().toEnum() == StateEnum.DEPLOYED
+            || virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNC)
         {
             VirtualmachineHB virtualMachineHB = createEmptyVirtualMachine(nodeVIPojo, owner);
             nodeVIPojo.setVirtualMachineHB(virtualMachineHB);
             session.save(virtualMachineHB);
             // TODO Change this IF sinces it's the same code
         }
-        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_ALLOCATED)
+        else if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED)
         {
             VirtualmachineHB virtualMachineHB = createEmptyVirtualMachine(nodeVIPojo, owner);
             nodeVIPojo.setVirtualMachineHB(virtualMachineHB);
@@ -3229,6 +3228,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         SoftLimitExceededException, HardLimitExceededException, NotEnoughResourcesException,
         VirtualApplianceCommandException
     {
+
         VirtualMachineResourceStub vmachineResource =
             APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
                 VirtualMachineResourceStub.class);
@@ -3265,7 +3265,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         }
                         else
                         {
-                            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE
+                            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNC
                                 && nodeVi.getVirtualMachineHB().getState() == StateEnum.NOT_ALLOCATED)
                             {
                                 // Before deleting logic
@@ -3301,9 +3301,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 // Deleting from nodes list
                                 nodesPojoList.remove(nodePojo);
 
-                                State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                                State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                                 virtualAppliance.setState(changesNeededState);
-                                virtualAppliance.setSubState(changesNeededState);
+                                // virtualAppliance.setSubState(changesNeededState);
                                 virtualappHBPojo.setState(changesNeededState.toEnum());
                                 // virtualappHBPojo.setSubState(changesNeededState.toEnum());
                             }
@@ -3311,9 +3311,9 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                             {
                                 session.update(nodePojo);
                                 updatenodesList.add(node);
-                                State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                                State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                                 virtualAppliance.setState(changesNeededState);
-                                virtualAppliance.setSubState(changesNeededState);
+                                // virtualAppliance.setSubState(changesNeededState);
                                 virtualappHBPojo.setState(changesNeededState.toEnum());
                                 // virtualappHBPojo.setSubState(changesNeededState.toEnum());
                             }
@@ -3333,15 +3333,16 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     break;
                 case Node.NODE_NEW:
                     NodeHB newNode = createNodePojo(session, node, virtualAppliance, owner);
+
                     newNode.setModified(Node.NODE_NOT_MODIFIED);
                     nodesPojoList.add(newNode);
                     // Setting the ID for the new ID
                     node = newNode.toPojo();
-                    if (virtualAppliance.getState().toEnum() != StateEnum.NOT_ALLOCATED)
+                    if (virtualAppliance.getState().toEnum() == StateEnum.DEPLOYED)
                     {
-                        State changesNeededState = new State(StateEnum.NEEDS_SYNCHRONIZE);
+                        State changesNeededState = new State(StateEnum.NEEDS_SYNC);
                         virtualAppliance.setState(changesNeededState);
-                        virtualAppliance.setSubState(changesNeededState);
+                        // virtualAppliance.setSubState(changesNeededState);
                         virtualappHBPojo.setState(changesNeededState.toEnum());
                         // virtualappHBPojo.setSubState(changesNeededState.toEnum());
                     }
