@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversion;
