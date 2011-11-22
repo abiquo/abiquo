@@ -145,4 +145,18 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         final Criteria criteria = createCriteria().add(sameImage(virtualImage));
         return criteria.list();
     }
+
+    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE = "SELECT "
+        + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
+        + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
+        + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
+
+    public Collection<VirtualImageConversion> findByVirtualImageConversionByNodeVirtualImage(
+        final NodeVirtualImage nodeVirtualImage)
+    {
+        Query query = getSession().createQuery(VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE);
+        query.setParameter("idVirtualImageConversion", nodeVirtualImage.getId());
+
+        return query.list();
+    }
 }

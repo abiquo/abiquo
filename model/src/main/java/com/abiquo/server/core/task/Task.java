@@ -30,7 +30,12 @@ public class Task extends RedisEntityBase
 {
     public enum TaskType
     {
-        DEPLOY, UNDEPLOY, RECONFIGURE, POWER_ON, POWER_OFF, PAUSE, RESUME, RESET, SNAPSHOT
+        DEPLOY, UNDEPLOY, RECONFIGURE, POWER_ON, POWER_OFF, PAUSE, RESUME, RESET, SNAPSHOT, HIGH_AVAILABILITY
+    }
+
+    public enum TaskState
+    {
+        FINISHED_SUCCESFULLY, FINISHED_UNSUCCESFULLY, PENDING, STARTED
     }
 
     protected String ownerId;
@@ -48,6 +53,17 @@ public class Task extends RedisEntityBase
     public Task()
     {
         this.jobs = new LinkedList<Job>();
+    }
+
+    @Override
+    protected String getIdAsString()
+    {
+        return getTaskId();
+    }
+
+    public TaskState getTaskState()
+    {
+        return TaskState.PENDING;
     }
 
     public String getOwnerId()
@@ -103,11 +119,5 @@ public class Task extends RedisEntityBase
     public void setType(TaskType type)
     {
         this.type = type;
-    }
-
-    @Override
-    protected String getIdAsString()
-    {
-        return getTaskId();
     }
 }

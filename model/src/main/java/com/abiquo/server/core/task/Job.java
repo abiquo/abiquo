@@ -61,7 +61,6 @@ public class Job extends RedisEntityBase
 
         this.state = JobState.PENDING;
         this.rollbackState = JobState.PENDING;
-        this.description = "asss";
     }
 
     @Override
