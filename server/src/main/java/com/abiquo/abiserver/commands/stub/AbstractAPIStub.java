@@ -1497,4 +1497,9 @@ public class AbstractAPIStub
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
                 params);
     }
+
+    protected String createVirtualAppliancesByEnterpriseLink(final Integer entId)
+    {
+        return createEnterpriseLink(entId) + "/action/virtualappliances";
+    }
 }

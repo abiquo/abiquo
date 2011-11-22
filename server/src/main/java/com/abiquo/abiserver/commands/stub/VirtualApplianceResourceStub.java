@@ -21,13 +21,15 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
-import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
-import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.user.Enterprise;
 import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.util.ErrorManager;
@@ -40,7 +42,7 @@ public interface VirtualApplianceResourceStub
 
     public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
         final Integer virtualApplianceId);
-    
+
     /**
      * Queries to allocate a new virtual machine
      * 
@@ -66,4 +68,7 @@ public interface VirtualApplianceResourceStub
         final Integer virtualApplianceId);
 
     public DataResult<List<Node>> getAppNodes(final VirtualAppliance entity);
+
+    DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
+        UserSession userSession, Enterprise enterprise);
 }
