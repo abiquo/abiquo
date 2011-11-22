@@ -231,4 +231,13 @@ public class TarantinoService extends DefaultApiService
             // vsm.unsubscribe(vsmRS, vm);
         }
     }
+
+    /**
+     * 
+     * */
+    public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine vm)
+    {
+        return null;
+    }
+
 }

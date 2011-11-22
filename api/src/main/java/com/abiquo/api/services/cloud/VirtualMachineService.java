@@ -49,6 +49,7 @@ import com.abiquo.api.services.StorageService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.appslibrary.VirtualImageService;
+import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -130,6 +131,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected VirtualImageService vimageService;
+
+    @Autowired
+    protected TarantinoService tarantino;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -370,6 +374,16 @@ public class VirtualMachineService extends DefaultApiService
         virtualMachineFromDto(dto, old);
         updateVirtualMachine(old);
         return old;
+    }
+
+    protected VirtualMachine createFromDto(final VirtualMachineDto dto)
+    {
+        return null; // TODO
+    }
+
+    protected VirtualMachine updateFromDto(final VirtualMachineDto dto, final VirtualMachine old)
+    {
+        return null; // TODO
     }
 
     private VirtualMachine virtualMachineFromDto(final VirtualMachineDto dto,
