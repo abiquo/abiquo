@@ -1493,7 +1493,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             proxy.getVirtualAppliancesByEnterprise(userSession, enterprise);
         if (result.getSuccess())
         {
-            result.setMessage(resourceManager.getMessage("getVirtualAppliances.success"));
+            result.setMessage(resourceManager
+                .getMessage("getVirtualAppliancesByEnterprise.success"));
         }
         return result;
     }

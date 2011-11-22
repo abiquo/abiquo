@@ -178,6 +178,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         ClientResponse post = post(linkVirtualMachines, virtualMachineDto);
                         if (post.getStatusCode() != Status.CREATED.getStatusCode())
                         {
+                            errors.append(n.getVirtualImage().getName());
                             addErrors(result, errors, post, "updateVirrtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
 
@@ -431,7 +432,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             throw new UserSessionException(result);
         }
         ErrorsDto error = response.getEntity(ErrorsDto.class);
-        errors.append("\n").append(errors.toString());
+        errors.append("\n").append(error.toString());
         if (error.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
         {
             result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
@@ -608,7 +609,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         if (response.getStatusCode() == 201)
         {
             VirtualApplianceDto networkDto = response.getEntity(VirtualApplianceDto.class);
-            result.setData(createVirtualApplianceFlexObject(networkDto));
+            result.setData(dtoToVirtualAppliance(networkDto,
+                virtualAppliance.getVirtualDataCenter(), result));
             result.setSuccess(Boolean.TRUE);
         }
         else
