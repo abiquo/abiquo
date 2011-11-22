@@ -29,7 +29,7 @@
 		<property name="cpuRequired" type="java.lang.Integer">
 			<column name="cpu_required" />
 		</property>
-		<property name="shared" type="int">
+		<property name="shared" type="org.hibernate.type.NumericBooleanType">
 			<column name="shared" not-null="true">
 				<comment>0-No 1-Yes</comment>
 			</column>
@@ -40,7 +40,7 @@
 		<property name="ovfId" type="string">
 			<column length="255" name="ovfid" not-null="false" />
 		</property>
-		<property name="stateful" type="int">
+		<property name="stateful" type="org.hibernate.type.NumericBooleanType">
 			<column length="1" name="stateful" not-null="true" />
 		</property>
 		<property name="diskFileSize" type="java.lang.Long">

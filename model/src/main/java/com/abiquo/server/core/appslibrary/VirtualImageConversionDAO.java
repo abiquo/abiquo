@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.appslibrary;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +35,8 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -136,9 +136,30 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return null;
     }
 
+    public boolean isConverted(final VirtualImage image, final DiskFormatType targetType)
+    {
+        final Criterion compat = Restrictions.and(sameImage(image), targetFormatIn(targetType));
+        return !createCriteria(compat).list().isEmpty();
+    }
+
     public Collection<VirtualImageConversion> findByVirtualImage(final VirtualImage virtualImage)
     {
         final Criteria criteria = createCriteria().add(sameImage(virtualImage));
         return criteria.list();
+    }
+
+    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE =
+        "SELECT "
+            + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
+            + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
+            + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
+
+    public Collection<VirtualImageConversion> findByVirtualImageConversionByNodeVirtualImage(
+        final NodeVirtualImage nodeVirtualImage)
+    {
+        Query query = getSession().createQuery(VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE);
+        query.setParameter("idVirtualImageConversion", nodeVirtualImage.getId());
+
+        return query.list();
     }
 }
