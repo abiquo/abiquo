@@ -369,7 +369,7 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, "privileges", params));
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGES, params));
 
         return links;
     }
@@ -388,7 +388,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
         links.add(builder.buildRestLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE, params));
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGES, params));
 
         return links;
     }
