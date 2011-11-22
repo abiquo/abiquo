@@ -111,7 +111,7 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    /* package */final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 1;
 
     /* package */final static int NAME_LENGTH_MAX = 255;
 
