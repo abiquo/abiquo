@@ -264,6 +264,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Machine> machines =
             createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
         Assert.assertEquals(machines.size(), 4);
+    }
     
     @Test
     public void test_findUsedVrdpPorts()
