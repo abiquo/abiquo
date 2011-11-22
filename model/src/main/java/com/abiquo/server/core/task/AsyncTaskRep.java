@@ -37,7 +37,7 @@ import redis.clients.jedis.Transaction;
 public class AsyncTaskRep
 {
     @Autowired
-    protected static JedisPool jedisPool;
+    protected JedisPool jedisPool;
 
     @Autowired
     protected TaskDAO taskDao;
