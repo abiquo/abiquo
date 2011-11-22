@@ -36,6 +36,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -126,8 +127,9 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             // This function should be returning the only object
             if (conversions.size() > 1)
             {
-                throw new NonUniqueObjectException("There is more than one conversion!", image
-                    .getId(), VirtualImageConversion.class.getSimpleName());
+                throw new NonUniqueObjectException("There is more than one conversion!",
+                    image.getId(),
+                    VirtualImageConversion.class.getSimpleName());
             }
             return conversions.get(0);
         }
