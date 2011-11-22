@@ -39,6 +39,29 @@ import com.abiquo.model.redis.RedisEntityUtils;
 import com.abiquo.server.core.task.Job.JobState;
 import com.abiquo.server.core.task.Job.JobType;
 
+/**
+ * This base class provides Redis-persistence logic for {@link Job} entity. <h3>Instance to persist</h3>
+ * 
+ * <pre>
+ * job.id = 0
+ * job.type = RESET
+ * job.state = PENDING
+ * job.rollbackState = PENDING
+ * job.description = ""
+ * job.parentTaskId = 1
+ * job.timestamp = 123456789
+ * job.data = { "one":"somenicedata" }
+ * </pre>
+ * 
+ * <h3>Redis structure</h3>
+ * 
+ * <pre>
+ * HMSET Job:0 "id" "0" "type" "RESET" "state" "PENDING" "rollbackState" "PENDING "description" "parentTaskId" "1" "timestamp" "123456789" "data" "Job:0:data"
+ * HMSET Job:0:data "one" "somenicedata"
+ * </pre>
+ * 
+ * @author eruiz@abiquo.com
+ */
 @Component
 public class JobDAO extends RedisDAOBase<Job>
 {
@@ -78,6 +101,7 @@ public class JobDAO extends RedisDAOBase<Job>
         job.setRollbackState(JobState.valueOf(hashed.get("rollbackState")));
         job.setDescription(hashed.get("description"));
         job.setTimestamp(Long.parseLong(hashed.get("timestamp")));
+        job.setParentTaskId(hashed.get("parentTaskId"));
 
         Map<String, String> data = jedis.hgetAll(getJobDataKey(job.getIdAsString()));
 
@@ -117,6 +141,7 @@ public class JobDAO extends RedisDAOBase<Job>
         hashed.put("state", job.getState().name());
         hashed.put("rollbackState", job.getRollbackState().name());
         hashed.put("description", job.getDescription());
+        hashed.put("parentTaskId", job.getParentTaskId());
         hashed.put("timestamp", String.valueOf(RedisEntityUtils.getUnixtime()));
 
         // Hash extra data map

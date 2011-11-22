@@ -95,10 +95,37 @@ public class RemoteServiceService extends DefaultApiService
         return infrastructureRepo.findRemoteServicesByDatacenter(datacenter);
     }
 
+    /**
+     * Add a new remoteService
+     * 
+     * @param rs remoteServoce
+     * @param datacenter datacenter where add it
+     * @return TransferObject: RemoteServiceDto if OK, ErrorsDto else
+     */
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public RemoteServiceDto addRemoteService(final RemoteService rs, final Datacenter datacenter)
+    {
+        return (RemoteServiceDto) addRemoteService(rs, datacenter, false);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
+    {
+        Datacenter datacenter = infrastructureRepo.findById(datacenterId);
+        return (RemoteServiceDto) addRemoteService(rs, datacenter, true);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public SingleResourceTransportDto addRemoteService(final RemoteService rs,
-        final Datacenter datacenter)
+        final Datacenter datacenter, final boolean flushErrors)
     {
+
+        if (rs.getType() == null)
+        {
+            addValidationErrors(APIError.WRONG_REMOTE_SERVICE_TYPE);
+            flushErrors();
+        }
+
         if (datacenter == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
@@ -107,9 +134,10 @@ public class RemoteServiceService extends DefaultApiService
 
         RemoteServiceDto responseDto = new RemoteServiceDto();
 
-        ErrorsDto errorsDto = checkUniqueness(datacenter, rs);
+        ErrorsDto errorsDto = checkUniqueness(datacenter, rs, flushErrors);
 
-        if (errorsDto.getCollection() == null || errorsDto.getCollection().size() > 0)
+        if (!flushErrors
+            && (errorsDto.getCollection() == null || errorsDto.getCollection().size() > 0))
         {
             return errorsDto;
         }
@@ -118,22 +146,8 @@ public class RemoteServiceService extends DefaultApiService
             RemoteService remoteService =
                 datacenter.createRemoteService(rs.getType(), rs.getUri(), 0);
 
-            if (!remoteService.isValid())
-            {
-                addValidationErrors(remoteService.getValidationErrors());
-                flushErrors();
-            }
-
             ErrorsDto configurationErrors =
-                checkStatus(remoteService.getType(), remoteService.getUri());
-
-            int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
-            remoteService.setStatus(status);
-
-            if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
-            {
-                configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
-            }
+                validateRemoteService(datacenter, rs, remoteService, responseDto);
 
             infrastructureRepo.insertRemoteService(remoteService);
 
@@ -142,56 +156,6 @@ public class RemoteServiceService extends DefaultApiService
             {
                 responseDto.setConfigurationErrors(configurationErrors);
             }
-        }
-
-        return responseDto;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
-    {
-        if (rs.getType() == null)
-        {
-            addValidationErrors(APIError.WRONG_REMOTE_SERVICE_TYPE);
-            flushErrors();
-        }
-
-        Datacenter datacenter = infrastructureRepo.findById(datacenterId);
-        if (datacenter == null)
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
-            flushErrors();
-        }
-
-        RemoteServiceDto responseDto = new RemoteServiceDto();
-
-        checkUniqueness(datacenter, rs, true);
-
-        RemoteService remoteService = datacenter.createRemoteService(rs.getType(), rs.getUri(), 0);
-
-        if (!remoteService.isValid())
-        {
-            addValidationErrors(remoteService.getValidationErrors());
-            flushErrors();
-        }
-
-        ErrorsDto configurationErrors =
-            checkStatus(remoteService.getType(), remoteService.getUri());
-
-        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
-        remoteService.setStatus(status);
-
-        if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
-        {
-            configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
-        }
-
-        infrastructureRepo.insertRemoteService(remoteService);
-
-        responseDto = createTransferObject(remoteService);
-        if (!configurationErrors.isEmpty())
-        {
-            responseDto.setConfigurationErrors(configurationErrors);
         }
 
         tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_CREATE,
@@ -230,7 +194,8 @@ public class RemoteServiceService extends DefaultApiService
 
                 try
                 {
-                    repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+                    repositoryLocation =
+                        amStub.getRepositoryConfiguration().getRepositoryLocation();
                 }
                 catch (ApplianceManagerStubException amEx)
                 {
@@ -488,10 +453,9 @@ public class RemoteServiceService extends DefaultApiService
         return configurationErrors;
     }
 
-    private ErrorsDto checkUniqueness(final Datacenter datacenter, final RemoteService remoteService)
-    {
-        return checkUniqueness(datacenter, remoteService, false);
-    }
+    // --------------- //
+    // PRIVATE METHODS //
+    // --------------- //
 
     private ErrorsDto checkUniqueness(final Datacenter datacenter,
         final RemoteService remoteService, final boolean flushErrors)
@@ -538,6 +502,29 @@ public class RemoteServiceService extends DefaultApiService
                 flushErrors();
             }
         }
+        return configurationErrors;
+    }
+
+    private ErrorsDto validateRemoteService(final Datacenter datacenter, final RemoteService rs,
+        final RemoteService remoteService, final RemoteServiceDto responseDto)
+    {
+        if (!remoteService.isValid())
+        {
+            addValidationErrors(remoteService.getValidationErrors());
+            flushErrors();
+        }
+
+        ErrorsDto configurationErrors =
+            checkStatus(remoteService.getType(), remoteService.getUri());
+
+        int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
+        remoteService.setStatus(status);
+
+        if (rs.getType() == RemoteServiceType.APPLIANCE_MANAGER)
+        {
+            configurationErrors.addAll(createApplianceManager(datacenter, remoteService));
+        }
+
         return configurationErrors;
     }
 }

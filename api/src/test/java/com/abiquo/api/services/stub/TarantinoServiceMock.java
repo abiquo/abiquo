@@ -18,27 +18,31 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.services.stub;
 
-package com.abiquo.server.core.tasks;
+import java.util.UUID;
 
-import javax.persistence.EntityManager;
+import org.springframework.stereotype.Service;
 
-import org.springframework.stereotype.Repository;
+import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.server.core.cloud.VirtualMachine;
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-
-@Repository("jpaTasksDAO")
-public class TaskDAO extends DefaultDAOBase<Integer, Task>
+/**
+ * Mock class to simulate {@link TarantinoService} behavior.
+ * 
+ * @author Ignasi Barrera
+ */
+@Service
+public class TarantinoServiceMock extends TarantinoService
 {
 
-    public TaskDAO()
+    @Override
+    public String reconfigureVirtualMachine(final VirtualMachine vm,
+        final VirtualMachineDescriptionBuilder originalConfig,
+        final VirtualMachineDescriptionBuilder newConfig)
     {
-        super(Task.class);
-    }
-
-    public TaskDAO(EntityManager entityManager)
-    {
-        super(Task.class, entityManager);
+        // Return a random task number
+        return UUID.randomUUID().toString();
     }
 
 }

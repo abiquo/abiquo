@@ -94,16 +94,13 @@ public class NodeVirtualImageStatefulConversionDAOTest extends
 
         nvisc.getNodeVirtualImage().setVirtualAppliance(vasc.getVirtualAppliance());
 
-        vm.getHypervisor().getMachine().getRack().setDatacenter(dc);
-        vm.getHypervisor().getMachine().setDatacenter(dc);
         vm.setUser(vasc.getUser());
         vasc.getUser().getRole().setPrivileges(null);
 
         // persist
         ds().persistAll(dc, ent, vasc.getVirtualAppliance().getVirtualDatacenter(),
             vasc.getVirtualAppliance(), vasc.getUser().getRole(), vasc.getUser(), vasc,
-            vi.getCategory(), vi.getRepository(), vi, vm.getHypervisor().getMachine().getRack(),
-            vm.getHypervisor().getMachine(), vm.getHypervisor(), vm, nvisc.getNodeVirtualImage(),
+            vi.getCategory(), vi.getRepository(), vi, vm, nvisc.getNodeVirtualImage(),
             nvisc.getTier(), nvisc);
 
         NodeVirtualImageStatefulConversionDAO dao = createDaoForRollbackTransaction();

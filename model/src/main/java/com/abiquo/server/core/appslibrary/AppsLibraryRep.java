@@ -27,8 +27,8 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.cloud.VirtualImageConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -280,8 +280,13 @@ public class AppsLibraryRep extends DefaultRepBase
         return virtualImageDAO.isMaster(vImage);
     }
 
+    public List<VirtualImage> findVirtualImagesByMaster(final VirtualImage master)
+    {
+        return virtualImageDAO.findByMaster(master);
+    }
+
     /**
-     * @see com.abiquo.server.core.cloud.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
+     * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
      *      com.abiquo.model.enumerator.HypervisorType)
      */
     public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
@@ -289,4 +294,15 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         return conversionDAO.compatilbeConversions(virtualImage, hypervisorType);
     }
+
+    public boolean isVirtualImageConverted(final VirtualImage image, final DiskFormatType targetType)
+    {
+        return conversionDAO.isConverted(image, targetType);
+    }
+
+    public void addConversion(final VirtualImageConversion conversion)
+    {
+        conversionDAO.persist(conversion);
+    }
+
 }

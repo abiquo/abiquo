@@ -72,6 +72,10 @@ public class JobDAOTest extends RedisDAOTestBase
         job = createUniqueJob();
         job.setType(null);
         expectRuntimeOnInsertNullField(job);
+
+        job = createUniqueJob();
+        job.setParentTaskId(null);
+        expectRuntimeOnInsertNullField(job);
     }
 
     @Test
@@ -153,6 +157,7 @@ public class JobDAOTest extends RedisDAOTestBase
         job.setId(UUID.randomUUID().toString());
         job.setDescription("blablablabla");
         job.setType(JobType.CONFIGURE);
+        job.setParentTaskId(UUID.randomUUID().toString());
 
         return job;
     }
@@ -165,6 +170,7 @@ public class JobDAOTest extends RedisDAOTestBase
         assertEquals(one.getDescription(), other.getDescription());
         assertEquals(one.getState(), other.getState());
         assertEquals(one.getRollbackState(), other.getRollbackState());
+        assertEquals(one.getParentTaskId(), other.getParentTaskId());
     }
 
     protected void expectRuntimeOnInsertNullField(Job job)
