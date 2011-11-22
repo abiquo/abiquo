@@ -117,16 +117,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.vdrpPort = vdrpPort;
     }
 
-    private String vdrpIp;
+    private String vdrpIP;
 
     public String getVdrpIP()
     {
-        return vdrpIp;
+        return vdrpIP;
     }
 
-    public void setVdrpIP(final String vdrpIp)
+    public void setVdrpIP(final String vdrpIP)
     {
-        this.vdrpIp = vdrpIp;
+        this.vdrpIP = vdrpIP;
     }
 
     private int idState;

@@ -20,6 +20,11 @@
  */
 package com.abiquo.vsm.web.servlet;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.abiquo.vsm.VSMManager;
 
 /**
@@ -33,8 +38,35 @@ public class CheckServlet extends AbstractCheckServlet
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected boolean check() throws Exception
+    protected boolean check(final HttpServletRequest req, final HttpServletResponse resp)
+        throws Exception
     {
+        // Read configuration
+        VSMManager vsmManager = VSMManager.getInstance();
+
+        if (!vsmManager.isRedisRunning())
+        {
+            req.setAttribute("redis", "Redis is down");
+        }
+        if (!vsmManager.isRabbitMQRunning())
+        {
+            req.setAttribute("rabbit", "RabbitMQ is down, check RabbitMQ and restart VSM");
+        }
+
         return VSMManager.getInstance().checkSystem();
     }
+
+    @Override
+    protected void fail(HttpServletRequest req, HttpServletResponse resp) throws IOException
+    {
+        String redis = (String) req.getAttribute("redis");
+        String rabbit = (String) req.getAttribute("rabbit");
+
+        String msg =
+            String.format("Configuration errors:\n\t%s\n\t%s", redis == null ? "" : redis,
+                rabbit == null ? "" : rabbit);
+
+        fail(req, resp, msg);
+    }
+
 }

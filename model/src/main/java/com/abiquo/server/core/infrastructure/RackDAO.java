@@ -324,4 +324,16 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         }
         return machines.subList(0, howMany < machines.size() ? howMany : machines.size() - 1);
     }
+    
+    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
+        "FROM com.abiquo.server.core.cloud.VirtualMachine vm " + //
+        "WHERE vm.hypervisor.machine.rack = :rack ";
+
+    @SuppressWarnings("unchecked")
+    public List<Integer> findUsedVrdpPorts(final Rack rack)
+    {
+        Query query = getSession().createQuery(QUERY_USED_VDRP);
+        query.setParameter("rack", rack);
+        return query.list();
+    }
 }
