@@ -320,7 +320,8 @@ public class StorageService extends DefaultApiService
         List< ? extends RasdManagement> attachments = repo.findDisksAndVolumesByVirtualMachine(vm);
 
         // In Hyper-v only 2 attached volumes are allowed
-        if (vm.getHypervisor().getType() == HypervisorType.HYPERV_301 && attachments.size() >= 2)
+        if (vm.getHypervisor() != null && vm.getHypervisor().getType() == HypervisorType.HYPERV_301
+            && attachments.size() >= 2)
         {
             addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
             flushErrors();

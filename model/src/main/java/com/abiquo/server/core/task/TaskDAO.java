@@ -36,6 +36,29 @@ import com.abiquo.model.redis.RedisDAOBase;
 import com.abiquo.model.redis.RedisEntityUtils;
 import com.abiquo.server.core.task.Task.TaskType;
 
+/**
+ * This base class provides Redis-persistence logic for {@link Task} entity. <h3>Instance to persist
+ * </h3>
+ * 
+ * <pre>
+ * task.ownerId = A
+ * task.taskId = 0
+ * task.userId = user0
+ * task.type = DEPLOY
+ * task.timestamp = 123456789
+ * task.jobs = [Job0, Job1]
+ * 
+ * <pre>
+ * <h3>Redis structure</h3>
+ * 
+ * <pre>
+ * HMSET Task:0 "ownerId" "A" "taskId" "0" "userId" "user0" "type" "DEPLOY" "timestamp" "12346789" "jobs" "Task:0:jobs"
+ * RPUSH Task:0:jobs Jobs:0
+ * RPUSH Task:0:jobs Jobs:1
+ * 
+ * <pre>
+ * @author eruiz@abiquo.com
+ */
 @Component
 public class TaskDAO extends RedisDAOBase<Task>
 {
