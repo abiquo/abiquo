@@ -38,6 +38,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import com.abiquo.server.core.task.Job.JobType;
+import com.abiquo.server.core.task.Task.TaskState;
 import com.abiquo.server.core.task.Task.TaskType;
 
 @Test(groups = "redisaccess")
@@ -112,6 +113,10 @@ public class AsyncTaskRepTest
 
         task = createUniqueTask();
         task.setUserId(null);
+        expectRuntimeOnInsertNullField(task);
+
+        task = createUniqueTask();
+        task.setState(null);
         expectRuntimeOnInsertNullField(task);
     }
 
@@ -215,6 +220,7 @@ public class AsyncTaskRepTest
         task.setTaskId(UUID.randomUUID().toString());
         task.setUserId(UUID.randomUUID().toString());
         task.setType(TaskType.POWER_ON);
+        task.setState(TaskState.STARTED);
 
         return task;
     }
@@ -225,6 +231,7 @@ public class AsyncTaskRepTest
         assertEquals(one.getOwnerId(), other.getOwnerId());
         assertEquals(one.getUserId(), other.getUserId());
         assertEquals(one.getType(), other.getType());
+        assertEquals(one.getState(), other.getState());
     }
 
     protected void expectRuntimeOnInsertNullField(Task task)

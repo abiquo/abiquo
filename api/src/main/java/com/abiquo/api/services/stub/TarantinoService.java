@@ -227,8 +227,7 @@ public class TarantinoService extends DefaultApiService
             }
 
             RemoteService vsmRS = services.get(0);
-            // TODO: Serafin, uncomment this
-            // vsm.unsubscribe(vsmRS, vm);
+            vsm.unsubscribe(vsmRS, vm);
         }
     }
 }
