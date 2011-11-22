@@ -133,7 +133,8 @@ public class EnterpriseService extends DefaultApiService
     }
 
     public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults)
+        final String filterName, final Integer offset, final Integer numResults,
+        final String orderBy, final boolean desc)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
@@ -151,7 +152,8 @@ public class EnterpriseService extends DefaultApiService
             {
                 pt = findPricingTemplate(idPricingTempl);
             }
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults);
+            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
+                orderBy, desc);
         }
 
         if (!StringUtils.isEmpty(filterName))

@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.common.internal.utils.UriHelper;
@@ -408,6 +409,8 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
         final boolean included)
     {
         DataResult<EnterpriseListResult> result = new DataResult<EnterpriseListResult>();
+        String orderBy = enterpriseListOptions.getOrderBy();
+        boolean desc = !enterpriseListOptions.getAsc();
 
         String uri =
             createEnterprisesLink(enterpriseListOptions.getFilterLike(),
@@ -419,6 +422,12 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
             queryParams.put("idPricingTemplate", new String[] {String.valueOf(idPricingTemplate)});
         }
         queryParams.put("included", new String[] {String.valueOf(included)});
+
+        if (!StringUtils.isEmpty(enterpriseListOptions.getOrderBy()))
+        {
+            queryParams.put("orderBy", new String[] {orderBy});
+        }
+        queryParams.put("desc", new String[] {String.valueOf(desc)});
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
