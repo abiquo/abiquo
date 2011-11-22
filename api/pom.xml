@@ -375,15 +375,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1-beta-1</version>
-                <configuration>
-                    <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
-                    <webResources>
-                        <resource>
-                            <directory>src/main/resources/tomcat</directory>
-                            <filtering>true</filtering>
-                        </resource>
-                    </webResources>
-                </configuration>
             </plugin>
         </plugins>
         <filters>
@@ -407,4 +398,27 @@
             </testResource>
         </testResources>
     </build>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.1-beta-1</version>
+                        <configuration>
+                            <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/resources/tomcat</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

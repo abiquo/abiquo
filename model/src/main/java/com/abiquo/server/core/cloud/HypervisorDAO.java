@@ -21,8 +21,6 @@
 
 package com.abiquo.server.core.cloud;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +42,20 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
     public HypervisorDAO(final EntityManager entityManager)
     {
         super(Hypervisor.class, entityManager);
+    }
+
+    public boolean existsAnyWithIp(final String ip)
+    {
+        assert !StringUtils.isEmpty(ip);
+
+        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_PROPERTY));
+    }
+
+    public boolean existsAnyWithIpService(final String ip)
+    {
+        assert !StringUtils.isEmpty(ip);
+
+        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_SERVICE_PROPERTY));
     }
 
     private Criterion sameIp(final String ip, final String propertyName)
