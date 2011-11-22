@@ -55,16 +55,25 @@ public class RepositorySpaceXML
 
     private final static Boolean JAXB_FORMATTED_OUTPUT = true;
 
-    private final static String PROXY_HOST;
+    private static String PROXY_HOST;
 
-    private final static Integer PROXY_PORT;
+    private static Integer PROXY_PORT;
 
     static
     {
+
         PROXY_HOST = getProperty("abiquo.proxy.host", null);
-
-        PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
-
+        try
+        {
+            PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
+        }
+        catch (NumberFormatException e)
+        {
+            logger
+                .debug("Cannot load proxy configuration properly, port must be an Integer, will proceed to use direct connection");
+            PROXY_HOST = null;
+            PROXY_PORT = 80;
+        }
         proxy = getProxy();
     }
 
