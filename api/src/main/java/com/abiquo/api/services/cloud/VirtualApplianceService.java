@@ -428,12 +428,11 @@ public class VirtualApplianceService extends DefaultApiService
 
         virtualMachinesCost.put(
             VirtualMachineCost.TOTAL,
-            virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
-                virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
-                    virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
-                        virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
-                            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                                virtualMachinesCost.get(VirtualMachineCost.NETWORK)))))));
+            virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
+                virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                        virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                            virtualMachinesCost.get(VirtualMachineCost.NETWORK))))));
         return virtualMachinesCost;
     }
 
@@ -470,7 +469,10 @@ public class VirtualApplianceService extends DefaultApiService
                     virtualMachinesCost.put(
                         VirtualMachineCost.ADDITIONAL_VOLUME,
                         virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            pricingTier.getPrice()));// multiplicar por _MB
+                            pricingTier.getPrice().multiply(
+                                new BigDecimal(volman.getSizeInMB() / 1024))));// multiplicar
+                    // por
+                    // _MB
                 }
             }
         }
