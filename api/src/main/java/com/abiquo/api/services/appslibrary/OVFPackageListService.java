@@ -258,6 +258,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
 
     private OVFPackageList obtainOVFPackageListFromRepositorySpaceLocation(String repositorySpaceURL)
     {
+
         if (!repositorySpaceURL.endsWith("/ovfindex.xml"))
         {
             if (repositorySpaceURL.endsWith("/"))
@@ -266,7 +267,8 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
             }
             else
             {
-                repositorySpaceURL += "/ovfindex.xml";
+                String suffix = repositorySpaceURL.endsWith(".xml") ? "" : "/ovfindex.xml";
+                repositorySpaceURL += suffix;
             }
         }
 
@@ -276,7 +278,8 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
 
         try
         {
-            repo = RepositorySpaceXML.getInstance().obtainRepositorySpace(repositorySpaceURL);
+            RepositorySpaceXML repoSpaceXML = RepositorySpaceXML.getInstance();
+            repo = repoSpaceXML.obtainRepositorySpace(repositorySpaceURL);
         }
         catch (XMLException e)
         {
@@ -304,9 +307,12 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
             flushErrors();
         }
 
-        final String baseRepositorySpaceURL =
-            repositorySpaceURL.substring(0, repositorySpaceURL.length() - "ovfindex.xml".length());
-
+        String baseRepositorySpaceURL = "";
+        if (repositorySpaceURL.lastIndexOf('/') != -1)
+        {
+            baseRepositorySpaceURL =
+                repositorySpaceURL.substring(0, repositorySpaceURL.lastIndexOf('/'));
+        }
         for (OVFDescription description : repo.getOVFDescription())
         {
 

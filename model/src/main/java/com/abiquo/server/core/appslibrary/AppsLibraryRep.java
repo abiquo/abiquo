@@ -29,7 +29,6 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.cloud.VirtualImageConversionDAO;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -282,7 +281,7 @@ public class AppsLibraryRep extends DefaultRepBase
     }
 
     /**
-     * @see com.abiquo.server.core.cloud.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
+     * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
      *      com.abiquo.model.enumerator.HypervisorType)
      */
     public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,

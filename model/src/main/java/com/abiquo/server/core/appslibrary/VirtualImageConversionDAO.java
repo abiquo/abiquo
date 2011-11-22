@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.appslibrary;
 
 import java.util.List;
 
@@ -33,8 +33,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")

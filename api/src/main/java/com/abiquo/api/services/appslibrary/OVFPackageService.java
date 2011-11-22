@@ -27,6 +27,7 @@ import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.UriBuilder;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -168,7 +169,10 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     public OVFPackage ovfPackageFromOvfDescription(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {
-        String packageUrl = baseRepositorySpaceURL + descr.getOVFFile(); // TODO check not double //
+
+        String packageUrl =
+            descr.getOVFFile().startsWith("http://") ? descr.getOVFFile() : baseRepositorySpaceURL
+                + descr.getOVFFile(); // TODO check not double //
 
         String name = descr.getProduct().getValue();
         String description = descr.getInfo().getValue();
