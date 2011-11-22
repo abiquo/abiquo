@@ -41,7 +41,6 @@ import javax.validation.Payload;
 import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.util.network.IPAddress;
 
 /**
  * @author jdevesa
@@ -54,7 +53,7 @@ public @interface Hypervisor
 {
     boolean required() default true;
 
-    String message() default "must be one of the following values {vbox, kvm, xen-3, vmx-04, hyperv-301, xenserver}";
+    String message() default "must be one of the following values { VBOX, KVM, XEN_3, VMX_04, HYPERV_301, XENSERVER, vbox, kvm, xen_3, vmx_04, hyperv_301, xenserver}";
 
     Class< ? >[] groups() default {};
 
