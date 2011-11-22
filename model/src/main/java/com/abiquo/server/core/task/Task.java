@@ -48,22 +48,20 @@ public class Task extends RedisEntityBase
 
     protected long timestamp;
 
+    protected TaskState state;
+
     protected List<Job> jobs;
 
     public Task()
     {
         this.jobs = new LinkedList<Job>();
+        this.state = TaskState.PENDING;
     }
 
     @Override
     protected String getIdAsString()
     {
         return getTaskId();
-    }
-
-    public TaskState getTaskState()
-    {
-        return TaskState.PENDING;
     }
 
     public String getOwnerId()
@@ -119,5 +117,15 @@ public class Task extends RedisEntityBase
     public void setType(TaskType type)
     {
         this.type = type;
+    }
+
+    public TaskState getState()
+    {
+        return state;
+    }
+
+    public void setState(TaskState state)
+    {
+        this.state = state;
     }
 }
