@@ -22,26 +22,24 @@
 package com.abiquo.api.services.stub;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.cloud.VirtualMachineService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
-import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
-import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtualMachineOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -56,13 +54,13 @@ import com.abiquo.tracer.SeverityType;
 public class TarantinoService extends DefaultApiService
 {
     @Autowired
-    private InfrastructureRep repo;
-
-    @Autowired
-    private VirtualMachineService vmService;
+    private RemoteServiceService remoteServiceService;
 
     @Autowired
     private VsmServiceStub vsm;
+
+    @Autowired
+    private TarantinoJobCreator jobCreator;
 
     public TarantinoService()
     {
@@ -71,8 +69,8 @@ public class TarantinoService extends DefaultApiService
 
     public TarantinoService(final EntityManager em)
     {
-        repo = new InfrastructureRep(em);
-        vmService = new VirtualMachineService(em);
+        remoteServiceService = new RemoteServiceService(em);
+        jobCreator = new TarantinoJobCreator(em);
         vsm = new VsmServiceStub();
     }
 
@@ -84,6 +82,7 @@ public class TarantinoService extends DefaultApiService
      * @param newConfig The new configuration for the virtual machine.
      * @return The identifier of the reconfigure task.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualMachine vm,
         final VirtualMachineDescriptionBuilder originalConfig,
         final VirtualMachineDescriptionBuilder newConfig)
@@ -91,52 +90,10 @@ public class TarantinoService extends DefaultApiService
         Datacenter datacenter = vm.getHypervisor().getMachine().getDatacenter();
         ignoreVSMEventsIfNecessary(datacenter, vm);
 
-        DatacenterTasks reconfigureTask = reconfigureTask(vm, originalConfig, newConfig);
+        DatacenterTasks reconfigureTask = jobCreator.reconfigureTask(vm, originalConfig, newConfig);
         send(datacenter, reconfigureTask, EventType.VM_RECONFIGURE);
 
         return reconfigureTask.getId();
-    }
-
-    /* ********************************** Helper methods ********************************** */
-
-    /**
-     * Creates a reconfigure task.
-     * 
-     * @param vm The virtual machine to reconfigure.
-     * @param originalConfig The original configuration for the virtual machine.
-     * @param newConfig The new configuration for the virtual machine.
-     * @return The reconfigure task.
-     */
-    private DatacenterTasks reconfigureTask(final VirtualMachine vm,
-        final VirtualMachineDescriptionBuilder originalConfig,
-        final VirtualMachineDescriptionBuilder newConfig)
-    {
-        DatacenterTasks reconfigureTask = new DatacenterTasks();
-        reconfigureTask.setId(vm.getUuid());
-        reconfigureTask.setDependent(true);
-
-        HypervisorConnection hypervisorConnection = hypervisorConnection(vm);
-
-        ReconfigureVirtualMachineOp reconfigureJob = new ReconfigureVirtualMachineOp();
-        reconfigureJob.setVirtualMachine(originalConfig.build(vm.getUuid()));
-        reconfigureJob.setNewVirtualMachine(newConfig.build(vm.getUuid()));
-        reconfigureJob.setHypervisorConnection(hypervisorConnection);
-        reconfigureJob.setId(reconfigureTask.getId() + "." + vm.getUuid() + "reconfigure");
-
-        reconfigureTask.getJobs().add(reconfigureJob);
-
-        return reconfigureTask;
-    }
-
-    /**
-     * Creates a new hypervisor connection configuration for the given virtual machine.
-     * 
-     * @param vm The virtual machine.
-     * @return The hypervisor connection configuration.
-     */
-    private HypervisorConnection hypervisorConnection(final VirtualMachine vm)
-    {
-        return vmService.hypervisorConnectionConfiguration(vm);
     }
 
     /**
@@ -149,6 +106,7 @@ public class TarantinoService extends DefaultApiService
     private void send(final Datacenter datacenter, final DatacenterTasks tasks,
         final EventType event)
     {
+        // FIXME use the datacenter UUID
         TarantinoRequestProducer producer = new TarantinoRequestProducer(datacenter.getName());
 
         try
@@ -210,23 +168,17 @@ public class TarantinoService extends DefaultApiService
      * @param datacenter The datacenter where the tasks are performed.
      * @param vm The virtual machine to unsubscribe.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void ignoreVSMEventsIfNecessary(final Datacenter datacenter, final VirtualMachine vm)
     {
         HypervisorType type = vm.getHypervisor().getType();
 
         if (type == HypervisorType.XEN_3 || type == HypervisorType.KVM)
         {
-            List<RemoteService> services =
-                repo.findRemoteServiceWithTypeInDatacenter(datacenter,
+            RemoteService vsmRS =
+                remoteServiceService.getRemoteService(datacenter.getId(),
                     RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
 
-            if (services.isEmpty())
-            {
-                addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
-                flushErrors();
-            }
-
-            RemoteService vsmRS = services.get(0);
             vsm.unsubscribe(vsmRS, vm);
         }
     }
