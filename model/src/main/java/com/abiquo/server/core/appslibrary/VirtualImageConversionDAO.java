@@ -127,8 +127,9 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             // This function should be returning the only object
             if (conversions.size() > 1)
             {
-                throw new NonUniqueObjectException("There is more than one conversion!", image
-                    .getId(), VirtualImageConversion.class.getSimpleName());
+                throw new NonUniqueObjectException("There is more than one conversion!",
+                    image.getId(),
+                    VirtualImageConversion.class.getSimpleName());
             }
             return conversions.get(0);
         }
