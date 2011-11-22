@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -46,7 +45,7 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 @Controller
 public class OVFPackageInstancesResource extends AbstractResource
 {
-    public static final String OVF_PACKAGE_INSTANCES_PATH = "ovfPackageInstances";
+    public static final String OVF_PACKAGE_INSTANCES_PATH = "ovfpackageinstances";
 
     @Autowired
     private InfrastructureService r;
@@ -56,10 +55,10 @@ public class OVFPackageInstancesResource extends AbstractResource
 
     @GET
     public OVFPackageInstancesDto getOVFPackageInstances(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE) Integer idEnterprise,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(AMResource.AM_SERVICE_PATH) final String serviceType,
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE) final Integer idEnterprise,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         RemoteService amService = AMResource.getValidAMRemoteService(r, serviceType, datacenterId);
 
@@ -72,10 +71,10 @@ public class OVFPackageInstancesResource extends AbstractResource
 
     @POST
     public OVFPackageInstanceStatusDto installOVFPackage(
-        @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
-        @PathParam(EnterpriseRepositoryResource.ENTERPRISE) Integer idEnterprise, String ovfUrl,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(AMResource.AM_SERVICE_PATH) final String serviceType,
+        @PathParam(EnterpriseRepositoryResource.ENTERPRISE) final Integer idEnterprise,
+        final String ovfUrl, @Context final IRESTBuilder restBuilder) throws Exception
     {
         RemoteService amService = AMResource.getValidAMRemoteService(r, serviceType, datacenterId);
 

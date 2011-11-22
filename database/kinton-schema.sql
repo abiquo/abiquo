@@ -1352,7 +1352,9 @@ INSERT INTO `kinton`.`system_properties` (`name`, `value`, `description`) VALUES
  ("client.virtual.virtualImagesRefreshConversionsInterval","5","Time interval in seconds to refresh missing virtual image conversions"),
  ("client.main.enterpriseLogoURL","http://www.abiquo.com","URL displayed when the header enterprise logo is clicked"),
  ("client.main.billingUrl","","URL displayed when the report header logo is clicked, if empty the report button will not be displayed"),
+ ("client.main.disableChangePassword","1","Allow (1) or deny (0) user to change their password"),
  ("client.logout.url","","Redirect to this URL after logout (empty -> login screen)"),
+ ("client.main.allowLogout","1","Allow (1) or deny (0) user to logout"),
  ("client.wiki.showHelp","1","Show (1) or hide (0) the help icon within the plateform"), 
  ("client.wiki.showDefaultHelp","0","Use (1) or not (0) the default help URL within the plateform"), 
  ("client.wiki.defaultURL","http://community.abiquo.com/display/ABI18/Abiquo+Documentation+Home","The default URL opened when not specific help URL is specified"),
@@ -1627,6 +1629,8 @@ CREATE TABLE `kinton`.`storage_device` (
   `iscsi_ip` varchar(256) NOT NULL,
   `iscsi_port` int(5) unsigned NOT NULL DEFAULT '0',
   `storage_technology` varchar(256) DEFAULT NULL,
+  `username` varchar(256) DEFAULT NULL,
+  `password` varchar(256) DEFAULT NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   PRIMARY KEY  (`id`),
   CONSTRAINT `storage_device_FK_1` FOREIGN KEY (`idDataCenter`) REFERENCES `datacenter` (`idDataCenter`) ON DELETE CASCADE

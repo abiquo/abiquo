@@ -411,7 +411,7 @@ public class InfrastructureService extends DefaultApiService
 
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(remoteServiceMapping.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(remoteServiceMapping);
 
         return isAssignedTo(datacenterId, type);
     }
@@ -728,7 +728,8 @@ public class InfrastructureService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }

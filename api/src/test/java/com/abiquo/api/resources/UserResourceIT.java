@@ -179,7 +179,7 @@ public class UserResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
         assertLinkExist(dto, resolveUserActionGetVirtualMachinesURI(user.getEnterprise().getId(),
-            user.getId()), "action", VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
+            user.getId()), VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
     }
 

@@ -139,22 +139,21 @@
                 listRequest.filterLike = ipFilter.text;
 
                 var event:NetworkingEvent;
-                
-                if(VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.EXTERNAL){
-                    event = new NetworkingEvent(NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN);
-                    event.available = true;
-                }else{
-                    event = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
-                }
-                
-                event.virtualDatacenter = _virtualDatacenter;
-                event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
-                event.listRequest = listRequest;
-                event.callback = setAvailablePrivateIPAddresses;
-                
-                //to avoid a bug, don't dispatch if the vlanNetwork is not selected
-                if(vlanList.selectedItem){                	
-	                dispatchEvent(event);
+                if(vlanList.selectedItem){
+	                if(VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.EXTERNAL){
+	                    event = new NetworkingEvent(NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN);
+	                    event.available = true;
+	                }else{
+	                    event = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+	                }
+	                
+	                event.virtualDatacenter = _virtualDatacenter;
+	                event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
+	                event.listRequest = listRequest;
+	                event.callback = setAvailablePrivateIPAddresses;
+	                
+	                //to avoid a bug, don't dispatch if the vlanNetwork is not selected
+		            dispatchEvent(event);
                 }
             }
 
