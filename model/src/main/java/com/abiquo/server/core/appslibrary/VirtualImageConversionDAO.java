@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.appslibrary;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +35,7 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -127,13 +126,18 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             // This function should be returning the only object
             if (conversions.size() > 1)
             {
-                throw new NonUniqueObjectException("There is more than one conversion!",
-                    image.getId(),
-                    VirtualImageConversion.class.getSimpleName());
+                throw new NonUniqueObjectException("There is more than one conversion!", image
+                    .getId(), VirtualImageConversion.class.getSimpleName());
             }
             return conversions.get(0);
         }
         return null;
+    }
+
+    public boolean isConverted(final VirtualImage image, final DiskFormatType targetType)
+    {
+        final Criterion compat = Restrictions.and(sameImage(image), targetFormatIn(targetType));
+        return !createCriteria(compat).list().isEmpty();
     }
 
     public Collection<VirtualImageConversion> findByVirtualImage(final VirtualImage virtualImage)

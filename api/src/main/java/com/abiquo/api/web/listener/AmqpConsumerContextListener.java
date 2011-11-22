@@ -82,7 +82,6 @@ public class AmqpConsumerContextListener implements ServletContextListener
     protected void registerConsumer(final BasicConsumer< ? > consumer)
     {
         allConsumers.add(consumer);
-        LOGGER.debug("Added new ");
     }
 
     protected void instantiateAndStartConsumers(final ServletContextEvent sce) throws IOException

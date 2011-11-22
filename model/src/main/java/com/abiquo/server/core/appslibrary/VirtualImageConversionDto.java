@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.cloud;
+package com.abiquo.server.core.appslibrary;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

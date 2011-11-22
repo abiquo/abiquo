@@ -30,7 +30,7 @@ public class Job extends RedisEntityBase
 {
     public enum JobState
     {
-        PENDING, STARTED, DONE, FAILED, SKIPPED
+        PENDING, STARTED, DONE, FAILED, ROLLBACK_PENDING, ROLLBACK_STARTED, ROLLBACK_DONE
 
     };
 
@@ -49,6 +49,8 @@ public class Job extends RedisEntityBase
 
     protected String description;
 
+    protected String parentTaskId;
+
     protected long timestamp;
 
     protected Map<String, String> data;
@@ -59,7 +61,12 @@ public class Job extends RedisEntityBase
 
         this.state = JobState.PENDING;
         this.rollbackState = JobState.PENDING;
-        this.description = "asss";
+    }
+
+    @Override
+    protected String getIdAsString()
+    {
+        return getId();
     }
 
     public String getId()
@@ -117,12 +124,6 @@ public class Job extends RedisEntityBase
         return this.data;
     }
 
-    @Override
-    protected String getIdAsString()
-    {
-        return getId();
-    }
-
     public long getTimestamp()
     {
         return timestamp;
@@ -131,5 +132,15 @@ public class Job extends RedisEntityBase
     public void setTimestamp(long timestamp)
     {
         this.timestamp = timestamp;
+    }
+
+    public String getParentTaskId()
+    {
+        return parentTaskId;
+    }
+
+    public void setParentTaskId(String parentTaskId)
+    {
+        this.parentTaskId = parentTaskId;
     }
 }

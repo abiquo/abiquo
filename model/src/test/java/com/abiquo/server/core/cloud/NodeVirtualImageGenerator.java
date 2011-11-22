@@ -22,78 +22,103 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.List;
-import java.util.Random;
 
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.enterprise.UserGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtualImage>
 {
-    private VirtualApplianceGenerator vApplianceGenerator;
+    private VirtualApplianceGenerator vappGenerator;
 
-    private VirtualMachineGenerator vMachineGenerator;
+    private VirtualMachineGenerator vmGenerator;
 
-    private VirtualImageGenerator vImageGenerator;
+    private VirtualImageGenerator imageGenerator;
+
+    private UserGenerator userGenerator;
 
     public NodeVirtualImageGenerator(final SeedGenerator seed)
     {
         super(seed);
-        vApplianceGenerator = new VirtualApplianceGenerator(seed);
-        vMachineGenerator = new VirtualMachineGenerator(seed);
-        vImageGenerator = new VirtualImageGenerator(seed);
+        vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
+        imageGenerator = new VirtualImageGenerator(seed);
+        userGenerator = new UserGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(final NodeVirtualImage obj1, final NodeVirtualImage obj2)
+    public void assertAllPropertiesEqual(final NodeVirtualImage node1, final NodeVirtualImage node2)
     {
-        AssertEx
-            .assertPropertiesEqualSilent(obj1, obj2, Node.MODIFIED_PROPERTY, Node.NAME_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(node1, node2, Node.MODIFIED_PROPERTY,
+            Node.NAME_PROPERTY);
 
-        vApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(), obj2
-            .getVirtualAppliance());
-        vMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(), obj2
-            .getVirtualMachine());
-        vImageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
+        vappGenerator.assertAllPropertiesEqual(node1.getVirtualAppliance(),
+            node2.getVirtualAppliance());
+        vmGenerator.assertAllPropertiesEqual(node1.getVirtualMachine(), node2.getVirtualMachine());
+        imageGenerator.assertAllPropertiesEqual(node1.getVirtualImage(), node2.getVirtualImage());
     }
 
     @Override
     public NodeVirtualImage createUniqueInstance()
     {
-        VirtualAppliance vAppliance = vApplianceGenerator.createUniqueInstance();
-        VirtualImage vImage = vImageGenerator.createUniqueInstance();
-        VirtualMachine vMachine = vMachineGenerator.createInstance(vImage);
-
-        return new NodeVirtualImage("" + new Random().nextInt(), vAppliance, vImage, vMachine);
+        VirtualAppliance vapp = vappGenerator.createUniqueInstance();
+        return createInstance(vapp);
     }
 
-    public NodeVirtualImage createInstance(final VirtualMachine vMachine)
+    public NodeVirtualImage createInstance(final VirtualMachine vm)
     {
-        VirtualAppliance vAppliance = vApplianceGenerator.createUniqueInstance();
-        return createInstance(vAppliance, vMachine);
+        VirtualAppliance vapp =
+            vappGenerator.createInstance(vm.getEnterprise(), vm.getHypervisor().getMachine()
+                .getDatacenter());
+        return createInstance(vapp, vm);
     }
 
-    public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
-        final VirtualImage vimage)
+    public NodeVirtualImage createInstance(final VirtualImage image)
     {
-        VirtualMachine vMachine = vMachineGenerator.createInstance(vimage);
+        VirtualAppliance vapp =
+            vappGenerator.createInstance(image.getEnterprise(), image.getRepository()
+                .getDatacenter());
+        User user = userGenerator.createInstance(image.getEnterprise());
 
-        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vimage, vMachine);
+        return createInstance(vapp, user, image);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance vapp)
+    {
+        User user = userGenerator.createInstance(vapp.getEnterprise());
+        return createInstance(vapp, user);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user)
+    {
+        VirtualImage image =
+            imageGenerator.createInstance(vapp.getEnterprise(), vapp.getVirtualDatacenter()
+                .getDatacenter());
+        return createInstance(vapp, user, image);
+    }
+
+    public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user,
+        final VirtualImage image)
+    {
+        VirtualMachine vm = vmGenerator.createInstance(image, vapp.getEnterprise(), user, "TestVM");
+        return createInstance(vapp, vm, image);
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine)
     {
-        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vMachine
-            .getVirtualImage(), vMachine);
+        return createInstance(virtualAppliance, vMachine, vMachine.getVirtualImage());
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine, final VirtualImage vImage)
     {
-        return new NodeVirtualImage("" + new Random().nextInt(), virtualAppliance, vImage, vMachine);
+        String name = newString(nextSeed(), Node.NAME_LENGTH_MIN, Node.NAME_LENGTH_MAX);
+        return new NodeVirtualImage(name, virtualAppliance, vImage, vMachine);
     }
 
     @Override
@@ -102,19 +127,13 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualAppliance vAppliance = entity.getVirtualAppliance();
-        VirtualMachine vMachine = entity.getVirtualMachine();
-        // VirtualImage vImage = entity.getVirtualImage();
+        VirtualAppliance vapp = entity.getVirtualAppliance();
+        vappGenerator.addAuxiliaryEntitiesToPersist(vapp, entitiesToPersist);
+        entitiesToPersist.add(vapp);
 
-        vApplianceGenerator.addAuxiliaryEntitiesToPersist(vAppliance, entitiesToPersist);
-        entitiesToPersist.add(vAppliance);
-
-        vMachineGenerator.addAuxiliaryEntitiesToPersist(vMachine, entitiesToPersist);
-        entitiesToPersist.add(vMachine);
-
-        // The virtualMachine generator already saves the VirtualImage
-        // vImageGenerator.addAuxiliaryEntitiesToPersist(vImage, entitiesToPersist);
-        // entitiesToPersist.add(vImage);
+        VirtualMachine vm = entity.getVirtualMachine();
+        vmGenerator.addAuxiliaryEntitiesToPersist(vm, entitiesToPersist);
+        entitiesToPersist.add(vm);
     }
 
 }
