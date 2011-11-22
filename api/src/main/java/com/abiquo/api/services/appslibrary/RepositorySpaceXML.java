@@ -55,17 +55,17 @@ public class RepositorySpaceXML
 
     private final static Boolean JAXB_FORMATTED_OUTPUT = true;
 
-    // private final static String PROXY_HOST;
-    //
-    // private final static Integer PROXY_PORT;
+    private final static String PROXY_HOST;
+
+    private final static Integer PROXY_PORT;
 
     static
     {
-        // PROXY_HOST = getProperty("abiquo.proxy.host", null);
-        //
-        // PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
+        PROXY_HOST = getProperty("abiquo.proxy.host", null);
 
-        // proxy = getProxy();
+        PROXY_PORT = Integer.parseInt(getProperty("abiquo.proxy.port", "80"));
+
+        proxy = getProxy();
     }
 
     private static Proxy proxy;
@@ -210,7 +210,7 @@ public class RepositorySpaceXML
         try
         {
 
-            // Proxy proxy; = getProxy();
+            Proxy proxy = getProxy();
 
             URL rsUrl = new URL(repositorySpaceURL);
 
@@ -240,21 +240,21 @@ public class RepositorySpaceXML
         return repo;
     }
 
-    // private static Proxy getProxy()
-    // {
-    // if (proxy == null)
-    // {
-    // if (PROXY_HOST == null)
-    // {
-    // proxy = Proxy.NO_PROXY;
-    // }
-    // else
-    // {
-    // proxy =
-    // new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, Integer
-    // .valueOf(PROXY_PORT)));
-    // }
-    // }
-    // return proxy;
-    // }
+    private static Proxy getProxy()
+    {
+        if (proxy == null)
+        {
+            if (PROXY_HOST == null)
+            {
+                proxy = Proxy.NO_PROXY;
+            }
+            else
+            {
+                proxy =
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, Integer
+                        .valueOf(PROXY_PORT)));
+            }
+        }
+        return proxy;
+    }
 }

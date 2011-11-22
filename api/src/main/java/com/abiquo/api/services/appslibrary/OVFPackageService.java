@@ -172,7 +172,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
 
         String packageUrl =
             descr.getOVFFile().startsWith("http://") ? descr.getOVFFile() : baseRepositorySpaceURL
-                + descr.getOVFFile(); // TODO check not double //
+                + "/" + descr.getOVFFile(); // TODO check not double //
 
         String name = descr.getProduct().getValue();
         String description = descr.getInfo().getValue();
