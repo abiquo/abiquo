@@ -110,13 +110,14 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults)
+        final String filterName, final Integer offset, final Integer numResults,
+        final String orderBy, final boolean desc)
     {
-        Criteria criteria = createCriteria(pt, included, filterName);
+        Criteria criteria = createCriteria(pt, included, filterName, orderBy, desc);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(pt, included, filterName);
+        criteria = createCriteria(pt, included, filterName, orderBy, desc);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -362,7 +363,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
-        final String filter)
+        final String filter, final String orderBy, final boolean desc)
     {
         Criteria criteria = createCriteria();
 
@@ -390,6 +391,16 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         if (!StringUtils.isEmpty(filter))
         {
             criteria.add(filterBy(filter));
+        }
+
+        if (!StringUtils.isEmpty(orderBy))
+        {
+            Order order = Order.asc(orderBy);
+            if (desc)
+            {
+                order = Order.desc(orderBy);
+            }
+            criteria.addOrder(order);
         }
 
         return criteria;

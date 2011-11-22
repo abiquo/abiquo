@@ -60,6 +60,7 @@ public class CostCodeDAO extends DefaultDAOBase<Integer, CostCode>
         Disjunction filterDisjunction = Restrictions.disjunction();
 
         filterDisjunction.add(Restrictions.like(CostCode.NAME_PROPERTY, '%' + filter + '%'));
+        filterDisjunction.add(Restrictions.like(CostCode.DESCRIPTION_PROPERTY, '%' + filter + '%'));
 
         return filterDisjunction;
     }
