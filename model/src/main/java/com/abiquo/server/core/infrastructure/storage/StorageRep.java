@@ -217,12 +217,6 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getAvailableVolumes(vdc, filterOptions);
     }
 
-    public List<VolumeManagement> getVolumesAttachedToVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualMachine vm, final FilterOptions filterOptions) throws Exception
-    {
-        return volumeDAO.getVolumesAttachedToVirtualMachine(vdc, vm, filterOptions);
-    }
-
     public List<Tier> getTiersByDatacenter(final Integer datacenterId)
     {
         return tierDAO.getTiersByDatacenter(datacenterId);
@@ -263,6 +257,12 @@ public class StorageRep extends DefaultRepBase
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm);
+    }
+
+    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm,
+        final FilterOptions filters) throws Exception
+    {
+        return volumeDAO.getVolumesByVirtualMachine(vm, filters);
     }
 
     public StorageDevice insertDevice(final StorageDevice sd)
