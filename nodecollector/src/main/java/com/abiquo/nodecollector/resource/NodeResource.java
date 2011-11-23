@@ -29,6 +29,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.apache.wink.common.annotations.Workspace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -44,6 +46,7 @@ import com.abiquo.nodecollector.exception.NodecollectorException;
 import com.abiquo.nodecollector.service.HostService;
 import com.abiquo.nodecollector.service.HypervisorService;
 import com.abiquo.nodecollector.service.VirtualSystemService;
+import com.abiquo.nodecollector.service.impl.HostServiceImpl;
 import com.abiquo.server.core.infrastructure.nodecollector.HostDto;
 import com.abiquo.server.core.infrastructure.nodecollector.HypervisorEnumTypeDto;
 import com.abiquo.server.core.infrastructure.nodecollector.VirtualSystemCollectionDto;
@@ -79,6 +82,8 @@ public class NodeResource
     @Autowired
     private VirtualSystemService virtualSystemService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NodeResource.class);
+    
     /**
      * Returns the current Hypervisor running in the Host.
      * 
@@ -94,7 +99,11 @@ public class NodeResource
         throws NodecollectorException
     {
 
-        return hypervisorService.discoverHypervisor(ip, aimport).getValue();
+    	Long time = System.currentTimeMillis();
+        String hypType = hypervisorService.discoverHypervisor(ip, aimport).getValue();
+        time = System.currentTimeMillis() - time;
+        LOGGER.debug("Discovering hypervisor type took " + time + " miliseconds.");
+        return hypType;
     }
 
     /**
@@ -116,6 +125,7 @@ public class NodeResource
         throws NodecollectorException
     {
 
+    	Long time = System.currentTimeMillis();
         HypervisorType hypType;
         try
         {
@@ -125,7 +135,11 @@ public class NodeResource
         {
             throw new BadRequestException(MessageValues.UNKNOWN_HYPERVISOR);
         }
-        return hostService.getHostInfo(ip, hypType, user, password, aimport);
+        HostDto dto = hostService.getHostInfo(ip, hypType, user, password, aimport);
+        
+        time = System.currentTimeMillis() - time;
+        LOGGER.debug("Retrieving host info took " + time + " miliseconds.");
+        return dto;
 
     }
 
@@ -146,6 +160,7 @@ public class NodeResource
         throws NodecollectorException
     {
 
+    	Long time = System.currentTimeMillis();
         HypervisorType hypType;
         try
         {
@@ -155,7 +170,10 @@ public class NodeResource
         {
             throw new BadRequestException(MessageValues.UNKNOWN_HYPERVISOR);
         }
-        return virtualSystemService.getVirtualSystemList(ip, hypType, user, password, aimport);
+        VirtualSystemCollectionDto dtos = virtualSystemService.getVirtualSystemList(ip, hypType, user, password, aimport);
+        time = System.currentTimeMillis() - time;
+        LOGGER.debug("Retrieving virtual system collection info took " + time + " miliseconds.");      
+        return dtos;
     }
 
     /**
@@ -175,6 +193,8 @@ public class NodeResource
         throws NodecollectorException
     {
 
+
+    	Long time = System.currentTimeMillis();
         HypervisorType hypType;
         try
         {
@@ -185,7 +205,11 @@ public class NodeResource
             throw new BadRequestException(MessageValues.UNKNOWN_HYPERVISOR);
         }
 
-        return virtualSystemService.getVirtualSystem(ip, hypType, user, password, aimport, uuid);
+        VirtualSystemDto dto = virtualSystemService.getVirtualSystem(ip, hypType, user, password, aimport, uuid);
+        
+        time = System.currentTimeMillis() - time;
+        LOGGER.debug("Retrieving virtual system info took " + time + " miliseconds.");  
+        return dto;
 
     }
 }
