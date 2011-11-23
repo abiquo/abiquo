@@ -129,7 +129,10 @@ public class PricingTemplateDAO extends DefaultDAOBase<Integer, PricingTemplate>
             {
                 order = Order.desc(orderBy);
             }
-            criteria.addOrder(Order.asc(PricingTemplate.CURRENCY_PROPERTY));
+            if (orderBy != PricingTemplate.NAME_PROPERTY)
+            {
+                criteria.addOrder(Order.asc(PricingTemplate.CURRENCY_PROPERTY));
+            }
             criteria.addOrder(order);
             criteria.addOrder(Order.asc(PricingTemplate.NAME_PROPERTY));
         }
