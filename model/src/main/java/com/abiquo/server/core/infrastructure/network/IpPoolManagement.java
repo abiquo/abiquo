@@ -60,26 +60,28 @@ public class IpPoolManagement extends RasdManagement
 
     public static enum Type
     {
-        PRIVATE, PUBLIC, EXTERNAL; // 0 = private, 1 = public, 2 = external
+        PRIVATE, PUBLIC, EXTERNAL, UNMANAGED; // 0 = private, 1 = public, 2 = external, 3 =
+                                              // unmanaged
     }
 
     public static final String TABLE_NAME = "ip_pool_management";
 
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip, "
-        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " NetworkConfiguration nc, " + " VLANNetwork vn " + "WHERE ip.vlanNetwork.id = vn.id "
         + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id";
 
     public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip, "
         + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id";
 
     public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip, "
         + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
-        + " Enterprise ent " + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " Enterprise ent " + "WHERE ip.vlanNetwork.id = vn.id "
         + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
         + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id";
 
+    // " WHERE ip.dhcp.id = nc.dhcp.id "
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     public IpPoolManagement()
@@ -87,29 +89,11 @@ public class IpPoolManagement extends RasdManagement
         // Just for JPA support
     }
 
-    public IpPoolManagement(final Dhcp dhcp, final VLANNetwork vlan, final String mac,
-        final String name, final String ip, final String networkName, final Type type)
+    public IpPoolManagement(final VLANNetwork vlan, final String mac, final String name,
+        final String ip, final String networkName, final Type type)
     {
         super(DISCRIMINATOR);
 
-        // // RasdManagement properties
-        // Rasd rasd =
-        // new Rasd(UUID.randomUUID().toString(),
-        // DEFAULT_RESOURCE_NAME,
-        // Integer.valueOf(DISCRIMINATOR));
-        //
-        // rasd.setDescription(DEFAULT_RESOURCE_DESCRIPTION);
-        // rasd.setConnection("");
-        // rasd.setAllocationUnits("0");
-        // rasd.setAutomaticAllocation(0);
-        // rasd.setAutomaticDeallocation(0);
-        //
-        // setRasd(rasd);
-        //
-        // // IpManagement properties
-        // setType(type);
-
-        setDhcp(dhcp);
         setMac(mac);
         setName(name);
         setIp(ip);
@@ -290,28 +274,6 @@ public class IpPoolManagement extends RasdManagement
         this.ip = ip;
     }
 
-    public final static String DHCP_PROPERTY = "dhcp";
-
-    private final static boolean DHCP_REQUIRED = true;
-
-    private final static String DHCP_ID_COLUMN = "dhcp_service_id";
-
-    @JoinColumn(name = DHCP_ID_COLUMN)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @ForeignKey(name = "FK_" + TABLE_NAME + "_dhcp")
-    private Dhcp dhcp;
-
-    @Required(value = DHCP_REQUIRED)
-    public Dhcp getDhcp()
-    {
-        return this.dhcp;
-    }
-
-    public void setDhcp(final Dhcp dhcp)
-    {
-        this.dhcp = dhcp;
-    }
-
     public final static String NETWORK_NAME_PROPERTY = "networkName";
 
     private final static boolean NETWORK_NAME_REQUIRED = false;
@@ -372,6 +334,11 @@ public class IpPoolManagement extends RasdManagement
     public boolean isExternalIp()
     {
         return getType() == Type.EXTERNAL;
+    }
+
+    public boolean isUnmanagedIp()
+    {
+        return getType() == Type.UNMANAGED;
     }
 
     // ********************************** Others ********************************

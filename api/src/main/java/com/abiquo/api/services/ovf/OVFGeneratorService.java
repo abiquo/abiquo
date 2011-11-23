@@ -80,6 +80,10 @@ import com.abiquo.ovfmanager.ovf.section.OVFNetworkUtils;
 import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
+<<<<<<< HEAD
+=======
+import com.abiquo.server.core.cloud.State;
+>>>>>>> dhcp_service_remove
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -582,9 +586,13 @@ public class OVFGeneratorService
             Integer numberOfRules = 0;
             Collection<IpPoolManagement> ips =
                 vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
+            List<RemoteService> remoteServices =
+                datacenterRepo.findRemoteServiceWithTypeInDatacenter(vdc.getDatacenter(),
+                    RemoteServiceType.DHCP_SERVICE);
+            // RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp()
+            // .getRemoteService();
 
-            RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
-            URI uri = new URI(dhcpRemoteService.getUri());
+            URI uri = new URI(remoteServices.get(0).getUri());
 
             DHCPServiceType dhcp = new DHCPServiceType();
             dhcp.setDhcpAddress(uri.getHost());
@@ -1123,5 +1131,4 @@ public class OVFGeneratorService
 
         return rasdOut;
     }
-
 }

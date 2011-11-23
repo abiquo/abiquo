@@ -116,8 +116,7 @@ public class PrivateNetworksResourceIT extends AbstractJpaGeneratorIT
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
 
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan, vlan2
-            .getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan.getConfiguration(), vlan, vlan2.getConfiguration(), vlan2);
 
         ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
         assertEquals(200, response.getStatusCode());

@@ -59,10 +59,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     public static final String BY_DATACENTER =
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "INNER JOIN vlan.configuration conf, "
+            // "INNER JOIN conf.dhcp dhcp, "
             + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
             + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
-            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id AND "
+            + "WHERE net.id = vlan.network.id "
+            // +"AND dhcp.id = ip.dhcp.id"
+            + "AND ip.vlanNetwork.id = vlan.id "
+            + " AND dc.id = :datacenter_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
@@ -71,56 +75,78 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
 
     public static final String BY_ENT = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn, "
-        + " Enterprise ent " + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " AND nc.id = vn.configuration.id " + " AND vn.network.id = vdc.network.id"
-        + " AND vdc.enterprise.id = ent.id" + " AND ent.id = :ent_id " + " AND "
-        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-        + " OR vm.name like :filterLike " + ")";
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VirtualDatacenter vdc, "
+        + " VLANNetwork vn, "
+        + " Enterprise ent "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
+        + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_IP_PURCHASED = " SELECT ip FROM "
         + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-        + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+        + "INNER JOIN vlan.configuration conf,"
+        // +" INNER JOIN conf.dhcp dhcp, "
         + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
         + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-        + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+        + "WHERE net.id = vlan.network.id "
+        // +"AND dhcp.id = ip.dhcp.id "
+        + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
         + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
         + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id";
 
     public static final String BY_IP_TO_PURCHASE = " SELECT ip FROM "
         + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-        + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+        + "INNER JOIN vlan.configuration conf,"
+        // +" INNER JOIN conf.dhcp dhcp, "
         + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
         + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-        + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+        + "WHERE net.id = vlan.network.id "
+        // +"AND dhcp.id = ip.dhcp.id "
+        + "AND ip.vlanNetwork.id = vlan.id " + "AND vdc.id = :vdc_id AND "
         + "vdc.datacenter.id = dc.id AND ip.id = :ip_id AND "
         + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter is null";
 
     public static final String BY_NETWORK = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
-        + " AND vn.network.id = :net_id AND " + "( ip.ip like :filterLike "
-        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VLANNetwork vn "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.id = :vlan_id " + " AND vn.network.id = :net_id AND "
+        + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
+        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
+        + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_PUBLIC_VLAN =
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "INNER JOIN vlan.configuration conf,"
+            // +" INNER JOIN conf.dhcp dhcp, "
             + "IpPoolManagement ip LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN ip.virtualAppliance vapp "
             + "LEFT JOIN ip.virtualMachine vm LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND dc.id = :datacenter_id AND "
+            + "WHERE net.id = vlan.network.id"
+            // +"AND dhcp.id = ip.dhcp.id "
+            + " AND ip.vlanNetwork.id = vlan.id "
+            + " AND dc.id = :datacenter_id AND "
             + "vlan.id = :vlan_id AND"
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
 
     public static final String BY_VDC = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VirtualDatacenter vdc, "
+        + " VLANNetwork vn "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.network.id = vdc.network.id" + " AND vdc.id = :vdc_id AND"
         + "( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
         + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
@@ -129,10 +155,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     public static final String BY_VDC_PURCHASED =
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "INNER JOIN vlan.configuration conf,"
+            // +" INNER JOIN conf.dhcp dhcp, "
             + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
             + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "WHERE net.id = vlan.network.id "
+            // +"AND dhcp.id = ip.dhcp.id "
+            + "AND ip.vlanNetwork.id = vlan.id "
+            + "AND vdc.id = :vdc_id AND "
             + "vdc.datacenter.id = dc.id AND "
             + "ip.available = 1 AND vlan.enterprise is null AND ip.virtualDatacenter.id = :vdc_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
@@ -141,10 +171,14 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     public static final String BY_VDC_TO_PURCHASE =
         " SELECT ip FROM "
             + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
-            + "INNER JOIN vlan.configuration conf INNER JOIN conf.dhcp dhcp, "
+            + "INNER JOIN vlan.configuration conf,"
+            // +" INNER JOIN conf.dhcp dhcp, "
             + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp, "
             + "VirtualDatacenter vdc LEFT JOIN vdc.enterprise ent "
-            + "WHERE net.id = vlan.network.id AND dhcp.id = ip.dhcp.id AND vdc.id = :vdc_id AND "
+            + "WHERE net.id = vlan.network.id "
+            // +"AND dhcp.id = ip.dhcp.id "
+            + "AND ip.vlanNetwork.id = vlan.id "
+            + "AND vdc.id = :vdc_id AND "
             + "vdc.datacenter.id = dc.id AND "
             + "ip.available = 1 AND ip.quarantine = 0  AND vlan.enterprise is null AND ip.virtualDatacenter is null AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
@@ -155,19 +189,28 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "ORDER BY ip.rasd.configurationName";
 
     public static final String BY_VLAN = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VirtualDatacenter vdc, "
+        + " VLANNetwork vn "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
         + " AND vdc.id = :vdc_id AND" + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp "
-        + " left join ip.virtualDatacenter vdc, " + " NetworkConfiguration nc, "
-        + " VLANNetwork vn " + " join vn.enterprise ent, " + " DatacenterLimits dcl"
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp "
+        + " left join ip.virtualDatacenter vdc, "
+        + " NetworkConfiguration nc, "
+        + " VLANNetwork vn "
+        + " join vn.enterprise ent, "
+        + " DatacenterLimits dcl"
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
         + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
         + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
@@ -180,17 +223,24 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "= vdc.idVirtualDatacenter and ip.vlan_network_id =:vlan_id";
 
     public static final String BY_VLAN_USED_BY_ANY_VM = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VLANNetwork vn " + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " AND nc.id = vn.configuration.id " + " AND vn.id = :vlan_id "
-        + " AND ( ip.ip like :filterLike " + " OR ip.mac like :filterLike "
-        + " OR ip.vlanNetwork.name like :filterLike " + " OR vapp.name like :filterLike "
-        + " OR vm.name like :filterLike " + ")";
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VLANNetwork vn "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.id = :vlan_id " + " AND ( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
     public static final String BY_VLAN_WITHOUT_USED_IPS = " SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm " + " left join ip.virtualAppliance vapp, "
-        + " NetworkConfiguration nc, " + " VirtualDatacenter vdc, " + " VLANNetwork vn "
-        + " WHERE ip.dhcp.id = nc.dhcp.id " + " AND nc.id = vn.configuration.id "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp, "
+        + " NetworkConfiguration nc, "
+        + " VirtualDatacenter vdc, "
+        + " VLANNetwork vn "
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.id = :vlan_id " + " AND vn.network.id = vdc.network.id"
         + " AND vdc.id = :vdc_id " + " AND vm is null AND " + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
@@ -209,14 +259,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
     private final static String GET_NETWORK_POOL_PURCHASED_BY_ENTERPRISE = "SELECT ip "//
         + "FROM com.abiquo.server.core.infrastructure.Datacenter dc "//
         + "INNER JOIN dc.network net, "//
-        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan "//
-        + "INNER JOIN vlan.configuration.dhcp dhcp, "//
+        + "com.abiquo.server.core.infrastructure.network.VLANNetwork vlan, "//
+        // + "INNER JOIN vlan.configuration.dhcp dhcp, "//
         + "com.abiquo.server.core.infrastructure.network.IpPoolManagement ip "//
         // + "LEFT JOIN join ip.virtualMachine vm "//
         + "LEFT JOIN ip.virtualAppliance vapp, "//
         + "com.abiquo.server.core.cloud.VirtualDatacenter vdc "//
         + "where net.id = vlan.network.id "//
-        + "and dhcp.id = ip.dhcp.id "//
+        // + "and dhcp.id = ip.dhcp.id "//
+        + "and ip.vlanNetwork.id = vlan.id "
         + "and dc.id = vdc.datacenter.id "//
         + "and vdc.enterprise.id = :enterpriseId "
         + "and ip.virtualDatacenter.id = vdc.id "
