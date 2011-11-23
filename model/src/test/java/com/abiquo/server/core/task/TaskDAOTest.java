@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import redis.clients.jedis.Transaction;
 
 import com.abiquo.server.core.task.Task.TaskState;
-import com.abiquo.server.core.task.Task.TaskType;
+import com.abiquo.server.core.task.enums.TaskType;
 
 public class TaskDAOTest extends RedisDAOTestBase
 {

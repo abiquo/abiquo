@@ -39,7 +39,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 import com.abiquo.server.core.task.Job.JobType;
 import com.abiquo.server.core.task.Task.TaskState;
-import com.abiquo.server.core.task.Task.TaskType;
+import com.abiquo.server.core.task.enums.TaskType;
 
 @Test(groups = "redisaccess")
 public class AsyncTaskRepTest

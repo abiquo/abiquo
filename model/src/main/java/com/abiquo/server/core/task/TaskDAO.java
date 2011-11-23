@@ -35,7 +35,7 @@ import com.abiquo.model.redis.KeyMaker;
 import com.abiquo.model.redis.RedisDAOBase;
 import com.abiquo.model.redis.RedisEntityUtils;
 import com.abiquo.server.core.task.Task.TaskState;
-import com.abiquo.server.core.task.Task.TaskType;
+import com.abiquo.server.core.task.enums.TaskType;
 
 /**
  * This base class provides Redis-persistence logic for {@link Task} entity. <h3>Instance to persist
@@ -57,6 +57,7 @@ import com.abiquo.server.core.task.Task.TaskType;
  * HMSET Task:0 "ownerId" "A" "taskId" "0" "userId" "user0" "type" "DEPLOY" "state" "STARTED" "timestamp" "12346789" "jobs" "Task:0:jobs"
  * RPUSH Task:0:jobs Jobs:0
  * RPUSH Task:0:jobs Jobs:1
+ * LPUSH Owner:
  * 
  * <pre>
  * @author eruiz@abiquo.com
