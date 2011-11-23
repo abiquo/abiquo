@@ -118,12 +118,15 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.commons.amqp.impl.vsm.VSMProducer;
+import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.resources.ResourceManager;
+import com.abiquo.vsm.events.VMEventType;
 import com.sun.ws.management.client.exceptions.FaultException;
 
 /**
@@ -2198,6 +2201,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
         State inProgress = new State(StateEnum.IN_PROGRESS);
         State notDeployed = new State(StateEnum.NOT_DEPLOYED);
+
         // Get the user POJO from the DB
         UserHB userHB = null;
         DAOFactory factory = HibernateDAOFactory.instance();
@@ -2304,7 +2308,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (Exception e)
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e.getMessage(),
                 "createVirtualMachines", e);
@@ -2318,7 +2321,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (EventingException e)
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
                 "The datacenter is not well configured. Contact your Cloud Administrator",
@@ -2327,7 +2329,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (Exception e)
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
@@ -2343,9 +2344,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             // As the event sink will update the virtual appliance state the
             // state will be in
             // progress
-            State newState = new State(StateEnum.IN_PROGRESS);
-            virtualAppliance.setState(newState);
-            dataResult.setData(virtualAppliance);
+
+            // WTF! If event arrives before that the appliance remains in PROGRESS
+            // State newState = new State(StateEnum.IN_PROGRESS);
+            // virtualAppliance.setState(newState);
+            // dataResult.setData(virtualAppliance);
+            publishVirtualMachineEvents(virtualAppliance.getNodes(), VMEventType.POWER_ON);
 
             traceLog(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWERON,
                 userSession, null, virtualAppliance.getVirtualDataCenter().getName(), null,
@@ -2369,6 +2373,41 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
 
         return dataResult;
+    }
+
+    protected void publishVirtualMachineEvents(Collection<Node> nodes, VMEventType eventType)
+    {
+        try
+        {
+            VSMProducer producer = new VSMProducer();
+
+            producer.openChannel();
+
+            for (Node< ? > node : nodes)
+            {
+                if (node.isNodeTypeVirtualImage())
+                {
+                    NodeVirtualImage nvi = (NodeVirtualImage) node;
+                    VirtualMachine vm = nvi.getVirtualMachine();
+                    HyperVisor hv = (HyperVisor) vm.getAssignedTo();
+
+                    VirtualSystemEvent event = new VirtualSystemEvent();
+                    event.setEventType(eventType.name());
+                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(),
+                        hv.getPort()));
+                    event.setVirtualSystemId(vm.getName());
+                    event.setVirtualSystemType(hv.getType().getName());
+
+                    producer.publish(event);
+                }
+            }
+
+            producer.closeChannel();
+        }
+        catch (IOException e)
+        {
+            logger.error("Can not connect RabbitMQ to refresh virtual machine states.");
+        }
     }
 
     /**
@@ -2900,7 +2939,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             Session session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            // Recovering Nodes
             Collection<Node> nodes = getNodesFromVirtualApp(session, virtualAppliance);
             transaction.commit();
 
@@ -2919,22 +2957,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
 
+                        // Deallocate VM if necessary
                         if (hypervisor != null)
                         {
                             logger.debug("Undeploy all the virtual machines");
-
-                            session = HibernateUtil.getSession();
-                            transaction = session.beginTransaction();
-                            HypervisorHB hypervisorHB =
-                                (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
-                            transaction.commit();
-
-                            PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
-                            PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
                             logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
                                 + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
-
-                            // scheduler.rollback(virtualMachine, physicalMachine);
 
                             try
                             {
@@ -2943,9 +2971,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                             }
                             catch (Exception e)
                             {
-                                throw new VirtualApplianceCommandException(e);
+                                logger.error("Could not rollback allocated resources "
+                                    + "(CPU, RAM, HD, network) for physical machine.", e);
                             }
-                        } // vm is allocated
+                        }
 
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
@@ -2954,16 +2983,17 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         VirtualmachineHB vmachineHB =
                             (VirtualmachineHB) session.get(VirtualmachineHB.class,
                                 virtualMachine.getId());
+
                         if (vmachineHB != null)
                         {
+                            // Should be already done by allocator, but if it is good to
+                            // re-set it to null just to bypass deallocate failures
                             vmachineHB.setState(StateEnum.NOT_DEPLOYED);
-                            // Hypervisor == null in order to delete the relation between
-                            // virtualMachine
-                            // and physicalMachine
                             vmachineHB.setHypervisor(null);
-                            // Datastore == null in order to delete the relation virtualmachine
-                            // datastore
                             vmachineHB.setDatastore(null);
+                            vmachineHB.setVdrpIp(null);
+                            vmachineHB.setVdrpPort(0);
+
                             if (nodeVI.getModified() == Node.NODE_ERASED)
                             {
                                 NodeHB nodePojo = (NodeHB) session.get(NodeHB.class, node.getId());
@@ -2975,11 +3005,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 session.update(vmachineHB);
                                 undeployedVMs.add(vmachineHB);
                             }
-                        }
-                        else
-                        {
-                            session.update(vmachineHB);
-                            undeployedVMs.add(vmachineHB);
                         }
 
                         transaction.commit();
