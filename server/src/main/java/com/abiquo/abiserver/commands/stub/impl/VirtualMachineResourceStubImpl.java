@@ -54,8 +54,8 @@ import com.abiquo.util.URIResolver;
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     VirtualMachineResourceStub
 {
-
-    private final static Integer TIMEOUT = 3 * 60 * 1000; // 3 minutes
+    /* Set the timeout to the double fo time of the set in the system properties */
+    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
 
     public VirtualMachineResourceStubImpl()
     {
