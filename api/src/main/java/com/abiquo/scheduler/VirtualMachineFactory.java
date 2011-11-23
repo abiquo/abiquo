@@ -22,6 +22,7 @@
 package com.abiquo.scheduler;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -31,14 +32,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.config.ConfigService;
 import com.abiquo.api.services.config.SystemPropertyService;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.Hypervisor;
-import com.abiquo.server.core.cloud.HypervisorDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.config.SystemProperty;
 import com.abiquo.server.core.infrastructure.Datastore;
-import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 
@@ -61,22 +61,17 @@ public class VirtualMachineFactory
     private final static Logger log = LoggerFactory.getLogger(VirtualMachineFactory.class);
 
     @Autowired
-    InfrastructureRep datacenterRepo;
+    protected InfrastructureRep datacenterRepo;
 
     @Autowired
-    HypervisorDAO hypervisorDao;
-
-    @Autowired
-    // TODO move to InfastructureRep
-    DatastoreDAO datastoreDao;
-
-    @Autowired
-    SystemPropertyService systemPropertyService;
+    protected SystemPropertyService systemPropertyService;
 
     /** The remote desktop min port **/
-    public final static int MIN_REMOTE_DESKTOP_PORT = 5900;
+    public final static int MIN_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService
+        .getSystemProperty(ConfigService.MIN_REMOTE_DESKTOP_PORT, "5900"));
 
-    public final static int MAX_REMOTE_DESKTOP_PORT = 65534;
+    public final static int MAX_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService
+        .getSystemProperty(ConfigService.MAX_REMOTE_DESKTOP_PORT, "65534"));
 
     protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
@@ -94,8 +89,8 @@ public class VirtualMachineFactory
      * @throws NotEnoughResourcesException, if the target machine haven't enough resources to hold
      *             the virtual machine
      */
-    public VirtualMachine createVirtualMachine(final Machine machine, VirtualMachine virtualMachine)
-        throws NotEnoughResourcesException
+    public VirtualMachine createVirtualMachine(final Machine machine,
+        final VirtualMachine virtualMachine) throws NotEnoughResourcesException
     {
         // TODO set UUID and name
         // TODO default also high disponibility flag)
@@ -118,7 +113,8 @@ public class VirtualMachineFactory
             final String currentDatastoreUuid = virtualMachine.getDatastore().getDatastoreUUID();
 
             // find the shared datastore on the target machine
-            Datastore datastore = datastoreDao.findDatastore(currentDatastoreUuid, machine);
+            Datastore datastore =
+                datacenterRepo.findDatastoreByUuidAndMachine(currentDatastoreUuid, machine);
 
             virtualMachine.setDatastore(datastore);
         }
@@ -183,7 +179,7 @@ public class VirtualMachineFactory
 
     }
 
-    private int selectVrdpPort(Machine machine) throws NotEnoughResourcesException
+    private int selectVrdpPort(final Machine machine) throws NotEnoughResourcesException
     {
         SystemProperty allowRdp = systemPropertyService.findByName(ALLOW_RDP_PROPERTY);
 
@@ -192,9 +188,10 @@ public class VirtualMachineFactory
             return DISABLED_VRDPORT;
         }
 
-        final List<Integer> rdpPorts = hypervisorDao.getUsedPorts(machine.getHypervisor().getId());
+        final List<Integer> usedPorts =
+            datacenterRepo.findUsedRemoteDesktopPortsInRack(machine.getRack());
 
-        Integer candidatePort = getFreePortFromUsedList(rdpPorts);
+        Integer candidatePort = getNextFreeRemoteDesktopPort(usedPorts);
 
         log.debug("The VRDP assigned port is: " + candidatePort);
 
@@ -204,51 +201,28 @@ public class VirtualMachineFactory
     /**
      * Gets a free port from the list used port
      * 
-     * @param rdpPorts
+     * @param portsInUse
      * @return
      * @throws SchedulerException
      */
-    protected Integer getFreePortFromUsedList(final List<Integer> rdpPorts)
+    protected Integer getNextFreeRemoteDesktopPort(final List<Integer> portsInUse)
         throws NotEnoughResourcesException
     {
-        final Integer candidatePort = MIN_REMOTE_DESKTOP_PORT;
+        // Sort ports (we don't care about portsInUse having repeated elements)
+        Collections.sort(portsInUse);
 
-        if (rdpPorts.isEmpty())
+        List<Integer> allowedPorts = new LinkedList<Integer>();
+        for (int i = MIN_REMOTE_DESKTOP_PORT; i <= MAX_REMOTE_DESKTOP_PORT; i++)
         {
-            return candidatePort;
+            allowedPorts.add(i);
+        }
+        allowedPorts.removeAll(portsInUse);
+
+        if (allowedPorts.isEmpty())
+        {
+            throw new NotEnoughResourcesException("The maximun number of remote desktop ports has been reached");
         }
 
-        Collections.sort(rdpPorts);
-
-        if (rdpPorts.get(0) > 0 && rdpPorts.get(0) != MIN_REMOTE_DESKTOP_PORT)
-        {
-            return candidatePort;
-        }
-
-        int next = 1;
-
-        for (int i = 0; i < rdpPorts.size(); i++)
-        {
-            if (rdpPorts.get(i) == MAX_REMOTE_DESKTOP_PORT)
-            {
-                final String cause = "The maximun number of remote desktop ports has been reached";
-                throw new NotEnoughResourcesException(cause);
-            }
-
-            // Ignoring the virtual machine ports less than 0
-            if (rdpPorts.get(i) < MIN_REMOTE_DESKTOP_PORT)
-            {
-                next++;
-                continue;
-            }
-
-            if (next == rdpPorts.size() || rdpPorts.get(next) != rdpPorts.get(i) + 1)
-            {
-                return rdpPorts.get(i) + 1;
-            }
-            next++;
-        }
-
-        return candidatePort;
+        return allowedPorts.get(0);
     }
 }
