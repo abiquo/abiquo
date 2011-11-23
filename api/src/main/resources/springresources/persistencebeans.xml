@@ -81,6 +81,8 @@
                 <!--  -->
                 <ref bean="virtualMachinesInfrastructureResource" />
                 <ref bean="virtualMachineInfrastructureResource" />
+                <ref bean="disksResource" />
+                <ref bean="diskResource" />
             </set>
         </property>
     </bean>

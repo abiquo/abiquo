@@ -155,4 +155,18 @@ public enum VirtualMachineState
                 return false;
         }
     }
+
+    public boolean reconfigureAllowed()
+    {
+        switch (this)
+        {
+            case ALLOCATED:
+            case NOT_ALLOCATED:
+            case OFF:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 }
