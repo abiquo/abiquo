@@ -36,6 +36,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
 @Repository("jpaVirtualImageConversionDAO")
@@ -126,8 +127,9 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
             // This function should be returning the only object
             if (conversions.size() > 1)
             {
-                throw new NonUniqueObjectException("There is more than one conversion!", image
-                    .getId(), VirtualImageConversion.class.getSimpleName());
+                throw new NonUniqueObjectException("There is more than one conversion!",
+                    image.getId(),
+                    VirtualImageConversion.class.getSimpleName());
             }
             return conversions.get(0);
         }
@@ -144,5 +146,20 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     {
         final Criteria criteria = createCriteria().add(sameImage(virtualImage));
         return criteria.list();
+    }
+
+    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE =
+        "SELECT "
+            + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
+            + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
+            + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
+
+    public Collection<VirtualImageConversion> findByVirtualImageConversionByNodeVirtualImage(
+        final NodeVirtualImage nodeVirtualImage)
+    {
+        Query query = getSession().createQuery(VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE);
+        query.setParameter("idVirtualImageConversion", nodeVirtualImage.getId());
+
+        return query.list();
     }
 }
