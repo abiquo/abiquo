@@ -1197,7 +1197,7 @@ public class ESXiCollector extends AbstractCollector
 
                 if (!neverExpires)
                 {
-                    if (expirationHours.intValue() == 0 || expirationMinutes.intValue() == 0)
+                    if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
                     {
                         throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                     }
