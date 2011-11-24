@@ -46,6 +46,11 @@ import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
+/**
+ * Abstract resource to add asyncronous task management capabilities to an existent API Resource.
+ * 
+ * @author eruiz
+ */
 public abstract class AbstractResourceWithTasks extends AbstractResource
 {
     public static final String TASKS_PATH = "/tasks";
