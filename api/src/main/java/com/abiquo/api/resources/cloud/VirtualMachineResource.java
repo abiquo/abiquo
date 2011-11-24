@@ -39,7 +39,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
-import com.abiquo.api.resources.AbstractResource;
+import com.abiquo.api.resources.AbstractResourceWithTasks;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
@@ -55,11 +55,12 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
-public class VirtualMachineResource extends AbstractResource
+public class VirtualMachineResource extends AbstractResourceWithTasks
 {
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
@@ -83,8 +84,6 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
-
-    public static final String VIRTUAL_MACHINE_ACTION_VOLUMES = "/action/volumes";
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
@@ -530,4 +529,9 @@ public class VirtualMachineResource extends AbstractResource
             restBuilder);
     }
 
+    @Override
+    public TaskOwnerType getTaskOwnerType()
+    {
+        return TaskOwnerType.VIRTUAL_MACHINE;
+    }
 }

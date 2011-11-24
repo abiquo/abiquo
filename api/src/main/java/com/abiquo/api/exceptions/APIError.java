@@ -491,7 +491,11 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"),
+
+    // TASKS
+    NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
+        "TASK-2", "");
 
     /**
      * Internal error code

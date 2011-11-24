@@ -23,7 +23,9 @@ package com.abiquo.server.core.task;
 
 import static com.abiquo.model.redis.RedisEntityUtils.getEntityKey;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -34,8 +36,9 @@ import redis.clients.jedis.Transaction;
 import com.abiquo.model.redis.KeyMaker;
 import com.abiquo.model.redis.RedisDAOBase;
 import com.abiquo.model.redis.RedisEntityUtils;
-import com.abiquo.server.core.task.Task.TaskState;
-import com.abiquo.server.core.task.Task.TaskType;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.task.enums.TaskState;
+import com.abiquo.server.core.task.enums.TaskType;
 
 /**
  * This base class provides Redis-persistence logic for {@link Task} entity. <h3>Instance to persist
@@ -57,6 +60,7 @@ import com.abiquo.server.core.task.Task.TaskType;
  * HMSET Task:0 "ownerId" "A" "taskId" "0" "userId" "user0" "type" "DEPLOY" "state" "STARTED" "timestamp" "12346789" "jobs" "Task:0:jobs"
  * RPUSH Task:0:jobs Jobs:0
  * RPUSH Task:0:jobs Jobs:1
+ * LPUSH Owner:VirtualMachine:A Task:0
  * 
  * <pre>
  * @author eruiz@abiquo.com
@@ -69,6 +73,24 @@ public class TaskDAO extends RedisDAOBase<Task>
     public Task findById(final String taskId, Jedis jedis)
     {
         return find(getEntityKey(Task.class, taskId), jedis);
+    }
+
+    public List<Task> findByOwnerId(final TaskOwnerType type, final String ownerId, Jedis jedis)
+    {
+        List<Task> tasks = new ArrayList<Task>();
+        String ownerKey = getOwnerTaskEntityKey(type, ownerId);
+
+        for (String taskKey : jedis.lrange(ownerKey, 0, -1))
+        {
+            Task task = find(taskKey, jedis);
+
+            if (task != null)
+            {
+                tasks.add(task);
+            }
+        }
+
+        return tasks;
     }
 
     protected Task find(final String taskKey, Jedis jedis)
@@ -96,11 +118,15 @@ public class TaskDAO extends RedisDAOBase<Task>
     public void delete(Task task, Transaction transaction)
     {
         // Build keys
-        String taskJobsKey = getTaskJobsKey(task.getIdAsString());
+        String taskJobsKey = getTaskJobsEntityKey(task.getIdAsString());
+        String ownerTaskKey = getOwnerTaskEntityKey(task);
 
         // Delete
         transaction.del(task.getEntityKey());
         transaction.del(taskJobsKey);
+
+        // Remove task from Owner index
+        transaction.lrem(ownerTaskKey, 0, task.getEntityKey());
     }
 
     @Override
@@ -119,7 +145,7 @@ public class TaskDAO extends RedisDAOBase<Task>
         hashed.put("timestamp", String.valueOf(RedisEntityUtils.getUnixtime()));
 
         // Hash job collection
-        String taskJobsKey = getTaskJobsKey(task.getIdAsString());
+        String taskJobsKey = getTaskJobsEntityKey(task.getIdAsString());
         hashed.put("jobs", taskJobsKey);
 
         // Persist
@@ -129,10 +155,23 @@ public class TaskDAO extends RedisDAOBase<Task>
         {
             transaction.rpush(taskJobsKey, job.getEntityKey());
         }
+
+        // Add task to Owner index
+        transaction.lpush(getOwnerTaskEntityKey(task), task.getEntityKey());
     }
 
-    public String getTaskJobsKey(final String taskId)
+    public String getTaskJobsEntityKey(final String taskId)
     {
         return keyMaker.make(taskId, "jobs");
+    }
+
+    protected String getOwnerTaskEntityKey(final Task task)
+    {
+        return getOwnerTaskEntityKey(task.getType().getOwnerType(), task.getOwnerId());
+    }
+
+    protected String getOwnerTaskEntityKey(final TaskOwnerType type, final String ownerId)
+    {
+        return String.format("Owner:%s:%s", type.getName(), ownerId);
     }
 }

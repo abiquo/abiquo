@@ -78,7 +78,12 @@ public class JobDAO extends RedisDAOBase<Job>
 
         for (String jobKey : jedis.lrange(jobsKey, 0, -1))
         {
-            jobs.add(find(jobKey, jedis));
+            Job job = find(jobKey, jedis);
+
+            if (job != null)
+            {
+                jobs.add(job);
+            }
         }
 
         return jobs;

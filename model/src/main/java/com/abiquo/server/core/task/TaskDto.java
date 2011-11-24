@@ -21,15 +21,21 @@
 
 package com.abiquo.server.core.task;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.abiquo.model.redis.RedisEntityBase;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.server.core.task.enums.TaskType;
 
-public class Task extends RedisEntityBase
+@XmlRootElement(name = "task")
+public class TaskDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 3587883337292250623L;
+
     protected String ownerId;
 
     protected String taskId;
@@ -42,18 +48,17 @@ public class Task extends RedisEntityBase
 
     protected TaskState state;
 
-    protected List<Job> jobs;
+    protected List<JobDto> jobs;
 
-    public Task()
+    public TaskDto()
     {
-        this.jobs = new LinkedList<Job>();
-        this.state = TaskState.PENDING;
+        jobs = new ArrayList<JobDto>();
     }
 
-    @Override
-    protected String getIdAsString()
+    @XmlElement(name = "job")
+    public List<JobDto> getJobs()
     {
-        return getTaskId();
+        return jobs;
     }
 
     public String getOwnerId()
@@ -76,11 +81,6 @@ public class Task extends RedisEntityBase
         this.taskId = taskId;
     }
 
-    public List<Job> getJobs()
-    {
-        return jobs;
-    }
-
     public String getUserId()
     {
         return userId;
@@ -91,16 +91,6 @@ public class Task extends RedisEntityBase
         this.userId = userId;
     }
 
-    public long getTimestamp()
-    {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp)
-    {
-        this.timestamp = timestamp;
-    }
-
     public TaskType getType()
     {
         return type;
@@ -109,6 +99,16 @@ public class Task extends RedisEntityBase
     public void setType(TaskType type)
     {
         this.type = type;
+    }
+
+    public long getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp)
+    {
+        this.timestamp = timestamp;
     }
 
     public TaskState getState()
