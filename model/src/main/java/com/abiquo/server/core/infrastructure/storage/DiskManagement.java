@@ -143,22 +143,4 @@ public class DiskManagement extends RasdManagement
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 
-    /**
-     * Specialization of a {@link DiskManagement} that represents the system disk. Its attachment
-     * order will always be 0.
-     * 
-     * @author Ignasi Barrera
-     */
-    public static class SystemDisk extends DiskManagement
-    {
-        public SystemDisk(final VirtualDatacenter vdc, final VirtualMachine virtualMachine,
-            final Long size)
-        {
-            super(vdc, size);
-            setVirtualMachine(virtualMachine);
-            setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE);
-            getRasd().setGeneration(0L);
-        }
-    }
-
 }
