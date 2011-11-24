@@ -139,8 +139,6 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         disk2.setVirtualMachine(vm);
         persistAll(ds(), entitiesToPersist, disk1, disk2.getRasd(), disk2);
 
-        VirtualMachine vm = disk1.getVirtualMachine();
-
         RasdManagementDAO dao = createDaoForRollbackTransaction();
         List<RasdManagement> disks = dao.findDisksAndVolumesByVirtualMachine(vm);
 
