@@ -138,7 +138,7 @@ public class NodeResource
         HostDto dto = hostService.getHostInfo(ip, hypType, user, password, aimport);
         
         time = System.currentTimeMillis() - time;
-        LOGGER.info("Retrieving host info took " + time + " miliseconds.");
+        LOGGER.info("Retrieving host '" + dto.getName() + " (" + ip + ")' took " + time + " miliseconds.");
         return dto;
 
     }
@@ -172,7 +172,7 @@ public class NodeResource
         }
         VirtualSystemCollectionDto dtos = virtualSystemService.getVirtualSystemList(ip, hypType, user, password, aimport);
         time = System.currentTimeMillis() - time;
-        LOGGER.info("Retrieving virtual system collection info took " + time + " miliseconds.");      
+        LOGGER.info("Retrieving virtual system collection info from host with ip: '" + ip + "' took " + time + " miliseconds.");      
         return dtos;
     }
 
@@ -208,7 +208,7 @@ public class NodeResource
         VirtualSystemDto dto = virtualSystemService.getVirtualSystem(ip, hypType, user, password, aimport, uuid);
         
         time = System.currentTimeMillis() - time;
-        LOGGER.info("Retrieving virtual system info took " + time + " miliseconds.");  
+        LOGGER.info("Retrieving virtual system info from host with ip : '" + ip + "' took " + time + " miliseconds.");  
         return dto;
 
     }
