@@ -21,19 +21,7 @@
 
 package com.abiquo.server.core.task.enums;
 
-public enum TaskOwnerType
+public enum TaskState
 {
-    VIRTUAL_MACHINE("VirtualMachine");
-
-    protected String name;
-
-    private TaskOwnerType(String name)
-    {
-        this.name = name;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
+    FINISHED_SUCCESFULLY, FINISHED_UNSUCCESFULLY, PENDING, STARTED
 }

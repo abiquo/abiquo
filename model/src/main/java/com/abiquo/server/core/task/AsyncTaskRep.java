@@ -21,12 +21,16 @@
 
 package com.abiquo.server.core.task;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
+
+import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 /**
  * Repository to manage the redis-based DAOs {@link TaskDAO} and {@link JobDAO}.
@@ -133,7 +137,21 @@ public class AsyncTaskRep
         }
     }
 
-    public Task findTask(String taskId)
+    public List<Task> findTasksByOwnerId(final TaskOwnerType type, final String ownerId)
+    {
+        Jedis jedis = jedisPool.getResource();
+
+        try
+        {
+            return taskDao.findByOwnerId(type, ownerId, jedis);
+        }
+        finally
+        {
+            jedisPool.returnResource(jedis);
+        }
+    }
+
+    public Task findTask(final String taskId)
     {
         Jedis jedis = jedisPool.getResource();
 
@@ -144,7 +162,7 @@ public class AsyncTaskRep
             if (task != null)
             {
                 task.getJobs().addAll(
-                    jobDao.findJobs(taskDao.getTaskJobsKey(task.getIdAsString()), jedis));
+                    jobDao.findJobs(taskDao.getTaskJobsEntityKey(task.getIdAsString()), jedis));
             }
 
             return task;
@@ -155,7 +173,7 @@ public class AsyncTaskRep
         }
     }
 
-    public Task findTaskByJobId(String jobId)
+    public Task findTaskByJobId(final String jobId)
     {
         Jedis jedis = jedisPool.getResource();
 
@@ -176,7 +194,7 @@ public class AsyncTaskRep
         }
     }
 
-    public Job findJob(String jobId)
+    public Job findJob(final String jobId)
     {
         Jedis jedis = jedisPool.getResource();
 

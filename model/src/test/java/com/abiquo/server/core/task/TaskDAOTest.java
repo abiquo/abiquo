@@ -26,13 +26,15 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.testng.annotations.Test;
 
 import redis.clients.jedis.Transaction;
 
-import com.abiquo.server.core.task.Task.TaskState;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.server.core.task.enums.TaskType;
 
 public class TaskDAOTest extends RedisDAOTestBase
@@ -92,6 +94,40 @@ public class TaskDAOTest extends RedisDAOTestBase
 
         Task fromDb = dao.findById(task.getTaskId(), jedis);
         assertNull(fromDb);
+    }
+
+    @Test
+    public void test_finByOwnerId()
+    {
+        Task task0 = createUniqueTask();
+        Task task1 = createUniqueTask();
+
+        task0.setOwnerId("A");
+        task1.setOwnerId("A");
+
+        Task task2 = createUniqueTask();
+        task2.setOwnerId("B");
+
+        Task task3 = createUniqueTask();
+        task3.setOwnerId("C");
+
+        save(task0);
+        save(task1);
+        save(task2);
+        save(task3);
+
+        List<Task> tasks = dao.findByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "A", jedis);
+        assertEquals(tasks.size(), 2);
+        assertEquals(tasks.get(0).getTaskId(), task1.getTaskId());
+        assertEquals(tasks.get(1).getTaskId(), task0.getTaskId());
+
+        tasks = dao.findByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "B", jedis);
+        assertEquals(tasks.size(), 1);
+        assertEquals(tasks.get(0).getTaskId(), task2.getTaskId());
+
+        tasks = dao.findByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "C", jedis);
+        assertEquals(tasks.size(), 1);
+        assertEquals(tasks.get(0).getTaskId(), task3.getTaskId());
     }
 
     protected void save(Task task)

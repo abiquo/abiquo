@@ -22,29 +22,36 @@
 package com.abiquo.server.core.task;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import com.abiquo.server.core.task.Job.JobType;
-import com.abiquo.server.core.task.Task.TaskState;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.task.enums.TaskState;
 import com.abiquo.server.core.task.enums.TaskType;
 
 @Test(groups = "redisaccess")
 public class AsyncTaskRepTest
 {
-    AsyncTaskRep repo = new AsyncTaskRep();
+    protected AsyncTaskRep repo = new AsyncTaskRep();
+
+    protected JedisPool jedisPool;
 
     @BeforeTest
     public void testSetUp() throws Exception
@@ -63,7 +70,16 @@ public class AsyncTaskRepTest
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setTestOnBorrow(true);
 
-        repoField.set(repo, new JedisPool(jedisPoolConfig, "localhost"));
+        jedisPool = new JedisPool(jedisPoolConfig, "localhost");
+        repoField.set(repo, jedisPool);
+    }
+
+    @AfterTest
+    public void testTearDown()
+    {
+        Jedis jedis = jedisPool.getResource();
+        jedis.flushDB();
+        jedisPool.returnResource(jedis);
     }
 
     @Test
@@ -74,6 +90,27 @@ public class AsyncTaskRepTest
 
         Task fromDb = repo.findTask(task.getTaskId());
         assertSameTask(task, fromDb);
+    }
+
+    @Test
+    public void test_saveTaskWithJobs()
+    {
+        Task task = createUniqueTask();
+        Job j0 = createUniqueJob();
+        Job j1 = createUniqueJob();
+        Job j2 = createUniqueJob();
+
+        task.getJobs().add(j0);
+        task.getJobs().add(j1);
+        task.getJobs().add(j2);
+
+        task = repo.save(task);
+
+        assertNotNull(task);
+        assertEquals(task.getJobs().size(), 3);
+
+        task = repo.save(task);
+        assertEquals(task.getJobs().size(), 3);
     }
 
     @Test
@@ -210,6 +247,40 @@ public class AsyncTaskRepTest
         job = createUniqueJob();
         job.setType(null);
         expectRuntimeOnInsertNullField(job);
+    }
+
+    @Test
+    public void test_finTaskByOwnerId()
+    {
+        Task task0 = createUniqueTask();
+        Task task1 = createUniqueTask();
+
+        task0.setOwnerId("A");
+        task1.setOwnerId("A");
+
+        Task task2 = createUniqueTask();
+        task2.setOwnerId("B");
+
+        Task task3 = createUniqueTask();
+        task3.setOwnerId("C");
+
+        repo.save(task0);
+        repo.save(task1);
+        repo.save(task2);
+        repo.save(task3);
+
+        List<Task> tasks = repo.findTasksByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "A");
+        assertEquals(tasks.size(), 2);
+        assertEquals(tasks.get(0).getTaskId(), task1.getTaskId());
+        assertEquals(tasks.get(1).getTaskId(), task0.getTaskId());
+
+        tasks = repo.findTasksByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "B");
+        assertEquals(tasks.size(), 1);
+        assertEquals(tasks.get(0).getTaskId(), task2.getTaskId());
+
+        tasks = repo.findTasksByOwnerId(TaskOwnerType.VIRTUAL_MACHINE, "C");
+        assertEquals(tasks.size(), 1);
+        assertEquals(tasks.get(0).getTaskId(), task3.getTaskId());
     }
 
     protected Task createUniqueTask()
