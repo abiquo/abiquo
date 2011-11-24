@@ -301,7 +301,6 @@
             <id>hudson</id>
             <properties>
                 <env>hudson</env>
-                <tomcat.home>localhost</tomcat.home>
                 <tomcat.port>8080</tomcat.port>
                 <tomcat.user>admin</tomcat.user>
                 <tomcat.password>admin</tomcat.password>

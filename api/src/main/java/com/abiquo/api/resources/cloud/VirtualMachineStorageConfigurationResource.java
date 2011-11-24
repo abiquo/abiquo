@@ -152,8 +152,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        DiskManagement disk =
-            service.createHardDiskIntoVM(vdcId, vappId, vmId, inputDto.getSizeInMb());
+        DiskManagement disk = service.allocateHardDiskIntoVM(vdcId, vappId, vmId, 0);
 
         return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }

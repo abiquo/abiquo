@@ -24,6 +24,8 @@ package com.abiquo.api.services;
 import java.util.Date;
 import java.util.Random;
 
+import javax.persistence.EntityManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,16 @@ public class OneTimeTokenService extends DefaultApiService
 
     @Autowired
     private EnterpriseRep repo;
+
+    public OneTimeTokenService()
+    {
+
+    }
+
+    public OneTimeTokenService(final EntityManager em)
+    {
+        repo = new EnterpriseRep(em);
+    }
 
     /**
      * Generates a valid and persisted one time token to be used as an authentication header in http
