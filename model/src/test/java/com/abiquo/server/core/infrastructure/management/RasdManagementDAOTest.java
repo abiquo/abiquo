@@ -130,13 +130,13 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         VirtualMachine vm = vmGenerator.createInstance(disk1.getVirtualDatacenter().getEnterprise());
 
         // Set reverse order to test DAO ordering
+        disk1.setVirtualMachine(vm);
+        disk2.setVirtualMachine(vm);
         disk1.setAttachmentOrder(2);
         disk2.setAttachmentOrder(1);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         diskGenerator.addAuxiliaryEntitiesToPersist(disk1, entitiesToPersist);
-        disk1.setVirtualMachine(vm);
-        disk2.setVirtualMachine(vm);
         persistAll(ds(), entitiesToPersist, disk1, disk2.getRasd(), disk2);
 
         RasdManagementDAO dao = createDaoForRollbackTransaction();
