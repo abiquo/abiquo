@@ -125,7 +125,7 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
     public void testFindDisksAndVolumesByVirtualMachineOnlyDisks()
     {
         DiskManagement disk1 = diskGenerator.createUniqueInstance();
-        DiskManagement disk2 = diskGenerator.createInstance(disk1.getVirtualMachine());
+        DiskManagement disk2 = diskGenerator.createInstance(disk1.getVirtualDatacenter());
 
         // Set reverse order to test DAO ordering
         disk1.setAttachmentOrder(2);
@@ -180,8 +180,8 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         VolumeManagement vol2 =
             volumeGenerator.createInstance(vol1.getStoragePool(), vol1.getVirtualDatacenter());
         VirtualMachine vm = vmGenerator.createInstance(vol1.getVirtualDatacenter().getEnterprise());
-        DiskManagement disk1 = diskGenerator.createInstance(vm);
-        DiskManagement disk2 = diskGenerator.createInstance(vm);
+        DiskManagement disk1 = diskGenerator.createInstance(vol1.getVirtualDatacenter());
+        DiskManagement disk2 = diskGenerator.createInstance(vol1.getVirtualDatacenter());
 
         vol1.setVirtualMachine(vm);
         vol2.setVirtualMachine(vm);

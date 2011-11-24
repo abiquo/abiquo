@@ -639,7 +639,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                 if (diskFormatType.equals(VirtualDiskEnumType.STATEFUL))
                 {
                     DiskManagement disky =
-                        new DiskManagement.SystemDisk(null, rt.getUnits() / MEGABYTE);
+                        new DiskManagement.SystemDisk(null, null, rt.getUnits() / MEGABYTE);
                     disky.setSizeInMb(rt.getUnits() / MEGABYTE);
                     vm.getDisks().add(disky);
                 }
@@ -649,7 +649,7 @@ public class NodecollectorServiceStub extends DefaultApiService
             }
             else
             {
-                DiskManagement disky = new DiskManagement(null, rt.getUnits() / MEGABYTE, 1);
+                DiskManagement disky = new DiskManagement(null, rt.getUnits() / MEGABYTE);
                 disky.setSizeInMb(rt.getUnits() / MEGABYTE);
                 vm.getDisks().add(disky);
             }

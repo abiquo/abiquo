@@ -34,6 +34,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -60,8 +61,7 @@ public class DiskManagement extends RasdManagement
         // Just for JPA support
     }
 
-    public DiskManagement(final VirtualMachine virtualMachine, final Long size,
-        final Integer attachmentOrder)
+    public DiskManagement(final VirtualDatacenter vdc, final Long size)
     {
         super(DISCRIMINATOR);
 
@@ -74,8 +74,7 @@ public class DiskManagement extends RasdManagement
         rasd.setAutomaticDeallocation(0);
 
         setRasd(rasd);
-        setVirtualMachine(virtualMachine);
-        setAttachmentOrder(attachmentOrder);
+        setVirtualDatacenter(vdc);
         setSizeInMb(size);
 
         // Disk properties
@@ -152,9 +151,12 @@ public class DiskManagement extends RasdManagement
      */
     public static class SystemDisk extends DiskManagement
     {
-        public SystemDisk(final VirtualMachine virtualMachine, final Long size)
+        public SystemDisk(final VirtualDatacenter vdc, final VirtualMachine virtualMachine,
+            final Long size)
         {
-            super(virtualMachine, size, FIRST_ATTACHMENT_SEQUENCE);
+            super(vdc, size);
+            setVirtualMachine(virtualMachine);
+            setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE);
             getRasd().setGeneration(0L);
         }
     }

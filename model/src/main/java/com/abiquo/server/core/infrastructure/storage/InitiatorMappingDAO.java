@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
@@ -37,18 +39,24 @@ public class InitiatorMappingDAO extends DefaultDAOBase<Integer, InitiatorMappin
         super(InitiatorMapping.class);
     }
 
-    public InitiatorMappingDAO(EntityManager entityManager)
+    public InitiatorMappingDAO(final EntityManager entityManager)
     {
         super(InitiatorMapping.class, entityManager);
     }
 
-    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement, final String initiatorIqn)
+    public InitiatorMapping findByVolumeAndInitiator(final Integer idVolumeManagement,
+        final String initiatorIqn)
     {
         Criteria criteria =
-            createCriteria(Restrictions.eq("volume.id", idVolumeManagement))
-                .add(Restrictions.eq("initiatorIqn", initiatorIqn));
+            createCriteria(Restrictions.eq("volume.id", idVolumeManagement)).add(
+                Restrictions.eq("initiatorIqn", initiatorIqn));
         Object obj = criteria.uniqueResult();
         return (InitiatorMapping) obj;
     }
 
+    public List<InitiatorMapping> findByVolumeId(final Integer idVolume)
+    {
+        Criteria criteria = createCriteria(Restrictions.eq("volume.id", idVolume));
+        return criteria.list();
+    }
 }

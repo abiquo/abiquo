@@ -84,6 +84,8 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
+    public static final String VIRTUAL_MACHINE_ACTION_VOLUMES = "/action/volumes";
+
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
     @Autowired
@@ -290,8 +292,8 @@ public class VirtualMachineResource extends AbstractResource
         throws Exception
     {
         String link =
-            vmService.deployVirtualMachine(vmId, vappId, vdcId,
-                forceSoftLimits.isForceEnterpriseSoftLimits());
+            vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
+                .isForceEnterpriseSoftLimits());
 
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);
