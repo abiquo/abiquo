@@ -240,7 +240,9 @@ public class RemoteService implements IPojo<RemoteServiceHB>
         }
         this.serviceMapping = u.getPath();
         if (serviceMapping.startsWith("/"))
+        {
             serviceMapping = serviceMapping.replaceFirst("/", "");
+        }
     }
 
     public static String getFullUri(final String protocol, final String domainName,
@@ -254,7 +256,7 @@ public class RemoteService implements IPojo<RemoteServiceHB>
 
         if (!StringUtils.isEmpty(serviceMappingTrim) && !(serviceMappingTrim.split(" ").length > 1))
         {
-            if (!serviceMappingTrim.equals("bpm") && !serviceMappingTrim.equals("dhcp"))
+            if (!serviceMappingTrim.equals("dhcp"))
             {
                 fullURL = UriHelper.appendPathToBaseUri(fullURL, serviceMappingTrim);
             }
@@ -295,10 +297,9 @@ public class RemoteService implements IPojo<RemoteServiceHB>
             URI u = new URI(uri);
 
             return !fixProtocol(u.getScheme()).equals(fixProtocol(protocol))
-                || !u.getHost().equals(domainName)
-                || u.getPort() != port
-                || (!StringUtils.isEmpty(u.getPath()) && !u.getPath().replaceFirst("/", "")
-                    .equals(serviceMapping));
+                || !u.getHost().equals(domainName) || u.getPort() != port
+                || !StringUtils.isEmpty(u.getPath())
+                && !u.getPath().replaceFirst("/", "").equals(serviceMapping);
         }
         catch (URISyntaxException e)
         {
