@@ -65,10 +65,11 @@ import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -141,6 +142,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected IconGenerator iconGenerator = new IconGenerator(seed);
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
+
+    protected InitiatorMappingGenerator initiatorMappingGenerator =
+        new InitiatorMappingGenerator(seed);
 
     protected VirtualImageConversionGenerator virtualImageConversionGenerator =
         new VirtualImageConversionGenerator(seed);

@@ -125,17 +125,19 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
     public void testFindDisksAndVolumesByVirtualMachineOnlyDisks()
     {
         DiskManagement disk1 = diskGenerator.createUniqueInstance();
-        DiskManagement disk2 = diskGenerator.createInstance(disk1.getVirtualMachine());
+        DiskManagement disk2 = diskGenerator.createInstance(disk1.getVirtualDatacenter());
+        
+        VirtualMachine vm = vmGenerator.createInstance(disk1.getVirtualDatacenter().getEnterprise());
 
         // Set reverse order to test DAO ordering
+        disk1.setVirtualMachine(vm);
+        disk2.setVirtualMachine(vm);
         disk1.setAttachmentOrder(2);
         disk2.setAttachmentOrder(1);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         diskGenerator.addAuxiliaryEntitiesToPersist(disk1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, disk1, disk2.getRasd(), disk2);
-
-        VirtualMachine vm = disk1.getVirtualMachine();
 
         RasdManagementDAO dao = createDaoForRollbackTransaction();
         List<RasdManagement> disks = dao.findDisksAndVolumesByVirtualMachine(vm);
@@ -180,12 +182,14 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         VolumeManagement vol2 =
             volumeGenerator.createInstance(vol1.getStoragePool(), vol1.getVirtualDatacenter());
         VirtualMachine vm = vmGenerator.createInstance(vol1.getVirtualDatacenter().getEnterprise());
-        DiskManagement disk1 = diskGenerator.createInstance(vm);
-        DiskManagement disk2 = diskGenerator.createInstance(vm);
+        DiskManagement disk1 = diskGenerator.createInstance(vol1.getVirtualDatacenter());
+        DiskManagement disk2 = diskGenerator.createInstance(vol1.getVirtualDatacenter());
 
         vol1.setVirtualMachine(vm);
         vol2.setVirtualMachine(vm);
-
+        disk1.setVirtualMachine(vm);
+        disk2.setVirtualMachine(vm);
+        
         // Set order to test DAO ordering
         disk1.setAttachmentOrder(4);
         disk2.setAttachmentOrder(1);
