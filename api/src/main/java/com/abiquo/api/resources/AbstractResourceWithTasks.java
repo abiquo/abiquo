@@ -54,11 +54,9 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
     public TasksDto getTasks(@Context final UriInfo uriInfo, @Context final IRESTBuilder restBuilder)
     {
         String parentId = extractParentId(uriInfo);
-        String ownerId = formatOwnerId(getTaskOwnerType(), parentId);
-
         // Links to all tasks?
 
-        List<Task> tasks = service.findTasks(ownerId);
+        List<Task> tasks = service.findTasks(getTaskOwnerType(), parentId);
 
         return new TasksDto();
     }
@@ -68,10 +66,7 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
     public TaskDto getTask(@PathParam(value = "id") final String id,
         @Context final UriInfo uriInfo, @Context final IRESTBuilder restBuilder)
     {
-        String parentId = extractParentId(uriInfo);
-        String ownerId = formatOwnerId(getTaskOwnerType(), parentId);
-
-        Task task = service.findTask(ownerId, id);
+        Task task = service.findTask(id);
 
         return new TaskDto();
     }
@@ -80,10 +75,5 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
     {
         // TODO
         return null;
-    }
-
-    public String formatOwnerId(final TaskOwnerType ownerType, final String id)
-    {
-        return String.format("Owner:%s:%s", ownerType.name(), id);
     }
 }

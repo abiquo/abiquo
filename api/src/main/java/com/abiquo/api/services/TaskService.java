@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.server.core.task.AsyncTaskRep;
 import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 @Component
 public class TaskService extends DefaultApiService
@@ -39,13 +40,12 @@ public class TaskService extends DefaultApiService
     @Autowired
     AsyncTaskRep repo;
 
-    public List<Task> findTasks(String ownerId)
+    public List<Task> findTasks(final TaskOwnerType type, final String ownerId)
     {
-        // TODO
-        return null;
+        return repo.findTasksByOwnerId(type, ownerId);
     }
 
-    public Task findTask(String ownerId, String taskId)
+    public Task findTask(String taskId)
     {
         return repo.findTask(taskId);
     }
