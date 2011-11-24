@@ -211,6 +211,16 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getStatefulCandidates(vdc);
     }
 
+    public List<VolumeManagement> getAttachedVolumes(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getAttachedVolumes(vdc);
+    }
+
+    public List<VolumeManagement> getDetachedVolumes(final VirtualDatacenter vdc)
+    {
+        return volumeDAO.getDetachedVolumes(vdc);
+    }
+
     public List<VolumeManagement> getAvailableVolumes(final VirtualDatacenter vdc,
         final FilterOptions filterOptions) throws Exception
     {

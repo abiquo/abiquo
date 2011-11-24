@@ -440,6 +440,21 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         }
     }
 
+    public List<VolumeManagement> getAttachedVolumes(final VirtualDatacenter vdc)
+    {
+        Criteria criteria =
+            createCriteria(sameVirtualDatacenter(vdc), sameState(VolumeState.ATTACHED));
+
+        return getResultList(criteria);
+    }
+
+    public List<VolumeManagement> getDetachedVolumes(final VirtualDatacenter vdc)
+    {
+        Criteria criteria =
+            createCriteria(sameVirtualDatacenter(vdc), sameState(VolumeState.DETACHED));
+        return getResultList(criteria);
+    }
+
     private static Criterion sameVirtualMachine(final VirtualMachine vm)
     {
         return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm);
