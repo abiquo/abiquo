@@ -47,7 +47,7 @@ import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 /**
- * Abstract resource to add asyncronous task management capabilities to an existent API Resource.
+ * Abstract resource to add asynchronous task management capabilities to an existent API Resource.
  * 
  * @author eruiz
  */
