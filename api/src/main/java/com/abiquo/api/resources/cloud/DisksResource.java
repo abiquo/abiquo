@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.abiquo.api.resources.cloud;
 
 import java.util.List;
