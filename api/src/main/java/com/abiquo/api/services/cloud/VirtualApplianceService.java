@@ -517,11 +517,12 @@ public class VirtualApplianceService extends DefaultApiService
                 PricingTier pricingTier = pricingRep.findPricingTier(tier, pricing);
                 if (pricingTier != null)
                 {
+                    BigDecimal volum = new BigDecimal(volman.getSizeInMB());
+                    BigDecimal toGB = new BigDecimal(1024);
                     virtualMachinesCost.put(
                         VirtualMachineCost.ADDITIONAL_VOLUME,
                         virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
-                            pricingTier.getPrice().multiply(
-                                new BigDecimal(volman.getSizeInMB() / 1024))));// multiplicar
+                            pricingTier.getPrice().multiply(volum.divide(toGB))));// multiplicar
                     // por
                     // _MB
                 }

@@ -33,6 +33,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
+import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -78,9 +79,15 @@ public class PricingTier extends DefaultEntityBase
 
     private final static String PRICE_COLUMN = "price";
 
-    @Column(name = PRICE_COLUMN, nullable = true)
+    private final static int PRICE_LENGTH_MIN = 0;
+
+    private final static int PRICE_LENGTH_MAX = 15;
+
+    @Column(name = PRICE_COLUMN, nullable = false, length = PRICE_LENGTH_MAX)
     private BigDecimal price;
 
+    @Required(value = true)
+    @Length(min = PRICE_LENGTH_MIN, max = PRICE_LENGTH_MAX)
     public BigDecimal getPrice()
     {
         return this.price;
