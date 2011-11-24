@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
+import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.StorageService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
@@ -81,7 +82,7 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 @Parent(VirtualMachineResource.class)
 @Controller
 @Path(VirtualMachineStorageConfigurationResource.STORAGE)
-public class VirtualMachineStorageConfigurationResource
+public class VirtualMachineStorageConfigurationResource extends AbstractResource
 {
     /** General REST path of the resource */
     public static final String STORAGE = "storage";

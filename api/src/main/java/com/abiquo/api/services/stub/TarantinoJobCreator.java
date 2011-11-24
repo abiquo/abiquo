@@ -21,6 +21,8 @@
 
 package com.abiquo.api.services.stub;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -36,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -81,6 +84,9 @@ public class TarantinoJobCreator extends DefaultApiService
     @Autowired
     protected InfrastructureRep infRep;
 
+    @Autowired
+    protected RemoteServiceService remoteServiceService;
+
     /* ********************************** Be aware of storing any kind of state in this Service */
 
     public TarantinoJobCreator()
@@ -93,6 +99,7 @@ public class TarantinoJobCreator extends DefaultApiService
         storageRep = new StorageRep(em);
         vdcRep = new VirtualDatacenterRep(em);
         infRep = new InfrastructureRep(em);
+        remoteServiceService = new RemoteServiceService(em);
     }
 
     /**
@@ -119,6 +126,7 @@ public class TarantinoJobCreator extends DefaultApiService
         vmDesc.setRdPort(virtualMachine.getVdrpPort());
 
         logger.debug("Creating the network related configuration");
+        addDhcpConfiguration(dcId, vmDesc);
         vnicDefinitionConfiguration(virtualMachine, vmDesc);
         logger.debug("Network configuration done!");
 
@@ -135,6 +143,29 @@ public class TarantinoJobCreator extends DefaultApiService
         logger.debug("Configure secondary Hard Disks done!");
 
         return vmDesc;
+    }
+
+    /**
+     * Gets the configured DCHP in the datacenter to set its URL in the
+     * {@link com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.NetworkConfiguration}
+     */
+    private void addDhcpConfiguration(final Integer datacenterId,
+        final VirtualMachineDescriptionBuilder vmDesc)
+    {
+        // TODO 2.0 will support manual DHCP configuration
+        final RemoteService dhcp =
+            remoteServiceService.getRemoteService(datacenterId, RemoteServiceType.DHCP_SERVICE);
+
+        try
+        {
+            final URI dhcpUri = new URI(dhcp.getUri());
+            vmDesc.dhcp(dhcpUri.getHost(), dhcpUri.getPort());
+        }
+        catch (URISyntaxException e)
+        {
+            addConflictErrors(APIError.REMOTE_SERVICE_DHCP_WRONG_URI);
+            flushErrors();
+        }
     }
 
     /**
@@ -266,8 +297,8 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore =
-            virtualMachine.getDatastore().getRootPath()
-                + virtualMachine.getDatastore().getDirectory();
+            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                .getDatastore().getDirectory());
 
         // Repository Manager address
         List<RemoteService> services =

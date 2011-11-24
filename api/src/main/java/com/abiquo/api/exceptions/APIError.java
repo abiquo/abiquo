@@ -296,7 +296,8 @@ public enum APIError
         "RS-8", "Cannot delete a Storage Manager with associated Storage Pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-9",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
-        "RS-10", "Provided URL is not valid"),
+        "RS-10", "Provided URL is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-11",
+        "The DHCP uri is invalid"),
 
     // OVF PACKAGE LIST
     OVF_PACKAGE_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0", "OVF Package list name already exist"),

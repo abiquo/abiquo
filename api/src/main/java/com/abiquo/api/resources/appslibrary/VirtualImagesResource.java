@@ -107,8 +107,8 @@ public class VirtualImagesResource extends AbstractResource
         {
             for (VirtualImage vimage : all)
             {
-                imagesDto.add(createTransferObject(vimage, enterpriseId, datacenterId, amUri,
-                    restBuilder));
+                imagesDto.getCollection().add(
+                    createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder));
             }
         }
 
