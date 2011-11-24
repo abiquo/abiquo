@@ -21,11 +21,103 @@
 
 package com.abiquo.server.core.task;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.task.enums.TaskState;
+import com.abiquo.server.core.task.enums.TaskType;
 
 @XmlRootElement(name = "task")
 public class TaskDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 3587883337292250623L;
+
+    protected String ownerId;
+
+    protected String taskId;
+
+    protected String userId;
+
+    protected TaskType type;
+
+    protected long timestamp;
+
+    protected TaskState state;
+
+    protected List<JobDto> jobs;
+
+    public TaskDto()
+    {
+        jobs = new ArrayList<JobDto>();
+    }
+
+    @XmlElement(name = "job")
+    public List<JobDto> getJobs()
+    {
+        return jobs;
+    }
+
+    public String getOwnerId()
+    {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId)
+    {
+        this.ownerId = ownerId;
+    }
+
+    public String getTaskId()
+    {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId)
+    {
+        this.taskId = taskId;
+    }
+
+    public String getUserId()
+    {
+        return userId;
+    }
+
+    public void setUserId(String userId)
+    {
+        this.userId = userId;
+    }
+
+    public TaskType getType()
+    {
+        return type;
+    }
+
+    public void setType(TaskType type)
+    {
+        this.type = type;
+    }
+
+    public long getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp)
+    {
+        this.timestamp = timestamp;
+    }
+
+    public TaskState getState()
+    {
+        return state;
+    }
+
+    public void setState(TaskState state)
+    {
+        this.state = state;
+    }
 }

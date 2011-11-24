@@ -245,8 +245,8 @@ public enum APIError
         "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
         "VM-19",
         "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
-        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"),
-        NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS("VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
+        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
+        "VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
         "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"),
 
     // ROLE
@@ -432,9 +432,8 @@ public enum APIError
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
         "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-18",
         "Could not get the Storage Manager remote service"), VOLUME_GRANT_ACCESS_ERROR("VOL-19",
-        "Could not add the initiators mappings"),
-        NON_EXISTENT_VOLUME_MAPPING("VOL-20", "The requested initiator mapping does not exist"),
-        VOLUME_NOT_ATTACHED("VOL-21",
+        "Could not add the initiators mappings"), NON_EXISTENT_VOLUME_MAPPING("VOL-20",
+        "The requested initiator mapping does not exist"), VOLUME_NOT_ATTACHED("VOL-21",
         "The volume is not attached to the virtual machine"), VOLUME_ATTACH_INVALID_LINK("VOL-22",
         "Invalid link to the volume to attach"), VOLUME_ATTACH_INVALID_VDC_LINK("VOL-23",
         "Invalid virtual datacenter in the link to the volume to attach"), VOLUME_ALREADY_ATTACHED(
@@ -444,7 +443,7 @@ public enum APIError
         "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
         "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
         "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_RECONFIGURE_ERROR(
-        "VOL-29", "An unexpected error occured while reconfiguring storage"), 
+        "VOL-29", "An unexpected error occured while reconfiguring storage"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -491,7 +490,11 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"),
+
+    // TASKS
+    NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
+        "TASK-2", "");
 
     /**
      * Internal error code

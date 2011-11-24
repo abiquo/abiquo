@@ -23,8 +23,8 @@ package com.abiquo.server.core.task;
 
 import static com.abiquo.model.redis.RedisEntityUtils.getEntityKey;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +77,7 @@ public class TaskDAO extends RedisDAOBase<Task>
 
     public List<Task> findByOwnerId(final TaskOwnerType type, final String ownerId, Jedis jedis)
     {
-        List<Task> tasks = new LinkedList<Task>();
+        List<Task> tasks = new ArrayList<Task>();
         String ownerKey = getOwnerTaskEntityKey(type, ownerId);
 
         for (String taskKey : jedis.lrange(ownerKey, 0, -1))

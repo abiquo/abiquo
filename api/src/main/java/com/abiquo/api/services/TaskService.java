@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.server.core.task.AsyncTaskRep;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
@@ -35,7 +36,7 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
 @Component
 public class TaskService extends DefaultApiService
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
 
     @Autowired
     AsyncTaskRep repo;
@@ -47,6 +48,15 @@ public class TaskService extends DefaultApiService
 
     public Task findTask(String taskId)
     {
-        return repo.findTask(taskId);
+        Task task = repo.findTask(taskId);
+
+        if (task == null)
+        {
+            LOGGER.error("Error retrieving the task: {} does not exist", taskId);
+            addNotFoundErrors(APIError.NON_EXISTENT_TASK);
+            flushErrors();
+        }
+
+        return task;
     }
 }
