@@ -78,6 +78,7 @@ public class TarantinoJobCreator extends DefaultApiService
         storageRep = new StorageRep(em);
         vdcRep = new VirtualDatacenterRep(em);
         infRep = new InfrastructureRep(em);
+        remoteServiceService = new RemoteServiceService(em);
     }
 
     /**
@@ -275,8 +276,8 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore =
-            virtualMachine.getDatastore().getRootPath()
-                + virtualMachine.getDatastore().getDirectory();
+            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                .getDatastore().getDirectory());
 
         // Repository Manager address
         List<RemoteService> services =

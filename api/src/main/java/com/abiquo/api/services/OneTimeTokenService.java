@@ -54,12 +54,11 @@ public class OneTimeTokenService extends DefaultApiService
 
     public OneTimeTokenService()
     {
-        super();
+
     }
 
     public OneTimeTokenService(final EntityManager em)
     {
-        super();
         repo = new EnterpriseRep(em);
     }
 
