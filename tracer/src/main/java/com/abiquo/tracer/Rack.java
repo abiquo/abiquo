@@ -23,41 +23,51 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class Rack implements Serializable {
+public class Rack implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1950131610582556724L;
-	private String name;
-	private Machine machine;
+    private static final long serialVersionUID = 1950131610582556724L;
 
-	public Rack(String rackName) {
-		this.setName(rackName);
-	}
+    private String name;
 
-	public static Rack rack(String rackName) {
-		return new Rack(rackName);
-	}
+    private Machine machine;
 
-	public Rack machine(Machine machine) {
-		this.setMachine(machine);
-		return this;
-	}
+    public Rack(String rackName)
+    {
+        this.setName(rackName);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public static Rack rack(String rackName)
+    {
+        return new Rack(rackName);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Rack machine(Machine machine)
+    {
+        this.setMachine(machine);
+        return this;
+    }
 
-	public void setMachine(Machine machine) {
-		this.machine = machine;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
 
-	public Machine getMachine() {
-		return machine;
-	}
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setMachine(Machine machine)
+    {
+        this.machine = machine;
+    }
+
+    public Machine getMachine()
+    {
+        return machine;
+    }
 }

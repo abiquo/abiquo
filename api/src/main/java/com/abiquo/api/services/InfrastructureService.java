@@ -25,6 +25,7 @@ import static com.abiquo.api.resources.RemoteServiceResource.createTransferObjec
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
 import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
 
+import java.beans.PropertyDescriptor;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,12 +40,12 @@ import javax.ws.rs.WebApplicationException;
 
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,16 +59,19 @@ import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.model.util.AddressingUtils;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.MachinesToCreateDto;
 import com.abiquo.server.core.infrastructure.Rack;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
@@ -77,6 +81,7 @@ import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
+import com.softwarementors.commons.collections.ListUtils;
 
 /*
  *  THIS CLASS RESOURCE IS USED AS THE DEFAULT ONE TO DEVELOP THE REST AND 
@@ -125,6 +130,14 @@ public class InfrastructureService extends DefaultApiService
         virtualMachineService = new VirtualMachineService(em);
         machineService = new MachineService(em);
         tracer = new TracerLogger();
+    }
+
+    public InfrastructureService(final EntityManager em,
+        final NodecollectorServiceStub ncserviceStub)
+    {
+        this(em);
+        nodecollectorServiceStub = ncserviceStub;
+
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -191,6 +204,18 @@ public class InfrastructureService extends DefaultApiService
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Map<String, Object> addMachines(final Integer datacenterId, final Integer rackId,
+        final MachinesToCreateDto createInfo) throws Exception
+    {
+
+        validateCreateInfo(createInfo);
+
+        return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
+            createInfo.getPort(), createInfo.getvSwitch());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Map<String, Object> addMachines(final Integer datacenterId, final Integer rackId,
         final String ipFrom, final String ipTo, final String hypervisor, final String user,
         final String password, final Integer port, final String vSwitch)
     {
@@ -207,15 +232,17 @@ public class InfrastructureService extends DefaultApiService
         }
 
         // prepare NODE COLLECTOR
-        Datacenter datacenter = getDatacenter(datacenterId);
-        RemoteService nodecollector =
-            getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
+        // Datacenter datacenter = getDatacenter(datacenterId);
+        // RemoteService nodecollector =
+        // getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
 
         // getting machines
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
-            nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-                user, password, port);
+        // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
+        // user, password, port);
+            this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
+                port, vSwitch);
 
         Map<String, Object> map = new HashMap<String, Object>();
         Set<CommonError> errors = new HashSet<CommonError>();
@@ -295,12 +322,14 @@ public class InfrastructureService extends DefaultApiService
         validate(machine);
 
         // Part 2: Insert the and machine into database.
-        if (repo.existAnyHypervisorWithIp(machine.getHypervisor().getIp()))
+        if (repo
+            .existAnyHypervisorWithIpInDatacenter(machine.getHypervisor().getIp(), datacenterId))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_IP);
         }
 
-        if (repo.existAnyHypervisorWithIpService(machine.getHypervisor().getIpService()))
+        if (repo.existAnyHypervisorWithIpServiceInDatacenter(
+            machine.getHypervisor().getIpService(), datacenterId))
         {
             addConflictErrors(APIError.HYPERVISOR_EXIST_SERVICE_IP);
         }
@@ -320,7 +349,9 @@ public class InfrastructureService extends DefaultApiService
             .getHypervisor().getUser(), machine.getHypervisor().getPassword());
 
         tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
-            + machine.getName() + "' has been created succesfully");
+            + machine.getName() + "' [ ip: " + machine.getHypervisor().getIp() + " type: "
+            + machine.getHypervisor().getType() + " state: " + machine.getState()
+            + " ] has been created succesfully");
 
         return machine;
     }
@@ -379,7 +410,7 @@ public class InfrastructureService extends DefaultApiService
 
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(remoteServiceMapping.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(remoteServiceMapping);
 
         return isAssignedTo(datacenterId, type);
     }
@@ -443,7 +474,6 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (machine.getHypervisor() != null)
                 {
-                    virtualMachineService.deleteNotManagedVirtualMachines(machine.getHypervisor());
                     machineService.removeMachine(machine.getId(), force);
                 }
             }
@@ -479,7 +509,6 @@ public class InfrastructureService extends DefaultApiService
     @Transactional(propagation = Propagation.REQUIRED)
     public RemoteServiceDto addRemoteService(final RemoteService rs, final Integer datacenterId)
     {
-
         return remoteServiceService.addRemoteService(rs, datacenterId);
     }
 
@@ -584,6 +613,12 @@ public class InfrastructureService extends DefaultApiService
 
     public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
+        return checkRemoteServiceStatus(type, url, false);
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
+        final boolean flushErrors)
+    {
         ErrorsDto configurationErrors = new ErrorsDto();
         if (type.canBeChecked())
         {
@@ -591,38 +626,52 @@ public class InfrastructureService extends DefaultApiService
             config.connectTimeout(5000);
 
             RestClient restClient = new RestClient(config);
-            Resource checkResource =
-                restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
+            String uriToCheck = UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE);
+            Resource checkResource = restClient.resource(uriToCheck);
 
             try
             {
                 ClientResponse response = checkResource.get();
                 if (response.getStatusCode() != 200)
                 {
-                    APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                    configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                        + error.getMessage()));
+                    configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                        .getCode(), type.getName() + ", "
+                        + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage()));
+                    if (flushErrors)
+                    {
+                        switch (response.getStatusCode())
+                        {
+                            case 404:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            case 503:
+                                addServiceUnavailableErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            default:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                        }
+                    }
                 }
-            }
-            catch (WebApplicationException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (ClientRuntimeException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
             }
             catch (Exception e)
             {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
+                configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                    .getCode(), type.getName() + ", "
+                    + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage() + ", "
+                    + e.getMessage()));
+                if (flushErrors)
+                {
+                    addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                }
             }
         }
+
+        if (flushErrors)
+        {
+            flushErrors();
+        }
+
         return configurationErrors;
     }
 
@@ -698,7 +747,8 @@ public class InfrastructureService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -779,6 +829,7 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+
     }
 
     public Collection<VirtualMachine> getVirtualMachinesByMachine(final Integer machineId)
@@ -792,6 +843,7 @@ public class InfrastructureService extends DefaultApiService
     {
         Machine machine = machineService.getMachine(machineId);
         updateUsedResourcesByMachine(machine);
+
     }
 
     public void updateUsedResourcesByMachine(final Machine machine)
@@ -822,6 +874,65 @@ public class InfrastructureService extends DefaultApiService
     {
         return rack.getNrsq() != null && rack.getVlanIdMax() != null && rack.getVlanIdMin() != null
             && rack.getVlanPerVdcReserved() != null;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public HypervisorType discoverRemoteHypervisorType(final Integer datacenterId, final String ip)
+    {
+        Datacenter datacenter = getDatacenter(datacenterId);
+        RemoteService nodecollector =
+            getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
+        return nodecollectorServiceStub.getRemoteHypervisorType(nodecollector, ip);
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public Machine discoverRemoteHypervisor(final Integer datacenterId, final IPAddress ip,
+        final HypervisorType hypType, final String user, final String password, final Integer port)
+    {
+        Datacenter datacenter = getDatacenter(datacenterId);
+        RemoteService nodecollector =
+            getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
+
+        Machine machine =
+            nodecollectorServiceStub.getRemoteHypervisor(nodecollector, ip, hypType, user,
+                password, port);
+
+        return machine;
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public List<Machine> discoverRemoteHypevisors(final Integer datacenterId,
+        final IPAddress ipFrom, final IPAddress ipTo, final HypervisorType hypType,
+        final String user, final String password, final Integer port, final String vswitch)
+    {
+        Datacenter datacenter = getDatacenter(datacenterId);
+        RemoteService nodecollector =
+            getRemoteService(datacenter.getId(), RemoteServiceType.NODE_COLLECTOR);
+
+        List<Machine> candidateMachines =
+            nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFrom, ipTo, hypType,
+                user, password, port);
+        if (vswitch != null)
+        {
+            candidateMachines = filterByVSwitch(candidateMachines, vswitch);
+        }
+        // We do not allow machines from ucs to be added if already exists in Abiquo.
+        return excludeAlreadyInAbiquo(datacenterId, candidateMachines);
+    }
+
+    public MachineState checkMachineState(final Integer datacenterId, final String ip,
+        final HypervisorType hypervisorType, final String user, final String password,
+        final Integer port)
+    {
+
+        RemoteService nodecollector =
+            getRemoteService(datacenterId, RemoteServiceType.NODE_COLLECTOR);
+
+        // getting all Virtual Machines from Hypervisor (managed and not managed) (NODE COLLETOR)
+        Machine m =
+            nodecollectorServiceStub.getRemoteHypervisor(nodecollector, IPAddress.newIPAddress(ip),
+                hypervisorType, user, password, port);
+        return m.getState();
     }
 
     public void checkAvailableCores(final Machine machine)
@@ -877,6 +988,98 @@ public class InfrastructureService extends DefaultApiService
         }
 
         return newErrors;
+    }
 
+    /**
+     * @param datacenterId Datacenter id.
+     * @param candidateMachines machines that we retrieved.
+     * @return List<Machine> that are not in Abiquo.
+     */
+    private List<Machine> excludeAlreadyInAbiquo(final Integer datacenterId,
+        final List<Machine> candidateMachines)
+    {
+        List<Machine> machines = new ArrayList<Machine>();
+        // We do not allow machines from ucs to be added if already exists in Abiquo.
+        for (Machine m : candidateMachines)
+        {
+            if (repo.existAnyHypervisorWithIpInDatacenter(m.getHypervisor().getIp(), datacenterId))
+            {
+                LOGGER
+                    .warn("Discovering blades: There is a machine already in Abiquo with this ip!!");
+                continue;
+            }
+            machines.add(m);
+        }
+        return machines;
+    }
+
+    /**
+     * Filters the candidateMachines into the ones that have the vswitch with @param vswitch.
+     * 
+     * @param candidateMachines candidate machines to be returned.
+     * @param vswitch name of the switch to filter
+     */
+    private List<Machine> filterByVSwitch(final List<Machine> candidateMachines,
+        final String vswitch)
+    {
+        List<Machine> filteredVSwitch = new ArrayList<Machine>();
+
+        // Filter the machines that doesn't have the switch name
+        for (Machine currentMachine : candidateMachines)
+        {
+            String[] switches = currentMachine.getVirtualSwitch().split("/");
+            for (String currentSwitch : switches)
+            {
+                if (currentSwitch.equalsIgnoreCase(vswitch))
+                {
+                    // The machine has the vswitch!
+                    currentMachine.setVirtualSwitch(vswitch);
+                    filteredVSwitch.add(currentMachine);
+                }
+            }
+        }
+
+        return filteredVSwitch;
+    }
+
+    private void validateCreateInfo(final MachinesToCreateDto dto) throws Exception
+    {
+        String[] properties =
+            {"ipFrom", "ipTo", "hypervisor", "user", "password", "port", "vSwitch"};
+
+        for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(dto.getClass()))
+        {
+            if (ListUtils.createList(properties).contains(pd.getName()))
+            {
+                if (pd.getReadMethod().invoke(dto) == null)
+                {
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                        pd.getName() + " can't be null"));
+                    flushErrors();
+                }
+            }
+        }
+
+        if (!AddressingUtils.isValidIP(dto.getIpFrom()))
+        {
+            addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                "Invalid ip From"));
+            flushErrors();
+        }
+
+        if (!AddressingUtils.isValidIP(dto.getIpTo()))
+        {
+            addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                "Invalid ip To"));
+            flushErrors();
+        }
+
+        if (IPAddress.newIPAddress(dto.getIpFrom()).isBiggerThan(
+            IPAddress.newIPAddress(dto.getIpTo())))
+        {
+            addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                "ip From can't be bigger than ip To"));
+            flushErrors();
+        }
     }
 }

@@ -602,6 +602,12 @@ package net.undf.abicloud.controller.infrastructure
             }
             else
             {
+            	//If the remote service has been created, we add it
+            	if(result is DataResult && DataResult(result).data is RemoteService){ 
+            		//Adding the new RemoteService to the Datacenter
+                    AbiCloudModel.getInstance().infrastructureManager.addRemoteServiceToDatacenter(DataResult(result).data as RemoteService,
+                                                                                               datacenter);
+            	}
                 //There was a problem
                 super.handleResult(result);
             }

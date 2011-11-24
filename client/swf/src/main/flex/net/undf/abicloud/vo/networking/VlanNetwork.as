@@ -38,6 +38,8 @@ package net.undf.abicloud.vo.networking
         
         public static const PUBLIC:String = "PUBLIC";
         
+        public static const UNMANAGED:String = "UNMANAGED";
+        
         
         public var vlanNetworkId:int;
 

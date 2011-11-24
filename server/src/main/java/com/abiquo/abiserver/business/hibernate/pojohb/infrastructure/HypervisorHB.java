@@ -142,21 +142,20 @@ public class HypervisorHB implements java.io.Serializable, IPojoHB<HyperVisor>
     {
         this.password = password;
     }
-    
+
     public HyperVisor toPojo()
     {
-    	return toPojo(physicalMachine.toPojo());
+        return toPojo(physicalMachine.toPojo());
     }
-    
+
     public HyperVisor toPojo(PhysicalMachine physicalMachine)
     {
         HyperVisor hyperVisor = new HyperVisor();
 
         hyperVisor.setAssignedTo(physicalMachine);
-        
+
         hyperVisor.setId(idHyper);
         hyperVisor.setName(getType().getValue());
-        
 
         hyperVisor.setIp(ip);
         hyperVisor.setIpService(ipService);

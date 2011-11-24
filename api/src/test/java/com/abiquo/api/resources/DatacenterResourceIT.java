@@ -24,6 +24,9 @@ package com.abiquo.api.resources;
 import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
+import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURIActionDiscover;
+import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURIActionDiscoverHypervidor;
+import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURIActionDiscoverMultiple;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterprisesByDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveHypervisorTypesURI;
 import static com.abiquo.api.common.UriTestResolver.resolveRacksURI;
@@ -34,13 +37,18 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.ClientWebException;
 import org.apache.wink.client.Resource;
+import org.apache.wink.common.internal.MultivaluedMapImpl;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.stub.NodecollectorServiceStubMock;
+import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.HypervisorTypesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -50,11 +58,33 @@ import com.abiquo.server.core.enterprise.EnterprisesDto;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.infrastructure.MachinesDto;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 
 public class DatacenterResourceIT extends AbstractJpaGeneratorIT
 {
+
+    private String validDatacenterUri;
+
+    private String validDatacenterUriDiscover;
+
+    private String validDatacenterUriDiscoverMultiple;
+
+    private Datacenter datacenter;
+
+    @Override
+    @BeforeMethod
+    public void setup()
+    {
+        datacenter = datacenterGenerator.createUniqueInstance();
+        RemoteService rs =
+            remoteServiceGenerator.createInstance(RemoteServiceType.NODE_COLLECTOR, datacenter);
+        setup(datacenter, rs);
+
+        validDatacenterUri = resolveDatacenterURI(datacenter.getId());
+    }
 
     @Test
     public void getDatacenterDoesntExist() throws ClientWebException
@@ -75,6 +105,10 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dc, resolveRemoteServicesURI(dc.getId()),
             RemoteServicesResource.REMOTE_SERVICES_PATH);
         assertLinkExist(dc, resolveDatacenterURI(dc.getId()), "edit");
+        assertLinkExist(dc, resolveDatacenterURIActionDiscover(dc.getId()),
+            DatacenterResource.ACTION_DISCOVER_REL);
+        assertLinkExist(dc, resolveDatacenterURIActionDiscoverMultiple(dc.getId()),
+            DatacenterResource.ACTION_DISCOVER_MULTIPLE_REL);
     }
 
     @Test
@@ -203,5 +237,242 @@ public class DatacenterResourceIT extends AbstractJpaGeneratorIT
         String href = resolveDatacenterURI(datacenter.getId());
 
         return get(href).getEntity(DatacenterDto.class);
+    }
+
+    /**
+     * Test the discover machine functionality for a correct behaviour. As you see, here we use the
+     * {@link NodecollectorServiceStubMock} mock class. Because we don't test the nodecollector
+     * behaviour, but the service behaviour in front of a correct response.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineFunctionality() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(datacenter.getId());
+
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        MachineDto machine = response.getEntity(MachineDto.class);
+        assertNotNull(machine);
+    }
+
+    /**
+     * Test the constraints check the id of the datacenter can not be less than 1.
+     */
+    @Test
+    public void discoverMachineRaises400WhenDatacenterIdIsMinorThan1() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @IP raises when it is not really an IP address
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineRaises400WhenParameterIPIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP, "234.12..1");
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @Hypervisor raises when it is not really an IP address
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineRaises400WhenParameterHypervisorIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.HYPERVISOR, "tetas");
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @Port when the value is bigger than 65535.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineRaises400WhenParameterPortIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+        params.putSingle(DatacenterResource.PORT, "70000");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the discover multiple machines functionality and check some errors are ignored and only
+     * returns the machines that match the query.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMultipleMachinesFunctionality() throws Exception
+    {
+        validDatacenterUriDiscoverMultiple =
+            resolveDatacenterURIActionDiscoverMultiple(datacenter.getId());
+
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP_FROM, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.IP_TO, NodecollectorServiceStubMock.IP_CORRECT_3);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscoverMultiple).queryParams(params);
+        ClientResponse response = resource.get();
+
+        MachinesDto machines = response.getEntity(MachinesDto.class);
+        assertNotNull(machines);
+        assertEquals(machines.getCollection().size(), 3);
+    }
+
+    /**
+     * Test the constraint @IP raises when the parameter IpFrom it is not really an IP address
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineRaises400WhenParameterIPFromIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP_FROM, "234.12..1");
+        params.putSingle(DatacenterResource.IP_TO, NodecollectorServiceStubMock.IP_CORRECT_3);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @IP raises when the parameter IpTo it is not really an IP address
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMachineRaises400WhenParameterIPToIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP_FROM, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.IP_TO, "234.12..1");
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @Hypervisor raises when it is not really an IP address
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMultipleMachineRaises400WhenParameterHypervisorIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP_FROM, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.IP_TO, NodecollectorServiceStubMock.IP_CORRECT_3);
+        params.putSingle(DatacenterResource.HYPERVISOR, "tetas");
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    /**
+     * Test the constraint @Port when the value is bigger than 65535.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void discoverMultipleMachineRaises400WhenParameterPortIsInvalid() throws Exception
+    {
+        validDatacenterUriDiscover = resolveDatacenterURIActionDiscover(0);
+        MultivaluedMapImpl<String, String> params = new MultivaluedMapImpl<String, String>();
+        params.putSingle(DatacenterResource.IP_FROM, NodecollectorServiceStubMock.IP_CORRECT_1);
+        params.putSingle(DatacenterResource.IP_TO, NodecollectorServiceStubMock.IP_CORRECT_3);
+        params.putSingle(DatacenterResource.HYPERVISOR, HypervisorType.VMX_04.getValue());
+        params.putSingle(DatacenterResource.USER, "user");
+        params.putSingle(DatacenterResource.PASSWORD, "password");
+        params.putSingle(DatacenterResource.PORT, "70000");
+
+        Resource resource = client.resource(validDatacenterUriDiscover).queryParams(params);
+        ClientResponse response = resource.get();
+
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void discoverHypervisorType() throws Exception
+    {
+        String ip = NodecollectorServiceStubMock.IP_CORRECT_1;
+
+        ClientResponse response =
+            get(resolveDatacenterURIActionDiscoverHypervidor(datacenter.getId(), ip));
+
+        String hType = response.getEntity(String.class);
+        assertNotNull(hType);
+        assertEquals(hType, HypervisorType.VMX_04.getValue());
     }
 }

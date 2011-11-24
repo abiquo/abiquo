@@ -49,7 +49,8 @@ public interface NetworkResourceStub
     public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
-        NetworkConfiguration configuration, Enterprise enterprise, Set<DhcpOption> dhcpOptions);
+        NetworkConfiguration configuration, Enterprise enterprise, boolean unmanaged,
+        Set<DhcpOption> dhcpOptions);
 
     public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
 
@@ -127,7 +128,7 @@ public interface NetworkResourceStub
 
     public BasicResult getPublicNetwork(final Integer datacenterId, final Integer vlanId);
 
-    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, Boolean onlypublic);
+    public BasicResult getPublicVlansByDatacenter(Integer datacenterId, String type);
 
     public BasicResult purchasePublicIp(final Integer vdcId, final Integer ipId);
 

@@ -34,6 +34,7 @@
 
     <mx:Script>
         <![CDATA[
+
         	import net.undf.abicloud.events.InfrastructureEvent;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
@@ -60,11 +61,12 @@
 
             //The VirtualAppliance that will be rendered
             [Bindable]
-            private var _virtualAppliance:VirtualAppliance;
+
+            protected var _virtualAppliance:VirtualAppliance;
+
             
             [Bindable]
             private var _logs:ArrayCollection;
-
 
             private function onCreationComplete():void{
             	//Check privilege
@@ -76,6 +78,7 @@
             public function set virtualAppliance(value:VirtualAppliance):void
             {
                 this._virtualAppliance = value;
+
                 if(this._virtualAppliance){
 	                getVirtualApplianceLogs();
                 }
@@ -99,6 +102,7 @@
             {
                 this._virtualAppliance.logs = value;
                 this._logs = value; 
+
             }
 
             /**
@@ -212,7 +216,8 @@
                 }
             }
 
-            private function powerOnVirtualAppliance():void
+
+            protected function powerOnVirtualAppliance():void
             {
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.START_VIRTUALAPPLIANCE);
 

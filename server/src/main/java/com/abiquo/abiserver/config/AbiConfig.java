@@ -123,7 +123,7 @@ public class AbiConfig
      * 
      * @return <ul>
      *         <li>abiquo: if DB login only</li>
-    *         <li>ldap: if LDAP and DB authentication</li>
+     *         <li>ldap: if LDAP and DB authentication</li>
      *         </ul>
      */
     public String getAbiquoSecurityMode()

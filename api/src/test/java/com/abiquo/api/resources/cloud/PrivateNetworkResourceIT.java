@@ -32,7 +32,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javax.ws.rs.core.MediaType;
@@ -90,8 +89,8 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan.setEnterprise(vdc.getEnterprise());
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(),
-            vlan.getConfiguration(), vlan, vdc, dclimit);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration(), vlan, vdc,
+            dclimit);
 
         validURI = resolvePrivateNetworkURI(vdc.getId(), vlan.getId());
 
@@ -151,7 +150,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         setup(vdc2.getEnterprise(), vdc2.getNetwork(), vdc2, dclimit);
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc2.getNetwork(), rs);
         vlan2.setEnterprise(vdc2.getEnterprise());
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan2.getConfiguration(), vlan2);
 
         // Ensure we have create it correctly.
         Resource resource = client.resource(resolvePrivateNetworkURI(vdc2.getId(), vlan2.getId()));
@@ -298,13 +297,7 @@ public class PrivateNetworkResourceIT extends AbstractJpaGeneratorIT
         // So we need to save another VLAN befor create the test
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs);
         vlan2.setEnterprise(vdc.getEnterprise());
-        List<Object> entitiesToSetup = new ArrayList<Object>();
-
-        entitiesToSetup.add(vlan2.getConfiguration().getDhcp());
-        entitiesToSetup.add(vlan2.getConfiguration());
-        entitiesToSetup.add(vlan2);
-        setup(entitiesToSetup.toArray());
-
+        setup(vlan2.getConfiguration(), vlan2);
         String uri = resolvePrivateNetworkURI(vdc.getId(), vlan2.getId());
         ClientResponse response = delete(uri, "basicUser", "basicUser");
 

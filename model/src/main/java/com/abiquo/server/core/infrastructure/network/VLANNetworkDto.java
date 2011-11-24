@@ -51,6 +51,8 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
 
     private Boolean defaultNetwork;
 
+    private Boolean unmanaged;
+
     private NetworkType type;
 
     private DhcpOptionsDto dhcpOptions;
@@ -173,6 +175,16 @@ public class VLANNetworkDto extends SingleResourceTransportDto implements Serial
     public void setDhcpOptions(final DhcpOptionsDto dhcpOptions)
     {
         this.dhcpOptions = dhcpOptions;
+    }
+
+    public Boolean getUnmanaged()
+    {
+        return unmanaged;
+    }
+
+    public void setUnmanaged(final Boolean unmanaged)
+    {
+        this.unmanaged = unmanaged;
     }
 
 }

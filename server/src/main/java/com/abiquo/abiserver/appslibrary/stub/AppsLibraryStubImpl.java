@@ -284,8 +284,7 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
     }
 
     @Override
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise,
-        final String nameOVFPackageList)
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList)
     {
         final Integer idOvfPackageList =
             getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
@@ -302,13 +301,13 @@ public class AppsLibraryStubImpl implements AppsLibraryStub
 
         return response.getEntity(OVFPackagesDto.class);
     }
-    
+
     public Resource createResourceOVFPackages(final Integer idEnterprise,
         final Integer idOvfpackageList)
     {
         final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH
-                + '/' + String.valueOf(idOvfpackageList);
+            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH + '/'
+                + String.valueOf(idOvfpackageList);
 
         Resource reso = client.resource(baseUri + "/" + path);
 

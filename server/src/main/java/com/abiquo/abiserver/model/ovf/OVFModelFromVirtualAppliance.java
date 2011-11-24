@@ -35,8 +35,12 @@ import javax.xml.namespace.QName;
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+<<<<<<< HEAD
 import org.dmtf.schemas.ovf.envelope._1.DHCPOption;
 import org.dmtf.schemas.ovf.envelope._1.DHCPOptions;
+=======
+import org.dmtf.schemas.ovf.envelope._1.DHCPServiceType;
+>>>>>>> stable
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.dmtf.schemas.ovf.envelope._1.IpPoolType;
@@ -56,8 +60,11 @@ import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
+<<<<<<< HEAD
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
+=======
+>>>>>>> stable
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
@@ -71,6 +78,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceMa
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.persistence.DAOFactory;
+import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -89,6 +97,7 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageDecorator;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.cim.CIMVirtualSystemSettingDataUtils;
@@ -443,6 +452,7 @@ public class OVFModelFromVirtualAppliance
         DAOFactory factory = HibernateDAOFactory.instance();
         VirtualMachineDAO vmDAO = factory.getVirtualMachineDAO();
         VlanNetworkDAO vlanDAO = factory.getVlanNetworkDAO();
+        DataCenterDAO dcDAO = factory.getDataCenterDAO();
 
         factory.beginConnection();
 
@@ -493,10 +503,7 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
-            VlanNetworkHB vlanHB = (VlanNetworkHB) vlan;// vlanDAO.findById(vlanId);
-
-            DHCPServiceHB service = (DHCPServiceHB) vlan.getConfiguration().getDhcpService();
-
+    VlanNetworkHB vlanHB = (VlanNetworkHB) vlan;
             DHCPOptions options = new DHCPOptions();
             Set<DhcpOptionHB> optionsHB = vlanHB.getDhcpOptionsHB();
             for (DhcpOptionHB opHB : optionsHB)
@@ -508,14 +515,32 @@ public class OVFModelFromVirtualAppliance
                 options.getOption().add(option);
             }
             vlan.setDhcpOptions(options);
-
-            if (service.getDhcpRemoteServiceId() != null)
+            Integer idDataCenter = null;
+            if (vlanHB.getNetworkType().equals(NetworkType.INTERNAL.name()))
+            {
+                idDataCenter =
+                    dcDAO.getDatacenterWhereThePrivateNetworkStays(vlanHB.getNetworkId())
+                        .getIdDataCenter();
+            }
+            else
+            {
+                idDataCenter =
+                    dcDAO.getDatacenterWhereThePublicNetworkStays(vlanHB.getNetworkId())
+                        .getIdDataCenter();
+            }
+            DHCPServiceType service = new DHCPServiceType();
+            if (idDataCenter != null)
             {
                 RemoteServiceDAO rmDAO = factory.getRemoteServiceDAO();
-                RemoteServiceHB remo = rmDAO.findById(service.getDhcpRemoteServiceId());
+                List<RemoteServiceHB> remo =
+                    rmDAO.getRemoteServicesByType(idDataCenter, RemoteServiceType.DHCP_SERVICE);
+                if (remo.size() != 0)
+                {
+                    service.setDhcpAddress(remo.get(0).getURI().getHost());
+                    service.setDhcpPort(remo.get(0).getURI().getPort());
+                    vlan.getConfiguration().setDhcpService(service);
+                }
 
-                service.setDhcpAddress(remo.getURI().getHost());
-                service.setDhcpPort(remo.getURI().getPort());
             }
 
             // Pass all the IpPoolManagement to IpPoolType if the virtual machine is assigned.
@@ -531,8 +556,7 @@ public class OVFModelFromVirtualAppliance
 
                 numberOfRules++;
             }
-
-            if (numberOfRules > 0)
+            if (numberOfRules > 0 && !vlanHB.getNetworkType().equals(NetworkType.UNMANAGED.name()))
             {
                 networkType.getNetworks().add(vlan);
             }

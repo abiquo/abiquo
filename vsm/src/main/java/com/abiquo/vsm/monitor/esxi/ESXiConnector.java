@@ -20,7 +20,6 @@
  */
 package com.abiquo.vsm.monitor.esxi;
 
-import java.awt.color.CMMException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
@@ -226,7 +225,7 @@ public class ESXiConnector
      */
     public void disconnect(String physicalMachineAddress)
     {
-        LOGGER.trace("Disconnecting to ESXi host: {}", physicalMachineAddress);
+        LOGGER.trace("Disconnecting from ESXi host: {}", physicalMachineAddress);
 
         if (serviceInstance != null && serviceInstance.getServerConnection() != null)
         {

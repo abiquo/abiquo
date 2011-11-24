@@ -126,7 +126,6 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         Machine machine =
             datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
                 realCpuThreads, currentCpusInUse, virtualCpusPerThread, state, virtualSwitch);
-
         return machine;
     }
 

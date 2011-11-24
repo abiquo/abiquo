@@ -74,6 +74,7 @@ public class APIExceptionMapper implements ExceptionMapper<APIException>
     }
 
     private Status defineStatus(final APIException exception, final ErrorsDto dto)
+
     {
         if (exception instanceof ForbiddenException)
         {

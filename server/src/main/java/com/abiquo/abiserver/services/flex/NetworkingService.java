@@ -466,9 +466,9 @@ public class NetworkingService
     }
 
     public BasicResult getExternalVlansByDatacenter(final UserSession userSession,
-        final Integer datacenterId, final Boolean onlypublic)
+        final Integer datacenterId, final String type)
     {
-        return proxyStub(userSession).getPublicVlansByDatacenter(datacenterId, onlypublic);
+        return proxyStub(userSession).getPublicVlansByDatacenter(datacenterId, type);
     }
 
     public DataResult<VlanNetwork> getExternalVlansByEnterprise(final UserSession userSession,

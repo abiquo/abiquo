@@ -27,6 +27,6 @@ public class VelocityMailTemplate
     public final static String APP_BRAND = "brand";
 
     public final static String APP_LANG = "lang";
-    
+
     public final static String DEFAULT_ENCODING = "UTF-8";
 }

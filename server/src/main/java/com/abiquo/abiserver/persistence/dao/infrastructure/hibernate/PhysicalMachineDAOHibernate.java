@@ -120,7 +120,9 @@ public class PhysicalMachineDAOHibernate extends HibernateDAO<PhysicalmachineHB,
                 .getNamedQuery(PHYSICALMACHINE_GET_NUMBER_OF_DEPLOYED_MACHINES_OWNED_BY_OTHER_ENTERPRISE);
         pmQuery.setInteger("idphysicalmachine", pmHB.getIdPhysicalMachine());
         pmQuery.setInteger("identerprise", idEnterprise);
+
         List<Long> longList = pmQuery.list();
+
         numberOfDeployedMachines = longList.get(0);
         return numberOfDeployedMachines;
     }
