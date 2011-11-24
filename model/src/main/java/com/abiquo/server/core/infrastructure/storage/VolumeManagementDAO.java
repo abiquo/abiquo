@@ -415,7 +415,7 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
             // Add order filter to the query
             Query queryWithOrder = getSession().createQuery(req);
             queryWithOrder.setInteger("vmId", vm.getId());
-            queryWithOrder.setInteger("state", VolumeState.ATTACHED.ordinal());
+            queryWithOrder.setParameter("state", VolumeState.ATTACHED);
             queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
                 + filters.getFilter() + "%");
 
