@@ -33,6 +33,7 @@ package net.undf.abicloud.controller.infrastructure
     import net.undf.abicloud.vo.infrastructure.DataCenter;
     import net.undf.abicloud.vo.infrastructure.Datastore;
     import net.undf.abicloud.vo.infrastructure.HyperVisor;
+    import net.undf.abicloud.vo.infrastructure.HypervisorRemoteAccessInfo;
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.PhysicalMachineCreation;
     import net.undf.abicloud.vo.infrastructure.Rack;
@@ -669,5 +670,20 @@ package net.undf.abicloud.controller.infrastructure
                 super.handleResult(result);
             }
         }
+        
+        public function handleGetHypervisorRemoteAccessInfo(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returing the result to who dispatched the event
+                callback(DataResult(result).data as HypervisorRemoteAccessInfo);
+            }
+            else
+            {
+                //There was a problem
+                super.handleResult(result);
+            }
+        }
+        
     }
 }

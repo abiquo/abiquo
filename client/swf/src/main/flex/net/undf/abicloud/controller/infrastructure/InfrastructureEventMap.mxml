@@ -1315,4 +1315,39 @@
         </RemoteObjectInvoker>
 
     </EventHandlers>
+    
+    <!-- InfrastructureEvent.GET_HYPERVISOR_REMOTE_ACCESS_INFO ___________________________________________________________________ -->
+    <EventHandlers type="{InfrastructureEvent.GET_HYPERVISOR_REMOTE_ACCESS_INFO}">
+
+        <!-- Blocking screen -->
+        <InlineInvoker method="ScreenBlocker.blockScreen"/>
+
+        <!-- Make call to the server here -->
+        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+            method="getHypervisorRemoteAccessInfo"
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.infrastructureElement]}">
+
+            <resultHandlers>
+                <MethodInvoker generator="{InfrastructureResultHandler}"
+                    method="handleGetHypervisorRemoteAccessInfo"
+                    arguments="{[resultObject, event.callback]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </resultHandlers>
+
+            <faultHandlers>
+                <MethodInvoker generator="{FaultHandler}"
+                    method="handleFault"
+                    arguments="{[fault]}"/>
+
+                <!-- Unblock screen -->
+                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+            </faultHandlers>
+
+        </RemoteObjectInvoker>
+
+    </EventHandlers>
+    
 </EventMap>
