@@ -233,8 +233,7 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
      * 
      * @throws Exception
      */
-    // @Test
-    // TODO SCG Post for multiple machines must use a machine dto, not query params
+    @Test
     void createMultipleMachines() throws Exception
     {
         MachineDto m = getValidMachine();

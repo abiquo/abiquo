@@ -28,6 +28,7 @@ import javax.persistence.EntityManager;
 import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
@@ -36,11 +37,19 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
 {
     public static final String GET_DISK_INTO_VIRTUALMACHINE =
         " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
-            + " AND disk.rasd.generation = :diskOrder ";
+            + " AND disk.id = :idDisk ";
 
     public static final String GET_DISKS_INTO_VIRTUALMACHINE =
         " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualMachine.id = :idVm "
             + " ORDER BY disk.rasd.generation";
+
+    public static final String GET_DISKS_INTO_VIRTUALDATACENTER =
+        " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualDatacenter.id = :idVdc "
+            + " ORDER BY disk.rasd.generation";
+
+    public static final String GET_DISK_INTO_VIRTUALDATACENTER =
+        " SELECT disk FROM DiskManagement disk" + " WHERE disk.virtualDatacenter.id = :idVdc "
+            + " AND disk.id = :idDisk";
 
     public DiskManagementDAO()
     {
@@ -50,6 +59,24 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
     public DiskManagementDAO(final EntityManager entityManager)
     {
         super(DiskManagement.class, entityManager);
+    }
+
+    public List<DiskManagement> findHardDisksByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        Query finalQuery = getSession().createQuery(GET_DISKS_INTO_VIRTUALDATACENTER);
+        finalQuery.setParameter("idVdc", vdc.getId());
+
+        return finalQuery.list();
+    }
+
+    public DiskManagement findHardDiskByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer diskId)
+    {
+        Query finalQuery = getSession().createQuery(GET_DISK_INTO_VIRTUALDATACENTER);
+        finalQuery.setParameter("idVdc", vdc.getId());
+        finalQuery.setParameter("idDisk", diskId);
+
+        return (DiskManagement) finalQuery.uniqueResult();
     }
 
     /**
@@ -75,11 +102,11 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
      * @return the found {@link DiskManagement}
      */
     public DiskManagement findHardDisksByVirtualMachine(final VirtualMachine vm,
-        final Integer diskOrder)
+        final Integer diskId)
     {
         Query finalQuery = getSession().createQuery(GET_DISK_INTO_VIRTUALMACHINE);
         finalQuery.setParameter("idVm", vm.getId());
-        finalQuery.setParameter("diskOrder", Long.valueOf(diskOrder));
+        finalQuery.setParameter("idDisk", diskId);
 
         return (DiskManagement) finalQuery.uniqueResult();
     }

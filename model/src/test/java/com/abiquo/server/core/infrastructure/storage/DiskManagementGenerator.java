@@ -23,11 +23,11 @@ package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
 
-import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
@@ -39,12 +39,15 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
 
     private VirtualMachineGenerator vmGenerator;
 
+    private VirtualDatacenterGenerator vdcGenerator;
+
     public DiskManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         datastoreGenerator = new DatastoreGenerator(seed);
         vmGenerator = new VirtualMachineGenerator(seed);
+        vdcGenerator = new VirtualDatacenterGenerator(seed);
     }
 
     @Override
@@ -62,14 +65,13 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
     @Override
     public DiskManagement createUniqueInstance()
     {
-        VirtualMachine vm = vmGenerator.createUniqueInstance();
-        return createInstance(vm);
+        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
+        return createInstance(vdc);
     }
 
-    public DiskManagement createInstance(final VirtualMachine vm)
+    public DiskManagement createInstance(final VirtualDatacenter vdc)
     {
-        return new DiskManagement(vm, (long) nextSeed(), RasdManagement.FIRST_ATTACHMENT_SEQUENCE
-            + nextSeed());
+        return new DiskManagement(vdc, (long) nextSeed());
     }
 
     @Override

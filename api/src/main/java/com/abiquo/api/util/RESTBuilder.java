@@ -1165,4 +1165,11 @@ public class RESTBuilder implements IRESTBuilder
         return links;
     }
 
+    @Override
+    public List<RESTLink> buildVirtualDatacenterDiskLinks(final DiskManagement disk)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

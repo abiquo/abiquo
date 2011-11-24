@@ -272,14 +272,25 @@ public class VirtualDatacenterRep extends DefaultRepBase
     }
 
     public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
-        final Integer diskOrder)
+        final Integer diskId)
     {
-        return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskOrder);
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskId);
     }
 
     public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
     {
         return diskManagementDAO.findHardDisksByVirtualMachine(vm);
+    }
+
+    public List<DiskManagement> findHardDisksByVirtualDatacenter(final VirtualDatacenter vdc)
+    {
+        return diskManagementDAO.findHardDisksByVirtualDatacenter(vdc);
+    }
+
+    public DiskManagement findHardDiskByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer idDisk)
+    {
+        return diskManagementDAO.findHardDiskByVirtualDatacenter(vdc, idDisk);
     }
 
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
