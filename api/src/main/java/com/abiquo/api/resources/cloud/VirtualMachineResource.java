@@ -85,8 +85,6 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
-    public static final String VIRTUAL_MACHINE_ACTION_VOLUMES = "/action/volumes";
-
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
     @Autowired
