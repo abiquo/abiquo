@@ -21,6 +21,7 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.common.internal.utils.UriHelper;
 
@@ -35,7 +36,8 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
     @Override
-    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(PhysicalMachine machine)
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(
+        final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine) + "?credentials=true";
 
@@ -48,8 +50,12 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
             MachineDto dto = response.getEntity(MachineDto.class);
 
             HypervisorRemoteAccessInfo info = new HypervisorRemoteAccessInfo();
-            info.setParam1(dto.getUser());
-            info.setParam2(dto.getPassword());
+
+            String encodedUser = new String(Base64.encodeBase64(dto.getUser().getBytes()));
+            String encodedPass = new String(Base64.encodeBase64(dto.getPassword().getBytes()));
+
+            info.setParam1(encodedUser);
+            info.setParam2(encodedPass);
 
             result.setSuccess(true);
             result.setData(info);
@@ -63,7 +69,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
     }
 
     @Override
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine)
+    public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
         uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
@@ -83,7 +89,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         return result;
     }
 
-    public static MachineDto fromPhysicalMachineToDto(PhysicalMachine machine)
+    public static MachineDto fromPhysicalMachineToDto(final PhysicalMachine machine)
     {
         MachineDto dto = new MachineDto();
         dto.setId(machine.getId());
@@ -107,7 +113,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOff(PhysicalMachine machine)
+    public BasicResult powerOff(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
@@ -117,7 +123,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOn(PhysicalMachine machine)
+    public BasicResult powerOn(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
