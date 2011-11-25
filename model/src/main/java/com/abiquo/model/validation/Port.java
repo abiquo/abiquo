@@ -37,10 +37,14 @@ import javax.validation.Payload;
 
 @Documented
 @Constraint(validatedBy = Port.Validator.class)
-@Target({METHOD, FIELD, PARAMETER})
+@Target( {METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Port
 {
+    public static final int MAX_VALUE = 65535;
+
+    public static final int MIN_VALUE = 0;
+
     boolean required() default true;
 
     String message() default "invalid port :";
@@ -54,13 +58,13 @@ public @interface Port
         Port port;
 
         @Override
-        public void initialize(Port constraintAnnotation)
+        public void initialize(final Port constraintAnnotation)
         {
             this.port = constraintAnnotation;
         }
 
         @Override
-        public boolean isValid(Integer value, ConstraintValidatorContext context)
+        public boolean isValid(final Integer value, final ConstraintValidatorContext context)
         {
             if (!port.required() && value == null)
             {
@@ -72,7 +76,7 @@ public @interface Port
                 return false;
             }
 
-            Boolean valid = value >= 0 && value <= 65535;
+            Boolean valid = value >= MIN_VALUE && value <= MAX_VALUE;
 
             if (!valid)
             {

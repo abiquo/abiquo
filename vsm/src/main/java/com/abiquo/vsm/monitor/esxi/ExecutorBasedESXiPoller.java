@@ -105,7 +105,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
     }
 
     @Override
-    public void publishState(String physicalMachineAddress, String virtualMachineName)
+    public void publishState(final String physicalMachineAddress, final String virtualMachineName)
         throws MonitorException
     {
         super.publishState(physicalMachineAddress, virtualMachineName);
@@ -136,14 +136,14 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      * @param pollInterval The polling execution interval.
      * @return The PeriodicalExecutor.
      */
-    private PeriodicalExecutor createExecutor(Poller poller, int pollInterval)
+    private PeriodicalExecutor createExecutor(final Poller poller, final int pollInterval)
     {
         return new PeriodicalExecutor(poller, pollInterval)
         {
             @Override
-            public void executionFailure(Throwable t)
+            public void executionFailure(final Throwable t)
             {
-                LOGGER.trace("An unexpected error occured while performing monitor tasks", t);
+                LOGGER.trace("An unexpected error occured while monitoring physical machine", t);
             }
         };
     }
@@ -167,7 +167,7 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
             {
                 for (String physicalMachineAddress : monitoredMachines)
                 {
-                    LOGGER.trace("Monitoring: {}", physicalMachineAddress);
+                    LOGGER.trace("Getting information from: {}", physicalMachineAddress);
 
                     PhysicalMachine pm = getPhysicalMachine(physicalMachineAddress);
                     VirtualMachinesCache cache = pm.getVirtualMachines();
@@ -179,6 +179,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
                     try
                     {
+                        LOGGER.trace("Getting information from the current VMS...");
+
                         // Get states
                         ObjectContent[] vms = esx.getAllVMs();
 
@@ -198,11 +200,21 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
 
                             // Get the new state of the VM
                             VMEventType state = esx.getStateForObject(vm);
+                            LOGGER.trace("Found VM {} in state {}", vmName, state.name());
+
                             VMEvent event = new VMEvent(state, physicalMachineAddress, vmName);
 
                             // Propagate the event. RedisSubscriber will decide if it must be
                             // notified, based on subscription information
                             ExecutorBasedESXiPoller.this.notify(event);
+                        }
+
+                        if (LOGGER.isTraceEnabled())
+                        {
+                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
+                            LOGGER.trace(
+                                "Cache for Machine {} before generating CREATE/DESTROY is: {}",
+                                physicalMachineAddress, cacheStr);
                         }
 
                         // Propagate create and destroy events
@@ -211,6 +223,14 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
                         // Update the physical machine with the current machines in the hypervisor
                         cache.getCache().clear();
                         cache.getCache().addAll(currentVMs);
+
+                        if (LOGGER.isTraceEnabled())
+                        {
+                            String cacheStr = StringUtils.join(cache.getCache(), ", ");
+                            LOGGER.trace(
+                                "Cache for Machine {} after generating CREATE/DESTROY is: {}",
+                                physicalMachineAddress, cacheStr);
+                        }
                     }
                     finally
                     {
@@ -226,7 +246,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
          * @param pm The physical machine being monitored.
          * @param currentVMs The current virtual machines in the hypervisor.
          */
-        private void propagateCreateAndDestroyEvents(PhysicalMachine pm, Set<String> currentVMs)
+        private void propagateCreateAndDestroyEvents(final PhysicalMachine pm,
+            final Set<String> currentVMs)
         {
             // Propagate DESTROY events
             Set<String> removedVMs = pm.getVirtualMachines().getCache();
@@ -235,6 +256,9 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
             for (String removed : removedVMs)
             {
                 VMEvent event = new VMEvent(VMEventType.DESTROYED, pm.getAddress(), removed);
+
+                LOGGER.trace("Removed VM {} from {}", removed, pm.getAddress());
+
                 ExecutorBasedESXiPoller.this.notify(event);
             }
 
@@ -245,6 +269,9 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
             for (String created : createdVMs)
             {
                 VMEvent event = new VMEvent(VMEventType.CREATED, pm.getAddress(), created);
+
+                LOGGER.trace("New VM {} at {}", created, pm.getAddress());
+
                 ExecutorBasedESXiPoller.this.notify(event);
             }
         }

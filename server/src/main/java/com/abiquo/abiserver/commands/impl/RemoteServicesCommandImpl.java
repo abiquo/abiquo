@@ -74,17 +74,6 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
     }
 
     @Override
-    public DataResult<RemoteService> addRemoteService(final UserSession userSession,
-        final RemoteService rs)
-    {
-        RemoteServicesResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
-                RemoteServicesResourceStub.class);
-
-        return proxy.addRemoteService(rs);
-    }
-
-    @Override
     public boolean checkRemoteService(final UserSession userSession, final Integer id)
         throws InfrastructureCommandException
     {

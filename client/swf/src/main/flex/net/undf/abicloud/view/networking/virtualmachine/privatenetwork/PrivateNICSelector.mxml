@@ -84,6 +84,7 @@
             {
                 _virtualDatacenter = virtualDatacenter;
                 _virtualMachine = virtualMachine;
+                acceptButton.enabled = false;
                 getNetworksByVirtualDatacenter();
                 availableIP = new ArrayCollection();
                 cleanFilteringOptions();
@@ -129,7 +130,11 @@
                 if (vlanList.selectedIndex > -1)
                 {
                     cleanFilteringOptions();
-                    requestIPAddresses();
+                    if(VlanNetwork(vlanList.selectedItem).networkType != VlanNetwork.UNMANAGED){
+	                    requestIPAddresses();
+                    }else{
+                    	setAvailablePrivateIPAddresses(new ArrayCollection(),0);
+                    }
                 }
             }
 
@@ -139,22 +144,21 @@
                 listRequest.filterLike = ipFilter.text;
 
                 var event:NetworkingEvent;
-                
-                if(VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.EXTERNAL){
-                    event = new NetworkingEvent(NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN);
-                    event.available = true;
-                }else{
-                    event = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
-                }
-                
-                event.virtualDatacenter = _virtualDatacenter;
-                event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
-                event.listRequest = listRequest;
-                event.callback = setAvailablePrivateIPAddresses;
-                
-                //to avoid a bug, don't dispatch if the vlanNetwork is not selected
-                if(vlanList.selectedItem){                	
-	                dispatchEvent(event);
+                if(vlanList.selectedItem){
+	                if(VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.EXTERNAL){
+	                    event = new NetworkingEvent(NetworkingEvent.GET_FREE_IPs_BY_EXTERNAL_VLAN);
+	                    event.available = true;
+	                }else{
+	                    event = new NetworkingEvent(NetworkingEvent.GET_AVAILABLE_NICs_BY_VLAN);
+	                }
+	                
+	                event.virtualDatacenter = _virtualDatacenter;
+	                event.vlanNetwork = vlanList.selectedItem as VlanNetwork;
+	                event.listRequest = listRequest;
+	                event.callback = setAvailablePrivateIPAddresses;
+	                
+	                //to avoid a bug, don't dispatch if the vlanNetwork is not selected
+		            dispatchEvent(event);
                 }
             }
 
@@ -211,16 +215,25 @@
                 dispatchEvent(event);
 
                 close(); */
-                if(vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                if(vlanNetwork.networkType == VlanNetwork.EXTERNAL || vlanNetwork.networkType == VlanNetwork.UNMANAGED){
                     dispatchEvent(new Event("onAssignExternalNicToVirtualMachine"));
                 }else{
-	                dispatchEvent(new Event("onAssignNicToVirtualMachine"));                	
+                    dispatchEvent(new Event("onAssignNicToVirtualMachine"));                    
                 }
             }
 
             public function close():void
             {
                 dispatchEvent(new Event("close"));
+            }
+            
+            private function returnUnmanaged(obj:VlanNetwork):String
+            {
+            	var returnLabel:String = obj.networkName;
+            	if(obj.networkType == VlanNetwork.UNMANAGED){
+            		returnLabel += " ("+resourceManager.getString('NetworkingPremium','LABEL_UNMANAGED').toLowerCase()+")";
+            	}
+            	return returnLabel;
             }
         ]]>
     </mx:Script>
@@ -241,6 +254,7 @@
                 width="100%" height="100%"
                 borderStyle="none"
                 styleName="ListFull" labelField="networkName"
+                labelFunction="returnUnmanaged"
                 dataProvider="{_virtualDatacenter.network.networks}"
                 click="onClickVLANList()"/>
         </general:GeneralSubPanel>
@@ -335,7 +349,7 @@
         horizontalAlign="center">
         <mx:Button id="acceptButton"
             height="18"
-            enabled="{availableIPList.selectedIndex > -1}"
+            enabled="{availableIPList.selectedIndex > -1 || VlanNetwork(vlanList.selectedItem).networkType == VlanNetwork.UNMANAGED}"
             label="@Resource(bundle='Common', key='BUTTON_ACCEPT')"
             click="onAccept()"/>
 

@@ -57,6 +57,8 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         return vlanNetworkId;
     }
 
+    private String networkType;
+
     /**
      * @param vlanNetworkId the vlanNetworkId to set
      */
@@ -97,6 +99,16 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         this.enterpriseHB = enterpriseHB;
     }
 
+    public void setNetworkType(final String networkType)
+    {
+        this.networkType = networkType;
+    }
+
+    public String getNetworkType()
+    {
+        return networkType;
+    }
+
     @Override
     public VlanNetwork toPojo()
     {
@@ -106,6 +118,7 @@ public class VlanNetworkHB extends OrgNetworkType implements IPojoHB<VlanNetwork
         vnet.setNetworkName(getNetworkName());
         vnet.setVlanNetworkId(getVlanNetworkId());
         vnet.setVlanTag(getVlanTag());
+        vnet.setNetworkType(getNetworkType());
 
         if (getConfiguration() != null)
         {

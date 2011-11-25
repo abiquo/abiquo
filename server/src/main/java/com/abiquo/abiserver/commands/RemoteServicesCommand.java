@@ -40,16 +40,6 @@ import com.abiquo.abiserver.pojo.service.RemoteServiceType;
 public interface RemoteServicesCommand
 {
     /**
-     * Adds a new Remote Service to a DataCenter
-     * 
-     * @param userSession
-     * @param rs
-     * @return
-     * @throws InfrastructureCommandException
-     */
-    public DataResult<RemoteService> addRemoteService(UserSession userSession, RemoteService rs);
-
-    /**
      * Updates a remote service data
      * 
      * @param userSession
