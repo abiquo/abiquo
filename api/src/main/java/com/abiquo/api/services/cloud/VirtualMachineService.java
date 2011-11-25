@@ -607,13 +607,13 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
-     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
+     * @param forceEnterpriseSoftLimits Do we should take care of the soft limits?
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
+        final Integer vdcId, final Boolean forceEnterpriseSoftLimits)
     {
         logger.debug("Starting the deploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
@@ -632,12 +632,12 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("The state is valid for deploy");
 
         logger
-            .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
+            .debug("Allocating with force enterpise  soft limits : " + forceEnterpriseSoftLimits);
         /*
          * Select a machine to allocate the virtual machine, Check limits, Check resources If one of
          * the above fail we cannot allocate the VirtualMachine
          */
-        vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
+        vmAllocatorService.allocateVirtualMachine(vmId, vappId, forceEnterpriseSoftLimits);
         vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
         logger.debug("Allocated!");
 
