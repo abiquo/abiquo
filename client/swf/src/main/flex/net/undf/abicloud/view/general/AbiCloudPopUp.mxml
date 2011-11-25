@@ -42,6 +42,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.view.general.components.info.InfoIcon;
         	import flash.net.navigateToURL;
@@ -70,6 +71,7 @@
              **/
             private final function onPreInitialize():void
             {
+            	BindingUtils.bindProperty(this, "updateShowIcon", AbiCloudModel.getInstance().configurationManager.config.client_wiki_showDefaultHelp,"value")
                 //Creating Icon
                 _popUpIcon = new Image();
                 _popUpIcon.source = _iconSource;
@@ -98,12 +100,19 @@
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
-                addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
-                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo);
+                /* addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
+                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo); */
                 this.addChildAt(header, 0);
 
                 //Registering Keyboard events, for standard application behaivor
                 this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+            }
+            
+            public function set updateShowIcon(value:int):void
+            {
+            	if(_iconInfo){
+	            	_iconInfo.wikiUrl = this._wikiUrl;
+            	}
             }
 
             /**
@@ -127,7 +136,7 @@
              */
             private function showIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                //this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
+                this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
             }
 
             /**
@@ -135,7 +144,7 @@
              */
             private function hideIconInfo(keyboardEvent:KeyboardEvent):void
             {
-                //this._iconInfo.hideIconInfo();
+                this._iconInfo.hideIconInfo();
             }
             
             
@@ -157,7 +166,7 @@
             {
                 this._iconSource = source;
             }
-
+            
             /**
              * We replicate here the behaivor described in AbiCloud.mxml, since Events dispatched from a PopUp
              * do not propagate outside
