@@ -110,8 +110,8 @@
     <!-- MeteringEvent.GET_EVENTS_FILTERED _____________________________________________________ -->
     <EventHandlers type="{MeteringEvent.GET_EVENTS_FILTERED}">
 
-        <!-- Blocking screen -->
-        <!--<InlineInvoker method="ScreenBlocker.blockScreen"/>-->
+       <InlineInvoker method="{AbiCloudModel.getInstance().meteringManager.setInProgress}"
+            arguments="{[MeteringEvent.GET_EVENTS_FILTERED, true]}"/>
 
         <!-- Make call to the server here -->
 
@@ -124,8 +124,8 @@
                     method="getEventsFilteredResultHandler"
                     arguments="{[resultObject]}"/>
 
-                <!-- Unblock screen -->
-                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+                <InlineInvoker method="{AbiCloudModel.getInstance().meteringManager.setInProgress}"
+                           arguments="{[MeteringEvent.GET_EVENTS_FILTERED, false]}"/>
             </resultHandlers>
 
             <faultHandlers>
@@ -133,8 +133,8 @@
                     method="handleFault"
                     arguments="{[fault]}"/>
 
-                <!-- Unblock screen -->
-                <InlineInvoker method="ScreenBlocker.unblockScreen"/>
+                <InlineInvoker method="{AbiCloudModel.getInstance().meteringManager.setInProgress}"
+                          arguments="{[MeteringEvent.GET_EVENTS_FILTERED, false]}"/>
             </faultHandlers>
 
         </RemoteObjectInvoker>

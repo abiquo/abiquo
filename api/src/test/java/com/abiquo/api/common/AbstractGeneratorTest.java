@@ -168,17 +168,17 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "virtualimage_conversions", "node_virtual_image_stateful_conversions",
             "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
-            "network_configuration", "dhcp_service", "storage_pool", "tier", "storage_device",
-            "remote_service", "datastore_assignment", "datastore", "hypervisor",
-            "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter",
-            "repository", "workload_fit_policy_rule", "network", "session", "user",
-            "roles_privileges", "role_ldap", "role", "privilege", "enterprise",
-            "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
-            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
-            "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
-            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "register", "costCodeCurrency",
-            "pricingCostCode", "pricingTier", "pricingTemplate", "currency", "costCode"};
+            "network_configuration", "storage_pool", "tier", "storage_device", "remote_service",
+            "datastore_assignment", "datastore", "hypervisor", "workload_machine_load_rule",
+            "physicalmachine", "rack", "ucs_rack", "datacenter", "repository",
+            "workload_fit_policy_rule", "network", "session", "user", "roles_privileges",
+            "role_ldap", "role", "privilege", "enterprise", "enterprise_limits_by_datacenter",
+            "workload_enterprise_exclusion_rule", "ovf_package_list_has_ovf_package",
+            "ovf_package", "ovf_package_list", "apps_library", "license", "system_properties",
+            "vdc_enterprise_stats", "vapp_enterprise_stats", "dc_enterprise_stats",
+            "enterprise_resources_stats", "cloud_usage_stats", "log", "metering", "tasks",
+            "alerts", "heartbeatlog", "icon", "register", "costCodeCurrency", "pricingCostCode",
+            "pricingTier", "pricingTemplate", "currency", "costCode"};
 
         tearDown(entities);
     }

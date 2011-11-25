@@ -35,6 +35,10 @@ public class ConfigService
 
     public static final String VLAN_PER_VDC = "abiquo.server.networking.vlanPerVdc";
 
+    public static final String MIN_REMOTE_DESKTOP_PORT = "abiquo.vncport.min";
+
+    public static final String MAX_REMOTE_DESKTOP_PORT = "abiquo.vncport.max";
+
     public static String getSystemProperty(final String property)
     {
         return System.getProperty(property);

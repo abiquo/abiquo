@@ -582,9 +582,13 @@ public class OVFGeneratorService
             Integer numberOfRules = 0;
             Collection<IpPoolManagement> ips =
                 vdcRepo.findIpsByPrivateVLAN(vdc.getId(), vlan.getId());
+            List<RemoteService> remoteServices =
+                datacenterRepo.findRemoteServiceWithTypeInDatacenter(vdc.getDatacenter(),
+                    RemoteServiceType.DHCP_SERVICE);
+            // RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp()
+            // .getRemoteService();
 
-            RemoteService dhcpRemoteService = vlan.getConfiguration().getDhcp().getRemoteService();
-            URI uri = new URI(dhcpRemoteService.getUri());
+            URI uri = new URI(remoteServices.get(0).getUri());
 
             DHCPServiceType dhcp = new DHCPServiceType();
             dhcp.setDhcpAddress(uri.getHost());
@@ -1123,5 +1127,4 @@ public class OVFGeneratorService
 
         return rasdOut;
     }
-
 }

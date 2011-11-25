@@ -181,7 +181,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
 
     @Override
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
-        final Integer vlanTag, final NetworkConfiguration configuration, final Enterprise enterprise)
+        final Integer vlanTag, final NetworkConfiguration configuration,
+        final Enterprise enterprise, final boolean unmanaged)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
@@ -195,6 +196,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setSecondaryDNS(configuration.getSecondaryDNS());
         dto.setSufixDNS(configuration.getSufixDNS());
         dto.setTag(vlanTag);
+        dto.setUnmanaged(unmanaged);
 
         if (enterprise != null)
         {
@@ -523,7 +525,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
                     for (VLANNetworkDto dto : dtos.getCollection())
                     {
                         VlanNetwork net = createFlexObject(dto);
-                        net.setNetworkType("EXTERNAL");
+                        // net.setNetworkType("EXTERNAL");
                         listOfNetworks.add(net);
                     }
 
@@ -1278,11 +1280,19 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             if (dcId.equals(datacenterId))
             {
                 String uriNIC = createVirtualMachineNICsLink(vdcId, vappId, vmId);
-                String uriIp =
-                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanNetworkId
-                        + "/ips/" + idManagement;
                 RESTLink externalIPlink = new RESTLink();
-                externalIPlink.setRel("externalip");
+                String uriIp =
+                    limitDto.searchLink("externalnetworks").getHref() + "/" + vlanNetworkId;
+                if (idManagement != 0)
+                {
+                    uriIp = uriIp + "/ips/" + idManagement;
+                    externalIPlink.setRel("externalip");
+                }
+                else
+                {
+                    externalIPlink.setRel("unmanagedip");
+                }
+
                 externalIPlink.setHref(uriIp);
 
                 LinksDto linkDto = new LinksDto();
@@ -1313,11 +1323,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     {
 
         BasicResult result = new BasicResult();
+        LinksDto links = new LinksDto();
+        RESTLink ipLink = new RESTLink();
 
         String uri = createVirtualMachineNICsLink(vdcId, vappId, vmId);
         String uriIp = createPrivateNetworkIPLink(vdcId, vlanId, idManagement);
-        LinksDto links = new LinksDto();
-        RESTLink ipLink = new RESTLink();
         ipLink.setHref(uriIp);
         ipLink.setRel("privateip");
         links.addLink(ipLink);
