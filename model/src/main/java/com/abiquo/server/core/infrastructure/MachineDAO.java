@@ -41,6 +41,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Machine.State;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaMachineDAO")
 @SuppressWarnings("unchecked")
@@ -73,7 +74,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
     private static Criterion sameId(final Integer id)
     {
-        return Restrictions.eq(Machine.ID_PROPERTY, id);
+        return Restrictions.eq(PersistentEntity.ID_PROPERTY, id);
     }
 
     private static Criterion sameName(final String name)
@@ -99,19 +100,14 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    /**
-     * @return the list of physical machines of the infrastructure without virtual machines in the
-     *         allocator.
-     */
-    public Machine isMachineInAllocator(final Integer machineId)
+    public boolean isMachineInAllocator(final Integer machineId)
     {
         // The way to define the virtual machines in the allocator is:
         // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
         Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
         query.setParameter("machineId", machineId);
 
-        return (Machine) query.uniqueResult();
-
+        return query.uniqueResult() != null;
     }
 
     public List<Machine> findRackMachines(final Rack rack)
