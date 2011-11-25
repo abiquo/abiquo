@@ -30,6 +30,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -69,14 +70,16 @@ public class MachineResource extends AbstractResource
 
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
 
+    public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
+
     public static final String MACHINE_ACTION_GET_VIRTUALMACHINES = "action/virtualmachines";
-    
+
     public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
-    
+
     public static final String MACHINE_ACTION_POWER_OFF_REL = "powerOff";
 
     public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
-    
+
     public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
 
     @Autowired
@@ -98,13 +101,24 @@ public class MachineResource extends AbstractResource
     public MachineDto getMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MACHINE) final Integer machineId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(MACHINE) final Integer machineId,
+        @QueryParam(SHOW_CREDENTIALS_QUERY_PARAM) final Boolean showCredentials,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
         Machine machine = service.getMachine(machineId);
-        return createTransferObject(machine, restBuilder);
+        MachineDto dto = createTransferObject(machine, restBuilder);
+
+        // Credentials are only returned if they are requested
+        if (showCredentials == null || showCredentials.equals(Boolean.FALSE)
+            && machine.getHypervisor() != null)
+        {
+            dto.setUser(null);
+            dto.setPassword(null);
+        }
+
+        return dto;
     }
 
     @PUT
@@ -163,10 +177,12 @@ public class MachineResource extends AbstractResource
                             for (VirtualMachine v : all)
                             {
                                 if (v.equals(vm))
+                                {
                                     vmDto.add(VirtualMachinesResource
                                         .createCloudAdminTransferObject(v, vapp
                                             .getVirtualDatacenter().getId(), vapp.getId(),
                                             restBuilder));
+                                }
                             }
                         }
                     }
@@ -211,7 +227,7 @@ public class MachineResource extends AbstractResource
     }
 
     protected static MachineDto addLinks(final IRESTBuilder restBuilder,
-        final Integer datacenterId, final Integer rackId, Boolean managedRack,
+        final Integer datacenterId, final Integer rackId, final Boolean managedRack,
         final MachineDto machine)
     {
         machine.setLinks(restBuilder.buildMachineLinks(datacenterId, rackId, managedRack, machine));
@@ -243,7 +259,7 @@ public class MachineResource extends AbstractResource
         dto.setIpmiPort(machine.getIpmiPort());
         dto.setIpmiUser(machine.getIpmiUser());
         dto.setIpmiPassword(machine.getIpmiPassword());
-        
+
         if (machine.getHypervisor() != null)
         {
             dto.setIp(machine.getHypervisor().getIp());
@@ -252,7 +268,7 @@ public class MachineResource extends AbstractResource
             dto.setUser(machine.getHypervisor().getUser());
             dto.setPassword(machine.getHypervisor().getPassword());
         }
-        
+
         if (machine.getDatastores() != null)
         {
             for (Datastore datastore : machine.getDatastores())
@@ -265,18 +281,21 @@ public class MachineResource extends AbstractResource
                 dataDto.setRootPath(datastore.getRootPath());
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
-                
+
                 dto.getDatastores().add(dataDto);
             }
         }
-        
-        // if the machine comes from the discovery manager it is not already saved in database and it does not have
+
+        // if the machine comes from the discovery manager it is not already saved in database and
+        // it does not have
         // any rack nor datacenter. Don't build the links.
         if (machine.getRack() != null)
-        {            
-            dto = addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(), machine.getBelongsToManagedRack(), dto);
+        {
+            dto =
+                addLinks(restBuilder, machine.getDatacenter().getId(), machine.getRack().getId(),
+                    machine.getBelongsToManagedRack(), dto);
         }
-        
+
         return dto;
     }
 
@@ -288,13 +307,13 @@ public class MachineResource extends AbstractResource
             throw new NotFoundException(APIError.NOT_ASSIGNED_MACHINE_DATACENTER_RACK);
         }
     }
-    
+
     // Create the persistence object.
-    public static Machine createPersistenceObject(MachineDto dto) throws Exception
+    public static Machine createPersistenceObject(final MachineDto dto) throws Exception
     {
         // Set the machine values.
         Machine machine = ModelTransformer.persistenceFromTransport(Machine.class, dto);
-                
+
         HypervisorType type = dto.getType();
         String ip = dto.getIp();
         String ipService = dto.getIpService();
@@ -303,18 +322,19 @@ public class MachineResource extends AbstractResource
         String password = dto.getPassword();
         Hypervisor hypervisor = new Hypervisor(machine, type, ip, ipService, port, user, password);
         machine.setHypervisor(hypervisor);
-        
+
         // Set the datastores
         for (DatastoreDto datastoreDto : dto.getDatastores().getCollection())
         {
             machine.getDatastores().add(DatastoreResource.createPersistenceObject(datastoreDto));
         }
-        
+
         return machine;
-        
+
     }
 
-    public static List<Machine> createPersistenceObjects(MachinesDto machinesDto) throws Exception
+    public static List<Machine> createPersistenceObjects(final MachinesDto machinesDto)
+        throws Exception
     {
         List<Machine> machines = new ArrayList<Machine>();
         for (MachineDto machineDto : machinesDto.getCollection())
@@ -324,16 +344,16 @@ public class MachineResource extends AbstractResource
         return machines;
     }
 
-    public static MachinesDto createTransferObjects(List<Machine> machinesCreated,
-        IRESTBuilder restBuilder) throws Exception
+    public static MachinesDto createTransferObjects(final List<Machine> machinesCreated,
+        final IRESTBuilder restBuilder) throws Exception
     {
         MachinesDto machinesDto = new MachinesDto();
-        
+
         for (Machine currentMachine : machinesCreated)
         {
             machinesDto.getCollection().add(createTransferObject(currentMachine, restBuilder));
         }
-        
+
         return machinesDto;
     }
 }

@@ -21,11 +21,15 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 
 public interface MachineResourceStub
 {
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(PhysicalMachine machine);
+
     public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine);
 
     /**

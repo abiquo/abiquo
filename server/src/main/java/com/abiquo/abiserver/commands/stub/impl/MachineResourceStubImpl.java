@@ -26,12 +26,41 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.MachineResourceStub;
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
+    @Override
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccess(PhysicalMachine machine)
+    {
+        String uri = createMachineLink(machine) + "?credentials=true";
+
+        DataResult<HypervisorRemoteAccessInfo> result =
+            new DataResult<HypervisorRemoteAccessInfo>();
+
+        ClientResponse response = get(uri);
+        if (response.getStatusCode() == 200)
+        {
+            MachineDto dto = response.getEntity(MachineDto.class);
+
+            HypervisorRemoteAccessInfo info = new HypervisorRemoteAccessInfo();
+            info.setParam1(dto.getUser());
+            info.setParam2(dto.getPassword());
+
+            result.setSuccess(true);
+            result.setData(info);
+        }
+        else
+        {
+            populateErrors(response, result, "getMachineWithCredentials");
+        }
+
+        return result;
+    }
 
     @Override
     public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine)
