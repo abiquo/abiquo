@@ -188,7 +188,7 @@ package net.undf.abicloud.vo.configuration
             {
             	systemProperty = properties.getItemAt(i) as SystemProperty;
             	propName = systemProperty.name.split(".").join("_");
-                this[propName].value = systemProperty.value;
+	            this[propName].value = systemProperty.value;
             }
 		}
 	}

@@ -71,7 +71,7 @@
              **/
             private final function onPreInitialize():void
             {
-            	BindingUtils.bindProperty(this, "updateShowIcon", AbiCloudModel.getInstance().configurationManager.config.client_wiki_showDefaultHelp,"value")
+            	BindingUtils.bindProperty(this, "updateShowIcon", AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp,"value")
                 //Creating Icon
                 _popUpIcon = new Image();
                 _popUpIcon.source = _iconSource;
@@ -111,7 +111,11 @@
             public function set updateShowIcon(value:int):void
             {
             	if(_iconInfo){
-	            	_iconInfo.wikiUrl = this._wikiUrl;
+	            	if(value == 0){
+		            	_iconInfo.hideIconInfo();
+	            	}else{
+	            		_iconInfo.showIconInfo();
+	            	}
             	}
             }
 
