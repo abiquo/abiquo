@@ -38,23 +38,24 @@ public class NetworkResolver
     /**
      * Specify all the masks user can choose
      */
-    private String[] allMasks =
-        {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0", "255.240.0.0", "255.248.0.0",
-        "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0", "255.255.192.0",
-        "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0", "255.255.254.0",
-        "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
-        "255.255.255.240", "255.255.255.248", "255.255.255.252"};
+    private String[] allMasks = {"255.0.0.0", "255.128.0.0", "255.192.0.0", "255.224.0.0",
+    "255.240.0.0", "255.248.0.0", "255.252.0.0", "255.254.0.0", "255.255.0.0", "255.255.128.0",
+    "255.255.192.0", "255.255.224.0", "255.255.240.0", "255.255.248.0", "255.255.252.0",
+    "255.255.254.0", "255.255.255.0", "255.255.255.128", "255.255.255.192", "255.255.255.224",
+    "255.255.255.240", "255.255.255.248", "255.255.255.252"};
 
     /**
      * List of values from 0 to 255
      */
     private List<String> possibleValues;
-    
+
     /**
-     * Error messages 
+     * Error messages
      */
     private static String CLASSTYPE_CANNOT_BE_NULL = "Network class type can not be null.";
+
     private static String INVALID_CLASSTYPE = "Invalid private network ClassType.";
+
     private static String INVALID_NETWORK_MASK = "Network mask is invalid.";
 
     public NetworkResolver()
@@ -88,12 +89,12 @@ public class NetworkResolver
 
         if (privateNetworkClassType.equalsIgnoreCase("A"))
         {
-            //masks = Arrays.asList(allMasks);
+            // masks = Arrays.asList(allMasks);
             masks = Arrays.asList(allMasks).subList(14, allMasks.length);
         }
         else if (privateNetworkClassType.equalsIgnoreCase("B"))
         {
-            //masks = Arrays.asList(allMasks).subList(8, allMasks.length);
+            // masks = Arrays.asList(allMasks).subList(8, allMasks.length);
             masks = Arrays.asList(allMasks).subList(14, allMasks.length);
         }
         else if (privateNetworkClassType.equalsIgnoreCase("C"))
@@ -137,12 +138,12 @@ public class NetworkResolver
         }
 
         // After check if the mask is inside the array of the accepted masks
-        if ((privateNetworkClassType.equalsIgnoreCase("A") && !Arrays.asList(allMasks).subList(
-            14, allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("B") && !Arrays.asList(allMasks).subList(
-                14, allMasks.length).contains(maskString))
-            || (privateNetworkClassType.equalsIgnoreCase("C") && !Arrays.asList(allMasks).subList(
-                16, allMasks.length).contains(maskString)))
+        if ((privateNetworkClassType.equalsIgnoreCase("A") && !Arrays.asList(allMasks)
+            .subList(14, allMasks.length).contains(maskString))
+            || (privateNetworkClassType.equalsIgnoreCase("B") && !Arrays.asList(allMasks)
+                .subList(14, allMasks.length).contains(maskString))
+            || (privateNetworkClassType.equalsIgnoreCase("C") && !Arrays.asList(allMasks)
+                .subList(16, allMasks.length).contains(maskString)))
         {
             throw new InvalidMaskException(INVALID_NETWORK_MASK);
         }

@@ -91,6 +91,11 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractJpaGeneratorIT
     // }
     // }
     //
+    @Override
+    protected List<String> data()
+    {
+        return Arrays.asList("/data/machine-am-infrastructure.xml");
+    }
 
     @Test(enabled = false)
     public void createRemoteService()
@@ -102,8 +107,8 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractJpaGeneratorIT
         dto.setUri("http://localhost:9010/am");
 
         ClientResponse response =
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML).post(
-                dto);
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .post(dto);
 
         assertEquals(201, response.getStatusCode());
 

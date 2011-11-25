@@ -32,13 +32,13 @@ public class ServiceUnavailableException extends APIException
     public ServiceUnavailableException(APIError error)
     {
         super(error);
-    }    
-    
+    }
+
     public ServiceUnavailableException(CommonError error)
     {
         super(error);
     }
-    
+
     public ServiceUnavailableException(Set<CommonError> errors)
     {
         super(errors);

@@ -25,9 +25,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -35,13 +38,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.abiquo.commons.amqp.impl.vsm.VSMConfiguration;
-import com.abiquo.commons.amqp.util.RabbitMQUtils;
 import com.abiquo.vsm.VSMManager;
 import com.abiquo.vsm.model.PhysicalMachine;
 import com.abiquo.vsm.model.VirtualMachine;
 import com.abiquo.vsm.redis.dao.RedisDao;
 import com.abiquo.vsm.redis.dao.RedisDaoFactory;
-import com.abiquo.vsm.redis.util.RedisUtils;
 
 public class ConsoleServlet extends HttpServlet
 {
@@ -77,8 +78,8 @@ public class ConsoleServlet extends HttpServlet
         // Publish check status
         Map<String, Boolean> checks = new LinkedHashMap<String, Boolean>();
         checks.put("VSM check result", vsmManager.checkSystem());
-        checks.put("Redis listening", RedisUtils.ping(redisHost, redisPort));
-        checks.put("RabbitMQ listening", RabbitMQUtils.pingRabbitMQ());
+        checks.put("Redis listening", vsmManager.isRedisRunning());
+        checks.put("RabbitMQ listening", vsmManager.isRabbitMQRunning());
 
         request.setAttribute("checks", checks);
 
@@ -106,9 +107,54 @@ public class ConsoleServlet extends HttpServlet
             request.setAttribute("extended", Boolean.TRUE);
             request.setAttribute("pms", pms);
             request.setAttribute("vms", vms);
+
+            // Duplicate VMs information
+            Map<String, Set<String>> hypervisorsByCacheEntry = new HashMap<String, Set<String>>();
+            Set<String> indexForDuplicates = new HashSet<String>();
+
+            for (PhysicalMachine pm : pms)
+            {
+                for (String vm : pm.getVirtualMachines().getCache())
+                {
+                    if (hypervisorsByCacheEntry.containsKey(vm))
+                    {
+                        indexForDuplicates.add(vm);
+                    }
+                    else
+                    {
+                        hypervisorsByCacheEntry.put(vm, new HashSet<String>());
+                    }
+
+                    hypervisorsByCacheEntry.get(vm).add(pm.getAddress());
+                }
+            }
+
+            Map<String, Set<String>> duplicates = new HashMap<String, Set<String>>();
+
+            for (String index : indexForDuplicates)
+            {
+                duplicates.put(index, hypervisorsByCacheEntry.get(index));
+            }
+
+            request.setAttribute("duplicates", duplicates);
         }
 
-        getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);
+        String format = "html";
+
+        if (request.getParameterMap().containsKey("format"))
+        {
+            format = request.getParameter("format");
+        }
+
+        if (format.equalsIgnoreCase("xml"))
+        {
+            getServletContext().getRequestDispatcher("/jsp/console_xml.jsp").forward(request,
+                response);
+        }
+        else
+        {
+            getServletContext().getRequestDispatcher("/jsp/console.jsp").forward(request, response);
+        }
     }
 
     @Override

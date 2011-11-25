@@ -37,6 +37,10 @@ public class ConfigService
 
     public static final String API_LOCATION = "abiquo.server.api.location";
 
+    public static final String MIN_REMOTE_DESKTOP_PORT = "abiquo.vncport.min";
+
+    public static final String MAX_REMOTE_DESKTOP_PORT = "abiquo.vncport.max";
+
     public static String getSystemProperty(final String property)
     {
         return System.getProperty(property);

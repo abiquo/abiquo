@@ -291,8 +291,8 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         throws Exception
     {
         String link =
-            vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
-                .isForceEnterpriseSoftLimits());
+            vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                forceSoftLimits.isForceEnterpriseSoftLimits());
 
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);

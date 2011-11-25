@@ -30,11 +30,14 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.URL;
@@ -44,6 +47,7 @@ import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
+import com.abiquo.server.core.pricing.PricingTemplate;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -320,6 +324,28 @@ public class Enterprise extends DefaultEntityWithLimits
         this.chefValidatorCertificate = chefValidatorCertificate.trim();
     }
 
+    public final static String PRICING_PROPERTY = "pricingTemplate";
+
+    private final static boolean PRICING_REQUIRED = false;
+
+    private final static String PRICING_ID_COLUMN = "idPricingTemplate";
+
+    @JoinColumn(name = PRICING_ID_COLUMN)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ForeignKey(name = "enterprise_pricingTemp_fk")
+    private PricingTemplate pricingTemplate;
+
+    @Required(value = PRICING_REQUIRED)
+    public PricingTemplate getPricingTemplate()
+    {
+        return pricingTemplate;
+    }
+
+    public void setPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        this.pricingTemplate = pricingTemplate;
+    }
+
     // *************************** Mandatory constructors ***********************
     public Enterprise(final String name, final int ramSoftLimitInMb, final int cpuCountSoftLimit,
         final long hdSoftLimitInMb, final int ramHardLimitInMb, final int cpuCountHardLimit,
@@ -365,4 +391,5 @@ public class Enterprise extends DefaultEntityWithLimits
     {
         return new User(this, role, name, surname, email, nick, password, locale);
     }
+
 }

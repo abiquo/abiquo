@@ -50,7 +50,10 @@
             private var _vlanNetwork:VlanNetwork;
             
             [Bindable]
+            private var _enterprise:Enterprise;
+
             private var _networkType:String;
+
 
             public function set vlanNetwork(value:VlanNetwork):void
             {
@@ -66,12 +69,20 @@
                         case VlanNetwork.INTERNAL:
                           this._networkType = resourceManager.getString('NetworkingPremium','LABEL_INTERNAL_VLAN');
                           break;
+                        case VlanNetwork.UNMANAGED:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_UNMANAGED');
+                          break;
 	                }
                 }
             }
             
-            [Bindable]
-            public var enterprise:Enterprise;
+            public function set enterprise(value:Enterprise):void{
+            	this._enterprise = value;
+            }
+            
+            public function get enterprise():Enterprise{
+            	return this._enterprise;
+            }
 
 
         ]]>
@@ -129,9 +140,9 @@
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
                  <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
-                 	includeInLayout="{enterprise}"
-                 	visible="{enterprise}">
-                    <mx:Label text="{enterprise.name}"/>
+                 	includeInLayout="{this._enterprise != null}"
+                 	visible="{this._enterprise != null}">
+                    <mx:Label text="{this._enterprise.name}"/>
                 </mx:FormItem>
                 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">

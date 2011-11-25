@@ -57,13 +57,11 @@ public class VirtualAppResourcesDAO extends DefaultDAOBase<Integer, VirtualAppRe
 
         Criteria criteria = createCriteria(sameIdEnterprise(idEnterprise));
         criteria.addOrder(Order.asc(VirtualAppResources.VAPP_NAME_PROPERTY));
-        
-        if (user != null && !StringUtils.isEmpty(user
-            .getAvailableVirtualDatacenters()))
+
+        if (user != null && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
         {
             criteria.add(availableToUser(user));
-        }        
-
+        }
 
         return criteria.list();
     }
@@ -72,14 +70,12 @@ public class VirtualAppResourcesDAO extends DefaultDAOBase<Integer, VirtualAppRe
     {
         return Restrictions.eq(VirtualAppResources.ID_ENTERPRISE_PROPERTY, idEnterprise);
     }
-    
-    
- // TODO in model && Triggers -> VirtualAppResources.ID_VDC_PROPERTY
-    
+
+    // TODO in model && Triggers -> VirtualAppResources.ID_VDC_PROPERTY
+
     private static Criterion availableToUser(User user)
     {
-        
-        
+
         Collection<String> idsStrings =
             Arrays.asList(user.getAvailableVirtualDatacenters().split(","));
 
@@ -91,7 +87,7 @@ public class VirtualAppResourcesDAO extends DefaultDAOBase<Integer, VirtualAppRe
                 return Integer.valueOf(input.toString());
             }
         });
-        
+
         return Restrictions.in(VirtualAppResources.ID_VDC_PROPERTY, ids);
     }
 

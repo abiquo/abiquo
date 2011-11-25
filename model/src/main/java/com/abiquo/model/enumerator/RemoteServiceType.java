@@ -1,3 +1,5 @@
+package com.abiquo.model.enumerator;
+
 /**
  * Abiquo community edition
  * cloud management application for hybrid clouds
@@ -18,8 +20,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-package com.abiquo.model.enumerator;
 
 import java.net.URI;
 
@@ -104,6 +104,19 @@ public enum RemoteServiceType
         }
 
         return fullURL;
+    }
+
+    public static RemoteServiceType valueFromName(final String name)
+    {
+        for (RemoteServiceType element : RemoteServiceType.values())
+        {
+            if (name.replaceAll("_", "").equalsIgnoreCase(element.toString().replaceAll("_", "")))
+            {
+                return element;
+            }
+        }
+
+        return valueOf(name);
     }
 
     private String fixProtocol(String protocol)

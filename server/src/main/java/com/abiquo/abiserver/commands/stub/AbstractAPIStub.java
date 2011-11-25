@@ -391,8 +391,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
-            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
+            .singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -485,8 +485,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
-            Collections.singletonMap("role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
+            "role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -513,8 +513,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
-            Collections.singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
+            .singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -546,8 +546,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
-            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
+            .singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -559,8 +559,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
-                Collections.singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
+                .singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -1000,6 +1000,7 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
+
     }
 
     protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
@@ -1161,7 +1162,7 @@ public class AbstractAPIStub
 
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
-        return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");
+        return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteservices");
     }
 
     protected String createRemoteServiceLink(final Integer datacenterId,
@@ -1169,9 +1170,9 @@ public class AbstractAPIStub
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
-        params.put("remoteService", remoteServiceType.toLowerCase());
+        params.put("remoteservice", remoteServiceType.toLowerCase().replace("_", ""));
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/remoteServices/{remoteService}",
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/remoteservices/{remoteservice}",
             params);
     }
 
@@ -1376,6 +1377,7 @@ public class AbstractAPIStub
         return resolveURI(apiUri, "admin/datacenters/{datacenter}/racks/{rack}", params);
     }
 
+<<<<<<< HEAD
     /**
      * @param virtualDatacenterId
      * @param virtualApplianceId
@@ -1497,4 +1499,174 @@ public class AbstractAPIStub
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
                 params);
     }
+=======
+    protected String createCurrencyLink(final int currencyId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
+    }
+
+    protected String createPricingTemplateLink(final int templateId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}",
+            Collections.singletonMap("pricingtemplate", valueOf(templateId)));
+    }
+
+    protected String createPricingTemplatesLink()
+    {
+        return createPricingTemplatesLink(null, null);
+    }
+
+    protected String createPricingTemplatesLink(Integer offset, final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/pricingtemplates", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (numResults != null)
+        {
+            queryParams.put("numResults", new String[] {numResults.toString()});
+            if (offset != null)
+            {
+                offset = offset / numResults;
+
+                queryParams.put("page", new String[] {offset.toString()});
+            }
+        }
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodesLink()
+    {
+        return createCostCodesLink(null, null);
+    }
+
+    protected String createCostCodesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/costcodes", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            if (numResults != 0)
+            {
+                offset = offset / numResults;
+
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
+            else if (numResults == 0 && offset == 0)
+            {
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodeCurrenciesLink(final Integer costCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("costcode", costCodeId.toString());
+
+        return resolveURI(apiUri, "config/costcodes/{costcode}/currencies", params);
+    }
+
+    protected String createCostCodeLink(final int costCodeId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
+    }
+
+    protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
+        final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCurrenciesLink()
+    {
+        return createCurrenciesLink(null, null);
+    }
+
+    protected String createCurrenciesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createPricingCostCodesLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes", params);
+    }
+
+    protected String createPricingCostCodeLink(final Integer pricingId,
+        final Integer pricingCostCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+        params.put("costcode", pricingCostCodeId.toString());
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes/{costcode}",
+            params);
+    }
+
+    protected String createPricingTiersLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers", params);
+    }
+
+    protected String createPricingTierLink(final Integer pricingId, final Integer pricingTierId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+        params.put("tier", pricingTierId.toString());
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers/{tier}", params);
+    }
+
+    protected String createVirtualAppliancePriceLink(final int virtualDatacenterId,
+        final int virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("vapp", String.valueOf(virtualApplianceId));
+
+        return resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{vapp}/action/price",
+            params);
+    }
+
+>>>>>>> stable
 }

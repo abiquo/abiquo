@@ -29,8 +29,13 @@ public enum RemoteServiceType
     VIRTUAL_FACTORY("Virtualization Manager", "virtualfactory", "http://", 80), STORAGE_SYSTEM_MONITOR(
         "Storage Manager", "ssm", "http://", 80), VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm",
         "http://", 80), NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), DHCP_SERVICE(
+<<<<<<< HEAD
         "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager",
         "bpm-async", "http://", 80), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
+=======
+        "DHCP Service", "dhcp", "omapi://", 7911), BPM_SERVICE("Business Process Manager", "bpm",
+        "tcp://", 61616), APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
+>>>>>>> stable
 
     String name;
 

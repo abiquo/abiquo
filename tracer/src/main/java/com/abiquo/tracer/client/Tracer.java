@@ -32,19 +32,29 @@ import com.abiquo.tracer.UserInfo;
 
 /**
  * @author Diego Parrilla
- *
  */
-public interface Tracer {
+public interface Tracer
+{
 
-	void destroy() throws Exception;
-	
-	void log(SeverityType level, ComponentType component, EventType event, String description, UserInfo user);
-	void log(SeverityType level, ComponentType component, EventType event, UserInfo user);
-	void log(SeverityType level, ComponentType component, EventType event, String description);
-	void log(SeverityType level, ComponentType component, EventType event);
+    void destroy() throws Exception;
 
-	void log(SeverityType level, ComponentType component, EventType event, String description, UserInfo user, Platform platform);
-	void log(SeverityType level, ComponentType component, EventType event, UserInfo user, Platform platform);
-	void log(SeverityType level, ComponentType component, EventType event, String description, Platform platform);
-	void log(SeverityType level, ComponentType component, EventType event, Platform platform);
+    void log(SeverityType level, ComponentType component, EventType event, String description,
+        UserInfo user);
+
+    void log(SeverityType level, ComponentType component, EventType event, UserInfo user);
+
+    void log(SeverityType level, ComponentType component, EventType event, String description);
+
+    void log(SeverityType level, ComponentType component, EventType event);
+
+    void log(SeverityType level, ComponentType component, EventType event, String description,
+        UserInfo user, Platform platform);
+
+    void log(SeverityType level, ComponentType component, EventType event, UserInfo user,
+        Platform platform);
+
+    void log(SeverityType level, ComponentType component, EventType event, String description,
+        Platform platform);
+
+    void log(SeverityType level, ComponentType component, EventType event, Platform platform);
 }

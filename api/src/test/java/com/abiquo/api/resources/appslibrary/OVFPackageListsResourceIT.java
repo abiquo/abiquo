@@ -21,9 +21,9 @@
 
 package com.abiquo.api.resources.appslibrary;
 
+import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListsURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
-import static com.abiquo.api.common.Assert.assertError;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -158,9 +158,9 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(
-                xmlindexURI);
+            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(xmlindexURI);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -184,9 +184,9 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(
-                xmlindexURI);
+            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(xmlindexURI);
 
         assertEquals(response.getStatusCode(), 201);
 
@@ -210,8 +210,9 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(badURL);
+            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+                .contentType(MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth)
+                .post(badURL);
 
         assertError(response, 404, APIError.NON_EXISTENT_REPOSITORY_SPACE);
     }
@@ -229,8 +230,8 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 
         ClientResponse response =
-            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
-                MediaType.TEXT_PLAIN).post(xmlindexURI);
+            client.resource(validURI).accept(MediaType.APPLICATION_XML)
+                .contentType(MediaType.TEXT_PLAIN).post(xmlindexURI);
 
         assertError(response, 400, APIError.INVALID_OVF_INDEX_XML);
     }

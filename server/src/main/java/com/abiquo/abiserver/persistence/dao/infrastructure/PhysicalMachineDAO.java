@@ -121,11 +121,14 @@ public interface PhysicalMachineDAO extends DAO<PhysicalmachineHB, Integer>
 
     /**
      * Gets the number of deployed virtualmachines in a physical machine owned by an enterprise
+     * 
      * @param pmHB the physical machine of the virtualmachine
-     * @param idEnterprise the enterprise to find the virtual machines owned by other enterprise than this one
+     * @param idEnterprise the enterprise to find the virtual machines owned by other enterprise
+     *            than this one
      * @return the number of deployed virtual machines
      */
-    Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(PhysicalmachineHB pmHB, Integer idEnterprise);
+    Long getNumberOfDeployedVirtualMachinesOwnedByOtherEnterprise(PhysicalmachineHB pmHB,
+        Integer idEnterprise);
 
     /**
      * This method gets de deployedVirtualMachine by abiquo of a PhysicalMachine
@@ -134,9 +137,10 @@ public interface PhysicalMachineDAO extends DAO<PhysicalmachineHB, Integer>
      * @return the list of virtualMachine
      */
     public List<VirtualmachineHB> getDeployedAbiquoVirtualMachines(Integer machineId);
-    
+
     /**
      * This method updates the usedResources of a physicalMachine
+     * 
      * @param idPhysicalMachine is the id of the physical Machine object
      */
     public void updateUsedResourcesByPhysicalMachine(final Integer idPhysicalMachine);

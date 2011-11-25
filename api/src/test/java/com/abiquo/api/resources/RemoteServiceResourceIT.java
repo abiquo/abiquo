@@ -139,8 +139,8 @@ public class RemoteServiceResourceIT extends AbstractJpaGeneratorIT
         resource = client.resource(invalidUri);
 
         ClientResponse response =
-            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML).put(
-                remoteService);
+            resource.accept(MediaType.APPLICATION_XML).contentType(MediaType.APPLICATION_XML)
+                .put(remoteService);
 
         assertEquals(response.getStatusCode(), 404);
     }

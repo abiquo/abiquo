@@ -27,13 +27,12 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
 
 /**
  * Class that implements the extra DAO functions for the
- * {@link com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageTypeDAO}
- * interface
+ * {@link com.abiquo.abiserver.persistence.dao.virtualimage.VirtualImageTypeDAO} interface
  * 
  * @author jdevesa@abiquo.com
  */
 public class VirtualImageTypeDAOHibernate extends HibernateDAO<VirtualimageTypeHB, Integer>
     implements VirtualImageTypeDAO
 {
-    //implement extra functionality
+    // implement extra functionality
 }

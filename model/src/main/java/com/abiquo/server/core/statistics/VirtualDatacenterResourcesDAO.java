@@ -57,12 +57,11 @@ public class VirtualDatacenterResourcesDAO extends
 
         Criteria criteria = createCriteria(sameIdEnterprise(idEnterprise));
         criteria.addOrder(Order.asc(VirtualDatacenterResources.VDC_NAME_PROPERTY));
-        
-        if (user != null && !StringUtils.isEmpty(user
-            .getAvailableVirtualDatacenters()))
+
+        if (user != null && !StringUtils.isEmpty(user.getAvailableVirtualDatacenters()))
         {
             criteria.add(availableToUser(user));
-        }        
+        }
 
         return criteria.list();
     }
@@ -71,7 +70,7 @@ public class VirtualDatacenterResourcesDAO extends
     {
         return Restrictions.eq(VirtualDatacenterResources.ID_ENTERPRISE_PROPERTY, idEnterprise);
     }
-    
+
     private static Criterion availableToUser(User user)
     {
         Collection<String> idsStrings =

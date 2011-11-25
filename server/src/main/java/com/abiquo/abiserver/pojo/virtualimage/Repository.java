@@ -129,10 +129,14 @@ public class Repository implements IPojo<RepositoryHB>
         repositoryHB.setName(name);
         repositoryHB.setUrl(URL);
         // repositoryHB.setEnterprise(enterpirse.toPojoHB());
+<<<<<<< HEAD
         if (datacenter != null)
         {
             repositoryHB.setDatacenter(datacenter.toPojoHB());
         }
+=======
+        repositoryHB.setDatacenter(datacenter.toPojoHB());
+>>>>>>> stable
 
         return repositoryHB;
     }

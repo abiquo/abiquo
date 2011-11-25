@@ -72,7 +72,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
-    private String costCode;
+    private int costCode;
 
     private String creationUser;
 
@@ -87,9 +87,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         category = new Category();
         repository = new Repository();
         ovfId = "";
+<<<<<<< HEAD
         stateful = false;
         shared = false;
         costCode = "";
+=======
+        stateful = 0;
+        deleted = false;
+        shared = 0;
+        costCode = 0;
+>>>>>>> stable
     }
 
     public int getId()
@@ -267,11 +274,16 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         return shared;
     }
 
+<<<<<<< HEAD
     public void setShared(final boolean shared)
+=======
+    public void setShared(final int shared)
+>>>>>>> stable
     {
         this.shared = shared;
     }
 
+<<<<<<< HEAD
     public boolean isChefEnabled()
     {
         return chefEnabled;
@@ -283,11 +295,18 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     }
 
     public String getCostCode()
+=======
+    public int getCostCode()
+>>>>>>> stable
     {
         return costCode;
     }
 
+<<<<<<< HEAD
     public void setCostCode(final String costCode)
+=======
+    public void setCostCode(final int costCode)
+>>>>>>> stable
     {
         this.costCode = costCode;
     }

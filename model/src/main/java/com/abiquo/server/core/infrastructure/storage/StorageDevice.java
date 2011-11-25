@@ -56,7 +56,8 @@ public class StorageDevice extends DefaultEntityBase
 
     public StorageDevice(final String name, final String managementIP,
         final Integer managementPort, final String iscsiIP, final Integer iscsiPort,
-        final StorageTechnologyType storageTechnology, final Datacenter dc)
+        final StorageTechnologyType storageTechnology, final String username,
+        final String password, final Datacenter dc)
     {
         this.setName(name);
         this.setManagementIp(managementIP);
@@ -64,6 +65,8 @@ public class StorageDevice extends DefaultEntityBase
         this.setIscsiIp(iscsiIP);
         this.setIscsiPort(iscsiPort);
         this.setStorageTechnology(storageTechnology);
+        this.setUsername(username);
+        this.setPassword(password);
         this.setDatacenter(dc);
     }
 
@@ -85,9 +88,9 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static String MANAGEMENT_PORT_COLUMN = "management_port";
 
-    private final static int MANAGEMENT_PORT_MIN = Integer.MIN_VALUE;
+    private final static int MANAGEMENT_PORT_MIN = Port.MIN_VALUE;
 
-    private final static int MANAGEMENT_PORT_MAX = Integer.MAX_VALUE;
+    private final static int MANAGEMENT_PORT_MAX = Port.MAX_VALUE;
 
     @Column(name = MANAGEMENT_PORT_COLUMN, nullable = !MANAGEMENT_PORT_REQUIRED)
     @Range(min = MANAGEMENT_PORT_MIN, max = MANAGEMENT_PORT_MAX)
@@ -108,7 +111,7 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    /* package */final static int NAME_LENGTH_MIN = 0;
+    /* package */final static int NAME_LENGTH_MIN = 1;
 
     /* package */final static int NAME_LENGTH_MAX = 255;
 
@@ -241,9 +244,9 @@ public class StorageDevice extends DefaultEntityBase
 
     private final static String ISCSI_PORT_COLUMN = "iscsi_port";
 
-    private final static int ISCSI_PORT_MIN = Integer.MIN_VALUE;
+    private final static int ISCSI_PORT_MIN = Port.MIN_VALUE;
 
-    private final static int ISCSI_PORT_MAX = Integer.MAX_VALUE;
+    private final static int ISCSI_PORT_MAX = Port.MAX_VALUE;
 
     @Column(name = ISCSI_PORT_COLUMN, nullable = !ISCSI_PORT_REQUIRED)
     @Range(min = ISCSI_PORT_MIN, max = ISCSI_PORT_MAX)
@@ -258,6 +261,62 @@ public class StorageDevice extends DefaultEntityBase
     public void setIscsiPort(final int iscsiPort)
     {
         this.iscsiPort = iscsiPort;
+    }
+
+    public final static String USERNAME_PROPERTY = "username";
+
+    private final static boolean USERNAME_REQUIRED = false;
+
+    /* package */final static int USERNAME_LENGTH_MIN = 0;
+
+    /* package */final static int USERNAME_LENGTH_MAX = 255;
+
+    private final static boolean USERNAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String USERNAME_COLUMN = "username";
+
+    @Column(name = USERNAME_COLUMN, nullable = !USERNAME_REQUIRED, length = USERNAME_LENGTH_MAX)
+    private String username;
+
+    @Required(value = USERNAME_REQUIRED)
+    @Length(min = USERNAME_LENGTH_MIN, max = USERNAME_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = USERNAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getUsername()
+    {
+        return this.username;
+    }
+
+    public void setUsername(final String username)
+    {
+        this.username = username;
+    }
+
+    public final static String PASSWORD_PROPERTY = "password";
+
+    private final static boolean PASSWORD_REQUIRED = false;
+
+    /* package */final static int PASSWORD_LENGTH_MIN = 0;
+
+    /* package */final static int PASSWORD_LENGTH_MAX = 255;
+
+    private final static boolean PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String PASSWORD_COLUMN = "password";
+
+    @Column(name = PASSWORD_COLUMN, nullable = !PASSWORD_REQUIRED, length = PASSWORD_LENGTH_MAX)
+    private String password;
+
+    @Required(value = PASSWORD_REQUIRED)
+    @Length(min = PASSWORD_LENGTH_MIN, max = PASSWORD_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = PASSWORD_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getPassword()
+    {
+        return this.password;
+    }
+
+    public void setPassword(final String password)
+    {
+        this.password = password;
     }
 
 }

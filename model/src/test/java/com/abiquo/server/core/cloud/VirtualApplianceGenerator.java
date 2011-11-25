@@ -85,7 +85,11 @@ public class VirtualApplianceGenerator extends DefaultEntityGenerator<VirtualApp
         return virtualAppliance;
     }
 
+<<<<<<< HEAD
     public VirtualAppliance createInstance(final VirtualDatacenter virtualDatacenter)
+=======
+    public VirtualAppliance createInstance(VirtualDatacenter virtualDatacenter, String vappName)
+>>>>>>> stable
     {
         String name = newString(nextSeed(), 0, 255);
         VirtualApplianceState state = newEnum(VirtualApplianceState.class, nextSeed());

@@ -58,6 +58,7 @@ public interface AppsLibraryStub
     /**
      * ICONS
      */
+<<<<<<< HEAD
 
     public DataResult<List<Icon>> getIcons();
 
@@ -102,4 +103,7 @@ public interface AppsLibraryStub
 
     public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
         Integer idEnterprise, Integer datacenterId);
+=======
+    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
+>>>>>>> stable
 }

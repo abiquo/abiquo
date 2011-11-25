@@ -37,6 +37,12 @@
             <version>${pom.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.abiquo</groupId>
+            <artifactId>model</artifactId>
+            <version>${pom.version}</version>
+            <classifier>transport</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.libvirt</groupId>
             <artifactId>libvirt</artifactId>
             <version>0.4.6</version>

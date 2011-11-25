@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import com.abiquo.abiserver.business.AuthService;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.LoginCommand;
+import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.Login;
 import com.abiquo.abiserver.pojo.authentication.LoginResult;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
@@ -55,6 +56,16 @@ public class LoginCommandImpl extends BasicCommand implements LoginCommand
     @Override
     public DataResult<LoginResult> login(final Login loginData)
     {
+        // Check database connectivity
+        if (!HibernateDAOFactory.instance().pingDB())
+        {
+            DataResult<LoginResult> result = new DataResult<LoginResult>();
+            result.setSuccess(false);
+            result.setMessage("Could not connect to database. "
+                + "Please contact the cloud administrator.");
+            return result;
+        }
+
         DataResult<LoginResult> resultResponse = AuthService.getInstance().doLogin(loginData);
 
         if (resultResponse.getSuccess())

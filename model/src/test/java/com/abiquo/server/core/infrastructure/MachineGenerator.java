@@ -128,8 +128,11 @@ public class MachineGenerator extends DefaultEntityGenerator<Machine>
         Machine machine =
             datacenter.createMachine(name, description, virtualRamInMb, virtualRamUsedInMb,
                 realCpuThreads, currentCpusInUse, virtualCpusPerThread, state, virtualSwitch);
+<<<<<<< HEAD
         machine.setInitiatorIQN(InitiatorMappingGenerator.DEFAULT_INITIATOR);
 
+=======
+>>>>>>> stable
         return machine;
     }
 

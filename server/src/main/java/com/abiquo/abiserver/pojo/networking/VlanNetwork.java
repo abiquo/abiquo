@@ -28,9 +28,6 @@ import java.io.Serializable;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.pojo.IPojo;
-import com.abiquo.abiserver.pojo.virtualhardware.Limit;
-import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
-import com.abiquo.model.transport.SingleResourceWithLimitsDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 
 /**

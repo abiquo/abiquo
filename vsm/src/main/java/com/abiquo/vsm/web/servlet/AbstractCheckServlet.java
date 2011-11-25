@@ -52,7 +52,8 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * @return A boolean indicating the status of the Remote Service.
      * @throws Exception If check operation fails or the Remote Service is not available.
      */
-    protected abstract boolean check() throws Exception;
+    protected abstract boolean check(final HttpServletRequest req, final HttpServletResponse resp)
+        throws Exception;
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
@@ -60,19 +61,19 @@ public abstract class AbstractCheckServlet extends HttpServlet
     {
         try
         {
-            if (check())
+            if (check(req, resp))
             {
-                success(resp);
+                success(req, resp);
             }
             else
             {
-                fail(resp);
+                fail(req, resp);
             }
         }
         catch (Exception ex)
         {
             LOGGER.warn("Check operation failed");
-            fail(resp, ex.getMessage());
+            fail(req, resp, ex.getMessage());
         }
     }
 
@@ -80,9 +81,10 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * Returns a {@link HttpServletResponse#SC_OK} HTTP code indicating that the Remote Service is
      * available.
      * 
+     * @param req The request.
      * @param resp The Response.
      */
-    protected void success(final HttpServletResponse resp)
+    protected void success(final HttpServletRequest req, final HttpServletResponse resp)
     {
         resp.setStatus(HttpServletResponse.SC_OK);
     }
@@ -91,10 +93,12 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * Returns a {@link HttpServletResponse#SC_SERVICE_UNAVAILABLE} HTTP code indicating that the
      * Remote Service is not available.
      * 
+     * @param req The request.
      * @param resp The Response.
      * @throws If error code cannot be sent.
      */
-    protected void fail(final HttpServletResponse resp) throws IOException
+    protected void fail(final HttpServletRequest req, final HttpServletResponse resp)
+        throws IOException
     {
         resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
     }
@@ -103,11 +107,13 @@ public abstract class AbstractCheckServlet extends HttpServlet
      * Returns a {@link HttpServletResponse#SC_SERVICE_UNAVAILABLE} HTTP code indicating that the
      * Remote Service is not available.
      * 
+     * @param req The request.
      * @param resp The Response.
      * @param msg The details of the check failure.
      * @throws If error code cannot be sent.
      */
-    protected void fail(final HttpServletResponse resp, final String msg) throws IOException
+    protected void fail(final HttpServletRequest req, final HttpServletResponse resp,
+        final String msg) throws IOException
     {
         resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
     }

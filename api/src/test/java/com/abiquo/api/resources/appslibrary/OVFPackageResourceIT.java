@@ -143,9 +143,16 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         // modifications
         ovfPackageDto.setDescription("new_description");
 
+<<<<<<< HEAD
         response =
             put(resolveOVFPackageURI(enterprise.getId(), ovfPackageDto.getId()), ovfPackageDto,
                 SYSADMIN, SYSADMIN);
+=======
+        Resource resource = client.resource(validOVFPackage);
+        ClientResponse response =
+            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
+                .put(ovfPackageDto);
+>>>>>>> stable
 
         assertEquals(response.getStatusCode(), 200);
         response =
@@ -175,7 +182,13 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         ClientResponse response =
             delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
 
+<<<<<<< HEAD
         assertEquals(response.getStatusCode(), 204);
+=======
+        Resource resource =
+            client.resource(installPackageAction).accept(MediaType.APPLICATION_XML)
+                .queryParam(OVFPackageResource.INSTALL_TARGET_QUERY_PARAM, 1);
+>>>>>>> stable
 
         response =
             get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);

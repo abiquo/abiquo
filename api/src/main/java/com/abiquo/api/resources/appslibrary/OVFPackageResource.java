@@ -31,7 +31,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+<<<<<<< HEAD
 import javax.ws.rs.core.MediaType;
+=======
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
+>>>>>>> stable
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +59,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 public class OVFPackageResource extends AbstractResource
 {
 
-    public static final String OVF_PACKAGE = "ovfPackage";
+    public static final String OVF_PACKAGE = "ovfpackage";
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
@@ -128,7 +134,6 @@ public class OVFPackageResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final String datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
-
     {
         service.installOVFPackage(ovfPackageId, Integer.valueOf(datacenterId), idEnterprise);
         return null;

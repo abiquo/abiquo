@@ -26,19 +26,19 @@
 // Generated on: 2011.10.27 at 11:33:59 AM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for ResourceEnumType.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for ResourceEnumType.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="ResourceEnumType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -49,33 +49,43 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "ResourceEnumType")
 @XmlEnum
-public enum ResourceEnumType {
+public enum ResourceEnumType
+{
 
     @XmlEnumValue("8")
+<<<<<<< HEAD
     VOLUME_DISK("8"),
     @XmlEnumValue("10")
     NETWORK_INTERFACE("10"),
     @XmlEnumValue("17")
     HARD_DISK("17"),
     @XmlEnumValue("34")
+=======
+    STORAGE_DISK("8"), @XmlEnumValue("10")
+    NETWORK_INTERFACE("10"), @XmlEnumValue("34")
+>>>>>>> stable
     VSWITCH("34");
     private final String value;
 
-    ResourceEnumType(String v) {
+    ResourceEnumType(String v)
+    {
         value = v;
     }
 
-    public String value() {
+    public String value()
+    {
         return value;
     }
 
-    public static ResourceEnumType fromValue(String v) {
-        for (ResourceEnumType c: ResourceEnumType.values()) {
-            if (c.value.equals(v)) {
+    public static ResourceEnumType fromValue(String v)
+    {
+        for (ResourceEnumType c : ResourceEnumType.values())
+        {
+            if (c.value.equals(v))
+            {
                 return c;
             }
         }

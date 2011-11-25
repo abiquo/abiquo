@@ -26,18 +26,18 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for VirtualSystemStatusEnumType.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for VirtualSystemStatusEnumType.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="VirtualSystemStatusEnumType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -47,21 +47,27 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "VirtualSystemStatusEnumType")
 @XmlEnum
-public enum VirtualSystemStatusEnumType {
+public enum VirtualSystemStatusEnumType
+{
 
+<<<<<<< HEAD
     OFF,
     ON,
     PAUSED;
+=======
+    POWERED_OFF, RUNNING, PAUSED;
+>>>>>>> stable
 
-    public String value() {
+    public String value()
+    {
         return name();
     }
 
-    public static VirtualSystemStatusEnumType fromValue(String v) {
+    public static VirtualSystemStatusEnumType fromValue(String v)
+    {
         return valueOf(v);
     }
 
