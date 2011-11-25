@@ -133,17 +133,23 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
 
     protected TaskDto transform(Task task, UriInfo uriInfo)
     {
-        // Build self link
+        // Build links
         UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
 
-        RESTLink selfLink = new RESTLink();
-        selfLink.setRel("self");
-        selfLink.setHref(uriBuilder.path(TASK_PATH).build(task.getTaskId()).getPath());
+        RESTLink parent = new RESTLink();
+        parent.setRel("parent");
+        parent.setHref(uriInfo.getAbsolutePath().getPath());
+
+        RESTLink self = new RESTLink();
+        self.setRel("self");
+        self.setHref(uriBuilder.path(TASK_PATH).build(task.getTaskId()).getPath());
 
         // Build the TaskDto
         TaskDto dto = new TaskDto();
 
-        dto.addLink(selfLink);
+        dto.addLink(parent);
+        dto.addLink(self);
+
         dto.setTaskId(task.getTaskId());
         dto.setOwnerId(task.getOwnerId());
         dto.setUserId(task.getUserId());
