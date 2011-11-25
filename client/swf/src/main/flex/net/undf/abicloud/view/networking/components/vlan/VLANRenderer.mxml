@@ -120,7 +120,7 @@
                 </mx:FormItem>
 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_TAG')">
-                    <mx:Label text="{_vlanNetwork.vlanTag.toString()}"/>
+                    <mx:Label text="{_vlanNetwork.vlanTag ? _vlanNetwork.vlanTag.toString():resourceManager.getString('Networking','LABEL_UNASSIGNED')}"/>
                 </mx:FormItem>
             </mx:Form>
 
