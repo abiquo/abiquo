@@ -62,6 +62,8 @@ import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
+import com.abiquo.api.resources.cloud.DisksResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -1002,6 +1004,31 @@ public class UriTestResolver
     public static String resolveIconsURI()
     {
         return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
+    }
+    
+    public static String resolveDisksUri(final Integer vdcId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+
+        return resolveURI(template, values);
+    }
+    
+    public static String resolveDiskUri(final Integer vdcId, final Integer diskId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH, DiskResource.DISK_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(DiskResource.DISK, diskId.toString());
+
+        return resolveURI(template, values);
     }
 
 }

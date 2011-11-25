@@ -458,7 +458,9 @@ public enum APIError
     HD_NON_EXISTENT_HARD_DISK("HD-1", "The requested hard disk does not exist"), HD_DISK_0_CAN_NOT_BE_DELETED(
         "HD-2",
         "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"), HD_INVALID_DISK_SIZE(
-        "HD-3", "Invalid disk size."),
+        "HD-3", "Invalid disk size."), HD_CURRENTLY_ALLOCATED("HD-4",
+        "Can not perform this action because hard disk is currently attached to a virtual machine"),
+        
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(

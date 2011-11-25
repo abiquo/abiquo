@@ -114,7 +114,7 @@ public class StorageService extends DefaultApiService
      * @return the created object {@link DiskManagement}
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public DiskManagement allocateHardDiskIntoVM(final Integer vdcId, final Integer vappId,
+    public DiskManagement attachHardDiskIntoVM(final Integer vdcId, final Integer vappId,
         final Integer vmId, final Integer diskId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
@@ -128,11 +128,18 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
 
-        // create the new disk from the diskSize
+        // get the disk from the virtualdatacenter's list
         DiskManagement createdDisk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
         if (createdDisk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
+        // if the hard disk is already attached to another virtual machine
+        //, raise a conflict error.
+        if (createdDisk.getVirtualMachine() != null)
+        {
+            addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
             flushErrors();
         }
         createdDisk.setVirtualAppliance(vapp);
@@ -178,22 +185,17 @@ public class StorageService extends DefaultApiService
     }
 
     /**
-     * Deletes a hard disk. Machine must be stopped and user should have the enough permissions.
+     * Detach a hard disk. Machine must be stopped and user should have the enough permissions.
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
      * @param vmId identifier of the virtual machine.
-     * @param diskSizeInMb disk size in mega bytes.
+     * @param diskId identifier of the disk
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer diskOrder)
+    public void detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final Integer diskId)
     {
-        if (diskOrder == 0)
-        {
-            addConflictErrors(APIError.HD_DISK_0_CAN_NOT_BE_DELETED);
-            flushErrors();
-        }
 
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -211,31 +213,49 @@ public class StorageService extends DefaultApiService
         }
 
         // Be sure the disk exists.
-        if (vdcRepo.findHardDiskByVirtualMachine(vm, diskOrder) == null)
+        DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
+        if (disk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
 
-        List<DiskManagement> disks = vdcRepo.findHardDisksByVirtualMachine(vm);
-        for (DiskManagement disk : disks)
-        {
-            // delete the disk.
-            if (disk.getAttachmentOrder() == diskOrder)
-            {
-                vdcRepo.removeHardDisk(disk);
-            }
-            // disk already deleted, update the attachment order in the rest
-            // if their order is bigger than the deleted one.
-            // TODO: Jaume. Validate commenting this does not break anything
-            // if (disk.getAttachmentOrder() > diskOrder)
-            // {
-            // disk.setAttachmentOrder(disk.getAttachmentOrder() - 1);
-            // vdcRepo.updateDisk(disk);
-            // }
-        }
+        // unregister the disk from the virtual machine
+        disk.setVirtualAppliance(null);
+        disk.setVirtualMachine(null);
+        vdcRepo.updateDisk(disk);
     }
 
+    /**
+     * Delete the disk from the virtual datacenter.\
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param diskId identifier of the {@link DiskManagement}
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deleteHardDisk(final Integer vdcId, final Integer diskId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        // The user has the role for manage This. But... is the user from the same enterprise
+        // than Virtual Datacenter?
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
+        
+        DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+        if (disk == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
+        if (disk.getVirtualMachine() != null)
+        {
+            addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
+            flushErrors();
+        }
+        
+        repo.removeHardDisk(disk);
+           
+    }
+    
     /**
      * Return a single of {@link DiskManagement} defined into a Virtual datacenter.
      * 
@@ -248,6 +268,11 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+        if (disk == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
         
         LOGGER.debug("Returning a single disk created into VirtualDatacenter '" + vdc.getName()
                 + "' identifier by id: " + diskId + ".");

@@ -152,7 +152,7 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        DiskManagement disk = service.allocateHardDiskIntoVM(vdcId, vappId, vmId, 0);
+        DiskManagement disk = service.attachHardDiskIntoVM(vdcId, vappId, vmId, 0);
 
         return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }
@@ -197,14 +197,14 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @DELETE
     @Path(DISKS_PATH + "/" + DISK_PARAM)
-    public void deleteHardDisk(
+    public void detachHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @PathParam(DISK) @NotNull @Min(0) final Integer diskOrder,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        service.deleteHardDisk(vdcId, vappId, vmId, diskOrder);
+        service.detachHardDisk(vdcId, vappId, vmId, diskOrder);
     }
 
     /**

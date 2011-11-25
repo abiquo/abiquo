@@ -118,9 +118,9 @@ public class StorageRep extends DefaultRepBase
     }
 
     public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
-        final Integer diskOrder)
+        final Integer diskId)
     {
-        return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskOrder);
+        return diskManagementDAO.findHardDiskByVirtualMachine(vm, diskId);
     }
 
     public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
