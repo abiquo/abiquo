@@ -1323,7 +1323,7 @@
         <InlineInvoker method="ScreenBlocker.blockScreen"/>
 
         <!-- Make call to the server here -->
-        <RemoteObjectInvoker instance="{services.remoteServicesService}"
+        <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="getHypervisorRemoteAccessInfo"
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.infrastructureElement]}">

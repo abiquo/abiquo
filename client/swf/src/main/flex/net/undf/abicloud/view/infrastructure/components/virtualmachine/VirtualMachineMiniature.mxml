@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
         	import net.undf.abicloud.vo.infrastructure.HypervisorRemoteAccessInfo;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.utils.AbicloudUtils;
@@ -306,7 +307,7 @@
             	{
             		this._mouseEvent = event;
             		var infraEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_HYPERVISOR_REMOTE_ACCESS_INFO);
-            		infraEvent.infrastructureElement = this._virtualMachine;
+            		infraEvent.infrastructureElement = PhysicalMachine(this._virtualMachine.assignedTo.assignedTo);
             		infraEvent.callback = onHypervisorRemoteAccessInfoRetrieved;
             		dispatchEvent(infraEvent);
             	}
