@@ -696,7 +696,7 @@ CREATE TRIGGER `kinton`.`create_volume_management_update_stats` AFTER INSERT ON 
         DECLARE limitResourceObj BIGINT;
         DECLARE idResourceObj VARCHAR(50);
         DECLARE idResourceTypeObj VARCHAR(5);
-	   DECLARE idStorageTier INTEGER;
+       DECLARE idStorageTier INTEGER;
         DECLARE resourceName VARCHAR(255);
         SELECT vdc.idDataCenter, vdc.idEnterprise, vdc.idVirtualDataCenter INTO idDataCenterObj, idThisEnterprise, idVirtualDataCenterObj
         FROM virtualdatacenter vdc, rasd_management rm
@@ -1399,5 +1399,4 @@ DELIMITER ;
 CALL `kinton`.`CalculateCloudUsageStats`();
 CALL `kinton`.`CalculateEnterpriseResourcesStats`();
 CALL `kinton`.`CalculateVdcEnterpriseStats`();
-
 

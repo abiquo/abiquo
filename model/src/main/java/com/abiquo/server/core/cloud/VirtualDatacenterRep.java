@@ -608,7 +608,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
     }
-    
+
     public void deleteIpPoolManagement(final IpPoolManagement ip)
     {
         ipManagementDAO.remove(ip);
