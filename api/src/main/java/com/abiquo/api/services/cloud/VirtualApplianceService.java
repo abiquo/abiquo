@@ -286,7 +286,8 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId)
+    public void deleteVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final boolean forceDelete)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
         userService.checkCurrentEnterpriseForPostMethods(virtualAppliance.getEnterprise());
@@ -313,6 +314,40 @@ public class VirtualApplianceService extends DefaultApiService
                         + virtualAppliance.getState().name()));
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
             flushErrors();
+        }
+
+        if (!forceDelete)
+        {
+            logger
+                .trace(
+                    "Deleting the virtual appliance with name {} forcing deletion of non managed images",
+                    virtualAppliance.getName());
+            // Preventing for delete non managed images (not in our repository)
+            for (NodeVirtualImage n : virtualAppliance.getNodes())
+            {
+                if (n.getVirtualImage().getRepository() == null)
+                {
+                    tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                        EventType.VAPP_DELETE, "Delete of the virtual appliance with name "
+                            + virtualAppliance.getName()
+                            + " failed with due having non managed virtual images");
+                    tracer
+                        .systemError(
+                            SeverityType.CRITICAL,
+                            ComponentType.VIRTUAL_APPLIANCE,
+                            EventType.VAPP_CREATE,
+                            "Delete of the virtual appliance with name "
+                                + virtualAppliance.getName()
+                                + " failed with due to having non managed images. And not forcing the delete",
+                            new Exception(" failed with due to having non managed images. And not forcing the delete"));
+                    logger
+                        .error(
+                            "Deleting the virtual appliance with name {} failed since there is non managed virtual images.",
+                            virtualAppliance.getName());
+                    addConflictErrors(APIError.VIRTUALAPPLIANCE_NON_MANAGED_IMAGES);
+                    flushErrors();
+                }
+            }
         }
 
         // We must delete all of its virtual machines
