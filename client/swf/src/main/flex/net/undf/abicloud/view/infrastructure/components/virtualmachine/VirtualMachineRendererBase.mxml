@@ -33,6 +33,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.infrastructure.HypervisorRemoteAccessInfo;
         	import mx.binding.utils.ChangeWatcher;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import mx.binding.utils.BindingUtils;
@@ -73,6 +74,9 @@
             public var nodeName:String;
             
             private var _stateChangeWatcher:ChangeWatcher;
+            
+            private var _hypervisorUser:String;
+            private var _hypervisorPassword:String;
             
             private function onCreationComplete():void{
             	//Checking privilege
@@ -316,6 +320,32 @@
                     updateBackgroundProcess(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
                 }
             }
+            
+            private var _mouseEvent:MouseEvent;
+            
+            private function onClickPreviousRemoteAccess(event:MouseEvent):void
+            {
+                if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER)
+                {
+                    this._mouseEvent = event;
+                    var infraEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.GET_HYPERVISOR_REMOTE_ACCESS_INFO);
+                    infraEvent.infrastructureElement = PhysicalMachine(this._virtualMachine.assignedTo.assignedTo);
+                    infraEvent.callback = onHypervisorRemoteAccessInfoRetrieved;
+                    dispatchEvent(infraEvent);
+                }
+                else
+                {
+                    onClickAccessRemoteButton(event);
+                }
+            }
+            
+            private function onHypervisorRemoteAccessInfoRetrieved(remoteAccessInfo:HypervisorRemoteAccessInfo):void
+            {
+                this._hypervisorUser = AbicloudUtils.decodeString(remoteAccessInfo.param1);
+                this._hypervisorPassword = AbicloudUtils.decodeString(remoteAccessInfo.param2);
+                onClickAccessRemoteButton(this._mouseEvent);
+            }
+
 
             /**
              * Initalizes a remote access Session against this Virtual Machine
@@ -361,8 +391,8 @@
                     }else if(HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER){
                     	appletURL = "xsapplet/xsapplet.html?vncIP=" 
                     	+ HyperVisor(this._virtualMachine.assignedTo).ip 
-                    	+ "&vncUser=" + HyperVisor(this._virtualMachine.assignedTo).user 
-                    	+ "&vncPass=" + HyperVisor(this._virtualMachine.assignedTo).password 
+                    	+ "&vncUser=" + this._hypervisorUser 
+                        + "&vncPass=" + this._hypervisorPassword 
                     	+ "&vncName=" + this._virtualMachine.name 
                     	+ "&width=" + appletWidth 
                     	+ "&height=" + appletHeight; 
@@ -525,7 +555,7 @@
             <mx:Button id="accessRemoteButton"
                 styleName="RemoteAccessButton"
                 toolTip="@Resource(bundle='Infrastructure', key='TOOLTIP_REMOTE_ACCESS')"
-                click="onClickAccessRemoteButton(event)"
+                click="onClickPreviousRemoteAccess(event)"
                 enabled="{this._vncIconEnable}"
                 includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"
                 visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1 ? true:false}"/>
