@@ -278,13 +278,13 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd(virtualMachine.getHd());
+        dto.setHdInBytes(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());
         dto.setVdrpIP(virtualMachine.getVdrpIP());
         dto.setVdrpPort(virtualMachine.getVdrpPort());
-
+        dto.setUuid(virtualMachine.getUUID());
         return dto;
     }
 
@@ -317,12 +317,12 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         final VirtualMachineState virtualMachineState)
     {
         DataResult result = new DataResult();
-        String url = "";
-        createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
-            virtualMachine.getId());
+        String url =
+            createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
         dto.setPower(virtualMachineState.name());
-        ClientResponse response = post(url, dto);
+        ClientResponse response = put(url, dto);
 
         if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
         {

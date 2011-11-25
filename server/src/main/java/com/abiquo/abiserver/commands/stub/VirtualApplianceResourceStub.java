@@ -71,4 +71,6 @@ public interface VirtualApplianceResourceStub
 
     DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         UserSession userSession, Enterprise enterprise);
+
+    BasicResult deleteVirtualAppliance(VirtualAppliance virtualAppliance, boolean forceDelete);
 }
