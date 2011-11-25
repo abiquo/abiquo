@@ -1472,7 +1472,7 @@ CREATE  TABLE IF NOT EXISTS `kinton`.`ovf_package` (
   `id_ovf_package` INT NOT NULL auto_increment,
   `id_apps_library` INT UNSIGNED NOT NULL ,
   `url` VARCHAR(255) NULL NOT NULL,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(255) NULL ,
   `description` VARCHAR(255) NULL ,
   `productName` VARCHAR(45) NULL ,
   `productUrl` VARCHAR(45) NULL ,

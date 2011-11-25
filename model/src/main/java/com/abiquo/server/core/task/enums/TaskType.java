@@ -19,37 +19,41 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.task.enums;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.abiquo.server.core.task.enums.TaskOwnerType.VIRTUAL_MACHINE;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
-
-/**
- * Wrapper class anotation for class {@link VolumeManagementDto} object
- * 
- * @author jdevesa@abiquo.com
- */
-@XmlRootElement(name = "volumes")
-public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
+public enum TaskType
 {
-    private static final long serialVersionUID = 1L;
+    DEPLOY(VIRTUAL_MACHINE),
 
-    @Override
-    @XmlElement(name = "volume")
-    public List<VolumeManagementDto> getCollection()
+    UNDEPLOY(VIRTUAL_MACHINE),
+
+    RECONFIGURE(VIRTUAL_MACHINE),
+
+    POWER_ON(VIRTUAL_MACHINE),
+
+    POWER_OFF(VIRTUAL_MACHINE),
+
+    PAUSE(VIRTUAL_MACHINE),
+
+    RESUME(VIRTUAL_MACHINE),
+
+    RESET(VIRTUAL_MACHINE),
+
+    SNAPSHOT(VIRTUAL_MACHINE),
+
+    HIGH_AVAILABILITY(VIRTUAL_MACHINE);
+
+    protected TaskOwnerType ownerType;
+
+    private TaskType(final TaskOwnerType ownerType)
     {
-        if (collection == null)
-        {
-            collection = new ArrayList<VolumeManagementDto>();
-        }
-        return collection;
+        this.ownerType = ownerType;
+    }
+
+    public TaskOwnerType getOwnerType()
+    {
+        return ownerType;
     }
 }

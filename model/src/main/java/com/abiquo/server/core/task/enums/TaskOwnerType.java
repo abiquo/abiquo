@@ -19,37 +19,21 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.server.core.infrastructure.storage;
+package com.abiquo.server.core.task.enums;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
-
-/**
- * Wrapper class anotation for class {@link VolumeManagementDto} object
- * 
- * @author jdevesa@abiquo.com
- */
-@XmlRootElement(name = "volumes")
-public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
+public enum TaskOwnerType
 {
-    private static final long serialVersionUID = 1L;
+    VIRTUAL_MACHINE("VirtualMachine");
 
-    @Override
-    @XmlElement(name = "volume")
-    public List<VolumeManagementDto> getCollection()
+    protected String name;
+
+    private TaskOwnerType(String name)
     {
-        if (collection == null)
-        {
-            collection = new ArrayList<VolumeManagementDto>();
-        }
-        return collection;
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 }

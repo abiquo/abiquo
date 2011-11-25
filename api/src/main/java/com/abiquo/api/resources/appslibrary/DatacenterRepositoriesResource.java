@@ -28,9 +28,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,7 @@ public class DatacenterRepositoriesResource extends AbstractResource
     public static final String DATACENTER_REPOSITORIES_PATH = "datacenterrepositories";
 
     @Autowired
-    private VirtualImageService service;
+    private VirtualImageService vimageService;
 
     @Autowired
     private InfrastructureService infService;
@@ -62,11 +60,11 @@ public class DatacenterRepositoriesResource extends AbstractResource
     @GET
     public DatacenterRepositoriesDto getDatacenterRepositories(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpId,
-        @Context IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         DatacenterRepositoriesDto reposDto = new DatacenterRepositoriesDto();
 
-        List<Repository> all = service.getDatacenterRepositories(enterpId);
+        List<Repository> all = vimageService.getDatacenterRepositories(enterpId);
 
         if (all != null && !all.isEmpty())
         {

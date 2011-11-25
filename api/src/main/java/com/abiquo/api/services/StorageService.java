@@ -63,9 +63,15 @@ import com.abiquo.server.core.infrastructure.storage.StorageRep;
 @Service
 public class StorageService extends DefaultApiService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StorageService.class);
+
     private static long MEGABYTE = 1048576;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StorageService.class);
+    @Autowired
+    protected InfrastructureRep datacenterRepo;
+
+    @Autowired
+    protected EnterpriseLimitChecker enterpriseLimitChecker;
 
     @Autowired
     protected StorageRep repo;
@@ -76,12 +82,6 @@ public class StorageService extends DefaultApiService
 
     @Autowired
     protected VirtualDatacenterRep vdcRepo;
-
-    @Autowired
-    protected EnterpriseLimitChecker enterpriseLimitChecker;
-
-    @Autowired
-    protected InfrastructureRep datacenterRepo;
 
     /** Default constructor. */
     public StorageService()
@@ -102,39 +102,6 @@ public class StorageService extends DefaultApiService
         repo = new StorageRep(em);
         enterpriseLimitChecker = new EnterpriseLimitChecker(em);
         datacenterRepo = new InfrastructureRep(em);
-    }
-
-    /**
-     * Creates a new resource {@link DiskManagement} associated to a virtual machine.
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param sizeInMb size of the disk.
-     * @return {@link DiskManagement} instance created.
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public DiskManagement createHardDisk(final Integer vdcId, final Long sizeInMb)
-    {
-        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
-
-        // The user has the role for manage This. But... is the user from the same enterprise
-        // than Virtual Datacenter?
-        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
-
-        // check input parameters
-        if (sizeInMb == null || sizeInMb < 1L)
-        {
-            addValidationErrors(APIError.HD_INVALID_DISK_SIZE);
-            flushErrors();
-        }
-
-        // check the limits.
-        checkStorageLimits(vdc, sizeInMb);
-
-        DiskManagement disk = new DiskManagement(vdc, sizeInMb);
-        validate(disk);
-        vdcRepo.insertHardDisk(disk);
-
-        return disk;
     }
 
     /**
@@ -175,6 +142,39 @@ public class StorageService extends DefaultApiService
         vdcRepo.updateDisk(createdDisk);
 
         return createdDisk;
+    }
+
+    /**
+     * Creates a new resource {@link DiskManagement} associated to a virtual machine.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param sizeInMb size of the disk.
+     * @return {@link DiskManagement} instance created.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public DiskManagement createHardDisk(final Integer vdcId, final Long sizeInMb)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+
+        // The user has the role for manage This. But... is the user from the same enterprise
+        // than Virtual Datacenter?
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
+
+        // check input parameters
+        if (sizeInMb == null || sizeInMb < 1L)
+        {
+            addValidationErrors(APIError.HD_INVALID_DISK_SIZE);
+            flushErrors();
+        }
+
+        // check the limits.
+        checkStorageLimits(vdc, sizeInMb);
+
+        DiskManagement disk = new DiskManagement(vdc, sizeInMb);
+        validate(disk);
+        vdcRepo.insertHardDisk(disk);
+
+        return disk;
     }
 
     /**
@@ -237,6 +237,25 @@ public class StorageService extends DefaultApiService
     }
 
     /**
+     * Return a single of {@link DiskManagement} defined into a Virtual datacenter.
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param diskId identifier of the {@link DiskManagement}
+     * @return the found {@link DiskManagement}
+     */
+    public DiskManagement getHardDiskByVirtualDatacenter(final Integer vdcId, final Integer diskId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+
+        DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+        
+        LOGGER.debug("Returning a single disk created into VirtualDatacenter '" + vdc.getName()
+                + "' identifier by id: " + diskId + ".");
+        
+        return disk;
+    }
+
+    /**
      * Returns a single DiskManagement from a Virtual Machine.
      * 
      * @param vdcId identifier of the virtual datacenter.
@@ -247,43 +266,23 @@ public class StorageService extends DefaultApiService
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public DiskManagement getHardDiskByVM(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskOrder)
+        final Integer vmId, final Integer diskId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
-
-        // disk order 0 always will be the readOnly image disk
-        if (diskOrder.equals(0))
+        
+        DiskManagement targetDisk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
+        if (targetDisk == null)
         {
-            VirtualImage vi = vm.getVirtualImage();
-            return new DiskManagement.SystemDisk(vdc, vm, vi.getDiskFileSize() / MEGABYTE);
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
         }
-        else
-        {
-            DiskManagement targetDisk = vdcRepo.findHardDiskByVirtualMachine(vm, diskOrder);
-            if (targetDisk == null)
-            {
-                addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
-                flushErrors();
-            }
-
-            return targetDisk;
-        }
-    }
-
-    /**
-     * Return a single of {@link DiskManagement} defined into a Virtual datacenter.
-     * 
-     * @param vdcId identifier of the {@link VirtualDatacenter}
-     * @param diskId identifier of the {@link DiskManagement}
-     * @return the found {@link DiskManagement}
-     */
-    public DiskManagement getHardDisksByVirtualDatacenter(final Integer vdcId, final Integer diskId)
-    {
-        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
-
-        return vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+        
+        LOGGER.debug("Returning a single disk allocated into VirtualMachine '" + vm.getName()
+                + "' identifier by id: " + diskId + ".");
+        
+        return targetDisk;
     }
 
     /**
@@ -296,7 +295,12 @@ public class StorageService extends DefaultApiService
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
-        return vdcRepo.findHardDisksByVirtualDatacenter(vdc);
+        List<DiskManagement> disks = vdcRepo.findHardDisksByVirtualDatacenter(vdc);
+        
+        LOGGER.debug("Returning list of disks created into VirtualDatacenter '" + vdc.getName()
+                + ".");
+        
+        return disks;
     }
 
     /**
@@ -318,15 +322,50 @@ public class StorageService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        // Insert the first hard disk, based on its virtual image
-        VirtualImage vi = vm.getVirtualImage();
-        DiskManagement diskRO =
-            new DiskManagement.SystemDisk(vdc, vm, vi.getDiskFileSize() / MEGABYTE);
-        disks.add(diskRO);
-
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
 
+        LOGGER.debug("Returning list of disks allocated into VirtualMachine '" + vdc.getName()
+                + ".");
+        
         return disks;
+    }
+
+    /**
+     * Check the limits for a new disk.
+     * 
+     * @param vdc object {@link VirtualDatacenter}
+     * @param sizeInMB new size we want to add as a resource.
+     */
+    protected void checkStorageLimits(final VirtualDatacenter vdc, final long sizeInMB)
+    {
+        // Must use the enterprise from VDC. When creating iSCSI volumes will be the cloud admin
+        // creating volumes in other enterprises VDC
+        Enterprise enterprise = vdc.getEnterprise();
+
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
+            enterprise.getName(), sizeInMB);
+
+        DatacenterLimits dcLimits =
+            datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
+
+        if (dcLimits == null)
+        {
+            addForbiddenErrors(APIError.DATACENTER_NOT_ALLOWED);
+            flushErrors();
+        }
+
+        VirtualMachineRequirements requirements =
+            new VirtualMachineRequirements(0L, 0L, sizeInMB * 1024 * 1024, 0L, 0L, 0L, 0L);
+
+        try
+        {
+            enterpriseLimitChecker.checkLimits(enterprise, requirements, true);
+        }
+        catch (LimitExceededException ex)
+        {
+            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.getCode(), ex.toString()));
+            flushErrors();
+        }
     }
 
     /**
@@ -414,43 +453,5 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
         return vm;
-    }
-
-    /**
-     * Check the limits for a new disk.
-     * 
-     * @param vdc object {@link VirtualDatacenter}
-     * @param sizeInMB new size we want to add as a resource.
-     */
-    protected void checkStorageLimits(final VirtualDatacenter vdc, final long sizeInMB)
-    {
-        // Must use the enterprise from VDC. When creating iSCSI volumes will be the cloud admin
-        // creating volumes in other enterprises VDC
-        Enterprise enterprise = vdc.getEnterprise();
-
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
-
-        DatacenterLimits dcLimits =
-            datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
-
-        if (dcLimits == null)
-        {
-            addForbiddenErrors(APIError.DATACENTER_NOT_ALLOWED);
-            flushErrors();
-        }
-
-        VirtualMachineRequirements requirements =
-            new VirtualMachineRequirements(0L, 0L, sizeInMB * 1024 * 1024, 0L, 0L, 0L, 0L);
-
-        try
-        {
-            enterpriseLimitChecker.checkLimits(enterprise, requirements, true);
-        }
-        catch (LimitExceededException ex)
-        {
-            addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.getCode(), ex.toString()));
-            flushErrors();
-        }
     }
 }

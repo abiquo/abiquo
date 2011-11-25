@@ -19,12 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
 package com.abiquo.server.core.infrastructure.storage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -32,24 +28,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.WrapperDto;
 
-/**
- * Wrapper class anotation for class {@link VolumeManagementDto} object
- * 
- * @author jdevesa@abiquo.com
- */
-@XmlRootElement(name = "volumes")
-public class VolumesManagementDto extends WrapperDto<VolumeManagementDto>
+@XmlRootElement(name = "initiatorMappings")
+public class InitiatorMappingsDto extends WrapperDto<InitiatorMappingDto>
 {
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "volume")
-    public List<VolumeManagementDto> getCollection()
+    @XmlElement(name = "initiatorMapping")
+    public List<InitiatorMappingDto> getCollection()
     {
-        if (collection == null)
-        {
-            collection = new ArrayList<VolumeManagementDto>();
-        }
         return collection;
     }
+
 }
