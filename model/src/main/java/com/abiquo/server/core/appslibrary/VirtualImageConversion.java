@@ -246,14 +246,14 @@ public class VirtualImageConversion extends DefaultEntityBase
 
     @Column(name = SIZE_COLUMN, nullable = !SIZE_REQUIRED)
     @Range(min = SIZE_MIN, max = SIZE_MAX)
-    private long size;
+    private Long size;
 
-    public long getSize()
+    public Long getSize()
     {
         return this.size;
     }
 
-    public void setSize(final long size)
+    public void setSize(final Long size)
     {
         this.size = size;
     }

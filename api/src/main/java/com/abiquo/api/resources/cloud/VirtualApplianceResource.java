@@ -24,11 +24,13 @@ package com.abiquo.api.resources.cloud;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -76,6 +78,8 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_STATE = "/state";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY = "/action/undeploy";
+
+    public static final String VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM = "force";
 
     @Autowired
     VirtualApplianceService service;
@@ -251,10 +255,11 @@ public class VirtualApplianceResource
     @DELETE
     public void deleteVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId)
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @QueryParam(VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM) @DefaultValue(value = "false") final Boolean forceDelete)
         throws Exception
     {
-        service.deleteVirtualAppliance(vdcId, vappId);
+        service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
 
     }
 }

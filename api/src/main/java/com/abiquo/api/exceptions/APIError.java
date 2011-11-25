@@ -172,7 +172,8 @@ public enum APIError
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
         "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
-        "The virtual appliance is deployed"),
+        "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
+        "The virtual appliance has non managed images"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -233,7 +234,7 @@ public enum APIError
         "VM-9", "The requested Virtual Image does not exists"), VIRTUAL_MACHINE_EDIT_STATE("VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore can't be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
-        "The Virtual Machine is not allocated. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
+        "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12", "The allowed power states for Virtual Machines is ON, OFF, PAUSED  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
@@ -493,7 +494,11 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"),
+
+    // TASKS
+    NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
+        "TASK-2", "");
 
     /**
      * Internal error code

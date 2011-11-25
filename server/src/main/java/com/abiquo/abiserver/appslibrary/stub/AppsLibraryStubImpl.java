@@ -111,8 +111,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
-                ovfpackageListURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .post(ovfpackageListURL);
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -270,8 +270,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageUninstallLink(String.valueOf(idEnterprise), String
-                .valueOf(ovfPackageId));
+            createOVFPackageUninstallLink(String.valueOf(idEnterprise),
+                String.valueOf(ovfPackageId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -436,8 +436,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
-                null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
+                .put(null);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -576,10 +576,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<List<DiskFormatType>> getDiskFormatTypes()
+    public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes()
     {
 
-        DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
+        DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> result =
+            new DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>>();
 
         final String uri = createDiskFormatTypesLink();
 
@@ -590,7 +591,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             result.setSuccess(Boolean.TRUE);
             DiskFormatTypesDto diskFormatTypes = response.getEntity(DiskFormatTypesDto.class);
 
-            List<DiskFormatType> listDiskFormatType = new ArrayList<DiskFormatType>();
+            List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType> listDiskFormatType =
+                new ArrayList<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>();
             for (DiskFormatTypeDto diskFormatType : diskFormatTypes.getCollection())
             {
                 listDiskFormatType.add(createFlexDiskFormatTypeObject(diskFormatType));
@@ -606,10 +608,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     }
 
-    public static DiskFormatType createFlexDiskFormatTypeObject(
+    public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
         final DiskFormatTypeDto diskFormatTypeDto)
     {
-        return DiskFormatType.fromId(diskFormatTypeDto.getId());
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType.fromId(diskFormatTypeDto
+            .getId()));
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final OVFPackageListDto listDto)

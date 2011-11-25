@@ -1497,4 +1497,21 @@ public class AbstractAPIStub
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
                 params);
     }
+
+    protected String createVirtualAppliancesByEnterpriseLink(final Integer entId)
+    {
+        return createEnterpriseLink(entId) + "/action/virtualappliances";
+    }
+
+    protected String createVirtualApplianceUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Map<String, String[]> queryParams)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+
+        return URIResolver.resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}",
+            params, queryParams);
+    }
 }

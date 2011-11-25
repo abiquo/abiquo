@@ -188,6 +188,8 @@ public class VirtualMachinesResource extends AbstractResource
         vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
             .getRepository().getDatacenter().getId(), vimage.getId()));
 
+        User user = v.getVirtualMachine().getUser();
+        vmDto.addLink(restBuilder.buildUserLink(vimage.getEnterprise().getId(), user.getId()));
         return vmDto;
     }
 
