@@ -286,6 +286,7 @@ public class ESXiCollector extends AbstractCollector
     @Override
     public HostDto getHostInfo() throws CollectorException
     {
+        LOGGER.debug("Getting information for host at: {}", getIpAddress());
 
         final HostHardwareInfo hardwareInfo;
         final HostDto physicalInfo = new HostDto();
@@ -306,7 +307,9 @@ public class ESXiCollector extends AbstractCollector
         ObjectContent hostSystem;
         try
         {
+            LOGGER.debug("Getting Managed Object information for the host from inventory...");
             hostSystem = getManagedObjectReferencesFromInventory(hostSystemSpec)[0];
+            LOGGER.debug("Got the information of the Managed Object");
         }
         catch (RemoteException e)
         {
@@ -329,9 +332,13 @@ public class ESXiCollector extends AbstractCollector
 
         try
         {
+            LOGGER.debug("Getting the storage system information for the host...");
             ManagedObjectReference storageSystemMor = getStorageSystem(hostSystem);
+            LOGGER.debug("Storage information retrieved...");
 
+            LOGGER.debug("Getting the iSCSI initiator...");
             final String initiatorIQN = getInternetSCSIInitiatorIQN(hostSystem, storageSystemMor);
+            LOGGER.debug("iSCSI initiator retrieved");
 
             physicalInfo.setInitiatorIQN(initiatorIQN);
         }
@@ -342,6 +349,8 @@ public class ESXiCollector extends AbstractCollector
         }
 
         physicalInfo.setStatus(HostStatusEnumType.MANAGED);
+
+        LOGGER.debug("Information retreived for host at: {}", getIpAddress());
 
         return physicalInfo;
     }
@@ -1160,6 +1169,8 @@ public class ESXiCollector extends AbstractCollector
      */
     private synchronized void hasValidLicense() throws NoManagedException
     {
+        LOGGER.debug("Checking if host {} has a valid license...", getIpAddress());
+
         ManagedObjectReference licenseManager = getServiceContent().getLicenseManager();
 
         LicenseManagerLicenseInfo[] licenseInfo;
@@ -1172,6 +1183,7 @@ public class ESXiCollector extends AbstractCollector
             {
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
+                    LOGGER.debug("Invalid license found!");
                     throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                 }
 
@@ -1199,6 +1211,7 @@ public class ESXiCollector extends AbstractCollector
                 {
                     if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
                     {
+                        LOGGER.debug("Expired license found!");
                         throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                     }
                 }
@@ -1211,6 +1224,7 @@ public class ESXiCollector extends AbstractCollector
             throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
         }
 
+        LOGGER.debug("Valid license found");
     }
 
     /**
