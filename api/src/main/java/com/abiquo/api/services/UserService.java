@@ -310,7 +310,11 @@ public class UserService extends DefaultApiService
             old.setPassword(encrypt(user.getPassword()));
         }
         old.setSurname(user.getSurname());
-        old.setNick(user.getNick());
+        if (!old.getNick().equalsIgnoreCase(user.getNick()))
+        {
+            addConflictErrors(APIError.USER_NICK_CANNOT_BE_CHANGED);
+            flushErrors();
+        }
         old.setDescription(user.getDescription());
 
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))
