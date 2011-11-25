@@ -82,11 +82,11 @@ package net.undf.abicloud.view.general.components.info
          * Display the icon if required
          */
         private function displayIcon():void{
-    		visible = true;
+    		showIconInfo();
         	if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showDefaultHelp.value == 0){
         		if(this._wikiUrl == AbiCloudModel.getInstance().configurationManager.config.client_wiki_defaultURL.value
         		|| this._wikiUrl == ''){
-	        		visible = false;        			
+	        		showIconInfo();       			
         		}
         	}else{
         		if(this._wikiUrl == ''){
@@ -98,10 +98,10 @@ package net.undf.abicloud.view.general.components.info
         /**
          * Show the info icon if user presses the CTRL key
          */
-        public function showIconInfo(keyPressed:Boolean):void
+        public function showIconInfo():void
         {
-           visible = keyPressed;
-           buttonMode = keyPressed;
+           visible = true;
+           buttonMode = true;
         }
 
         /**
@@ -114,6 +114,5 @@ package net.undf.abicloud.view.general.components.info
         }       
 
 
-    }		
 	}
 }

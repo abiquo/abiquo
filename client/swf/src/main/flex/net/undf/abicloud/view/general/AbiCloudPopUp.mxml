@@ -131,22 +131,6 @@
                 stopDrag();
             }
             
-            /**
-             * Show the info icon if user presses the CTRL key
-             */
-            private function showIconInfo(keyboardEvent:KeyboardEvent):void
-            {
-                this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
-            }
-
-            /**
-             * Hide the info icon
-             */
-            private function hideIconInfo(keyboardEvent:KeyboardEvent):void
-            {
-                this._iconInfo.hideIconInfo();
-            }
-            
             
             public function set titleText(text:String):void
             {
