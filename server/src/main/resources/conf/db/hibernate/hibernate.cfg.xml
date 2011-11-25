@@ -16,6 +16,7 @@
         <property name="hibernate.validator.apply_to_ddl">false</property>
         <property name="hibernate.validator.autoregister_listeners">false</property>
         <property name="hibernate.archive.autodetection">hbm</property>
+        <property name="hibernate.query.substitutions">true 1, false 0</property>
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/enumeration-mappings.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientResourceHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/authorization/AuthClientresourceExceptionHB.hbm.xml" />

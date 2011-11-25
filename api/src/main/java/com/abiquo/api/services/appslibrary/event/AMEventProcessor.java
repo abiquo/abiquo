@@ -51,10 +51,9 @@ import com.abiquo.tracer.SeverityType;
  * and create new {@link VirtualImage}
  */
 @Service
-public class OVFPackageInstanceStatusEventProcessor implements AMCallback
+public class AMEventProcessor implements AMCallback
 {
-    protected final static Logger logger =
-        LoggerFactory.getLogger(OVFPackageInstanceStatusEventProcessor.class);
+    protected final static Logger logger = LoggerFactory.getLogger(AMEventProcessor.class);
 
     @Autowired
     protected InfrastructureService infService;
@@ -65,11 +64,11 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     @Autowired
     private TracerLogger tracer;
 
-    public OVFPackageInstanceStatusEventProcessor(final EntityManager em)
+    public AMEventProcessor(final EntityManager em)
     {
     }
 
-    public OVFPackageInstanceStatusEventProcessor()
+    public AMEventProcessor()
     {
     }
 
