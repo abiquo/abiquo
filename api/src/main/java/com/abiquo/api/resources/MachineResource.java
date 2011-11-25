@@ -111,11 +111,11 @@ public class MachineResource extends AbstractResource
         MachineDto dto = createTransferObject(machine, restBuilder);
 
         // Credentials are only returned if they are requested
-        if (showCredentials == null || showCredentials.equals(Boolean.FALSE)
+        if (showCredentials != null && showCredentials.equals(Boolean.TRUE)
             && machine.getHypervisor() != null)
         {
-            dto.setUser(null);
-            dto.setPassword(null);
+            dto.setUser(machine.getHypervisor().getUser());
+            dto.setPassword(machine.getHypervisor().getPassword());
         }
 
         return dto;
@@ -265,8 +265,10 @@ public class MachineResource extends AbstractResource
             dto.setIp(machine.getHypervisor().getIp());
             dto.setIpService(machine.getHypervisor().getIpService());
             dto.setType(machine.getHypervisor().getType());
-            dto.setUser(machine.getHypervisor().getUser());
-            dto.setPassword(machine.getHypervisor().getPassword());
+
+            // Credentials are not returned by default
+            // dto.setUser(machine.getHypervisor().getUser());
+            // dto.setPassword(machine.getHypervisor().getPassword());
         }
 
         if (machine.getDatastores() != null)
