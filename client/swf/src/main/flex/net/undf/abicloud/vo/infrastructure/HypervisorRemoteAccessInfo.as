@@ -19,30 +19,24 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.abiserver.exception;
-
-/**
- * Exception thrown when the communication with the Virtual factory times out.
- * 
- * @author Ignasi Barrera
- */
-public class VirtualApplianceTimeoutException extends VirtualApplianceFaultException
+package net.undf.abicloud.vo.infrastructure
 {
-    private static final long serialVersionUID = 1L;
 
-    public VirtualApplianceTimeoutException(final String message, final Throwable cause)
+    [Bindable]
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo")]
+    public class HypervisorRemoteAccessInfo
     {
-        super(message, cause);
-    }
+        /* ------------- Public atributes ------------- */
+        public var param1:String;
 
-    public VirtualApplianceTimeoutException(final String message)
-    {
-        super(message);
-    }
+        public var param2:String;
 
-    public VirtualApplianceTimeoutException(final Throwable cause)
-    {
-        super(cause);
-    }
+        /* ------------- Constructor ------------- */
+        public function HypervisorRemoteAccessInfo()
+        {
+            param1 = '';
+            param2 = '';
+        }
 
+    }
 }

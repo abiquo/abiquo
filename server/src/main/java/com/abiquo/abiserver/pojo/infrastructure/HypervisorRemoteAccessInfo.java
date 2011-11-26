@@ -18,31 +18,36 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.abiserver.pojo.infrastructure;
 
-package com.abiquo.abiserver.exception;
+import java.io.Serializable;
 
-/**
- * Exception thrown when the communication with the Virtual factory times out.
- * 
- * @author Ignasi Barrera
- */
-public class VirtualApplianceTimeoutException extends VirtualApplianceFaultException
+public class HypervisorRemoteAccessInfo implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    public VirtualApplianceTimeoutException(final String message, final Throwable cause)
+    public String param1;
+
+    public String param2;
+
+    public String getParam1()
     {
-        super(message, cause);
+        return param1;
     }
 
-    public VirtualApplianceTimeoutException(final String message)
+    public void setParam1(String param1)
     {
-        super(message);
+        this.param1 = param1;
     }
 
-    public VirtualApplianceTimeoutException(final Throwable cause)
+    public String getParam2()
     {
-        super(cause);
+        return param2;
+    }
+
+    public void setParam2(String param2)
+    {
+        this.param2 = param2;
     }
 
 }

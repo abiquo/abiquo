@@ -39,6 +39,7 @@ import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.DataCenter;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
+import com.abiquo.abiserver.pojo.infrastructure.HypervisorRemoteAccessInfo;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine;
 import com.abiquo.abiserver.pojo.infrastructure.PhysicalMachineCreation;
 import com.abiquo.abiserver.pojo.infrastructure.Rack;
@@ -735,6 +736,16 @@ public class InfrastructureService
         {
             return e.getResult();
         }
+    }
+
+    public DataResult<HypervisorRemoteAccessInfo> getHypervisorRemoteAccessInfo(
+        UserSession userSession, PhysicalMachine machine)
+    {
+        MachineResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new MachineResourceStubImpl(),
+                MachineResourceStub.class);
+
+        return proxy.getHypervisorRemoteAccess(machine);
     }
 
     protected BasicResult deleteNotManagerVirtualMachines(final UserSession userSession,

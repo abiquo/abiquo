@@ -110,6 +110,8 @@ package net.undf.abicloud.events
         public static const EDIT_HYPERVISOR:String = "editHypervisorInfrastructureEvent";
 
         public static const DELETE_HYPERVISOR:String = "deleteHypervisorInfrastructureEvent";
+        
+        public static const GET_HYPERVISOR_REMOTE_ACCESS_INFO:String = "getHypervisorRemoteAccessInfoInfrastructureEvent";
 
         /* ------------------------------------ */
 

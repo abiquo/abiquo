@@ -127,8 +127,11 @@ public class MachinesResourceIT extends AbstractJpaGeneratorIT
         assertEquals(m.getType(), entityPost.getType());
         assertEquals(m.getIp(), entityPost.getIp());
         assertEquals(m.getIpService(), entityPost.getIpService());
-        assertEquals(m.getUser(), entityPost.getUser());
-        assertEquals(m.getPassword(), entityPost.getPassword());
+
+        // Hypervisor credentials are no longer returned by the API
+        // assertEquals(m.getUser(), entityPost.getUser());
+        // assertEquals(m.getPassword(), entityPost.getPassword());
+
         assertEquals(entityPost.getRealCpuCores(), m.getRealCpuCores());
         assertEquals(entityPost.getRealRamInMb(), m.getRealRamInMb());
         assertEquals(entityPost.getState(), m.getState());

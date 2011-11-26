@@ -130,7 +130,8 @@ public class MachineService extends DefaultApiService
         return machine;
     }
 
-    public Machine getMachine(Integer datacenterId, Integer rackId, Integer machineId)
+    public Machine getMachine(final Integer datacenterId, final Integer rackId,
+        final Integer machineId)
     {
         Machine machine = repo.findMachineByIds(datacenterId, rackId, machineId);
 

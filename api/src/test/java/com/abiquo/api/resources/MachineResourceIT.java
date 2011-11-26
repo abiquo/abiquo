@@ -31,6 +31,7 @@ import static com.abiquo.api.common.UriTestResolver.resolveRackURI;
 import static com.abiquo.api.common.UriTestResolver.resolveUserURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,26 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     {
         MachineDto machine = getValidMachine();
         assertNotNull(machine);
+
+        // Verify that the credentials are not returned
+        assertNull(machine.getUser());
+        assertNull(machine.getPassword());
+    }
+
+    @Test
+    public void testGetMachineWithCredentials()
+    {
+        RestClient client = new RestClient();
+        Resource resource = client.resource(validMachineUri + "?credentials=true");
+
+        ClientResponse response = resource.accept(MediaType.APPLICATION_XML).get();
+        assertEquals(200, response.getStatusCode());
+        MachineDto machine = response.getEntity(MachineDto.class);
+
+        // Verify that the credentials are not returned
+        assertNotNull(machine);
+        assertNotNull(machine.getUser());
+        assertNotNull(machine.getPassword());
     }
 
     @Test

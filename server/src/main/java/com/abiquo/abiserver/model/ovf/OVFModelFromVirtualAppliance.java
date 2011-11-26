@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
@@ -811,7 +812,7 @@ public class OVFModelFromVirtualAppliance
             CIMVirtualSystemSettingDataUtils.createVirtualSystemSettingData("Hypervisor",
                 instanceID, null, null, null, null); // TODO
 
-        insertUserAndPassword(vssd, hypervisor.getUser(), hypervisor.getPassword());
+        insertUserAndPassword(vssd, hypervisor);
 
         // Setting the hypervisor address as VirtualSystemIdentifier element
         String virtualSystemIdentifier = hypervisorAddres;
@@ -890,14 +891,21 @@ public class OVFModelFromVirtualAppliance
      * Adds user and password in the Virtual System Type
      * 
      * @param vssd the virtual system type
-     * @param user the user
-     * @param password the password
+     * @param hypervisor The hypervisor
      */
-    private static void insertUserAndPassword(final VSSDType vssd, final String user,
-        final String password)
+    private static void insertUserAndPassword(final VSSDType vssd, final HyperVisor hypervisor)
     {
-        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, user);
-        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, password);
+        DAOFactory factory = HibernateDAOFactory.instance();
+        factory.beginConnection(true);
+
+        // Refresh credentials from database, since Flex Client does not provide them
+        HypervisorHB hv = factory.getHyperVisorDAO().findById(hypervisor.getId());
+
+        vssd.getOtherAttributes().put(AbiCloudConstants.ADMIN_USER_QNAME, hv.getUser());
+        vssd.getOtherAttributes()
+            .put(AbiCloudConstants.ADMIN_USER_PASSWORD_QNAME, hv.getPassword());
+
+        factory.endConnection();
     }
 
     /**
