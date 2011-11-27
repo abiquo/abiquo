@@ -24,9 +24,11 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
+import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -51,6 +53,8 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
  * 
  * @author jdevesa
  */
+@Parent(DisksResource.class)
+@Path(DiskResource.DISK_PARAM)
 @Controller
 public class DiskResource extends AbstractResource
 {
@@ -75,7 +79,7 @@ public class DiskResource extends AbstractResource
      *             {@link APIExceptionMapper} exception mapper.
      */
     @GET
-    public DiskManagementDto getfHardDisk(
+    public DiskManagementDto getHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(DiskResource.DISK) @NotNull @Min(1) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception

@@ -56,6 +56,7 @@ import com.abiquo.api.resources.appslibrary.OVFPackageResource;
 import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -1168,8 +1169,18 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildVirtualDatacenterDiskLinks(final DiskManagement disk)
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, disk.getVirtualDatacenter()
+            .getId().toString());
+        params.put(DiskResource.DISK, disk.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+        links.add(builder.buildRestLink(DiskResource.class, REL_EDIT, params));
+
+        return links;
     }
 
     public RESTLink buildUserLink(final Integer enterpriseId, final Integer userId)

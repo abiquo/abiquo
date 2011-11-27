@@ -92,7 +92,9 @@ public enum EventType implements Serializable
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
         410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
-        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"),
+        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414, "HARD_DISK_CREATE", "Hard disk created"),
+        HARD_DISK_DELETE(415, "HARD_DISK_DELETE", "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"),
+        HARD_DISK_UNASSIGN(417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
 
     // Image-related events
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,

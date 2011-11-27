@@ -54,6 +54,9 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /**
  * Implements all the business logic for storage features.
@@ -136,7 +139,7 @@ public class StorageService extends DefaultApiService
             flushErrors();
         }
         // if the hard disk is already attached to another virtual machine
-        //, raise a conflict error.
+        // , raise a conflict error.
         if (createdDisk.getVirtualMachine() != null)
         {
             addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
@@ -147,6 +150,17 @@ public class StorageService extends DefaultApiService
         createdDisk.setAttachmentOrder(getFreeAttachmentSlot(vm));
 
         vdcRepo.updateDisk(createdDisk);
+
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "The hard disk resource '" + createdDisk.getId() + "' and size of "
+                    + createdDisk.getSizeInMb() + "MB has been assigned to virtual machine '"
+                    + vm.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                EventType.HARD_DISK_ASSIGN, messageTrace);
+        }
 
         return createdDisk;
     }
@@ -180,6 +194,17 @@ public class StorageService extends DefaultApiService
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);
         vdcRepo.insertHardDisk(disk);
+
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "A new hard disk VLAN of " + sizeInMb
+                    + " MB has been created as a resource in VirtualDatacenter '" + vdc.getName()
+                    + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
+                EventType.HARD_DISK_CREATE, messageTrace);
+        }
 
         return disk;
     }
@@ -224,6 +249,17 @@ public class StorageService extends DefaultApiService
         disk.setVirtualAppliance(null);
         disk.setVirtualMachine(null);
         vdcRepo.updateDisk(disk);
+        
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "The hard disk resource '" + disk.getId() + "' and size of "
+                    + disk.getSizeInMb() + "MB has been released from virtual machine '"
+                    + vm.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                EventType.HARD_DISK_UNASSIGN, messageTrace);
+        }
     }
 
     /**
@@ -239,7 +275,7 @@ public class StorageService extends DefaultApiService
         // The user has the role for manage This. But... is the user from the same enterprise
         // than Virtual Datacenter?
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
-        
+
         DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
         if (disk == null)
         {
@@ -251,11 +287,21 @@ public class StorageService extends DefaultApiService
             addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
             flushErrors();
         }
-        
+
         repo.removeHardDisk(disk);
-           
+
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "The hard disk resource '" + disk.getId() + "' and size of "
+                    + disk.getSizeInMb() + "MB has been deleted from VirtualDatacenter '"
+                    + vdc.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
+                EventType.HARD_DISK_DELETE, messageTrace);
+        }
     }
-    
+
     /**
      * Return a single of {@link DiskManagement} defined into a Virtual datacenter.
      * 
@@ -263,6 +309,7 @@ public class StorageService extends DefaultApiService
      * @param diskId identifier of the {@link DiskManagement}
      * @return the found {@link DiskManagement}
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public DiskManagement getHardDiskByVirtualDatacenter(final Integer vdcId, final Integer diskId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
@@ -273,10 +320,10 @@ public class StorageService extends DefaultApiService
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
-        
+
         LOGGER.debug("Returning a single disk created into VirtualDatacenter '" + vdc.getName()
-                + "' identifier by id: " + diskId + ".");
-        
+            + "' identifier by id: " + diskId + ".");
+
         return disk;
     }
 
@@ -296,17 +343,17 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
-        
+
         DiskManagement targetDisk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
         if (targetDisk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
-        
+
         LOGGER.debug("Returning a single disk allocated into VirtualMachine '" + vm.getName()
-                + "' identifier by id: " + diskId + ".");
-        
+            + "' identifier by id: " + diskId + ".");
+
         return targetDisk;
     }
 
@@ -316,15 +363,16 @@ public class StorageService extends DefaultApiService
      * @param vdcId identifier of the {@link VirtualDatacenter}
      * @return the list of found {@link DiskManagement}
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<DiskManagement> getListOfHardDisksByVirtualDatacenter(final Integer vdcId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         List<DiskManagement> disks = vdcRepo.findHardDisksByVirtualDatacenter(vdc);
-        
+
         LOGGER.debug("Returning list of disks created into VirtualDatacenter '" + vdc.getName()
-                + ".");
-        
+            + ".");
+
         return disks;
     }
 
@@ -350,8 +398,8 @@ public class StorageService extends DefaultApiService
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
 
         LOGGER.debug("Returning list of disks allocated into VirtualMachine '" + vdc.getName()
-                + ".");
-        
+            + ".");
+
         return disks;
     }
 

@@ -43,8 +43,6 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 @Test(groups = {STORAGE_INTEGRATION_TESTS})
 public class DisksResourceIT extends AbstractJpaGeneratorIT
 {
-    private static long MEGABYTE = 1048576;
-
     /** Service we are testing */
     protected StorageService service;
 
@@ -102,7 +100,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         DiskManagementDto newDisk = new DiskManagementDto();
         newDisk.setSizeInMb(12000L);
 
-        ClientResponse response = post(uri, newDisk);
+        ClientResponse response = post(uri, newDisk, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
     }
 
@@ -132,7 +130,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk2.getRasd(), disk3.getRasd(), disk1, disk2, disk3);
 
         String uri = resolveDisksUri(vdc.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, "basicUser", "basicUser");
 
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertNotNull(response.getEntity(DisksManagementDto.class));
@@ -162,13 +160,13 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
      * Just check the get of hard disk works.
      */
     @Test
-    public void getHardDisksEndToEndTest()
+    public void getHardDiskEndToEndTest()
     {
         DiskManagement disk1 = diskGenerator.createInstance(vdc);
         setup(disk1.getRasd(), disk1);
 
         String uri = resolveDiskUri(vdc.getId(), disk1.getId());
-        ClientResponse response = get(uri);
+        ClientResponse response = get(uri, "basicUser", "basicUser");
 
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         assertNotNull(response.getEntity(DiskManagementDto.class));
@@ -203,7 +201,7 @@ public class DisksResourceIT extends AbstractJpaGeneratorIT
         setup(disk1.getRasd(), disk1);
 
         String uri = resolveDiskUri(vdc.getId(), disk1.getId());
-        ClientResponse response = delete(uri);
+        ClientResponse response = delete(uri, "basicUser", "basicUser");
 
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
         

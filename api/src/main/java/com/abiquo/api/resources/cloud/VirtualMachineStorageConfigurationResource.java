@@ -45,6 +45,9 @@
  */
 package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -52,22 +55,32 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.StorageService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 /**
  * <pre>
@@ -132,13 +145,12 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     }
 
     /**
-     * Creates a new Hard Disk to be used by a Virtual Machine.
+     * Attaches Hard Disks to be used by a Virtual Machine.
      * 
      * @param vdcId identifier of the Virtual Datacenter.
      * @param vappId identifier of the Virtual Appliance.
      * @param vmId identifier of the Virtual Machine.
-     * @param inputDto {@link DiskManagementDto} with the attributes to create a new HardDisk inside
-     *            the machine.
+     * @param hdRefs A list of links to the volumes to attach.
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return the {@link DiskManagementDto} object that contains all the {@link DiskManagementDto}
      * @throws Exception any thrown exception. Moved to HTTP status code in the
@@ -146,17 +158,71 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
      */
     @POST
     @Path(DISKS_PATH)
-    public DiskManagementDto createHardDisk(
+    public DiskManagementDto attachHardDisks(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        final DiskManagementDto inputDto, @Context final IRESTBuilder restBuilder) throws Exception
+        final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
+        List<DiskManagement> volumes = getHardDisksFromLinks(hdRefs, vdcId);
+        // TODO: apply Albert configuration changes.
         DiskManagement disk = service.attachHardDiskIntoVM(vdcId, vappId, vmId, 0);
 
         return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }
 
+    /**
+     * Detach all hard disks from the virtual machine.
+     * 
+     * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
+     * @param vappId The id of the virtual appliance of the virtual machine.
+     * @param vmId The id of the virtual machine.
+     * @param restBuilder The rest builder used to generate resource links.
+     * @return The identifier of the attachment task, if the virtual machine is deployed,
+     *         <code>null</code> otherwise.
+     * @throws Exception If an error occurs. Exception will be automatically transformed to the
+     *             appropriate HTTP errors by the {@link APIExceptionMapper}.
+     */
+    @DELETE
+    @Path(DISKS_PATH)
+        public AcceptedRequestDto< ? > detachHardDisks(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+
+        // TODO: apply Albert changes
+
+        return null;
+    }
+    
+    /**
+     * Modify the hard disks of the virtual machine.
+     * 
+     * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
+     * @param vappId The id of the virtual appliance of the virtual machine.
+     * @param vmId The id of the virtual machine.
+     * @param hdRefs A list of links to the volumes for the virtual machine.
+     * @param restBuilder The rest builder used to generate resource links.
+     * @return The identifier of the attachment task, if the virtual machine is deployed,
+     *         <code>null</code> otherwise.
+     * @throws Exception If an error occurs. Exception will be automatically transformed to the
+     *             appropriate HTTP errors by the {@link APIExceptionMapper}.
+     */
+    @PUT
+    @Path(DISKS_PATH)
+    public AcceptedRequestDto< ? > changeVolumes(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @NotNull final LinksDto hdRefs, @Context final IRESTBuilder restBuilder)
+        throws Exception
+    {
+        // TODO: apply Albert configuration changes.
+        return null;
+    }
+    
     /**
      * Returns a single disk according on its order in Virtual Machine
      * 
@@ -184,27 +250,29 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
     }
 
     /**
-     * Deleting a single disk identified by its order in Virtual Machine
+     * Detach a hard disk from the virtual machine.
      * 
-     * @param vdcId identifier of the Virtual Datacenter.
-     * @param vappId identifier of the Virtual Appliance.
-     * @param vmId identifier of the Virtual Machine.
-     * @param diskOrder identifier of the hard disk inside the virtual machine
-     * @param restBuilder a Context-injected object to create the links of the Dto
-     * @return the {@link DiskManagementDto} object that contains all the {@link DiskManagementDto}
-     * @throws Exception any thrown exception. Moved to HTTP status code in the
-     *             {@link APIExceptionMapper} exception mapper.
+     * @param vdcId The id of the virtual datacenter where the virtual machine belongs to.
+     * @param vappId The id of the virtual appliance of the virtual machine.
+     * @param vmId The id of the virtual machine.
+     * @param diskId The id of the volume to detach.
+     * @param restBuilder The rest builder used to generate resource links.
+     * @return The identifier of the attachment task, if the virtual machine is deployed,
+     *         <code>null</code> otherwise.
+     * @throws Exception If an error occurs. Exception will be automatically transformed to the
+     *             appropriate HTTP errors by the {@link APIExceptionMapper}.
      */
     @DELETE
     @Path(DISKS_PATH + "/" + DISK_PARAM)
-    public void detachHardDisk(
+    public AcceptedRequestDto< ? > detachHardDisk(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @PathParam(DISK) @NotNull @Min(0) final Integer diskOrder,
+        @PathParam(DISK) @NotNull @Min(0) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        service.detachHardDisk(vdcId, vappId, vmId, diskOrder);
+        // TODO : apply Albert configuration changes.
+        return null;
     }
 
     /**
@@ -240,5 +308,54 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         throws Exception
     {
         return ModelTransformer.persistenceFromTransport(DiskManagement.class, inputDto);
+    }
+    
+    /**
+     * Validates the given link to a hard disk and returns the referenced hard disk.
+     * 
+     * @param links The links to validate the hard disk.
+     * @param expectedVirtualDatacenter The expected virtual datacenter to be found in the link.
+     * @return The list of {@link DiskManagement} referenced by the link.
+     * @throws Exception If the link is not valid.
+     */
+    private List<DiskManagement> getHardDisksFromLinks(final LinksDto links,
+        final Integer expectedVirtualDatacenter) throws Exception
+    {
+        List<DiskManagement> disks = new LinkedList<DiskManagement>();
+
+        // Validate and load each volume from the link list
+        for (RESTLink link : links.searchLinks(DISK))
+        {
+            String path =
+                buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                    DisksResource.DISKS_PATH, DiskResource.DISK_PARAM);
+
+            MultivaluedMap<String, String> pathValues =
+                URIResolver.resolveFromURI(path, link.getHref());
+
+            // URI needs to have an identifier to a VDC, and another one to the volume
+            if (pathValues == null
+                || !pathValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+                || !pathValues.containsKey(DiskResource.DISK))
+            {
+                throw new BadRequestException(APIError.HD_ATTACH_INVALID_LINK);
+            }
+
+            // Volume provided in link must belong to the same virtual datacenter
+            Integer vdcId =
+                Integer.parseInt(pathValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+            if (!vdcId.equals(expectedVirtualDatacenter))
+            {
+                throw new BadRequestException(APIError.VOLUME_ATTACH_INVALID_VDC_LINK);
+            }
+
+            Integer diskId = Integer.parseInt(pathValues.getFirst(DiskResource.DISK));
+
+            DiskManagement disk = service.getHardDiskByVirtualDatacenter(vdcId, diskId);
+            disks.add(disk);
+        }
+
+        return disks;
     }
 }
