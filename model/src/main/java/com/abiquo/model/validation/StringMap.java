@@ -46,8 +46,6 @@ public @interface StringMap
 {
     boolean required() default true;
 
-    String message() default "must be a String map and the Strings must be in the defined range";
-
     public int minKey();
 
     public int maxKey();
@@ -55,6 +53,14 @@ public @interface StringMap
     public int maxValue();
 
     public int minValue();
+
+    String message() default "is a required field";
+
+    String genericMessage() default "is invalid. ";
+
+    String messageMissingKey() default "The field 'key' is required";
+
+    String messageMissingValue() default "The field 'value' is required but it may be empty";
 
     Class< ? >[] groups() default {};
 
@@ -80,51 +86,71 @@ public @interface StringMap
             }
 
             boolean valid =
-                value != null && validKeys(value.keySet()) && validValues(value.values());
+                value != null && validKeys(value.keySet(), context)
+                    && validValues(value.values(), context);
 
-            if (!valid)
+            return valid;
+        }
+
+        private boolean validKeys(final Set<String> keys, final ConstraintValidatorContext context)
+        {
+            boolean valid = true;
+            String error = "";
+
+            for (String key : keys)
+            {
+                if (key == null)
+                {
+                    valid = false;
+                    error = map.genericMessage() + map.messageMissingKey();
+                }
+                else if (key.length() < map.minKey() || key.length() > map.maxKey())
+                {
+                    valid = false;
+                    error =
+                        map.genericMessage() + "The field 'key' must be between " + map.minKey()
+                            + " and " + map.maxKey() + " characters long";
+                }
+            }
+
+            if (valid == false)
             {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(map.message())
-                    .addConstraintViolation();
+                context.buildConstraintViolationWithTemplate(error).addConstraintViolation();
             }
 
             return valid;
         }
 
-        private boolean validKeys(Set<String> keys)
+        private boolean validValues(final Collection<String> values,
+            final ConstraintValidatorContext context)
         {
-            for (String key : keys)
-            {
-                if (key == null)
-                {
-                    return false;
-                }
-                if (key.length() < map.minKey() || key.length() > map.maxKey())
-                {
-                    return false;
-                }
-            }
+            boolean valid = true;
+            String error = "";
 
-            return true;
-        }
-
-        private boolean validValues(Collection<String> values)
-        {
             for (String value : values)
             {
                 if (value == null)
                 {
-                    return false;
+                    valid = false;
+                    error = map.genericMessage() + map.messageMissingValue();
                 }
-
-                if (value.length() < map.minValue() || value.length() > map.maxValue())
+                else if (value.length() < map.minValue() || value.length() > map.maxValue())
                 {
-                    return false;
+                    valid = false;
+                    error =
+                        map.genericMessage() + "The field 'value' must be between "
+                            + map.minValue() + " and " + map.maxValue() + " characters long";
                 }
             }
 
-            return true;
+            if (valid == false)
+            {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate(error).addConstraintViolation();
+            }
+
+            return valid;
         }
     }
 }
