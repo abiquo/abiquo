@@ -8,6 +8,7 @@
             <run>
                 <include name="model" />
                 <include name="dataaccess" />
+                <include name="redisaccess" />
             </run>
         </groups>
         <packages>

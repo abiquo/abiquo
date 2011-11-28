@@ -212,9 +212,11 @@ public abstract class VSMEventProcessorTestBase extends AbstractUnitTest
                 assertEquals(foundVM.getState(), stage.getExpected());
 
                 // Resources are freed
-                assertEquals(datastore.getUsedSize(), 0);
-                assertEquals(hypervisor.getMachine().getVirtualCpusUsed().intValue(), 0);
-                assertEquals(hypervisor.getMachine().getVirtualRamUsedInMb().intValue(), 0);
+                assertEquals(foundVM.getDatastore().getUsedSize(), 0);
+                assertEquals(foundVM.getHypervisor().getMachine().getVirtualCpusUsed().intValue(),
+                    0);
+                assertEquals(foundVM.getHypervisor().getMachine().getVirtualRamUsedInMb()
+                    .intValue(), 0);
             }
         }
         finally

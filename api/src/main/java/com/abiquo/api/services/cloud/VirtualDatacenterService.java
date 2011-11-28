@@ -141,6 +141,7 @@ public class VirtualDatacenterService extends DefaultApiService
         return repo.findByDatacenter(datacenter);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualDatacenter getVirtualDatacenter(final Integer id)
     {
         VirtualDatacenter vdc = repo.findById(id);

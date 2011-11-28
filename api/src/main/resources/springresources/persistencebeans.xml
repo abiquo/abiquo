@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
 	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -23,6 +24,10 @@
                 <value>com.abiquo.api.exceptions.mapper.PersistenceExceptionMapper</value>
             </set>
         </property>
+        <!--
+            Is mandatory to place the parent before the child. Eg Volumes before Volume. Or
+            autowired will fail.
+        -->
         <property name="instances">
             <set>
                 <ref bean="datacentersResource" />
@@ -58,13 +63,10 @@
                 <ref bean="virtualMachineNetworkConfigurationResource" />
                 <ref bean="virtualMachineStorageConfigurationResource" />
                 <!-- AM as REST Resource -->
-
-                <ref bean="datacenterRepositoryResource" />
                 <ref bean="datacenterRepositoriesResource" />
+                <ref bean="datacenterRepositoryResource" />
                 <ref bean="virtualImagesResource" />
                 <ref bean="virtualImageResource" />
-                
-                
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->
@@ -84,6 +86,8 @@
                 <!--  -->
                 <ref bean="virtualMachinesInfrastructureResource" />
                 <ref bean="virtualMachineInfrastructureResource" />
+                <ref bean="disksResource" />
+                <ref bean="diskResource" />
             </set>
         </property>
     </bean>

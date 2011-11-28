@@ -63,7 +63,7 @@
                         <configuration>
                             <executable>mysql</executable>
                             <arguments>
-                                <argument>-hlocalhost</argument>
+                                <argument>-h${devmachine}</argument>
                                 <argument>-uroot</argument>
                                 <argument>-proot</argument>
                                 <argument>&lt;kinton-schema.sql</argument>

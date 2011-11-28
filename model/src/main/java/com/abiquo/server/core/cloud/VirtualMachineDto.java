@@ -32,6 +32,11 @@ import com.abiquo.server.core.cloud.chef.RunlistElementsDto;
 public class VirtualMachineDto extends SingleResourceTransportDto implements
     Comparable<VirtualMachineDto>
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -8877350185009627544L;
+
     private Integer id;
 
     public Integer getId()
@@ -92,16 +97,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.cpu = cpu;
     }
 
-    private long hd;
+    private long hdInBytes;
 
-    public long getHd()
+    public long getHdInBytes()
     {
-        return hd;
+        return hdInBytes;
     }
 
-    public void setHd(final long hd)
+    public void setHdInBytes(final long hdInBytes)
     {
-        this.hd = hd;
+        this.hdInBytes = hdInBytes;
     }
 
     private int vdrpPort;
@@ -164,17 +169,19 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.highDisponibility = highDisponibility;
     }
 
-    private String type;
+    private int idType;
 
-    public String getType() {
-		return type;
-	}
+    public int getIdType()
+    {
+        return idType;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setIdType(final int idType)
+    {
+        this.idType = idType;
+    }
 
-	private String password;
+    private String password;
 
     public String getPassword()
     {

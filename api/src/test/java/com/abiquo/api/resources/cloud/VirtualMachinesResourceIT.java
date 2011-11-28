@@ -395,18 +395,18 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         final VirtualMachineDto dto = new VirtualMachineDto();
         dto.setCpu(vm.getCpu());
         dto.setDescription(vm.getDescription());
-        dto.setHd(vm.getHdInBytes());
+        dto.setHdInBytes(vm.getHdInBytes());
         dto.setHighDisponibility(vm.getHighDisponibility());
         dto.setName(vm.getName());
 
         // dto.setIdState(v.getidState)
         if (vm.getIdType() == 0)
         {
-        	dto.setType("NOT_MANAGED");
+            dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.NOT_MANAGED);
         }
         else
         {
-        	dto.setType("MANAGED");
+            dto.setIdType(com.abiquo.server.core.cloud.VirtualMachine.MANAGED);
         }
         dto.setPassword(vm.getPassword());
         dto.setRam(vm.getRam());

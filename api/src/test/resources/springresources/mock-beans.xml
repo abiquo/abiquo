@@ -7,6 +7,7 @@
                 <entry key="vsmServiceStub" value="vsmServiceStubMock" />
                 <entry key="infrastructureService" value="infrastructureTestService" />
                 <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />
+                <entry key="tarantinoService" value="tarantinoServiceMock" />
             </map>
         </property>
     </bean>

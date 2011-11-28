@@ -165,7 +165,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             factory.rollbackConnection();
             traceBundleError("Error bundling VirtualAppliance: " + va.getId());
 
-            State notDeployed = new State(StateEnum.ALLOCATED);
+            State notDeployed = new State(StateEnum.DEPLOYED); // ALLOCATED
             updateVirtualAppliance(va.toPojoHB(), notDeployed, notDeployed);
 
             return reportBundleError(va, "bundleVirtualAppliance.databaseError", e.getMessage(), e);
@@ -214,7 +214,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         }
         catch (BundleException e)
         {
-            throw new BundleException(e.getMessage(), new State(StateEnum.ON));
+            throw new BundleException(e.getMessage(), new State(StateEnum.DEPLOYED));
         }
 
         checkTransaction();
@@ -223,7 +223,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
         if (!powerOffNodes(getNodes(nodeIds)))
         {
             throw new BundleException("bundleVirtualAppliance.powerOffError",
-                new State(StateEnum.ON));
+                new State(StateEnum.DEPLOYED));
         }
 
         factory.endConnection();
@@ -250,18 +250,18 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
             InvokerTransformer.getInstance("getId")))))
         {
             throw new BundleException("bundleVirtualAppliance.powerOnError",
-                new State(StateEnum.ON));
+                new State(StateEnum.DEPLOYED));
         }
 
         if (!completed)
         {
-            throw new BundleException("bundleVirtualAppliance", new State(StateEnum.ON));
+            throw new BundleException("bundleVirtualAppliance", new State(StateEnum.DEPLOYED));
         }
 
         factory.endConnection();
 
-        return manageImagesAndUpdateAppliance(virtualApp, nodes, enterpriseId, StateEnum.ON,
-            StateEnum.ON);
+        return manageImagesAndUpdateAppliance(virtualApp, nodes, enterpriseId, StateEnum.DEPLOYED,
+            StateEnum.DEPLOYED);
     }
 
     protected VirtualAppliance manageImagesAndUpdateAppliance(VirtualappHB virtualApp,

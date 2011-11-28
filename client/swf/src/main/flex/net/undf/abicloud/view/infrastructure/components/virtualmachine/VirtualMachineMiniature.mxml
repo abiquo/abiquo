@@ -112,7 +112,7 @@
             	
             	if(this._virtualMachine){
 	            	//Must be running or paused in a first step
-	            	if(this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.PAUSED){
+	            	if(this._virtualMachine.state.description == State.ON.description || this._virtualMachine.state.description == State.PAUSED.description){
 	            		//Then must have a valid VNC IP
 	            		if(this._virtualMachine.vdrpIP){
 	            			_vncIconEnable = true;
@@ -139,7 +139,7 @@
 
             private function onRollOver():void
             {
-                if (this._virtualMachine != null && this._virtualMachine.state.description != State.LOCKED)
+                if (this._virtualMachine != null && this._virtualMachine.state.description != State.LOCKED.description)
                 {
                     buttonsContainer.visible = true;
                 }
@@ -158,7 +158,7 @@
              */
             private function onMouseDownVirtualMachineMiniature():void
             {
-                if (this._virtualMachine.state.description != State.LOCKED)
+                if (this._virtualMachine.state.description != State.LOCKED.description)
                     this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
             }
 
@@ -198,7 +198,7 @@
             {
                 mouseEvent.stopImmediatePropagation();
 
-                if (_virtualMachine.state.description == State.ON || _virtualMachine.state.description == State.PAUSED)
+                if (_virtualMachine.state.description == State.ON.description || _virtualMachine.state.description == State.PAUSED.description)
                 {
                     //The Virtual Machine is running. Asking user for confirmation
                     AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
@@ -261,12 +261,12 @@
                 {
                     var event:InfrastructureEvent;
 
-                    if (_virtualMachine.state.description == State.PAUSED)
+                    if (_virtualMachine.state.description == State.PAUSED.description)
                     {
                         //The virtual machine is paused. We proceed to resume it
                         event = new InfrastructureEvent(InfrastructureEvent.START_VIRTUALMACHINE_IN_INFRASTRUCTURE);
                     }
-                    else if (_virtualMachine.state.description == State.ON)
+                    else if (_virtualMachine.state.description == State.ON.description)
                     {
                         //The virtual machine is running. We procced to pause it
                         event = new InfrastructureEvent(InfrastructureEvent.PAUSE_VIRTUALMACHINE_IN_INFRASTRUCTURE);
@@ -442,11 +442,11 @@
         <utils:SmoothImage 
             width="14" height="14"
             right="10" top="10"
-            source="{ (_virtualMachine.state.description == State.ON) ? StateIcons.RUNNING :
-					  ((_virtualMachine.state.description == State.PAUSED) ? StateIcons.PAUSED : 
+            source="{ (_virtualMachine.state.description == State.ON.description) ? StateIcons.RUNNING :
+					  ((_virtualMachine.state.description == State.PAUSED.description) ? StateIcons.PAUSED : 
 					  StateIcons.STOPPED)
 				    }"
-            visible="{this._virtualMachine.state.description != State.LOCKED}"/>
+            visible="{this._virtualMachine.state.description != State.LOCKED.description}"/>
 
         <mx:SWFLoader id="busyIcon"
             width="80" height="80"
@@ -454,7 +454,7 @@
             verticalCenter="-10"
             creationComplete="net.undf.abicloud.utils.AbicloudUtils.getImageFromStyle('VirtualMachineBusyIcon', busyIcon)"
             toolTip="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
-            visible="{this._virtualMachine.state.description == State.LOCKED}"
+            visible="{this._virtualMachine.state.description == State.LOCKED.description}"
             buttonMode="true"
             useHandCursor="true"
             mouseChildren="false"
@@ -465,11 +465,11 @@
         <!--mx:SWFLoader id="busyIcon"
              source="assets/application/icons/loading_small.swf" scaleContent="true" maintainAspectRatio="true"
              right="10" top="10" width="14" height="14"
-             visible="{this._virtualMachine.state.description == State.LOCKED}"/ -->
+             visible="{this._virtualMachine.state.description == State.LOCKED.description}"/ -->
 
         <!--mx:Button height="18" bottom="25" horizontalCenter="0" styleName="AlternativeButton"
              label="@Resource(bundle='VirtualAppliance', key='LABEL_FORCE_REFRESH')"
-             visible="{this._virtualMachine.state.description == State.LOCKED}"
+             visible="{this._virtualMachine.state.description == State.LOCKED.description}"
              click="onClickForceRefreshStateButton()"/-->
 
         <mx:HBox id="buttonsContainer"
@@ -480,24 +480,24 @@
             verticalCenter="0"
             hideEffect="{fadeOut}"
             showEffect="{fadeIn}"
-            enabled="{this._virtualMachine.state.description != State.LOCKED}"
+            enabled="{this._virtualMachine.state.description != State.LOCKED.description}"
             visible="false">
 
             <mx:Button id="powerOnOffButton"
                 styleName="PowerOnOffButtonSmall"
-                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (this._virtualMachine.state.description == State.ON || this._virtualMachine.state.description == State.OFF)}"
-                selected="{_virtualMachine.state.description == State.ON}"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (this._virtualMachine.state.description == State.ON.description || this._virtualMachine.state.description == State.OFF.description)}"
+                selected="{_virtualMachine.state.description == State.ON.description}"
                 click="onClickPowerOnOffButton(event)"/>
 
             <mx:Button id="pauseButton"
                 styleName="PauseButtonSmall"
-                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (_virtualMachine.state.description == State.PAUSED || _virtualMachine.state.description == State.ON)}"
-                selected="{_virtualMachine.state.description == State.PAUSED}"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; (_virtualMachine.state.description == State.PAUSED.description || _virtualMachine.state.description == State.ON.description)}"
+                selected="{_virtualMachine.state.description == State.PAUSED.description}"
                 click="onClickPauseButton(event)"/>
 
             <mx:Button id="rebootButton"
                 styleName="RebootButtonSmall"
-                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; _virtualMachine.state.description == State.ON}"
+                enabled="{this._virtualMachine.idType == VirtualMachine.VIRTUAL_MACHINE_MANAGED &amp;&amp; _virtualMachine.state.description == State.ON.description}"
                 click="onClickRebootButton(event)"/>
 
             <mx:Spacer width="100%"/>

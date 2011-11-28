@@ -43,8 +43,12 @@ import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
+import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
@@ -274,13 +278,13 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         dto.setCpu(virtualMachine.getCpu());
         dto.setRam(virtualMachine.getRam());
         dto.setDescription(virtualMachine.getDescription());
-        dto.setHd(virtualMachine.getHd());
+        dto.setHdInBytes(virtualMachine.getHd());
         dto.setHighDisponibility(virtualMachine.getHighDisponibility() ? 1 : 0);
         dto.setPassword(virtualMachine.getPassword());
         dto.setName(virtualMachine.getName());
         dto.setVdrpIP(virtualMachine.getVdrpIP());
         dto.setVdrpPort(virtualMachine.getVdrpPort());
-
+        dto.setUuid(virtualMachine.getUUID());
         return dto;
     }
 
@@ -306,4 +310,59 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 
         return result;
     }
+
+    @Override
+    public DataResult editVirtualMachineState(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine,
+        final VirtualMachineState virtualMachineState)
+    {
+        DataResult result = new DataResult();
+        String url =
+            createEditVirtualMachineStateUrl(virtualDatacenterId, virtualApplianceId,
+                virtualMachine.getId());
+        VirtualMachineStateDto dto = new VirtualMachineStateDto();
+        dto.setPower(virtualMachineState.name());
+        ClientResponse response = put(url, dto);
+
+        if (response.getStatusCode() == Status.ACCEPTED.getStatusCode())
+        {
+            result.setSuccess(true);
+            AcceptedRequestDto acc = response.getEntity(AcceptedRequestDto.class);
+            result.setData(acc.getLinks());
+        }
+        else
+        {
+            populateErrors(response, result, "editVirtualMachineState");
+        }
+
+        return result;
+    }
+
+    @Override
+    public DataResult powerOffVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.OFF);
+    }
+
+    @Override
+    public DataResult powerOnVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.ON);
+    }
+
+    @Override
+    public DataResult pauseVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    {
+        return editVirtualMachineState(virtualDatacenterId, virtualApplianceId, virtualMachine,
+            VirtualMachineState.PAUSED);
+    }
+
+    // private VirtualMachineDto getVirtualMachine(Integer virtualMachineId) {
+    //
+    // }
 }

@@ -345,7 +345,7 @@ package net.undf.abicloud.business.managers
 	
 	            if (vaToUpdate)
 	            {
-	                vaToUpdate.state = new State(State.LOCKED);
+	                vaToUpdate.state = new State(10, State.LOCKED.description);
 	            }            	
             }
         }
@@ -356,7 +356,7 @@ package net.undf.abicloud.business.managers
 
             if (vaToUpdate)
             {
-                vaToUpdate.state = new State(State.OFF);
+                vaToUpdate.state = new State(8, State.OFF.description);
             }
         }
 
@@ -366,7 +366,7 @@ package net.undf.abicloud.business.managers
 
             if (vaToUpdate)
             {
-                vaToUpdate.state = new State(State.NEEDS_SYNC);
+                vaToUpdate.state = new State(9, State.NEEDS_SYNC.description);
             }
         }
 

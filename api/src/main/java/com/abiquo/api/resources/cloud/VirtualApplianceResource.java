@@ -23,10 +23,14 @@ package com.abiquo.api.resources.cloud;
 
 import java.util.List;
 
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -37,6 +41,8 @@ import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -70,6 +76,10 @@ public class VirtualApplianceResource
     public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_APPLIANCE_STATE = "/state";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY = "/action/undeploy";
+
+    public static final String VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM = "force";
 
     @Autowired
     VirtualApplianceService service;
@@ -148,7 +158,6 @@ public class VirtualApplianceResource
         dto =
             addLinks(builder, dto, vapp.getVirtualDatacenter().getId(), vapp.getEnterprise()
                 .getId());
-
         return dto;
     }
 
@@ -191,6 +200,32 @@ public class VirtualApplianceResource
 
     }
 
+    @POST
+    @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
+    public AcceptedRequestDto<String> deploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder)
+    {
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+        addStatusLinks(links, dto);
+        return dto;
+    }
+
+    @POST
+    @Path(VIRTUAL_APPLIANCE_ACTION_UNDEPLOY)
+    public AcceptedRequestDto<String> undeploy(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder)
+    {
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+        List<String> links = service.undeployVirtualAppliance(vdcId, vappId);
+        addStatusLinks(links, dto);
+        return dto;
+    }
+
     private VirtualApplianceStateDto virtualApplianceStateToDto(final Integer vdcId,
         final Integer vappId, final IRESTBuilder restBuilder, final VirtualApplianceState state)
     {
@@ -198,5 +233,33 @@ public class VirtualApplianceResource
         dto.setPower(state.name());
         dto.addLinks(restBuilder.buildVirtualApplianceStateLinks(dto, vappId, vdcId));
         return dto;
+    }
+
+    private void addStatusLinks(final List<String> links, final AcceptedRequestDto dto)
+    {
+        for (String url : links)
+        {
+            RESTLink link = new RESTLink("status", url);
+            dto.addLink(link);
+        }
+    }
+
+    /**
+     * Delete the virtual appliance if exists.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param restBuilder to build the links
+     * @throws Exception
+     */
+    @DELETE
+    public void deleteVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @QueryParam(VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM) @DefaultValue(value = "false") final Boolean forceDelete)
+        throws Exception
+    {
+        service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
+
     }
 }

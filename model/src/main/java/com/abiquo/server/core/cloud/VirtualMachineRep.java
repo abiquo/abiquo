@@ -53,6 +53,9 @@ public class VirtualMachineRep extends DefaultRepBase
     @Autowired
     private RunlistElementDAO chefDao;
 
+    @Autowired
+    private NodeVirtualImageDAO nodeVirtualImageDAO;
+
     public VirtualMachineRep()
     {
 
@@ -68,6 +71,7 @@ public class VirtualMachineRep extends DefaultRepBase
         this.dao = new VirtualMachineDAO(entityManager);
         this.rasdDao = new RasdManagementDAO(entityManager);
         this.chefDao = new RunlistElementDAO(entityManager);
+        this.nodeVirtualImageDAO = new NodeVirtualImageDAO(entityManager);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -195,6 +199,32 @@ public class VirtualMachineRep extends DefaultRepBase
     public void clearVirtualMachineRunlist(final VirtualMachine virtualMachine)
     {
         chefDao.clearVirtualMachineRunlist(virtualMachine);
+    }
+
+    public NodeVirtualImage insertNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.persist(nodeVirtualImage);
+        return nodeVirtualImage;
+    }
+
+    public NodeVirtualImage findNodeVirtualImageByVm(final VirtualMachine virtualMachine)
+    {
+
+        return nodeVirtualImageDAO.findByVirtualMachine(virtualMachine);
+
+    }
+
+    public List<NodeVirtualImage> findNodeVirtualImagesByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+
+        return nodeVirtualImageDAO.findByVirtualAppliance(virtualAppliance);
+
+    }
+
+    public void deleteNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.remove(nodeVirtualImage);
     }
 
 }

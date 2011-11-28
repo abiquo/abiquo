@@ -838,7 +838,8 @@
             <mx:FormItem 
                 id="chefEnabledFormItem"
                 label="@Resource(bundle='VirtualImage', key='LABEL_CHEF_ENABLED')"
-                includeInLayout="{this._virtualImage != null}">
+                includeInLayout="{this._virtualImage != null}"
+                visible="{this._virtualImage != null}">
                 <mx:CheckBox id="chefEnabledCombobox"
                     change="validateForm()"/>
             </mx:FormItem>

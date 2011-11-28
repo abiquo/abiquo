@@ -195,9 +195,14 @@ public interface IRESTBuilder
     public List<RESTLink> buildExternalIpRasdLinks(final Integer entId, final Integer limitId,
         IpPoolManagement ip);
 
-    public List<RESTLink> buildDiskLinks(DiskManagement disk);
+    public List<RESTLink> buildDiskLinks(final DiskManagement disk, final Integer vdcId,
+        final Integer vappId);
 
     public List<RESTLink> buildCategoryLinks(CategoryDto categorydto);
 
     public List<RESTLink> buildIconLinks(final IconDto icon);
+
+    public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
+    
+    public RESTLink buildUserLink(Integer enterpriseId, Integer userId);
 }

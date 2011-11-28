@@ -44,10 +44,8 @@ import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
-import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.api.services.UserService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.model.enumerator.DiskFormatType;
@@ -57,8 +55,8 @@ import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
-import com.abiquo.server.core.cloud.VirtualImageConversionDAO;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -85,9 +83,6 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
 
     @Autowired
     private CategoryService categoryService;
-
-    @Autowired
-    private UserService userService;
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)

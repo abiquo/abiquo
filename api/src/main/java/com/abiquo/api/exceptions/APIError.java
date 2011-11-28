@@ -171,7 +171,9 @@ public enum APIError
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
         "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
-        "The virtual appliance is not running"),
+        "The virtual appliance is not running"), VIRTUALAPPLIANCE_DEPLOYED("VAPP-1",
+        "The virtual appliance is deployed"), VIRTUALAPPLIANCE_NON_MANAGED_IMAGES("VAPP-4",
+        "The virtual appliance has non managed images"),
 
     // VIRTUAL CONVERSION
     NON_EXISTENT_VIRTUALAPPLIANCE_STATEFULCONVERSION("VASC-0",
@@ -233,7 +235,7 @@ public enum APIError
         "VM-9", "The requested Virtual Image does not exists"), VIRTUAL_MACHINE_EDIT_STATE("VM-10",
         "The Virtual Machine is in a state that does not allow the request, therefore can't be modified"), VIRTUAL_MACHINE_UNALLOCATED_STATE(
         "VM-11",
-        "The Virtual Machine is not allocated. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
+        "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12", "The allowed power states for Virtual Machines is ON, OFF, PAUSED  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
@@ -245,7 +247,9 @@ public enum APIError
         "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
         "VM-19",
         "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
-        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"),
+        "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
+        "VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
+        "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -293,8 +297,9 @@ public enum APIError
         "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
         "RS-8", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
         "RS-9",
-        "Cannot delete a virtual system monitor or DHCP service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
-        "RS-10", "URL provided is not valid"),
+        "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
+        "RS-10", "Provided URL is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-11",
+        "The DHCP uri is invalid"),
 
     // OVF PACKAGE LIST
     OVF_PACKAGE_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0", "OVF Package list name already exist"),
@@ -426,9 +431,20 @@ public enum APIError
         "VOL-14", "The volume cannot be edited because it is being used in a virtual machine"), VOLUME_UPDATE(
         "VOL-15", "An unexpected error occurred and the volume could not be updated"), VOLUME_RESIZE_STATEFUL(
         "VOL-16", "Cannot resize a persistent volume"), VOLUME_RESIZE_GENERIC_ISCSI("VOL-17",
-        "Cannot resize a generic iSCSI volume"), SSM_UNREACHABLE("VOL-19",
-        "Could not get the Storage Manager remote service"), NON_EXISTENT_VOLUME_MAPPING("VOL-20",
-        "The requested initiator mapping does not exist"),
+        "Cannot resize a generic Iscsi volume"), SSM_UNREACHABLE("VOL-18",
+        "Could not get the Storage Manager remote service"), VOLUME_GRANT_ACCESS_ERROR("VOL-19",
+        "Could not add the initiators mappings"), NON_EXISTENT_VOLUME_MAPPING("VOL-20",
+        "The requested initiator mapping does not exist"), VOLUME_NOT_ATTACHED("VOL-21",
+        "The volume is not attached to the virtual machine"), VOLUME_ATTACH_INVALID_LINK("VOL-22",
+        "Invalid link to the volume to attach"), VOLUME_ATTACH_INVALID_VDC_LINK("VOL-23",
+        "Invalid virtual datacenter in the link to the volume to attach"), VOLUME_ALREADY_ATTACHED(
+        "VOL-24", "The volume is already attached to a virtual machine"), VOLUME_TOO_MUCH_ATTACHMENTS(
+        "VOL-25", "The maximum number of attached disks and volumes has been reached"), VOLUME_ATTACH_ERROR(
+        "VOL-26",
+        "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
+        "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
+        "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_RECONFIGURE_ERROR(
+        "VOL-29", "An unexpected error occured while reconfiguring storage"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(
@@ -475,7 +491,11 @@ public enum APIError
         "The requested icon does not exist"), NON_EXISENT_ICON_WITH_PATH("ICON-3",
         "No icon found with the requested path"), ICON_IN_USE_BY_VIRTUAL_IMAGES("ICON-4",
         "Cannot delete the icon because it is in use by some virtual image"), INVALID_ICON_LINK(
-        "ICON-5", "Invalid Icon identifier in the Icon link"), ;
+        "ICON-5", "Invalid Icon identifier in the Icon link"),
+
+    // TASKS
+    NON_EXISTENT_TASK("TASK-1", "The requested task does not exist"), TASK_OWNER_NOT_FOUND(
+        "TASK-2", "");
 
     /**
      * Internal error code

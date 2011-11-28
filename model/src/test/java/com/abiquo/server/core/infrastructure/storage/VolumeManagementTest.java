@@ -21,16 +21,30 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import static com.abiquo.server.core.infrastructure.management.RasdManagement.FIRST_ATTACHMENT_SEQUENCE;
+
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
 public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement>
 {
+    private VirtualMachineGenerator vmGenerator;
+
+    @Override
+    @BeforeMethod
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        vmGenerator = new VirtualMachineGenerator(getSeed());
+    }
 
     private VirtualImageGenerator virtualImageGenerator;
 
@@ -90,12 +104,14 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     public void testStateTransitions()
     {
         VolumeManagement volume = createUniqueEntity();
+        VirtualMachine vm = vmGenerator.createUniqueInstance();
+
         assertEquals(volume.getState(), VolumeState.DETACHED);
 
-        volume.associate();
+        volume.attach(FIRST_ATTACHMENT_SEQUENCE, vm);
         assertEquals(volume.getState(), VolumeState.ATTACHED);
 
-        volume.disassociate();
+        volume.detach();
         assertEquals(volume.getState(), VolumeState.DETACHED);
     }
 
@@ -103,12 +119,28 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     public void testInvalidAssociate()
     {
         VolumeManagement volume = createUniqueEntity();
+        VirtualMachine vm = vmGenerator.createUniqueInstance();
+
         assertEquals(volume.getState(), VolumeState.DETACHED);
 
-        volume.associate();
+        volume.attach(FIRST_ATTACHMENT_SEQUENCE, vm);
         assertEquals(volume.getState(), VolumeState.ATTACHED);
 
-        volume.associate(); // This one must fail
+        volume.attach(FIRST_ATTACHMENT_SEQUENCE, vm); // This one must fail
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testInvalidAssociateWithNullVM()
+    {
+        VolumeManagement volume = createUniqueEntity();
+        volume.attach(FIRST_ATTACHMENT_SEQUENCE, null);
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testInvalidAssociateWithInvalidAttachmentOrder()
+    {
+        VolumeManagement volume = createUniqueEntity();
+        volume.attach(FIRST_ATTACHMENT_SEQUENCE - 1, null);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
@@ -117,7 +149,7 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         VolumeManagement volume = createUniqueEntity();
         assertEquals(volume.getState(), VolumeState.DETACHED);
 
-        volume.disassociate();
+        volume.detach();
     }
 
     @Test

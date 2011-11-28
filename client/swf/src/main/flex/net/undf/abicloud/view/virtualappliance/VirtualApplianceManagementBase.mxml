@@ -231,7 +231,7 @@
                     _currentVirtualDataCenter = virtualAppliance.virtualDataCenter;
 
                     //Starting BackgroundUpdates. Time interval depends on the state of VirtualAppliance
-                    if (this._virtualAppliance.state.description == State.LOCKED)
+                    if (this._virtualAppliance.state.description == State.LOCKED.description)
                         startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
                     else
                         startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualAppliancesUpdateInterval.value);
@@ -539,7 +539,7 @@
             {
                 var virtualApplianceEvent:VirtualApplianceEvent;
 
-                if (this._virtualAppliance.state.description == State.ON)
+                if (this._virtualAppliance.state.description == State.DEPLOYED.description)
                 {
                     virtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.DELETE_VIRTUALAPPLIANCE_NON_BLOCKING);
                     virtualApplianceEvent.virtualAppliance = ObjectUtil.copy(this._virtualAppliance) as VirtualAppliance;
@@ -594,7 +594,7 @@
             {
                 switch (this._virtualAppliance.state.description)
                 {
-                    case State.ON:
+                    case State.DEPLOYED.description: // ON
                         //Asking for confirmation to power the virtual appliance off
                         AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -606,7 +606,7 @@
                                                 powerOffVirtualAppliance);
                         break;
 
-                    case State.PAUSED:
+                    case State.NEEDS_SYNC.description:
                         //Asking for confirmation to power the virtual appliance off
                         AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -618,29 +618,12 @@
                                                 powerOffVirtualAppliance);
                         break;
 
-                    case State.NEEDS_SYNC:
-                        //Asking for confirmation to power the virtual appliance off
-                        AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
-                                                                                        "ALERT_TITLE_LABEL"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_HEADER"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_SHUTDOWN_VIRTUALAPPLIANCE_TEXT"),
-                                                Alert.YES | Alert.NO,
-                                                powerOffVirtualAppliance);
-                        break;
-
-                    case State.OFF:
-                        //The Virtual Appliance is powered off We proceed to power it on
-                        powerOnVirtualAppliance();
-                        break;
-
-                    case State.NOT_DEPLOYED:
+                    case State.NOT_DEPLOYED.description:
                         //The Virtual Appliance is powered off We proceed to power it on
                         powerOnVirtualAppliance();
                         break;
                         
-                    case State.UNKNOWN:
+                    case State.UNKNOWN.description:
                         //The VirtualAppliance is in state Failed, and cannot be modified
                         AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
                                                                                         "ALERT_TITLE_LABEL"),
@@ -650,15 +633,6 @@
                                                                                         "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_TEXT"),
                                                 Alert.OK); 
 
-                    /* case State.FAILED:
-                        //The VirtualAppliance is in state Failed, and cannot be modified
-                        AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
-                                                                                        "ALERT_TITLE_LABEL"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_HEADER"),
-                                                ResourceManager.getInstance().getString("VirtualAppliance",
-                                                                                        "ALERT_VIRTUALAPPLIANCE_FAILED_STATE_TEXT"),
-                                                Alert.OK); */
                         break;
 
                     default:

@@ -67,6 +67,19 @@ public class VirtualImageConversion extends DefaultEntityBase
         this.state = ConversionState.ENQUEUED;
     }
 
+    public VirtualImageConversion(final VirtualImage image, final ConversionState state,
+        final DiskFormatType sourceType, final DiskFormatType targetType, final String sourcePath,
+        final String targetPath)
+    {
+        this.virtualImage = image;
+        this.targetType = targetType;
+        this.targetPath = targetPath;
+        this.timestamp = new Date();
+        this.state = state;
+        this.sourceType = sourceType;
+        this.sourcePath = sourcePath;
+    }
+
     private final static String ID_COLUMN = "id";
 
     @Id
@@ -233,14 +246,14 @@ public class VirtualImageConversion extends DefaultEntityBase
 
     @Column(name = SIZE_COLUMN, nullable = !SIZE_REQUIRED)
     @Range(min = SIZE_MIN, max = SIZE_MAX)
-    private long size;
+    private Long size;
 
-    public long getSize()
+    public Long getSize()
     {
         return this.size;
     }
 
-    public void setSize(final long size)
+    public void setSize(final Long size)
     {
         this.size = size;
     }

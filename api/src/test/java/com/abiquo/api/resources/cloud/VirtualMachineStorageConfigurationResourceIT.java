@@ -66,7 +66,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
 
     protected VirtualMachine vm;
 
-    @BeforeMethod(groups = {STORAGE_INTEGRATION_TESTS})
+    @BeforeMethod(groups = {STORAGE_INTEGRATION_TESTS}, enabled = false)
     public void setUp()
     {
         Enterprise e = enterpriseGenerator.createUniqueInstance();
@@ -105,7 +105,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     /**
      * Test to create a disk.
      */
-    @Test
+    @Test(enabled = false)
     public void createDiskIT()
     {
         String uri = resolveVirtualMachineDisksUri(vdc.getId(), vapp.getId(), vm.getId());
@@ -119,14 +119,16 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     /**
      * Test to delete a disk.
      */
-    @Test
+    @Test(enabled = false)
     public void deleteDiskIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 = new DiskManagement(vdc, 9000L);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disk is deleted
-        String uri = resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        String uri =
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
+                Long.valueOf(inputDisk2.getAttachmentOrder()).intValue());
         ClientResponse response = delete(uri, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
     }
@@ -134,10 +136,10 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     /**
      * Test to get a list of disks.
      */
-    @Test
+    @Test(enabled = false)
     public void getDisksIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 = new DiskManagement(vdc, 9000L);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disks are in the list
@@ -155,14 +157,16 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
     /**
      * Test to get a disk.
      */
-    @Test
+    @Test(enabled = false)
     public void getDiskIT()
     {
-        DiskManagement inputDisk2 = new DiskManagement(vdc, vapp, vm, 9000L, 1);
+        DiskManagement inputDisk2 = new DiskManagement(vdc, 9000L);
         setup(inputDisk2.getRasd(), inputDisk2);
 
         // Assert the disk is created
-        String uri = resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        String uri =
+            resolveVirtualMachineDiskUri(vdc.getId(), vapp.getId(), vm.getId(),
+                Long.valueOf(inputDisk2.getAttachmentOrder()).intValue());
 
         ClientResponse response = get(uri, "basicUser", "basicUser");
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());

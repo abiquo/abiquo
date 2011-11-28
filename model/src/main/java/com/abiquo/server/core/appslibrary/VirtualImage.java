@@ -592,7 +592,7 @@ public class VirtualImage extends DefaultEntityBase
 
     // Creation date does not have a setter, since it will be auto generated.
 
-    /*  *********************** Helper methods ************************* */
+    /* *********************** Helper methods ************************* */
 
     public void setRequirements(final int cpu, final int ram, final long hd)
     {

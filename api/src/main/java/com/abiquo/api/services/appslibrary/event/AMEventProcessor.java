@@ -24,6 +24,8 @@ package com.abiquo.api.services.appslibrary.event;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +51,9 @@ import com.abiquo.tracer.SeverityType;
  * and create new {@link VirtualImage}
  */
 @Service
-public class OVFPackageInstanceStatusEventProcessor implements AMCallback
+public class AMEventProcessor implements AMCallback
 {
-    protected final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceStatusEventProcessor.class);
+    protected final static Logger logger = LoggerFactory.getLogger(AMEventProcessor.class);
 
     @Autowired
     protected InfrastructureService infService;
@@ -63,9 +64,17 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     @Autowired
     private TracerLogger tracer;
 
+    public AMEventProcessor(final EntityManager em)
+    {
+    }
+
+    public AMEventProcessor()
+    {
+    }
+
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void onDownload(OVFPackageInstanceStatusEvent event)
+    public void onDownload(final OVFPackageInstanceStatusEvent event)
     {
         logger.debug("Virtual image [{}] added", event.getOvfId());
 
@@ -83,8 +92,8 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
         catch (Exception e)
         {
             final String msg =
-                String.format("Virtual image [%s] can not be added to repository [%s]",
-                    event.getOvfId(), event.getRepositoryLocation());
+                String.format("Virtual image [%s] can not be added to repository [%s]", event
+                    .getOvfId(), event.getRepositoryLocation());
             tracer.systemError(SeverityType.NORMAL, ComponentType.APPLIANCE_MANAGER,
                 EventType.VI_ADD, msg, e);
         }
@@ -113,7 +122,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     }
 
     @Override
-    public void onNotDownload(OVFPackageInstanceStatusEvent event)
+    public void onNotDownload(final OVFPackageInstanceStatusEvent event)
     {
         logger.debug("VirtualImage [{}] canceled/deleted ", event.getOvfId());
 
@@ -126,7 +135,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     }
 
     @Override
-    public void onError(OVFPackageInstanceStatusEvent event)
+    public void onError(final OVFPackageInstanceStatusEvent event)
     {
         final String errorCause = event.getErrorCause();
 
@@ -142,7 +151,7 @@ public class OVFPackageInstanceStatusEventProcessor implements AMCallback
     }
 
     @Override
-    public void onDownloading(OVFPackageInstanceStatusEvent event)
+    public void onDownloading(final OVFPackageInstanceStatusEvent event)
     {
         logger.debug("Downloading VirtualImage [{}]", event.getOvfId());
     }

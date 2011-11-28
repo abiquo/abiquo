@@ -26,7 +26,6 @@ import java.util.List;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.AppsLibraryCommand;
 import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -46,7 +45,6 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.abiserver.pojo.virtualimage.Repository;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.IconDto;
 
 public class AppsLibraryService
@@ -233,7 +231,8 @@ public class AppsLibraryService
     /**
      * ################################# #################################
      */
-    public DataResult<List<DiskFormatType>> getDiskFormatTypes(final UserSession userSession)
+    public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes(
+        final UserSession userSession)
     {
 
         return proxyStub(userSession).getDiskFormatTypes();

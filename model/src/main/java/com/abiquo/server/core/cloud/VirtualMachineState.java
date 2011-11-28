@@ -141,4 +141,32 @@ public enum VirtualMachineState
                 return false;
         }
     }
+
+    public boolean existsInHypervisor()
+    {
+        switch (this)
+        {
+            case ON:
+            case OFF:
+            case PAUSED:
+            case CONFIGURED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean reconfigureAllowed()
+    {
+        switch (this)
+        {
+            case ALLOCATED:
+            case NOT_ALLOCATED:
+            case OFF:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 }

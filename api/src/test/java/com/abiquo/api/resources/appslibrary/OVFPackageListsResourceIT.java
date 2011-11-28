@@ -170,6 +170,32 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
+    public void createOVFPackageListFromOtherXml()
+    {
+
+        AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
+        app.setEnterprise(enterprise);
+        setup(app);
+
+        validURI = resolveOVFPackageListsURI(enterprise.getId());
+
+        String xmlindexURI = "http://localhost:7979/testovf/anyother.xml";
+
+        String basicAuth = basicAuth(SYSADMIN, SYSADMIN);
+
+        ClientResponse response =
+            client.resource(validURI).accept(MediaType.APPLICATION_XML).contentType(
+                MediaType.TEXT_PLAIN).header("Authorization", "Basic " + basicAuth).post(
+                xmlindexURI);
+
+        assertEquals(response.getStatusCode(), 201);
+
+        OVFPackageListDto entityPost = response.getEntity(OVFPackageListDto.class);
+        assertNotNull(entityPost);
+        assertEquals(entityPost.getName(), "Abiquo Official Repository");
+    }
+
+    @Test(groups = {APPS_INTEGRATION_TESTS})
     public void createOVFPackageListwithBadURLRises404()
     {
 

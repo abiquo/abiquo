@@ -45,6 +45,8 @@ import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
+import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionGenerator;
+import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionGenerator;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;
@@ -63,10 +65,11 @@ import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
@@ -140,6 +143,18 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
 
+    protected InitiatorMappingGenerator initiatorMappingGenerator =
+        new InitiatorMappingGenerator(seed);
+
+    protected VirtualImageConversionGenerator virtualImageConversionGenerator =
+        new VirtualImageConversionGenerator(seed);
+
+    protected VirtualApplianceStatefulConversionGenerator virtualApplianceStatefulConversionGenerator =
+        new VirtualApplianceStatefulConversionGenerator(seed);
+
+    protected NodeVirtualImageStatefulConversionGenerator nodeVirtualImageStatefulConversionGenerator =
+        new NodeVirtualImageStatefulConversionGenerator(seed);
+
     protected void setup(final Object... entities)
     {
         EntityManager em = getEntityManager();
@@ -150,6 +165,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.persist(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     protected void update(final Object... entities)
@@ -162,6 +178,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             em.merge(entity);
         }
         em.getTransaction().commit();
+        em.close();
     }
 
     @BeforeMethod
@@ -180,7 +197,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             {"ip_pool_management", "volume_management", "diskstateful_conversions",
             "initiator_mapping", "rasd_management", "rasd", "nodevirtualimage", "nodenetwork",
             "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage",
-            "category", "virtualimage_conversions", "node_virtual_image_stateful_conversions",
+            "virtualimage_conversions", "node_virtual_image_stateful_conversions",
             "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
             "virtualdatacenter", "vlan_network", "vlan_network_assignment",
             "network_configuration", "chef_runlist", "dhcp_service", "storage_pool", "tier",
@@ -189,10 +206,11 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
             "repository", "workload_fit_policy_rule", "network", "session", "user",
             "roles_privileges", "role_ldap", "role", "privilege", "enterprise",
             "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
-            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "apps_library",
-            "license", "system_properties", "vdc_enterprise_stats", "vapp_enterprise_stats",
-            "dc_enterprise_stats", "enterprise_resources_stats", "cloud_usage_stats", "log",
-            "metering", "tasks", "alerts", "heartbeatlog", "icon", "repository", "register"};
+            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "category",
+            "apps_library", "license", "system_properties", "vdc_enterprise_stats",
+            "vapp_enterprise_stats", "dc_enterprise_stats", "enterprise_resources_stats",
+            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog", "icon",
+            "repository", "register"};
 
         tearDown(entities);
     }
@@ -221,18 +239,17 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
-
         return em;
     }
 
     protected EntityManager getEntityManager()
     {
         EntityManagerFactory emf = getEntityManagerFactory();
-        EntityManager em;
+        EntityManager em = null;
 
         if (TransactionSynchronizationManager.hasResource(emf))
         {
-            EntityManagerHolder emHolder = unbind(emf);
+            EntityManagerHolder emHolder = getResource(emf);
             em = emHolder.getEntityManager();
 
             if (!em.isOpen())
@@ -265,9 +282,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
         }
     }
 
-    private EntityManagerHolder unbind(final EntityManagerFactory emf)
+    private EntityManagerHolder getResource(final EntityManagerFactory emf)
     {
-        return (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(emf);
+        return (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
     }
 
 }

@@ -165,7 +165,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             String virtualSystemMonitor =
                 RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualAppliance);
 
-            if (virtualAppliance.getState().toEnum() == StateEnum.ALLOCATED)
+            if (virtualAppliance.getState().toEnum() == StateEnum.NOT_DEPLOYED) // DEPLOYED
             {
 
                 String destination = RemoteServiceUtils.getVirtualFactoryFromVA(virtualAppliance);
@@ -579,7 +579,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         Collection<Node> nodesNew = new ArrayList<Node>();
         try
         {
-            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNCHRONIZE)
+            if (virtualAppliance.getState().toEnum() == StateEnum.NEEDS_SYNC)
             {
                 Collection<Node> nodes = virtualAppliance.getNodes();
 

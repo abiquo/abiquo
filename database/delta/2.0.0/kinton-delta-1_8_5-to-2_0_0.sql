@@ -84,6 +84,12 @@ ALTER TABLE `kinton`.`enterprise` ADD COLUMN `chef_url` VARCHAR(255)  DEFAULT NU
  ADD COLUMN `chef_client_certificate` TEXT  DEFAULT NULL AFTER `chef_validator`,
  ADD COLUMN `chef_validator_certificate` TEXT  DEFAULT NULL AFTER `chef_client_certificate`;
 
+ALTER TABLE `kinton`.`vappstateful_conversions` DROP COLUMN `state`;
+ALTER TABLE `kinton`.`vappstateful_conversions` DROP COLUMN `substate`; 
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `state` VARCHAR(50)  DEFAULT NULL AFTER `idDiskStatefulConversion`;
+ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `subState` VARCHAR(50)  DEFAULT NULL AFTER `state`;
+ALTER TABLE `kinton`.`ovf_package` MODIFY COLUMN `name` VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
