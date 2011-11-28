@@ -477,6 +477,11 @@ public class InfrastructureRep extends DefaultRepBase
         return datastoreDao.findById(id);
     }
 
+    public Datastore findDatastoreByUuidAndMachine(final String uuid, final Machine machine)
+    {
+        return datastoreDao.findDatastore(uuid, machine);
+    }
+
     public void insertDatastore(final Datastore datastore)
     {
         assert datastore != null;

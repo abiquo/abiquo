@@ -21,11 +21,13 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.MachineState;
@@ -36,11 +38,23 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 {
+    private DatacenterGenerator datacenterGenerator;
+
+    private VirtualMachineGenerator vmgenerator;
+
+    @BeforeMethod
+    @Override
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        datacenterGenerator = new DatacenterGenerator(getSeed());
+        vmgenerator = new VirtualMachineGenerator(getSeed());
+    }
 
     @Override
-    protected RackDAO createDao(final EntityManager arg0)
+    protected RackDAO createDao(final EntityManager entityManager)
     {
-        return new RackDAO(arg0);
+        return new RackDAO(entityManager);
     }
 
     @Override
@@ -53,10 +67,8 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     public void test_findRacks() throws IllegalAccessException, InvocationTargetException,
         NoSuchMethodException
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter1 = generator.createUniqueInstance();
-        Datacenter datacenter2 = generator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack2_1 = datacenter2.createRack("bRack_1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("aRack_2", 2, 4094, 2, 10);
         ds().persistAll(datacenter1, datacenter2, rack2_1, rack2_2);
@@ -94,10 +106,8 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     @Test
     public void test_existsAnyWithDatacenterAndName()
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter1 = generator.createUniqueInstance();
-        Datacenter datacenter2 = generator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack1_1 = datacenter1.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_1 = datacenter2.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("Rack 2", 2, 4094, 2, 10);
@@ -120,10 +130,8 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     @Test
     public void test_existsAnyOtherWithDatacenterAndName()
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter1 = generator.createUniqueInstance();
-        Datacenter datacenter2 = generator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack1_1 = datacenter1.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_1 = datacenter2.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("Rack 2", 2, 4094, 2, 10);
@@ -155,9 +163,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     public void test_findRacksWithHAEnabled() throws IllegalAccessException,
         InvocationTargetException, NoSuchMethodException
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter = generator.createUniqueInstance();
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
 
         Rack rack1 = datacenter.createRack("Rack_1", 2, 4094, 2, 10);
         Rack rack2 = datacenter.createRack("Rack_2", 2, 4094, 2, 10);

@@ -117,7 +117,6 @@ public class EnterpriseProperties extends DefaultEntityBase
     @Column(name = VALUE_COLUMN, length = 50, nullable = false)
     private Map<String, String> map = new HashMap<String, String>();
 
-    @Required(value = PROPERTIES_REQUIRED)
     @StringMap(minKey = KEY_LENGTH_MIN, maxKey = KEY_LENGTH_MAX, minValue = VALUE_LENGTH_MIN, maxValue = VALUE_LENGTH_MAX)
     public Map<String, String> getProperties()
     {

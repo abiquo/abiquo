@@ -77,7 +77,7 @@
         <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
         <class>com.abiquo.server.core.pricing.PricingCostCode</class>
         <class>com.abiquo.server.core.pricing.PricingTier</class>
-		<!-- end:pricing-->
+	<!-- end:pricing-->
 		
 	<properties>
 		<property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />

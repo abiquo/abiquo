@@ -61,7 +61,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
-@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextTests
