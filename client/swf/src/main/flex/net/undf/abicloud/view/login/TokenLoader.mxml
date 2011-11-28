@@ -27,6 +27,7 @@
     horizontalAlign="center"
     verticalAlign="middle"
     verticalGap="11"
+    creationComplete="onCreationComplete()"
     creationPolicy="all" verticalScrollPolicy="off" horizontalScrollPolicy="off"
     styleName="MainLoginStyle"
     xmlns:mx="http://www.adobe.com/2006/mxml"
@@ -69,6 +70,11 @@
             [Bindable]
             private var _showError:Boolean;
             
+            private function onCreationComplete():void
+            {
+            	loading_txt.text = resourceManager.getString('Login','LABEL_LOADING_APPLICATION');
+            }
+            
             //Display error if authentication fails
             public function showError():void
             {
@@ -106,7 +112,14 @@
             	indeterminate="true" width="100%" 
             	height="12"
             	styleName="TokenProgressBar"
-            	label="@Resource(bundle='Login',key='LABEL_LOADING_APPLICATION')"/>
+            	label="" labelWidth="0"/>
+            <mx:Label
+            	id="loading_txt"
+                visible="{!this._showError}"
+                includeInLayout="{!this._showError}"
+                color="red"
+                fontWeight="bold"
+                />
             <mx:Label
             	text="@Resource(bundle='Login',key='LABEL_ERROR_AUTHENTICATION')" 
                 visible="{this._showError}"

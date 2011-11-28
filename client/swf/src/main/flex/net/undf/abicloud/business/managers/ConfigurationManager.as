@@ -34,8 +34,10 @@ package net.undf.abicloud.business.managers
     import mx.messaging.channels.AMFChannel;
     import mx.messaging.channels.SecureAMFChannel;
     
+    import net.undf.abicloud.events.ConfigurationEvent;
     import net.undf.abicloud.vo.configuration.Config;
     import net.undf.abicloud.vo.configuration.Heartbeat;
+    import net.undf.abicloud.vo.configuration.Language;
     import net.undf.abicloud.vo.configuration.Registration;
 
     [Bindable]
@@ -84,6 +86,9 @@ package net.undf.abicloud.business.managers
 
             //Once the xml file is properly loaded, we can load specific configuration
             loadChannelSet();
+            
+            //Now we load languages
+            loadLanguagesSet();
         }
 
         /**
@@ -129,6 +134,39 @@ package net.undf.abicloud.business.managers
 
             dispatchEvent(new Event("channelSetUpdated"));
         }
+        
+        private function loadLanguagesSet():void
+        {
+            var languageList:XMLList = this._config.languages.languages.language;
+
+            var length:int = languageList.length();
+            var i:int;
+            this._languageSet = new ArrayCollection();
+            for (i = 0; i < length; i++)
+            {
+                //Creating the language and adding it to the Application's Language Set
+                var language:Language = new Language(languageList[i].name,languageList[i].value);
+                this._languageSet.addItem(language);
+            }
+
+            dispatchEvent(new Event("channelSetUpdated")); 
+        }
+        
+        private var _selectedLanguage:Language;
+
+        [Bindable(event="languageChange")]
+        public function get selectedLanguage():Language
+        {
+            return this._selectedLanguage;
+        }
+        
+        public function set selectedLanguage(value:Language):void
+        {
+            this._selectedLanguage = value;
+            dispatchEvent(new ConfigurationEvent(ConfigurationEvent.LOAD_LANGUAGE_LABEL));
+        }
+        
+        
 
         /**
          * Returns an associative array contaning key - value pairs
@@ -162,6 +200,17 @@ package net.undf.abicloud.business.managers
         public function get secureChannelSet():ChannelSet
         {
             return this._secureChannelSet;
+        }
+        
+         /**
+         * The LanguageSet with the languages available to the application
+         */
+        private var _languageSet:ArrayCollection;
+
+        [Bindable(event="languageSetUpdated")]
+        public function get languageSet():ArrayCollection
+        {
+            return this._languageSet;
         }
 
 
