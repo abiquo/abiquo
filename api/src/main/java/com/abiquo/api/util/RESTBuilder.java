@@ -62,6 +62,7 @@ import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.resources.cloud.VirtualMachinesResource;
 import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -161,7 +162,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.HYPERVISORS_PATH, DatacenterResource.HYPERVISORS_PATH, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES, params));
+            DatacenterResource.ENTERPRISES_PATH, DatacenterResource.ENTERPRISES_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.UPDATE_RESOURCES_PATH, DatacenterResource.UPDATE_RESOURCES, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
@@ -225,8 +226,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(MachineResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(DatastoresResource.class,
             DatastoresResource.DATASTORES_PATH, params));
-        links.add(builder.buildActionLink(MachineResource.class,
-            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(MachineResource.class,
+            MachineResource.MACHINE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
         links.add(builder.buildActionLink(MachineResource.class,
             MachineResource.MACHINE_ACTION_CHECK, MachineResource.MACHINE_CHECK, params));
@@ -234,10 +235,10 @@ public class RESTBuilder implements IRESTBuilder
         if (managedRack)
         {
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_ON,
+                MachineResource.MACHINE_ACTION_POWER_ON_PATH,
                 MachineResource.MACHINE_ACTION_POWER_ON_REL, params));
             links.add(builder.buildActionLink(MachineResource.class,
-                MachineResource.MACHINE_ACTION_POWER_OFF,
+                MachineResource.MACHINE_ACTION_POWER_OFF_PATH,
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
         }
 
@@ -266,7 +267,15 @@ public class RESTBuilder implements IRESTBuilder
             params));
 
         params.put(RemoteServiceResource.REMOTE_SERVICE, remoteService.getType().toString()
-            .toLowerCase());
+            .toLowerCase().replaceAll("_", ""));
+
+        if (remoteService.getType().canBeChecked())
+        {
+            links
+                .add(builder.buildRestLink(RemoteServiceResource.class,
+                    RemoteServiceResource.CHECK_RESOURCE, InfrastructureService.CHECK_RESOURCE,
+                    params));
+        }
 
         links.add(builder.buildRestLink(RemoteServiceResource.class, REL_EDIT, params));
         return links;
@@ -296,8 +305,8 @@ public class RESTBuilder implements IRESTBuilder
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
-        links.add(builder.buildActionLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+        links.add(builder.buildRestLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, "privileges", params));
 
         return links;
     }
@@ -315,8 +324,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(RoleResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
-        links.add(builder.buildActionLink(RoleResource.class,
-            RoleResource.ROLE_ACTION_GET_PRIVILEGES, "privileges", params));
+        links.add(builder.buildRestLink(RoleResource.class,
+            RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE, params));
 
         return links;
     }
@@ -346,19 +355,18 @@ public class RESTBuilder implements IRESTBuilder
             OVFPackagesResource.OVF_PACKAGES_PATH, params));
 
         // action get virtual machines by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         // action get ips by enterprise
-        links
-            .add(builder.buildActionLink(EnterpriseResource.class,
-                EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
-                params));
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH, IpAddressesResource.IP_ADDRESSES,
+            params));
 
         // action get virtual datacenters by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
-            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS,
+        links.add(builder.buildRestLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALDATACENTERS_PATH,
             VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH, params));
 
         return links;
@@ -386,8 +394,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(UserResource.class, REL_EDIT, params));
 
         // virtual machines
-        links.add(builder.buildActionLink(UserResource.class,
-            UserResource.USER_ACTION_GET_VIRTUALMACHINES,
+        links.add(builder.buildRestLink(UserResource.class,
+            UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH,
             VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
         return links;
@@ -846,7 +854,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
     public List<RESTLink> buildMachineLoadRuleLinks(final MachineLoadRuleDto mlrDto,
         final MachineLoadRule mlr)
     {
@@ -860,7 +867,6 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
-    @Override
     public List<RESTLink> buildFitPolicyRuleLinks(final FitPolicyRuleDto fprDto,
         final FitPolicyRule fpr)
     {

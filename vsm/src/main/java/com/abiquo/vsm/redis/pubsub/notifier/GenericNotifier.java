@@ -111,6 +111,9 @@ public abstract class GenericNotifier
         if (!virtualMachine.getPhysicalMachine().getId().equals(machine.getId()))
         {
             // Build and add a new MOVED notification
+            logger.trace(String.format("VM %s MOVED from %s to %s", virtualMachine.getName(),
+                virtualMachine.getPhysicalMachine().getAddress(), machine.getAddress()));
+
             notifications.add(buildVirtualSystemEvent(virtualMachine, machine.getAddress(),
                 VMEventType.MOVED));
         }
