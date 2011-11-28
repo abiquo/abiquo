@@ -85,7 +85,7 @@ public interface IAllocator
      * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
      *         but we wants to move it.
      */
-    VirtualMachine allocateHAVirtualMachine(VirtualMachine vMachine, VirtualAppliance vApp,
+    VirtualMachine allocateHAVirtualMachine(final Integer vmId,
         VirtualMachineState targetState) throws AllocatorException, ResourceAllocationException;
 
     /**
