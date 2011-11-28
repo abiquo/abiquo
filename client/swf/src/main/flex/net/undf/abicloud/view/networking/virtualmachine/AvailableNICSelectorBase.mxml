@@ -90,24 +90,6 @@
                privateNICSelector.close();
             }
             
-            public function onAssignExternalNicToVirtualMachine(evt:Event):void{
-                 //Assign the selected NIC to the Virtual Machine
-               var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_EXTERNAL_NIC_TO_VIRTUAL_MACHINE);
-               event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-               event.virtualDatacenter = _virtualDatacenter;
-               event.virtualAppliance = _virtualAppliance;
-               if(!privateNICSelector.availableIPList.selectedItem){
-               	    var ipPoolManagement:IPPoolManagement = new IPPoolManagement();
-               	    ipPoolManagement.vlanNetworkId = VlanNetwork(privateNICSelector.vlanList.selectedItem).vlanNetworkId;
-               	    event.ipPoolManagement = ipPoolManagement;
-               }else{
-	               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
-               }
-               event.virtualMachine = _virtualMachine;
-               dispatchEvent(event);
-
-               privateNICSelector.close();
-            }
             
             public function init(virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance, virtualMachine:VirtualMachine):void
             {
