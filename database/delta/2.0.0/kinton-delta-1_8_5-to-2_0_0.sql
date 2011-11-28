@@ -186,6 +186,7 @@ ALTER TABLE `kinton`.`vappstateful_conversions` DROP COLUMN `state`;
 ALTER TABLE `kinton`.`vappstateful_conversions` DROP COLUMN `substate`; 
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `state` VARCHAR(50)  DEFAULT NULL AFTER `idDiskStatefulConversion`;
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `subState` VARCHAR(50)  DEFAULT NULL AFTER `state`;
+ALTER TABLE `kinton`.`ovf_package` MODIFY COLUMN `name` VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 
 -- PRICING --
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --

@@ -338,6 +338,7 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances" method="POST" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/ips" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/action/poweron" method="PUT" access="ROLE_VAPP_PERFORM_ACTIONS" />
@@ -353,6 +354,9 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*" method="PUT" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*" method="DELETE" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/state" method="PUT" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/state" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/network/configurations" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/network/configurations/*" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/virtualappliances/*/virtualmachines/*/network/configurations/*" method="PUT" access="ROLE_VAPP_ASSIGN_NETWORK" />

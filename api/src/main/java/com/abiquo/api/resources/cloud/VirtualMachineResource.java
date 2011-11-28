@@ -40,12 +40,15 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.resources.AbstractResourceWithTasks;
+import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -56,61 +59,66 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
+import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.Rack;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResourceWithTasks
 {
-    public static final String VIRTUAL_MACHINE = "virtualmachine";
+public static final String VIRTUAL_MACHINE = "virtualmachine";
 
-    public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
+public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
-    public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
+public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
 
-    public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
+public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
 
-    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
+public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
+public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
+public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
-    public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
+public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
-    public static final String VIRTUAL_MACHINE_STATE = "/state";
+public static final String VIRTUAL_MACHINE_STATE = "/state";
 
-    // Chef constants to help link builders. Method implementation are premium.
-    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
+// Chef constants to help link builders. Method implementation are premium.
+public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
 
-    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
+public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
-    public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
+public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
-    @Autowired
-    VirtualMachineService vmService;
+@Autowired
+VirtualMachineService vmService;
 
-    @Autowired
-    VirtualMachineAllocatorService service;
+@Autowired
+VirtualMachineAllocatorService service;
 
-    @Autowired
-    UserService userService;
+@Autowired
+UserService userService;
 
-    @Autowired
-    NetworkService networkService;
+@Autowired
+NetworkService networkService;
 
-    /**
-     * Return the virtual appliance if exists.
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vappId identifier of the virtual appliance.
-     * @param restBuilder to build the links
-     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
-     * @throws Exception
-     */
-    @GET
-    public VirtualMachineDto getVirtualMachine(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+/**
+ * Return the virtual appliance if exists.
+ * 
+ * @param vdcId identifier of the virtual datacenter.
+ * @param vappId identifier of the virtual appliance.
+ * @param restBuilder to build the links
+ * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+ * @throws Exception
+ */
+@GET
+public VirtualMachineDto getVirtualMachine(
+    @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -170,6 +178,12 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     {
         VirtualMachineState newState = validateState(state);
         String link = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
+
+        // If the link is null no Task was performed
+        if (link == null)
+        {
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+        }
         AcceptedRequestDto request = new AcceptedRequestDto();
         request.setStatusUrlLink(link);
         request.setEntity(null);
@@ -294,9 +308,14 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             vmService.deployVirtualMachine(vmId, vappId, vdcId,
                 forceSoftLimits.isForceEnterpriseSoftLimits());
 
+        // If the link is null no Task was performed
+        if (link == null)
+        {
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+        }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);
-        a202.setEntity("");
+        a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
     }
@@ -334,6 +353,11 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     {
 
         String link = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+        // If the link is null no Task was performed
+        if (link == null)
+        {
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+        }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);
         a202.setEntity("");
@@ -370,6 +394,11 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         String link = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+        // If the link is null no Task was performed
+        if (link == null)
+        {
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+        }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
         a202.setStatusUrlLink(link);
         a202.setEntity("");
@@ -387,11 +416,13 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final IRESTBuilder restBuilder)
     {
+
         VirtualMachineDto dto = new VirtualMachineDto();
 
+        dto.setUuid(v.getUuid());
         dto.setCpu(v.getCpu());
         dto.setDescription(v.getDescription());
-        dto.setHd(v.getHdInBytes());
+        dto.setHdInBytes(v.getHdInBytes());
         dto.setHighDisponibility(v.getHighDisponibility());
         dto.setId(v.getId());
         // dto.setIdState(v.getidState)
@@ -411,6 +442,21 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         dto.setVdrpIP(v.getVdrpIP());
         dto.setVdrpPort(v.getVdrpPort());
 
+        final Hypervisor hypervisor = v.getHypervisor();
+        final Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        final Rack rack = machine == null ? null : machine.getRack();
+        final Datacenter dc = rack == null ? null : rack.getDatacenter();
+
+        final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
+        final User user = v.getUser() == null ? null : v.getUser();
+
+        dto.addLinks(restBuilder.buildVirtualMachineAdminLinks(dc == null ? null : dc.getId(),
+            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
+
+        final VirtualImage vimage = v.getVirtualImage();
+        dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+            .getRepository().getDatacenter().getId(), vimage.getId()));
         return dto;
     }
 
@@ -418,9 +464,10 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         final IRESTBuilder restBuilder)
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
+        dto.setUuid(v.getVirtualMachine().getUuid());
         dto.setCpu(v.getVirtualMachine().getCpu());
         dto.setDescription(v.getVirtualMachine().getDescription());
-        dto.setHd(v.getVirtualMachine().getHdInBytes());
+        dto.setHdInBytes(v.getVirtualMachine().getHdInBytes());
         dto.setHighDisponibility(v.getVirtualMachine().getHighDisponibility());
         dto.setId(v.getVirtualMachine().getId());
         // dto.setIdState(v.getidState)
@@ -436,6 +483,25 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         dto.setNodeName(v.getName());
         dto.setX(v.getX());
         dto.setY(v.getY());
+
+        final Hypervisor hypervisor = v.getVirtualMachine().getHypervisor();
+        final Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        final Rack rack = machine == null ? null : machine.getRack();
+        final Datacenter dc = rack == null ? null : rack.getDatacenter();
+
+        final Enterprise enterprise =
+            v.getVirtualMachine().getEnterprise() == null ? null : v.getVirtualMachine()
+                .getEnterprise();
+        final User user =
+            v.getVirtualMachine().getUser() == null ? null : v.getVirtualMachine().getUser();
+
+        dto.addLinks(restBuilder.buildVirtualMachineAdminLinks(dc == null ? null : dc.getId(),
+            rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
+
+        final VirtualImage vimage = v.getVirtualMachine().getVirtualImage();
+        dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+            .getRepository().getDatacenter().getId(), vimage.getId()));
         return dto;
     }
 

@@ -221,4 +221,10 @@ public class VirtualMachineRep extends DefaultRepBase
         return nodeVirtualImageDAO.findByVirtualAppliance(virtualAppliance);
 
     }
+
+    public void deleteNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.remove(nodeVirtualImage);
+    }
+
 }

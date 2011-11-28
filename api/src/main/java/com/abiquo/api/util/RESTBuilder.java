@@ -1234,4 +1234,18 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    public RESTLink buildUserLink(final Integer enterpriseId, final Integer userId)
+    {
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        return buildEnterpriseLink(enterpriseId, builder);
+    }
+
+    protected RESTLink buildUserLink(final Integer enterpriseId, final Integer userId,
+        final AbiquoLinkBuilder builder)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
+        params.put(UserResource.USER, userId.toString());
+        return builder.buildRestLink(UserResource.class, UserResource.USER, params);
+    }
 }

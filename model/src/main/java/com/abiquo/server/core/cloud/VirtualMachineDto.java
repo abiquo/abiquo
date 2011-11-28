@@ -97,16 +97,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto implements
         this.cpu = cpu;
     }
 
-    private long hd;
+    private long hdInBytes;
 
-    public long getHd()
+    public long getHdInBytes()
     {
-        return hd;
+        return hdInBytes;
     }
 
-    public void setHd(final long hd)
+    public void setHdInBytes(final long hdInBytes)
     {
-        this.hd = hd;
+        this.hdInBytes = hdInBytes;
     }
 
     private int vdrpPort;

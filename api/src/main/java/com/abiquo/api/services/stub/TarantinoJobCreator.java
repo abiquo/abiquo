@@ -42,7 +42,6 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
-import com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.PrimaryDisk;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
@@ -58,6 +57,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -225,19 +225,6 @@ public class TarantinoJobCreator extends DefaultApiService
             .fromValue(stateTransition.name()));
         stateJob.setId(deployTask.getId() + "." + virtualMachine.getUuid());
         return stateJob;
-    }
-
-    public ApplyVirtualMachineStateOp configureJobConfiguration(
-        final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
-        final VirtualMachineDescriptionBuilder vmDesc,
-        final HypervisorConnection hypervisorConnection)
-    {
-        ApplyVirtualMachineStateOp configJob = new ApplyVirtualMachineStateOp();
-        configJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
-        configJob.setHypervisorConnection(hypervisorConnection);
-        configJob.setTransaction(StateTransition.CONFIGURE);
-        configJob.setId(deployTask.getId() + "." + virtualMachine.getUuid() + "configure");
-        return configJob;
     }
 
     /**
@@ -430,5 +417,110 @@ public class TarantinoJobCreator extends DefaultApiService
     {
         // PREMIUM
         logger.debug("bootstrap community implementation");
+    }
+
+    /**
+     * Creates a deploy task. The Job id identifies this job and is neede to create the ids of the
+     * items. It is hyerarchic so Task 1 and its job would be 1.1, another 1.2
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param builder The original configuration for the virtual machine.
+     * @return The reconfigure task.
+     */
+    public DatacenterTasks deployTask(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder builder)
+    {
+        DatacenterTasks deployTask = new DatacenterTasks();
+        deployTask.setId(virtualMachine.getUuid());
+        deployTask.setDependent(true);
+
+        HypervisorConnection hypervisorConnection =
+            hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+
+        ApplyVirtualMachineStateOp configuration =
+            applyStateVirtualMachineConfiguration(virtualMachine, deployTask, builder,
+                hypervisorConnection, VirtualMachineStateTransition.CONFIGURE);
+        configuration.setId(deployTask.getId() + ".configure");
+
+        ApplyVirtualMachineStateOp state =
+            applyStateVirtualMachineConfiguration(virtualMachine, deployTask, builder,
+                hypervisorConnection, VirtualMachineStateTransition.POWERON);
+        state.setId(deployTask.getId() + ".poweron");
+
+        deployTask.getJobs().add(configuration);
+        deployTask.getJobs().add(state);
+
+        return deployTask;
+    }
+
+    /**
+     * Creates a undeploy task. The Job id identifies this job and is neede to create the ids of the
+     * items. It is hyerarchic so Task 1 and its job would be 1.1, another 1.2 <br>
+     * <br>
+     * If it is ON we shutdown the virtual machine.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param builder The original configuration for the virtual machine.
+     * @param currentState State of the {@link VirtualMachine} at the start of the undeploy.
+     * @return The reconfigure task.
+     */
+    public DatacenterTasks undeployTask(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder builder, final VirtualMachineState currentState)
+    {
+        DatacenterTasks undeployTask = new DatacenterTasks();
+        undeployTask.setId(virtualMachine.getUuid());
+        undeployTask.setDependent(true);
+
+        HypervisorConnection hypervisorConnection =
+            hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+
+        // We must shutdown only if its ON
+        if (VirtualMachineState.ON.equals(currentState))
+        {
+            ApplyVirtualMachineStateOp state =
+                applyStateVirtualMachineConfiguration(virtualMachine, undeployTask, builder,
+                    hypervisorConnection, VirtualMachineStateTransition.POWEROFF);
+            state.setId(undeployTask.getId() + ".poweroff");
+
+            undeployTask.getJobs().add(state);
+        }
+
+        ApplyVirtualMachineStateOp configuration =
+            applyStateVirtualMachineConfiguration(virtualMachine, undeployTask, builder,
+                hypervisorConnection, VirtualMachineStateTransition.DECONFIGURE);
+        configuration.setId(undeployTask.getId() + ".deconfigure");
+
+        undeployTask.getJobs().add(configuration);
+
+        return undeployTask;
+    }
+
+    /**
+     * Creates a deploy task. The Job id identifies this job and is neede to create the ids of the
+     * items. It is hyerarchic so Task 1 and its job would be 1.1, another 1.2
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param builder The original configuration for the virtual machine.
+     * @return The reconfigure task.
+     */
+    public DatacenterTasks applyStateTask(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder builder,
+        final VirtualMachineStateTransition machineStateTransition)
+    {
+        DatacenterTasks applyStateTask = new DatacenterTasks();
+        applyStateTask.setId(virtualMachine.getUuid());
+        applyStateTask.setDependent(true);
+
+        HypervisorConnection hypervisorConnection =
+            hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+
+        ApplyVirtualMachineStateOp state =
+            applyStateVirtualMachineConfiguration(virtualMachine, applyStateTask, builder,
+                hypervisorConnection, machineStateTransition);
+        state.setId(applyStateTask.getId() + ".applystate");
+
+        applyStateTask.getJobs().add(state);
+
+        return applyStateTask;
     }
 }

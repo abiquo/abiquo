@@ -76,8 +76,10 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualDatacenterResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
@@ -1484,15 +1486,18 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     public DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         final UserSession userSession, final Enterprise enterprise)
     {
-        return new GetVirtualAppliancesList(userSession, enterprise.getId(), null)
-        {
 
-            @Override
-            protected Collection<VirtualappHB> get(final UserHB user, final VirtualApplianceDAO dao)
-            {
-                return dao.getVirtualAppliancesByEnterprise(user, enterpriseId);
-            }
-        }.getVirtualAppliances(errorManager, resourceManager);
+        VirtualApplianceResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new VirtualApplianceResourceStubImpl(),
+                VirtualApplianceResourceStub.class);
+        DataResult<Collection<VirtualAppliance>> result =
+            proxy.getVirtualAppliancesByEnterprise(userSession, enterprise);
+        if (result.getSuccess())
+        {
+            result.setMessage(resourceManager
+                .getMessage("getVirtualAppliancesByEnterprise.success"));
+        }
+        return result;
     }
 
     /*
@@ -3720,4 +3725,5 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             errorManager.reportError(resourceManager, dataResult, "updateStateInDB", e);
         }
     }
+
 }
