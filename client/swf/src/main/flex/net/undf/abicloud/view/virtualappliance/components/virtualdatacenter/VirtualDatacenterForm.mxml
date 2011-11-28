@@ -178,6 +178,12 @@
                         break;
                     }
                 }
+                
+                //Hypervisor was not found
+                if(hyperTypeInput.selectedIndex == -1 && this._virtualDatacenter.hyperType.id != 0)
+                {
+                    hyperTypeInput.prompt = HyperVisorType.HYPERVISOR_NAMES[this._virtualDatacenter.hyperType.id];
+                }
             }
 
             private function hypervisorTypeInputLabelFunction(item:Object):String
