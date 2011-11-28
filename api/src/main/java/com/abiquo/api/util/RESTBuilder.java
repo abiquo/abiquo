@@ -348,15 +348,15 @@ public class RESTBuilder implements IRESTBuilder
             OVFPackagesResource.OVF_PACKAGES_PATH, params));
 
         // action get virtual machines by enterprise
-        links.add(builder.buildActionLink(EnterpriseResource.class,
+        links.add(builder.buildRelLink(EnterpriseResource.class,
             EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES,
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params,
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH));
 
         // action get ips by enterprise
-        links
-            .add(builder.buildActionLink(EnterpriseResource.class,
-                EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES,
-                params));
+        links.add(builder.buildRelLink(EnterpriseResource.class,
+            EnterpriseResource.ENTERPRISE_ACTION_GET_IPS, IpAddressesResource.IP_ADDRESSES, params,
+            IpAddressesResource.IP_ADDRESSES));
 
         // action get virtual datacenters by enterprise
         links.add(builder.buildActionLink(EnterpriseResource.class,
@@ -388,9 +388,10 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(UserResource.class, REL_EDIT, params));
 
         // virtual machines
-        links.add(builder.buildActionLink(UserResource.class,
+        links.add(builder.buildRelLink(UserResource.class,
             UserResource.USER_ACTION_GET_VIRTUALMACHINES,
-            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params,
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH));
 
         return links;
     }
@@ -497,11 +498,12 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualAppliancesResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE, params));
         links.add(builder.buildRestLink(PrivateNetworkResource.class, "defaultnetwork", params));
-        links.add(builder.buildActionLink(VirtualDatacenterResource.class,
+        links.add(builder.buildRelLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params));
-        links.add(builder.buildActionLink(VirtualDatacenterResource.class,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO, "dhcpinfo", params));
+            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
+        links.add(builder.buildRelLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO, "dhcpinfo", params,
+            "dhcpinfo"));
         RESTLink getVlanLink =
             builder.buildActionLink(VirtualDatacenterResource.class,
                 VirtualDatacenterResource.ACTION_DEFAULT_VLAN, "defaultvlan", params);
@@ -549,11 +551,19 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualApplianceResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_POWERON, "power on", params));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE, "state", params));
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
+        links.add(builder.buildRelLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE, "state", params, "state"));
+        links.add(builder.buildRelLink(VirtualApplianceResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params));
+            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
+        links.add(builder.buildRelLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL, params,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL));
+        links.add(builder.buildRelLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL, params,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL));
 
         return links;
 
@@ -657,15 +667,17 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
-        links.add(builder.buildActionLink(VirtualMachineNetworkConfigurationResource.class,
+        links.add(builder.buildRelLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NIC, params));
-        links.add(builder.buildActionLink(VirtualMachineStorageConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NIC, params,
+            VirtualMachineNetworkConfigurationResource.NIC));
+        links.add(builder.buildRelLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH,
-            VirtualMachineStorageConfigurationResource.DISK, params));
-        links.add(builder.buildActionLink(VirtualMachineResource.class,
+            VirtualMachineStorageConfigurationResource.DISK, params,
+            VirtualMachineStorageConfigurationResource.DISK));
+        links.add(builder.buildRelLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params));
+            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE_REL, params));

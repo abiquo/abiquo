@@ -136,7 +136,7 @@ public class RoleResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(dto, href, "edit");
         assertLinkExist(dto, enterpriseUri, "enterprise");
-        assertLinkExist(dto, privilegesUri, "privileges", "privileges");
+        assertLinkExist(dto, privilegesUri, "action", "privileges");
     }
 
 }

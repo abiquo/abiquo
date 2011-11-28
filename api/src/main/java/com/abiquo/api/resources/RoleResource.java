@@ -76,6 +76,8 @@ public class RoleResource extends AbstractResource
 
     public static final String ROLE_ACTION_GET_PRIVILEGES = "/action/privileges";
 
+    public static final String ROLE_ACTION_GET_PRIVILEGES_REL = "privileges";
+
     @Autowired
     RoleService service;
 

@@ -73,6 +73,10 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL = "undeploy";
+
+    public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL = "deploy";
+
     public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
 
     public static final String VIRTUAL_APPLIANCE_STATE = "/state";
