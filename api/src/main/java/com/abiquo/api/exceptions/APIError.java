@@ -110,7 +110,7 @@ public enum APIError
 
     // VLANS
     VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
-        "You have reached the maximum VLANs that you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME(
+        "You have reached the maximum VLANs that you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME_VDC(
         "VLAN-1", "Cannot create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Cannot use any address outside the private range"), VLANS_TOO_BIG_NETWORK(
         "VLAN-3", "For performance reasons, Abiquo does not allow you to create large networks"), VLANS_TOO_BIG_NETWORK_II(
