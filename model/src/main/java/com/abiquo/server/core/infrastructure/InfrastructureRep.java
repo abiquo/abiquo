@@ -877,4 +877,9 @@ public class InfrastructureRep extends DefaultRepBase
     {
         pricingRep.insertPricingTier(pricingTier);
     }
+
+    public List<Integer> findUsedRemoteDesktopPortsInRack(final Rack rack)
+    {
+        return rackDao.findUsedVrdpPorts(rack);
+    }
 }
