@@ -31,109 +31,134 @@ import javax.persistence.EntityManagerFactory;
 import org.hibernate.classic.Session;
 import org.hibernate.stat.Statistics;
 
-public class HibernateSessionAllocationChecker {
+public class HibernateSessionAllocationChecker
+{
 
-	private boolean statisticsEnabledOnEntry;
-	private long outstandingSessionsOnEntry;
-	private int openMySqlConnectionsOnEntry;
-	private long sessionsNotReleasedAfterCreation;
-	private int mySqlConnectionsNoReleasedAfterCreation;
-	private EntityManagerFactory factory;
+    private boolean statisticsEnabledOnEntry;
 
-	private int getMySqlConnectionCount(Connection connection)
-			throws SQLException {
-		assert connection != null;
+    private long outstandingSessionsOnEntry;
 
-		Statement query = connection.createStatement();
-		try {
-			ResultSet rs = query
-					.executeQuery("show global status like 'Threads_connected'");
-			try {
-				boolean found = rs.next();
-				assert found;
+    private int openMySqlConnectionsOnEntry;
 
-				String result = rs.getString(2);
-				return Integer.parseInt(result);
-			} finally {
-				rs.close();
-			}
-		} finally {
-			query.close();
-		}
-	}
+    private long sessionsNotReleasedAfterCreation;
 
-	public HibernateSessionAllocationChecker(EntityManagerFactory factory) {
-		assert factory != null;
+    private int mySqlConnectionsNoReleasedAfterCreation;
 
-		this.factory = factory;
+    private EntityManagerFactory factory;
 
-		EntityManager em = factory.createEntityManager();
-		try {
-			Session session = (Session) em.getDelegate();
-			Statistics statistics = session.getSessionFactory().getStatistics();
-			this.statisticsEnabledOnEntry = statistics.isStatisticsEnabled();
-			statistics.setStatisticsEnabled(true);
-			this.outstandingSessionsOnEntry = statistics.getSessionOpenCount()
-					- statistics.getSessionCloseCount();
-			try {
-				this.openMySqlConnectionsOnEntry = getMySqlConnectionCount(session
-						.connection());
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
-		} finally {
-			em.close();
-		}
-	}
+    private int getMySqlConnectionCount(Connection connection) throws SQLException
+    {
+        assert connection != null;
 
-	private boolean resultObtained;
+        Statement query = connection.createStatement();
+        try
+        {
+            ResultSet rs = query.executeQuery("show global status like 'Threads_connected'");
+            try
+            {
+                boolean found = rs.next();
+                assert found;
 
-	private void ensureResultObtained() {
-		if (!resultObtained) {
-			EntityManager em = factory.createEntityManager();
-			try {
-				Session session = (Session) em.getDelegate();
-				Statistics statistics = session.getSessionFactory()
-						.getStatistics();
+                String result = rs.getString(2);
+                return Integer.parseInt(result);
+            }
+            finally
+            {
+                rs.close();
+            }
+        }
+        finally
+        {
+            query.close();
+        }
+    }
 
-				assert statistics.isStatisticsEnabled() : "Somebody else disabled the statistics: DON'T do, or do not use this component";
+    public HibernateSessionAllocationChecker(EntityManagerFactory factory)
+    {
+        assert factory != null;
 
-				long outstandingSessionsOnExit = statistics
-						.getSessionOpenCount()
-						- statistics.getSessionCloseCount();
-				this.sessionsNotReleasedAfterCreation = outstandingSessionsOnExit
-						- this.outstandingSessionsOnEntry;
+        this.factory = factory;
 
-				assert sessionsNotReleasedAfterCreation >= 0 : "Somebody else played with the statistics (maybe cleared/disabled them?): DON'T do, or do not use this component";
-				// System.err.println( "OUTSTANDING SESSIONS: " +
-				// sessionsNotReleasedAfterCreation);
+        EntityManager em = factory.createEntityManager();
+        try
+        {
+            Session session = (Session) em.getDelegate();
+            Statistics statistics = session.getSessionFactory().getStatistics();
+            this.statisticsEnabledOnEntry = statistics.isStatisticsEnabled();
+            statistics.setStatisticsEnabled(true);
+            this.outstandingSessionsOnEntry =
+                statistics.getSessionOpenCount() - statistics.getSessionCloseCount();
+            try
+            {
+                this.openMySqlConnectionsOnEntry = getMySqlConnectionCount(session.connection());
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        finally
+        {
+            em.close();
+        }
+    }
 
-				try {
-					this.mySqlConnectionsNoReleasedAfterCreation = getMySqlConnectionCount(session
-							.connection())
-							- this.openMySqlConnectionsOnEntry;
-				} catch (SQLException e) {
-					throw new RuntimeException(e);
-				}
+    private boolean resultObtained;
 
-				// Reset statistics to the state they were before we started to
-				// be interested in open/closed session count
-				statistics.setStatisticsEnabled(this.statisticsEnabledOnEntry);
-			} finally {
-				em.close();
-			}
-			resultObtained = true;
-		}
+    private void ensureResultObtained()
+    {
+        if (!resultObtained)
+        {
+            EntityManager em = factory.createEntityManager();
+            try
+            {
+                Session session = (Session) em.getDelegate();
+                Statistics statistics = session.getSessionFactory().getStatistics();
 
-	}
+                assert statistics.isStatisticsEnabled() : "Somebody else disabled the statistics: DON'T do, or do not use this component";
 
-	public long getOutstandingMySqlConnections() {
-		ensureResultObtained();
-		return this.mySqlConnectionsNoReleasedAfterCreation;
-	}
+                long outstandingSessionsOnExit =
+                    statistics.getSessionOpenCount() - statistics.getSessionCloseCount();
+                this.sessionsNotReleasedAfterCreation =
+                    outstandingSessionsOnExit - this.outstandingSessionsOnEntry;
 
-	public long getOutstandingSessions() {
-		ensureResultObtained();
-		return this.sessionsNotReleasedAfterCreation;
-	}
+                assert sessionsNotReleasedAfterCreation >= 0 : "Somebody else played with the statistics (maybe cleared/disabled them?): DON'T do, or do not use this component";
+                // System.err.println( "OUTSTANDING SESSIONS: " +
+                // sessionsNotReleasedAfterCreation);
+
+                try
+                {
+                    this.mySqlConnectionsNoReleasedAfterCreation =
+                        getMySqlConnectionCount(session.connection())
+                            - this.openMySqlConnectionsOnEntry;
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeException(e);
+                }
+
+                // Reset statistics to the state they were before we started to
+                // be interested in open/closed session count
+                statistics.setStatisticsEnabled(this.statisticsEnabledOnEntry);
+            }
+            finally
+            {
+                em.close();
+            }
+            resultObtained = true;
+        }
+
+    }
+
+    public long getOutstandingMySqlConnections()
+    {
+        ensureResultObtained();
+        return this.mySqlConnectionsNoReleasedAfterCreation;
+    }
+
+    public long getOutstandingSessions()
+    {
+        ensureResultObtained();
+        return this.sessionsNotReleasedAfterCreation;
+    }
 }

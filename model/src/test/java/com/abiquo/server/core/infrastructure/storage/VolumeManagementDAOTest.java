@@ -225,7 +225,7 @@ public class VolumeManagementDAOTest extends
         assertSize(results, 2);
     }
 
-	@Test
+    @Test
     public void testGetVolumesByRasd()
     {
         // Test without filtering
@@ -239,6 +239,6 @@ public class VolumeManagementDAOTest extends
 
         VolumeManagement vol = dao.getVolumeByRasd(rasd);
 
-        eg().assertAllPropertiesEqual(vol,volume);
+        eg().assertAllPropertiesEqual(vol, volume);
     }
 }

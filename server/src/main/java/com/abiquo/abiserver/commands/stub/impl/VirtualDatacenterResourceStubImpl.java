@@ -128,7 +128,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 VirtualDataCenter.create(responseDto, vdc.getIdDataCenter(), vdc.getEnterprise(),
                     network.toPojo());
             responseVdc.setLimits(vdc.getLimits());
-            responseVdc.setDefaultVlan(vdc.getDefaultVlan());
+            responseVdc.setDefaultVlan(responseVdc.getDefaultVlan());
             dataResult.setData(responseVdc);
             dataResult.setMessage(resourceManager.getMessage("createVirtualDataCenter.success"));
 
@@ -257,6 +257,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
 
                 factory.beginConnection();
                 NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
+
                 factory.endConnection();
 
                 VirtualDataCenter vdctoadd =
@@ -270,6 +271,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
                 datacenters.add(vdctoadd);
+
             }
             result.setData(datacenters);
 

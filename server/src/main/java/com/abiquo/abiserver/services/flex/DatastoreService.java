@@ -64,10 +64,11 @@ public class DatastoreService
      * @param datastore datastore to create.
      * @return a DataResult containing the Datastore created.
      */
-    public BasicResult createDatastore(UserSession userSession, Datastore datastore, Integer idPhysicalMachine)
+    public BasicResult createDatastore(UserSession userSession, Datastore datastore,
+        Integer idPhysicalMachine)
     {
         DataResult<Datastore> dataResult = new DataResult<Datastore>();
-        
+
         DatastoreCommand command = proxyCommand(userSession);
 
         DatastoreHB datastoreResult;
@@ -84,11 +85,10 @@ public class DatastoreService
             dataResult.setSuccess(false);
             dataResult.setMessage(e.getMessage());
         }
-        
-        
+
         return dataResult;
     }
-    
+
     /**
      * Service to edit a new Datastore.
      * 
@@ -100,7 +100,7 @@ public class DatastoreService
     public BasicResult editDatastore(UserSession userSession, Datastore datastore)
     {
         DataResult<Datastore> dataResult = new DataResult<Datastore>();
-        
+
         DatastoreCommand command = proxyCommand(userSession);
         DatastoreHB datastoreResult;
 
@@ -115,9 +115,8 @@ public class DatastoreService
             dataResult.setSuccess(false);
             dataResult.setMessage(e.getMessage());
         }
-        
-        
+
         return dataResult;
     }
-    
+
 }

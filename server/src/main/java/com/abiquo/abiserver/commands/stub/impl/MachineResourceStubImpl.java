@@ -32,9 +32,8 @@ import com.abiquo.server.core.infrastructure.MachineDto;
 
 public class MachineResourceStubImpl extends AbstractAPIStub implements MachineResourceStub
 {
-
     @Override
-    public BasicResult deleteNotManagedVirtualMachines(PhysicalMachine machine)
+    public BasicResult deleteNotManagedVirtualMachines(final PhysicalMachine machine)
     {
         String uri = createMachineLink(machine);
         uri = UriHelper.appendPathToBaseUri(uri, "action/virtualmachines");
@@ -54,19 +53,14 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
         return result;
     }
 
-    public static MachineDto fromPhysicalMachineToDto(PhysicalMachine machine)
+    public static MachineDto fromPhysicalMachineToDto(final PhysicalMachine machine)
     {
         MachineDto dto = new MachineDto();
         dto.setId(machine.getId());
         dto.setDescription(machine.getDescription());
-        dto.setRealCpuCores(machine.getRealCpu());
-        dto.setRealHardDiskInMb(machine.getRealStorage());
-        dto.setRealRamInMb(machine.getRealRam());
         dto.setVirtualCpuCores(machine.getCpu());
         dto.setVirtualCpusUsed(machine.getCpuUsed());
         dto.setVirtualCpusPerCore(machine.getCpuRatio());
-        dto.setVirtualHardDiskInMb(machine.getHd());
-        dto.setVirtualHardDiskUsedInMb(machine.getHdUsed());
         dto.setVirtualRamInMb(machine.getRam());
         dto.setVirtualRamUsedInMb(machine.getRamUsed());
 
@@ -78,7 +72,7 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOff(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOff(PhysicalMachine machine)
+    public BasicResult powerOff(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;
@@ -88,7 +82,14 @@ public class MachineResourceStubImpl extends AbstractAPIStub implements MachineR
      * @see com.abiquo.abiserver.commands.stub.RacksResourceStub#powerOn(com.abiquo.abiserver.pojo.infrastructure.PhysicalMachine)
      */
     @Override
-    public BasicResult powerOn(PhysicalMachine machine)
+    public BasicResult powerOn(final PhysicalMachine machine)
+    {
+        // PREMIUM
+        return null;
+    }
+
+    @Override
+    public BasicResult deletePhysicalMachine(final PhysicalMachine machine)
     {
         // PREMIUM
         return null;

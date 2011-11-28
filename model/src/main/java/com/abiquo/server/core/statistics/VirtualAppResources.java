@@ -222,7 +222,7 @@ public class VirtualAppResources extends DefaultEntityBase
     {
         this.idEnterprise = idEnterprise;
     }
-    
+
     public final static String ID_VDC_PROPERTY = "idVirtualDataCenter";
 
     private final static String ID_VDC_COLUMN = "idVirtualDataCenter";

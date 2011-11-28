@@ -46,4 +46,6 @@ public interface MachineResourceStub
      */
     public BasicResult powerOn(PhysicalMachine machine);
 
+    public BasicResult deletePhysicalMachine(PhysicalMachine machine);
+
 }

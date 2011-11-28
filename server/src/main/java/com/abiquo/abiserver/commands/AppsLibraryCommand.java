@@ -139,11 +139,11 @@ public interface AppsLibraryCommand
      */
     OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(UserSession userSession,
         String idOVFPackageName, final Integer nameOVFPackageList, Integer idEnterprise,
-        Integer idRepository)
-        throws AppsLibraryCommandException;
-    
+        Integer idRepository) throws AppsLibraryCommandException;
+
     /**
      * Refresh the current status of a {@link OVFPackage} in the DB.
+     * 
      * @param userSession Data from the current user.
      * @param idsOvfInstance Name of the item to refresh.
      * @param idEnterprise Id of {@link Enterprise} to which this {@link OVFPackage} belongs.

@@ -392,7 +392,9 @@ package net.undf.abicloud.controller.virtualappliance
             if (result.success)
             {
                 //Announcing that the state of a Virtual Appliance has been changed
-                //AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
+                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                Application.application.dispatchEvent(virtualApplianceEvent);
             }
             else
             {

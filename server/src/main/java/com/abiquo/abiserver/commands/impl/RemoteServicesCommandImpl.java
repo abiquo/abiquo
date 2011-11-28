@@ -74,17 +74,6 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
     }
 
     @Override
-    public DataResult<RemoteService> addRemoteService(final UserSession userSession,
-        final RemoteService rs)
-    {
-        RemoteServicesResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
-                RemoteServicesResourceStub.class);
-
-        return proxy.addRemoteService(rs);
-    }
-
-    @Override
     public boolean checkRemoteService(final UserSession userSession, final Integer id)
         throws InfrastructureCommandException
     {
@@ -118,7 +107,7 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
 
     @Override
     public DataResult<Boolean> deleteRemoteService(final UserSession userSession,
-        RemoteService remoteService)
+        final RemoteService remoteService)
     {
         RemoteServicesResourceStub proxy =
             APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
@@ -201,7 +190,8 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
     }
 
     @Override
-    public List<RemoteService> getRemoteServicesByUrl(final UserSession userSession, String uri)
+    public List<RemoteService> getRemoteServicesByUrl(final UserSession userSession,
+        final String uri)
     {
         List<RemoteService> remoteServices = new ArrayList<RemoteService>();
 
@@ -228,8 +218,8 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
     }
 
     @Override
-    public boolean checkRemoteService(final UserSession userSession, String serviceUri,
-        com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType rsType)
+    public boolean checkRemoteService(final UserSession userSession, final String serviceUri,
+        final com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType rsType)
     {
 
         // If a Remote Service cannot be checked by definition, we assume it is

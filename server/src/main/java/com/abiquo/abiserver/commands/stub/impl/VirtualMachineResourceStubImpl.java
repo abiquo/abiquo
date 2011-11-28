@@ -96,7 +96,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         NotEnoughResourcesException
     {
 
-
         String vmachineUrl =
             resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
 

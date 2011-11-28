@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
-import com.abiquo.server.core.cloud.State;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -144,7 +144,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 updateUsageDatastore(virtualMachine, false);
                 updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
 
-                virtualMachine.setState(State.IN_PROGRESS);
+                virtualMachine.setState(VirtualMachineState.IN_PROGRESS);
             }
             else
             {
@@ -179,25 +179,25 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {
-
         final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
 
         try
         {
             updateUsageDatastore(virtualMachine, true);
-
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(State.NOT_DEPLOYED);
+            virtualMachine.setState(VirtualMachineState.NOT_DEPLOYED);
+            virtualMachine.setHypervisor(null);
+            virtualMachine.setDatastore(null);
+            virtualMachine.setVdrpIP(null);
+            virtualMachine.setVdrpPort(0);
+
             vmachineDao.flush();
         }
-        catch (final Exception e) // HibernateException NotEnoughResourcesException
-        // NoSuchObjectException
+        catch (final Exception e)
         {
-            throw new ResourceUpgradeUseException("Can not update resource utilization"
-                + e.getMessage());
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
     }
 
@@ -352,18 +352,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             used.setHdInBytes(0l); // stateful virtual images doesn't use the datastores
         }
 
-        final Long newHd =
-            isRollback ? machine.getVirtualHardDiskUsedInBytes() - used.getHdInBytes() : machine
-                .getVirtualHardDiskUsedInBytes() + used.getHdInBytes();
-
         // prevent to set negative usage
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
-        machine.setVirtualHardDiskUsedInBytes(newHd >= 0 ? newHd : 0);
-
-        machine.setRealCpuCores(machine.getVirtualCpuCores());
-        machine.setRealHardDiskInBytes(machine.getVirtualHardDiskInBytes());
-        machine.setRealRamInMb(machine.getVirtualRamInMb());
 
         datacenterRepo.updateMachine(machine);
     }
@@ -389,7 +380,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         if (virtual.getVirtualImage().getStateful() == 1)
         {
-            // statefull images doesn't update the datastore utilization.
+            // Stateful images doesn't update the datastore utilization.
             return;
         }
 

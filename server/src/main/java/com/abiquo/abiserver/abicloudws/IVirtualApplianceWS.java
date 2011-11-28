@@ -118,6 +118,7 @@ public interface IVirtualApplianceWS
         JAXBException, ParserConfigurationException, SOAPException, IOException, FaultException,
         DatatypeConfigurationException, VirtualFactoryHealthException;
 
-    public Boolean checkRemovedNodes(final VirtualAppliance virtualAppliance) throws VirtualFactoryHealthException;
+    public Boolean checkRemovedNodes(final VirtualAppliance virtualAppliance)
+        throws VirtualFactoryHealthException;
 
 }

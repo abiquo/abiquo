@@ -145,7 +145,7 @@
             	var testedVlan:VlanNetwork;
             	for(var i:int = 0 ; i < networks.length ; i++){
             		testedVlan = VlanNetwork(networks.getItemAt(i)) as VlanNetwork;
-            		if(vlan.networkId == testedVlan.networkId){
+            		if(vlan.vlanNetworkId == testedVlan.vlanNetworkId){
             			testedVlan.defaultNetwork = true;
             		}else{
             			testedVlan.defaultNetwork = false;
@@ -221,7 +221,7 @@
                                                                                     "ALERT_UNABLE_DELETE_DEFAULT_VLAN_TEXT"),
                                             Alert.OK);
                 }
-                else if (_selectedVLAN.networkType == VlanNetwork.EXTERNAL)
+                else if (_selectedVLAN.networkType == VlanNetwork.EXTERNAL || _selectedVLAN.networkType == VlanNetwork.UNMANAGED)
                 {
                     //The external VLAN cannot be deleted
                     AbiCloudAlert.showError(ResourceManager.getInstance().getString("Common",
@@ -268,6 +268,15 @@
                     privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
                 }
             }
+            
+             private function returnUnmanaged(obj:VlanNetwork):String
+            {
+                var returnLabel:String = obj.networkName;
+                if(obj.networkType == VlanNetwork.UNMANAGED){
+                    returnLabel += " ("+resourceManager.getString('NetworkingPremium','LABEL_UNMANAGED').toLowerCase()+")";
+                }
+                return returnLabel;
+            }
         ]]>
     </mx:Script>
 
@@ -300,6 +309,7 @@
             borderStyle="none"
             labelField="networkName"
             dataProvider="{_virtualDatacenter.network.networks}"
+            labelFunction="returnUnmanaged"
             itemRenderer="net.undf.abicloud.view.networking.virtualdatacenter.privatenetwork.VLANListItemRenderer"
             click="onClickVLANList()"/>
 

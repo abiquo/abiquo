@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
@@ -33,9 +34,11 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 
 @Repository("jpaVirtualMachineDAO")
 public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
@@ -168,7 +171,7 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         return vmList;
     }
 
-    public void updateVirtualMachineState(final Integer vmachineId, final State state)
+    public void updateVirtualMachineState(final Integer vmachineId, final VirtualMachineState state)
     {
         VirtualMachine vmachine = findById(vmachineId);
 
@@ -185,5 +188,19 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     private Criterion notManaged()
     {
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
+    }
+
+    private static Criterion equalName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return Restrictions.eq(Datacenter.NAME_PROPERTY, name);
+    }
+
+    public boolean existsAnyWithName(final String name)
+    {
+        assert !StringUtils.isEmpty(name);
+
+        return this.existsAnyByCriterions(equalName(name));
     }
 }

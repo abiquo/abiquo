@@ -45,8 +45,8 @@ public enum HypervisorType
 
     public DiskFormatType[] compatibilityTable;
 
-    private HypervisorType(int defaultPort, DiskFormatType baseFormat,
-        DiskFormatType[] compatibilityTable)
+    private HypervisorType(final int defaultPort, final DiskFormatType baseFormat,
+        final DiskFormatType[] compatibilityTable)
     {
         this.defaultPort = defaultPort;
         this.baseFormat = baseFormat;
@@ -58,12 +58,12 @@ public enum HypervisorType
         return ordinal() + 1;
     }
 
-    public boolean isCompatible(DiskFormatType type)
+    public boolean isCompatible(final DiskFormatType type)
     {
         return ArrayUtils.contains(compatibilityTable, type);
     }
 
-    public static HypervisorType fromId(int id)
+    public static HypervisorType fromId(final int id)
     {
         return values()[id - 1];
     }
@@ -74,25 +74,26 @@ public enum HypervisorType
      * @param v value
      * @return
      */
-    public static HypervisorType fromValue(String v)
+    public static HypervisorType fromValue(final String v)
     {
-        return HypervisorType.valueOf(v.toUpperCase().replace("-", "_"));
+        return HypervisorType.valueOf(v.toUpperCase());
     }
 
     public String getValue()
     {
-        return name().toLowerCase().replace("_", "-");
+        return name();
     }
-    
+
     public boolean requiresCredentials()
     {
-    	switch (this) {
-		case KVM:
-		case XEN_3:
-			return false;
-		default:
-			return true;
-		}
+        switch (this)
+        {
+            case KVM:
+            case XEN_3:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /**
@@ -215,5 +216,66 @@ public enum HypervisorType
             default:
                 return "";
         }
+    }
+
+    public static Integer transformHypervisorTypeToInteger(final String hypervisorType)
+    {
+        if (hypervisorType.equalsIgnoreCase(HypervisorType.VBOX.getValue()))
+        {
+            return 1;
+        }
+        else if (hypervisorType.equalsIgnoreCase(HypervisorType.KVM.getValue()))
+        {
+            return 2;
+        }
+        else if (hypervisorType.equalsIgnoreCase(HypervisorType.XEN_3.getValue()))
+        {
+            return 3;
+        }
+        else if (hypervisorType.equalsIgnoreCase(HypervisorType.VMX_04.getValue()))
+        {
+            return 4;
+        }
+        else if (hypervisorType.equalsIgnoreCase(HypervisorType.HYPERV_301.getValue()))
+        {
+            return 5;
+        }
+        else if (hypervisorType.equalsIgnoreCase(HypervisorType.XENSERVER.getValue()))
+        {
+            return 6;
+        }
+
+        return null;
+
+    }
+
+    public static HypervisorType transformHypervisorTypeFromInteger(final int hypervisorType)
+    {
+        if (hypervisorType == 1)
+        {
+            return HypervisorType.VBOX;
+        }
+        else if (hypervisorType == 2)
+        {
+            return HypervisorType.KVM;
+        }
+        else if (hypervisorType == 3)
+        {
+            return HypervisorType.XEN_3;
+        }
+        else if (hypervisorType == 4)
+        {
+            return HypervisorType.VMX_04;
+        }
+        else if (hypervisorType == 5)
+        {
+            return HypervisorType.HYPERV_301;
+        }
+        else if (hypervisorType == 6)
+        {
+            return HypervisorType.XENSERVER;
+        }
+
+        return null;
     }
 }

@@ -50,6 +50,8 @@
                 <ref bean="privateNetworksResource" />
                 <ref bean="privateNetworkResource" />
                 <ref bean="ipAddressesResource" />
+                <ref bean="pricingTemplatesResource" />
+                <ref bean="pricingTemplateResource" />
                 <!-- -->
                 <ref bean="virtualAppliancesResource" />
                 <ref bean="virtualApplianceResource" />
@@ -89,4 +91,5 @@
             </list>
         </property>
     </bean>
+    <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>

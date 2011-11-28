@@ -49,7 +49,6 @@
         <class>com.abiquo.server.core.infrastructure.network.VLANNetwork</class>
         <class>com.abiquo.server.core.infrastructure.network.Network</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkConfiguration</class>
-        <class>com.abiquo.server.core.infrastructure.network.Dhcp</class>
         <class>com.abiquo.server.core.infrastructure.network.IpPoolManagement</class>
         <class>com.abiquo.server.core.infrastructure.network.NetworkAssignment</class>
         <!-- end: networking -->
@@ -68,10 +67,19 @@
         <!-- configuration -->
         <class>com.abiquo.server.core.config.SystemProperty</class>
         <class>com.abiquo.server.core.tasks.Task</class>
-        <!-- end: configuration -->
-        <properties>
-            <property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
-            <property name="hibernate.hbm2ddl.auto" value="verify" />
-        </properties>
-    </persistence-unit>
+        <!-- end: configuration --> 
+	<!-- pricing -->
+	<class>com.abiquo.server.core.pricing.PricingTemplate</class>
+	<class>com.abiquo.server.core.pricing.CostCode</class>
+	<class>com.abiquo.server.core.pricing.Currency</class>
+        <class>com.abiquo.server.core.pricing.CostCodeCurrency</class>
+        <class>com.abiquo.server.core.pricing.PricingCostCode</class>
+        <class>com.abiquo.server.core.pricing.PricingTier</class>
+	<!-- end:pricing-->
+		
+  	<properties>
+		<property name="dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+		<property name="hibernate.hbm2ddl.auto" value="verify" />
+	</properties>
+	</persistence-unit>
 </persistence>

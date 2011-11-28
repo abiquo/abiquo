@@ -37,8 +37,6 @@ import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.DhcpDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
@@ -54,8 +52,6 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
 {
-    @Autowired
-    DhcpDAO dhcpDAO;
 
     @Autowired
     IpPoolManagementDAO ipManagementDAO;
@@ -101,13 +97,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         this.virtualDatacenterDAO = new VirtualDatacenterDAO(em);
         this.vlanDAO = new VLANNetworkDAO(em);
         this.networkDAO = new NetworkDAO(em);
-        this.dhcpDAO = new DhcpDAO(em);
         this.ipManagementDAO = new IpPoolManagementDAO(em);
         this.virtualApplianceDAO = new VirtualApplianceDAO(em);
         this.rasdManagementDAO = new RasdManagementDAO(em);
         this.rasdDAO = new RasdDAO(em);
         this.networkConfigDAO = new NetworkConfigurationDAO(em);
-        this.dhcpDAO = new DhcpDAO(em);
         this.vmDao = new VirtualMachineDAO(em);
         this.nodeviDao = new NodeVirtualImageDAO(em);
     }
@@ -126,6 +120,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         nodeviDao.persist(nvi);
 
         return nvi;
+    }
+
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
     }
 
     public boolean containsResources(final VirtualDatacenter virtualDatacenter,
@@ -521,11 +520,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         virtualDatacenterDAO.persist(vdc);
     }
 
-    public void insertDhcp(final Dhcp dhcp)
-    {
-        dhcpDAO.persist(dhcp);
-    }
-
     public void insertIpManagement(final IpPoolManagement ipManagement)
     {
         if (ipManagement.getRasd() != null)
@@ -613,6 +607,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
     {
         return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
+    }
+
+    public void deleteIpPoolManagement(final IpPoolManagement ip)
+    {
+        ipManagementDAO.remove(ip);
     }
 
 }

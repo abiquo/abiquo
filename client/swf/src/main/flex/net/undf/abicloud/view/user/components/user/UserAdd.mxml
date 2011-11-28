@@ -135,7 +135,7 @@
                 newUser.surname = surnameInput.text;
                 newUser.role = roleInput.selectedItem as Role;
                 newUser.user = userInput.text;
-                newUser.pass = MD5.hash(passwordInput.text);
+                newUser.pass = passwordInput.text;
                 newUser.email = emailInput.text;
                 newUser.description = descriptionInput.text;
                 newUser.active = activeInput.selected;

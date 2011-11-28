@@ -47,11 +47,11 @@ public class DatastoreHB implements IPojoHB<Datastore>
     private Long size;
 
     private Long usedSize;
-    
+
     private String datastoreUUID;
-    
+
     private Set<PhysicalmachineHB> pmList;
-    
+
     /**
      * Sets the id
      * 
@@ -111,7 +111,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
     {
         this.enabled = enabled;
     }
-    
+
     /**
      * Gets the mounted point
      * 
@@ -183,6 +183,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
     {
         return rootPath;
     }
+
     /**
      * @param pmList the pmList to set
      */
@@ -198,7 +199,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
     {
         return pmList;
     }
-    
+
     public void setDatastoreUUID(String datastoreUUID)
     {
         this.datastoreUUID = datastoreUUID;
@@ -208,7 +209,7 @@ public class DatastoreHB implements IPojoHB<Datastore>
     {
         return datastoreUUID;
     }
-        
+
     @Override
     public Datastore toPojo()
     {
@@ -225,7 +226,4 @@ public class DatastoreHB implements IPojoHB<Datastore>
 
     }
 
-    
-
-   
 }

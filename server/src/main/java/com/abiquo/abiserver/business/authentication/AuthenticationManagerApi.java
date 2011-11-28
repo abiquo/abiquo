@@ -28,6 +28,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.BadCredentialsException;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
 
@@ -61,6 +63,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
      */
     private String apiUri;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
+
     /**
      * Factory of DAOs and transaction manager.
      */
@@ -71,8 +75,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
     private static final ResourceManager resourceManger =
         new ResourceManager(AuthenticationManagerDB.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     public AuthenticationManagerApi()
     {
@@ -104,8 +108,10 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 // The session does not exist, so is not valid
                 checkSessionResult.setResultCode(BasicResult.SESSION_INVALID);
-                errorManager
-                    .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                // logger.debug("The session is invalid. Please log in again. "); // log into the
+                // authentication.log
+                // errorManager
+                // .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
             }
             else
             {
@@ -125,8 +131,11 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     getUserSessionDAO().makeTransient(sessionToCheck);
 
                     checkSessionResult.setResultCode(BasicResult.SESSION_TIMEOUT);
-                    errorManager.reportError(resourceManger, checkSessionResult,
-                        "checkSession.expired");
+                    // logger.debug("The session is expired. Please log in again. "); // log into
+                    // the
+                    // authentication.log
+                    // errorManager.reportError(resourceManger, checkSessionResult,
+                    // "checkSession.expired");
                 }
 
             }
@@ -521,8 +530,8 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         {
             // Validate credentials with the token
             String signature =
-                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(),
-                    userHB.getPassword())
+                TokenUtils.makeTokenSignature(tokenExpiration, userHB.getUser(), userHB
+                    .getPassword())
                     + userHB.getAuthType();
 
             if (!signature.equals(tokenSignature))
@@ -622,14 +631,14 @@ public class AuthenticationManagerApi implements IAuthenticationManager
         userHB.setSurname(userDto.getSurname());
         userHB.setUser(userDto.getNick());
         userHB.setAuthType(userDto.getAuthType());
-        EnterpriseHB enterpriseHB = getEnterpriseDAO().findById(userDto.getIdEnterprise());
+        EnterpriseHB enterpriseHB =
+            getEnterpriseDAO().findById(userDto.getIdFromLink("enterprise"));
 
-        RoleHB roleHB = getRoleDAO().findById(userDto.getIdRole());
+        RoleHB roleHB = getRoleDAO().findById(userDto.getIdFromLink("role"));
 
         userHB.setEnterpriseHB(enterpriseHB);
         userHB.setRoleHB(roleHB);
 
         return userHB;
     }
-
 }

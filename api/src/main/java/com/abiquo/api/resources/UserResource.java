@@ -42,6 +42,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -59,7 +60,7 @@ public class UserResource extends AbstractResource
 
     public static final String USER_PARAM = "{" + USER + "}";
 
-    public static final String USER_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    public static final String USER_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
     @Autowired
     UserService service;
@@ -79,7 +80,7 @@ public class UserResource extends AbstractResource
         @PathParam(USER) final Integer userId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = service.getCurrentUser();
             if (currentUser.getId().equals(userId))
@@ -90,7 +91,7 @@ public class UserResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_VIEW);
             }
 
         }
@@ -129,7 +130,7 @@ public class UserResource extends AbstractResource
     }
 
     @GET
-    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES)
+    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)

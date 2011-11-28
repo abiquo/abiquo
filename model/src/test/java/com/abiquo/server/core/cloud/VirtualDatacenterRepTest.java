@@ -209,7 +209,6 @@ public class VirtualDatacenterRepTest extends DefaultJpaDataAccessTestBase
         RemoteService rs =
             remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
                 vdc.getDatacenter());
-        ip.getDhcp().setRemoteService(rs);
 
         List<Object> additionalEntities = new ArrayList<Object>();
         ipGenerator.addAuxiliaryEntitiesToPersist(ip, additionalEntities);

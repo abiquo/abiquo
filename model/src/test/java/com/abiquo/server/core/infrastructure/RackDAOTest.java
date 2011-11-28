@@ -21,23 +21,40 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.server.core.appslibrary.Category;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 {
+    private DatacenterGenerator datacenterGenerator;
+
+    private VirtualMachineGenerator vmgenerator;
+
+    @BeforeMethod
+    @Override
+    protected void methodSetUp()
+    {
+        super.methodSetUp();
+        datacenterGenerator = new DatacenterGenerator(getSeed());
+        vmgenerator = new VirtualMachineGenerator(getSeed());
+    }
 
     @Override
-    protected RackDAO createDao(EntityManager arg0)
+    protected RackDAO createDao(final EntityManager entityManager)
     {
-        return new RackDAO(arg0);
+        return new RackDAO(entityManager);
     }
 
     @Override
@@ -50,10 +67,8 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     public void test_findRacks() throws IllegalAccessException, InvocationTargetException,
         NoSuchMethodException
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter1 = generator.createUniqueInstance();
-        Datacenter datacenter2 = generator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack2_1 = datacenter2.createRack("bRack_1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("aRack_2", 2, 4094, 2, 10);
         ds().persistAll(datacenter1, datacenter2, rack2_1, rack2_2);
@@ -64,13 +79,35 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         assertEqualsPropertyForList(Rack.NAME_PROPERTY, result, "aRack_2", "bRack_1");
     }
 
-    @Test
-    public void test_existsAnyWithDatacenterAndName()
+    public void test_findfilteredRacks() throws IllegalAccessException, InvocationTargetException,
+        NoSuchMethodException
     {
         DatacenterGenerator generator = new DatacenterGenerator(getSeed());
 
         Datacenter datacenter1 = generator.createUniqueInstance();
         Datacenter datacenter2 = generator.createUniqueInstance();
+        Rack rack2_1 = datacenter2.createRack("bRack_1", 2, 4094, 2, 10);
+        Rack rack2_2 = datacenter2.createRack("aRack_2", 2, 4094, 2, 10);
+        Rack rack2_3 = datacenter2.createRack("cRack_3_filter", 2, 4094, 2, 10);
+        ds().persistAll(datacenter1, datacenter2, rack2_1, rack2_2, rack2_3);
+
+        RackDAO dao = createDaoForRollbackTransaction();
+        List<Rack> racks1 = dao.findRacks(reload(dao, datacenter1));
+        List<Rack> racks2 = dao.findRacks(reload(dao, datacenter2));
+        List<Rack> racks2filter = dao.findRacks(reload(dao, datacenter2), "filter");
+        Assert.assertEquals(racks1.size(), 0);
+        Assert.assertEquals(racks2.size(), 3);
+        Assert.assertEquals(racks2filter.size(), 1);
+        assertEqualsPropertyForList(Rack.NAME_PROPERTY, racks2, "aRack_2", "bRack_1",
+            "cRack_3_filter");
+        assertEqualsPropertyForList(Rack.NAME_PROPERTY, racks2filter, "cRack_3_filter");
+    }
+
+    @Test
+    public void test_existsAnyWithDatacenterAndName()
+    {
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack1_1 = datacenter1.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_1 = datacenter2.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("Rack 2", 2, 4094, 2, 10);
@@ -93,10 +130,8 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     @Test
     public void test_existsAnyOtherWithDatacenterAndName()
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter1 = generator.createUniqueInstance();
-        Datacenter datacenter2 = generator.createUniqueInstance();
+        Datacenter datacenter1 = datacenterGenerator.createUniqueInstance();
+        Datacenter datacenter2 = datacenterGenerator.createUniqueInstance();
         Rack rack1_1 = datacenter1.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_1 = datacenter2.createRack("Rack 1", 2, 4094, 2, 10);
         Rack rack2_2 = datacenter2.createRack("Rack 2", 2, 4094, 2, 10);
@@ -128,9 +163,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     public void test_findRacksWithHAEnabled() throws IllegalAccessException,
         InvocationTargetException, NoSuchMethodException
     {
-        DatacenterGenerator generator = new DatacenterGenerator(getSeed());
-
-        Datacenter datacenter = generator.createUniqueInstance();
+        Datacenter datacenter = datacenterGenerator.createUniqueInstance();
 
         Rack rack1 = datacenter.createRack("Rack_1", 2, 4094, 2, 10);
         Rack rack2 = datacenter.createRack("Rack_2", 2, 4094, 2, 10);
@@ -147,5 +180,32 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Rack> result = dao.findRacksWithHAEnabled(reload(dao, datacenter));
 
         Assert.assertEquals(result.size(), 2);
+    }
+
+    @Test
+    public void test_findUsedVrdpPorts()
+    {
+        VirtualMachine vm1 = vmgenerator.createUniqueInstance();
+        VirtualMachine vm2 =
+            vmgenerator.createInstance(vm1.getVirtualImage(), vm1.getEnterprise(),
+                vm1.getHypervisor(), vm1.getUser(), "test");
+
+        // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
+        Category category = new Category("test-category");
+        category.setIsDefault(0);
+        category.setIsErasable(0);
+        ds().persistAll(category);
+        vm1.getVirtualImage().setIdCategory(category.getId());
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vm1, vm2);
+
+        Rack rack = vm1.getHypervisor().getMachine().getRack();
+
+        RackDAO dao = createDaoForRollbackTransaction();
+        List<Integer> usedPorts = dao.findUsedVrdpPorts(rack);
+
+        assertEquals(usedPorts.size(), 2);
     }
 }

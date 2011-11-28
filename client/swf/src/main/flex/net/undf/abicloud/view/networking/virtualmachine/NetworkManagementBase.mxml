@@ -32,6 +32,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.utils.AbicloudUtils;
         	import mx.core.UIComponent;
@@ -77,6 +78,9 @@
             private var availableNICSelector:AvailableNICSelector;
 
             private var virtualMachineGateway:IPAddress;
+            
+            //Use to detect if the gateway has changed
+            private var _previousGateway:IPAddress;
 
             [Bindable]
             private var availableGateways:ArrayCollection = new ArrayCollection();
@@ -87,6 +91,8 @@
             public var oldIndex:int;
             
             public var itemMoved:Object;
+            
+            private var _showGatewayChange:Boolean;
 
             override protected function createChildren():void
             {
@@ -146,6 +152,7 @@
             private function onVirtualMachineNICsChanged(event:NetworkingEvent):void
             {
                 getVirtualMachineNICs();
+                this._showGatewayChange = true;
                 getVirtualMachineGateway();
             }
 
@@ -221,7 +228,23 @@
 
             protected function setVirtualMachineGateway(gateway:IPAddress):void
             {
+                //Save the previous gateway
+                this._previousGateway = virtualMachineGateway;
                 virtualMachineGateway = gateway;
+                
+                //Check if we display the message
+                if(this._showGatewayChange)
+                {
+                    if(this._previousGateway && this._previousGateway.ip != virtualMachineGateway.ip)
+                    {
+                        AbiCloudAlert.showConfirmation(ResourceManager.getInstance().getString("InfrastructurePremium",
+                                                                                    "ALERT_SUCCESS_TITLE_LABEL"),
+                                              ResourceManager.getInstance().getString("VirtualAppliancePremium",
+                                                                                       "ALERT_PUBLIC_IP_AS_GATEWAY_HEADER"),
+                                               ResourceManager.getInstance().getString("VirtualAppliancePremium",
+                                                                                       "ALERT_PUBLIC_IP_AS_GATEWAY_TEXT"));        
+                    }
+                }
 
                 getAvailableGateways();
             }
@@ -241,7 +264,9 @@
                 availableGateways = list;
                 virtualMachineGatewayInput.dataProvider = availableGateways;
                 virtualMachineGatewayInput.selectedIndex = -1;
-
+                
+                this._showGatewayChange = false;
+                
                 if (virtualMachineGateway)
                 {
                     var length:int = availableGateways.length;
@@ -254,6 +279,8 @@
                         }
                     }
                 }
+                
+                
             }
 
             protected function assignGatewayToVirtualMachine():void
@@ -330,6 +357,11 @@
             private function returnMac(object:Object, column:DataGridColumn):String{
             	return AbicloudUtils.formatMac(object.mac);
             }
+            
+            private function returnIp(obj:IPPoolManagement,column:DataGridColumn):String
+            {
+            	return obj.ip ? obj.ip:'-';
+            }
            
         ]]>
     </mx:Script>
@@ -365,6 +397,7 @@
                         labelFunction="nicOrderLabelFunction"
                         headerText="# NIC"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_IP_ADDRESS')"
+                    	labelFunction="returnIp"
                         dataField="ip"/>
                     <mx:DataGridColumn headerText="@Resource(bundle='Networking', key='LABEL_MAC')"
                     	labelFunction="returnMac"

@@ -23,10 +23,14 @@ package com.abiquo.server.core.cloud;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.util.StringUtils;
+
+import com.abiquo.model.enumerator.VirtualMachineState;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "virtualMachine")
-public class VirtualMachineDto extends SingleResourceTransportDto
+public class VirtualMachineDto extends SingleResourceTransportDto implements
+    Comparable<VirtualMachineDto>
 {
     private Integer id;
 
@@ -112,16 +116,16 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.vdrpPort = vdrpPort;
     }
 
-    private String vdrpIp;
+    private String vdrpIP;
 
     public String getVdrpIP()
     {
-        return vdrpIp;
+        return vdrpIP;
     }
 
-    public void setVdrpIP(final String vdrpIp)
+    public void setVdrpIP(final String vdrpIP)
     {
-        this.vdrpIp = vdrpIp;
+        this.vdrpIP = vdrpIP;
     }
 
     private int idState;
@@ -136,14 +140,14 @@ public class VirtualMachineDto extends SingleResourceTransportDto
         this.idState = idState;
     }
 
-    private State state;
+    private VirtualMachineState state;
 
-    public void setState(final State state)
+    public void setState(final VirtualMachineState state)
     {
         this.state = state;
     }
 
-    public State getState()
+    public VirtualMachineState getState()
     {
         return state;
     }
@@ -182,6 +186,27 @@ public class VirtualMachineDto extends SingleResourceTransportDto
     public void setPassword(final String password)
     {
         this.password = password;
+    }
+
+    @Override
+    public int compareTo(final VirtualMachineDto vm2)
+    {
+        if (StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return this.getName().compareTo(vm2.getName());
+        }
+        else if (!StringUtils.hasText(this.getName()) && !StringUtils.hasText(vm2.getName()))
+        {
+            return 0;
+        }
+        else if (!StringUtils.hasText(this.getName()) && StringUtils.hasText(vm2.getName()))
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
     }
 
 }

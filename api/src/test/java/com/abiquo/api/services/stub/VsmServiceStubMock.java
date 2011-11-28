@@ -39,9 +39,9 @@ public class VsmServiceStubMock extends VsmServiceStub
         VSMClient mockClient = mock(VSMClient.class);
 
         // set here the mock behaviour.
-        
-        //....
-        
+
+        // ....
+
         return mockClient;
     }
 }

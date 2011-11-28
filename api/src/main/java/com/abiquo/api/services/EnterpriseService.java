@@ -40,8 +40,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.DatacentersResource;
+import com.abiquo.api.resources.config.PricingTemplateResource;
+import com.abiquo.api.resources.config.PricingTemplatesResource;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -59,6 +62,8 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Service
 @Transactional(readOnly = true)
@@ -69,6 +74,9 @@ public class EnterpriseService extends DefaultApiService
 
     @Autowired
     VirtualDatacenterRep vdcRepo;
+
+    @Autowired
+    PricingRep pricingRep;
 
     @Autowired
     MachineService machineService;
@@ -123,16 +131,26 @@ public class EnterpriseService extends DefaultApiService
         return userService.getCurrentUser().getEnterprise();
     }
 
-    public Collection<Enterprise> getEnterprises(final String filterName, final Integer offset,
-        final Integer numResults)
+    public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
+        final String filterName, final Integer offset, final Integer numResults)
     {
         User user = userService.getCurrentUser();
         // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.hasPrivilege(SecurityService.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(SecurityService.ENTRPRISE_ADMINISTER_ALL))
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
         {
             return Collections.singletonList(user.getEnterprise());
+        }
+
+        PricingTemplate pt = null;
+        if (idPricingTempl != -1)
+        {
+            if (idPricingTempl != 0)
+            {
+                pt = findPricingTemplate(idPricingTempl);
+            }
+            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults);
         }
 
         if (!StringUtils.isEmpty(filterName))
@@ -167,10 +185,40 @@ public class EnterpriseService extends DefaultApiService
         enterprise.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         enterprise.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
 
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
+        {
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    enterprise.setPricingTemplate(null);
+                }
+                else
+                {
+
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    enterprise.setPricingTemplate(pricingTemplate);
+                }
+            }
+        }
         isValidEnterprise(enterprise);
 
         repo.insert(enterprise);
         return enterprise;
+    }
+
+    public PricingTemplate getPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
     }
 
     public Enterprise getEnterprise(final Integer id)
@@ -198,7 +246,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         Integer userEnt = userService.getCurrentUser().getEnterprise().getId();
-        if (!securityService.hasPrivilege(SecurityService.USERS_MANAGE_OTHER_ENTERPRISES)
+        if (!securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
             && !userEnt.equals(dto.getId()))
         {
             throw new AccessDeniedException("");
@@ -226,9 +274,28 @@ public class EnterpriseService extends DefaultApiService
         old.setRepositoryLimits(new Limit(dto.getRepositorySoft(), dto.getRepositoryHard()));
         old.setVlansLimits(new Limit(dto.getVlansSoft(), dto.getVlansHard()));
         old.setPublicIPLimits(new Limit(dto.getPublicIpsSoft(), dto.getPublicIpsHard()));
-
         isValidEnterprise(old);
         isValidEnterpriseLimit(old);
+
+        // if we are in community the Pricingtemplate id is not informed, is null
+        // in this case we don't overwrite the old value.
+        if (securityService.hasPrivilege(Privileges.PRICING_MANAGE))
+        {
+            if (dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE) != null)
+            {
+                int idPricing = getPricingTemplateId(dto);
+                if (idPricing == 0)
+                {
+                    old.setPricingTemplate(null);
+                }
+                else
+                {
+
+                    PricingTemplate pricingTemplate = findPricingTemplate(idPricing);
+                    old.setPricingTemplate(pricingTemplate);
+                }
+            }
+        }
 
         repo.update(old);
         return old;
@@ -562,5 +629,42 @@ public class EnterpriseService extends DefaultApiService
     protected void removeEnterpriseProperties(final Enterprise enterprise)
     {
         // PREMIUM
+    }
+
+    private PricingTemplate findPricingTemplate(final Integer id)
+    {
+        PricingTemplate pt = pricingRep.findPricingTemplateById(id);
+        if (pt == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_PRICING_TEMPLATE);
+            flushErrors();
+        }
+        return pt;
+    }
+
+    private Integer getPricingTemplateId(final EnterpriseDto dto)
+    {
+        RESTLink pt = dto.searchLink(PricingTemplateResource.PRICING_TEMPLATE);
+
+        if (pt == null)
+        {
+            addValidationErrors(APIError.MISSING_PRICING_TEMPLATE_LINK);
+            flushErrors();
+        }
+
+        String buildPath =
+            buildPath(PricingTemplatesResource.PRICING_TEMPLATES_PATH,
+                PricingTemplateResource.PRICING_TEMPLATE_PARAM);
+        MultivaluedMap<String, String> values = URIResolver.resolveFromURI(buildPath, pt.getHref());
+
+        if (values == null || !values.containsKey(PricingTemplateResource.PRICING_TEMPLATE))
+        {
+            addNotFoundErrors(APIError.PRICING_TEMPLATE_PARAM_NOT_FOUND);
+            flushErrors();
+        }
+
+        Integer pricingTemplateId =
+            Integer.valueOf(values.getFirst(PricingTemplateResource.PRICING_TEMPLATE));
+        return pricingTemplateId;
     }
 }

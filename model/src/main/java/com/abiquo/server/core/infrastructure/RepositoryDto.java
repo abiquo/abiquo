@@ -19,72 +19,73 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure;
+package com.abiquo.server.core.infrastructure;
 
-  import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-  import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 
-  @XmlRootElement(name = "")
-  public class RepositoryDto extends SingleResourceTransportDto
-  {
-      private Integer id;
-      public Integer getId()
-      {
-          return id;
-      }
-
-      public void setId(Integer id)
-      {
-          this.id = id;
-      }
-
-      private String name;
-
-public String getName()
+@XmlRootElement(name = "")
+public class RepositoryDto extends SingleResourceTransportDto
 {
-    return name;
+    private Integer id;
+
+    public Integer getId()
+    {
+        return id;
+    }
+
+    public void setId(Integer id)
+    {
+        this.id = id;
+    }
+
+    private String name;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    private long repositoryRemainingMb;
+
+    public long getRepositoryRemainingMb()
+    {
+        return repositoryRemainingMb;
+    }
+
+    public void setRepositoryRemainingMb(long repositoryRemainingMb)
+    {
+        this.repositoryRemainingMb = repositoryRemainingMb;
+    }
+
+    private String url;
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public void setUrl(String url)
+    {
+        this.url = url;
+    }
+
+    private long repositoryCapacityMb;
+
+    public long getRepositoryCapacityMb()
+    {
+        return repositoryCapacityMb;
+    }
+
+    public void setRepositoryCapacityMb(long repositoryCapacityMb)
+    {
+        this.repositoryCapacityMb = repositoryCapacityMb;
+    }
+
 }
-
-public void setName(String name)
-{
-    this.name = name;
-}
-
-private long repositoryRemainingMb;
-
-public long getRepositoryRemainingMb()
-{
-    return repositoryRemainingMb;
-}
-
-public void setRepositoryRemainingMb(long repositoryRemainingMb)
-{
-    this.repositoryRemainingMb = repositoryRemainingMb;
-}
-
-private String url;
-
-public String getUrl()
-{
-    return url;
-}
-
-public void setUrl(String url)
-{
-    this.url = url;
-}
-
-private long repositoryCapacityMb;
-
-public long getRepositoryCapacityMb()
-{
-    return repositoryCapacityMb;
-}
-
-public void setRepositoryCapacityMb(long repositoryCapacityMb)
-{
-    this.repositoryCapacityMb = repositoryCapacityMb;
-}
-
-  }
