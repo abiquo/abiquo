@@ -31,8 +31,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.MachineState;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
+import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -261,5 +264,32 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
         List<Machine> machines =
             createDaoForRollbackTransaction().getRandomMachinesToStartFromRack(ucsRack.getId(), 4);
         Assert.assertEquals(machines.size(), 4);
+    }
+
+    @Test
+    public void test_findUsedVrdpPorts()
+    {
+        VirtualMachine vm1 = vmgenerator.createUniqueInstance();
+        VirtualMachine vm2 =
+            vmgenerator.createInstance(vm1.getVirtualImage(), vm1.getEnterprise(), vm1
+                .getHypervisor(), vm1.getUser(), "test");
+
+        // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
+        Category category = new Category("test-category");
+        category.setIsDefault(0);
+        category.setIsErasable(0);
+        ds().persistAll(category);
+        vm1.getVirtualImage().setIdCategory(category.getId());
+
+        List<Object> entitiesToPersist = new ArrayList<Object>();
+        vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);
+        persistAll(ds(), entitiesToPersist, vm1, vm2);
+
+        Rack rack = vm1.getHypervisor().getMachine().getRack();
+
+        RackDAO dao = createDaoForRollbackTransaction();
+        List<Integer> usedPorts = dao.findUsedVrdpPorts(rack);
+
+        assertEquals(usedPorts.size(), 2);
     }
 }

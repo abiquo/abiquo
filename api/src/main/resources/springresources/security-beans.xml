@@ -50,7 +50,7 @@
         <security:intercept-url pattern="/admin/rolesldap/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- ENTERPRISES -->
         <security:intercept-url pattern="/admin/enterprises" method="POST" access="ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
-        <security:intercept-url pattern="/admin/enterprises" method="GET"  access="ROLE_USERS_VIEW,ROLE_USERS_MANAGE_ENTERPRISE,ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_ENTERPRISE_ENUMERATE,ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION,ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK" />
+        <security:intercept-url pattern="/admin/enterprises" method="GET"  access="ROLE_USERS_VIEW,ROLE_USERS_MANAGE_ENTERPRISE,ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_ENTERPRISE_ENUMERATE,ROLE_PHYS_DC_ALLOW_MODIFY_ALLOCATION,ROLE_PHYS_DC_ALLOW_MODIFY_NETWORK,ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/admin/enterprises" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_OTHER_ENTERPRISES,ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/admin/enterprises/*" method="DELETE" access="ROLE_USERS_MANAGE_ENTERPRISE" />
@@ -182,8 +182,8 @@
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/racks/*/machines/*/datastores/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- TIERS -->
-        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE,ROLE_VAPP_CREATE_STATEFUL" />
-        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE,ROLE_VAPP_CREATE_STATEFUL,ROLE_PRICING_VIEW" />
+        <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_PRICING_VIEW" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="OPTIONS" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_MANAGE_STORAGE,ROLE_VAPP_CREATE_STATEFUL" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/storage/tiers/*/pools" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />

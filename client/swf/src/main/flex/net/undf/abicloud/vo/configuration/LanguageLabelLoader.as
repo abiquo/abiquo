@@ -100,7 +100,7 @@ package net.undf.abicloud.vo.configuration
          */
         private function loadPropertyFileIOErrorHandler(ioErrorEvent:IOErrorEvent):void
         {
-            Alert.show('Error while loading loading property file : '+ PROPERTY_FILE + " for language " + AbiCloudModel.getInstance().configurationManager.selectedLanguage.name);
+            Alert.show('Error while loading property file : '+ PROPERTY_FILE + " for language " + AbiCloudModel.getInstance().configurationManager.selectedLanguage.name);
         }
 	}
 }

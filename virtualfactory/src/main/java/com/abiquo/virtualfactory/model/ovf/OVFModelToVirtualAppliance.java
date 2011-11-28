@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.sound.midi.SysexMessage;
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
@@ -239,43 +238,44 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
             // VirtualSystemModel.getModel().getMachine(hvConfig, newConfig);
 
             newConfig = removeStatefulFromExtendedList(newConfig);
-            
+
             // Apply the new configuration to the machine in the hypervisor
             virtualMachine.reconfigVM(newConfig);
         }
     }
-    
+
     /**
-     * Due ABICLOUDPREMIUM-2129 an stateful virtual disk is also present in the list of auxiliary disks
-     * */
-    private VirtualMachineConfiguration removeStatefulFromExtendedList(VirtualMachineConfiguration conf)
+     * Due ABICLOUDPREMIUM-2129 an stateful virtual disk is also present in the list of auxiliary
+     * disks
+     */
+    private VirtualMachineConfiguration removeStatefulFromExtendedList(
+        final VirtualMachineConfiguration conf)
     {
         VirtualDisk primary = conf.getVirtualDiskBase();
-        
-        if(primary.getDiskType() == VirtualDiskType.STANDARD)
+
+        if (primary.getDiskType() == VirtualDiskType.STANDARD)
         {
             return conf;
         }
-        
+
         final String primaryLocation = primary.getLocation();
-        
+
         List<VirtualDisk> newList = new LinkedList<VirtualDisk>();
-        for(VirtualDisk vd : conf.getExtendedVirtualDiskList())
+        for (VirtualDisk vd : conf.getExtendedVirtualDiskList())
         {
             final String loc = vd.getLocation();
-            if(!primaryLocation.equalsIgnoreCase(loc))
+            if (!primaryLocation.equalsIgnoreCase(loc))
             {
                 newList.add(vd);
             }
         }
-        
+
         conf.getExtendedVirtualDiskList().clear();
         conf.getExtendedVirtualDiskList().addAll(newList);
-        
+
         return conf;
     }
 
-    
     private VirtualMachineConfiguration buildUpdateConfiguration(
         final VirtualMachineConfiguration vmConfig, final ContentType virtualSystem)
         throws SectionException
@@ -1052,26 +1052,32 @@ public class OVFModelToVirtualAppliance implements OVFModelConvertable
 
         for (OrgNetworkType network : abiquoNetwork.getNetworks())
         {
-            List<IpPoolType> rules = network.getConfiguration().getDhcpService().getStaticRules();
-            for (IpPoolType rule : rules)
+            if (network.getConfiguration().getDhcpService() != null)
             {
-                // There is only one rule with the configure gateway flag in ALL rules from ALL
-                // networks
-                if (rule.isConfigureGateway())
+
+                List<IpPoolType> rules =
+                    network.getConfiguration().getDhcpService().getStaticRules();
+                for (IpPoolType rule : rules)
                 {
-                    if (rule.getBootstrapConfigURI() != null)
+                    // There is only one rule with the configure gateway flag in ALL rules from ALL
+                    // networks
+                    if (rule.isConfigureGateway())
                     {
-                        // We assume bootstrapAuth can be null if the bootstrapURI does not require
-                        // authentication
-                        BootstrapConfiguration bootstrapConfig = new BootstrapConfiguration();
-                        bootstrapConfig.setConfigURI(rule.getBootstrapConfigURI());
-                        bootstrapConfig.setAuth(rule.getBootstrapConfigAuth());
+                        if (rule.getBootstrapConfigURI() != null)
+                        {
+                            // We assume bootstrapAuth can be null if the bootstrapURI does not
+                            // require
+                            // authentication
+                            BootstrapConfiguration bootstrapConfig = new BootstrapConfiguration();
+                            bootstrapConfig.setConfigURI(rule.getBootstrapConfigURI());
+                            bootstrapConfig.setAuth(rule.getBootstrapConfigAuth());
 
-                        virtualConfig.setBootstrapConfig(bootstrapConfig);
+                            virtualConfig.setBootstrapConfig(bootstrapConfig);
+                        }
+
+                        // We're done
+                        return;
                     }
-
-                    // We're done
-                    return;
                 }
             }
         }

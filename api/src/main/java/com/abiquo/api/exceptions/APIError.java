@@ -125,7 +125,7 @@ public enum APIError
         "VLAN-9", "There must be at least one default VLAN in each Virtual Datacenter"), VLANS_EDIT_INVALID_VALUES(
         "VLAN-10",
         "Attributes 'address', 'mask' and 'tag' can not be changed by the Edit process of private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
-        "VLAN-11", "Default VLAN can not be deleted."), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
+        "VLAN-11", "The VLAN cannot be deleted because it is the Default VLAN of this Enterprise"), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-12", "Can not delete a VLAN with IPs used by Virtual Machines"), VLANS_TAG_MANDATORY_FOR_PUBLIC_VLANS(
         "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
         "VLAN-14", "Can not delete a VLAN with IPs purchased by Enterprises"), VLANS_DUPLICATED_VLAN_NAME_DC(
@@ -259,8 +259,9 @@ public enum APIError
         "In Ldap mode can not create user"), NOT_EDIT_USER_ROLE_LDAP_MODE("USER-7",
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
         "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
-        "The user cannot delete his own user account"),
-
+        "The user cannot delete his own user account"), USER_PASSWORD_IS_NECESSARY("USER 10",
+        "The field password is necessary"), USER_NICK_CANNOT_BE_CHANGED("USER 11",
+        "Cannot change the user nick"),
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
@@ -451,7 +452,8 @@ public enum APIError
         "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
-        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"), NOT_ASSIGNED_PRICING_TIER_PRICE(
+        "PRICING_TIER-4", "Price is required"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
@@ -523,9 +525,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
-
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

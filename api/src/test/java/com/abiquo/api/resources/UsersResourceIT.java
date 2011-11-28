@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveRoleURI;
 import static com.abiquo.api.common.UriTestResolver.resolveUsersURI;
 import static org.testng.Assert.assertEquals;
@@ -39,6 +40,7 @@ import org.apache.wink.common.internal.utils.UriHelper;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -292,6 +294,32 @@ public class UsersResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 201);
 
         assertUserResponse(dto, response);
+    }
+
+    @Test
+    public void createUsersWithPasswordNullRises400()
+    {
+        User user = userGenerator.createUniqueInstance();
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        for (Privilege p : user.getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+        entitiesToSetup.add(user.getRole());
+        entitiesToSetup.add(user.getEnterprise());
+        entitiesToSetup.add(user);
+
+        setup(entitiesToSetup.toArray());
+
+        UserDto dto = getValidUser(user);
+        dto.setPassword(null);
+
+        ClientResponse response =
+            post(resolveUsersURI(user.getEnterprise().getId()), dto, SYSADMIN, SYSADMIN);
+
+        assertErrors(response, 400, APIError.USER_PASSWORD_IS_NECESSARY);
     }
 
     @Test

@@ -271,6 +271,7 @@ DROP TRIGGER IF EXISTS `kinton`.`update_datastore_update_stats`;
 DROP TRIGGER IF EXISTS `kinton`.`delete_datastore_update_stats`;
 -- 
 DROP TRIGGER IF EXISTS `kinton`.`create_rasd_management_update_stats`; -- Trigger removed in 2.0
+
 --
 --
 --
@@ -658,6 +659,7 @@ CREATE TRIGGER `kinton`.`update_virtualmachine_update_stats` AFTER UPDATE ON `ki
         END IF;
       END IF;
     END;
+--
 |
 --
 CREATE TRIGGER `kinton`.`delete_rasd_management_update_stats` AFTER DELETE ON `kinton`.`rasd_management`
