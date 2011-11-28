@@ -34,6 +34,10 @@ import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.vsm.client.VSMClient;
+import com.abiquo.vsm.client.VSMClientException;
+import com.abiquo.vsm.model.transport.PhysicalMachineDto;
+import com.abiquo.vsm.model.transport.VirtualMachineDto;
+import com.abiquo.vsm.model.transport.VirtualMachinesDto;
 
 /**
  * Eventing support utility class for sending subscribe messages to be monitored by the abicloud
@@ -135,8 +139,8 @@ public final class EventingSupport
         {
             String virtualSystemAddress =
                 "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
-            subscribe(virtualSystemAddress, hypervisor.toPojoHB().getType(), virtualMachine
-                .getName(), virtualSystemMonitorAddress);
+            subscribe(virtualSystemAddress, hypervisor.toPojoHB().getType(),
+                virtualMachine.getName(), virtualSystemMonitorAddress);
         }
         else
         {
@@ -194,8 +198,8 @@ public final class EventingSupport
         }
         catch (Exception e)
         {
-            logger.trace("An error occured while finding the VirtualSystemMonitor", e
-                .getStackTrace()[0]);
+            logger.trace("An error occured while finding the VirtualSystemMonitor",
+                e.getStackTrace()[0]);
 
             // Do not unsubscribe
             return;
@@ -328,7 +332,8 @@ public final class EventingSupport
     {
         try
         {
-            if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
+            if (hypervisorType.requiresCredentials()
+                && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }
@@ -357,13 +362,14 @@ public final class EventingSupport
      * @param virtualSystemAddress the physical machine addres to monitor
      * @throws EventingException
      */
-    public static void unMonitorPhysicalMachine(String virtualSystemAddress, HypervisorType hypervisorType,
-        final String virtualSystemMonitorAddress, final String user, final String password)
-        throws EventingException
+    public static void unMonitorPhysicalMachine(String virtualSystemAddress,
+        HypervisorType hypervisorType, final String virtualSystemMonitorAddress, final String user,
+        final String password) throws EventingException
     {
         try
         {
-        	if (hypervisorType.requiresCredentials() && (emptyString(user) || emptyString(password)))
+            if (hypervisorType.requiresCredentials()
+                && (emptyString(user) || emptyString(password)))
             {
                 throw new EventingException("User and password are required fields.");
             }
@@ -376,6 +382,31 @@ public final class EventingSupport
             }
         }
         catch (Exception e)
+        {
+            throw new EventingException(e);
+        }
+    }
+
+    public static void unsubscribeVirtualMachinesByPhysicalMachine(
+        final String virtualSystemAddress, final String virtualSystemMonitorAddress)
+        throws EventingException
+    {
+        try
+        {
+            VSMClient client = new VSMClient(virtualSystemMonitorAddress);
+            VirtualMachinesDto dto = client.getSubscriptions();
+
+            for (VirtualMachineDto vm : dto.getCollection())
+            {
+                PhysicalMachineDto pm = vm.getPhysicalMachine();
+
+                if (pm != null && pm.getAddress().equalsIgnoreCase(virtualSystemAddress))
+                {
+                    unsubscribe(vm.getName(), virtualSystemMonitorAddress);
+                }
+            }
+        }
+        catch (VSMClientException e)
         {
             throw new EventingException(e);
         }

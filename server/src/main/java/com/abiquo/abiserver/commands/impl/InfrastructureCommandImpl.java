@@ -1244,9 +1244,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             PhysicalMachineDAO machineDao = factory.getPhysicalMachineDAO();
             PhysicalmachineHB machine = machineDao.findById(physicalMachine.getId());
-            List<VirtualmachineHB> vms =
-                machineDao.getDeployedVirtualMachines(machine.getIdPhysicalMachine());
-
             HypervisorHB hypervisor = machine.getHypervisor();
 
             try
@@ -1280,17 +1277,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromPhysicalMachine(physicalMachine);
 
-            for (VirtualmachineHB vm : vms)
-            {
-                try
-                {
-                    EventingSupport.unsubscribe(vm.getName(), virtualSystemMonitorAddress);
-                }
-                catch (EventingException e)
-                {
-                    logger.debug(e.getMessage());
-                }
-            }
+            EventingSupport.unsubscribeVirtualMachinesByPhysicalMachine(virtualSystemAddress,
+                virtualSystemMonitorAddress);
 
             EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
                 virtualSystemMonitorAddress, user, password);

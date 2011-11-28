@@ -160,7 +160,16 @@ public class AbstractResource
         dto.setId(vm.getId());
         dto.setName(vm.getName());
         dto.setLastKnownState(vm.getLastKnownState());
-        dto.setPhysicalMachine(toDto(vm.getPhysicalMachine()));
+
+        if (vm.getPhysicalMachine() != null)
+        {
+            dto.setPhysicalMachine(toDto(vm.getPhysicalMachine()));
+        }
+        else
+        {
+            dto.setPhysicalMachine(null);
+        }
+
         return dto;
     }
 
