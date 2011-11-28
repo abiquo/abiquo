@@ -257,7 +257,9 @@ public enum APIError
         "In Ldap mode can not modify user's role"), NOT_EDIT_USER_ENTERPRISE_LDAP_MODE("USER-8",
         "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
         "The user cannot delete his own user account"), USER_PASSWORD_IS_NECESSARY("USER 11",
-        "The field password is necessary"),
+        "The field password is necessary"), USER_NAME_IS_NECESSARY("USER 12",
+        "The field name is necessary"), USER_NICK_IS_NECESSARY("USER 13",
+        "The field nick is necessary"),
 
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
@@ -497,8 +499,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 
