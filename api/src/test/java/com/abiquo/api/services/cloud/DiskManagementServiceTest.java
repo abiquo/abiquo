@@ -359,7 +359,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
 
-        service.attachHardDiskIntoVM(vdc.getId(), vapp.getId(), vm.getId(), 100000);
+        service.registerHardDiskIntoVMInDatabase(vdc.getId(), vapp.getId(), vm.getId(), 100000);
     }
     
     /**

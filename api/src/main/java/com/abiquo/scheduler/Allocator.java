@@ -46,7 +46,6 @@ import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -114,20 +113,17 @@ public class Allocator implements IAllocator
 
     @Override
     public void checkEditVirtualMachineResources(final Integer idVirtualApp,
-        final Integer virtualMachineId, final VirtualMachineDto newVmRequirements,
+        final VirtualMachine virtualMachine, final VirtualMachine newVirtualMachine,
         final boolean foreceEnterpriseSoftLimits) throws AllocatorException
     {
 
-        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
         final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
-        final Machine machine = vmachine.getHypervisor().getMachine();
+        final Machine machine = virtualMachine.getHypervisor().getMachine();
 
-        final VirtualMachineRequirements increaseRequirements =
-            getVirtualMachineRequirements(vmachine, newVmRequirements);
+        VirtualMachineRequirements newVmRequirements = calculateNewRequirements(virtualMachine, newVirtualMachine);
+        checkLimist(vapp, newVmRequirements, foreceEnterpriseSoftLimits);
 
-        checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
-
-        final VirtualImage increaseVirtualImage = getVirtualImage(increaseRequirements);
+        final VirtualImage increaseVirtualImage = getVirtualImage(newVmRequirements);
 
         boolean check =
             allocationService.checkVirtualMachineResourceIncrease(machine, increaseVirtualImage,
@@ -141,18 +137,6 @@ public class Allocator implements IAllocator
                     machine.getName());
             throw new AllocatorException(cause);
         }
-    }
-
-    private VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine,
-        final VirtualMachineDto newVmRequirements)
-    {
-        Integer cpu = newVmRequirements.getCpu() - vmachine.getCpu();
-        Integer ram = newVmRequirements.getRam() - vmachine.getRam();
-
-        cpu = cpu > 0 ? cpu : 0;
-        ram = ram > 0 ? ram : 0;
-
-        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);
     }
 
     private VirtualImage getVirtualImage(final VirtualMachineRequirements increaseRequirements)
@@ -361,6 +345,25 @@ public class Allocator implements IAllocator
         return machineChecker.check(machine);
     }
 
+    /**
+     * Create the object {@link VirtualMachineRequirements} from a {@link VirtualMachine} instance and the previous one.
+     * 
+     * @param vmachine previous {@link VirtualMachine} object.
+     * @param newvmachine new input {@link VirtualMachine) with new requirements
+     * @return the resultant {@link VirtualMachineRequirement} object.
+     */
+    private VirtualMachineRequirements calculateNewRequirements(final VirtualMachine vmachine,
+        final VirtualMachine newvmachine)
+    {
+        Integer cpu = newvmachine.getCpu() - vmachine.getCpu();
+        Integer ram = newvmachine.getRam() - vmachine.getRam();
+
+        cpu = cpu > 0 ? cpu : 0;
+        ram = ram > 0 ? ram : 0;
+
+        return new VirtualMachineRequirements(cpu.longValue(), ram.longValue(), 0l, 0l, 0l, 0l, 0l);
+    }
+    
     /*
      * IoC Community implementation
      */

@@ -48,6 +48,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -70,55 +71,55 @@ import com.abiquo.server.core.infrastructure.Rack;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResourceWithTasks
 {
-public static final String VIRTUAL_MACHINE = "virtualmachine";
+    public static final String VIRTUAL_MACHINE = "virtualmachine";
 
-public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
+    public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
-public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_ON = "/action/poweron";
 
-public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
+    public static final String VIRTUAL_MACHINE_ACTION_POWER_OFF = "/action/poweroff";
 
-public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
+    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
 
-public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
+    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
 
-public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
+    public static final String VIRTUAL_MACHINE_ACTION_RESUME = "/action/resume";
 
-public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
+    public static final String VIRTUAL_MACHINE_ACTION_PAUSE = "/action/pause";
 
-public static final String VIRTUAL_MACHINE_STATE = "/state";
+    public static final String VIRTUAL_MACHINE_STATE = "/state";
 
-// Chef constants to help link builders. Method implementation are premium.
-public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
+    // Chef constants to help link builders. Method implementation are premium.
+    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
 
-public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
+    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
-public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
+    public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
-@Autowired
-VirtualMachineService vmService;
+    @Autowired
+    VirtualMachineService vmService;
 
-@Autowired
-VirtualMachineAllocatorService service;
+    @Autowired
+    VirtualMachineAllocatorService service;
 
-@Autowired
-UserService userService;
+    @Autowired
+    UserService userService;
 
-@Autowired
-NetworkService networkService;
+    @Autowired
+    NetworkService networkService;
 
-/**
- * Return the virtual appliance if exists.
- * 
- * @param vdcId identifier of the virtual datacenter.
- * @param vappId identifier of the virtual appliance.
- * @param restBuilder to build the links
- * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
- * @throws Exception
- */
-@GET
-public VirtualMachineDto getVirtualMachine(
-    @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+    /**
+     * Return the virtual appliance if exists.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param restBuilder to build the links
+     * @return the {@link VirtualApplianceDto} transfer object for the virtual appliance.
+     * @throws Exception
+     */
+    @GET
+    public VirtualMachineDto getVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -305,8 +306,8 @@ public VirtualMachineDto getVirtualMachine(
         throws Exception
     {
         String link =
-            vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
-                .isForceEnterpriseSoftLimits());
+            vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                forceSoftLimits.isForceEnterpriseSoftLimits());
 
         // If the link is null no Task was performed
         if (link == null)
@@ -545,21 +546,6 @@ public VirtualMachineDto getVirtualMachine(
     }
 
     // TODO forceEnterpriseLimits = true
-
-    @PUT
-    @Path("action/checkedit")
-    @Deprecated
-    public synchronized void checkEditAllocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
-        final VirtualMachineDto vmachine, @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
-
-        service.checkAllocate(virtualApplianceId, virtualMachineId, vmachine, true);
-    }
 
     @DELETE
     @Deprecated

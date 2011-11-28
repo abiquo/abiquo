@@ -53,7 +53,9 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -568,6 +570,36 @@ public class VirtualMachine extends DefaultEntityBase
     public void setDisks(final List<DiskManagement> disks)
     {
         this.disks = disks;
+    }
+    
+    /** List of volumes */
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = VolumeManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<VolumeManagement> volumes;
+
+    public List<VolumeManagement> getVolumes()
+    {
+        return volumes;
+    }
+
+    public void setVolumes(final List<VolumeManagement> volumes)
+    {
+        this.volumes = volumes;
+    }
+    
+    /** List of ips */
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = IpPoolManagement.class)
+    @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
+    private List<IpPoolManagement> ips;
+
+    public List<IpPoolManagement> getIps()
+    {
+        return ips;
+    }
+
+    public void setIps(final List<IpPoolManagement> ips)
+    {
+        this.ips = ips;
     }
 
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";

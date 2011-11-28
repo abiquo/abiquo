@@ -23,6 +23,7 @@ package com.abiquo.scheduler;
 
 import javax.jms.ResourceAllocationException;
 
+import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -100,7 +101,7 @@ public interface IAllocator
      * if resources are increased check the limits and the workload rules applied to the already
      * selected machine. PRE: the virtualMachine is already deployed to some target hypervisor.
      */
-    void checkEditVirtualMachineResources(Integer idVirtualApp, Integer virtualMachineId,
-        VirtualMachineDto newVmRequirements, boolean foreceEnterpriseSoftLimits)
+    void checkEditVirtualMachineResources(Integer idVirtualApp, VirtualMachine virtualMachine,
+        VirtualMachine newVirtualMachine, boolean foreceEnterpriseSoftLimits)
         throws AllocatorException, ResourceAllocationException;
 }

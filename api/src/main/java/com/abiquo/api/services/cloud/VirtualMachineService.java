@@ -21,12 +21,16 @@
 
 package com.abiquo.api.services.cloud;
 
+import static com.abiquo.api.util.URIResolver.buildPath;
+
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +42,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.cloud.DiskResource;
+import com.abiquo.api.resources.cloud.DisksResource;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
@@ -50,6 +59,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
+import com.abiquo.api.util.URIResolver;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
@@ -57,8 +67,13 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
+import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -74,6 +89,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -236,12 +252,27 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * @param vdcId
+     * @param vappId
+     * @param vmId
+     * @param dto
+     * @return
+     */
+    public String reconfigureVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
+        VirtualMachineDto dto)
+    {
+        // Calls the reconfigure with the VirtualMachine object.
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        return reconfigureVirtualMachine(vdcId, vappId, vmId, buildVirtualMachineFromDto(vdc, dto));
+    }
+
+    /**
      * @return the tarantino task Id if required, null if no {@link DatacenterTasks} to tarantino is
      *         required.
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final VirtualMachineDto newVirtualMachineDto)
+        final Integer vmId, final VirtualMachine newVirtualMachine)
     {
         logger.debug("Starting the reconfigure of the virtual machine {}", vmId);
 
@@ -264,7 +295,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             // There might be different hardware needs. This call also recalculate.
             logger.debug("Updating the hardware needs in DB for virtual machine {}", vmId);
-            vmAllocatorService.checkAllocate(vappId, vmId, newVirtualMachineDto, false);
+            vmAllocatorService.checkAllocate(vappId, virtualMachine, newVirtualMachine, false);
             logger.debug("Updated the hardware needs in DB for virtual machine {}", vmId);
         }
 
@@ -273,7 +304,7 @@ public class VirtualMachineService extends DefaultApiService
             jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
         logger.debug("Updating the virtual machine in the DB with id {}", vmId);
-        VirtualMachine newVirtualMachine = updateFromDto(newVirtualMachineDto, virtualMachine);
+        repo.update(newVirtualMachine);
         logger.debug("Updated virtual machine {}", vmId);
 
         // it is required a tarantino Task ?
@@ -1248,5 +1279,109 @@ public class VirtualMachineService extends DefaultApiService
     {
         virtualMachine.setState(VirtualMachineState.UNKNOWN);
         repo.update(virtualMachine);
+    }
+
+    /**
+     * Builds a {@link VirtualMachine} object from {@link VirtualMachineDto} object.
+     * 
+     * @param dto transfer input object
+     * @return output pojo object.
+     */
+    protected VirtualMachine buildVirtualMachineFromDto(final VirtualDatacenter vdc,
+        final VirtualMachineDto dto)
+    {
+        VirtualMachine vm = null;
+        try
+        {
+            vm = ModelTransformer.persistenceFromTransport(VirtualMachine.class, dto);
+            vm.setDisks(getHardDisksFromDto(vdc, dto));
+
+        }
+        catch (Exception e)
+        {
+            addUnexpectedErrors(APIError.STATUS_BAD_REQUEST);
+            flushErrors();
+        }
+
+        return vm;
+    }
+
+    /**
+     * Validates the given object with links to a hard disk and returns the referenced hard disk.
+     * 
+     * @param links The links to validate the hard disk.
+     * @param expectedVirtualDatacenter The expected virtual datacenter to be found in the link.
+     * @return The list of {@link DiskManagement} referenced by the link.
+     * @throws Exception If the link is not valid.
+     */
+    public List<DiskManagement> getHardDisksFromDto(final VirtualDatacenter vdc,
+        final SingleResourceTransportDto dto)
+    {
+        List<DiskManagement> disks = new LinkedList<DiskManagement>();
+
+        // Validate and load each volume from the link list
+        for (RESTLink link : dto.searchLinks(DiskResource.DISK))
+        {
+            String path =
+                buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH,
+                    DiskResource.DISK_PARAM);
+
+            MultivaluedMap<String, String> pathValues =
+                URIResolver.resolveFromURI(path, link.getHref());
+
+            // URI needs to have an identifier to a VDC, and another one to the volume
+            if (pathValues == null
+                || !pathValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+                || !pathValues.containsKey(DiskResource.DISK))
+            {
+                throw new BadRequestException(APIError.HD_ATTACH_INVALID_LINK);
+            }
+
+            // Volume provided in link must belong to the same virtual datacenter
+            Integer vdcId =
+                Integer.parseInt(pathValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+            if (!vdcId.equals(vdc.getId()))
+            {
+                throw new BadRequestException(APIError.HD_ATTACH_INVALID_VDC_LINK);
+            }
+
+            Integer diskId = Integer.parseInt(pathValues.getFirst(DiskResource.DISK));
+
+            DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+            if (disk == null)
+            {
+                String errorCode = APIError.HD_NON_EXISTENT_HARD_DISK.getCode();
+                String message = APIError.HD_NON_EXISTENT_HARD_DISK.getMessage() + ": Hard Disk id " + diskId;
+                CommonError error = new CommonError(errorCode, message);
+                addNotFoundErrors(error);
+            }
+            else
+            {
+                disks.add(disk);
+            }
+        }
+        
+        // Throw the exception with all the disks we have not found.
+        flushErrors();
+
+        return disks;
+    }
+
+    /**
+     * Gets a VirtualDatacenter. Raises an exception if it does not exist.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @return the found {@link VirtualDatacenter} instance.
+     */
+    protected VirtualDatacenter getVirtualDatacenter(final Integer vdcId)
+    {
+        VirtualDatacenter vdc = vdcRepo.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+        return vdc;
     }
 }

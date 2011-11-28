@@ -25,6 +25,7 @@
 package com.abiquo.api.services;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -37,7 +38,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.model.enumerator.HypervisorType;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
@@ -54,6 +57,7 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -66,6 +70,31 @@ import com.abiquo.tracer.SeverityType;
 @Service
 public class StorageService extends DefaultApiService
 {
+    /**
+     * Static class to specify the operation
+     * to execute for a Disk.
+     * 
+     * @author jaume.devesa@abiquo.com
+     */
+    public static class DiskOp
+    {
+        public static enum Op
+        {
+            ATTACH, DETACH
+        };
+
+        public DiskManagement disk;
+
+        public Op type;
+
+        public DiskOp(final DiskManagement disk, final Op type)
+        {
+            super();
+            this.disk = disk;
+            this.type = type;
+        }
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageService.class);
 
     private static long MEGABYTE = 1048576;
@@ -85,13 +114,16 @@ public class StorageService extends DefaultApiService
 
     @Autowired
     protected VirtualDatacenterRep vdcRepo;
+    
+    @Autowired
+    protected VirtualMachineService vmService;
 
     /** Default constructor. */
     public StorageService()
     {
 
     }
-
+    
     /**
      * Auxiliar constructor for test purposes. Haters gonna hate 'bzengine'. And his creator as
      * well...
@@ -105,66 +137,91 @@ public class StorageService extends DefaultApiService
         repo = new StorageRep(em);
         enterpriseLimitChecker = new EnterpriseLimitChecker(em);
         datacenterRepo = new InfrastructureRep(em);
+        vmService = new VirtualMachineService(em);
     }
 
     /**
-     * Create a new Hard Disk inside a Virtual Machine.
+     * Attach a list of disks to a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
      * 
      * @param vdcId identifier of the virtual datacenter.
-     * @param vappId identifier of the virtual appliance.
-     * @param vmId identifier of the virtual machine.
-     * @param diskSizeInMb disk size in mega bytes.
-     * @return the created object {@link DiskManagement}
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param disks list of disks to attach.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public DiskManagement attachHardDiskIntoVM(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskId)
+    public Object attachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final LinksDto hdRefs)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
-
-        // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
+        
+        List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
+        
+        for (DiskManagement disk : disks)
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
-            flushErrors();
+            // if the hard disk is already attached to another virtual machine
+            // , raise a conflict error.
+            if (disk.getVirtualMachine() != null)
+            {
+                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
+                flushErrors();
+            }
+            disk.setVirtualAppliance(vapp);
+            disk.setVirtualMachine(vm);
+            disk.setAttachmentOrder(getFreeAttachmentSlot(vm));
+            
+            vm.getDisks().add(disk);
         }
-
-        // get the disk from the virtualdatacenter's list
-        DiskManagement createdDisk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
-        if (createdDisk == null)
-        {
-            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
-            flushErrors();
-        }
-        // if the hard disk is already attached to another virtual machine
-        // , raise a conflict error.
-        if (createdDisk.getVirtualMachine() != null)
-        {
-            addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
-            flushErrors();
-        }
-        createdDisk.setVirtualAppliance(vapp);
-        createdDisk.setVirtualMachine(vm);
-        createdDisk.setAttachmentOrder(getFreeAttachmentSlot(vm));
-
-        vdcRepo.updateDisk(createdDisk);
-
-        // Trace
-        if (tracer != null)
-        {
-            String messageTrace =
-                "The hard disk resource '" + createdDisk.getId() + "' and size of "
-                    + createdDisk.getSizeInMb() + "MB has been assigned to virtual machine '"
-                    + vm.getName() + "'.";
-            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, messageTrace);
-        }
-
-        return createdDisk;
+        
+        return vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, vm);
+    }
+    
+    /**
+     * Detach all the list of disks from a Virtual Machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+        
+        vm.getDisks().clear();
+        
+        return vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, vm);
     }
 
+    /**
+     * Attach a list of disks to a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param volume The volume to attach.
+     * @param vm The virtual machine.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    
+    
     /**
      * Creates a new resource {@link DiskManagement} associated to a virtual machine.
      * 
@@ -207,59 +264,6 @@ public class StorageService extends DefaultApiService
         }
 
         return disk;
-    }
-
-    /**
-     * Detach a hard disk. Machine must be stopped and user should have the enough permissions.
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vappId identifier of the virtual appliance.
-     * @param vmId identifier of the virtual machine.
-     * @param diskId identifier of the disk
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void detachHardDisk(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer diskId)
-    {
-
-        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
-        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
-        VirtualMachine vm = getVirtualMachine(vapp, vmId);
-
-        // The user has the role for manage This. But... is the user from the same enterprise
-        // than Virtual Datacenter?
-        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
-
-        // Check if the machine is in the correct state to perform the action.
-        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
-        {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
-            flushErrors();
-        }
-
-        // Be sure the disk exists.
-        DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
-        if (disk == null)
-        {
-            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
-            flushErrors();
-        }
-
-        // unregister the disk from the virtual machine
-        disk.setVirtualAppliance(null);
-        disk.setVirtualMachine(null);
-        vdcRepo.updateDisk(disk);
-        
-        // Trace
-        if (tracer != null)
-        {
-            String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of "
-                    + disk.getSizeInMb() + "MB has been released from virtual machine '"
-                    + vm.getName() + "'.";
-            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_UNASSIGN, messageTrace);
-        }
     }
 
     /**
@@ -401,6 +405,118 @@ public class StorageService extends DefaultApiService
             + ".");
 
         return disks;
+    }
+
+    /**
+     * Attaches a new Hard Disk inside a Virtual Machine into Database.
+     * The disk should already be attached to the virtual machine.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine.
+     * @param diskSizeInMb disk size in mega bytes.
+     * @return the created object {@link DiskManagement}
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public DiskManagement registerHardDiskIntoVMInDatabase(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        // Check if the machine is in the correct state to perform the action.
+        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
+
+        // get the disk from the virtualdatacenter's list
+        DiskManagement createdDisk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+        if (createdDisk == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
+        // if the hard disk is already attached to another virtual machine
+        // , raise a conflict error.
+        if (createdDisk.getVirtualMachine() != null)
+        {
+            addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
+            flushErrors();
+        }
+        createdDisk.setVirtualAppliance(vapp);
+        createdDisk.setVirtualMachine(vm);
+        createdDisk.setAttachmentOrder(getFreeAttachmentSlot(vm));
+
+        vdcRepo.updateDisk(createdDisk);
+
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "The hard disk resource '" + createdDisk.getId() + "' and size of "
+                    + createdDisk.getSizeInMb() + "MB has been assigned to virtual machine '"
+                    + vm.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                EventType.HARD_DISK_ASSIGN, messageTrace);
+        }
+
+        return createdDisk;
+    }
+
+    /**
+     * Detach a hard disk. Machine must be stopped and user should have the enough permissions.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance.
+     * @param vmId identifier of the virtual machine.
+     * @param diskId identifier of the disk
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void unregisterHardDiskFromVMInDatabase(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final Integer diskId)
+    {
+
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        // The user has the role for manage This. But... is the user from the same enterprise
+        // than Virtual Datacenter?
+        userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
+
+        // Check if the machine is in the correct state to perform the action.
+        if (!vm.getState().equals(VirtualMachineState.NOT_ALLOCATED))
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
+
+        // Be sure the disk exists.
+        DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
+        if (disk == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
+
+        // unregister the disk from the virtual machine
+        disk.setVirtualAppliance(null);
+        disk.setVirtualMachine(null);
+        vdcRepo.updateDisk(disk);
+        
+        // Trace
+        if (tracer != null)
+        {
+            String messageTrace =
+                "The hard disk resource '" + disk.getId() + "' and size of "
+                    + disk.getSizeInMb() + "MB has been released from virtual machine '"
+                    + vm.getName() + "'.";
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                EventType.HARD_DISK_UNASSIGN, messageTrace);
+        }
     }
 
     /**
