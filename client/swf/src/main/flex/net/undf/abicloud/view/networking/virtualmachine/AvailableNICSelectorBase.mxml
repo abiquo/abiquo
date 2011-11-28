@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.events.FlexEvent;
         	import net.undf.abicloud.vo.networking.VlanNetwork;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.model.AbiCloudModel;
@@ -63,12 +64,18 @@
                 super.createChildren();
 
                 privateNICSelector = new PrivateNICSelector();
+                privateNICSelector.type = VlanNetwork.INTERNAL;
                 privateNICSelector.addEventListener("onAssignNicToVirtualMachine",onAssignNicToVirtualMachine);
-                privateNICSelector.addEventListener("onAssignExternalNicToVirtualMachine",onAssignExternalNicToVirtualMachine);
+                privateNICSelector.addEventListener(FlexEvent.SHOW, onShowPrivateNICSelector);
                 privateNICSelector.addEventListener("close", onClose);
 
                 toggledContainer.addContent(privateNICSelector, ResourceManager.getInstance().getString("Networking",
-                                                                                                        "LABEL_PRIVATE_EXTERNAL"));
+                                                                                                        "LABEL_PRIVATE"));
+            }
+            
+            private function onShowPrivateNICSelector(event:FlexEvent):void
+            {
+                privateNICSelector.init(_virtualDatacenter, _virtualMachine);
             }
             
             public function onAssignNicToVirtualMachine(evt:Event):void{

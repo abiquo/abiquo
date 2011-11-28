@@ -35,6 +35,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.networking.Network;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.collections.ArrayCollection;
@@ -70,6 +71,19 @@
             {
                 _virtualDatacenter = value;
                 init();
+            }
+            
+            [Bindable]
+            private var _vlanType:String;
+            
+            public function get vlanType():String
+            {
+                return this._vlanType;
+            }
+            
+            public function set vlanType(value:String):void
+            {
+                this._vlanType = value;
             }
 
             //The VLAN that is currently selected
@@ -119,21 +133,25 @@
             	if(_virtualDatacenter && _virtualDatacenter.network){
 	            	_virtualDatacenter.network.networks = new ArrayCollection();            		
             	}
-            	//Private Vlan Networks
+            	
             	var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
+            	
+            	if(this._vlanType == VlanNetwork.EXTERNAL)
+            	{
+	            	//External Vlan Networks
+	                event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER);
+            	}
+            	else
+            	{
+	            	//Private Vlan Networks
+	                event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_NETWORKS_BY_VIRTUALDATACENTER);
+            	}
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
             	if(this._virtualDatacenter){
 	            	dispatchEvent(event);            		
             	}
             	
-            	//External Vlan Networks
-                event = new NetworkingEvent(NetworkingEvent.GET_EXTERNAL_NETWORKS_BY_VIRTUALDATACENTER);
-                event.virtualDatacenter = this._virtualDatacenter;
-                event.callback = populatePrivateNetworks;
-                if(this._virtualDatacenter){
-                    dispatchEvent(event);                   
-                }
             }
             
             private function populatePrivateNetworks(networks:ArrayCollection):void{
@@ -343,7 +361,8 @@
         verticalGap="-1"
         title="@Resource(bundle='Networking', key='LABEL_PRIVATE_IPS')">
 
-        <privateip:PrivateIPList id="privateIPList"/>
+        <privateip:PrivateIPList id="privateIPList" 
+        	vlanType="{this._vlanType}"/>
 
     </general:GeneralSubPanel>
 </mx:HBox>
