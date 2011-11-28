@@ -84,7 +84,7 @@ public enum RemoteServiceType
 
     public boolean checkUniqueness()
     {
-        return this == APPLIANCE_MANAGER || this == VIRTUAL_FACTORY;
+        return this == APPLIANCE_MANAGER || this == VIRTUAL_FACTORY || this == BPM_SERVICE;
     }
 
     public String fixUri(final URI uri)

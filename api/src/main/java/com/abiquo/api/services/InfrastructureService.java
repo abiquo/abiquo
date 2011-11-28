@@ -1149,6 +1149,11 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
+    {
+        return checkRemoteServiceStatus(type, url, false);
+    }
+
     public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
         final boolean flushErrors)
     {

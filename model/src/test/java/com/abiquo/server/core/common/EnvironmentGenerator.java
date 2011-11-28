@@ -188,6 +188,8 @@ public class EnvironmentGenerator
             remoteServiceGenerator.createInstance(RemoteServiceType.APPLIANCE_MANAGER, dc);
         RemoteService ssm =
             remoteServiceGenerator.createInstance(RemoteServiceType.STORAGE_SYSTEM_MONITOR, dc);
+        RemoteService dhcp =
+            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE, dc);
 
         // Compute
         Hypervisor hypervisor = hypervisorGenerator.createInstance(dc);
@@ -202,6 +204,7 @@ public class EnvironmentGenerator
         add(dcLimits);
         add(am);
         add(ssm);
+        add(dhcp);
 
         add(hypervisor.getMachine().getRack());
         add(hypervisor.getMachine());
