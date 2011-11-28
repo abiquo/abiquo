@@ -276,7 +276,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
-            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()), "action",
+            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()),
+            VirtualMachineNetworkConfigurationResource.NIC,
             VirtualMachineNetworkConfigurationResource.NIC);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");

@@ -45,6 +45,7 @@ import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.StorageService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.appslibrary.VirtualImageService;
@@ -129,6 +130,9 @@ public class VirtualMachineService extends DefaultApiService
     // job creator should be used ONLY inside the TarantinoService
     @Autowired
     protected TarantinoJobCreator jobCreator;
+
+    @Autowired
+    protected TaskService tasksService;
 
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
@@ -1173,6 +1177,7 @@ public class VirtualMachineService extends DefaultApiService
             "The enqueuing in Tarantino was OK. The virtual machine is locked");
 
         lockVirtualMachine(virtualMachine);
+        // tasksService.
         // Here we add the url which contains the status
         return location;
     }

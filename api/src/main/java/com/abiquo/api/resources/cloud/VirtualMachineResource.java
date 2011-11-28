@@ -518,6 +518,24 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         dto.setVdrpIP(v.getVdrpIP());
         dto.setVdrpPort(v.getVdrpPort());
 
+        final Hypervisor hypervisor = v.getHypervisor();
+        final Machine machine = hypervisor == null ? null : hypervisor.getMachine();
+        final Rack rack = machine == null ? null : machine.getRack();
+
+        final Enterprise enterprise = v.getEnterprise() == null ? null : v.getEnterprise();
+        final User user = v.getUser() == null ? null : v.getUser();
+
+        dto.addLinks(restBuilder.buildVirtualMachineAdminLinks(rack == null ? null : rack
+            .getDatacenter().getId(), rack == null ? null : rack.getId(), machine == null ? null
+            : machine.getId(), enterprise == null ? null : enterprise.getId(), user == null ? null
+            : user.getId()));
+
+        final VirtualImage vimage = v.getVirtualImage();
+        if (vimage != null)
+        {
+            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+                .getRepository().getDatacenter().getId(), vimage.getId()));
+        }
         return dto;
     }
 
@@ -562,6 +580,13 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
             v.isChefEnabled()));
+
+        final VirtualImage vimage = v.getVirtualImage();
+        if (vimage != null)
+        {
+            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
+                .getRepository().getDatacenter().getId(), vimage.getId()));
+        }
         return dto;
     }
 

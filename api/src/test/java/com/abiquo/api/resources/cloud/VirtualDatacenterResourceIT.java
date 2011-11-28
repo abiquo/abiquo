@@ -134,8 +134,8 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertLinkExist(dto, resolveVirtualDatacenterURI(vdc.getId()), "edit");
         assertLinkExist(dto, resolveVirtualAppliancesURI(vdc.getId()),
             VirtualApplianceResource.VIRTUAL_APPLIANCE);
-        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()), "action",
-            IpAddressesResource.IP_ADDRESSES);
+        assertLinkExist(dto, resolveVirtualDatacenterActionGetIPsURI(vdc.getId()),
+            IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
     }
 
     private VirtualDatacenterDto getValidVdc(final VirtualDatacenter vdc)
