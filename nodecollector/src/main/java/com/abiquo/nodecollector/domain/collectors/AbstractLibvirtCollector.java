@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
@@ -336,24 +335,4 @@ public abstract class AbstractLibvirtCollector extends AbstractCollector
 
     }
 
-<<<<<<< HEAD
-    /**
-     * Parses the fileName to get the datastore name.
-     * 
-     * @param fileName the file name to parse
-     * @return the datastore directory
-     */
-    private String getDatastoreFromFile(final String fileName)
-    {
-        int count = StringUtils.countMatches(fileName, "/");
-        if (count == 1)
-        {
-            return "/";
-        }
-        int indexEndDirectory = fileName.lastIndexOf('/');
-        return fileName.substring(0, indexEndDirectory);
-    }
-
-=======
->>>>>>> stable
 }

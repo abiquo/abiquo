@@ -53,20 +53,14 @@ import javax.xml.bind.annotation.XmlType;
 public enum VirtualSystemStatusEnumType
 {
 
-<<<<<<< HEAD
-    OFF,
-    ON,
-    PAUSED;
-=======
-    POWERED_OFF, RUNNING, PAUSED;
->>>>>>> stable
+    OFF, ON, PAUSED;
 
     public String value()
     {
         return name();
     }
 
-    public static VirtualSystemStatusEnumType fromValue(String v)
+    public static VirtualSystemStatusEnumType fromValue(final String v)
     {
         return valueOf(v);
     }

@@ -68,7 +68,6 @@
         <!-- end:workload -->
         <!-- configuration -->
         <class>com.abiquo.server.core.config.SystemProperty</class>
-        <class>com.abiquo.server.core.tasks.Task</class>
         <!-- end: configuration --> 
 		<!-- pricing -->
 		<class>com.abiquo.server.core.pricing.PricingTemplate</class>

@@ -53,7 +53,6 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     @Override
     public void assertAllPropertiesEqual(final NodeVirtualImage node1, final NodeVirtualImage node2)
     {
-<<<<<<< HEAD
         AssertEx.assertPropertiesEqualSilent(node1, node2, Node.MODIFIED_PROPERTY,
             Node.NAME_PROPERTY);
 
@@ -61,16 +60,6 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
             node2.getVirtualAppliance());
         vmGenerator.assertAllPropertiesEqual(node1.getVirtualMachine(), node2.getVirtualMachine());
         imageGenerator.assertAllPropertiesEqual(node1.getVirtualImage(), node2.getVirtualImage());
-=======
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, NodeVirtualImage.MODIFIED_PROPERTY,
-            NodeVirtualImage.NAME_PROPERTY);
-
-        vApplianceGenerator.assertAllPropertiesEqual(obj1.getVirtualAppliance(),
-            obj2.getVirtualAppliance());
-        vMachineGenerator.assertAllPropertiesEqual(obj1.getVirtualMachine(),
-            obj2.getVirtualMachine());
-        vImageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
->>>>>>> stable
     }
 
     @Override
@@ -122,7 +111,6 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine)
     {
-<<<<<<< HEAD
         return createInstance(virtualAppliance, vMachine, vMachine.getVirtualImage());
     }
 
@@ -131,12 +119,6 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     {
         String name = newString(nextSeed(), Node.NAME_LENGTH_MIN, Node.NAME_LENGTH_MAX);
         return new NodeVirtualImage(name, virtualAppliance, vImage, vMachine);
-=======
-        return new NodeVirtualImage("" + new Random().nextInt(),
-            virtualAppliance,
-            vMachine.getVirtualImage(),
-            vMachine);
->>>>>>> stable
     }
 
     @Override

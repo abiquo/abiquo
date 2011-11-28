@@ -38,11 +38,6 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -555,7 +550,8 @@ public class InfrastructureService extends DefaultApiService
     {
         RemoteService old = getRemoteService(id);
 
-        ErrorsDto configurationErrors = checkRemoteServiceStatus(dto.getType(), dto.getUri());
+        ErrorsDto configurationErrors =
+            remoteServiceService.checkRemoteServiceStatus(dto.getType(), dto.getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -615,70 +611,6 @@ public class InfrastructureService extends DefaultApiService
                 flushErrors();
             }
         }
-    }
-
-    public static ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
-    {
-        return checkRemoteServiceStatus(type, url, false);
-    }
-
-    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
-        final boolean flushErrors)
-    {
-        ErrorsDto configurationErrors = new ErrorsDto();
-        if (type.canBeChecked())
-        {
-            ClientConfig config = new ClientConfig();
-            config.connectTimeout(5000);
-
-            RestClient restClient = new RestClient(config);
-            String uriToCheck = UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE);
-            Resource checkResource = restClient.resource(uriToCheck);
-
-            try
-            {
-                ClientResponse response = checkResource.get();
-                if (response.getStatusCode() != 200)
-                {
-                    configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
-                        .getCode(), type.getName() + ", "
-                        + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage()));
-                    if (flushErrors)
-                    {
-                        switch (response.getStatusCode())
-                        {
-                            case 404:
-                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
-                                break;
-                            case 503:
-                                addServiceUnavailableErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
-                                break;
-                            default:
-                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
-                                break;
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
-                    .getCode(), type.getName() + ", "
-                    + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage() + ", "
-                    + e.getMessage()));
-                if (flushErrors)
-                {
-                    addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
-                }
-            }
-        }
-
-        if (flushErrors)
-        {
-            flushErrors();
-        }
-
-        return configurationErrors;
     }
 
     // PROTECTED METHODS
@@ -753,8 +685,7 @@ public class InfrastructureService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + ", " + error.getMessage()));
+                    .getName() + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -1129,7 +1060,8 @@ public class InfrastructureService extends DefaultApiService
 
         for (RemoteService r : remoteServicesByDatacenter)
         {
-            ErrorsDto checkRemoteServiceStatus = checkRemoteServiceStatus(r.getType(), r.getUri());
+            ErrorsDto checkRemoteServiceStatus =
+                remoteServiceService.checkRemoteServiceStatus(r.getType(), r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
         return errors;
@@ -1215,6 +1147,12 @@ public class InfrastructureService extends DefaultApiService
                 "Virtual Machines not managed by host from '" + hypervisor.getIp()
                     + "' have been deleted");
         }
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
+        final boolean flushErrors)
+    {
+        return remoteServiceService.checkRemoteServiceStatus(type, url, flushErrors);
     }
 
     protected void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)

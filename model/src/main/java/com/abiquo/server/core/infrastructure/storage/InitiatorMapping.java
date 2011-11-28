@@ -76,33 +76,18 @@ public class InitiatorMapping extends DefaultEntityBase
 
     private final static String TARGET_LUN_COLUMN = "targetLun";
 
-<<<<<<< HEAD
     /* package */final static long TARGET_LUN_MIN = 0;
-=======
-    // private final static boolean TARGET_LUN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
->>>>>>> stable
 
     /* package */final static long TARGET_LUN_MAX = Integer.MAX_VALUE;
 
     private final static boolean TARGET_LUN_REQUIRED = true;
 
     @Column(name = TARGET_LUN_COLUMN, nullable = !TARGET_LUN_REQUIRED)
-<<<<<<< HEAD
     @Range(min = TARGET_LUN_MIN, max = TARGET_LUN_MAX)
     private int targetLun;
 
     @Required(value = TARGET_LUN_REQUIRED)
     public int getTargetLun()
-=======
-    @Range(min = TARGET_IQN_LENGTH_MIN, max = TARGET_IQN_LENGTH_MAX)
-    private Integer targetLun;
-
-    //
-    // @Required(value = TARGET_LUN_REQUIRED)
-    // @Length(min = TARGET_LUN_LENGTH_MIN, max = TARGET_LUN_LENGTH_MAX)
-    // @LeadingOrTrailingWhitespace(allowed = TARGET_LUN_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
-    public Integer getTargetLun()
->>>>>>> stable
     {
         return this.targetLun;
     }

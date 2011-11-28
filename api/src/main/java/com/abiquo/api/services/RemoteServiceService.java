@@ -453,6 +453,70 @@ public class RemoteServiceService extends DefaultApiService
         return configurationErrors;
     }
 
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
+    {
+        return checkRemoteServiceStatus(type, url, false);
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
+        final boolean flushErrors)
+    {
+        ErrorsDto configurationErrors = new ErrorsDto();
+        if (type.canBeChecked())
+        {
+            ClientConfig config = new ClientConfig();
+            config.connectTimeout(5000);
+
+            RestClient restClient = new RestClient(config);
+            String uriToCheck = UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE);
+            Resource checkResource = restClient.resource(uriToCheck);
+
+            try
+            {
+                ClientResponse response = checkResource.get();
+                if (response.getStatusCode() != 200)
+                {
+                    configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                        .getCode(), type.getName() + ", "
+                        + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage()));
+                    if (flushErrors)
+                    {
+                        switch (response.getStatusCode())
+                        {
+                            case 404:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            case 503:
+                                addServiceUnavailableErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                            default:
+                                addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                configurationErrors.add(new ErrorDto(APIError.REMOTE_SERVICE_CONNECTION_FAILED
+                    .getCode(), type.getName() + ", "
+                    + APIError.REMOTE_SERVICE_CONNECTION_FAILED.getMessage() + ", "
+                    + e.getMessage()));
+                if (flushErrors)
+                {
+                    addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
+                }
+            }
+        }
+
+        if (flushErrors)
+        {
+            flushErrors();
+        }
+
+        return configurationErrors;
+    }
+
     // --------------- //
     // PRIVATE METHODS //
     // --------------- //

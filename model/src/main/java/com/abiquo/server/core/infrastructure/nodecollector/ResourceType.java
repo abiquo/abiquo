@@ -35,21 +35,11 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
 /**
-<<<<<<< HEAD
- *  This class represents a resource allocated in a computer system,
- *                 whatever is virtual or physical.
- *             
- * 
- * <p>Java class for ResourceType complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
-=======
  * This class represents a resource allocated in a computer system, whatever is virtual or physical.
  * <p>
  * Java class for ResourceType complex type.
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
->>>>>>> stable
  * 
  * <pre>
  * &lt;complexType name="ResourceType">
@@ -72,26 +62,10 @@ import javax.xml.bind.annotation.XmlType;
  * </pre>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-<<<<<<< HEAD
-@XmlType(name = "ResourceType", propOrder = {
-    "elementName",
-    "address",
-    "resourceType",
-    "resourceSubType",
-    "units",
-    "availableUnits",
-    "connection",
-    "label",
-    "attachment"
-})
-public class ResourceType {
-=======
 @XmlType(name = "ResourceType", propOrder = {"elementName", "address", "resourceType",
-"resourceSubType", "units", "availableUnits", "connection"})
+"resourceSubType", "units", "availableUnits", "connection", "label", "attachment"})
 public class ResourceType
 {
->>>>>>> stable
-
     @XmlElement(required = true)
     protected String elementName;
 
@@ -113,8 +87,10 @@ public class ResourceType
 
     @XmlElement(required = true, nillable = true)
     protected String connection;
+
     @XmlElement(required = true, nillable = true)
     protected String label;
+
     @XmlElement(required = true, nillable = true)
     protected String attachment;
 
@@ -133,7 +109,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link String }
      */
-    public void setElementName(String value)
+    public void setElementName(final String value)
     {
         this.elementName = value;
     }
@@ -153,7 +129,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link String }
      */
-    public void setAddress(String value)
+    public void setAddress(final String value)
     {
         this.address = value;
     }
@@ -173,7 +149,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link ResourceEnumType }
      */
-    public void setResourceType(ResourceEnumType value)
+    public void setResourceType(final ResourceEnumType value)
     {
         this.resourceType = value;
     }
@@ -193,7 +169,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link Object }
      */
-    public void setResourceSubType(Object value)
+    public void setResourceSubType(final Object value)
     {
         this.resourceSubType = value;
     }
@@ -213,7 +189,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link Long }
      */
-    public void setUnits(Long value)
+    public void setUnits(final Long value)
     {
         this.units = value;
     }
@@ -233,7 +209,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link Long }
      */
-    public void setAvailableUnits(Long value)
+    public void setAvailableUnits(final Long value)
     {
         this.availableUnits = value;
     }
@@ -253,7 +229,7 @@ public class ResourceType
      * 
      * @param value allowed object is {@link String }
      */
-    public void setConnection(String value)
+    public void setConnection(final String value)
     {
         this.connection = value;
     }
@@ -261,48 +237,40 @@ public class ResourceType
     /**
      * Gets the value of the label property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getLabel() {
+    public String getLabel()
+    {
         return label;
     }
 
     /**
      * Sets the value of the label property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setLabel(String value) {
+    public void setLabel(final String value)
+    {
         this.label = value;
     }
 
     /**
      * Gets the value of the attachment property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getAttachment() {
+    public String getAttachment()
+    {
         return attachment;
     }
 
     /**
      * Sets the value of the attachment property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setAttachment(String value) {
+    public void setAttachment(final String value)
+    {
         this.attachment = value;
     }
 

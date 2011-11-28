@@ -236,12 +236,12 @@ public class EnvironmentGenerator
 
         VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork());
-        vlan.getConfiguration().getDhcp().getRemoteService().setDatacenter(datacenter);
+        // vlan.getConfiguration().getDhcp().getRemoteService().setDatacenter(datacenter);
         vdc.setDefaultVlan(vlan);
 
         add(vdc.getNetwork());
-        add(vlan.getConfiguration().getDhcp().getRemoteService());
-        add(vlan.getConfiguration().getDhcp());
+        // add(vlan.getConfiguration().getDhcp().getRemoteService());
+        // add(vlan.getConfiguration().getDhcp());
         add(vlan.getConfiguration());
         add(vlan);
         add(vdc);

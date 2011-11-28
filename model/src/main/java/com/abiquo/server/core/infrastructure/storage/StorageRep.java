@@ -31,17 +31,10 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-<<<<<<< HEAD
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-=======
-import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
-import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualImage;
->>>>>>> stable
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversionDAO;
@@ -124,17 +117,8 @@ public class StorageRep extends DefaultRepBase
         return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
-<<<<<<< HEAD
     public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
         final Integer diskOrder)
-=======
-    public Tier findTierById(final Integer tierId)
-    {
-        return tierDAO.findById(tierId);
-    }
-
-    public Tier findTierById(final Integer datacenterId, final Integer tierId)
->>>>>>> stable
     {
         return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskOrder);
     }
@@ -172,6 +156,11 @@ public class StorageRep extends DefaultRepBase
     public List<StoragePool> findPoolsByTier(final Tier tier)
     {
         return poolDAO.findPoolsByTier(tier);
+    }
+
+    public Tier findTierById(final Integer tierId)
+    {
+        return tierDAO.findById(tierId);
     }
 
     public Tier findTierById(final Integer datacenterId, final Integer tierId)
@@ -248,12 +237,8 @@ public class StorageRep extends DefaultRepBase
         return tierDAO.getTiersByDatacenter(datacenterId);
     }
 
-<<<<<<< HEAD
     public VolumeManagement getVolumeByVirtualDatacenter(final VirtualDatacenter vdc,
         final Integer volumeId)
-=======
-    public VolumeManagement getVolumeFromImage(final Integer idImage)
->>>>>>> stable
     {
         return volumeDAO.getVolumeByVirtualDatacenter(vdc, volumeId);
     }
@@ -381,25 +366,12 @@ public class StorageRep extends DefaultRepBase
         poolDAO.flush();
     }
 
-<<<<<<< HEAD
     public void updateTier(final Tier tier)
-=======
-    public void updateVolume(final VolumeManagement volume)
-    {
-        volumeDAO.flush();
-    }
-
-    public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm)
->>>>>>> stable
     {
         tierDAO.flush();
     }
 
-<<<<<<< HEAD
     public void updateVolume(final VolumeManagement volume)
-=======
-    public void insertInitiatorMapping(final InitiatorMapping imapping)
->>>>>>> stable
     {
         volumeDAO.flush();
     }

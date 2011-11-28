@@ -192,10 +192,7 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
 
         // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
         Category category = new Category("test-category");
-        category.setIsDefault(0);
-        category.setIsErasable(0);
-        ds().persistAll(category);
-        vm1.getVirtualImage().setIdCategory(category.getId());
+        vm1.getVirtualImage().setCategory(category);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);

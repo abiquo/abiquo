@@ -109,6 +109,7 @@ public class EnterpriseService extends DefaultApiService
         return userService.getCurrentUser().getEnterprise();
     }
 
+    @Transactional(readOnly = true)
     public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
         final String filterName, final Integer offset, final Integer numResults)
     {

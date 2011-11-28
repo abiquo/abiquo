@@ -77,8 +77,6 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end: appliance manager -->
-<<<<<<< HEAD
-=======
      <!-- pricing -->
     <orm:entity class="com.abiquo.server.core.pricing.PricingTemplate"></orm:entity>
     <orm:entity class="com.abiquo.server.core.pricing.CostCode"></orm:entity>
@@ -87,8 +85,4 @@
     <orm:entity class="com.abiquo.server.core.pricing.PricingCostCode"></orm:entity>
     <orm:entity class="com.abiquo.server.core.pricing.PricingTier"></orm:entity>
     <!-- end: pricing -->
-    <!-- tasks -->
-    <orm:entity class="com.abiquo.server.core.tasks.Task" />
-    <!-- end: tasks -->
->>>>>>> stable
 </orm:entity-mappings>

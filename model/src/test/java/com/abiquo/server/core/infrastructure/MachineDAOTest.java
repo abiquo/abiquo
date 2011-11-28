@@ -21,11 +21,8 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.lang.reflect.InvocationTargetException;
-<<<<<<< HEAD
-import java.util.ArrayList;
-=======
 import java.math.BigInteger;
->>>>>>> stable
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -572,7 +569,6 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
     }
 
     @Test
-<<<<<<< HEAD
     public void test_findbyIP()
     {
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
@@ -589,7 +585,6 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         assertNotNull(result);
     }
 
-
     @Test
     public void test_findbyIP_notFound()
     {
@@ -605,7 +600,8 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         Machine result = dao.findByIp(datacenter, "NOT_EXISTING_IP");
         assertNull(result);
-=======
+    }
+
     public void testLargeSwitchName()
     {
         MachineGenerator machineGenerator = new MachineGenerator(getSeed());
@@ -634,6 +630,5 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         Machine machine = this.createUniqueEntity();
         machine.setVirtualSwitch(new BigInteger(1004, new Random()).toString(32));
         ds().persistAll(machine);
->>>>>>> stable
     }
 }

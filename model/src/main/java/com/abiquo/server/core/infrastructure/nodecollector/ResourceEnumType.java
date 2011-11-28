@@ -56,21 +56,13 @@ public enum ResourceEnumType
 {
 
     @XmlEnumValue("8")
-<<<<<<< HEAD
-    VOLUME_DISK("8"),
-    @XmlEnumValue("10")
-    NETWORK_INTERFACE("10"),
-    @XmlEnumValue("17")
-    HARD_DISK("17"),
-    @XmlEnumValue("34")
-=======
-    STORAGE_DISK("8"), @XmlEnumValue("10")
-    NETWORK_INTERFACE("10"), @XmlEnumValue("34")
->>>>>>> stable
+    VOLUME_DISK("8"), @XmlEnumValue("10")
+    NETWORK_INTERFACE("10"), @XmlEnumValue("17")
+    HARD_DISK("17"), @XmlEnumValue("34")
     VSWITCH("34");
     private final String value;
 
-    ResourceEnumType(String v)
+    ResourceEnumType(final String v)
     {
         value = v;
     }
@@ -80,7 +72,7 @@ public enum ResourceEnumType
         return value;
     }
 
-    public static ResourceEnumType fromValue(String v)
+    public static ResourceEnumType fromValue(final String v)
     {
         for (ResourceEnumType c : ResourceEnumType.values())
         {

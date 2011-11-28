@@ -42,7 +42,6 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.scheduler.limit.VirtualMachineRequirements;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -172,7 +171,7 @@ public class StorageService extends DefaultApiService
 
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);
-        vdcRepo.insertHardDisk(disk);
+        // vdcRepo.insertHardDisk(disk);
 
         return disk;
     }
@@ -248,10 +247,10 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
-        
+
         LOGGER.debug("Returning a single disk created into VirtualDatacenter '" + vdc.getName()
-                + "' identifier by id: " + diskId + ".");
-        
+            + "' identifier by id: " + diskId + ".");
+
         return disk;
     }
 
@@ -271,17 +270,17 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
-        
+
         DiskManagement targetDisk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
         if (targetDisk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
             flushErrors();
         }
-        
+
         LOGGER.debug("Returning a single disk allocated into VirtualMachine '" + vm.getName()
-                + "' identifier by id: " + diskId + ".");
-        
+            + "' identifier by id: " + diskId + ".");
+
         return targetDisk;
     }
 
@@ -296,10 +295,10 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         List<DiskManagement> disks = vdcRepo.findHardDisksByVirtualDatacenter(vdc);
-        
+
         LOGGER.debug("Returning list of disks created into VirtualDatacenter '" + vdc.getName()
-                + ".");
-        
+            + ".");
+
         return disks;
     }
 
@@ -325,8 +324,8 @@ public class StorageService extends DefaultApiService
         disks.addAll(vdcRepo.findHardDisksByVirtualMachine(vm));
 
         LOGGER.debug("Returning list of disks allocated into VirtualMachine '" + vdc.getName()
-                + ".");
-        
+            + ".");
+
         return disks;
     }
 

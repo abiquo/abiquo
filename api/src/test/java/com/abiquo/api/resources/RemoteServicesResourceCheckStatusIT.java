@@ -91,7 +91,6 @@ public class RemoteServicesResourceCheckStatusIT extends AbstractJpaGeneratorIT
     // }
     // }
     //
-    @Override
     protected List<String> data()
     {
         return Arrays.asList("/data/machine-am-infrastructure.xml");

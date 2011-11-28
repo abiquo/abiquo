@@ -74,11 +74,7 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
         return createInstance(machine, type);
     }
 
-<<<<<<< HEAD
     public Hypervisor createReservedHypervisor(final Enterprise enterprise)
-=======
-    public Hypervisor createReservedHypervisor(Enterprise enterprise)
->>>>>>> stable
     {
         Machine machine = machineGenerator.createReservedMachine(enterprise);
 

@@ -110,14 +110,8 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     public VirtualimageHB(final RepositoryHB repository, final IconHB icon,
         final CategoryHB category, final String name, final String description,
         final String pathName, final Long hdRequired, final Integer ramRequired,
-<<<<<<< HEAD
         final Integer cpuRequired, final VirtualimageHB master, final int idEnterprise,
-        final String ovfId, final Long diskFileSize, final String costCode)
-=======
-        final Integer cpuRequired, final int treaty, final int deleted,
-        final VirtualimageHB master, final int idEnterprise, final String ovfId,
-        final Long diskFileSize, final int costCode)
->>>>>>> stable
+        final String ovfId, final Long diskFileSize, final int costCode)
     {
         this.repository = repository;
         this.icon = icon;
@@ -282,16 +276,11 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         return shared;
     }
 
-<<<<<<< HEAD
     public void setShared(final boolean shared)
-=======
-    public void setShared(final int shared)
->>>>>>> stable
     {
         this.shared = shared;
     }
 
-<<<<<<< HEAD
     public boolean isChefEnabled()
     {
         return chefEnabled;
@@ -302,19 +291,12 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.chefEnabled = chefEnabled;
     }
 
-    public String getCostCode()
-=======
     public int getCostCode()
->>>>>>> stable
     {
         return costCode;
     }
 
-<<<<<<< HEAD
-    public void setCostCode(final String costCode)
-=======
     public void setCostCode(final int costCode)
->>>>>>> stable
     {
         this.costCode = costCode;
     }

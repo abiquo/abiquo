@@ -130,12 +130,7 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
         p.setIconPath("http://www.google.com/logos/2011/Albert_Szent_Gyorgyi-2011-hp.jpg");
 
         ClientResponse response =
-<<<<<<< HEAD
             post(resolveOVFPackagesURI(appsLibrary.getEnterprise().getId()), p, SYSADMIN, SYSADMIN);
-=======
-            resource.contentType(MediaType.APPLICATION_XML).accept(MediaType.APPLICATION_XML)
-                .post(p);
->>>>>>> stable
 
         assertEquals(response.getStatusCode(), 201);
 

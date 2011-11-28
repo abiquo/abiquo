@@ -87,7 +87,6 @@ public class EnterpriseTest extends DefaultEntityTestBase<Enterprise>
     @Test
     public void test_checkLimitStatus()
     {
-<<<<<<< HEAD
         assertEquals(Enterprise.LimitStatus.OK, DefaultEntityWithLimits.checkLimitStatus(
             DefaultEntityWithLimits.NO_LIMIT, DefaultEntityWithLimits.NO_LIMIT, 3));
         assertEquals(Enterprise.LimitStatus.OK,
@@ -115,19 +114,5 @@ public class EnterpriseTest extends DefaultEntityTestBase<Enterprise>
 
         Enterprise chef = ((EnterpriseGenerator) eg()).createChefInstance();
         assertTrue(chef.isChefEnabled());
-=======
-        assertEquals(Enterprise.LimitStatus.OK,
-            Enterprise.checkLimitStatus(Enterprise.NO_LIMIT, Enterprise.NO_LIMIT, 3));
-        assertEquals(Enterprise.LimitStatus.OK,
-            Enterprise.checkLimitStatus(2, Enterprise.NO_LIMIT, 1));
-        assertEquals(Enterprise.LimitStatus.OK, Enterprise.checkLimitStatus(2, 3, 1));
-
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 2));
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 3));
-        assertEquals(Enterprise.LimitStatus.SOFT_LIMIT, Enterprise.checkLimitStatus(2, 4, 4));
-
-        assertEquals(Enterprise.LimitStatus.HARD_LIMIT, Enterprise.checkLimitStatus(2, 4, 5));
-        assertEquals(Enterprise.LimitStatus.HARD_LIMIT, Enterprise.checkLimitStatus(2, 4, 6));
->>>>>>> stable
     }
 }

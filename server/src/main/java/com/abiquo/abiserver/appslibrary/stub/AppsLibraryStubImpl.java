@@ -488,19 +488,10 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return response.getEntity(OVFPackagesDto.class);
     }
 
-<<<<<<< HEAD
     @Override
     public BasicResult deleteIcon(final Integer idIcon)
     {
         BasicResult result = new BasicResult();
-=======
-    public Resource createResourceOVFPackages(final Integer idEnterprise,
-        final Integer idOvfpackageList)
-    {
-        final String path =
-            ENTERPRISES_PATH + '/' + String.valueOf(idEnterprise) + '/' + OVF_PACKAGE_PATH + '/'
-                + String.valueOf(idOvfpackageList);
->>>>>>> stable
 
         final String uri = createIconLink(idIcon);
 
