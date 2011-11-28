@@ -251,6 +251,22 @@ public class VirtualApplianceService extends DefaultApiService
         catch (Exception e)
         {
             // The virtual appliance is in an unknown state
+            // The virtual appliance is in an unknown state
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VM_DEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VM_DEPLOY,
+                    "The virtual machine threw and error. Nevertheless we continue with next virtual machine. Unexpected Error: "
+                        + e.toString());
+            logger
+                .error(
+                    "Error deploying virtual appliance name {}. But we continue with next virtual machine: {}",
+                    virtualAppliance.getName(), e.toString());
         }
         return dto;
     }
@@ -281,6 +297,21 @@ public class VirtualApplianceService extends DefaultApiService
         catch (Exception e)
         {
             // The virtual appliance is in an unknown state
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
+                EventType.VM_UNDEPLOY, APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VM_UNDEPLOY,
+                    "The virtual machine threw and error. Nevertheless we continue with next virtual machine. Unexpected Error: "
+                        + e.toString());
+            logger
+                .error(
+                    "Error undeploying virtual appliance name {}. But we continue with next virtual machine: {}",
+                    virtualAppliance.getName(), e.toString());
         }
         return dto;
     }

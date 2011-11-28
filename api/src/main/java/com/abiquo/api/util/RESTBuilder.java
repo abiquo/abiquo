@@ -666,19 +666,18 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildActionLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params));
-        links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_ON, "poweron", params));
-        links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_POWER_OFF, "poweroff", params));
-        links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESUME, "resume", params));
-        links.add(builder.buildActionLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_PAUSE, "pause", params));
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_STATE, "state", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE,
+            VirtualMachineResource.VIRTUAL_MACHINE_STATE_REL, params));
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY, "deploy", params));
-        links.add(builder.buildRestLink(VirtualMachineResource.class, "edit", params));
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL, params));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY_REL, params));
+        links
+            .add(builder.buildRestLink(VirtualMachineResource.class, RESTBuilder.REL_EDIT, params));
 
         return links;
     }
@@ -1172,6 +1171,7 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
     public RESTLink buildUserLink(final Integer enterpriseId, final Integer userId)
     {
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);

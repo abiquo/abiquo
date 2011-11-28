@@ -34,66 +34,67 @@ import com.abiquo.model.rest.RESTLink;
 public class AbiquoLinkBuilder extends SingleLinkBuilderImpl
 {
 
-    public AbiquoLinkBuilder(ServerMessageContext context)
+    public AbiquoLinkBuilder(final ServerMessageContext context)
     {
         super(context);
     }
 
-    public RESTLink buildRestLink(Class< ? > resource, String rel, Map<String, String> params)
+    public RESTLink buildRestLink(final Class< ? > resource, final String rel,
+        final Map<String, String> params)
     {
-        
+
         List<SyndLink> links = setResource(resource).rel(rel).pathParams(params).build(null);
         SyndLink first = links.get(0);
         return new RESTLink(first);
     }
 
-    public RESTLink buildRestLink(Class< ? > resource, String subResource, String rel,
-        Map<String, String> params)
+    public RESTLink buildRestLink(final Class< ? > resource, final String subResource,
+        final String rel, final Map<String, String> params)
     {
         List<SyndLink> links =
             setResource(resource).rel(rel).pathParams(params).subResource(subResource).build(null);
         return new RESTLink(links.get(0));
     }
 
-    public RESTLink buildActionLink(Class< ? > resource, String subResource, String title,
-        Map<String, String> params)
+    public RESTLink buildActionLink(final Class< ? > resource, final String subResource,
+        final String title, final Map<String, String> params)
     {
         List<SyndLink> links =
-            setResource(resource).rel("action").pathParams(params).subResource(subResource).build(
-                null);
+            setResource(resource).rel(title).pathParams(params).subResource(subResource)
+                .build(null);
         SyndLink first = links.get(0);
         RESTLink link = new RESTLink(first);
         link.setTitle(title);
         return link;
     }
 
-    public AbiquoLinkBuilder pathParams(Map<String, String> params)
+    public AbiquoLinkBuilder pathParams(final Map<String, String> params)
     {
         if (params != null && !params.isEmpty())
         {
             for (Map.Entry<String, String> entry : params.entrySet())
             {
-//                if (!pathParams.containsKey(entry.getKey()))
-//                {
-                    pathParam(entry.getKey(), entry.getValue());
-              //  }
+                // if (!pathParams.containsKey(entry.getKey()))
+                // {
+                pathParam(entry.getKey(), entry.getValue());
+                // }
             }
         }
         return this;
     }
 
     @Override
-    public AbiquoLinkBuilder rel(String rel)
+    public AbiquoLinkBuilder rel(final String rel)
     {
         return (AbiquoLinkBuilder) super.rel(rel);
     }
 
-    public AbiquoLinkBuilder setResource(Class< ? > resource)
+    public AbiquoLinkBuilder setResource(final Class< ? > resource)
     {
         return (AbiquoLinkBuilder) super.resource(resource);
     }
 
-    public static AbiquoLinkBuilder createBuilder(LinkBuilders linkProcessor)
+    public static AbiquoLinkBuilder createBuilder(final LinkBuilders linkProcessor)
     {
         return (AbiquoLinkBuilder) linkProcessor.createSingleLinkBuilder().relativize(false);
     }

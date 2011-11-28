@@ -46,7 +46,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
-import com.abiquo.api.resources.cloud.VirtualMachinesResource;
+import com.abiquo.api.resources.cloud.VirtualMachineResource;
 import com.abiquo.api.services.DatacenterService;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.NetworkService;
@@ -227,8 +227,8 @@ public class EnterpriseResource extends AbstractResource
             VirtualAppliance vapp = nvimg.getVirtualAppliance();
             VirtualMachine vm = nvimg.getVirtualMachine();
 
-            vmDto.add(VirtualMachinesResource.createCloudAdminTransferObject(vm, vapp
-                .getVirtualDatacenter().getId(), vapp.getId(), restBuilder));
+            vmDto.add(VirtualMachineResource.createTransferObject(vm, vapp.getVirtualDatacenter()
+                .getId(), vapp.getId(), restBuilder));
         }
         return vmDto;
 
