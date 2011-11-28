@@ -107,7 +107,7 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
         query.setParameter("machineId", machineId);
 
-        return query.uniqueResult() != null;
+        return !query.list().isEmpty();
     }
 
     public List<Machine> findRackMachines(final Rack rack)
@@ -741,11 +741,10 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND datastore.datastoreUUID = :datastoreUuid";
 
     private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
-        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
-            + ") AND m.id = :machineId";
+        "SELECT vm FROM com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h join h.machine m WHERE m.id = :machineId "
+            + "AND vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + "AND vm.state != 'PAUSED' AND vm.state != 'REBOOTED'";
 
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
