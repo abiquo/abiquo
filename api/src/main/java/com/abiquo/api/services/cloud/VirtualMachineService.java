@@ -40,7 +40,6 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
@@ -1198,7 +1197,7 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                InfrastructureService.checkRemoteServiceStatus(r.getType(), r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getType(), r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 

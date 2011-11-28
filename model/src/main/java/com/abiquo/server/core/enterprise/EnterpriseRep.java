@@ -36,6 +36,7 @@ import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDAO;
+import com.abiquo.server.core.pricing.PricingTemplate;
 
 @Repository
 public class EnterpriseRep extends DefaultRepBase
@@ -129,6 +130,14 @@ public class EnterpriseRep extends DefaultRepBase
     public List<Enterprise> findAll(final Integer offset, final Integer numResults)
     {
         return this.enterpriseDAO.findAll(offset, numResults);
+    }
+
+    public List<Enterprise> findByPricingTemplate(final PricingTemplate pricingTempl,
+        final boolean included, final String filterName, final Integer offset,
+        final Integer numResults)
+    {
+        return this.enterpriseDAO.findByPricingTemplate(pricingTempl, included, filterName, offset,
+            numResults);
     }
 
     public List<Enterprise> findByNameAnywhere(final String name)
@@ -405,24 +414,24 @@ public class EnterpriseRep extends DefaultRepBase
     {
         limitsDAO.remove(limit);
     }
-    
+
     /**
      * Consumes the token. After a successful execution the token will be invalidated.
      * 
      * @param token token.
      * @return boolean true if there was token. False otherwise.
      */
-    public boolean existOneTimeToken(String token)
+    public boolean existOneTimeToken(final String token)
     {
         return ottSessionDAO.consumeToken(token) > 0;
     }
-    
+
     /**
      * The uniqueness of users is granted by Login + AuthType.
      * 
      * @param token token to persist.
      */
-    public void persistToken(String token)
+    public void persistToken(final String token)
     {
         OneTimeTokenSession ottSession = new OneTimeTokenSession(token);
         ottSessionDAO.persist(ottSession);
@@ -456,4 +465,8 @@ public class EnterpriseRep extends DefaultRepBase
         return userDAO.existAnyUserWithNickAndAuth(nick, authType);
     }
 
+    public boolean existAnyEnterpriseWithPricingTemplate(final PricingTemplate pricingTemplate)
+    {
+        return enterpriseDAO.existAnyEnterpriseWithPricingTemplate(pricingTemplate);
+    }
 }

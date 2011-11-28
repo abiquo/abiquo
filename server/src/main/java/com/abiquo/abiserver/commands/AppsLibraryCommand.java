@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.commands;
 
-
 /**
  * This command collects all actions related to Virtual Images
  * 

@@ -26,19 +26,19 @@
 // Generated on: 2011.05.31 at 10:28:37 AM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for HypervisorEnumTypeDto.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for HypervisorEnumTypeDto.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="HypervisorEnumTypeDto">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -51,37 +51,37 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "HypervisorEnumTypeDto")
 @XmlEnum
-public enum HypervisorEnumTypeDto {
+public enum HypervisorEnumTypeDto
+{
 
     @XmlEnumValue("kvm")
-    KVM("kvm"),
-    @XmlEnumValue("esxi")
-    ESXI("esxi"),
-    @XmlEnumValue("vbox")
-    VBOX("vbox"),
-    @XmlEnumValue("xen")
-    XEN("xen"),
-    @XmlEnumValue("hyperv")
-    HYPERV("hyperv"),
-    @XmlEnumValue("xenserver")
+    KVM("kvm"), @XmlEnumValue("esxi")
+    ESXI("esxi"), @XmlEnumValue("vbox")
+    VBOX("vbox"), @XmlEnumValue("xen")
+    XEN("xen"), @XmlEnumValue("hyperv")
+    HYPERV("hyperv"), @XmlEnumValue("xenserver")
     XENSERVER("xenserver");
     private final String value;
 
-    HypervisorEnumTypeDto(String v) {
+    HypervisorEnumTypeDto(String v)
+    {
         value = v;
     }
 
-    public String value() {
+    public String value()
+    {
         return value;
     }
 
-    public static HypervisorEnumTypeDto fromValue(String v) {
-        for (HypervisorEnumTypeDto c: HypervisorEnumTypeDto.values()) {
-            if (c.value.equals(v)) {
+    public static HypervisorEnumTypeDto fromValue(String v)
+    {
+        for (HypervisorEnumTypeDto c : HypervisorEnumTypeDto.values())
+        {
+            if (c.value.equals(v))
+            {
                 return c;
             }
         }

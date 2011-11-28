@@ -67,6 +67,8 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
 
+    public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
+
     public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
 
     public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
@@ -266,4 +268,5 @@ public class VirtualApplianceResource
         service.deleteVirtualAppliance(vdcId, vappId, forceDelete);
 
     }
+
 }

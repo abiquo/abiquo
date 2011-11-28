@@ -270,6 +270,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
                 datacenters.add(vdctoadd);
+
             }
             result.setData(datacenters);
 

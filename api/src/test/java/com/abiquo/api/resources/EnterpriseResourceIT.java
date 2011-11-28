@@ -200,13 +200,13 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualDatacenter vdc = vdcGenerator.createInstance(rs.getDatacenter());
         setup(vdc.getDatacenter(), rs, vdc.getEnterprise(), vdc.getNetwork(), vdc);
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan.getConfiguration().getDhcp(), vlan.getConfiguration(), vlan);
+        setup(vlan.getConfiguration(), vlan);
 
         IPAddress ip = IPAddress.newIPAddress(vlan.getConfiguration().getAddress()).nextIPAddress();
         IPAddress lastIP =
-            IPNetworkRang.lastIPAddressWithNumNodes(
-                IPAddress.newIPAddress(vlan.getConfiguration().getAddress()),
-                IPNetworkRang.masktoNumberOfNodes(vlan.getConfiguration().getMask()));
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vlan.getConfiguration()
+                .getAddress()), IPNetworkRang
+                .masktoNumberOfNodes(vlan.getConfiguration().getMask()));
 
         List<IpPoolManagement> ips = new ArrayList<IpPoolManagement>();
         while (!ip.equals(lastIP))
@@ -230,9 +230,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         // Get the first object and ensure it have at least the links of virtualdatacenter
         // and the link of private network that belongs to
-        assertLinkExist(entity.getCollection().get(0),
-            resolvePrivateNetworkURI(vdc.getId(), vlan.getId()),
-            PrivateNetworkResource.PRIVATE_NETWORK);
+        assertLinkExist(entity.getCollection().get(0), resolvePrivateNetworkURI(vdc.getId(), vlan
+            .getId()), PrivateNetworkResource.PRIVATE_NETWORK);
         assertLinkExist(entity.getCollection().get(0), resolveVirtualDatacenterURI(vdc.getId()),
             "virtualdatacenter");
 
@@ -419,8 +418,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
         VirtualMachine vm = vmGenerator.createUniqueInstance();
 
         VirtualDatacenter vdc =
-            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
-                vm.getEnterprise());
+            vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(), vm
+                .getEnterprise());
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         vm.getVirtualImage().getRepository()
@@ -468,8 +467,8 @@ public class EnterpriseResourceIT extends AbstractJpaGeneratorIT
 
         assertLinkExist(vmDto, resolveEnterpriseURI(e.getId()), "enterprise");
         assertLinkExist(vmDto, resolveUserURI(e.getId(), u.getId()), "user");
-        assertLinkExist(vmDto,
-            resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m.getId()), "machine");
+        assertLinkExist(vmDto, resolveMachineURI(m.getDatacenter().getId(), m.getRack().getId(), m
+            .getId()), "machine");
     }
 
 }

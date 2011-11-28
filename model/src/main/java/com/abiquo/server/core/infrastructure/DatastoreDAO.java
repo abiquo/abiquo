@@ -19,31 +19,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * abiCloud  community version
- * cloud management application for hybrid clouds
- * Copyright (C) 2008-2010 - Soluciones Grid SL
- *
- * This application is free software; you can redistribute it and/or
- * modify it under the terms of the GNU LESSER GENERAL PUBLIC
- * LICENSE as published by the Free Software Foundation under
- * version 3 of the License
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * LESSER GENERAL PUBLIC LICENSE v.3 for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
-
 package com.abiquo.server.core.infrastructure;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -56,7 +34,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.enterprise.Enterprise;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaDatastoreDAO")
 public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
@@ -66,12 +44,12 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
         super(Datastore.class);
     }
 
-    public DatastoreDAO(EntityManager entityManager)
+    public DatastoreDAO(final EntityManager entityManager)
     {
         super(Datastore.class, entityManager);
     }
 
-    public List<Datastore> findMachineDatastores(Machine machine)
+    public List<Datastore> findMachineDatastores(final Machine machine)
     {
         assert machine != null;
         assert isManaged2(machine);
@@ -91,7 +69,7 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
      * 
      * @return all the datastores with the same ''datastore uuid'' INCLUDING the provided datastore.
      */
-    public List<Datastore> findShares(Datastore datastore)
+    public List<Datastore> findShares(final Datastore datastore)
     {
         if (datastore.getDatastoreUUID() == null)
         {
@@ -113,40 +91,40 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
         return getSingleResult(criteria);
     }
 
-    private Criteria inMachine(Machine machine)
+    private Criteria inMachine(final Machine machine)
     {
         return createCriteria().createCriteria(Datastore.MACHINES_PROPERTY).add(
-            Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+            Restrictions.in(PersistentEntity.ID_PROPERTY, new Integer[] {machine.getId()}));
 
     }
-    
-    private Criteria inMachine(Machine machine, String uuid)
+
+    private Criteria inMachine(final Machine machine, final String uuid)
     {
         return createCriteria(sharedUuid(uuid)).createCriteria(Datastore.MACHINES_PROPERTY).add(
-            Restrictions.in(Machine.ID_PROPERTY, new Integer[] {machine.getId()}));
+            Restrictions.in(PersistentEntity.ID_PROPERTY, new Integer[] {machine.getId()}));
 
     }
 
-    private static Criterion sharedUuid(String uuid)
+    private static Criterion sharedUuid(final String uuid)
     {
         return Restrictions.eq(Datastore.DATASTORE_UUID_PROPERTY, uuid);
     }
 
-    private static Criterion equalName(String name)
+    private static Criterion equalName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Datastore.NAME_PROPERTY, name);
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return this.existsAnyByCriterions(equalName(name));
     }
 
-    public boolean existsAnyOtherWithName(Datastore entity, String name)
+    public boolean existsAnyOtherWithName(final Datastore entity, final String name)
     {
         assert entity != null;
         assert isManaged(entity);
@@ -155,21 +133,21 @@ public class DatastoreDAO extends DefaultDAOBase<Integer, Datastore>
         return this.existsAnyOtherByCriterions(entity, equalName(name));
     }
 
-    private static Criterion equalDirectory(String directory)
+    private static Criterion equalDirectory(final String directory)
     {
         assert !StringUtils.isEmpty(directory);
 
         return Restrictions.eq(Datastore.DIRECTORY_PROPERTY, directory);
     }
 
-    public boolean existsAnyWithDirectory(String directory)
+    public boolean existsAnyWithDirectory(final String directory)
     {
         assert !StringUtils.isEmpty(directory);
 
         return this.existsAnyByCriterions(equalDirectory(directory));
     }
 
-    public boolean existsAnyOtherWithDirectory(Datastore entity, String directory)
+    public boolean existsAnyOtherWithDirectory(final Datastore entity, final String directory)
     {
         assert entity != null;
         assert isManaged(entity);

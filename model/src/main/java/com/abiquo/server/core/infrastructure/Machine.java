@@ -424,7 +424,7 @@ public class Machine extends DefaultEntityBase
 
     private final static int VIRTUAL_SWITCH_LENGTH_MIN = 0;
 
-    private final static int VIRTUAL_SWITCH_LENGTH_MAX = 255;
+    private final static int VIRTUAL_SWITCH_LENGTH_MAX = 200;
 
     private final static boolean VIRTUAL_SWITCH_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 

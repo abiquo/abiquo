@@ -19,25 +19,31 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.pricing;
 
-import javax.persistence.EntityManager;
+import java.util.List;
 
-import org.springframework.stereotype.Repository;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.abiquo.model.transport.WrapperDto;
 
-@Repository("jpaDhcpDAO")
-public class DhcpDAO extends DefaultDAOBase<Integer, Dhcp>
+@XmlRootElement(name = "pricingCostCodes")
+public class PricingCostCodesDto extends WrapperDto<PricingCostCodeDto>
 {
-    public DhcpDAO()
-    {
-        super(Dhcp.class);
-    }
 
-    public DhcpDAO(EntityManager entityManager)
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public static final String MEDIA_TYPE = "application/pricingcostcodesdto+xml";
+
+    @Override
+    @XmlElement(name = "pricingCostCode")
+    public List<PricingCostCodeDto> getCollection()
     {
-        super(Dhcp.class, entityManager);
+        return collection;
     }
 
 }

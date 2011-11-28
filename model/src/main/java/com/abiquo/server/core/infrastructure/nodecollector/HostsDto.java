@@ -26,7 +26,6 @@
 // Generated on: 2011.05.25 at 12:44:58 PM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import java.util.ArrayList;
@@ -35,15 +34,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * 
- *     			Wrapper class to get a list of Hosts.
- *     		
- * 
- * <p>Java class for HostsDto complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * Wrapper class to get a list of Hosts.
+ * <p>
+ * Java class for HostsDto complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="HostsDto">
@@ -56,41 +52,33 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "HostsDto", propOrder = {
-    "host"
-})
-public class HostsDto {
+@XmlType(name = "HostsDto", propOrder = {"host"})
+public class HostsDto
+{
 
     protected List<HostDto> host;
 
     /**
      * Gets the value of the host property.
-     * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the host property.
-     * 
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the host property.
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getHost().add(newItem);
+     * getHost().add(newItem);
      * </pre>
-     * 
-     * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link HostDto }
-     * 
-     * 
+     * Objects of the following type(s) are allowed in the list {@link HostDto }
      */
-    public List<HostDto> getHost() {
-        if (host == null) {
+    public List<HostDto> getHost()
+    {
+        if (host == null)
+        {
             host = new ArrayList<HostDto>();
         }
         return this.host;

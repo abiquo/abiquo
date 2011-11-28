@@ -24,8 +24,12 @@
  */
 package com.abiquo.api.services.cloud;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -43,15 +47,29 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.scheduler.limit.VirtualMachinePrice;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
+import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
+import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
+import com.abiquo.server.core.cloud.VirtualAppliancePriceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
+import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.PricingCostCode;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -88,6 +106,11 @@ public class VirtualApplianceService extends DefaultApiService
     VirtualApplianceRep virtualApplianceRepo;
 
     @Autowired
+    private PricingRep pricingRep;
+
+    @Autowired
+    RasdManagementDAO rasdManDao;
+
     VirtualMachineService vmService;
 
     /** The logger object **/
@@ -230,6 +253,181 @@ public class VirtualApplianceService extends DefaultApiService
         repo.updateVirtualAppliance(vapp);
 
         return vapp;
+    }
+
+    public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
+    {
+        String price = "";
+        VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
+        // if enterprise has pt associated
+        PricingTemplate pricingTemplate = virtualAppliance.getEnterprise().getPricingTemplate();
+        if (pricingTemplate != null && pricingTemplate.isShowChangesBefore())
+        {
+            VirtualAppliancePriceDto priceDto =
+                getPriceVirtualAppliance(virtualAppliance, pricingTemplate);
+            price = pricingTemplate.getDescription();
+            price =
+                price.replace(PricingModelVariables.CHARGE.getText(), priceDto.getTotalCost() + " "
+                    + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.CHARGE_PERIOD.getText(), pricingTemplate
+                    .getChargingPeriod().name());
+            price =
+                price.replace(PricingModelVariables.MIN_CHARGE.getText(),
+                    priceDto.getMinimumChargePeriod() + " "
+                        + pricingTemplate.getCurrency().getSymbol());
+            price =
+                price.replace(PricingModelVariables.MIN_PERIOD.getText(), pricingTemplate
+                    .getMinimumCharge().name());
+
+        }
+        if (!price.equals(""))
+        {
+            price = price + "\n";
+        }
+        return price;// + "\n";
+    }
+
+    public VirtualAppliancePriceDto getPriceVirtualAppliance(
+        final VirtualAppliance virtualAppliance, final PricingTemplate pricingTemplate)
+    {
+        BigDecimal cost = new BigDecimal(0);
+        Map<VirtualMachineCost, BigDecimal> virtualMachinesCost =
+            new HashMap<VirtualMachinePrice.VirtualMachineCost, BigDecimal>();
+        virtualMachinesCost.put(VirtualMachineCost.COMPUTE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.COST_CODE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.NETWORK, cost);
+        virtualMachinesCost.put(VirtualMachineCost.ADDITIONAL_VOLUME, cost);
+        virtualMachinesCost.put(VirtualMachineCost.STORAGE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.STANDING_CHARGE, cost);
+        virtualMachinesCost.put(VirtualMachineCost.TOTAL, cost);
+
+        VirtualAppliancePriceDto dto =
+            new VirtualAppliancePriceDto(cost, cost, cost, cost, cost, cost);
+
+        int significantDigits = pricingTemplate.getCurrency().getDigits();
+
+        for (NodeVirtualImage node : virtualAppliance.getNodes())
+        {
+            VirtualMachineRequirements virtualMachineRequirements =
+                allocatorService.getVirtualMachineRequirements(node.getVirtualMachine());
+
+            virtualMachinesCost =
+                addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),
+                    virtualMachineRequirements, pricingTemplate);
+        }
+        dto.setAdditionalVolumCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME)));
+        dto.setCostCodeCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.COST_CODE)));
+        dto.setComputeCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE)));
+        dto.setStorageCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.STORAGE)));
+        dto.setNetworkCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.NETWORK)));
+        dto.setStandingCharge(rounded(significantDigits, pricingTemplate.getStandingChargePeriod()));
+        dto.setMinimumCharge(pricingTemplate.getMinimumCharge().ordinal());
+        dto.setMinimumChargePeriod(rounded(significantDigits,
+            pricingTemplate.getMinimumChargePeriod()));
+        dto.setTotalCost(rounded(significantDigits,
+            virtualMachinesCost.get(VirtualMachineCost.TOTAL)));
+        // It is for enterprise so we don't have to add to the price
+        // .add( pricingTemplate.getStandingChargePeriod())
+
+        return dto;
+    }
+
+    private BigDecimal rounded(final int significantDigits, final BigDecimal aNumber)
+    {
+        return aNumber.setScale(significantDigits, BigDecimal.ROUND_UP);
+    }
+
+    private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
+        final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final VirtualMachine virtualMachine,
+        final VirtualMachineRequirements virtualMachineRequirements,
+        final PricingTemplate pricingTemplate)
+    {
+        BigDecimal BYTES_TO_GB = new BigDecimal(1024l * 1024l * 1024l);
+
+        getCostCodeCost(virtualMachinesCost, virtualMachine, pricingTemplate);
+
+        Collection<RasdManagement> resources = rasdManDao.findByVirtualMachine(virtualMachine);
+        getAdditionalStorageCost(virtualMachinesCost, resources, pricingTemplate);
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.COMPUTE,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                pricingTemplate.getVcpu().multiply(
+                    new BigDecimal(virtualMachineRequirements.getCpu()))));
+        virtualMachinesCost.put(
+            VirtualMachineCost.COMPUTE,
+            virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                pricingTemplate.getMemoryMB().multiply(
+                    new BigDecimal(virtualMachineRequirements.getRam()))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.STORAGE,
+            virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                pricingTemplate.getHdGB().multiply(
+                    new BigDecimal(virtualMachineRequirements.getHd()).divide(BYTES_TO_GB, 2,
+                        BigDecimal.ROUND_HALF_EVEN))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.NETWORK,
+            virtualMachinesCost.get(VirtualMachineCost.NETWORK).add(
+                pricingTemplate.getPublicIp().multiply(
+                    new BigDecimal(virtualMachineRequirements.getPublicIP()))));
+
+        virtualMachinesCost.put(
+            VirtualMachineCost.TOTAL,
+            virtualMachinesCost.get(VirtualMachineCost.TOTAL).add(
+                virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
+                    virtualMachinesCost.get(VirtualMachineCost.COMPUTE).add(
+                        virtualMachinesCost.get(VirtualMachineCost.STORAGE).add(
+                            virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                                virtualMachinesCost.get(VirtualMachineCost.NETWORK)))))));
+        return virtualMachinesCost;
+    }
+
+    private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final VirtualMachine virtualMachine, final PricingTemplate pricing)
+    {
+        CostCode cc = pricingRep.findCostCodeById(virtualMachine.getVirtualImage().getCostCode());
+        PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
+        if (pricingCostCode != null)
+        {
+            virtualMachinesCost.put(
+                VirtualMachineCost.COST_CODE,
+                virtualMachinesCost.get(VirtualMachineCost.COST_CODE).add(
+                    pricingCostCode.getPrice()));
+        }
+
+    }
+
+    private void getAdditionalStorageCost(
+        final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
+        final Collection<RasdManagement> resources, final PricingTemplate pricing)
+    {
+
+        for (final RasdManagement resource : resources)
+        {
+            if (resource instanceof VolumeManagement)
+            {
+                final VolumeManagement volman = (VolumeManagement) resource;
+                // accum += volman.getSizeInMB();
+                Tier tier = pricingRep.findTierById(volman.getStoragePool().getTier().getId());
+                PricingTier pricingTier = pricingRep.findPricingTier(tier, pricing);
+                if (pricingTier != null)
+                {
+                    virtualMachinesCost.put(
+                        VirtualMachineCost.ADDITIONAL_VOLUME,
+                        virtualMachinesCost.get(VirtualMachineCost.ADDITIONAL_VOLUME).add(
+                            pricingTier.getPrice()));
+                }
+            }
+        }
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

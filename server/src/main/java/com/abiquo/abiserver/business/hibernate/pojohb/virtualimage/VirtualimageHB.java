@@ -81,7 +81,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
-    private String costCode;
+    private int costCode;
 
     private String creationUser;
 
@@ -111,7 +111,7 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         final CategoryHB category, final String name, final String description,
         final String pathName, final Long hdRequired, final Integer ramRequired,
         final Integer cpuRequired, final VirtualimageHB master, final int idEnterprise,
-        final String ovfId, final Long diskFileSize, final String costCode)
+        final String ovfId, final Long diskFileSize, final int costCode)
     {
         this.repository = repository;
         this.icon = icon;
@@ -291,12 +291,12 @@ public class VirtualimageHB implements java.io.Serializable, IPojoHB<VirtualImag
         this.chefEnabled = chefEnabled;
     }
 
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(final String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }

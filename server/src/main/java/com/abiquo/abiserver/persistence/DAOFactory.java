@@ -33,7 +33,6 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.PhysicalMachineDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RackDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
-import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkAssigmntDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkConfigurationDAO;
@@ -103,8 +102,6 @@ public interface DAOFactory
 
     // Network interfaces
     public abstract IpPoolManagementDAO getIpPoolManagementDAO();
-
-    public abstract DHCPServiceDAO getDHCPServiceDAO();
 
     public abstract NetworkConfigurationDAO getNetworkConfigurationDAO();
 

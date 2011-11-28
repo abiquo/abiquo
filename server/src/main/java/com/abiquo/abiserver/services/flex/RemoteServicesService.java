@@ -27,6 +27,9 @@ import com.abiquo.abiserver.business.BusinessDelegateProxy;
 import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.impl.RemoteServicesCommandImpl;
+import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.RemoteServicesResourceStubImpl;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -49,7 +52,7 @@ public class RemoteServicesService
         remoteCommand = new RemoteServicesCommandImpl();
     }
 
-    protected RemoteServicesCommand proxyCommand(UserSession userSession)
+    protected RemoteServicesCommand proxyCommand(final UserSession userSession)
     {
         return BusinessDelegateProxy.getInstance(userSession, remoteCommand,
             RemoteServicesCommand.class);
@@ -62,18 +65,13 @@ public class RemoteServicesService
      * @param rs
      * @return
      */
-    public BasicResult addRemoteService(UserSession userSession, RemoteService rs)
+    public BasicResult addRemoteService(final UserSession userSession, final RemoteService rs)
     {
-        RemoteServicesCommand proxied = proxyCommand(userSession);
+        RemoteServicesResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
+                RemoteServicesResourceStub.class);
 
-        try
-        {
-            return proxied.addRemoteService(userSession, rs);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
+        return proxy.addRemoteService(rs);
     }
 
     /**
@@ -83,7 +81,7 @@ public class RemoteServicesService
      * @param rs
      * @return
      */
-    public BasicResult updateRemoteService(UserSession userSession, RemoteService rs)
+    public BasicResult updateRemoteService(final UserSession userSession, final RemoteService rs)
     {
         RemoteServicesCommand proxied = proxyCommand(userSession);
 
@@ -104,7 +102,8 @@ public class RemoteServicesService
      * @param id
      * @return
      */
-    public DataResult<RemoteService> getRemoteService(UserSession userSession, Integer id)
+    public DataResult<RemoteService> getRemoteService(final UserSession userSession,
+        final Integer id)
     {
         DataResult<RemoteService> dataResult = new DataResult<RemoteService>();
 
@@ -139,8 +138,8 @@ public class RemoteServicesService
      * @param idRemoteServiceType
      * @return
      */
-    public DataResult<List<RemoteService>> getRemoteServicesByType(UserSession userSession,
-        Integer idDataCenter, String remoteServiceType)
+    public DataResult<List<RemoteService>> getRemoteServicesByType(final UserSession userSession,
+        final Integer idDataCenter, final String remoteServiceType)
     {
         DataResult<List<RemoteService>> dataResult = new DataResult<List<RemoteService>>();
 
@@ -175,8 +174,8 @@ public class RemoteServicesService
      * @param idDataCenter
      * @return
      */
-    public DataResult<List<RemoteService>> getAllRemoteServices(UserSession userSession,
-        Integer idDataCenter)
+    public DataResult<List<RemoteService>> getAllRemoteServices(final UserSession userSession,
+        final Integer idDataCenter)
     {
         DataResult<List<RemoteService>> dataResult = new DataResult<List<RemoteService>>();
 
@@ -211,7 +210,7 @@ public class RemoteServicesService
      * @param id
      * @return
      */
-    public DataResult<Boolean> checkRemoteService(UserSession userSession, Integer id)
+    public DataResult<Boolean> checkRemoteService(final UserSession userSession, final Integer id)
     {
         DataResult<Boolean> dataResult = new DataResult<Boolean>();
 
@@ -247,8 +246,9 @@ public class RemoteServicesService
      * @param serviceMapping
      * @return
      */
-    public DataResult<Boolean> checkRemoteService(UserSession userSession, String protocol,
-        String domainName, Integer port, String serviceMapping, String remoteServiceType)
+    public DataResult<Boolean> checkRemoteService(final UserSession userSession,
+        final String protocol, final String domainName, final Integer port,
+        final String serviceMapping, final String remoteServiceType)
     {
         DataResult<Boolean> dataResult = new DataResult<Boolean>();
 
@@ -283,8 +283,8 @@ public class RemoteServicesService
      * @param id
      * @return
      */
-    public DataResult<Boolean> deleteRemoteService(UserSession userSession,
-        RemoteService remoteService)
+    public DataResult<Boolean> deleteRemoteService(final UserSession userSession,
+        final RemoteService remoteService)
     {
         RemoteServicesCommand proxied = proxyCommand(userSession);
 
@@ -297,7 +297,7 @@ public class RemoteServicesService
      * @param userSession
      * @return
      */
-    public DataResult<List<RemoteServiceType>> getRemoteServiceTypes(UserSession userSession)
+    public DataResult<List<RemoteServiceType>> getRemoteServiceTypes(final UserSession userSession)
     {
         DataResult<List<RemoteServiceType>> dataResult = new DataResult<List<RemoteServiceType>>();
 

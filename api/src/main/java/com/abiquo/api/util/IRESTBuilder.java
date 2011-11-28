@@ -55,7 +55,16 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrencyDto;
+import com.abiquo.server.core.pricing.Currency;
+import com.abiquo.server.core.pricing.CurrencyDto;
+import com.abiquo.server.core.pricing.PricingCostCodeDto;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTemplateDto;
+import com.abiquo.server.core.pricing.PricingTierDto;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRuleDto;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
@@ -172,6 +181,22 @@ public interface IRESTBuilder
         Integer vdcId);
 
     public List<RESTLink> buildVirtualMachineStateLinks(Integer vappId, Integer vdcId, Integer vmId);
+
+    public List<RESTLink> buildCurrencyLinks(CurrencyDto currencyDto, Currency currency);
+
+    public List<RESTLink> buildPricingTemplateLinks(final Integer currencyId,
+        final PricingTemplateDto pricingTemplate);
+
+    public List<RESTLink> buildCostCodeLinks(final Integer costCodeId);
+
+    public List<RESTLink> buildCostCodeCurrencyLinks(CostCode costCode, Currency currency,
+        CostCodeCurrencyDto dto);
+
+    public List<RESTLink> buildPricingCostCodeLinks(CostCode costCode,
+        PricingTemplate pricingTemplate, PricingCostCodeDto dto);
+
+    public List<RESTLink> buildPricingTierLinks(Tier tier, PricingTemplate pricingTemplate,
+        PricingTierDto dto);
 
     public List<RESTLink> buildPublicNetworksLinks(Integer datacenterId);
 

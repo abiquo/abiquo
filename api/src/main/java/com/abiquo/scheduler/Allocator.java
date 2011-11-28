@@ -345,7 +345,8 @@ public class Allocator implements IAllocator
      *            for the datacenter repository)
      * @param resources, additional resources configuration
      */
-    protected VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
+    @Override
+    public VirtualMachineRequirements getVirtualMachineRequirements(final VirtualMachine vmachine)
     {
         return new VirtualMachineRequirements(vmachine);
     }

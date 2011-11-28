@@ -72,7 +72,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
     /** Size of the file containing the Disk. in bytes */
     private Long diskFileSize;
 
-    private String costCode;
+    private int costCode;
 
     private String creationUser;
 
@@ -89,7 +89,7 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         ovfId = "";
         stateful = false;
         shared = false;
-        costCode = "";
+        costCode = 0;
     }
 
     public int getId()
@@ -282,12 +282,12 @@ public class VirtualImage implements IPojo<VirtualimageHB>
         this.chefEnabled = chefEnabled;
     }
 
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(final String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }
