@@ -36,6 +36,7 @@ import com.abiquo.api.common.Assert;
 import com.abiquo.api.common.SysadminAuthentication;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.services.UserService;
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.model.rest.RESTLink;
@@ -223,5 +224,47 @@ public class UserServiceTest extends AbstractUnitTest
         {
             rollbackActiveTransaction(em);
         }
+    }
+
+    @Test(expectedExceptions = {BadRequestException.class})
+    public void addUserWithOutNick()
+    {
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        UserService service = new UserService(em);
+
+        UserDto dto =
+            new UserDto("foo", "foo", "foo@foo.com", null, "foo", "ES", "", User.AuthType.ABIQUO
+                .name());
+
+        service.addUser(dto, e.getId(), r);
+
+    }
+
+    @Test(expectedExceptions = {BadRequestException.class})
+    public void addUserWithEmptyName()
+    {
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        UserService service = new UserService(em);
+
+        UserDto dto =
+            new UserDto("", "foo", "foo@foo.com", "newuser", "foo", "ES", "", User.AuthType.ABIQUO
+                .name());
+
+        service.addUser(dto, e.getId(), r);
+
+    }
+
+    @Test(expectedExceptions = {BadRequestException.class})
+    public void addUserWithEmptyNick()
+    {
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        UserService service = new UserService(em);
+
+        UserDto dto =
+            new UserDto("foo", "foo", "foo@foo.com", "", "foo", "ES", "", User.AuthType.ABIQUO
+                .name());
+
+        service.addUser(dto, e.getId(), r);
+
     }
 }

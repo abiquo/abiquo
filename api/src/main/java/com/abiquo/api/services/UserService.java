@@ -208,6 +208,16 @@ public class UserService extends DefaultApiService
             addValidationErrors(APIError.USER_PASSWORD_IS_NECESSARY);
             flushErrors();
         }
+        if (dto.getNick() == null || dto.getNick().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NICK_IS_NECESSARY);
+            flushErrors();
+        }
+        if (dto.getName() == null || dto.getName().isEmpty())
+        {
+            addValidationErrors(APIError.USER_NAME_IS_NECESSARY);
+            flushErrors();
+        }
 
         User user =
             enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
@@ -223,10 +233,6 @@ public class UserService extends DefaultApiService
         else
         {
             user.setAvailableVirtualDatacenters(dto.getAvailableVirtualDatacenters());
-        }
-        if (dto.getPassword().isEmpty())
-        {
-
         }
 
         if (!user.isValid())
