@@ -261,7 +261,10 @@ public enum APIError
         "In Ldap mode can not modify user's enterprise"), USER_DELETING_HIMSELF("USER 9",
         "The user cannot delete his own user account"), USER_PASSWORD_IS_NECESSARY("USER 10",
         "The field password is necessary"), USER_NICK_CANNOT_BE_CHANGED("USER 11",
-        "Cannot change the user nick"),
+        "Cannot change the user nick"), USER_NAME_IS_NECESSARY("USER 12",
+        "The field name is necessary"), USER_NICK_IS_NECESSARY("USER 13",
+        "The field nick is necessary"),
+
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
@@ -527,7 +530,6 @@ public enum APIError
         {
             System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
                 .name()));
-
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
