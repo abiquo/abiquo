@@ -92,16 +92,14 @@
                 header.setStyle("horizontalAlign", "left");
                 header.addChild(_popUpIcon);
                 header.addChild(_title);
+                header.addChild(_iconInfo);                	
                 
-                //Show only if required
-                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 1){
-	                header.addChild(_iconInfo);                	
+                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 0){
+                	_iconInfo.hideIconInfo();
                 }
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
-                /* addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
-                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo); */
                 this.addChildAt(header, 0);
 
                 //Registering Keyboard events, for standard application behaivor
