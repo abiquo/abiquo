@@ -56,6 +56,13 @@
             private var IP_RESULTS_PER_PAGE:int = AbiCloudModel.getInstance().configurationManager.config.client_network_numberIpAdressesPerPage.value;
 
             private var networkManagement:NetworkManagement = null;
+            
+            private var _vlanType:String;
+            
+            public function set vlanType(value:String):void
+            {
+                this._vlanType = value;	
+            }
 
             private var _enterprise:Enterprise;
 
@@ -141,6 +148,7 @@
                 {
                     event = new NetworkingEvent(NetworkingEvent.GET_PRIVATE_IPs_BY_VDC);
                     event.virtualDatacenter = _virtualDatacenter;
+                    event.networkName = this._vlanType;
                 }
                 else if (_enterprise != null)
                 {
