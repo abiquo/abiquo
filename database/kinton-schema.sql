@@ -230,6 +230,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `kinton`.`datacenter`;
 CREATE TABLE  `kinton`.`datacenter` (
   `idDataCenter` int(10) unsigned NOT NULL auto_increment,
+  `uuid` varchar(40) default NULL,
   `name` varchar(20) NOT NULL,
   `situation` varchar(100) default NULL,
   `network_id` int(11) unsigned default NULL,
