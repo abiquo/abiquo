@@ -39,14 +39,14 @@ public class TaskService extends DefaultApiService
     private final static Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
 
     @Autowired
-    AsyncTaskRep repo;
+    private AsyncTaskRep repo;
 
     public List<Task> findTasks(final TaskOwnerType type, final String ownerId)
     {
         return repo.findTasksByOwnerId(type, ownerId);
     }
 
-    public Task findTask(String taskId)
+    public Task findTask(final String taskId)
     {
         Task task = repo.findTask(taskId);
 
@@ -58,5 +58,10 @@ public class TaskService extends DefaultApiService
         }
 
         return task;
+    }
+
+    public Task addTask(final Task task)
+    {
+        return repo.save(task);
     }
 }
