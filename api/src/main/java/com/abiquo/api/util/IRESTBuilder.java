@@ -228,6 +228,9 @@ public interface IRESTBuilder
     public List<RESTLink> buildIconLinks(final IconDto icon);
 
     public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
-    
+
     public RESTLink buildUserLink(Integer enterpriseId, Integer userId);
+
+    public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
+
 }
