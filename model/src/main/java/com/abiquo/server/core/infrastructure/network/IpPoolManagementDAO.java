@@ -36,6 +36,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
@@ -68,7 +69,8 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "AND ip.vlanNetwork.id = vlan.id "
             + " AND dc.id = :datacenter_id AND "
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
-            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )"
+            + "AND (vlan.type = :type OR vlan.type  = :type2 )";//
 
     public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
@@ -669,13 +671,20 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
      */
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         Integer startwith, final Integer limit, final String filter, final OrderByEnum orderByEnum,
-        final Boolean descOrAsc)
+        final Boolean descOrAsc, final NetworkType type)
     {
+        NetworkType type2 = type;
+        if (type.equals(NetworkType.EXTERNAL))
+        {
+            type2 = NetworkType.UNMANAGED;
+        }
         Query finalQuery =
             getSession().createQuery(BY_DATACENTER + " " + defineOrderBy(orderByEnum, descOrAsc));
         finalQuery.setParameter("datacenter_id", datacenterId);
         finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
             + filter + "%");
+        finalQuery.setParameter("type", type);
+        finalQuery.setParameter("type2", type2);
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();

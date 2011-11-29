@@ -831,7 +831,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
         final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc)
+        final String filterLike, final String orderBy, final Boolean asc, final String type)
         throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
@@ -843,6 +843,8 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+
+        buildRequest.append("&type=" + type);
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);

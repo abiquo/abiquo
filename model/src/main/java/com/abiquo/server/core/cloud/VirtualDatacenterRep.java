@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -375,10 +376,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        final OrderByEnum orderByEnum, final Boolean descOrAsc, final NetworkType netType)
     {
         return ipManagementDAO.findPublicIpsByDatacenter(datacenterId, startwith, limit, filter,
-            orderByEnum, descOrAsc);
+            orderByEnum, descOrAsc, netType);
     }
 
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,
