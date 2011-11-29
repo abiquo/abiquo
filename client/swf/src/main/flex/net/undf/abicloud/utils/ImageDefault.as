@@ -23,9 +23,9 @@ package net.undf.abicloud.utils
 {
     import flash.events.Event;
     import flash.events.IOErrorEvent;
-
+    
     import mx.controls.Image;
-
+    
     import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
 
     /**
@@ -76,6 +76,11 @@ package net.undf.abicloud.utils
         {
             return this._loadSuccess;
         }
+        
+        public function set loadSuccess(value:Boolean):void
+        {
+            this._loadSuccess = value;
+        }
 
         /**
          * Constructor
@@ -111,7 +116,9 @@ package net.undf.abicloud.utils
          */
         private function loadImageComplete_handler(event:Event):void
         {
-            //this._loadSuccess = true;
+            if(this.source != this._defaultImagePath){
+	            this._loadSuccess = true;
+            }
 
             dispatchEvent(new Event("loadSuccessChanged"));
         }
