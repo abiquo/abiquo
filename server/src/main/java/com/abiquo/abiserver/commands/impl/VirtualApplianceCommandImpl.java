@@ -2838,8 +2838,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
         HibernateException, NotEnoughResourcesException, VirtualImageException
     {
-
+        
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+        
+        // Unsuscribe to all VA. We perform this action in case one of the virtual machines are already deployed
+        // and Abiquo does not know it. The best way to avoid 'move' and 'delete' side effects is to delete de
+        // subscriptions. I really love Tarantino currently.
+        EventingSupport.unsubscribeToAllVA(virtualAppliance);
+        
         // transaction = session.beginTransaction();
         session = checkOpenTransaction(session);
 

@@ -33,6 +33,7 @@ import com.abiquo.virtualfactory.network.VirtualNIC;
 import com.vmware.vim25.HostListSummary;
 import com.vmware.vim25.InvalidLogin;
 import com.vmware.vim25.VirtualMachineConnectionState;
+import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.mo.DistributedVirtualPortgroup;
 import com.vmware.vim25.mo.Folder;
 import com.vmware.vim25.mo.HostSystem;
@@ -51,30 +52,9 @@ public class VCenterBridge
 {
 
     /**
-     * IP address to vCenter.
-     */
-    private String vCenterIP;
-
-    /**
-     * Maintain the object of the vCenter connection.
-     */
-    private ServiceInstance vCenterServiceInstance;
-
-    /**
      * Logger class
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(VCenterBridge.class);
-    
-    /**
-     * Private constructor. It is only called by the
-     * {@link VCenterBridge#createVCenterBridge(ServiceInstance) function} and it must be this way.
-     * 
-     * @param vCenterIP ip address of the vCenter.
-     */
-    private VCenterBridge(final String vCenterIP)
-    {
-        this.vCenterIP = vCenterIP;
-    }
 
     /**
      * Static method to implement the logic to discover the vCenter IP from the Host address.
@@ -105,26 +85,24 @@ public class VCenterBridge
     }
 
     /**
-     * Create a port group with name "networkName_vlanTag" in a Distributed Virtual Switch.
-     * 
-     * @param vSwitchName name of the distributed virtual switch where to create the port group.
-     * @param networkName name of the network in Abiquo.
-     * @param vlanTag tag to use in the port group.
-     * @throws VirtualMachineException encapsulate any exception
+     * IP address to vCenter.
      */
-    public void createPortGroupInVCenter(String vSwitchName, String networkName, Integer vlanTag)
-        throws VirtualMachineException
+    private String vCenterIP;
+    
+    /**
+     * Maintain the object of the vCenter connection.
+     */
+    private ServiceInstance vCenterServiceInstance;
+
+    /**
+     * Private constructor. It is only called by the
+     * {@link VCenterBridge#createVCenterBridge(ServiceInstance) function} and it must be this way.
+     * 
+     * @param vCenterIP ip address of the vCenter.
+     */
+    private VCenterBridge(final String vCenterIP)
     {
-        String portGroupName = networkName + "_" + vlanTag;
-        connect();
-        DistrubutedPortGroupActions vdsCreation =
-            new DistrubutedPortGroupActions(vCenterServiceInstance);
-        if (vdsCreation.getPortGroup(vSwitchName, portGroupName) == null)
-        {
-            // create port group because it does not exist.
-            vdsCreation.createPortGroupInDVS(vSwitchName, networkName, vlanTag);
-        }
-        disconnect();
+        this.vCenterIP = vCenterIP;
     }
 
     /**
@@ -144,6 +122,29 @@ public class VCenterBridge
         {
             dpgActions.attachVirtualMachineNICToPortGroup(nameVM, vnic.getNetworkName() + "_"
                 + vnic.getVlanTag(), vnic.getMacAddress());
+        }
+        disconnect();
+    }
+
+    /**
+     * Create a port group with name "networkName_vlanTag" in a Distributed Virtual Switch.
+     * 
+     * @param vSwitchName name of the distributed virtual switch where to create the port group.
+     * @param networkName name of the network in Abiquo.
+     * @param vlanTag tag to use in the port group.
+     * @throws VirtualMachineException encapsulate any exception
+     */
+    public void createPortGroupInVCenter(String vSwitchName, String networkName, Integer vlanTag)
+        throws VirtualMachineException
+    {
+        String portGroupName = networkName + "_" + vlanTag;
+        connect();
+        DistrubutedPortGroupActions vdsCreation =
+            new DistrubutedPortGroupActions(vCenterServiceInstance);
+        if (vdsCreation.getPortGroup(vSwitchName, portGroupName) == null)
+        {
+            // create port group because it does not exist.
+            vdsCreation.createPortGroupInDVS(vSwitchName, networkName, vlanTag);
         }
         disconnect();
     }
@@ -174,6 +175,36 @@ public class VCenterBridge
 
         }
         disconnect();
+    }
+
+    /**
+     * Search for a virtual machine and remove it if it exists.
+     * 
+     * @param machineName name of the virtual machine in vCenter
+     * @throws VirtualMachineException 
+     */
+    public void seachAndCleanExistingMachine(String machineName) throws VirtualMachineException
+    {
+        connect();
+        VirtualMachineVCenterActions vmActions = new VirtualMachineVCenterActions(vCenterServiceInstance);
+        VirtualMachine vm = vmActions.getVirtualMachine(machineName);
+        if (vm != null)
+        {
+            switch(vm.getRuntime().powerState)
+            {
+                case suspended:
+                    // if it is suspended we should power on before power off...
+                    vmActions.startVirtualMachine(vm);
+                case poweredOn:
+                    // if it is powered on we should power off before delete it.
+                    vmActions.stopVirtualMachine(vm);
+                default:
+                    // always delete it.
+                    vmActions.deleteVirtualMachine(vm);
+                    
+            }
+        }
+        disconnect();   
     }
 
     /**
