@@ -101,25 +101,6 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
-    // Chef constants to help link builders. Method implementation are premium.
-    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
-
-    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
-
-    public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
-
-    @Autowired
-    VirtualMachineService vmService;
-
-    @Autowired
-    VirtualMachineAllocatorService service;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    NetworkService networkService;
-
     @Autowired
     VirtualMachineService vmService;
 
