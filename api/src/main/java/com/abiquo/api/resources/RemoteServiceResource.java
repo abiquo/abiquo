@@ -23,6 +23,7 @@ package com.abiquo.api.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -83,9 +84,10 @@ public class RemoteServiceResource extends AbstractResource
         @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        RemoteServiceDto rs = getRemoteService(datacenterId, serviceType, restBuilder);
-
-        service.checkRemoteServiceStatus(rs.getType(), rs.getUri(), true);
+        validatePathParameters(datacenterId, serviceType);
+        RemoteService rs =
+            service.getRemoteService(datacenterId, RemoteServiceType.valueFromName(serviceType));
+        service.checkRemoteServiceStatus(rs.getDatacenter(), rs.getType(), rs.getUri(), true);
     }
 
     @PUT
