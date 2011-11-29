@@ -149,6 +149,7 @@ public class EnterprisesResourceStubImpl extends AbstractAPIStub implements Ente
     {
         EnterpriseDto dto = new EnterpriseDto();
         dto.setName(enterprise.getName());
+        dto.setIsReservationRestricted(enterprise.getIsReservationRestricted());
 
         ResourceAllocationLimit limits = enterprise.getLimits();
         return (EnterpriseDto) fillLimits(dto, limits);
