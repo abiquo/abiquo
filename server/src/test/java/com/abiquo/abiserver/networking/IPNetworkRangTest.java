@@ -97,17 +97,17 @@ public class IPNetworkRangTest
             .equalsIgnoreCase("23.23.23.42"));
         assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 1293879).toString()
             .equalsIgnoreCase("23.42.213.77"));
-        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 1).toString().equalsIgnoreCase(
-            "23.23.23.23"));
+        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 1).toString()
+            .equalsIgnoreCase("23.23.23.23"));
         assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 871287).toString()
             .equalsIgnoreCase("23.36.98.141"));
         assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 4294967).toString()
             .equalsIgnoreCase("23.88.160.77"));
         assertNull(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 0));
-        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 1).toString().equalsIgnoreCase(
-            "23.23.23.23"));
-        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 2).toString().equalsIgnoreCase(
-            "23.23.23.24"));
+        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 1).toString()
+            .equalsIgnoreCase("23.23.23.23"));
+        assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 2).toString()
+            .equalsIgnoreCase("23.23.23.24"));
         assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 233).toString()
             .equalsIgnoreCase("23.23.23.255"));
         assertTrue(IPNetworkRang.lastIPAddressWithNumNodes(beginIP, 12343).toString()

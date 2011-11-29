@@ -22,6 +22,7 @@
 package com.abiquo.api.services.appslibrary;
 
 import static java.lang.System.getProperty;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -260,8 +261,8 @@ public class RepositorySpaceXML
             else
             {
                 proxy =
-                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, Integer
-                        .valueOf(PROXY_PORT)));
+                    new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST,
+                        Integer.valueOf(PROXY_PORT)));
             }
         }
         return proxy;

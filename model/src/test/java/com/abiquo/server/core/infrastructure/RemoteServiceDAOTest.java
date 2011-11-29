@@ -65,5 +65,4 @@ public class RemoteServiceDAOTest extends DefaultDAOTestBase<RemoteServiceDAO, R
         return (RemoteServiceGenerator) super.eg();
     }
 
-    
 }

@@ -34,6 +34,6 @@ import com.abiquo.abiserver.persistence.DAO;
 public interface CategoryDAO extends DAO<CategoryHB, Integer>
 {
     public CategoryHB findByName(final String name);
-    
-    public CategoryHB findDefault();    
+
+    public CategoryHB findDefault();
 }

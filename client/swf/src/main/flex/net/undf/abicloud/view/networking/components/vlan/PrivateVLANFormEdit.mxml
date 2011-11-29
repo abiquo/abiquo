@@ -91,7 +91,8 @@
 
                 var event:NetworkingEvent;
                 
-                if(this._vlanNetwork.networkType == VlanNetwork.EXTERNAL){
+                if(this._vlanNetwork.networkType == VlanNetwork.EXTERNAL 
+                || this._vlanNetwork.networkType == VlanNetwork.UNMANAGED){
                 	event = new NetworkingEvent(NetworkingEvent.SET_DEFAULT_VLAN);
                 }else{
                 	event = new NetworkingEvent(NetworkingEvent.EDIT_VLAN);
@@ -106,7 +107,8 @@
                 event.callback = closeForm;
                 
                 //Close in case of External Vlan and no changes done
-                if(this._vlanNetwork.networkType == VlanNetwork.EXTERNAL && !defaultNetworkInput.selected){
+                if( (this._vlanNetwork.networkType == VlanNetwork.EXTERNAL 
+                  || this._vlanNetwork.networkType == VlanNetwork.UNMANAGED )&& !defaultNetworkInput.selected){
                     closeForm();	
                 }else{
 	                dispatchEvent(event);                	
@@ -145,7 +147,7 @@
             label="@Resource(bundle='Networking', key='LABEL_NAME')"
             required="true">
             <mx:TextInput id="nameInput"
-            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL &amp;&amp; this._vlanNetwork.networkType != VlanNetwork.UNMANAGED}"
                 height="20"
                 maxChars="39"
                 change="validateForm()"/>
@@ -167,7 +169,7 @@
             label="@Resource(bundle='Networking', key='LABEL_GATEWAY')"
             required="true">
             <mx:TextInput id="gatewayInput"
-            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL &amp;&amp; this._vlanNetwork.networkType != VlanNetwork.UNMANAGED}"
                 height="20"
                 maxChars="39"
                 change="validateForm()"
@@ -176,7 +178,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">
             <mx:TextInput id="primaryDNSInput"
-                editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
+                editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL &amp;&amp; this._vlanNetwork.networkType != VlanNetwork.UNMANAGED}"
                 height="20"
                 maxChars="39"
                 restrict="0-9.:A-F"/>
@@ -184,7 +186,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_SECONDARY_DNS')">
             <mx:TextInput id="secondaryDNSInput"
-            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL &amp;&amp; this._vlanNetwork.networkType != VlanNetwork.UNMANAGED}"
                 height="20"
                 maxChars="39"
                 restrict="0-9.:A-F"/>
@@ -192,7 +194,7 @@
 
         <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_DNS_SUFIX')">
             <mx:TextInput id="sufixDNSInput"
-            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL}"
+            	editable="{this._vlanNetwork.networkType != VlanNetwork.EXTERNAL &amp;&amp; this._vlanNetwork.networkType != VlanNetwork.UNMANAGED}"
                 height="20"
                 maxChars="39"/>
         </mx:FormItem>

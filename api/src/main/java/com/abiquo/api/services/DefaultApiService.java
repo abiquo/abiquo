@@ -41,12 +41,16 @@ import com.abiquo.server.core.common.GenericEnityBase;
 public abstract class DefaultApiService
 {
     private Collection<CommonError> conflictErrors;
-    private Collection<CommonError> validationErrors;
-    private Collection<CommonError> notfoundErrors;
-    private Collection<CommonError> forbiddenErrors;
-    private Collection<CommonError> unexpectedErrors;
-    private Collection<CommonError> serviceUnavailableErrors;
 
+    private Collection<CommonError> validationErrors;
+
+    private Collection<CommonError> notfoundErrors;
+
+    private Collection<CommonError> forbiddenErrors;
+
+    private Collection<CommonError> unexpectedErrors;
+
+    private Collection<CommonError> serviceUnavailableErrors;
 
     @Autowired
     protected TracerLogger tracer;
@@ -100,7 +104,7 @@ public abstract class DefaultApiService
             flushErrors();
         }
     }
-    
+
     // ValidationErrors
     private Collection<CommonError> getValidationErrors()
     {
@@ -110,22 +114,22 @@ public abstract class DefaultApiService
         }
         return validationErrors;
     }
-    
+
     protected void addValidationErrors(Set<CommonError> errors)
     {
         getValidationErrors().addAll(errors);
     }
-    
+
     protected void addValidationErrors(CommonError error)
     {
         getValidationErrors().add(error);
     }
-    
+
     protected void addValidationErrors(APIError apiError)
     {
         getValidationErrors().add(addAPIError(apiError));
     }
-    
+
     // NotFoundErrors
     private Collection<CommonError> getNotfoundErrors()
     {
@@ -135,17 +139,17 @@ public abstract class DefaultApiService
         }
         return notfoundErrors;
     }
-    
+
     protected void addNotFoundErrors(Set<CommonError> errors)
     {
         getNotfoundErrors().addAll(errors);
     }
-    
+
     protected void addNotFoundErrors(CommonError error)
     {
         getNotfoundErrors().add(error);
     }
-    
+
     protected void addNotFoundErrors(APIError apiError)
     {
         getNotfoundErrors().add(addAPIError(apiError));
@@ -165,17 +169,17 @@ public abstract class DefaultApiService
     {
         getConflictErrors().addAll(errors);
     }
-    
+
     protected void addConflictErrors(CommonError error)
     {
         getConflictErrors().add(error);
     }
-    
+
     protected void addConflictErrors(APIError apiError)
     {
         getConflictErrors().add(addAPIError(apiError));
     }
-   
+
     // Security Errors
     private Collection<CommonError> getForbiddenErrors()
     {
@@ -185,22 +189,22 @@ public abstract class DefaultApiService
         }
         return forbiddenErrors;
     }
-    
+
     protected void addForbiddenErrors(Set<CommonError> errors)
     {
         getForbiddenErrors().addAll(errors);
     }
-    
+
     protected void addForbiddenErrors(CommonError error)
     {
         getForbiddenErrors().add(error);
     }
-    
+
     protected void addForbiddenErrors(APIError apiError)
     {
         getForbiddenErrors().add(addAPIError(apiError));
     }
-    
+
     // Unexpected Errors
     private Collection<CommonError> getUnexpectedErrors()
     {
@@ -210,22 +214,22 @@ public abstract class DefaultApiService
         }
         return unexpectedErrors;
     }
-    
+
     protected void addUnexpectedErrors(Set<CommonError> errors)
     {
         getUnexpectedErrors().addAll(errors);
     }
-    
+
     protected void addUnexpectedErrors(CommonError error)
     {
         getUnexpectedErrors().add(error);
     }
-    
+
     protected void addUnexpectedErrors(APIError apiError)
     {
         getUnexpectedErrors().add(addAPIError(apiError));
     }
-    
+
     // Service Unavailabe Errors
     private Collection<CommonError> getServiceUnavailableErrors()
     {
@@ -235,22 +239,22 @@ public abstract class DefaultApiService
         }
         return serviceUnavailableErrors;
     }
-    
+
     protected void addServiceUnavailableErrors(Set<CommonError> errors)
     {
         getServiceUnavailableErrors().addAll(errors);
     }
-    
+
     protected void addServiceUnavailableErrors(CommonError error)
     {
         getServiceUnavailableErrors().add(error);
     }
-    
+
     protected void addServiceUnavailableErrors(APIError apiError)
     {
         getServiceUnavailableErrors().add(addAPIError(apiError));
     }
-    
+
     private CommonError addAPIError(APIError apiError)
     {
         return new CommonError(apiError.getCode(), apiError.getMessage());

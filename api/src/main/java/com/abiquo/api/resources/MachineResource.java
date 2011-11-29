@@ -71,13 +71,15 @@ public class MachineResource extends AbstractResource
 
     public static final String MOVE_TARGET_QUERY_PARAM = "target";
 
-    public static final String MACHINE_ACTION_POWER_OFF = "action/powerOff";
+    public static final String MACHINE_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
-    public static final String MACHINE_ACTION_POWER_OFF_REL = "powerOff";
+    public static final String MACHINE_ACTION_POWER_OFF_PATH = "action/poweroff";
 
-    public static final String MACHINE_ACTION_POWER_ON = "action/powerOn";
+    public static final String MACHINE_ACTION_POWER_OFF_REL = "poweroff";
 
-    public static final String MACHINE_ACTION_POWER_ON_REL = "powerOn";
+    public static final String MACHINE_ACTION_POWER_ON_PATH = "action/poweron";
+
+    public static final String MACHINE_ACTION_POWER_ON_REL = "poweron";
 
     public static final String MACHINE_ACTION_CHECK = "action/checkState";
 
@@ -132,6 +134,53 @@ public class MachineResource extends AbstractResource
     {
         validatePathParameters(datacenterId, rackId, machineId);
         service.removeMachine(machineId);
+    }
+
+    /**
+     * Check the machine state and update it.
+     * 
+     * @param datacenterId The ID of the datacenter where this remote service and machine are
+     *            assigned.
+     * @param ip The IP of the target cloud node.
+     * @param hypervisorType The cloud node hypervisor type.
+     * @param user The hypervisor user.
+     * @param password The hypervisor password.
+     * @param port The hypervisor AIM port.
+     * @return The actual machine's state.
+     */
+    @GET
+    @Path(MACHINE_ACTION_CHECK)
+    public MachineStateDto checkMachineState(
+        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
+        @PathParam(RackResource.RACK) final Integer rackId,
+        @PathParam(MachineResource.MACHINE) final Integer machineId,
+        @QueryParam("sync") @DefaultValue("false") final boolean sync,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        try
+        {
+            Machine m = service.getMachine(machineId);
+            Hypervisor h = m.getHypervisor();
+
+            MachineState state =
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
+                    h.getPassword(), h.getPort());
+
+            if (sync)
+            {
+                m.setState(state);
+                MachineDto machineDto = createTransferObject(m, restBuilder);
+                service.modifyMachine(machineId, machineDto);
+            }
+
+            MachineStateDto dto = new MachineStateDto();
+            dto.setState(state);
+            return dto;
+        }
+        catch (Exception e)
+        {
+            throw translateException(e);
+        }
     }
 
     // protected methods
@@ -204,7 +253,6 @@ public class MachineResource extends AbstractResource
                 dataDto.setSize(datastore.getSize());
                 dataDto.setUsedSize(datastore.getUsedSize());
                 dataDto.setDatastoreUUID(datastore.getDatastoreUUID());
-
                 dto.getDatastores().add(dataDto);
             }
         }

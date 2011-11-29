@@ -36,7 +36,8 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class InfrastructureTestService extends InfrastructureService
 {
 
-    public static ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
+    @Override
+    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
     {
         // During tests the target remote service may not be up and running
         // Do not return errors to simulate a normal behavior

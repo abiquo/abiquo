@@ -29,15 +29,15 @@ import java.io.InputStream;
  */
 public class FileTemplateDaoImpl implements TemplateDao
 {
-//    private static final Logger debug =
-//        LoggerFactory.getLogger(FileTemplateDaoImpl.class.getName());
+    // private static final Logger debug =
+    // LoggerFactory.getLogger(FileTemplateDaoImpl.class.getName());
 
     /**
      * 
      */
     public FileTemplateDaoImpl()
     {
-        super();     
+        super();
     }
 
     /*
@@ -51,8 +51,11 @@ public class FileTemplateDaoImpl implements TemplateDao
 
         InputStream result = null;
         result =
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                "./templates/" + templateName + "_" + brandId + "_" + langId + ".vm");
+            Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(
+                    "./templates/" + templateName + "_" + brandId + "_" + langId + ".vm");
         return result;
     }
 

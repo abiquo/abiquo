@@ -26,7 +26,6 @@
     <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkConfiguration"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.VLANNetwork"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.Network"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.infrastructure.network.Dhcp"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.IpPoolManagement"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkAssignment"></orm:entity>
     <!-- end: networking -->
@@ -78,4 +77,12 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
     <!-- end: appliance manager -->
+     <!-- pricing -->
+    <orm:entity class="com.abiquo.server.core.pricing.PricingTemplate"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.CostCode"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.Currency"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.CostCodeCurrency"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.PricingCostCode"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.pricing.PricingTier"></orm:entity>
+    <!-- end: pricing -->
 </orm:entity-mappings>

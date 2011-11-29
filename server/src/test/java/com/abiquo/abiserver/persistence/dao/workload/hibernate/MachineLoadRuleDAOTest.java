@@ -36,22 +36,23 @@ import com.abiquo.abiserver.persistence.TestEntityGenerationUtils;
 import com.abiquo.abiserver.persistence.dao.workload.MachineLoadRuleDAO;
 
 @Test
-public class MachineLoadRuleDAOTest extends DataAccessTestBase {
-	/** This test makes completely sure we have everything well mapped */
-	@Test
-	public void test_save() throws PersistenceException {
-		Session session = createSessionInTransaction();
-		DatacenterHB datacenter = TestEntityGenerationUtils
-				.createDatacenter("datacenter1");
-		
-		MachineLoadRuleHB rule = new MachineLoadRuleHB(datacenter, null, null, 90, 90);
+public class MachineLoadRuleDAOTest extends DataAccessTestBase
+{
+    /** This test makes completely sure we have everything well mapped */
+    @Test
+    public void test_save() throws PersistenceException
+    {
+        Session session = createSessionInTransaction();
+        DatacenterHB datacenter = TestEntityGenerationUtils.createDatacenter("datacenter1");
 
-		MachineLoadRuleDAO dao = TestDAOHelper
-				.createMachineLoadRuleDAO(session);
-		SessionUtils.saveAndFlush(session, datacenter);
-		dao.makePersistent(rule);
-		session.flush();
+        MachineLoadRuleHB rule = new MachineLoadRuleHB(datacenter, null, null, 90, 90);
 
-		Assert.assertTrue(SessionUtils.entityExists(session, MachineLoadRuleHB.class, rule.getId()));
-	}
+        MachineLoadRuleDAO dao = TestDAOHelper.createMachineLoadRuleDAO(session);
+        SessionUtils.saveAndFlush(session, datacenter);
+        dao.makePersistent(rule);
+        session.flush();
+
+        Assert
+            .assertTrue(SessionUtils.entityExists(session, MachineLoadRuleHB.class, rule.getId()));
+    }
 }

@@ -50,6 +50,8 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
 
     private boolean isReservationRestricted;
 
+    private Integer idPricingTemplate;
+
     public Integer getId()
     {
         return id;
@@ -155,4 +157,15 @@ public class EnterpriseDto extends SingleResourceWithLimitsDto
     {
         this.isReservationRestricted = isReservationRestricted;
     }
+
+    public Integer getIdPricingTemplate()
+    {
+        return idPricingTemplate;
+    }
+
+    public void setIdPricingTemplate(final Integer idPricingTemplate)
+    {
+        this.idPricingTemplate = idPricingTemplate;
+    }
+
 }

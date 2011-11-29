@@ -133,10 +133,10 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-    }     
-    
+    }
+
     private String datastoreUUID;
-    
+
     public void setDatastoreUUID(String datastoreUUID)
     {
         this.datastoreUUID = datastoreUUID;
@@ -146,7 +146,5 @@ public class DatastoreDto extends SingleResourceTransportDto implements Serializ
     {
         return datastoreUUID;
     }
-
-    
 
 }

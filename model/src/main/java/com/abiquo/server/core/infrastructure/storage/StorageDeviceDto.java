@@ -120,4 +120,28 @@ public class StorageDeviceDto extends SingleResourceTransportDto implements Seri
         this.iscsiPort = iscsiPort;
     }
 
+    private String username;
+
+    public void setUsername(final String username)
+    {
+        this.username = username;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    private String password;
+
+    public void setPassword(final String password)
+    {
+        this.password = password;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
 }

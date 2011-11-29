@@ -26,8 +26,8 @@ import com.abiquo.abiserver.persistence.DAO;
 
 /**
  * Specific interface to work with the
- * {@link com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB} Exposes all the
- * methods that this entity will need to interact with the data source
+ * {@link com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB} Exposes
+ * all the methods that this entity will need to interact with the data source
  * 
  * @author jdevesa@abiquo.com
  */
