@@ -45,7 +45,6 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.scheduler.limit.VirtualMachineRequirements;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -250,7 +249,7 @@ public class StorageService extends DefaultApiService
 
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);
-        vdcRepo.insertHardDisk(disk);
+        // vdcRepo.insertHardDisk(disk);
 
         // Trace
         if (tracer != null)
@@ -319,6 +318,7 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
 
         DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+
         if (disk == null)
         {
             addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);

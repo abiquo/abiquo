@@ -39,10 +39,11 @@ public class UserSessionDAOHibernate extends HibernateDAO<UserSession, Integer> 
      */
     public int deleteUserSessionsOlderThan(String name, Date date)
     {
-        return getSession().createQuery(
-            "delete from " + UserSession.class.getSimpleName()
-                + " where user = ? and expireDate < ?").setString(0, name).setDate(1, new Date())
-            .executeUpdate();
+        return getSession()
+            .createQuery(
+                "delete from " + UserSession.class.getSimpleName()
+                    + " where user = ? and expireDate < ?").setString(0, name)
+            .setDate(1, new Date()).executeUpdate();
 
     }
 
@@ -55,8 +56,9 @@ public class UserSessionDAOHibernate extends HibernateDAO<UserSession, Integer> 
      */
     public int deleteAllUserSessions(String name, String key)
     {
-        return getSession().createQuery(
-            "delete from " + UserSession.class.getSimpleName() + " where user = ? and key = ?")
+        return getSession()
+            .createQuery(
+                "delete from " + UserSession.class.getSimpleName() + " where user = ? and key = ?")
             .setString(0, name).setString(1, key).executeUpdate();
     }
 

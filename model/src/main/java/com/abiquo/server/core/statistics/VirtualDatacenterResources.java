@@ -48,7 +48,7 @@ public class VirtualDatacenterResources extends DefaultEntityBase
         setVlanUsed(0);
         setVlanReserved(0);
     }
-    
+
     private final static String ID_COLUMN = "idVirtualDataCenter";
 
     @Id

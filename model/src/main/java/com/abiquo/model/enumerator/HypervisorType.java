@@ -83,12 +83,12 @@ public enum HypervisorType
      */
     public static HypervisorType fromValue(final String v)
     {
-        return HypervisorType.valueOf(v.toUpperCase().replace("-", "_"));
+        return HypervisorType.valueOf(v.toUpperCase());
     }
 
     public String getValue()
     {
-        return name().toLowerCase().replace("_", "-");
+        return name();
     }
 
     public boolean requiresCredentials()

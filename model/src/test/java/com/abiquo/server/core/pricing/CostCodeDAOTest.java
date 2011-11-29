@@ -19,11 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.infrastructure.network;
+package com.abiquo.server.core.pricing;
+
+import java.util.Collection;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,26 +32,32 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
+import com.softwarementors.commons.testng.AssertEx;
 
-public class DhcpDAOTest extends DefaultDAOTestBase<DhcpDAO, Dhcp>
+public class CostCodeDAOTest extends DefaultDAOTestBase<CostCodeDAO, CostCode>
 {
 
+    @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
+
+        // FIXME: Remember to add all entities that have to be removed during tearDown in the
+        // method:
+        // com.abiquo.server.core.common.persistence.TestDataAccessManager.initializePersistentInstanceRemovalSupport
     }
 
     @Override
-    protected DhcpDAO createDao(EntityManager entityManager)
+    protected CostCodeDAO createDao(final EntityManager entityManager)
     {
-        return new DhcpDAO(entityManager);
+        return new CostCodeDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<Dhcp> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<CostCode> createEntityInstanceGenerator()
     {
-        return new DhcpGenerator(getSeed());
+        return new CostCodeGenerator(getSeed());
     }
 
     @Override
@@ -60,10 +67,23 @@ public class DhcpDAOTest extends DefaultDAOTestBase<DhcpDAO, Dhcp>
     }
 
     @Override
-    public DhcpGenerator eg()
+    public CostCodeGenerator eg()
     {
-        return (DhcpGenerator) super.eg();
+        return (CostCodeGenerator) super.eg();
     }
 
-    
+    @Test
+    public void findCostCodes()
+    {
+        CostCode c1 = eg().createUniqueInstance();
+        CostCode c2 = eg().createUniqueInstance();
+
+        ds().persistAll(c1, c2);
+
+        CostCodeDAO dao = createDaoForRollbackTransaction();
+
+        Collection<CostCode> costCodes = dao.find(null, null, false, 0, 25);
+        AssertEx.assertSize(costCodes, 2);
+
+    }
 }

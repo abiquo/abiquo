@@ -195,8 +195,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         String uri =
-            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
-                userListOptions.getLength());
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(), userListOptions
+                .getLength());
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
@@ -284,8 +284,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
 
         String uri =
-            createUsersLink(enterpriseWildcard, userListOptions.getOffset(),
-                userListOptions.getLength());
+            createUsersLink(enterpriseWildcard, userListOptions.getOffset(), userListOptions
+                .getLength());
 
         uri = UriHelper.appendQueryParamsToPath(uri, queryParams, false);
 
@@ -342,13 +342,13 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
                 if (SecurityService.isStandardUser(currentUser.getRoleHB().toPojo())
                     && orderBy.equalsIgnoreCase("role"))
                 {
-                    normalUsers.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role, entRole, privileges)));
+                    normalUsers.add(User.create(dto, Enterprise.create(enterprise), Role.create(
+                        role, entRole, privileges)));
                 }
                 else
                 {
-                    users.add(User.create(dto, Enterprise.create(enterprise),
-                        Role.create(role, entRole, privileges)));
+                    users.add(User.create(dto, Enterprise.create(enterprise), Role.create(role,
+                        entRole, privileges)));
                 }
                 // }
                 // else
@@ -457,14 +457,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
     private UserDto fromUserToDto(final User user)
     {
         UserDto newUser =
-            new UserDto(user.getName(),
-                user.getSurname(),
-                user.getEmail(),
-                user.getUser(),
-                user.getPass(),
-                user.getLocale(),
-                user.getDescription(),
-                user.getAuthType().name());
+            new UserDto(user.getName(), user.getSurname(), user.getEmail(), user.getUser(), user
+                .getPass(), user.getLocale(), user.getDescription(), user.getAuthType().name());
 
         newUser.setActive(user.getActive());
         newUser.addLink(new RESTLink("role", createRoleLink(user.getRole().getId())));
@@ -482,8 +476,8 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         }
         else
         {
-            newUser.setAvailableVirtualDatacenters(StringUtils.join(
-                user.getAvailableVirtualDatacenters(), ","));
+            newUser.setAvailableVirtualDatacenters(StringUtils.join(user
+                .getAvailableVirtualDatacenters(), ","));
         }
 
         return newUser;
@@ -537,7 +531,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
 
         if (getPrivileges)
         {
-            RESTLink privilegesLink = role.searchLink("action", "privileges");
+            RESTLink privilegesLink = role.searchLink("privileges");
 
             if (privilegesLink != null)
             {
@@ -561,7 +555,7 @@ public class UsersResourceStubImpl extends AbstractAPIStub implements UsersResou
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (enterprise != null)
         {
-            queryParams.put("idEnterprise", new String[] {String.valueOf(enterprise.getId())});
+            queryParams.put("identerprise", new String[] {String.valueOf(enterprise.getId())});
         }
         if (!StringUtils.isEmpty(roleListOptions.getFilterLike()))
         {

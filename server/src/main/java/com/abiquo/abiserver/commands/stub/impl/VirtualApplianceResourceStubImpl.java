@@ -468,8 +468,12 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
                 RESTLink virtualMachines = entity.searchLink("virtualmachine");
-                DataResult<List<Node>> nodeVirtualImages = getAppNodes(app);
-                app.setNodes(nodeVirtualImages.getData());
+                if (virtualMachines != null)
+                {
+                    DataResult<List<Node>> nodeVirtualImages =
+                        getAppNodes(virtualMachines.getHref());
+                    app.setNodes(nodeVirtualImages.getData());
+                }
                 result.setData(app);
             }
             catch (Exception e)

@@ -26,7 +26,6 @@
 // Generated on: 2011.10.27 at 11:30:26 AM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -35,15 +34,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- *  This class represents a resource allocated in a computer system,
- *                 whatever is virtual or physical.
- *             
- * 
- * <p>Java class for ResourceType complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * This class represents a resource allocated in a computer system, whatever is virtual or physical.
+ * <p>
+ * Java class for ResourceType complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="ResourceType">
@@ -64,256 +60,217 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ResourceType", propOrder = {
-    "elementName",
-    "address",
-    "resourceType",
-    "resourceSubType",
-    "units",
-    "availableUnits",
-    "connection",
-    "label",
-    "attachment"
-})
-public class ResourceType {
-
+@XmlType(name = "ResourceType", propOrder = {"elementName", "address", "resourceType",
+"resourceSubType", "units", "availableUnits", "connection", "label", "attachment"})
+public class ResourceType
+{
     @XmlElement(required = true)
     protected String elementName;
+
     @XmlElement(required = true)
     protected String address;
+
     @XmlElement(required = true)
     protected ResourceEnumType resourceType;
+
     @XmlElement(required = true, nillable = true)
     @XmlSchemaType(name = "anySimpleType")
     protected Object resourceSubType;
+
     @XmlElement(required = true, type = Long.class, nillable = true)
     protected Long units;
+
     @XmlElement(required = true, type = Long.class, nillable = true)
     protected Long availableUnits;
+
     @XmlElement(required = true, nillable = true)
     protected String connection;
+
     @XmlElement(required = true, nillable = true)
     protected String label;
+
     @XmlElement(required = true, nillable = true)
     protected String attachment;
 
     /**
      * Gets the value of the elementName property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getElementName() {
+    public String getElementName()
+    {
         return elementName;
     }
 
     /**
      * Sets the value of the elementName property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setElementName(String value) {
+    public void setElementName(final String value)
+    {
         this.elementName = value;
     }
 
     /**
      * Gets the value of the address property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getAddress() {
+    public String getAddress()
+    {
         return address;
     }
 
     /**
      * Sets the value of the address property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setAddress(String value) {
+    public void setAddress(final String value)
+    {
         this.address = value;
     }
 
     /**
      * Gets the value of the resourceType property.
      * 
-     * @return
-     *     possible object is
-     *     {@link ResourceEnumType }
-     *     
+     * @return possible object is {@link ResourceEnumType }
      */
-    public ResourceEnumType getResourceType() {
+    public ResourceEnumType getResourceType()
+    {
         return resourceType;
     }
 
     /**
      * Sets the value of the resourceType property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link ResourceEnumType }
-     *     
+     * @param value allowed object is {@link ResourceEnumType }
      */
-    public void setResourceType(ResourceEnumType value) {
+    public void setResourceType(final ResourceEnumType value)
+    {
         this.resourceType = value;
     }
 
     /**
      * Gets the value of the resourceSubType property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Object }
-     *     
+     * @return possible object is {@link Object }
      */
-    public Object getResourceSubType() {
+    public Object getResourceSubType()
+    {
         return resourceSubType;
     }
 
     /**
      * Sets the value of the resourceSubType property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Object }
-     *     
+     * @param value allowed object is {@link Object }
      */
-    public void setResourceSubType(Object value) {
+    public void setResourceSubType(final Object value)
+    {
         this.resourceSubType = value;
     }
 
     /**
      * Gets the value of the units property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
+     * @return possible object is {@link Long }
      */
-    public Long getUnits() {
+    public Long getUnits()
+    {
         return units;
     }
 
     /**
      * Sets the value of the units property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
+     * @param value allowed object is {@link Long }
      */
-    public void setUnits(Long value) {
+    public void setUnits(final Long value)
+    {
         this.units = value;
     }
 
     /**
      * Gets the value of the availableUnits property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Long }
-     *     
+     * @return possible object is {@link Long }
      */
-    public Long getAvailableUnits() {
+    public Long getAvailableUnits()
+    {
         return availableUnits;
     }
 
     /**
      * Sets the value of the availableUnits property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Long }
-     *     
+     * @param value allowed object is {@link Long }
      */
-    public void setAvailableUnits(Long value) {
+    public void setAvailableUnits(final Long value)
+    {
         this.availableUnits = value;
     }
 
     /**
      * Gets the value of the connection property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getConnection() {
+    public String getConnection()
+    {
         return connection;
     }
 
     /**
      * Sets the value of the connection property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setConnection(String value) {
+    public void setConnection(final String value)
+    {
         this.connection = value;
     }
 
     /**
      * Gets the value of the label property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getLabel() {
+    public String getLabel()
+    {
         return label;
     }
 
     /**
      * Sets the value of the label property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setLabel(String value) {
+    public void setLabel(final String value)
+    {
         this.label = value;
     }
 
     /**
      * Gets the value of the attachment property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getAttachment() {
+    public String getAttachment()
+    {
         return attachment;
     }
 
     /**
      * Sets the value of the attachment property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setAttachment(String value) {
+    public void setAttachment(final String value)
+    {
         this.attachment = value;
     }
 

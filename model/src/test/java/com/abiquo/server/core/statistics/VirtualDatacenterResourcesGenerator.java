@@ -29,21 +29,40 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class VirtualDatacenterResourcesGenerator extends DefaultEntityGenerator<VirtualDatacenterResources>
+public class VirtualDatacenterResourcesGenerator extends
+    DefaultEntityGenerator<VirtualDatacenterResources>
 {
-
-    
 
     public VirtualDatacenterResourcesGenerator(SeedGenerator seed)
     {
         super(seed);
-        
+
     }
 
     @Override
-    public void assertAllPropertiesEqual(VirtualDatacenterResources obj1, VirtualDatacenterResources obj2)
+    public void assertAllPropertiesEqual(VirtualDatacenterResources obj1,
+        VirtualDatacenterResources obj2)
     {
-      AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualDatacenterResources.MEMORY_RESERVED_PROPERTY,VirtualDatacenterResources.VDC_NAME_PROPERTY,VirtualDatacenterResources.VOL_CREATED_PROPERTY,VirtualDatacenterResources.VLAN_RESERVED_PROPERTY,VirtualDatacenterResources.PUBLIC_I_PS_USED_PROPERTY,VirtualDatacenterResources.PUBLIC_I_PS_RESERVED_PROPERTY,VirtualDatacenterResources.LOCAL_STORAGE_RESERVED_PROPERTY,VirtualDatacenterResources.EXT_STORAGE_USED_PROPERTY,VirtualDatacenterResources.VOL_ATTACHED_PROPERTY,VirtualDatacenterResources.VLAN_USED_PROPERTY,VirtualDatacenterResources.EXT_STORAGE_RESERVED_PROPERTY,VirtualDatacenterResources.LOCAL_STORAGE_USED_PROPERTY,VirtualDatacenterResources.V_CPU_USED_PROPERTY,VirtualDatacenterResources.V_CPU_RESERVED_PROPERTY,VirtualDatacenterResources.VM_CREATED_PROPERTY,VirtualDatacenterResources.VOL_ASSOCIATED_PROPERTY,VirtualDatacenterResources.VM_ACTIVE_PROPERTY,VirtualDatacenterResources.MEMORY_USED_PROPERTY,VirtualDatacenterResources.ID_ENTERPRISE_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2,
+            VirtualDatacenterResources.MEMORY_RESERVED_PROPERTY,
+            VirtualDatacenterResources.VDC_NAME_PROPERTY,
+            VirtualDatacenterResources.VOL_CREATED_PROPERTY,
+            VirtualDatacenterResources.VLAN_RESERVED_PROPERTY,
+            VirtualDatacenterResources.PUBLIC_I_PS_USED_PROPERTY,
+            VirtualDatacenterResources.PUBLIC_I_PS_RESERVED_PROPERTY,
+            VirtualDatacenterResources.LOCAL_STORAGE_RESERVED_PROPERTY,
+            VirtualDatacenterResources.EXT_STORAGE_USED_PROPERTY,
+            VirtualDatacenterResources.VOL_ATTACHED_PROPERTY,
+            VirtualDatacenterResources.VLAN_USED_PROPERTY,
+            VirtualDatacenterResources.EXT_STORAGE_RESERVED_PROPERTY,
+            VirtualDatacenterResources.LOCAL_STORAGE_USED_PROPERTY,
+            VirtualDatacenterResources.V_CPU_USED_PROPERTY,
+            VirtualDatacenterResources.V_CPU_RESERVED_PROPERTY,
+            VirtualDatacenterResources.VM_CREATED_PROPERTY,
+            VirtualDatacenterResources.VOL_ASSOCIATED_PROPERTY,
+            VirtualDatacenterResources.VM_ACTIVE_PROPERTY,
+            VirtualDatacenterResources.MEMORY_USED_PROPERTY,
+            VirtualDatacenterResources.ID_ENTERPRISE_PROPERTY);
     }
 
     @Override
@@ -52,17 +71,15 @@ public class VirtualDatacenterResourcesGenerator extends DefaultEntityGenerator<
         // FIXME: Write here how to create the pojo
         VirtualDatacenterResources virtualDatacenterResources = new VirtualDatacenterResources();
 
-        
-
         return virtualDatacenterResources;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VirtualDatacenterResources entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(VirtualDatacenterResources entity,
+        List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-        
-        
+
     }
 
 }

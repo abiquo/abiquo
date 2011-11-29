@@ -60,7 +60,7 @@ public class UserResource extends AbstractResource
 
     public static final String USER_PARAM = "{" + USER + "}";
 
-    public static final String USER_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    public static final String USER_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
     @Autowired
     UserService service;
@@ -130,7 +130,7 @@ public class UserResource extends AbstractResource
     }
 
     @GET
-    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES)
+    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)
@@ -143,7 +143,7 @@ public class UserResource extends AbstractResource
 
         Collection<VirtualMachine> vms = vmService.findVirtualMachinesByUser(enterprise, user);
 
-        return VirtualMachinesResource.createAdminTransferObjects(vms, restBuilder);
+        return VirtualMachinesResource.createTransferObjects(vms, restBuilder);
     }
 
     private static UserDto addLinks(final IRESTBuilder restBuilder, final UserDto user,

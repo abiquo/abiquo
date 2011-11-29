@@ -1,5 +1,5 @@
 /**
- * Abiquo community edition
+t * Abiquo community edition
  * cloud management application for hybrid clouds
  * Copyright (C) 2008-2010 - Abiquo Holdings S.L.
  *
@@ -21,6 +21,7 @@
 
 package com.abiquo.api.services;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +59,8 @@ import com.abiquo.server.core.infrastructure.RemoteServicesDto;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -143,12 +146,25 @@ public class DatacenterService extends DefaultApiService
             new DatacenterLimits(userService.getCurrentUser().getEnterprise(), datacenter);
         enterpriseRep.insertLimit(dcLimits);
 
+        List<PricingTemplate> pricingTemplateList = repo.getPricingTemplates();
+        BigDecimal zero = new BigDecimal(0);
+
         // Add the default tiers
         for (int i = 1; i <= 4; i++)
         {
             Tier tier =
                 new Tier("Default Tier " + i, "Description of the default tier " + i, datacenter);
             repo.insertTier(tier);
+
+            if (!pricingTemplateList.isEmpty())
+            {
+                for (PricingTemplate pt : pricingTemplateList)
+                {
+                    PricingTier pricingTier = new PricingTier(zero, pt, tier);
+                    repo.insertPricingTier(pricingTier);
+                }
+
+            }
         }
 
         // Log the event
@@ -295,12 +311,18 @@ public class DatacenterService extends DefaultApiService
         return repo.findRacksWithHAEnabled(datacenter);
     }
 
+    public List<Machine> getMachines(final Rack rack)
+    {
+        return repo.findRackMachines(rack);
+    }
+
     public List<Machine> getEnabledMachines(final Rack rack)
     {
         return repo.findRackEnabledForHAMachines(rack);
     }
 
     public void removeDatacenter(final Integer id)
+
     {
         Datacenter datacenter = repo.findById(id);
         if (datacenter == null)

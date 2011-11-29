@@ -19,25 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.infrastructure.network;
+  package com.abiquo.server.core.pricing;
 
-import javax.xml.bind.annotation.XmlRootElement;
+  import com.abiquo.server.core.common.DefaultEntityTestBase;
+  import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-import com.abiquo.model.transport.SingleResourceTransportDto;
+  public class PricingCostCodeTest extends DefaultEntityTestBase<PricingCostCode>
+  {
 
-@XmlRootElement(name = "dhcp")
-public class DhcpDto extends SingleResourceTransportDto
-{
-    private Integer id;
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId(Integer id)
-    {
-        this.id = id;
-    }
-
-}
+      @Override
+      protected InstanceTester<PricingCostCode> createEntityInstanceGenerator()
+      {
+          return new PricingCostCodeGenerator(getSeed());
+      }
+  }

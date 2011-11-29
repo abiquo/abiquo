@@ -24,7 +24,6 @@ package com.abiquo.abiserver.commands.impl;
 import java.util.Comparator;
 import java.util.UUID;
 
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
@@ -36,14 +35,15 @@ import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
+import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
 import com.abiquo.abiserver.persistence.dao.user.UserDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualMachineDAO;
 import com.abiquo.abiserver.persistence.dao.virtualhardware.ResourceAllocationSettingDataDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 
@@ -104,13 +104,9 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
             // Get the default VLAN
             VlanNetworkHB vlanHB = vapp.getVirtualDataCenterHB().getDefaultVlan();
 
-            DHCPServiceHB dhcpServiceHB =
-                (DHCPServiceHB) vlanHB.getConfiguration().getDhcpService();
-
             // Define the next available IP for the VLAN
             IpPoolManagementHB nextIp =
-                getNextAvailableIP(dhcpServiceHB.getDhcpServiceId(), vlanHB.getConfiguration()
-                    .getGateway());
+                getNextAvailableIP(vlanHB, vlanHB.getConfiguration().getGateway());
 
             ResourceAllocationSettingData rasd;
             if (nextIp.getVirtualDataCenter() == null)
@@ -119,8 +115,13 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
                 nextIp.setVirtualDataCenter(vapp.getVirtualDataCenterHB());
                 nextIp.setMac(IPNetworkRang.requestRandomMacAddress(vapp.getVirtualDataCenterHB()
                     .getHypervisorType()));
+                nextIp.setName(nextIp.getMac().replace(":", "") + "_host");
                 rasd = this.assignPrivateMACResourceRASD(nextIp.getMac(), vlanHB.getNetworkName());
                 rasd.setResourceSubType("2");
+                if (vlanHB.getNetworkType().equals(NetworkType.UNMANAGED.name()))
+                {
+                    rasd.setResourceSubType("3");
+                }
             }
             else
             {
@@ -205,11 +206,23 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
      * @param gateway gateway can not be the the next available by default.
      * @return an {@link IpPoolManagementHB} instance
      */
-    protected IpPoolManagementHB getNextAvailableIP(final Integer dhcpServiceId,
+    protected IpPoolManagementHB getNextAvailableIP(final VlanNetworkHB vlanNetwork,
         final String gateway) throws NetworkCommandException
     {
-        DHCPServiceDAO dhcpServiceDAO = factory.getDHCPServiceDAO();
-        IpPoolManagementHB nextIp = dhcpServiceDAO.getNextAvailableIp(dhcpServiceId, gateway);
+        if (vlanNetwork.getNetworkType().equals(NetworkType.UNMANAGED.name()))
+        {
+            IpPoolManagementHB ip = new IpPoolManagementHB();
+            ip.setVlanNetworkName(vlanNetwork.getNetworkName());
+            ip.setIdResourceType(com.abiquo.server.core.infrastructure.network.IpPoolManagement.DISCRIMINATOR);
+            ip.setIp("");
+            ip.setQuarantine(false);
+            ip.setAvailable(true);
+
+            return ip;
+        }
+        VlanNetworkDAO vlanNetworkDAO = factory.getVlanNetworkDAO();
+        IpPoolManagementHB nextIp =
+            vlanNetworkDAO.getNextAvailableIp(vlanNetwork.getVlanNetworkId(), gateway);
 
         if (nextIp == null)
         {

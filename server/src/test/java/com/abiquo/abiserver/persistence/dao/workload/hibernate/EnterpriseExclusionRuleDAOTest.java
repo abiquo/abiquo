@@ -119,8 +119,8 @@ public class EnterpriseExclusionRuleDAOTest extends DataAccessTestBase
         // We have a machine with a VM, but belongs to 'excluded' enterprise: return it
         EnterpriseExclusionRuleHB rule = new EnterpriseExclusionRuleHB(enterprise, enterprise2);
         SessionUtils.saveAndFlush(session, rule);
-        AssertUtils.assertContainsAllAndOnly(dao
-            .findMachinesWithVMsFromExcludedEnterprises(enterprise), machine);
+        AssertUtils.assertContainsAllAndOnly(
+            dao.findMachinesWithVMsFromExcludedEnterprises(enterprise), machine);
 
         // We add another machine, associated to a non-excluded enterprise: do not return it
         PhysicalmachineHB machine2 = TestEntityGenerationUtils.createMachine(rack, "machine2");
@@ -131,21 +131,21 @@ public class EnterpriseExclusionRuleDAOTest extends DataAccessTestBase
         vm2.setHypervisor(hypervisor2);
         vm2.setEnterpriseHB(enterprise3);
         SessionUtils.saveAndFlush(session, machine2, hypervisor2, vm2);
-        AssertUtils.assertContainsAllAndOnly(dao
-            .findMachinesWithVMsFromExcludedEnterprises(enterprise), machine);
+        AssertUtils.assertContainsAllAndOnly(
+            dao.findMachinesWithVMsFromExcludedEnterprises(enterprise), machine);
 
         // Exclude enterprise to which machine2 belongs: then it will be one of the forbidden
         // machines
         EnterpriseExclusionRuleHB rule2 = new EnterpriseExclusionRuleHB(enterprise3, enterprise);
         SessionUtils.saveAndFlush(session, rule2);
-        AssertUtils.assertContainsAllAndOnly(dao
-            .findMachinesWithVMsFromExcludedEnterprises(enterprise), machine, machine2);
+        AssertUtils.assertContainsAllAndOnly(
+            dao.findMachinesWithVMsFromExcludedEnterprises(enterprise), machine, machine2);
 
         // Remove VM deployed in machine2: it will not appear in query
         session.delete(vm);
         session.flush();
-        AssertUtils.assertContainsAllAndOnly(dao
-            .findMachinesWithVMsFromExcludedEnterprises(enterprise), machine2);
+        AssertUtils.assertContainsAllAndOnly(
+            dao.findMachinesWithVMsFromExcludedEnterprises(enterprise), machine2);
     }
 
     /** This test makes completely sure we have everything well worked out */
@@ -162,8 +162,8 @@ public class EnterpriseExclusionRuleDAOTest extends DataAccessTestBase
         dao.makePersistent(rule);
         session.flush();
 
-        Assert.assertTrue(SessionUtils.entityExists(session, EnterpriseExclusionRuleHB.class, rule
-            .getId()));
+        Assert.assertTrue(SessionUtils.entityExists(session, EnterpriseExclusionRuleHB.class,
+            rule.getId()));
     }
 
 }

@@ -84,7 +84,7 @@ public class VirtualDatacenterGenerator extends DefaultEntityWithLimitsGenerator
 
         VirtualDatacenter virtualDatacenter =
             new VirtualDatacenter(enterprise, datacenter, network, htype, name);
-        
+
         setDefaultLimits(virtualDatacenter);
 
         return virtualDatacenter;

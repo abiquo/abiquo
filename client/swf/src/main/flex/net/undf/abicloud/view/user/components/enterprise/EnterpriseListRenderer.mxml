@@ -79,6 +79,7 @@
             {
                 var userDragged:User = dragEvent.dragSource.dataForFormat("User") as User;
                 var userCopy:User = ObjectUtil.copy(userDragged) as User;
+                userCopy.pass = null;
                 userCopy.enterprise = this._enterprise;
 
                 var userEvent:UserEvent = new UserEvent(UserEvent.EDIT_USERS);

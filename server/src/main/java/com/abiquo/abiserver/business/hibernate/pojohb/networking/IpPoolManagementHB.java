@@ -63,11 +63,6 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     protected Boolean configureGateway;
 
     /**
-     * Identifier of its dhcp service definition.
-     */
-    private Integer dhcpServiceId;
-
-    /**
      * The name of the vlan network where the Resource belongs.
      */
     private String vlanNetworkName;
@@ -160,22 +155,6 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
     }
 
     /**
-     * @return the dhcpServiceId
-     */
-    public Integer getDhcpServiceId()
-    {
-        return dhcpServiceId;
-    }
-
-    /**
-     * @param dhcpServiceId the dhcpServiceId to set
-     */
-    public void setDhcpServiceId(final Integer dhcpServiceId)
-    {
-        this.dhcpServiceId = dhcpServiceId;
-    }
-
-    /**
      * @return the vlanNetworkName
      */
     public String getVlanNetworkName()
@@ -229,7 +208,6 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         IpPoolManagement ipPool = new IpPoolManagement();
 
         ipPool.setConfigureGateway(getConfigureGateway());
-        ipPool.setDhcpServiceId(getDhcpServiceId());
         ipPool.setIdManagement(getIdManagement());
         ipPool.setIdResourceType(getIdResourceType());
         ipPool.setIp(getIp());
@@ -292,7 +270,7 @@ public class IpPoolManagementHB extends ResourceManagementHB implements Serializ
         return available;
     }
 
-    public void setAvailable(Boolean available)
+    public void setAvailable(final Boolean available)
     {
         this.available = available;
     }

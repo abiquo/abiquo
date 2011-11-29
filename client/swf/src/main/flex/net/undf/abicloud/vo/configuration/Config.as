@@ -80,6 +80,8 @@ package net.undf.abicloud.vo.configuration
 		public var client_main_enterpriseLogoURL:SystemProperty;
 		public var client_main_billingUrl:SystemProperty;
 		public var client_logout_url:SystemProperty;
+		public var client_main_disableChangePassword:SystemProperty;
+		public var client_main_allowLogout:SystemProperty;
 		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
@@ -129,7 +131,11 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_config_general:SystemProperty;
 		public var client_wiki_config_heartbeat:SystemProperty;
 		public var client_wiki_config_registration:SystemProperty;	
-		public var client_wiki_config_licence:SystemProperty;		
+		public var client_wiki_config_licence:SystemProperty;	
+		
+		public var client_wiki_pricing_createTemplate:SystemProperty;
+		public var client_wiki_pricing_createCostCode:SystemProperty;	
+		public var client_wiki_pricing_createCurrency:SystemProperty;
 		
 
 		private var propertiesIndex:Array;

@@ -142,6 +142,34 @@ public class Datacenter extends DefaultEntityBase // DefaultEntityWithLimits
         this.name = name;
     }
 
+    public final static String UUID_PROPERTY = "uuid";
+
+    private final static boolean UUID_REQUIRED = false;
+
+    final static int UUID_LENGTH_MIN = 1;
+
+    final static int UUID_LENGTH_MAX = 40;
+
+    private final static boolean UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+
+    private final static String UUID_COLUMN = "uuid";
+
+    @Column(name = UUID_COLUMN, nullable = !UUID_REQUIRED, length = UUID_LENGTH_MAX)
+    private String uuid;
+
+    @Required(value = UUID_REQUIRED)
+    @Length(min = UUID_LENGTH_MIN, max = UUID_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = UUID_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    public String getUuid()
+    {
+        return this.uuid;
+    }
+
+    public void setUuid(final String uuid)
+    {
+        this.uuid = uuid;
+    }
+
     // ****************************** Associations ******************************
 
     public final static String NETWORK_PROPERTY = "network";

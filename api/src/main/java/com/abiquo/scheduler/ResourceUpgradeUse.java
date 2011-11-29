@@ -41,12 +41,12 @@ import org.springframework.stereotype.Component;
 
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.server.core.cloud.HypervisorDAO;
-import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDAO;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
@@ -101,7 +101,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     HypervisorDAO hypervisorDao;
 
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
-    
+
     public ResourceUpgradeUse()
     {
 
@@ -113,7 +113,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         assert entityManager != null;
         assert entityManager.isOpen();
 
-//        this.entityManager = entityManager;
+        // this.entityManager = entityManager;
 
         this.datastoreDao = new DatastoreDAO(entityManager);
         this.datacenterRepo = new InfrastructureRep(entityManager);
@@ -201,25 +201,20 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Override
     public void rollbackUse(final VirtualMachine virtualMachine)
     {
-
         final Machine physicalMachine = virtualMachine.getHypervisor().getMachine();
 
         try
         {
             updateUsageDatastore(virtualMachine, true);
-
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
-
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
             virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
             vmachineDao.flush();
         }
-        catch (final Exception e) // HibernateException NotEnoughResourcesException
-        // NoSuchObjectException
+        catch (final Exception e)
         {
-            throw new ResourceUpgradeUseException("Can not update resource utilization"
-                + e.getMessage());
+            throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
     }
 
@@ -402,7 +397,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
 
         if (virtual.getVirtualImage().isStateful())
         {
-            // statefull images doesn't update the datastore utilization.
+            // Stateful images doesn't update the datastore utilization.
             return;
         }
 

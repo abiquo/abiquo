@@ -145,7 +145,7 @@ public class Hypervisor extends DefaultEntityBase
     private final static long PORT_MIN = Integer.MIN_VALUE;
 
     private final static long PORT_MAX = Integer.MAX_VALUE;
-    
+
     private final static Integer DEFAULT_PORT_VALUE = 8889;
 
     @Column(name = PORT_COLUMN, nullable = false)

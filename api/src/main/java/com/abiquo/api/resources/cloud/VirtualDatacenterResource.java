@@ -55,6 +55,9 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
+import com.abiquo.server.core.cloud.VirtualDatacenterWithDatacenterDto;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.DatacenterDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -266,5 +269,26 @@ public class VirtualDatacenterResource extends AbstractResource
         response.setVlansLimits(vdc.getVlanSoft(), vdc.getVlanHard());
         response.setPublicIPLimits(vdc.getPublicIpsSoft(), vdc.getPublicIpsHard());
         return response;
+    }
+
+    public static VirtualDatacenterWithDatacenterDto createTransferObjectWithDatacenter(
+        final VirtualDatacenter vdc) throws Exception
+    {
+        VirtualDatacenterWithDatacenterDto dto = new VirtualDatacenterWithDatacenterDto();
+
+        dto.setId(vdc.getId());
+        dto.setName(vdc.getName());
+        dto.setHypervisorType(vdc.getHypervisorType());
+
+        DatacenterDto vdcDto = new DatacenterDto();
+        Datacenter datacenter = vdc.getDatacenter();
+
+        vdcDto.setId(datacenter.getId());
+        vdcDto.setName(datacenter.getName());
+        vdcDto.setLocation(datacenter.getLocation());
+
+        dto.setDatacenter(vdcDto);
+
+        return dto;
     }
 }

@@ -107,7 +107,8 @@ public class UriTestResolver
     public static String resolveEnterpriseURI(final Integer enterpriseId)
     {
         String template =
-            buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM);
+            buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
+                EnterpriseResource.ENTERPRISE_PARAM);
 
         return resolveURI(template,
             Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
@@ -115,13 +116,14 @@ public class UriTestResolver
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId) + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_IPS_PATH;
     }
 
     public static String resolveEnterpriseActionGetVirtualMachinesURI(final Integer entId)
     {
-        return resolveEnterpriseURI(entId)
-            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES;
+        return resolveEnterpriseURI(entId) + "/"
+            + EnterpriseResource.ENTERPRISE_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
     public static String resolveEnterprisesByDatacenterURI(final Integer datacenterId)
@@ -153,7 +155,7 @@ public class UriTestResolver
 
     public static String resolveRoleActionGetPrivilegesURI(final Integer entId)
     {
-        return resolveRoleURI(entId) + RoleResource.ROLE_ACTION_GET_PRIVILEGES;
+        return resolveRoleURI(entId) + "/" + RoleResource.ROLE_ACTION_GET_PRIVILEGES_PATH;
     }
 
     public static String resolveUsersURI(final Serializable enterpriseId)
@@ -189,7 +191,8 @@ public class UriTestResolver
     public static String resolveUserActionGetVirtualMachinesURI(final Integer enterpriseId,
         final Integer userId)
     {
-        return resolveUserURI(enterpriseId, userId) + UserResource.USER_ACTION_GET_VIRTUALMACHINES;
+        return resolveUserURI(enterpriseId, userId) + "/"
+            + UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH;
     }
 
     public static String resolveDatacentersURI()
@@ -387,7 +390,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(DatacenterResource.DATACENTER, datacenterId.toString());
-        values.put(RemoteServiceResource.REMOTE_SERVICE, type.toString().toLowerCase());
+        values.put(RemoteServiceResource.REMOTE_SERVICE,
+            type.toString().toLowerCase().replace("_", ""));
 
         return resolveURI(template, values);
     }
