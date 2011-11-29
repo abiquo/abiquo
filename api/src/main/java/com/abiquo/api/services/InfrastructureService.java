@@ -551,7 +551,8 @@ public class InfrastructureService extends DefaultApiService
         RemoteService old = getRemoteService(id);
 
         ErrorsDto configurationErrors =
-            remoteServiceService.checkRemoteServiceStatus(dto.getType(), dto.getUri());
+            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(),
+                dto.getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -1051,17 +1052,17 @@ public class InfrastructureService extends DefaultApiService
      * @param datacenterId
      * @return ErrorsDto
      */
-    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Integer datacenterId)
+    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Datacenter datacenter)
     {
 
         List<RemoteService> remoteServicesByDatacenter =
-            getRemoteServicesByDatacenter(datacenterId);
+            getRemoteServicesByDatacenter(datacenter.getId());
         ErrorsDto errors = new ErrorsDto();
 
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getType(), r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(datacenter, r.getType(), r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
         return errors;
@@ -1149,15 +1150,16 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url)
     {
-        return checkRemoteServiceStatus(type, url, false);
+        return checkRemoteServiceStatus(datacenter, type, url, false);
     }
 
-    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
-        final boolean flushErrors)
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url, final boolean flushErrors)
     {
-        return remoteServiceService.checkRemoteServiceStatus(type, url, flushErrors);
+        return remoteServiceService.checkRemoteServiceStatus(datacenter, type, url, flushErrors);
     }
 
     protected void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)

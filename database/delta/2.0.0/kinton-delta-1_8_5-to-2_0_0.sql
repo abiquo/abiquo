@@ -188,6 +188,8 @@ ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `state
 ALTER TABLE `kinton`.`node_virtual_image_stateful_conversions` ADD COLUMN `subState` VARCHAR(50)  DEFAULT NULL AFTER `state`;
 ALTER TABLE `kinton`.`ovf_package` MODIFY COLUMN `name` VARCHAR(255)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 
+ALTER TABLE `kinton`.`datacenter` ADD COLUMN `uuid` VARCHAR(40) DEFAULT NULL AFTER `idDataCenter`;
+
 -- PRICING --
 -- ADD THE COLUMN ID_PRICING TO ENTERPRISE --
 ALTER TABLE `kinton`.`enterprise` ADD COLUMN `idPricingTemplate` int(10) unsigned DEFAULT NULL;
