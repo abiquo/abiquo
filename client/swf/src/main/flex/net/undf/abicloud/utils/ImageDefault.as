@@ -111,7 +111,7 @@ package net.undf.abicloud.utils
          */
         private function loadImageComplete_handler(event:Event):void
         {
-            this._loadSuccess = true;
+            //this._loadSuccess = true;
 
             dispatchEvent(new Event("loadSuccessChanged"));
         }
