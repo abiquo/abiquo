@@ -216,6 +216,15 @@ public class NodecollectorServiceStubMock extends NodecollectorServiceStub
         resourceEth0.setElementName("vSwitch0");
         host.getResources().add(resourceEth0);
 
+        ResourceType resourceDatastore0 = new ResourceType();
+        resourceDatastore0.setResourceType(ResourceEnumType.HARD_DISK);
+        resourceDatastore0.setAddress("Datastore1");
+        resourceDatastore0.setElementName("Datastore1");
+        resourceDatastore0.setUnits(30000000l);
+        resourceDatastore0.setAvailableUnits(21340002l);
+
+        host.getResources().add(resourceDatastore0);
+
         return host;
     }
 
@@ -233,6 +242,15 @@ public class NodecollectorServiceStubMock extends NodecollectorServiceStub
         resourceEth0.setAddress("52:50:00:23:12:19");
         resourceEth0.setElementName("vSwitch0");
         host.getResources().add(resourceEth0);
+
+        ResourceType resourceDatastore0 = new ResourceType();
+        resourceDatastore0.setResourceType(ResourceEnumType.HARD_DISK);
+        resourceDatastore0.setAddress("Datastore1");
+        resourceDatastore0.setElementName("Datastore1");
+        resourceDatastore0.setUnits(30000000l);
+        resourceDatastore0.setAvailableUnits(21340002l);
+
+        host.getResources().add(resourceDatastore0);
 
         return host;
     }

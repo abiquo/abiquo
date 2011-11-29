@@ -37,6 +37,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaRackDAO")
 /* package */class RackDAO extends DefaultDAOBase<Integer, Rack>
@@ -205,7 +206,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
     public Rack findByIds(final Integer datacenterId, final Integer rackId)
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq(Rack.ID_PROPERTY, rackId));
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, rackId));
     }
 
     private final static String HQL_NOT_MANAGED_RACKS_BY_DATACENTER = //
@@ -241,5 +242,17 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         }
 
         return q.list();
+    }
+
+    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
+        "FROM com.abiquo.server.core.cloud.VirtualMachine vm " + //
+        "WHERE vm.hypervisor.machine.rack = :rack ";
+
+    @SuppressWarnings("unchecked")
+    public List<Integer> findUsedVrdpPorts(final Rack rack)
+    {
+        Query query = getSession().createQuery(QUERY_USED_VDRP);
+        query.setParameter("rack", rack);
+        return query.list();
     }
 }

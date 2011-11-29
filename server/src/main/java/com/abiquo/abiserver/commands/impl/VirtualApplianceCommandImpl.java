@@ -76,8 +76,10 @@ import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
+import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualDatacenterResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
+import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualDatacenterResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
@@ -118,6 +120,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -1483,15 +1486,18 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     public DataResult<Collection<VirtualAppliance>> getVirtualAppliancesByEnterprise(
         final UserSession userSession, final Enterprise enterprise)
     {
-        return new GetVirtualAppliancesList(userSession, enterprise.getId(), null)
-        {
 
-            @Override
-            protected Collection<VirtualappHB> get(final UserHB user, final VirtualApplianceDAO dao)
-            {
-                return dao.getVirtualAppliancesByEnterprise(user, enterpriseId);
-            }
-        }.getVirtualAppliances(errorManager, resourceManager);
+        VirtualApplianceResourceStub proxy =
+            APIStubFactory.getInstance(userSession, new VirtualApplianceResourceStubImpl(),
+                VirtualApplianceResourceStub.class);
+        DataResult<Collection<VirtualAppliance>> result =
+            proxy.getVirtualAppliancesByEnterprise(userSession, enterprise);
+        if (result.getSuccess())
+        {
+            result.setMessage(resourceManager
+                .getMessage("getVirtualAppliancesByEnterprise.success"));
+        }
+        return result;
     }
 
     /*
@@ -3459,19 +3465,29 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
-            netMan.setRasd(null);
-            netMan.setVirtualMachine(null);
-            netMan.setVirtualApp(null);
-            netMan.setConfigureGateway(Boolean.FALSE);
 
-            if (rasd.getResourceSubType() != null
-                && rasd.getResourceSubType().equalsIgnoreCase("2"))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
+                .equals(NetworkType.UNMANAGED.name()))
             {
-                netMan.setMac(null);
-                netMan.setVirtualDataCenter(null);
-                netMan.setName(null);
+                session.delete(netMan);
             }
-            session.saveOrUpdate(netMan);
+            else
+            {
+                netMan.setRasd(null);
+                netMan.setVirtualMachine(null);
+                netMan.setVirtualApp(null);
+                netMan.setConfigureGateway(Boolean.FALSE);
+
+                if (rasd.getResourceSubType() != null
+                    && rasd.getResourceSubType().equalsIgnoreCase("2"))
+                {
+                    netMan.setMac(null);
+                    netMan.setVirtualDataCenter(null);
+                    netMan.setName(null);
+                }
+                session.saveOrUpdate(netMan);
+            }
+
         }
     }
 
@@ -3709,4 +3725,5 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             errorManager.reportError(resourceManager, dataResult, "updateStateInDB", e);
         }
     }
+
 }

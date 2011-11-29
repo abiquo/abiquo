@@ -19,18 +19,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.infrastructure;
+package com.abiquo.server.core.infrastructure;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-  public class DatacenterLimitsTest extends DefaultEntityTestBase<DatacenterLimits>
-  {
+public class DatacenterLimitsTest extends DefaultEntityTestBase<DatacenterLimits>
+{
 
-      @Override
-      protected InstanceTester<DatacenterLimits> createEntityInstanceGenerator()
-      {
-          return new DatacenterLimitsGenerator(getSeed());
-      }
-  }
+    @Override
+    protected InstanceTester<DatacenterLimits> createEntityInstanceGenerator()
+    {
+        return new DatacenterLimitsGenerator(getSeed());
+    }
+}

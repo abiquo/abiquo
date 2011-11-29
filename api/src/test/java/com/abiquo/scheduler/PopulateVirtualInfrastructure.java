@@ -51,7 +51,6 @@ import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.RepositoryDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
@@ -432,12 +431,12 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         Network network = vdc.getDatacenter().getNetwork();
 
         VLANNetwork vlan = vlanNetGen.createInstance(network, vlanNetworkName);
-
-        RemoteService rsDhcp = vlan.getConfiguration().getDhcp().getRemoteService();
-        // XXX save remote service on the current datacenter
-
-        rsDhcp.setDatacenter(vdc.getDatacenter());
-        dcRep.insertRemoteService(rsDhcp);
+        //
+        // RemoteService rsDhcp = vlan.getConfiguration().getDhcp().getRemoteService();
+        // // XXX save remote service on the current datacenter
+        //
+        // rsDhcp.setDatacenter(vdc.getDatacenter());
+        // dcRep.insertRemoteService(rsDhcp);
 
         if (fragments.length == 2)
         {
@@ -474,7 +473,6 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         IpPoolManagement ipPoolManagement = ipPoolGen.createInstance(vdc, vdc.getNetwork());
         ipPoolManagement.setVlanNetwork(vlanNetwork);
         ipPoolManagement.setName(vnicName);
-        ipPoolManagement.setDhcp(vlanNetwork.getConfiguration().getDhcp());
         vdcRep.insertIpManagement(ipPoolManagement);
 
     }

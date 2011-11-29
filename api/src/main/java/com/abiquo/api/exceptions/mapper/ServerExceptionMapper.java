@@ -71,11 +71,11 @@ public class ServerExceptionMapper<T extends Throwable> implements ExceptionMapp
                     error.setMessage(APIError.STATUS_NOT_FOUND.getMessage());
                     builder.status(Status.NOT_FOUND);
                     break;
-//                case 405:
-//                    error.setCode(APIError.STATUS_METHOD_NOT_ALLOWED.getCode());
-//                    error.setMessage(APIError.STATUS_METHOD_NOT_ALLOWED.getMessage());
-//                    builder.status(Status.);
-//                    break;
+                // case 405:
+                // error.setCode(APIError.STATUS_METHOD_NOT_ALLOWED.getCode());
+                // error.setMessage(APIError.STATUS_METHOD_NOT_ALLOWED.getMessage());
+                // builder.status(Status.);
+                // break;
                 case 415:
                     error.setCode(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE.getCode());
                     error.setMessage(APIError.STATUS_UNSUPPORTED_MEDIA_TYPE.getMessage());
@@ -86,7 +86,7 @@ public class ServerExceptionMapper<T extends Throwable> implements ExceptionMapp
                     error.setMessage(APIError.STATUS_INTERNAL_SERVER_ERROR.getMessage());
                     builder.status(Status.INTERNAL_SERVER_ERROR);
                     break;
-                    
+
             }
         }
         else
@@ -94,13 +94,13 @@ public class ServerExceptionMapper<T extends Throwable> implements ExceptionMapp
             error.setCode(APIError.STATUS_INTERNAL_SERVER_ERROR.getCode());
             error.setMessage(APIError.STATUS_INTERNAL_SERVER_ERROR.getMessage());
             builder.status(Status.INTERNAL_SERVER_ERROR);
-            
-            exception.printStackTrace();            
+
+            exception.printStackTrace();
         }
-        
-        errors.getCollection().add(error);       
+
+        errors.getCollection().add(error);
         builder.entity(errors).type(MediaType.APPLICATION_XML_TYPE);
-        
+
         return builder.build();
     }
 

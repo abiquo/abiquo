@@ -225,6 +225,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @deprecated
      * @throws Exception
      */
+
     @Deprecated
     BasicResult forceCreateVirtualAppliance(final VirtualAppliance virtualAppliance,
         final boolean mustChangeState) throws Exception

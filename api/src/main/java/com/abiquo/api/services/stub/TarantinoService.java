@@ -25,12 +25,15 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
@@ -39,6 +42,8 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.tracer.ComponentType;
@@ -53,6 +58,10 @@ import com.abiquo.tracer.SeverityType;
 @Service
 public class TarantinoService extends DefaultApiService
 {
+
+    /** The logger object **/
+    private final static Logger logger = LoggerFactory.getLogger(TarantinoService.class);
+
     @Autowired
     private RemoteServiceService remoteServiceService;
 
@@ -180,5 +189,192 @@ public class TarantinoService extends DefaultApiService
 
             vsm.unsubscribe(vsmRS, vm);
         }
+    }
+
+    /**
+     * Creates and sends a deploy operation.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String deployVirtualMachine(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        RemoteService remoteService =
+            remoteServiceService.getRemoteService(datacenter.getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+        vsm.subscribe(remoteService, virtualMachine);
+
+        try
+        {
+            DatacenterTasks deployTask =
+                jobCreator.deployTask(virtualMachine, virtualMachineDesciptionBuilder);
+            send(datacenter, deployTask, EventType.VM_DEPLOY);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            // We need to unsuscribe the machine
+            logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
+                + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
+            vsm.unsubscribe(remoteService, virtualMachine);
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY,
+                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
+                        + e.getMessage());
+
+            // We need to unsuscribe the machine
+            logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
+                + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
+            vsm.unsubscribe(remoteService, virtualMachine);
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
+    /**
+     * Creates and sends a deploy operation.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String undeployVirtualMachine(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        RemoteService remoteService =
+            remoteServiceService.getRemoteService(datacenter.getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+        vsm.unsubscribe(remoteService, virtualMachine);
+
+        try
+        {
+            DatacenterTasks deployTask =
+                jobCreator.undeployTask(virtualMachine, virtualMachineDesciptionBuilder,
+                    currentState);
+            send(datacenter, deployTask, EventType.VM_UNDEPLOY);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            // We need to suscribe the machine
+            logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
+                + e.getMessage() + " monitoring the machine: " + virtualMachine.getName());
+            vsm.subscribe(remoteService, virtualMachine);
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the undeploy task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_UNDEPLOY,
+                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
+                        + e.getMessage());
+
+            // We need to unsuscribe the machine
+            logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
+                + e.getMessage() + " monitoring the machine: " + virtualMachine.getName());
+            vsm.subscribe(remoteService, virtualMachine);
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
+    /**
+     * Creates and sends a deploy operation.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String applyVirtualMachineState(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineStateTransition machineStateTransition)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        // ignoreVSMEventsIfNecessary(datacenter, virtualMachine);
+
+        try
+        {
+            DatacenterTasks deployTask =
+                jobCreator.applyStateTask(virtualMachine, virtualMachineDesciptionBuilder,
+                    machineStateTransition);
+            send(datacenter, deployTask, EventType.VM_STATE);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            // We need to unsuscribe the machine
+            logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
+                + e.getMessage() + " machine: " + virtualMachine.getName());
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the state change task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer
+                .systemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY,
+                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
+                        + e.getMessage());
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
     }
 }

@@ -36,7 +36,9 @@ import com.abiquo.model.transport.WrapperDto;
 public class StoragePoolsWithTierDto extends WrapperDto<StoragePoolWithTierDto>
 {
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/storagepoolswithtierdto+xml";
+
     @Override
     @XmlElement(name = "storagePoolWithTier")
     public List<StoragePoolWithTierDto> getCollection()

@@ -30,7 +30,6 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
-import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
@@ -59,7 +58,6 @@ public interface AppsLibraryStub
     /**
      * ICONS
      */
-
     public DataResult<List<Icon>> getIcons();
 
     public DataResult<Icon> createIcon(final IconDto icon);
@@ -78,11 +76,11 @@ public interface AppsLibraryStub
 
     public BasicResult deleteCategory(final Integer idCategory);
 
-    /* 
+    /*
      * DISK FORMMAT TYPES
      */
 
-    public DataResult<List<DiskFormatType>> getDiskFormatTypes();
+    public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes();
 
     /**
      * API will update the {@link OVFPackageInstanceStateDto} the creation state in the provided

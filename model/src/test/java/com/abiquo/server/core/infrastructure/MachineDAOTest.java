@@ -21,11 +21,14 @@
 package com.abiquo.server.core.infrastructure;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
+import javax.validation.ConstraintViolationException;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -582,7 +585,6 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
         assertNotNull(result);
     }
 
-
     @Test
     public void test_findbyIP_notFound()
     {
@@ -598,5 +600,35 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
 
         Machine result = dao.findByIp(datacenter, "NOT_EXISTING_IP");
         assertNull(result);
+    }
+
+    public void testLargeSwitchName()
+    {
+        MachineGenerator machineGenerator = new MachineGenerator(getSeed());
+        EnterpriseGenerator eGenerator = new EnterpriseGenerator(getSeed());
+        Enterprise e = eGenerator.createInstanceNoLimits("someEnterprise");
+
+        Datacenter datacenter = new Datacenter("Datacenter name", "Datacenter location");
+
+        Rack rack1 = datacenter.createRack("Rack 1", 2, 4094, 2, 10);
+        ds().persistAll(datacenter, rack1, e);
+
+        Machine machine = machineGenerator.createMachine(datacenter, rack1);
+
+        machine.setEnterprise(e);
+
+        machine.setState(MachineState.MANAGED);
+        machine.setVirtualSwitch(new BigInteger(1000, new Random()).toString(32));
+        MachineDAO dao = createDaoForReadWriteTransaction();
+        dao.persist(machine);
+        EntityManagerHelper.commitAndClose(dao.getEntityManager());
+    }
+
+    @Test(expectedExceptions = {ConstraintViolationException.class})
+    public void testLargeSwitchNameFail()
+    {
+        Machine machine = this.createUniqueEntity();
+        machine.setVirtualSwitch(new BigInteger(1004, new Random()).toString(32));
+        ds().persistAll(machine);
     }
 }

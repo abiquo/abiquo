@@ -395,7 +395,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         final VirtualMachineDto dto = new VirtualMachineDto();
         dto.setCpu(vm.getCpu());
         dto.setDescription(vm.getDescription());
-        dto.setHd(vm.getHdInBytes());
+        dto.setHdInBytes(vm.getHdInBytes());
         dto.setHighDisponibility(vm.getHighDisponibility());
         dto.setName(vm.getName());
 

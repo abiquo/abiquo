@@ -94,8 +94,8 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
         vlanDto.setSufixDNS(netConfig.getSufixDNS());
 
         String datacenterLink =
-            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}", Collections
-                .singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
+            URIResolver.resolveURI(apiUri, "admin/datacenters/{datacenter}",
+                Collections.singletonMap("datacenter", String.valueOf(vdc.getIdDataCenter())));
 
         String enterpriseLink = createEnterpriseLink(vdc.getEnterprise().getId());
         URIResolver.resolveURI(apiUri, "cloud/virtualdatacenters", new HashMap<String, String>());
@@ -255,12 +255,12 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                     URIResolver.getLinkId(vdc.searchLink("datacenter"), "admin/datacenters",
                         "{datacenter}", "datacenter");
 
-                factory.beginConnection();
-                NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
-                factory.endConnection();
+                // factory.beginConnection();
+                // NetworkHB network = factory.getNetworkDAO().findByVirtualDatacenter(vdc.getId());
+                // factory.endConnection();
 
                 VirtualDataCenter vdctoadd =
-                    VirtualDataCenter.create(vdc, datacenterId, enterprise, network.toPojo());
+                    VirtualDataCenter.create(vdc, datacenterId, enterprise);
 
                 // Get the default network of the vdc.
                 RESTLink link = vdc.searchLink("defaultnetwork");
@@ -270,6 +270,7 @@ public class VirtualDatacenterResourceStubImpl extends AbstractAPIStub implement
                 vdctoadd.setDefaultVlan(NetworkResourceStubImpl.createFlexObject(vlanDto));
 
                 datacenters.add(vdctoadd);
+
             }
             result.setData(datacenters);
 

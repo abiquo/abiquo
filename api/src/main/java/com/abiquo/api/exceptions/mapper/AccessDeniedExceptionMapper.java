@@ -50,7 +50,7 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<SpringSecuri
             error.setCode(APIError.FORBIDDEN.getCode());
             error.setMessage(APIError.FORBIDDEN.getMessage());
             errors.add(error);
-            
+
             ResponseBuilder builder = new ResponseBuilderImpl();
             builder.status(Response.Status.FORBIDDEN);
             builder.entity(errors);
@@ -63,7 +63,7 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<SpringSecuri
             error.setCode(APIError.INVALID_CREDENTIALS.getCode());
             error.setMessage(APIError.INVALID_CREDENTIALS.getMessage());
             errors.add(error);
-            
+
             ResponseBuilder builder = new ResponseBuilderImpl();
             builder.status(Response.Status.UNAUTHORIZED);
             builder.entity(errors);
@@ -76,7 +76,7 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<SpringSecuri
             error.setCode(APIError.INTERNAL_SERVER_ERROR.getCode());
             error.setMessage(APIError.INTERNAL_SERVER_ERROR.getMessage());
             errors.add(error);
-            
+
             ResponseBuilder builder = new ResponseBuilderImpl();
             builder.status(Response.Status.INTERNAL_SERVER_ERROR);
             builder.entity(errors);

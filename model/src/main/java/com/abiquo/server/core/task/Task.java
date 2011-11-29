@@ -25,19 +25,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.abiquo.model.redis.RedisEntityBase;
+import com.abiquo.server.core.task.enums.TaskState;
+import com.abiquo.server.core.task.enums.TaskType;
 
 public class Task extends RedisEntityBase
 {
-    public enum TaskType
-    {
-        DEPLOY, UNDEPLOY, RECONFIGURE, POWER_ON, POWER_OFF, PAUSE, RESUME, RESET, SNAPSHOT, HIGH_AVAILABILITY
-    }
-
-    public enum TaskState
-    {
-        FINISHED_SUCCESFULLY, FINISHED_UNSUCCESFULLY, PENDING, STARTED
-    }
-
     protected String ownerId;
 
     protected String taskId;

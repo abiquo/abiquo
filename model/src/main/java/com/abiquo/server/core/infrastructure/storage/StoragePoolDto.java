@@ -28,9 +28,11 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "storagePool")
 public class StoragePoolDto extends SingleResourceTransportDto
 {
-    
+
     private static final long serialVersionUID = 1L;
+
     public static final String MEDIA_TYPE = "application/storagepooldto+xml";
+
     protected String idStorage;
 
     public String getIdStorage()
@@ -42,7 +44,7 @@ public class StoragePoolDto extends SingleResourceTransportDto
     {
         this.idStorage = idStorage;
     }
-    
+
     protected String name;
 
     public String getName()
@@ -102,5 +104,5 @@ public class StoragePoolDto extends SingleResourceTransportDto
     {
         this.enabled = enabled;
     }
-    
+
 }

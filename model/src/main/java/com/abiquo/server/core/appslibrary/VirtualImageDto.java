@@ -56,7 +56,7 @@ public class VirtualImageDto extends SingleResourceTransportDto
 
     private boolean shared;
 
-    private String costCode;
+    private int costCode;
 
     private Date creationDate;
 
@@ -174,12 +174,12 @@ public class VirtualImageDto extends SingleResourceTransportDto
         this.shared = shared;
     }
 
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(final String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }

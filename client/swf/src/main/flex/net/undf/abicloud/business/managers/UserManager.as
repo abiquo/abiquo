@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.business.managers
 {
+    import com.adobe.crypto.MD5;
+    
     import flash.events.Event;
     import flash.events.EventDispatcher;
     
@@ -32,6 +34,7 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.vo.user.Enterprise;
     import net.undf.abicloud.vo.user.Privilege;
     import net.undf.abicloud.vo.user.User;
+    import com.adobe.crypto.MD5;
 
     /**
      * Manager for Users
@@ -171,7 +174,11 @@ package net.undf.abicloud.business.managers
             oldUser.surname = newUser.surname;
             oldUser.description = newUser.description;
             oldUser.email = newUser.email;
-            oldUser.pass = newUser.pass;
+            
+            //
+            if(newUser.pass){
+	            oldUser.pass = MD5.hash(newUser.pass);
+            }
             oldUser.active = newUser.active;
             oldUser.deleted = newUser.deleted;
             oldUser.locale = newUser.locale;

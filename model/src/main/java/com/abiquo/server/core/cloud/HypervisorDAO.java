@@ -48,6 +48,20 @@ public class HypervisorDAO extends DefaultDAOBase<Integer, Hypervisor>
         super(Hypervisor.class, entityManager);
     }
 
+    public boolean existsAnyWithIp(final String ip)
+    {
+        assert !StringUtils.isEmpty(ip);
+
+        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_PROPERTY));
+    }
+
+    public boolean existsAnyWithIpService(final String ip)
+    {
+        assert !StringUtils.isEmpty(ip);
+
+        return existsAnyByCriterions(sameIp(ip, Hypervisor.IP_SERVICE_PROPERTY));
+    }
+
     private Criterion sameIp(final String ip, final String propertyName)
     {
         assert !StringUtils.isEmpty(ip);

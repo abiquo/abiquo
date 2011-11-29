@@ -158,6 +158,11 @@ public class StorageRep extends DefaultRepBase
         return poolDAO.findPoolsByTier(tier);
     }
 
+    public Tier findTierById(final Integer tierId)
+    {
+        return tierDAO.findById(tierId);
+    }
+
     public Tier findTierById(final Integer datacenterId, final Integer tierId)
     {
         return tierDAO.getTierById(datacenterId, tierId);
@@ -180,7 +185,7 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> findVolumesByPool(final StoragePool pool,
-        final FilterOptions filters) throws Exception
+        final FilterOptions filters)
     {
         return volumeDAO.getVolumesByPool(pool, filters);
     }
@@ -222,7 +227,7 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> getAvailableVolumes(final VirtualDatacenter vdc,
-        final FilterOptions filterOptions) throws Exception
+        final FilterOptions filterOptions)
     {
         return volumeDAO.getAvailableVolumes(vdc, filterOptions);
     }
@@ -259,7 +264,7 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc,
-        final FilterOptions filterOptions) throws Exception
+        final FilterOptions filterOptions)
     {
         return volumeDAO.getVolumesByVirtualDatacenter(vdc, filterOptions);
     }
@@ -270,7 +275,7 @@ public class StorageRep extends DefaultRepBase
     }
 
     public List<VolumeManagement> getVolumesByVirtualMachine(final VirtualMachine vm,
-        final FilterOptions filters) throws Exception
+        final FilterOptions filters)
     {
         return volumeDAO.getVolumesByVirtualMachine(vm, filters);
     }

@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceStatusEventProcessor;
+import com.abiquo.api.services.appslibrary.event.AMEventProcessor;
 import com.abiquo.commons.amqp.consumer.BasicConsumer;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.AMConsumer;
@@ -45,8 +45,8 @@ import com.abiquo.commons.amqp.impl.vsm.VSMConsumer;
  */
 public class AmqpConsumerContextListener implements ServletContextListener
 {
-    protected static final Logger LOGGER = LoggerFactory
-        .getLogger(AmqpConsumerContextListener.class);
+    protected static final Logger LOGGER =
+        LoggerFactory.getLogger(AmqpConsumerContextListener.class);
 
     /** The RabbitMQ consumer for VSM */
     protected VSMConsumer eventsConsumer;
@@ -131,7 +131,7 @@ public class AmqpConsumerContextListener implements ServletContextListener
 
     /**
      * Creates an instance of {@link AMConsumer}, add all the needed listeners
-     * {@link OVFPackageInstanceStatusEventProcessor} and starts the consuming.
+     * {@link AMEventProcessor} and starts the consuming.
      * 
      * @throws IOException When there is some network error.
      */
@@ -139,7 +139,7 @@ public class AmqpConsumerContextListener implements ServletContextListener
     {
         AMCallback processor =
             WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean("OVFPackageInstanceStatusEventProcessor", AMCallback.class);
+                .getBean("AMEventProcessor", AMCallback.class);
 
         amConsumer = new AMConsumer();
         amConsumer.addCallback(processor);
