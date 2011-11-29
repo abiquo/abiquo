@@ -37,6 +37,8 @@ package net.undf.abicloud.vo.infrastructure
         
         public var defaultTemplate:String;
         
+        public var maxMachinesOn:int;
+        
         public static const TYPE:String = "Cisco UCS";
         public static const DEFAULT_PORT:int = 80;
 
@@ -48,6 +50,7 @@ package net.undf.abicloud.vo.infrastructure
 			user = "";
 			password = "";
 			port = DEFAULT_PORT;
+			maxMachinesOn = 0;
 		}
 		
 	}
