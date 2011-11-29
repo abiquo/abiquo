@@ -52,6 +52,7 @@
             [Bindable]
             private var _enterprise:Enterprise;
 
+            [Bindable]
             private var _networkType:String;
 
 
