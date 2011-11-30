@@ -278,11 +278,11 @@ public class NetworkingService
      * @return a list of all the IPs managed by a Virtual DataCenter.
      */
     public BasicResult getNetworkPoolInfoByVDC(final UserSession userSession,
-        final Integer virtualDataCenterId, final ListRequest listRequest)
+        final Integer virtualDataCenterId, final ListRequest listRequest, final String type)
     {
         return proxyStub(userSession).getListNetworkPoolByVirtualDatacenter(virtualDataCenterId,
             listRequest.getOffset(), listRequest.getNumberOfNodes(), listRequest.getFilterLike(),
-            listRequest.getOrderBy(), listRequest.getAsc());
+            listRequest.getOrderBy(), listRequest.getAsc(), type);
     }
 
     /**

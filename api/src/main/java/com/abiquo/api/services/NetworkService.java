@@ -155,9 +155,8 @@ public class NetworkService extends DefaultApiService
 
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                IpPoolManagement.DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
+                .valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -395,7 +394,7 @@ public class NetworkService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc)
+        final Boolean asc, final String type)
     {
         // Check if the orderBy element is actually one of the available ones
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
@@ -415,9 +414,22 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        NetworkType netType = null;
+        if (type != null && !type.equals("false") && !type.equals("INTERNAL"))
+        {
+            netType = NetworkType.fromValue(type);
+            if (netType == null || netType.equals(NetworkType.INTERNAL))
+            {
+                LOGGER
+                    .info("Bad parameter 'type' in request to get the public networks by a datacenter.");
+                addValidationErrors(APIError.QUERY_NETWORK_TYPE_INVALID_PARAMETER);
+                flushErrors();
+            }
+        }
+
         // Query the list to database.
         List<IpPoolManagement> ips =
-            repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
+            repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc, netType);
         LOGGER
             .debug("Returning the list of IPs used by VirtualDatacenter '" + vdc.getName() + "'.");
         return ips;
@@ -463,8 +475,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -956,10 +968,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress()
-            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask()
-                .equals(newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
+            newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask().equals(
+                newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -972,8 +984,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway()
-            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
+            oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -1382,11 +1394,8 @@ public class NetworkService extends DefaultApiService
     public DhcpOption addDhcpOption(final DhcpOptionDto dto)
     {
         DhcpOption opt =
-            new DhcpOption(dto.getOption(),
-                dto.getGateway(),
-                dto.getNetworkAddress(),
-                dto.getMask(),
-                dto.getNetmask());
+            new DhcpOption(dto.getOption(), dto.getGateway(), dto.getNetworkAddress(), dto
+                .getMask(), dto.getNetmask());
 
         if (!opt.isValid())
         {

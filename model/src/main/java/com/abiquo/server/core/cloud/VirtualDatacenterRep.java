@@ -39,7 +39,6 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -49,6 +48,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
@@ -326,9 +326,9 @@ public class VirtualDatacenterRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer firstElem,
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
-        final Boolean asc)
+        final Boolean asc, final NetworkType netType)
     {
-        return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
+        return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc, netType);
     }
 
     /**

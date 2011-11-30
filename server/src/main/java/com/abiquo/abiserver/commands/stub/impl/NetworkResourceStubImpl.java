@@ -785,7 +785,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
         final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc) throws NetworkCommandException
+        final Boolean asc, String type) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -797,6 +797,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (type != null && type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
+        if (type != null)
+        {
+            buildRequest.append("&type=" + type);
+        }
+
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -831,7 +840,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
         final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc, final String type)
+        final String filterLike, final String orderBy, final Boolean asc, String type)
         throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
@@ -843,7 +852,10 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
-
+        if (type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
         buildRequest.append("&type=" + type);
         if (!filterLike.isEmpty())
         {
