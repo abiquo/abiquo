@@ -103,7 +103,7 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
     private final static int NAME_LENGTH_MAX = 20;
 
