@@ -57,6 +57,7 @@
             protected var _datacenter:DataCenter;
 
             //The new rack that will be created or edited
+            [Bindable]
             protected var _rack:Rack;
             
             override protected function createChildren():void
@@ -104,7 +105,9 @@
                     //Creating a new Rack
                     titleText = ResourceManager.getInstance().getString("Infrastructure",
                     													"POPUP_TITLE_RACKADD");
-					this._rackFormBasicInfo.rackTypeCombo.selectedItem = Rack.TYPE;                    													
+					this._rackFormBasicInfo.rackTypeCombo.selectedItem = Rack.TYPE;    
+					
+					automaticOpenCheck.selected = AbiCloudModel.getInstance().configurationManager.checkRegisteredSharedObject("automaticOpenPhysicalMachine");                													
                    
                 }
                 //Update the rack view
@@ -205,6 +208,11 @@
             {
                 toggledContainer.visible = true;
             }
+            
+            private function onAutomaticOpenCheckChange(event:Event):void{
+                //we save the user choice about automatically open datacenetr after creation
+                AbiCloudModel.getInstance().configurationManager.modifyRegisteredSharedObject("automaticOpenPhysicalMachine",CheckBox(event.currentTarget).selected);   
+            }
         ]]>
     </mx:Script>
     	
@@ -219,6 +227,12 @@
     <GeneralToggledContainer id="toggledContainer"
         width="100%" height="100%"
         resizeEffect="{myResize}"/>
+
+    <mx:CheckBox id="automaticOpenCheck" 
+    	includeInLayout="{!this._rack}"
+    	visible="{!this._rack}"
+        label="@Resource(bundle='Infrastructure',key='LABEL_PHYSICAL_MACHINE_AUTOMATIC_OPEN')"
+        change="onAutomaticOpenCheckChange(event)"/>
        
     <mx:HBox 
     	width="100%" height="20"
