@@ -190,6 +190,8 @@ public class VCenterBridge
         VirtualMachine vm = vmActions.getVirtualMachine(machineName);
         if (vm != null)
         {
+            LOGGER.info("VirtualMachine '" + machineName + "' duplicated in another host of the vCenter cluster.");
+            LOGGER.info("Cleaning duplicate VirtualMachine '" + machineName + "' before deploy the new one...");
             switch(vm.getRuntime().powerState)
             {
                 case suspended:
