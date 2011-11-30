@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.util.TimeoutFSUtils;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 
 // TODO add authentication support
@@ -181,6 +182,9 @@ extends HttpServlet
 
     protected LookupResult lookup(HttpServletRequest req)
     {
+        // checks the NFS is up and running
+        TimeoutFSUtils.getInstance().canWriteRepository();
+        
         LookupResult r = (LookupResult) req.getAttribute("lookupResult");
         if (r == null)
         {
