@@ -137,13 +137,11 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         // TODO FIXME once OVFPackageDto work with Enum
     }
 
-    @Override
     public String getIconPath()
     {
         return iconPath;
     }
 
-    @Override
     public void setIconPath(final String iconPath)
     {
         this.iconPath = iconPath;

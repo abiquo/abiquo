@@ -168,16 +168,4 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.diskFormatTypeUri = diskFormatTypeUri;
     }
 
-    private String iconPath;
-
-    public String getIconPath()
-    {
-        return iconPath;
-    }
-
-    public void setIconPath(final String iconPath)
-    {
-        this.iconPath = iconPath;
-    }
-
 }

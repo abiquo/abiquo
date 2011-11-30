@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
@@ -126,8 +127,13 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
         p.setDiskFormatTypeUri(DiskFormatType.UNKNOWN.uri); // test this is a
         // necessary
         // field
-        p.setName("category_1"); // test this is a necessary field
-        p.setIconPath("http://www.google.com/logos/2011/Albert_Szent_Gyorgyi-2011-hp.jpg");
+        RESTLink categoryLink = new RESTLink(CategoryResource.CATEGORY, "");
+        categoryLink.setTitle("category_1");
+        p.addLink(categoryLink);
+
+        RESTLink iconLink = new RESTLink(IconResource.ICON, "");
+        iconLink.setTitle("http://www.google.com/logos/2011/Albert_Szent_Gyorgyi-2011-hp.jpg");
+        p.addLink(iconLink);
 
         ClientResponse response =
             post(resolveOVFPackagesURI(appsLibrary.getEnterprise().getId()), p, SYSADMIN, SYSADMIN);
