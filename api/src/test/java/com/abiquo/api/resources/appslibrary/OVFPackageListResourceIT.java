@@ -328,7 +328,7 @@ public class OVFPackageListResourceIT extends AbstractJpaGeneratorIT
                 OVFPackageListDto result = response.getEntity(OVFPackageListDto.class);
                 assertNotNull(result);
                 assertEquals(result.getName(), "ovfPackageList_1");
-                assertEquals(result.getOvfPackages().size(), 2);
+                assertEquals(result.getOvfPackages().getCollection().size(), 2);
             }
         }
     }

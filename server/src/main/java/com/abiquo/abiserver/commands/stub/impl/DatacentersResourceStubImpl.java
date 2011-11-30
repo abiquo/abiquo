@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.infrastructure.Datacenter;
-import org.jclouds.abiquo.predicates.infrastructure.DatacenterPredicates;
 
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
@@ -84,9 +83,7 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
 
         try
         {
-            Datacenter dc =
-                getApiClient().getAdministrationService().findDatacenter(
-                    DatacenterPredicates.id(datacenterId));
+            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(datacenterId);
 
             result.setSuccess(true);
             result.setData(fromDtoToPojo(dc));
