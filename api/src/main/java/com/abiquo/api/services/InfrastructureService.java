@@ -668,7 +668,7 @@ public class InfrastructureService extends DefaultApiService
                 ApplianceManagerResourceStubImpl amStub =
                     new ApplianceManagerResourceStubImpl(remoteService.getUri());
 
-                repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+                repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
                 if (repo.existRepositoryInOtherDatacenter(datacenter, repositoryLocation))
                 {
@@ -730,7 +730,7 @@ public class InfrastructureService extends DefaultApiService
                 try
                 {
                     String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getLocation();
 
                     Repository oldRepository = repo.findRepositoryByDatacenter(old.getDatacenter());
 
@@ -754,7 +754,7 @@ public class InfrastructureService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
             repo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
         }

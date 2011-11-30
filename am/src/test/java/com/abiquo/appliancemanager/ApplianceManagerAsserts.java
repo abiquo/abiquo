@@ -223,10 +223,9 @@ public class ApplianceManagerAsserts
 
         // di.setImageSize(121212); // XXX not use
         di.setDiskFilePath(diskPath);
-        di.setOvfId(bundleOVFid);
+        di.setUrl(bundleOVFid);
 
-        di.setIdEnterprise(Integer.valueOf(idEnterprise));
-        di.setIdUser(2);
+        di.setEnterpriseRepositoryId(Integer.valueOf(idEnterprise));
         di.setCategoryName("Test others");
 
         return di;
@@ -249,10 +248,9 @@ public class ApplianceManagerAsserts
 
         // di.setImageSize(121212); // XXX not use
         di.setDiskFilePath("XXXXXXXXX do not used XXXXXXXXXXX"); // XXX not use
-        di.setOvfId(ovfid);
+        di.setUrl(ovfid);
 
-        di.setIdEnterprise(Integer.valueOf(idEnterprise));
-        di.setIdUser(2);
+        di.setEnterpriseRepositoryId(Integer.valueOf(idEnterprise));
         di.setCategoryName("Test others");
 
         return di;

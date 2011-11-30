@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.abicloudws.IVirtualApplianceWS;
 import com.abiquo.abiserver.abicloudws.RemoteServiceUtils;
 import com.abiquo.abiserver.abicloudws.VirtualApplianceWS;
-import com.abiquo.abiserver.appslibrary.VirtualImageException;
 import com.abiquo.abiserver.business.authentication.SessionUtil;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
@@ -2290,13 +2289,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             dataResult.setMessage(message);
             return dataResult;
         }
-        catch (VirtualImageException e)
-        {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
-                sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
-                "createVirtualMachines", e);
-        }
         catch (Exception e1)
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
@@ -2735,7 +2727,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     private void createVirtualMachines(final UserSession userSession,
         final VirtualAppliance virtualAppliance, final boolean force, final DataResult dataResult)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        HibernateException, NotEnoughResourcesException, VirtualImageException
+        HibernateException, NotEnoughResourcesException
     {
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();

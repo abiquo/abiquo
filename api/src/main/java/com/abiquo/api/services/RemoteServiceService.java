@@ -194,7 +194,7 @@ public class RemoteServiceService extends DefaultApiService
                 try
                 {
                     repositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getLocation();
                 }
                 catch (ApplianceManagerStubException amEx)
                 {
@@ -317,7 +317,7 @@ public class RemoteServiceService extends DefaultApiService
                 try
                 {
                     String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getLocation();
 
                     Repository oldRepository =
                         infrastructureRepo.findRepositoryByDatacenter(old.getDatacenter());
@@ -342,7 +342,7 @@ public class RemoteServiceService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
             infrastructureRepo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
         }

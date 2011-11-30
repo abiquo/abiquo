@@ -204,7 +204,7 @@ public class OVFPackageInstanceFromOVFEnvelope
                 {
                     diskInfo = new OVFPackageInstanceDto();
                     diskInfo.setName(vssName);
-                    diskInfo.setOvfId(ovfId);
+                    diskInfo.setUrl(ovfId);
 
                     DiskFormat diskFormat = DiskFormat.fromValue(format);
                     DiskFormatType ovfDiskFormat = DiskFormatType.valueOf(diskFormat.name());

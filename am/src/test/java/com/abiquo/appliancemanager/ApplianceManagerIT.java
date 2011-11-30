@@ -90,24 +90,24 @@ public class ApplianceManagerIT
         client.checkService();
 
         RepositoryConfigurationDto config = client.getRepositoryConfiguration();
-        Assert.assertFalse(StringUtils.isEmpty(config.getRepositoryLocation()));
+        Assert.assertFalse(StringUtils.isEmpty(config.getLocation()));
     }
 
     public void test_EnterpriseRepository()
     {
         EnterpriseRepositoryDto erepo = client.getRepository(idEnterprise, true);
 
-        Assert.assertFalse(StringUtils.isEmpty(erepo.getRepositoryLocation()));
-        Assert.assertTrue((erepo.getRepositoryCapacityMb() > 0));
-        Assert.assertTrue((erepo.getRepositoryRemainingMb() > 0));
-        Assert.assertTrue((erepo.getRepositoryEnterpriseUsedMb() >= 0));
+        Assert.assertFalse(StringUtils.isEmpty(erepo.getLocation()));
+        Assert.assertTrue((erepo.getCapacityMb() > 0));
+        Assert.assertTrue((erepo.getRemainingMb() > 0));
+        Assert.assertTrue((erepo.getEnterpriseUsedMb() >= 0));
 
         // TODO check size after a create
 
         Assert
-            .assertTrue((erepo.getRepositoryEnterpriseUsedMb() < erepo.getRepositoryCapacityMb()));
-        Assert.assertTrue((erepo.getRepositoryCapacityMb() >= erepo.getRepositoryEnterpriseUsedMb()
-            + erepo.getRepositoryRemainingMb()));
+            .assertTrue((erepo.getEnterpriseUsedMb() < erepo.getCapacityMb()));
+        Assert.assertTrue((erepo.getCapacityMb() >= erepo.getEnterpriseUsedMb()
+            + erepo.getRemainingMb()));
     }
 
     public void test_Create() throws Exception
@@ -243,7 +243,7 @@ public class ApplianceManagerIT
 
         OVFPackageInstanceDto ovfDto = createTestDiskInfoBundle(ovfId, snapshot);
 
-        final String ovfBundle = ovfDto.getOvfId();
+        final String ovfBundle = ovfDto.getUrl();
         asserts.ovfInstanceNoExist(ovfBundle);
 
         // client.preBundleOVFPackage(idEnterprise, snapshot);
