@@ -71,7 +71,9 @@ import com.abiquo.api.resources.config.PrivilegeResource;
 import com.abiquo.api.resources.config.SystemPropertyResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -436,27 +438,37 @@ public class RESTBuilder implements IRESTBuilder
 
         params.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageList.getId().toString());
 
-        ovfPackageList.addEditLink(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT,
-            params));
+        links.add(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT, params));
 
         return links;
     }
 
     @Override
     public List<RESTLink> buildOVFPackageLinks(final Integer enterpriseId,
-        final OVFPackageDto ovfPackage)
+        final OVFPackageDto ovfPackage, final Category category, final Icon icon)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
+        params.put(CategoryResource.CATEGORY, String.valueOf(category.getId()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
+        links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
+            category.getName(), params));
 
         params.put(OVFPackageResource.OVF_PACKAGE, ovfPackage.getId().toString());
-        ovfPackage.addEditLink(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+
+        if (icon != null)
+        {
+            params.put(IconResource.ICON, String.valueOf(icon.getId()));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
+                .getPath(), params));
+
+        }
 
         return links;
     }
@@ -1214,8 +1226,8 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineStorageConfigurationResource.DISK,
-            String.valueOf(disk.getAttachmentOrder()));
+        params.put(VirtualMachineStorageConfigurationResource.DISK, String.valueOf(disk
+            .getAttachmentOrder()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,

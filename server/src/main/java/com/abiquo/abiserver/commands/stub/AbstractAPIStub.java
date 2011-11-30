@@ -388,7 +388,7 @@ public class AbstractAPIStub
         else if (ex instanceof AbiquoException)
         {
             AbiquoException abiquoException = (AbiquoException) ex;
-            result.setMessage(abiquoException.toString());
+            result.setMessage(abiquoException.getMessage());
             if (abiquoException.hasError("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
