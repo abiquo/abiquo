@@ -183,7 +183,7 @@ extends HttpServlet
     protected LookupResult lookup(HttpServletRequest req)
     {
         // checks the NFS is up and running
-        TimeoutFSUtils.getInstance().canWriteRepository();
+        TimeoutFSUtils.getInstance().canUseRepository();
         
         LookupResult r = (LookupResult) req.getAttribute("lookupResult");
         if (r == null)

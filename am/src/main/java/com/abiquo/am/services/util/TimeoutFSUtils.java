@@ -42,7 +42,8 @@ import com.abiquo.appliancemanager.exceptions.AMException;
  */
 public class TimeoutFSUtils
 {
-    private final static Integer FILE_EXIST_TIMEOUT_SECONDS = 10;
+    private final static Integer FILE_EXIST_TIMEOUT_SECONDS = Integer.valueOf(System.getProperty(
+        "abiquo.repository.timeoutSeconds", "10"));
 
     private final static AMConfiguration CONF = AMConfigurationManager.getInstance()
         .getAMConfiguration();
