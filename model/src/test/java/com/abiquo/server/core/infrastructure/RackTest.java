@@ -21,6 +21,8 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import org.testng.annotations.Test;
+
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -31,5 +33,32 @@ public class RackTest extends DefaultEntityTestBase<Rack>
     protected InstanceTester<Rack> createEntityInstanceGenerator()
     {
         return new RackGenerator(getSeed());
+    }
+
+    @Test
+    public void testVlanRange()
+    {
+        Rack rack = eg().createUniqueInstance();
+
+        rack.setVlanIdMin(Rack.VLAN_ID_MIN_MIN - 1);
+        assertFalse(rack.isValid());
+        rack.setVlanIdMin(Rack.VLAN_ID_MIN_MIN);
+        assertTrue(rack.isValid());
+
+        rack.setVlanIdMax(Rack.VLAN_ID_MAX_MAX + 1);
+        assertFalse(rack.isValid());
+        rack.setVlanIdMax(Rack.VLAN_ID_MAX_MAX);
+        assertTrue(rack.isValid());
+
+        rack.setNrsq(Rack.NRSQ_MAX + 1);
+        assertFalse(rack.isValid());
+        rack.setNrsq(Rack.NRSQ_MAX);
+        assertTrue(rack.isValid());
+
+        rack.setVlanPerVdcReserved(Rack.VLAN_PER_VDC_EXPECTED_MIN - 1);
+        assertFalse(rack.isValid());
+        rack.setVlanPerVdcReserved(Rack.VLAN_PER_VDC_EXPECTED_MIN);
+        assertTrue(rack.isValid());
+
     }
 }

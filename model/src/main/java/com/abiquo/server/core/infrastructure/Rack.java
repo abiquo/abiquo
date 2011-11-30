@@ -202,9 +202,9 @@ public class Rack extends DefaultEntityBase
 
     private final static String VLAN_ID_MIN_COLUMN = "vlan_id_min";
 
-    private final static int VLAN_ID_MIN_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_ID_MIN_MIN = 2;
 
-    private final static int VLAN_ID_MIN_MAX = Integer.MAX_VALUE;
+    /* package */final static int VLAN_ID_MIN_MAX = 4096;
 
     @Column(name = VLAN_ID_MIN_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MIN_MIN, max = VLAN_ID_MIN_MAX)
@@ -226,7 +226,7 @@ public class Rack extends DefaultEntityBase
 
     public final static int VLAN_PER_VDC_EXPECTED_DEFAULT_VALUE = 2;
 
-    private final static int VLAN_PER_VDC_EXPECTED_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_PER_VDC_EXPECTED_MIN = 1;
 
     private final static int VLAN_PER_VDC_EXPECTED_MAX = Integer.MAX_VALUE;
 
@@ -248,9 +248,9 @@ public class Rack extends DefaultEntityBase
 
     private final static String NRSQ_COLUMN = "nrsq";
 
-    private final static int NRSQ_MIN = Integer.MIN_VALUE;
+    private final static int NRSQ_MIN = 0;
 
-    private final static int NRSQ_MAX = Integer.MAX_VALUE;
+    /* package */final static int NRSQ_MAX = 100;
 
     public final static int NRSQ_DEFAULT_VALUE = 0;
 
@@ -272,11 +272,11 @@ public class Rack extends DefaultEntityBase
 
     private final static String VLAN_ID_MAX_COLUMN = "vlan_id_max";
 
-    private final static int VLAN_ID_MAX_MIN = Integer.MIN_VALUE;
+    /* package */final static int VLAN_ID_MAX_MIN = 2;
 
-    private final static int VLAN_ID_MAX_MAX = Integer.MAX_VALUE;
+    /* package */final static int VLAN_ID_MAX_MAX = 4096;
 
-    public final static int VLAN_ID_MAX_DEFAULT_VALUE = 4094;
+    public final static int VLAN_ID_MAX_DEFAULT_VALUE = 4096;
 
     @Column(name = VLAN_ID_MAX_COLUMN, nullable = true)
     @Range(min = VLAN_ID_MAX_MIN, max = VLAN_ID_MAX_MAX)
