@@ -31,6 +31,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -193,8 +194,7 @@ public class RemoteServiceService extends DefaultApiService
 
                 try
                 {
-                    repositoryLocation =
-                        amStub.getRepositoryConfiguration().getLocation();
+                    repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
                 }
                 catch (ApplianceManagerStubException amEx)
                 {
@@ -495,7 +495,35 @@ public class RemoteServiceService extends DefaultApiService
                                 break;
                         }
                     }
-                }
+                }// remote service check fail
+
+                if (type.checkDatacenterId())
+                {
+                    final String rsDatacenterUuid = response.getEntity(String.class);
+
+                    if (StringUtils.isEmpty(rsDatacenterUuid))
+                    {
+                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND;
+                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+                            + error.getMessage()));
+                        if (flushErrors)
+                        {
+                            addConflictErrors(error);
+                        }
+                    }
+
+                    if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
+                    {
+                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT;
+                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+                            + error.getMessage() + "\n Current datacenter UUID is "
+                            + datacenter.getUuid()));
+                        if (flushErrors)
+                        {
+                            addConflictErrors(error);
+                        }
+                    }
+                }// datacenter uuid
             }
             catch (Exception e)
             {
@@ -516,6 +544,33 @@ public class RemoteServiceService extends DefaultApiService
         }
 
         return configurationErrors;
+    }
+
+    /**
+     * Checks the datacenter uuid (or set it if not already defined)
+     * 
+     * @param rsDatacenterId, UUID from the remote service
+     * @param datacenter, current datacenter
+     * @return true if the informed datacenter uuid is consistent.
+     */
+    private boolean isValidDatacenterUuid(final String rsDatacenterId, final Datacenter datacenter)
+    {
+        final String datacenterUuid = datacenter.getUuid();
+        if (StringUtils.isEmpty(datacenterUuid))
+        {
+            datacenter.setUuid(rsDatacenterId);
+            infrastructureRepo.update(datacenter);
+            return true;
+        }
+        else if (rsDatacenterId.equals(datacenterUuid))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
     }
 
     // --------------- //

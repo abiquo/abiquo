@@ -115,8 +115,7 @@ public class TarantinoService extends DefaultApiService
     private void send(final Datacenter datacenter, final DatacenterTasks tasks,
         final EventType event)
     {
-        // FIXME use the datacenter UUID
-        TarantinoRequestProducer producer = new TarantinoRequestProducer(datacenter.getName());
+        TarantinoRequestProducer producer = new TarantinoRequestProducer(datacenter.getUuid());
 
         try
         {
