@@ -85,14 +85,14 @@ public class OVFPackageInstanceService
 
         if (!StringUtils.isBlank(errorMsg))
         {
-            notifier.setOVFStatusError(String.valueOf(diskinfo.getIdEnterprise()),
-                diskinfo.getOvfId(), errorMsg);
+            notifier.setOVFStatusError(String.valueOf(diskinfo.getEnterpriseRepositoryId()),
+                diskinfo.getUrl(), errorMsg);
         }
 
         downloader.uploadOVFPackage(diskinfo, diskFile);
 
         // sets the current state to start downloading
-        notifier.setOVFStatus(String.valueOf(diskinfo.getIdEnterprise()), diskinfo.getOvfId(),
+        notifier.setOVFStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo.getUrl(),
             OVFStatusEnumType.DOWNLOAD);
     }
 
@@ -176,7 +176,7 @@ public class OVFPackageInstanceService
             OVFPackageInstanceDto packDto =
                 OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
             packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
-            packDto.setIdEnterprise(Integer.valueOf(erId));
+            packDto.setEnterpriseRepositoryId(Integer.valueOf(erId));
 
             return packDto;
         }
@@ -194,7 +194,7 @@ public class OVFPackageInstanceService
 
             packDto.setMasterDiskFilePath(masterDiskPath);
             packDto.setDiskFilePath(bundleDiskPath);
-            packDto.setOvfId(ovfId);
+            packDto.setUrl(ovfId);
             // packDto.setDiskFileSize(diskFileSize); TODO change the disk size
 
             return packDto;
@@ -231,8 +231,8 @@ public class OVFPackageInstanceService
     public String createOVFBundle(final OVFPackageInstanceDto diskInfo, final String snapshot)
     {
 
-        final String erId = String.valueOf(diskInfo.getIdEnterprise());
-        final String ovfIdSnapshot = diskInfo.getOvfId();
+        final String erId = String.valueOf(diskInfo.getEnterpriseRepositoryId());
+        final String ovfIdSnapshot = diskInfo.getUrl();
 
         final EnvelopeType envelopeBundle =
             OVFPackageInstanceToOVFEnvelope.createEnvelopeFromOVFPackageInstance(diskInfo);

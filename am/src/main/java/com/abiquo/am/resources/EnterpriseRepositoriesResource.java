@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import org.apache.wink.common.annotations.Workspace;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.am.services.filesystem.EnterpriseRepositoryFileSystem;
 import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
@@ -49,8 +50,11 @@ public class EnterpriseRepositoriesResource extends AbstractResource
 
         RepositoryConfigurationDto configDto = new RepositoryConfigurationDto();
         //configDto.setBrokerUrl(config.getBrokerUrl());
-        configDto.setRepositoryLocation(config.getRepositoryLocation());
+        configDto.setLocation(config.getRepositoryLocation());
+        configDto.setCapacityMb(EnterpriseRepositoryFileSystem.getCapacityMb());
+        configDto.setRemainingMb(EnterpriseRepositoryFileSystem.getFreeMb());
 
+        
         return configDto;
     }
 

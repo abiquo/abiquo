@@ -22,12 +22,11 @@
 package com.abiquo.appliancemanager.transport;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 
-@XmlRootElement
-@XmlType(name = "repositoryConfiguration")
+@XmlRootElement(name = "repositoryConfiguration")
 public class RepositoryConfigurationDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -912929254475352163L;
@@ -36,16 +35,48 @@ public class RepositoryConfigurationDto extends SingleResourceTransportDto
      * {@link abiquo.appliancemanager.repositoryLocation} property in the datacenter remote services
      * configuration. Remote repository NFS exported location ('nsf-devel:/opt/vm_repository')
      */
-    protected String repositoryLocation;
+    protected String location;
 
-    public String getRepositoryLocation()
+    /**
+     * Capacity of the {@link DatacenterRepositoryDto}, shared by all the EnterpriseRepositories.
+     * TODO consider move to {@link RepositoryConfigurationDto}
+     */
+    private long capacityMb;
+
+    /**
+     * Remaining free space in the {@link DatacenterRepositoryDto}, shared by all the
+     * EnterpriseRepositories.TODO consider move to {@link RepositoryConfigurationDto}
+     */
+    private long remainingMb;
+
+    public long getCapacityMb()
     {
-        return repositoryLocation;
+        return capacityMb;
     }
 
-    public void setRepositoryLocation(String repositoryLocation)
+    public void setCapacityMb(final long capacityMb)
     {
-        this.repositoryLocation = repositoryLocation;
+        this.capacityMb = capacityMb;
+    }
+
+    public long getRemainingMb()
+    {
+        return remainingMb;
+    }
+
+    public void setRemainingMb(final long remainingMb)
+    {
+        this.remainingMb = remainingMb;
+    }
+
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(final String location)
+    {
+        this.location = location;
     }
 
 }
