@@ -1197,7 +1197,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getType(), r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
