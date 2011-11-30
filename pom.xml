@@ -30,6 +30,7 @@
         <catalina.version>6.0.29</catalina.version>
         <testng.version>5.12.1</testng.version>
         <commonsamqp.version>2.0-tarantino-SNAPSHOT</commonsamqp.version>
+        <guava.version>10.0.1</guava.version>
     </properties>
     <!-- Aggregations. Common modules -->
     <modules>
