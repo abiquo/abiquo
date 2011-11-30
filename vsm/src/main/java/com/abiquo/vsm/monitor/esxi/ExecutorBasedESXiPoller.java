@@ -75,10 +75,13 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     public ExecutorBasedESXiPoller()
     {
+        int pollingInterval =
+            Integer.valueOf(System.getProperty("abiquo.vsm.esx.pollinginterval", "5000"));
+
         esx = new ESXiConnector();
         dao = RedisDaoFactory.getInstance();
         poller = new Poller();
-        executor = createExecutor(poller, Poller.POLLING_INTERVAL);
+        executor = createExecutor(poller, pollingInterval);
     }
 
     @Override
@@ -138,6 +141,8 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     private PeriodicalExecutor createExecutor(final Poller poller, final int pollInterval)
     {
+        LOGGER.debug("Creating new ESX monitor with polling interval: {} ms", pollInterval);
+
         return new PeriodicalExecutor(poller, pollInterval)
         {
             @Override
@@ -155,9 +160,6 @@ public class ExecutorBasedESXiPoller extends AbstractMonitor
      */
     private class Poller extends AbstractTask
     {
-        /** The polling interval. */
-        public static final int POLLING_INTERVAL = 5000;
-
         @Override
         public void execute() throws Exception
         {
