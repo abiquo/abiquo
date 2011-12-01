@@ -33,13 +33,13 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorSetType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
@@ -578,6 +578,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         result.setSuccess(true);
         Collection<Node> nodesOld = virtualAppliance.getNodes();
         Collection<Node> nodesNew = new ArrayList<Node>();
+        Collection<Node> deployedNodes = new ArrayList<Node>();
+
         try
         {
             if (virtualAppliance.getState().toEnum() == StateEnum.APPLY_CHANGES_NEEDED)
@@ -589,10 +591,15 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                     if (node.isNodeTypeVirtualImage())
                     {
                         NodeVirtualImage nvi = (NodeVirtualImage) node;
+
                         if (nvi.getVirtualMachine().getState().toEnum()
                             .compareTo(StateEnum.IN_PROGRESS) == 0)
                         {
                             nodesNew.add(node);
+                        }
+                        else
+                        {
+                            deployedNodes.add(node);
                         }
                     }
                 }
@@ -606,6 +613,17 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                     virtualAppliance.setState(new State(StateEnum.NOT_DEPLOYED));
                     startVirtualAppliance(virtualAppliance);
                 }
+
+                String vsmAddress =
+                    RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualAppliance);
+
+                for (Node< ? > node : deployedNodes)
+                {
+                    NodeVirtualImage nvi = (NodeVirtualImage) node;
+
+                    EventingSupport.subscribeEvent(nvi.getVirtualMachine(), vsmAddress);
+                }
+
                 virtualAppliance.setNodes(nodesOld);
                 result.setSuccess(true);
             }
