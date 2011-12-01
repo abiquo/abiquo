@@ -148,7 +148,7 @@
             	}
             	event.virtualDatacenter = this._virtualDatacenter;
             	event.callback = populatePrivateNetworks;
-            	if(this._virtualDatacenter){
+            	if(this._virtualDatacenter && this.visible){
 	            	dispatchEvent(event);            		
             	}
             	
@@ -335,11 +335,15 @@
         	<mx:HBox id="networkTool" 
         		width="100%" verticalAlign="middle">        		
 	            <mx:Button id="addVLANButton"
+	            	visible="{this._vlanType == VlanNetwork.INTERNAL}"
+	            	includeInLayout="{this._vlanType == VlanNetwork.INTERNAL}"
 	                enabled="{_virtualDatacenter != null}" styleName="AddButton"
 	                toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
 	                click="addVLAN()"/>
 	
 	            <mx:Button id="deleteVLANButton"
+	            	visible="{this._vlanType == VlanNetwork.INTERNAL}"
+                    includeInLayout="{this._vlanType == VlanNetwork.INTERNAL}"
 	                enabled="{_selectedVLAN != null}" styleName="RemoveButton"
 	                toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
 	                click="askVLANDeletion()"/>
