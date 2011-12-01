@@ -111,6 +111,10 @@
                 //Listening for udpates in racks list
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureManager.RACKS_UPDATED,
                                                                                    getRacksByDatacenter);
+                                                                                   
+                //To automatically open physical machine form if requested
+                AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.RACK_CREATED,
+                                                                                   addPhysicalMachine);                                                                                   
 
                 //Listening for editions in any infrastructure element
                 AbiCloudModel.getInstance().infrastructureManager.addEventListener(InfrastructureEvent.INFRASTRUCTURE_ELEMENT_EDITED,
@@ -354,22 +358,36 @@
             /**
              * Opens a component to create a new Physical Machine
              */
-            private function addPhysicalMachine():void
+            private function addPhysicalMachine(event:InfrastructureEvent = null):void
             {
-                if (AbiCloudModel.getInstance().infrastructureManager.racks.length > 0)
-                {
-                    PopUpManager.addPopUp(physicalMachineFormAdd, Application.application as DisplayObject,
-                                          true);
-                    PopUpManager.centerPopUp(physicalMachineFormAdd);
-                    if (infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is Rack)
-                        physicalMachineFormAdd.init(this._dataCenter, infrastructureSelector.selectedInfrastructureElement as Rack);
-                    else
-                        physicalMachineFormAdd.init(this._dataCenter);
-                }
-                else
-                {
-                 	//Any rack exists, we add one by default   
-                    addRack();
+                if(event){
+                	
+                	var automaticOpen:SharedObject = SharedObject.getLocal("automaticOpenPhysicalMachine");
+                	if(event.infrastructureElement is Rack 
+                	&& automaticOpen.data.value != null 
+                	&& automaticOpen.data.value == true){
+                		//automatic open physical machine form
+                		PopUpManager.addPopUp(physicalMachineFormAdd, Application.application as DisplayObject,
+                                              true);
+                        PopUpManager.centerPopUp(physicalMachineFormAdd);
+                        physicalMachineFormAdd.init(this._dataCenter, event.infrastructureElement as Rack);
+                	}
+                }else{
+	                if (AbiCloudModel.getInstance().infrastructureManager.racks.length > 0)
+	                {
+	                    PopUpManager.addPopUp(physicalMachineFormAdd, Application.application as DisplayObject,
+	                                          true);
+	                    PopUpManager.centerPopUp(physicalMachineFormAdd);
+	                    if (infrastructureSelector.selectedInfrastructureElement && infrastructureSelector.selectedInfrastructureElement is Rack)
+	                        physicalMachineFormAdd.init(this._dataCenter, infrastructureSelector.selectedInfrastructureElement as Rack);
+	                    else
+	                        physicalMachineFormAdd.init(this._dataCenter);
+	                }
+	                else
+	                {
+	                 	//Any rack exists, we add one by default   
+	                    addRack();
+	                }
                 }
 
             }

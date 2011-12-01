@@ -37,7 +37,6 @@ package net.undf.abicloud.business.managers
     import net.undf.abicloud.vo.infrastructure.PhysicalMachine;
     import net.undf.abicloud.vo.infrastructure.Rack;
     import net.undf.abicloud.vo.infrastructure.State;
-    import net.undf.abicloud.vo.infrastructure.UcsRack;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.service.RemoteService;
     import net.undf.abicloud.vo.service.RemoteServiceType;
@@ -67,7 +66,7 @@ package net.undf.abicloud.business.managers
         public static const INFRASTRUCTURE_UPDATED:String = "infrastructureUpdated_InfrastructureManager";
         
         public static const RACKS_UPDATED:String = "racksUpdated_InfrastructureManager";
-
+        
         /* ------------- Private attributes ------------- */
 
         //Represents the infrastructure, where infrastructure elements are stored.
@@ -147,6 +146,11 @@ package net.undf.abicloud.business.managers
             _racks.addItem(rack);
             //Announcing that infrastructure has been updated
             this.dispatchEvent(new Event(INFRASTRUCTURE_UPDATED));
+            
+            //Anounce the rack has been created, to automatically open physical machine form
+            var event:InfrastructureEvent =  new InfrastructureEvent(InfrastructureEvent.RACK_CREATED);
+            event.infrastructureElement = rack;
+            dispatchEvent(event);
         }
 
 

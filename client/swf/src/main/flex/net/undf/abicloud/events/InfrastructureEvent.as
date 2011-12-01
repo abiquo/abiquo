@@ -90,6 +90,8 @@ package net.undf.abicloud.events
         public static const DELETE_RACK:String = "deleteClusterInfrastructureEvent";
 
         public static const EDIT_RACK:String = "saveRackInfrastructureEvent";
+        
+        public static const RACK_CREATED:String = "rackCreatedInfrastructureEvent";
 
         /* ------------------------------------ */
 
