@@ -28,6 +28,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.handlers.BasicAuthSecurityHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.BadCredentialsException;
 import org.springframework.security.providers.encoding.Md5PasswordEncoder;
 
@@ -56,6 +58,8 @@ import com.abiquo.util.resources.ResourceManager;
 
 public class AuthenticationManagerApi implements IAuthenticationManager
 {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerApi.class);
+
     /**
      * Abiquo API URL.
      */
@@ -104,8 +108,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 // The session does not exist, so is not valid
                 checkSessionResult.setResultCode(BasicResult.SESSION_INVALID);
-                errorManager
-                    .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                logger.trace("Invalod session. Please login again");
             }
             else
             {
@@ -125,8 +128,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
                     getUserSessionDAO().makeTransient(sessionToCheck);
 
                     checkSessionResult.setResultCode(BasicResult.SESSION_TIMEOUT);
-                    errorManager.reportError(resourceManger, checkSessionResult,
-                        "checkSession.expired");
+                    logger.trace("Session expired. Please login again");
                 }
 
             }
@@ -138,8 +140,7 @@ public class AuthenticationManagerApi implements IAuthenticationManager
             {
                 getFactory().rollbackConnection();
             }
-            errorManager.reportError(resourceManger, checkSessionResult, "checkSession.exception",
-                e);
+            logger.trace("Unexpected error while checking the user session", e);
         }
         finally
         {

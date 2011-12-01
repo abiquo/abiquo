@@ -32,6 +32,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
@@ -56,6 +58,7 @@ import com.abiquo.util.resources.ResourceManager;
 @Deprecated
 public class AuthenticationManagerDB implements IAuthenticationManager
 {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationManagerDB.class);
 
     private final AbiConfig abiConfig = AbiConfigManager.getInstance().getAbiConfig();
 
@@ -65,6 +68,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
     private final ErrorManager errorManager = ErrorManager
         .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
+    @Override
     @SuppressWarnings("unchecked")
     public DataResult<LoginResult> doLogin(final Login login)
     {
@@ -173,6 +177,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
         return dataResult;
     }
 
+    @Override
     public BasicResult doLogout(final UserSession userSession)
     {
         BasicResult basicResult = new BasicResult();
@@ -215,6 +220,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
         return basicResult;
     }
 
+    @Override
     public BasicResult checkSession(final UserSession userSession)
     {
         BasicResult checkSessionResult = new BasicResult();
@@ -238,8 +244,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
             {
                 // The session does not exist, so is not valid
                 checkSessionResult.setResultCode(BasicResult.SESSION_INVALID);
-                errorManager
-                    .reportError(resourceManger, checkSessionResult, "checkSession.invalid");
+                logger.trace("Invalod session. Please login again");
             }
             else
             {
@@ -265,8 +270,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
                     session.delete(sessionToCheck);
 
                     checkSessionResult.setResultCode(BasicResult.SESSION_TIMEOUT);
-                    errorManager.reportError(resourceManger, checkSessionResult,
-                        "checkSession.expired");
+                    logger.trace("Session expired. Please login again");
                 }
 
             }
@@ -280,8 +284,7 @@ public class AuthenticationManagerDB implements IAuthenticationManager
                 transaction.rollback();
             }
 
-            errorManager.reportError(resourceManger, checkSessionResult, "checkSession.exception",
-                e);
+            logger.trace("Unexpected error while checking the user session", e);
         }
 
         return checkSessionResult;
