@@ -123,11 +123,13 @@ public class AppsLibraryTransformer extends DefaultApiService
         {
             if (categoryLink.getTitle() == null)
             {
-                addValidationErrors(APIError.OVF_PACKAGE_CANNOT_TRANSFORM);
-                flushErrors();
+                category = appslibraryRep.findCategoryByName("Others");
             }
-            category = new Category(categoryLink.getTitle());
-            appslibraryRep.insertCategory(category);
+            else
+            {
+                category = new Category(categoryLink.getTitle());
+                appslibraryRep.insertCategory(category);
+            }
         }
 
         RESTLink iconLink = ovfDto.searchLink(IconResource.ICON);
