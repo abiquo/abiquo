@@ -176,7 +176,7 @@ public class OVFPackageInstancesResource
 
         // XXX notify DOWNLOADING
 
-        final String ovfId = diskInfo.getOvfId();
+        final String ovfId = diskInfo.getUrl();
         if (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus() == OVFStatusEnumType.ERROR)
         {
             ovfService.delete(erId, ovfId);
@@ -196,7 +196,7 @@ public class OVFPackageInstancesResource
         diskInfo.setDiskFileSize(diskFile.length());
         ovfService.upload(diskInfo, diskFile, errorMsg);
 
-        return Response.created(URI.create(diskInfo.getOvfId())).build();
+        return Response.created(URI.create(diskInfo.getUrl())).build();
     }
 
     @POST
@@ -216,6 +216,7 @@ public class OVFPackageInstancesResource
         // we replace the \ with / because a fail parsing strings with \ followed by a char that
         // might resemble a control char. (C:\f... ends up as C:[ctrl-L]...)
         String json2 = removeFakePath(removeControlChar(json));
+        json2 = temporalJsonNameHack(json2);
 
         return providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
             MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
@@ -227,6 +228,17 @@ public class OVFPackageInstancesResource
         // MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
         // MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
         // diskInfoPart.getInputStream());
+    }
+
+    /**
+     * Duet the flex client now sends 'OVFPackageInstanceDto' instead of 'ovfInstance', this will be
+     * removed before the 2.0 release
+     */
+    @Deprecated
+    private String temporalJsonNameHack(final String jsonin)
+    {
+        return jsonin.replaceAll("ovfPackageInstanceDto", "ovfInstance").replaceAll("ovfUrl",
+            "ovfId");
     }
 
     /**

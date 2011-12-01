@@ -26,7 +26,9 @@ import java.util.List;
 import org.apache.wink.server.utils.LinkBuilders;
 
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
+import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
@@ -102,7 +104,8 @@ public interface IRESTBuilder
     public List<RESTLink> buildOVFPackageListLinks(Integer datacenterId,
         OVFPackageListDto ovfPackageList);
 
-    public List<RESTLink> buildOVFPackageLinks(Integer datacenterId, OVFPackageDto ovfPackage);
+    public List<RESTLink> buildOVFPackageLinks(Integer enterpriseId, OVFPackageDto ovfPackage,
+        Category category, Icon icon);
 
     public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenter vdc, Integer datacenterId,
         Integer enterpriseId);

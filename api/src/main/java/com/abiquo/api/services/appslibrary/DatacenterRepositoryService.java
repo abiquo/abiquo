@@ -86,8 +86,8 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
             ApplianceManagerResourceStubImpl amStub = getApplianceManagerClient(datacenterId);
             EnterpriseRepositoryDto erepoDto = amStub.getRepository(String.valueOf(enterpriseId));
 
-            repoDto.setRepositoryCapacityMb(erepoDto.getRepositoryCapacityMb());
-            repoDto.setRepositoryRemainingMb(erepoDto.getRepositoryRemainingMb());
+            repoDto.setRepositoryCapacityMb(erepoDto.getCapacityMb());
+            repoDto.setRepositoryRemainingMb(erepoDto.getRemainingMb());
             // TODO enterprise utilization
         }
         catch (Exception e) // TODO only if timeout getting usage
@@ -108,7 +108,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
         final ApplianceManagerResourceStubImpl amStub)
     {
         final String repositoryLocation =
-            amStub.getRepositoryConfiguration().getRepositoryLocation();
+            amStub.getRepositoryConfiguration().getLocation();
 
         final Repository repo = infService.getRepository(datacenter);
 

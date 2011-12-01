@@ -31,9 +31,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.ClientRuntimeException;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
@@ -194,8 +194,7 @@ public class RemoteServiceService extends DefaultApiService
 
                 try
                 {
-                    repositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                    repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
                 }
                 catch (ApplianceManagerStubException amEx)
                 {
@@ -276,7 +275,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         RemoteService old = getRemoteService(id);
 
-        ErrorsDto configurationErrors = checkStatus(dto.getType(), dto.getUri());
+        ErrorsDto configurationErrors =
+            checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto.getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -317,7 +317,7 @@ public class RemoteServiceService extends DefaultApiService
                 try
                 {
                     String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getLocation();
 
                     Repository oldRepository =
                         infrastructureRepo.findRepositoryByDatacenter(old.getDatacenter());
@@ -342,7 +342,7 @@ public class RemoteServiceService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
             infrastructureRepo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
         }
@@ -409,57 +409,58 @@ public class RemoteServiceService extends DefaultApiService
             && remoteService.getDatacenter().getId().equals(datacenterId);
     }
 
-    public ErrorsDto checkStatus(final RemoteServiceType type, final String url)
+    // public ErrorsDto checkStatus(final RemoteServiceType type, final String url)
+    // {
+    // ErrorsDto configurationErrors = new ErrorsDto();
+    // if (type.canBeChecked())
+    // {
+    // ClientConfig config = new ClientConfig();
+    // config.connectTimeout(5);
+    //
+    // RestClient restClient = new RestClient(config);
+    // Resource checkResource =
+    // restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
+    //
+    // try
+    // {
+    // ClientResponse response = checkResource.get();
+    // if (response.getStatusCode() != 200)
+    // {
+    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
+    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+    // + error.getMessage()));
+    // }
+    // }
+    // catch (WebApplicationException e)
+    // {
+    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
+    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+    // + error.getMessage() + ", " + e.getMessage()));
+    // }
+    // catch (ClientRuntimeException e)
+    // {
+    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
+    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+    // + error.getMessage() + ", " + e.getMessage()));
+    // }
+    // catch (Exception e)
+    // {
+    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
+    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+    // + error.getMessage() + ", " + e.getMessage()));
+    // }
+    // }
+    // return configurationErrors;
+    // }
+
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url)
     {
-        ErrorsDto configurationErrors = new ErrorsDto();
-        if (type.canBeChecked())
-        {
-            ClientConfig config = new ClientConfig();
-            config.connectTimeout(5);
-
-            RestClient restClient = new RestClient(config);
-            Resource checkResource =
-                restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
-
-            try
-            {
-                ClientResponse response = checkResource.get();
-                if (response.getStatusCode() != 200)
-                {
-                    APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                    configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                        + error.getMessage()));
-                }
-            }
-            catch (WebApplicationException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (ClientRuntimeException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (Exception e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-        }
-        return configurationErrors;
+        return checkRemoteServiceStatus(datacenter, type, url, false);
     }
 
-    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
-    {
-        return checkRemoteServiceStatus(type, url, false);
-    }
-
-    public ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url,
-        final boolean flushErrors)
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url, final boolean flushErrors)
     {
         ErrorsDto configurationErrors = new ErrorsDto();
         if (type.canBeChecked())
@@ -494,7 +495,35 @@ public class RemoteServiceService extends DefaultApiService
                                 break;
                         }
                     }
-                }
+                }// remote service check fail
+
+                if (type.checkDatacenterId())
+                {
+                    final String rsDatacenterUuid = response.getEntity(String.class);
+
+                    if (StringUtils.isEmpty(rsDatacenterUuid))
+                    {
+                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND;
+                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+                            + error.getMessage()));
+                        if (flushErrors)
+                        {
+                            addConflictErrors(error);
+                        }
+                    }
+
+                    if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
+                    {
+                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT;
+                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
+                            + error.getMessage() + "\n Current datacenter UUID is "
+                            + datacenter.getUuid()));
+                        if (flushErrors)
+                        {
+                            addConflictErrors(error);
+                        }
+                    }
+                }// datacenter uuid
             }
             catch (Exception e)
             {
@@ -515,6 +544,33 @@ public class RemoteServiceService extends DefaultApiService
         }
 
         return configurationErrors;
+    }
+
+    /**
+     * Checks the datacenter uuid (or set it if not already defined)
+     * 
+     * @param rsDatacenterId, UUID from the remote service
+     * @param datacenter, current datacenter
+     * @return true if the informed datacenter uuid is consistent.
+     */
+    private boolean isValidDatacenterUuid(final String rsDatacenterId, final Datacenter datacenter)
+    {
+        final String datacenterUuid = datacenter.getUuid();
+        if (StringUtils.isEmpty(datacenterUuid))
+        {
+            datacenter.setUuid(rsDatacenterId);
+            infrastructureRepo.update(datacenter);
+            return true;
+        }
+        else if (rsDatacenterId.equals(datacenterUuid))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
     }
 
     // --------------- //
@@ -583,7 +639,7 @@ public class RemoteServiceService extends DefaultApiService
         }
 
         ErrorsDto configurationErrors =
-            checkStatus(remoteService.getType(), remoteService.getUri());
+            checkRemoteServiceStatus(datacenter, remoteService.getType(), remoteService.getUri());
 
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         remoteService.setStatus(status);

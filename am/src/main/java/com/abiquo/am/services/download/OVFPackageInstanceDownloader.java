@@ -166,8 +166,8 @@ public class OVFPackageInstanceDownloader
         final File diskFile) throws IOException
     {
 
-        final long idEnterprise = diskInfo.getIdEnterprise();
-        final String ovfId = diskInfo.getOvfId(); // XXX
+        final long idEnterprise = diskInfo.getEnterpriseRepositoryId();
+        final String ovfId = diskInfo.getUrl(); // XXX
 
         EnterpriseRepositoryService enterpriseRepository =
             ErepoFactory.getRepo(String.valueOf(idEnterprise));

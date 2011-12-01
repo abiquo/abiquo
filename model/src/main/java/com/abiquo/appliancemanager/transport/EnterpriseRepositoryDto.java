@@ -22,7 +22,6 @@
 package com.abiquo.appliancemanager.transport;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -30,8 +29,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 /**
  * Each {@link Enterprise} have a ''folder'' in the {@link DatacenterRepositoryDto}
  */
-@XmlRootElement
-@XmlType(name = "enterpriseRepository")
+@XmlRootElement(name = "enterpriseRepository")
 public class EnterpriseRepositoryDto extends RepositoryConfigurationDto
 {
     private static final long serialVersionUID = -346581740339075827L;
@@ -40,62 +38,29 @@ public class EnterpriseRepositoryDto extends RepositoryConfigurationDto
     private Integer id;
 
     /**
-     * Capacity of the {@link DatacenterRepositoryDto}, shared by all the EnterpriseRepositories.
-     * TODO consider move to {@link RepositoryConfigurationDto}
-     */
-    private long repositoryCapacityMb;
-
-    /**
-     * Remaining free space in the {@link DatacenterRepositoryDto}, shared by all the
-     * EnterpriseRepositories.TODO consider move to {@link RepositoryConfigurationDto}
-     */
-    private long repositoryRemainingMb;
-
-    /**
      * Used space in the enterprise folder of the datacenter repository.
      * <p>
      * TODO instances of shared waste space in the original enterprise repository
      */
-    private long repositoryEnterpriseUsedMb;
+    private long enterpriseUsedMb;
 
     public Integer getId()
     {
         return id;
     }
 
-    public void setId(Integer id)
+    public void setId(final Integer id)
     {
         this.id = id;
     }
 
-    public long getRepositoryCapacityMb()
+    public long getEnterpriseUsedMb()
     {
-        return repositoryCapacityMb;
+        return enterpriseUsedMb;
     }
 
-    public void setRepositoryCapacityMb(long repositoryCapacityMb)
+    public void setEnterpriseUsedMb(final long repositoryEnterpriseUsedMb)
     {
-        this.repositoryCapacityMb = repositoryCapacityMb;
+        this.enterpriseUsedMb = repositoryEnterpriseUsedMb;
     }
-
-    public long getRepositoryEnterpriseUsedMb()
-    {
-        return repositoryEnterpriseUsedMb;
-    }
-
-    public void setRepositoryEnterpriseUsedMb(long repositoryEnterpriseUsedMb)
-    {
-        this.repositoryEnterpriseUsedMb = repositoryEnterpriseUsedMb;
-    }
-
-    public long getRepositoryRemainingMb()
-    {
-        return repositoryRemainingMb;
-    }
-
-    public void setRepositoryRemainingMb(long repositoryRemainingMb)
-    {
-        this.repositoryRemainingMb = repositoryRemainingMb;
-    }
-
 }

@@ -38,6 +38,28 @@ public class OVFPackageDto extends SingleResourceTransportDto
 
     private Integer id;
 
+    private String url;
+
+    private String name;
+
+    private String description;
+
+    private String productName;
+
+    private String productVendor;
+
+    private String productUrl;
+
+    private String productVersion;
+
+    private DiskFormatType type;
+
+    private String diskFormatTypeUri;
+
+    private long diskFileSize;
+
+    private String iconPath;
+
     public Integer getId()
     {
         return id;
@@ -47,8 +69,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.id = id;
     }
-
-    private String productVersion;
 
     public String getProductVersion()
     {
@@ -60,8 +80,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.productVersion = productVersion;
     }
 
-    private String name;
-
     public String getName()
     {
         return name;
@@ -71,8 +89,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.name = StringUtils.strip(name);
     }
-
-    private String productVendor;
 
     public String getProductVendor()
     {
@@ -84,8 +100,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.productVendor = StringUtils.strip(productVendor);
     }
 
-    private String productUrl;
-
     public String getProductUrl()
     {
         return productUrl;
@@ -95,8 +109,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.productUrl = productUrl;
     }
-
-    private String url;
 
     public String getUrl()
     {
@@ -108,8 +120,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.url = url;
     }
 
-    private DiskFormatType type;
-
     public DiskFormatType getType()
     {
         return type;
@@ -119,8 +129,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.type = type;
     }
-
-    private String productName;
 
     public String getProductName()
     {
@@ -132,8 +140,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.productName = StringUtils.strip(productName);
     }
 
-    private long diskFileSize;
-
     public long getDiskFileSize()
     {
         return diskFileSize;
@@ -143,8 +149,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.diskFileSize = diskFileSize;
     }
-
-    private String description;
 
     public String getDescription()
     {
@@ -156,8 +160,6 @@ public class OVFPackageDto extends SingleResourceTransportDto
         this.description = StringUtils.strip(description);
     }
 
-    private String diskFormatTypeUri;
-
     public String getDiskFormatTypeUri()
     {
         return diskFormatTypeUri;
@@ -167,17 +169,4 @@ public class OVFPackageDto extends SingleResourceTransportDto
     {
         this.diskFormatTypeUri = diskFormatTypeUri;
     }
-
-    private String iconPath;
-
-    public String getIconPath()
-    {
-        return iconPath;
-    }
-
-    public void setIconPath(final String iconPath)
-    {
-        this.iconPath = iconPath;
-    }
-
 }

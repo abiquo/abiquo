@@ -46,6 +46,7 @@ import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
 import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
@@ -111,8 +112,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .post(ovfpackageListURL);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
+                ovfpackageListURL);
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -270,8 +271,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageUninstallLink(String.valueOf(idEnterprise),
-                String.valueOf(ovfPackageId));
+            createOVFPackageUninstallLink(String.valueOf(idEnterprise), String
+                .valueOf(ovfPackageId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -436,8 +437,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
-            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN)
-                .put(null);
+            resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
+                null);
 
         final Integer httpStatus = response.getStatusCode();
         if (httpStatus != 200)
@@ -611,8 +612,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     public static com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createFlexDiskFormatTypeObject(
         final DiskFormatTypeDto diskFormatTypeDto)
     {
-        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType.fromId(diskFormatTypeDto
-            .getId()));
+        return new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+            .fromId(diskFormatTypeDto.getId()));
     }
 
     protected OVFPackageList createFlexOVFPackageListObject(final OVFPackageListDto listDto)
@@ -625,7 +626,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         if (listDto.getOvfPackages() != null)
         {
-            for (OVFPackageDto packDto : listDto.getOvfPackages())
+            for (OVFPackageDto packDto : listDto.getOvfPackages().getCollection())
             {
                 packs.add(createFlexOVFPackageObject(packDto));
             }
@@ -649,7 +650,12 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         pack.setDescription(packDto.getDescription());
         pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatTypeUri()).name());
         pack.setDiskSizeMb(packDto.getDiskFileSize());
-        pack.setIconUrl(packDto.getIconPath());
+        RESTLink iconLink = packDto.searchLink("icon");
+        if (iconLink != null)
+        {
+            pack.setIconUrl(iconLink.getTitle());
+        }
+
         pack.setIdOVFPackage(packDto.getId());
         pack.setName(packDto.getProductName()); // XXX duplicated name
         pack.setProductName(packDto.getProductName());

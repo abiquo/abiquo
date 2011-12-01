@@ -349,12 +349,12 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(amrepo);
         assertEquals(amrepo.getId(), enterpriseId);
 
-        assertNotNull(amrepo.getRepositoryCapacityMb());
-        assertNotNull(amrepo.getRepositoryEnterpriseUsedMb());
-        assertNotNull(amrepo.getRepositoryRemainingMb());
+        assertNotNull(amrepo.getCapacityMb());
+        assertNotNull(amrepo.getEnterpriseUsedMb());
+        assertNotNull(amrepo.getRemainingMb());
 
-        assertTrue(amrepo.getRepositoryCapacityMb() > amrepo.getRepositoryEnterpriseUsedMb());
-        assertTrue(amrepo.getRepositoryCapacityMb() >= amrepo.getRepositoryRemainingMb());
+        assertTrue(amrepo.getCapacityMb() > amrepo.getEnterpriseUsedMb());
+        assertTrue(amrepo.getCapacityMb() >= amrepo.getRemainingMb());
     }
 
     @Test
