@@ -209,6 +209,10 @@
 	                //Making the AbiCloudAlert bigger if mainTextArea does not fit
 	                if (mainText.textHeight > mainText.minHeight)
 	                {
+	                	if(_titleText == ResourceManager.getInstance().getString("VirtualAppliance","ALERT_DHCP_TITLE_LABEL"))
+	                	{
+                            mainText.verticalScrollPolicy = 'auto';
+                        }
 	                    var newHeight:int = height + mainText.textHeight - mainText.minHeight;
 	                    //height = height + mainText.textHeight - mainText.minHeight;
 	                    if (newHeight <= maxHeight && newHeight >= minHeight)
