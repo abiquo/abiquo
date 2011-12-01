@@ -179,6 +179,8 @@
                 dispatchEvent(new Event("selectedVLANChange"));
 
                 privateIPList.init(null, _virtualDatacenter, _selectedVLAN);
+                
+                getNetworksByVirtualDatacenter();
 
             }
 
