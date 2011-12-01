@@ -35,10 +35,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-
 @Documented
 @Constraint(validatedBy = UriVal.Validator.class)
-@Target( {METHOD, FIELD})
+@Target({METHOD, FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UriVal
 {
@@ -49,29 +48,33 @@ public @interface UriVal
     Class< ? >[] groups() default {};
 
     Class< ? extends Payload>[] payload() default {};
-    
-    static Pattern pattern = Pattern.compile("^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$", Pattern.CASE_INSENSITIVE);
+
+    static Pattern pattern =
+        Pattern
+            .compile(
+                "^([a-z0-9+.-]+):(?://(?:((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*)@)?((?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*)(?::(\\d*))?(/(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?|(/?(?:[a-z0-9-._~!$&'()*+,;=:@]|%[0-9A-F]{2})+(?:[a-z0-9-._~!$&'()*+,;=:@/]|%[0-9A-F]{2})*)?)(?:\\?((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?(?:#((?:[a-z0-9-._~!$&'()*+,;=:/?@]|%[0-9A-F]{2})*))?$",
+                Pattern.CASE_INSENSITIVE);
 
     static class Validator implements ConstraintValidator<UriVal, String>
     {
         @Override
-        public void initialize(UriVal constraintAnnotation)
-        {            
+        public void initialize(final UriVal constraintAnnotation)
+        {
         }
 
         @Override
-        public boolean isValid(String value, ConstraintValidatorContext context)
+        public boolean isValid(final String value, final ConstraintValidatorContext context)
         {
-        	boolean valid = pattern.matcher(value).matches();
-        	                    	        	
-        	if (!valid)
-        	{
-        		context.disableDefaultConstraintViolation();
-        		context.buildConstraintViolationWithTemplate("invalid uri: " + value)
-                .addConstraintViolation();
-        	}
-        	
-        	return valid;
+            boolean valid = pattern.matcher(value).matches();
+
+            if (!valid)
+            {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("invalid uri: " + value)
+                    .addConstraintViolation();
+            }
+
+            return valid;
         }
-    }       
+    }
 }

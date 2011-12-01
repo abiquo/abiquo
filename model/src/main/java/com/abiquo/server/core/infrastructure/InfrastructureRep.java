@@ -52,6 +52,9 @@ import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.Tier;
+import com.abiquo.server.core.pricing.PricingRep;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.util.PagedList;
 
 @Repository
@@ -113,6 +116,9 @@ public class InfrastructureRep extends DefaultRepBase
 
     @Autowired
     private StorageRep storageRep;
+
+    @Autowired
+    private PricingRep pricingRep;
 
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
@@ -477,6 +483,11 @@ public class InfrastructureRep extends DefaultRepBase
         return datastoreDao.findById(id);
     }
 
+    public Datastore findDatastoreByUuidAndMachine(final String uuid, final Machine machine)
+    {
+        return datastoreDao.findDatastore(uuid, machine);
+    }
+
     public void insertDatastore(final Datastore datastore)
     {
         assert datastore != null;
@@ -757,6 +768,16 @@ public class InfrastructureRep extends DefaultRepBase
         return hypervisorDao.existsAnyWithIpServiceAndDatacenter(ip, datacenterId);
     }
 
+    public List<PricingTemplate> getPricingTemplates()
+    {
+        return pricingRep.findPricingTemplats();
+    }
+
+    public void insertPricingTier(final PricingTier pricingTier)
+    {
+        pricingRep.insertPricingTier(pricingTier);
+    }
+
     /**
      * Return all the public VLANs by Datacenter.
      * 
@@ -829,6 +850,11 @@ public class InfrastructureRep extends DefaultRepBase
         final Integer vmId)
     {
         return virtualMachineDao.findVirtualMachineByHypervisor(hypervisor, vmId);
+    }
+
+    public List<Integer> findUsedRemoteDesktopPortsInRack(final Rack rack)
+    {
+        return rackDao.findUsedVrdpPorts(rack);
     }
 
 }

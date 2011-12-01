@@ -58,7 +58,6 @@ public interface AppsLibraryStub
     /**
      * ICONS
      */
-
     public DataResult<List<Icon>> getIcons();
 
     public DataResult<Icon> createIcon(final IconDto icon);

@@ -42,29 +42,25 @@ public class OVFPackageInstanceDto extends OVFPackageDto
 {
     private static final long serialVersionUID = 6994372893155355385L;
 
-    /**
-     * Original location of the {@link OVFPackage}. Identify the entity combined with the
-     * {@link Enterprise} identifier (id of the ApplianceManager EnterpriseRepository). Datacenter
-     * identifier is implicit in the ApplianceManager context.
-     */
-    private String ovfId;
-
     /** Virtual disk file (.vmdk) path relative to the repository */
     private String diskFilePath;
 
     /** Optional. Only for vimages instances (bundles) */
     private String masterDiskFilePath;
 
-    /** ############################## */
-    /**
-     * Descriptive attributes. Deprecated attributes (should use the {@link OVFPackageDto} links :
-     * TODO remove them
-     */
-    /**
-     * ##############################
-     */
+    /** ######### hardware requirements : TODO move to {@link OVFPackageDto} ######### */
 
+    @Deprecated
+    /** Use {@link OVFPackageDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the OVFPackageDto*/
     private DiskFormatType diskFileFormat;
+
+    @Deprecated
+    // Use links
+    private String iconPath;
+
+    @Deprecated
+    // Use links
+    private String categoryName;
 
     private Integer cpu;
 
@@ -76,23 +72,9 @@ public class OVFPackageInstanceDto extends OVFPackageDto
 
     private MemorySizeUnit hdSizeUnit;
 
-    private Integer idEnterprise;
-
-    private Integer idUser;
-
-    private String iconPath;
-
-    private String categoryName;
-
-    public String getOvfId()
-    {
-        return ovfId;
-    }
-
-    public void setOvfId(final String ovfId)
-    {
-        this.ovfId = ovfId;
-    }
+    @Deprecated
+    // Use links
+    private Integer enterpriseRepositoryId;
 
     public String getDiskFilePath()
     {
@@ -115,16 +97,6 @@ public class OVFPackageInstanceDto extends OVFPackageDto
         this.masterDiskFilePath = masterDiskFilePath;
     }
 
-    /** ############################## */
-    /**
-     * Deprecated attributes (should use the {@link OVFPackageDto} links : TODO remove them
-     */
-    /**
-     * ##############################
-     */
-
-    @Deprecated
-    /** Use {@link OVFPackageDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the OVFPackageDto*/
     public DiskFormatType getDiskFileFormat()
     {
         return diskFileFormat;
@@ -134,7 +106,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
     {
         this.diskFileFormat = diskFileFormat;
         this.setDiskFormatTypeUri(diskFileFormat.uri);
-        // TODO FIXME once OVFPackageDto work with Enum
+        // FIXME once OVFPackageDto work with Enum
     }
 
     @Override
@@ -160,36 +132,16 @@ public class OVFPackageInstanceDto extends OVFPackageDto
     }
 
     /** TODO get from the EnterpriseRepository link */
-    public Integer getIdEnterprise()
+    public Integer getEnterpriseRepositoryId()
     {
-        return idEnterprise;
+        return enterpriseRepositoryId;
     }
 
     /** TODO set to the EnterpriseRepository link */
-    public void setIdEnterprise(final Integer idEnterprise)
+    public void setEnterpriseRepositoryId(final Integer enterpriseRepositoryId)
     {
-        this.idEnterprise = idEnterprise;
+        this.enterpriseRepositoryId = enterpriseRepositoryId;
     }
-
-    @Deprecated
-    // TODO not being used
-    public Integer getIdUser()
-    {
-        return idUser;
-    }
-
-    @Deprecated
-    // TODO not being used
-    public void setIdUser(final Integer idUser)
-    {
-        this.idUser = idUser;
-    }
-
-    /** ############################## */
-    /**
-     * {@link VirtualImage} hardware requirements : TODO move them to OVFPackageDto
-     */
-    /** ############################## */
 
     public Integer getCpu()
     {

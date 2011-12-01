@@ -26,6 +26,7 @@ import static java.lang.String.valueOf;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
@@ -38,6 +39,11 @@ import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.client.handlers.ClientHandler;
 import org.apache.wink.common.internal.utils.UriHelper;
+import org.jclouds.abiquo.AbiquoContext;
+import org.jclouds.abiquo.AbiquoContextFactory;
+import org.jclouds.abiquo.domain.exception.AbiquoException;
+import org.jclouds.logging.config.NullLoggingModule;
+import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.UserSessionException;
@@ -58,6 +64,8 @@ import com.abiquo.server.core.enterprise.User.AuthType;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
 import com.abiquo.util.resources.ResourceManager;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -74,6 +82,8 @@ public class AbstractAPIStub
 
     protected UserSession currentSession;
 
+    private AbiquoContext context;
+
     public AbstractAPIStub()
     {
         this.apiUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
@@ -87,6 +97,33 @@ public class AbstractAPIStub
     public void setCurrentSession(final UserSession currentSession)
     {
         this.currentSession = currentSession;
+    }
+
+    protected AbiquoContext getApiClient()
+    {
+        if (context == null)
+        {
+            UserHB user = getCurrentUserCredentials();
+            String token = generateToken(user.getUser(), user.getPassword());
+
+            Properties props = new Properties();
+            props.put("abiquo.endpoint", apiUri);
+
+            context =
+                new AbiquoContextFactory().createContext(token,
+                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
+        }
+
+        return context;
+    }
+
+    protected void releaseApiClient()
+    {
+        if (context != null)
+        {
+            context.close();
+            context = null;
+        }
     }
 
     private UserHB getCurrentUserCredentials()
@@ -245,26 +282,7 @@ public class AbstractAPIStub
     private Resource resource(final String uri, final String user, final String password)
     {
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
-        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
-
-        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
-
-        String[] tokens;
-        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
-        {
-            tokens =
-                new String[] {user, valueOf(tokenExpiration), signature,
-                currentSession.getAuthType()};
-        }
-        else
-        {
-            tokens =
-                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
-        }
-        String cookieValue = StringUtils.join(tokens, ":");
-
-        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
-
+        String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
     }
 
@@ -272,26 +290,7 @@ public class AbstractAPIStub
         final String mediaType)
     {
         Resource resource = client.resource(uri).accept(mediaType);
-        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
-
-        String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
-
-        String[] tokens;
-        if (this.currentSession != null && StringUtils.isNotBlank(currentSession.getAuthType()))
-        {
-            tokens =
-                new String[] {user, valueOf(tokenExpiration), signature,
-                currentSession.getAuthType()};
-        }
-        else
-        {
-            tokens =
-                new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
-        }
-        String cookieValue = StringUtils.join(tokens, ":");
-
-        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
-
+        String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
     }
 
@@ -309,8 +308,13 @@ public class AbstractAPIStub
         final MediaType mediaType)
     {
         Resource resource = client.resource(uri).contentType(mediaType);
-        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
+        String cookieValue = generateToken(user, password);
+        return resource.cookie(new Cookie("auth", cookieValue));
+    }
 
+    private String generateToken(final String user, final String password)
+    {
+        long tokenExpiration = System.currentTimeMillis() + 1000L * 1800;
         String signature = TokenUtils.makeTokenSignature(tokenExpiration, user, password);
 
         String[] tokens;
@@ -325,10 +329,9 @@ public class AbstractAPIStub
             tokens =
                 new String[] {user, valueOf(tokenExpiration), signature, AuthType.ABIQUO.name()};
         }
-        String cookieValue = StringUtils.join(tokens, ":");
-        cookieValue = new String(Base64.encodeBase64(cookieValue.getBytes()));
 
-        return resource.cookie(new Cookie("auth", cookieValue));
+        String cookieValue = StringUtils.join(tokens, ":");
+        return new String(Base64.encodeBase64(cookieValue.getBytes()));
     }
 
     protected UserHB getCurrentUser()
@@ -366,6 +369,34 @@ public class AbstractAPIStub
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
             }
+        }
+    }
+
+    protected void populateErrors(final Exception ex, final BasicResult result,
+        final String methodName)
+    {
+        result.setSuccess(false);
+        if (ex instanceof AuthorizationException)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(ex.getMessage());
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
+        else if (ex instanceof AbiquoException)
+        {
+            AbiquoException abiquoException = (AbiquoException) ex;
+            result.setMessage(abiquoException.toString());
+            if (abiquoException.hasError("LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            }
+        }
+        else
+        {
+            result.setMessage(ex.getMessage());
         }
     }
 
@@ -1000,6 +1031,7 @@ public class AbstractAPIStub
 
         return resolveURI(apiUri,
             "admin/datacenters/{datacenter}/racks/{rack}/machines/{machine}/action/powerOn", params);
+
     }
 
     protected String createMachineLinkPowerOff(final Integer datacenterId, final Integer rackId,
@@ -1161,7 +1193,7 @@ public class AbstractAPIStub
 
     protected String createRemoteServicesLink(final Integer datacenterId)
     {
-        return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteServices");
+        return UriHelper.appendPathToBaseUri(createDatacenterLink(datacenterId), "remoteservices");
     }
 
     protected String createRemoteServiceLink(final Integer datacenterId,
@@ -1169,9 +1201,9 @@ public class AbstractAPIStub
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("datacenter", datacenterId.toString());
-        params.put("remoteService", remoteServiceType.toLowerCase());
+        params.put("remoteservice", remoteServiceType.toLowerCase().replace("_", ""));
 
-        return resolveURI(apiUri, "admin/datacenters/{datacenter}/remoteServices/{remoteService}",
+        return resolveURI(apiUri, "admin/datacenters/{datacenter}/remoteservices/{remoteservice}",
             params);
     }
 
@@ -1496,6 +1528,174 @@ public class AbstractAPIStub
                 apiUri,
                 "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines",
                 params);
+    }
+
+    protected String createCurrencyLink(final int currencyId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
+    }
+
+    protected String createPricingTemplateLink(final int templateId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}",
+            Collections.singletonMap("pricingtemplate", valueOf(templateId)));
+    }
+
+    protected String createPricingTemplatesLink()
+    {
+        return createPricingTemplatesLink(null, null);
+    }
+
+    protected String createPricingTemplatesLink(Integer offset, final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/pricingtemplates", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (numResults != null)
+        {
+            queryParams.put("numResults", new String[] {numResults.toString()});
+            if (offset != null)
+            {
+                offset = offset / numResults;
+
+                queryParams.put("page", new String[] {offset.toString()});
+            }
+        }
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodesLink()
+    {
+        return createCostCodesLink(null, null);
+    }
+
+    protected String createCostCodesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/costcodes", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            if (numResults != 0)
+            {
+                offset = offset / numResults;
+
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
+            else if (numResults == 0 && offset == 0)
+            {
+                queryParams.put("page", new String[] {offset.toString()});
+                queryParams.put("numResults", new String[] {numResults.toString()});
+            }
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCostCodeCurrenciesLink(final Integer costCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("costcode", costCodeId.toString());
+
+        return resolveURI(apiUri, "config/costcodes/{costcode}/currencies", params);
+    }
+
+    protected String createCostCodeLink(final int costCodeId)
+    {
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
+    }
+
+    protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
+        final Integer numResults)
+    {
+        String uri =
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createCurrenciesLink()
+    {
+        return createCurrenciesLink(null, null);
+    }
+
+    protected String createCurrenciesLink(Integer offset, final Integer numResults)
+    {
+        String uri = URIResolver.resolveURI(apiUri, "config/currencies", Collections.emptyMap());
+
+        Map<String, String[]> queryParams = new HashMap<String, String[]>();
+
+        if (offset != null && numResults != null)
+        {
+            offset = offset / numResults;
+
+            queryParams.put("page", new String[] {offset.toString()});
+            queryParams.put("numResults", new String[] {numResults.toString()});
+        }
+
+        return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
+    }
+
+    protected String createPricingCostCodesLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes", params);
+    }
+
+    protected String createPricingCostCodeLink(final Integer pricingId,
+        final Integer pricingCostCodeId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+        params.put("costcode", pricingCostCodeId.toString());
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/costcodes/{costcode}",
+            params);
+    }
+
+    protected String createPricingTiersLink(final Integer pricingId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers", params);
+    }
+
+    protected String createPricingTierLink(final Integer pricingId, final Integer pricingTierId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("pricingtemplate", pricingId.toString());
+        params.put("tier", pricingTierId.toString());
+        return resolveURI(apiUri, "config/pricingtemplates/{pricingtemplate}/tiers/{tier}", params);
+    }
+
+    protected String createVirtualAppliancePriceLink(final int virtualDatacenterId,
+        final int virtualApplianceId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("vapp", String.valueOf(virtualApplianceId));
+
+        return resolveURI(apiUri,
+            "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{vapp}/action/price",
+            params);
     }
 
     protected String createVirtualAppliancesByEnterpriseLink(final Integer entId)

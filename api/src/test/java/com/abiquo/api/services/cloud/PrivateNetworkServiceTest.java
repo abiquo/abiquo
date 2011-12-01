@@ -83,8 +83,8 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         vlan = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan.setEnterprise(vdc.getEnterprise());
         vdc.setDefaultVlan(vlan);
-        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration().getDhcp(),
-            vlan.getConfiguration(), vlan, vdc, dclimit);
+        setup(vdc.getDatacenter(), rs, vdc.getNetwork(), vlan.getConfiguration(), vlan, vdc,
+            dclimit);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
     }
@@ -234,7 +234,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         // the process doesn't allow us to update it.
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan2.setEnterprise(vdc.getEnterprise());
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan2.getConfiguration(), vlan2);
 
         // Create the third VLANNetwork 'vlan3' in other VDC than 'vlan'. The VLAN with the same
         // name
@@ -243,7 +243,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
             vdcGenerator.createInstance(rs.getDatacenter(), vdc.getEnterprise());
         setup(vdc2.getNetwork(), vdc2);
         VLANNetwork vlan3 = vlanGenerator.createInstance(vdc2.getNetwork(), rs, "255.255.255.0");
-        setup(vlan3.getConfiguration().getDhcp(), vlan3.getConfiguration(), vlan3);
+        setup(vlan3.getConfiguration(), vlan3);
 
         // STEP 1
         EntityManager em = getEntityManagerWithAnActiveTransaction();
@@ -324,7 +324,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
 
         // Create the second one
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan2.getConfiguration(), vlan2);
 
         // Try to delete the first one.
         service.deletePrivateNetwork(vdc.getId(), vlan.getId());
@@ -339,7 +339,7 @@ public class PrivateNetworkServiceTest extends AbstractUnitTest
         // Create the second one
         VLANNetwork vlan2 = vlanGenerator.createInstance(vdc.getNetwork(), rs, "255.255.255.0");
         vlan2.setEnterprise(vdc.getEnterprise());
-        setup(vlan2.getConfiguration().getDhcp(), vlan2.getConfiguration(), vlan2);
+        setup(vlan2.getConfiguration(), vlan2);
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         NetworkService service = new NetworkService(em);

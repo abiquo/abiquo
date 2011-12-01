@@ -38,12 +38,6 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.wink.client.ClientConfig;
-import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.ClientRuntimeException;
-import org.apache.wink.client.Resource;
-import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -413,7 +407,7 @@ public class InfrastructureService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public boolean isAssignedTo(final Integer datacenterId, final String remoteServiceMapping)
     {
-        RemoteServiceType type = RemoteServiceType.valueOf(remoteServiceMapping.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(remoteServiceMapping);
 
         return isAssignedTo(datacenterId, type);
     }
@@ -556,7 +550,9 @@ public class InfrastructureService extends DefaultApiService
     {
         RemoteService old = getRemoteService(id);
 
-        ErrorsDto configurationErrors = checkRemoteServiceStatus(dto.getType(), dto.getUri());
+        ErrorsDto configurationErrors =
+            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(),
+                dto.getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -618,50 +614,6 @@ public class InfrastructureService extends DefaultApiService
         }
     }
 
-    public static ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
-    {
-        ErrorsDto configurationErrors = new ErrorsDto();
-        if (type.canBeChecked())
-        {
-            ClientConfig config = new ClientConfig();
-            config.connectTimeout(5000);
-
-            RestClient restClient = new RestClient(config);
-            Resource checkResource =
-                restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
-
-            try
-            {
-                ClientResponse response = checkResource.get();
-                if (response.getStatusCode() != 200)
-                {
-                    APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                    configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                        + error.getMessage()));
-                }
-            }
-            catch (WebApplicationException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (ClientRuntimeException e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-            catch (Exception e)
-            {
-                APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-                configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                    + error.getMessage() + ", " + e.getMessage()));
-            }
-        }
-        return configurationErrors;
-    }
-
     // PROTECTED METHODS
     protected void checkUniqueness(final Datacenter datacenter, final RemoteServiceDto remoteService)
     {
@@ -716,7 +668,7 @@ public class InfrastructureService extends DefaultApiService
                 ApplianceManagerResourceStubImpl amStub =
                     new ApplianceManagerResourceStubImpl(remoteService.getUri());
 
-                repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+                repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
                 if (repo.existRepositoryInOtherDatacenter(datacenter, repositoryLocation))
                 {
@@ -778,7 +730,7 @@ public class InfrastructureService extends DefaultApiService
                 try
                 {
                     String newRepositoryLocation =
-                        amStub.getRepositoryConfiguration().getRepositoryLocation();
+                        amStub.getRepositoryConfiguration().getLocation();
 
                     Repository oldRepository = repo.findRepositoryByDatacenter(old.getDatacenter());
 
@@ -802,7 +754,7 @@ public class InfrastructureService extends DefaultApiService
         }
         else if (dto.getStatus() == STATUS_SUCCESS)
         {
-            String repositoryLocation = amStub.getRepositoryConfiguration().getRepositoryLocation();
+            String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
             repo.updateRepositoryLocation(old.getDatacenter(), repositoryLocation);
         }
@@ -816,6 +768,7 @@ public class InfrastructureService extends DefaultApiService
         // being used and it changes it location.
 
         flushErrors();
+
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -853,6 +806,7 @@ public class InfrastructureService extends DefaultApiService
     {
         Machine machine = repo.findMachineById(machineId);
         updateUsedResourcesByMachine(machine);
+
     }
 
     public void updateUsedResourcesByMachine(final Machine machine)
@@ -1098,16 +1052,17 @@ public class InfrastructureService extends DefaultApiService
      * @param datacenterId
      * @return ErrorsDto
      */
-    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Integer datacenterId)
+    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Datacenter datacenter)
     {
 
         List<RemoteService> remoteServicesByDatacenter =
-            getRemoteServicesByDatacenter(datacenterId);
+            getRemoteServicesByDatacenter(datacenter.getId());
         ErrorsDto errors = new ErrorsDto();
 
         for (RemoteService r : remoteServicesByDatacenter)
         {
-            ErrorsDto checkRemoteServiceStatus = checkRemoteServiceStatus(r.getType(), r.getUri());
+            ErrorsDto checkRemoteServiceStatus =
+                remoteServiceService.checkRemoteServiceStatus(datacenter, r.getType(), r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
         return errors;
@@ -1193,6 +1148,18 @@ public class InfrastructureService extends DefaultApiService
                 "Virtual Machines not managed by host from '" + hypervisor.getIp()
                     + "' have been deleted");
         }
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url)
+    {
+        return checkRemoteServiceStatus(datacenter, type, url, false);
+    }
+
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
+        final RemoteServiceType type, final String url, final boolean flushErrors)
+    {
+        return remoteServiceService.checkRemoteServiceStatus(datacenter, type, url, flushErrors);
     }
 
     protected void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)

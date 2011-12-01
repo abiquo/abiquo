@@ -57,7 +57,6 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -67,6 +66,12 @@ import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.StoragePool;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.pricing.CostCode;
+import com.abiquo.server.core.pricing.CostCodeCurrency;
+import com.abiquo.server.core.pricing.Currency;
+import com.abiquo.server.core.pricing.PricingCostCode;
+import com.abiquo.server.core.pricing.PricingTemplate;
+import com.abiquo.server.core.pricing.PricingTier;
 import com.abiquo.server.core.scheduler.EnterpriseExclusionRule;
 import com.abiquo.server.core.scheduler.FitPolicyRule;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
@@ -144,15 +149,17 @@ public class TestDataAccessManager
             VirtualMachine.class, OVFPackageList.class, OVFPackage.class, AppsLibrary.class,
             VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
             Category.class, Icon.class, IpPoolManagement.class, RasdManagement.class,
-            VLANNetwork.class, NetworkConfiguration.class, Dhcp.class,
-            VirtualDatacenterResources.class, VirtualDatacenter.class, DatacenterResources.class,
-            DatacenterLimits.class, Session.class, User.class, RoleLdap.class, Role.class,
-            Privilege.class, EnterpriseResources.class, Enterprise.class, Hypervisor.class,
-            Datastore.class, Machine.class, Rack.class, StoragePool.class, Tier.class,
-            StorageDevice.class, RemoteService.class, Repository.class, CloudUsage.class,
-            Datacenter.class, Network.class, SystemProperty.class, Rasd.class, License.class,
+            VLANNetwork.class, NetworkConfiguration.class, VirtualDatacenterResources.class,
+            VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,
+            Session.class, User.class, RoleLdap.class, Role.class, Privilege.class,
+            EnterpriseResources.class, Enterprise.class, Hypervisor.class, Datastore.class,
+            Machine.class, Rack.class, StoragePool.class, Tier.class, StorageDevice.class,
+            RemoteService.class, Repository.class, CloudUsage.class, Datacenter.class,
+            Network.class, SystemProperty.class, Rasd.class, License.class,
             NodeVirtualImageStatefulConversion.class, DiskStatefulConversion.class,
-            VirtualApplianceStatefulConversion.class, OneTimeTokenSession.class);
+            VirtualApplianceStatefulConversion.class, CostCodeCurrency.class,
+            PricingCostCode.class, PricingTier.class, PricingTemplate.class, CostCode.class,
+            Currency.class, OneTimeTokenSession.class);
 
         addIntermediateTablesToCleanInRemovalOrder(Machine.DATASTORES_ASSOCIATION_TABLE,
             DatacenterLimits.TABLE_NAME, EnterpriseResources.TABLE_NAME, Role.ASSOCIATION_TABLE,

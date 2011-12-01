@@ -72,29 +72,28 @@ public class StatisticsRep extends DefaultRepBase
     }
 
     /**
-     * Total Cloud Usage has some special cases when showing limits
-     * 
-     * Limits are not total sum of limits by DC. 
-     * Instead they must show limits defined for all the enterprises, that is CloudUsage with datacenterId = -1 
-     * 
+     * Total Cloud Usage has some special cases when showing limits Limits are not total sum of
+     * limits by DC. Instead they must show limits defined for all the enterprises, that is
+     * CloudUsage with datacenterId = -1
      * 
      * @return
      */
     public CloudUsage findTotalCloudUsage()
     {
-    	CloudUsage cuTotal = this.cloudUsageDAO.sumTotalCloudUsage();
-    	
-    	CloudUsage cuLimits = this.cloudUsageDAO.findById(-1);
-    	
-    	if (cuTotal != null && cuLimits != null){
-    		cuTotal.setPublicIPsReserved(cuLimits.getPublicIPsReserved());
-        	cuTotal.setStorageReserved(cuLimits.getStorageReserved());
-        	cuTotal.setVirtualCpuReserved(cuLimits.getVirtualCpuReserved());
-        	cuTotal.setVirtualMemoryReserved(cuLimits.getVirtualMemoryReserved());
-        	cuTotal.setVirtualStorageReserved(cuLimits.getVirtualStorageReserved());    		
-    	}
-    	
-    	return cuTotal;
+        CloudUsage cuTotal = this.cloudUsageDAO.sumTotalCloudUsage();
+
+        CloudUsage cuLimits = this.cloudUsageDAO.findById(-1);
+
+        if (cuTotal != null && cuLimits != null)
+        {
+            cuTotal.setPublicIPsReserved(cuLimits.getPublicIPsReserved());
+            cuTotal.setStorageReserved(cuLimits.getStorageReserved());
+            cuTotal.setVirtualCpuReserved(cuLimits.getVirtualCpuReserved());
+            cuTotal.setVirtualMemoryReserved(cuLimits.getVirtualMemoryReserved());
+            cuTotal.setVirtualStorageReserved(cuLimits.getVirtualStorageReserved());
+        }
+
+        return cuTotal;
     }
 
     public EnterpriseResources findTotalEnterpriseResources()
@@ -109,14 +108,16 @@ public class StatisticsRep extends DefaultRepBase
         return this.enterpriseResourcesDAO.findById(idEnterprise);
     }
 
-    public Collection<VirtualAppResources> findVappResourcesByEnterprise(Integer idEnterprise, User user)
+    public Collection<VirtualAppResources> findVappResourcesByEnterprise(Integer idEnterprise,
+        User user)
     {
         assert idEnterprise != null;
 
         return this.vappResourcesDAO.findByIdEnterprise(idEnterprise, user);
     }
 
-    public Collection<VirtualDatacenterResources> findVDCResourcesByEnterprise(Integer idEnterprise, User user)
+    public Collection<VirtualDatacenterResources> findVDCResourcesByEnterprise(
+        Integer idEnterprise, User user)
     {
         assert idEnterprise != null;
 

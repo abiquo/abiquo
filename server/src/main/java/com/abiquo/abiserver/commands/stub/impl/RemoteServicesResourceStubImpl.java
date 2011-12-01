@@ -144,8 +144,8 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         dto.setUri(remoteService.getUri());
         dto.setType(RemoteServiceType.valueOf(remoteService.getRemoteServiceType().toEnum()
             .toString()));
+        dto.setId(remoteService.getIdRemoteService());
 
         return dto;
     }
-
 }

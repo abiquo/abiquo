@@ -37,8 +37,6 @@ import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
-import com.abiquo.server.core.infrastructure.network.Dhcp;
-import com.abiquo.server.core.infrastructure.network.DhcpDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
@@ -56,8 +54,6 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagementDAO;
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
 {
-    @Autowired
-    DhcpDAO dhcpDAO;
 
     @Autowired
     DiskManagementDAO diskManagementDAO;
@@ -106,13 +102,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         this.virtualDatacenterDAO = new VirtualDatacenterDAO(em);
         this.vlanDAO = new VLANNetworkDAO(em);
         this.networkDAO = new NetworkDAO(em);
-        this.dhcpDAO = new DhcpDAO(em);
         this.ipManagementDAO = new IpPoolManagementDAO(em);
         this.virtualApplianceDAO = new VirtualApplianceDAO(em);
         this.rasdManagementDAO = new RasdManagementDAO(em);
         this.rasdDAO = new RasdDAO(em);
         this.networkConfigDAO = new NetworkConfigurationDAO(em);
-        this.dhcpDAO = new DhcpDAO(em);
         this.vmDao = new VirtualMachineDAO(em);
         this.nodeviDao = new NodeVirtualImageDAO(em);
         this.diskManagementDAO = new DiskManagementDAO(em);
@@ -271,8 +265,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
-    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
-        final Integer diskId)
+    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm, final Integer diskId)
     {
         return diskManagementDAO.findHardDisksByVirtualMachine(vm, diskId);
     }
@@ -554,20 +547,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         virtualDatacenterDAO.persist(vdc);
     }
 
-    public void insertDhcp(final Dhcp dhcp)
-    {
-        dhcpDAO.persist(dhcp);
-    }
-
-    public void insertHardDisk(final DiskManagement createdDisk)
-    {
-        if (createdDisk.getRasd() != null)
-        {
-            rasdDAO.persist(createdDisk.getRasd());
-        }
-        diskManagementDAO.persist(createdDisk);
-    }
-
     public void insertIpManagement(final IpPoolManagement ipManagement)
     {
         if (ipManagement.getRasd() != null)
@@ -669,6 +648,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
     {
         return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
+    }
+
+    public void deleteIpPoolManagement(final IpPoolManagement ip)
+    {
+        ipManagementDAO.remove(ip);
     }
 
 }

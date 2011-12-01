@@ -49,8 +49,6 @@ public class MailingTracerProcessor implements TracerProcessor
 
     /** Sends an email using the configured SMTP account. */
     private MailManager mail = MailManager.instance();
-    
-    
 
     @Override
     public void process(TracerTo tracer) throws TracerCollectorException
@@ -62,7 +60,7 @@ public class MailingTracerProcessor implements TracerProcessor
                 break;
         }
     }
-    
+
     @Override
     public void destroy() throws TracerCollectorException
     {
@@ -71,24 +69,24 @@ public class MailingTracerProcessor implements TracerProcessor
 
     private void sendLoginEmail(TracerTo tracer)
     {
-        
+
         // XXX WIP
-//        
-//        log.debug("User " + tracer.getUser().getUsername() + "is logging in.");
-//        Properties properties = new Properties();
-//        properties.setProperty("username", tracer.getUser().getUsername());
-//        properties.setProperty("enterprise", tracer.getUser().getEnterprise());
-//        properties.setProperty("timestamp", Calendar.getInstance().getTime().toString());
-//        String body = RendererManager.generateBody(properties, "userlogin", "en", "default");
-//        try
-//        {
-//            mail.send("testing@abiquo.com", "testing@abiquo.com", "testing@abiquo.com",
-//                "User Login", body);
-//        }
-//        catch (Exception e)
-//        {
-//            log.error("Cannot send email", e);
-//        }
+        //
+        // log.debug("User " + tracer.getUser().getUsername() + "is logging in.");
+        // Properties properties = new Properties();
+        // properties.setProperty("username", tracer.getUser().getUsername());
+        // properties.setProperty("enterprise", tracer.getUser().getEnterprise());
+        // properties.setProperty("timestamp", Calendar.getInstance().getTime().toString());
+        // String body = RendererManager.generateBody(properties, "userlogin", "en", "default");
+        // try
+        // {
+        // mail.send("testing@abiquo.com", "testing@abiquo.com", "testing@abiquo.com",
+        // "User Login", body);
+        // }
+        // catch (Exception e)
+        // {
+        // log.error("Cannot send email", e);
+        // }
 
     }
 }

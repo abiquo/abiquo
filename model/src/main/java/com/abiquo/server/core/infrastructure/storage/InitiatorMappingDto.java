@@ -32,6 +32,7 @@ public class InitiatorMappingDto extends SingleResourceTransportDto
      * 
      */
     private static final long serialVersionUID = 1L;
+
     private Integer id;
 
     public Integer getId()

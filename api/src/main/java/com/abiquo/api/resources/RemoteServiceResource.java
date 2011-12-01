@@ -21,9 +21,6 @@
 
 package com.abiquo.api.resources;
 
-import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_ERROR;
-import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +40,6 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceDto;
@@ -75,7 +71,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         return createTransferObject(remoteService, restBuilder);
@@ -83,17 +79,15 @@ public class RemoteServiceResource extends AbstractResource
 
     @GET
     @Path(CHECK_RESOURCE)
-    public RemoteServiceDto pingRemoteService(
+    public void pingRemoteService(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(REMOTE_SERVICE) final String serviceType, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        RemoteServiceDto rs = getRemoteService(datacenterId, serviceType, restBuilder);
-
-        ErrorsDto errors = service.checkRemoteServiceStatus(rs.getType(), rs.getUri());
-
-        rs.setStatus(errors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR);
-        return rs;
+        validatePathParameters(datacenterId, serviceType);
+        RemoteService rs =
+            service.getRemoteService(datacenterId, RemoteServiceType.valueFromName(serviceType));
+        service.checkRemoteServiceStatus(rs.getDatacenter(), rs.getType(), rs.getUri(), true);
     }
 
     @PUT
@@ -104,7 +98,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService old = service.getRemoteService(datacenterId, type);
 
         RemoteServiceDto r = service.modifyRemoteService(old.getId(), remoteService);
@@ -121,7 +115,7 @@ public class RemoteServiceResource extends AbstractResource
     {
         validatePathParameters(datacenterId, serviceType);
 
-        RemoteServiceType type = RemoteServiceType.valueOf(serviceType.toUpperCase());
+        RemoteServiceType type = RemoteServiceType.valueFromName(serviceType);
         RemoteService remoteService = service.getRemoteService(datacenterId, type);
 
         service.removeRemoteService(remoteService.getId());

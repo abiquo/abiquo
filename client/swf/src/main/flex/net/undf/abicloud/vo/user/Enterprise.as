@@ -42,7 +42,7 @@ package net.undf.abicloud.vo.user
         /******
         * 
         * allowedDatacenter is an array containing all allowed datacenters for this enterprise
-        * when a new DC is created (set tio 'allowed), it will be added automatically to this list 
+        * when a new DC is created (set to 'allowed), it will be added automatically to this list 
         * 
         * ****/
         
@@ -68,6 +68,8 @@ package net.undf.abicloud.vo.user
         
         public var chefClientCertificate:String;
 
+        public var idPricingTemplate:int;
+
         public function Enterprise()
         {
             id = 0;
@@ -77,7 +79,7 @@ package net.undf.abicloud.vo.user
             limits = new ResourceAllocationLimit();
             dcLimits = new ArrayCollection();
             reservedMachines = new ArrayCollection();
-	       isReservationRestricted = false;
+	        isReservationRestricted = false;
         }
 
     }

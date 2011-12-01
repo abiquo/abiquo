@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.abicloudws.IVirtualApplianceWS;
 import com.abiquo.abiserver.abicloudws.RemoteServiceUtils;
 import com.abiquo.abiserver.abicloudws.VirtualApplianceWS;
-import com.abiquo.abiserver.appslibrary.VirtualImageException;
 import com.abiquo.abiserver.business.authentication.SessionUtil;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
@@ -120,6 +119,7 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -2289,13 +2289,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             dataResult.setMessage(message);
             return dataResult;
         }
-        catch (VirtualImageException e)
-        {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-            return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
-                sourceSubState, userHB, ComponentType.IMAGE_CONVERTER, e.getMessage(),
-                "createVirtualMachines", e);
-        }
         catch (Exception e1)
         {
             undeployVirtualMachines(userSession, virtualAppliance, dataResult);
@@ -2734,7 +2727,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     private void createVirtualMachines(final UserSession userSession,
         final VirtualAppliance virtualAppliance, final boolean force, final DataResult dataResult)
         throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        HibernateException, NotEnoughResourcesException, VirtualImageException
+        HibernateException, NotEnoughResourcesException
     {
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
@@ -3464,19 +3457,29 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
-            netMan.setRasd(null);
-            netMan.setVirtualMachine(null);
-            netMan.setVirtualApp(null);
-            netMan.setConfigureGateway(Boolean.FALSE);
 
-            if (rasd.getResourceSubType() != null
-                && rasd.getResourceSubType().equalsIgnoreCase("2"))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
+                .equals(NetworkType.UNMANAGED.name()))
             {
-                netMan.setMac(null);
-                netMan.setVirtualDataCenter(null);
-                netMan.setName(null);
+                session.delete(netMan);
             }
-            session.saveOrUpdate(netMan);
+            else
+            {
+                netMan.setRasd(null);
+                netMan.setVirtualMachine(null);
+                netMan.setVirtualApp(null);
+                netMan.setConfigureGateway(Boolean.FALSE);
+
+                if (rasd.getResourceSubType() != null
+                    && rasd.getResourceSubType().equalsIgnoreCase("2"))
+                {
+                    netMan.setMac(null);
+                    netMan.setVirtualDataCenter(null);
+                    netMan.setName(null);
+                }
+                session.saveOrUpdate(netMan);
+            }
+
         }
     }
 

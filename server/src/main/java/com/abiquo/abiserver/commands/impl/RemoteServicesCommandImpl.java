@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.abiquo.abiserver.abicloudws.RemoteServiceClient;
-import com.abiquo.abiserver.appslibrary.AppsLibraryRecovery;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
@@ -60,27 +59,12 @@ public class RemoteServicesCommandImpl extends BasicCommand implements RemoteSer
      */
     protected DAOFactory factory;
 
-    protected AppsLibraryRecovery recovery;
-
     /**
      * Creates a new {@link RemoteServicesCommand} and instantiates the DAO factory;
      */
     public RemoteServicesCommandImpl()
     {
         factory = HibernateDAOFactory.instance();
-        recovery = new AppsLibraryRecovery();
-
-    }
-
-    @Override
-    public DataResult<RemoteService> addRemoteService(final UserSession userSession,
-        final RemoteService rs)
-    {
-        RemoteServicesResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
-                RemoteServicesResourceStub.class);
-
-        return proxy.addRemoteService(rs);
     }
 
     @Override

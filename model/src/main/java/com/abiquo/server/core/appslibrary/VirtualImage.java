@@ -490,17 +490,16 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static String COST_CODE_COLUMN = "cost_code";
 
-    @Column(name = COST_CODE_COLUMN, nullable = !COST_CODE_REQUIRED, length = COST_CODE_LENGTH_MAX)
-    private String costCode;
+    @Column(name = COST_CODE_COLUMN, nullable = !COST_CODE_REQUIRED)
+    private int costCode;
 
     @Required(value = COST_CODE_REQUIRED)
-    @Length(min = COST_CODE_LENGTH_MIN, max = COST_CODE_LENGTH_MAX)
-    public String getCostCode()
+    public int getCostCode()
     {
         return costCode;
     }
 
-    public void setCostCode(final String costCode)
+    public void setCostCode(final int costCode)
     {
         this.costCode = costCode;
     }

@@ -23,27 +23,33 @@ package com.abiquo.tracer;
 
 import java.io.Serializable;
 
-public class Volume implements Serializable {
+public class Volume implements Serializable
+{
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 65724177203036062L;
+    private static final long serialVersionUID = 65724177203036062L;
 
-	private String name;
+    private String name;
 
-	private Volume(String volume) {
-		this.setName(volume);
-	}
+    private Volume(String volume)
+    {
+        this.setName(volume);
+    }
 
-	public static Volume volume(String volume) {
-		return new Volume(volume);
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
+    public static Volume volume(String volume)
+    {
+        return new Volume(volume);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
 }

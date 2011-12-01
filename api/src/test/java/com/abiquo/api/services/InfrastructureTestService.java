@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
 
 /**
@@ -36,7 +37,9 @@ import com.abiquo.server.core.infrastructure.RemoteService;
 public class InfrastructureTestService extends InfrastructureService
 {
 
-    public static ErrorsDto checkRemoteServiceStatus(final RemoteServiceType type, final String url)
+    @Override
+    public ErrorsDto checkRemoteServiceStatus(final Datacenter datancenter,
+        final RemoteServiceType type, final String url)
     {
         // During tests the target remote service may not be up and running
         // Do not return errors to simulate a normal behavior

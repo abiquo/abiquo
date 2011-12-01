@@ -53,7 +53,7 @@ import com.abiquo.server.core.appslibrary.OVFPackageDto;
 public class OVFPackageResource extends AbstractResource
 {
 
-    public static final String OVF_PACKAGE = "ovfPackage";
+    public static final String OVF_PACKAGE = "ovfpackage";
 
     public static final String OVF_PACKAGE_PARAM = "{" + OVF_PACKAGE + "}";
 
@@ -128,7 +128,6 @@ public class OVFPackageResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @PathParam(OVF_PACKAGE) final Integer ovfPackageId, final String datacenterId,
         @Context final IRESTBuilder restBuilder) throws Exception
-
     {
         service.installOVFPackage(ovfPackageId, Integer.valueOf(datacenterId), idEnterprise);
         return null;
