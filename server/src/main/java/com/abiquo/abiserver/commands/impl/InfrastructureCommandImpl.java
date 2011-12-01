@@ -244,8 +244,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 transaction.rollback();
             }
 
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "getInfrastructureByDataCenter", e);
+            logger.trace("Unexpected database error when refreshing infrastructure data", e);
         }
 
         return dataResult;

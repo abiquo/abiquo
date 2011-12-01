@@ -23,12 +23,8 @@ package com.abiquo.abiserver.commands.impl;
 
 import java.util.ArrayList;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.MainCommand;
-import com.abiquo.abiserver.persistence.hibernate.HibernateUtil;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
 import com.abiquo.abiserver.pojo.main.MainResult;
@@ -44,41 +40,14 @@ import com.abiquo.model.enumerator.HypervisorType;
 public class MainCommandImpl extends BasicCommand implements MainCommand
 {
     @Override
-    @SuppressWarnings("unchecked")
     public DataResult<MainResult> getCommonInformation(final UserSession userSession)
     {
         DataResult<MainResult> dataResult = new DataResult<MainResult>();
         ArrayList<HyperVisorType> hypervisorTypesList = new ArrayList<HyperVisorType>();
 
-        Session session = null;
-        Transaction transaction = null;
-
-        try
+        for (HypervisorType type : HypervisorType.values())
         {
-            session = HibernateUtil.getSession();
-            transaction = session.beginTransaction();
-
-            for (HypervisorType type : HypervisorType.values())
-            {
-                hypervisorTypesList.add(new HyperVisorType(type));
-            }
-
-            transaction.commit();
-        }
-        catch (Exception e)
-        {
-            if (transaction != null && transaction.isActive())
-            {
-                transaction.rollback();
-            }
-
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-
-            errorManager.reportError(resourceManager, dataResult, "getCommonInformation.Exception",
-                e);
-
-            return dataResult;
+            hypervisorTypesList.add(new HyperVisorType(type));
         }
 
         MainResult mainResult = new MainResult();
