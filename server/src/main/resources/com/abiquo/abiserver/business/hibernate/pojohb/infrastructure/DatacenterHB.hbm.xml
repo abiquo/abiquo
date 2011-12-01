@@ -13,6 +13,9 @@
         <property name="situation" type="string">
             <column length="100" name="situation" />
         </property>
+        <property name="datacenterUUID" type="string">
+            <column length="40" name="uuid" />
+        </property>
         <set name="entLimits" lazy="false" cascade="all-delete-orphan">
             <key>
                 <column name="idDataCenter" />

@@ -92,7 +92,7 @@ public class VirtualApplianceRep extends DefaultRepBase
     {
         this.virtualApplianceDao.flush();
     }
-    
+
     public VirtualApplianceStatefulConversion findConversionById(final Integer id)
     {
         return vAppStatefulConversionDao.findById(id);
@@ -200,6 +200,12 @@ public class VirtualApplianceRep extends DefaultRepBase
     public void deleteVirtualAppliance(final VirtualAppliance virtualAppliance)
     {
         virtualApplianceDao.remove(virtualAppliance);
+    }
+
+    public String getDatacenterUUIDByVirtualImageConversionID(final Integer idVirtualImageConversion)
+    {
+        return virtualImageConversionDao
+            .getDatacenterUUIDByVirtualImageConversionID(idVirtualImageConversion);
     }
 
 }

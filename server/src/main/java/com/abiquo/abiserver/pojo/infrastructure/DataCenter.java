@@ -51,6 +51,8 @@ public class DataCenter implements IPojo<DatacenterHB>
 
     private Network network;
 
+    private String datacenterUUID;
+
     /** remote services list */
     private ArrayList<RemoteService> remoteServices;
 
@@ -102,12 +104,24 @@ public class DataCenter implements IPojo<DatacenterHB>
         this.remoteServices = remoteServices;
     }
 
+    public String getDatacenterUUID()
+    {
+        return datacenterUUID;
+    }
+
+    public void setDatacenterUUID(final String datacenterUUID)
+    {
+        this.datacenterUUID = datacenterUUID;
+    }
+
+    @Override
     public DatacenterHB toPojoHB()
     {
         DatacenterHB dataCenterHB = new DatacenterHB();
         dataCenterHB.setIdDataCenter(getId());
         dataCenterHB.setName(name);
         dataCenterHB.setSituation(situation);
+        dataCenterHB.setDatacenterUUID(datacenterUUID);
         if (remoteServices != null)
         {
             Set<RemoteServiceHB> remoteServicesHB = new HashSet<RemoteServiceHB>(0);
@@ -140,7 +154,7 @@ public class DataCenter implements IPojo<DatacenterHB>
         return network;
     }
 
-    public static DataCenter create(DatacenterDto dto)
+    public static DataCenter create(final DatacenterDto dto)
     {
         DataCenter dataCenter = new DataCenter();
         dataCenter.setId(dto.getId());

@@ -148,11 +148,10 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return criteria.list();
     }
 
-    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE =
-        "SELECT "
-            + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
-            + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
-            + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
+    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE = "SELECT "
+        + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
+        + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
+        + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
 
     public Collection<VirtualImageConversion> findByVirtualImageConversionByNodeVirtualImage(
         final NodeVirtualImage nodeVirtualImage)
@@ -161,5 +160,16 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         query.setParameter("idVirtualImageConversion", nodeVirtualImage.getId());
 
         return query.list();
+    }
+
+    private final String DATACENTERUUID_BY_VIRTUALIMAGECONVERSION =
+        "select distinct(dc.uuid) from virtualimage_conversions vic left outer join virtualimage vi on vic.idImage = vi.idImage left outer join repository rep on vi.idRepository = rep.idRepository left outer join datacenter dc on rep.idDataCenter = dc.idDatacenter where vic.id = :idVirtualImageConversion";
+
+    public String getDatacenterUUIDByVirtualImageConversionID(final Integer idVirtualImageConversion)
+    {
+        Query query = getSession().createQuery(DATACENTERUUID_BY_VIRTUALIMAGECONVERSION);
+        query.setParameter("idVirtualImageConversion", idVirtualImageConversion);
+
+        return (String) query.uniqueResult();
     }
 }
