@@ -641,7 +641,7 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     }
 
     @Override
-    public TaskOwnerType getTaskOwnerType()
+    protected TaskOwnerType getTaskOwnerType()
     {
         return TaskOwnerType.VIRTUAL_MACHINE;
     }

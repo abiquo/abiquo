@@ -61,6 +61,7 @@ import org.testng.annotations.Test;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
@@ -86,6 +87,13 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.NicsDto;
+import com.abiquo.server.core.task.Job;
+import com.abiquo.server.core.task.Job.JobType;
+import com.abiquo.server.core.task.JobGenerator;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TaskGenerator;
+import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.Constants;
 
 public class VirtualMachineResourceIT extends TestPopulate
@@ -207,69 +215,74 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     }
 
-    // @Test(groups = "redisaccess")
-    // public void test_enric()
-    // {
-    // // Create a virtual machine
-    // VirtualMachine vm = vmGenerator.createInstance(ent);
-    //
-    // vm.getVirtualImage().getRepository().setDatacenter(datacenter);
-    // Machine machine = vm.getHypervisor().getMachine();
-    // machine.setDatacenter(vdc.getDatacenter());
-    // machine.setRack(null);
-    //
-    // // Associate it to the created virtual appliance
-    // NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-    //
-    // List<Object> entitiesToSetup = new ArrayList<Object>();
-    //
-    // entitiesToSetup.add(ent);
-    // entitiesToSetup.add(datacenter);
-    // entitiesToSetup.add(vdc);
-    // entitiesToSetup.add(vapp);
-    //
-    // for (Privilege p : vm.getUser().getRole().getPrivileges())
-    // {
-    // entitiesToSetup.add(p);
-    // }
-    //
-    // entitiesToSetup.add(vm.getUser().getRole());
-    // entitiesToSetup.add(vm.getUser());
-    // entitiesToSetup.add(vm.getVirtualImage().getRepository());
-    // entitiesToSetup.add(vm.getVirtualImage().getCategory());
-    // entitiesToSetup.add(vm.getVirtualImage());
-    // entitiesToSetup.add(machine);
-    // entitiesToSetup.add(vm.getHypervisor());
-    // entitiesToSetup.add(vm);
-    // entitiesToSetup.add(nvi);
-    //
-    // setup(entitiesToSetup.toArray());
-    //
-    // // Persist some redis data
-    // TaskGenerator taskGenerator = new TaskGenerator();
-    // JobGenerator jobGenerator = new JobGenerator();
-    //
-    // Job configure = jobGenerator.createUniqueInstance();
-    // configure.setType(JobType.CONFIGURE);
-    //
-    // Job poweron = jobGenerator.createUniqueInstance();
-    // poweron.setType(JobType.POWER_ON);
-    //
-    // Task deploy = taskGenerator.createUniqueInstance();
-    // deploy.setType(TaskType.DEPLOY);
-    // deploy.setOwnerId(vm.getId().toString());
-    // deploy.setUserId(vm.getUser().getId().toString());
-    // deploy.getJobs().add(configure);
-    // deploy.getJobs().add(poweron);
-    //
-    // // Check for vm
-    // ClientResponse response =
-    // get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()) + "/tasks");
-    //
-    // TasksDto tasks = response.getEntity(TasksDto.class);
-    //
-    // assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
-    // }
+    @Autowired
+    protected TaskService taskService;
+
+    @Test(groups = "redisaccess")
+    public void test_enric()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+
+        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Associate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Persist redis data
+        TaskGenerator taskGenerator = new TaskGenerator();
+        JobGenerator jobGenerator = new JobGenerator();
+
+        Job configure = jobGenerator.createUniqueInstance();
+        configure.setType(JobType.CONFIGURE);
+
+        Job poweron = jobGenerator.createUniqueInstance();
+        poweron.setType(JobType.POWER_ON);
+
+        Task deploy = taskGenerator.createUniqueInstance();
+        deploy.setType(TaskType.DEPLOY);
+        deploy.setOwnerId(vm.getId().toString());
+        deploy.setUserId(vm.getUser().getId().toString());
+        deploy.getJobs().add(configure);
+        deploy.getJobs().add(poweron);
+
+        taskService.addTask(deploy);
+
+        // Check for vm
+        ClientResponse response =
+            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()) + "/tasks");
+
+        TasksDto tasks = response.getEntity(TasksDto.class);
+
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+    }
 
     /**
      * Create two virtual machines into a virtual appliance. Check the resources are addressable.

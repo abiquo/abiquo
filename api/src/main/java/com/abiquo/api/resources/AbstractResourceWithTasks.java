@@ -27,7 +27,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,12 +38,18 @@ import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.JobDto;
+import com.abiquo.server.core.task.JobsDto;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
+
+// TODO
+// Add link to tasks in parent
+// Validate entire URI
 
 /**
  * Abstract resource to add asynchronous task management capabilities to an existent API Resource.
@@ -53,11 +58,15 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
  */
 public abstract class AbstractResourceWithTasks extends AbstractResource
 {
-    public static final String TASKS_PATH = "/tasks";
+    protected static final String TASKS_PATH = "/tasks";
 
-    public static final String TASK_PATH = TASKS_PATH + "/{id}";
+    protected static final String TASK_PATH = TASKS_PATH + "/{id}";
 
-    public abstract TaskOwnerType getTaskOwnerType();
+    protected static final String SELF_REL = "self";
+
+    protected static final String PARENT_REL = "parent";
+
+    protected abstract TaskOwnerType getTaskOwnerType();
 
     @Autowired
     TaskService service;
@@ -101,13 +110,12 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
 
         if (clazz.isAnnotationPresent(Path.class))
         {
-            Path path = this.getClass().getAnnotation(Path.class);
+            Path path = clazz.getAnnotation(Path.class);
             String segment = path.value();
 
-            String regex = String.format(".*%s/", segment);
-            ownerId = uriInfo.getPath().replaceAll(regex, "");
+            ownerId = removeTaskSegments(uriInfo.getPath());
 
-            regex = String.format("%s.*", TASKS_PATH);
+            String regex = String.format(".*%s/", segment);
             ownerId = ownerId.replaceAll(regex, "");
         }
 
@@ -119,10 +127,24 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
         return ownerId;
     }
 
+    protected String removeTaskSegments(final String path)
+    {
+        String regex = String.format("%s.*", TASKS_PATH);
+        return path.replaceAll(regex, "");
+    }
+
     protected TasksDto transform(List<Task> tasks, UriInfo uriInfo)
     {
         TasksDto dto = new TasksDto();
 
+        // Build links
+        String selfHref = uriInfo.getRequestUri().toString();
+        String parentHref = removeTaskSegments(selfHref);
+
+        addLink(dto, SELF_REL, selfHref);
+        addLink(dto, PARENT_REL, parentHref);
+
+        // Add each task
         for (Task task : tasks)
         {
             dto.add(transform(task, uriInfo));
@@ -133,50 +155,53 @@ public abstract class AbstractResourceWithTasks extends AbstractResource
 
     protected TaskDto transform(Task task, UriInfo uriInfo)
     {
-        // Build links
-        UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
-
-        RESTLink parent = new RESTLink();
-        parent.setRel("parent");
-        parent.setHref(uriInfo.getAbsolutePath().getPath());
-
-        RESTLink self = new RESTLink();
-        self.setRel("self");
-        self.setHref(uriBuilder.path(TASK_PATH).build(task.getTaskId()).getPath());
-
-        // Build the TaskDto
         TaskDto dto = new TaskDto();
 
-        dto.addLink(parent);
-        dto.addLink(self);
+        // Build links
+        String parentHref = uriInfo.getRequestUri().toString();
+        String selfHref = parentHref.concat("/" + task.getTaskId());
 
+        addLink(dto, SELF_REL, selfHref);
+        addLink(dto, PARENT_REL, parentHref);
+
+        // Add fields
         dto.setTaskId(task.getTaskId());
         dto.setOwnerId(task.getOwnerId());
         dto.setUserId(task.getUserId());
         dto.setType(task.getType());
         dto.setState(task.getState());
         dto.setTimestamp(task.getTimestamp());
-
-        for (Job job : task.getJobs())
-        {
-            dto.getJobs().add(transform(job));
-        }
+        dto.setJobs(transform(task.getJobs()));
 
         return dto;
     }
 
-    protected JobDto transform(Job job)
+    protected JobsDto transform(List<Job> jobs)
     {
-        JobDto dto = new JobDto();
+        JobsDto jobsDto = new JobsDto();
 
-        dto.setId(job.getId());
-        dto.setParentTaskId(job.getParentTaskId());
-        dto.setType(job.getType());
-        dto.setDescription(job.getDescription());
-        dto.setState(job.getState());
-        dto.setRollbackState(job.getRollbackState());
-        dto.setTimestamp(job.getTimestamp());
+        for (Job job : jobs)
+        {
+            JobDto jobDto = new JobDto();
 
+            jobDto.setId(job.getId());
+            jobDto.setParentTaskId(job.getParentTaskId());
+            jobDto.setType(job.getType());
+            jobDto.setDescription(job.getDescription());
+            jobDto.setState(job.getState());
+            jobDto.setRollbackState(job.getRollbackState());
+            jobDto.setTimestamp(job.getTimestamp());
+
+            jobsDto.getCollection().add(jobDto);
+        }
+
+        return jobsDto;
+    }
+
+    protected SingleResourceTransportDto addLink(SingleResourceTransportDto dto, final String rel,
+        final String href)
+    {
+        dto.addLink(new RESTLink(rel, href));
         return dto;
     }
 }
