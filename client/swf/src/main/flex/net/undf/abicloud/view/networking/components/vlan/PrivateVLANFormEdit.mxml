@@ -95,6 +95,7 @@
                 
                 this._staticRules = new StaticRulesForm();
                 this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
+                this._staticRules.init(this._vlanNetwork.dhcpOptions);
             }
 
             private function validateForm():void
@@ -185,7 +186,6 @@
                                       true);
                 PopUpManager.centerPopUp(this._staticRules);
               
-                this._staticRules.init(this._vlanNetwork.dhcpOptions);
             }
             
             private function closeStaticRulesPopUp(event:Event):void

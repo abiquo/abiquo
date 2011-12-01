@@ -105,6 +105,7 @@
                 
                 this._staticRules = new StaticRulesForm();
                 this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
+                this._staticRules.init();
             }
 
 
@@ -225,7 +226,6 @@
                                       true);
                 PopUpManager.centerPopUp(this._staticRules);
               
-                this._staticRules.init();
             }
             
             private function closeStaticRulesPopUp(event:Event):void
