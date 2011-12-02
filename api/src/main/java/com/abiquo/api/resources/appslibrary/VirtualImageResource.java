@@ -28,6 +28,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.client.Resource;
@@ -66,10 +67,13 @@ public class VirtualImageResource extends AbstractResource
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @PathParam(VirtualImageResource.VIRTUAL_IMAGE) final Integer virtualImageId,
+        @QueryParam("category") final String category,
+        @QueryParam("hypervisortype") final String hypervisorType,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         VirtualImage vimage =
-            vimageService.getVirtualImage(enterpriseId, datacenterId, virtualImageId);
+            vimageService.getVirtualImage(enterpriseId, datacenterId, virtualImageId, category,
+                hypervisorType);
 
         final String amUri =
             infrastructureService.getRemoteService(datacenterId,
@@ -135,9 +139,7 @@ public class VirtualImageResource extends AbstractResource
         final Integer enterpriseId, final Integer dcId, final VirtualImage vimage,
         final String amUri)
     {
-        dto
-            .setLinks(builder
-                .buildVirtualImageLinks(enterpriseId, dcId, vimage, vimage.getMaster()));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage, vimage.getMaster()));
         addApplianceManagerLinks(dto, amUri, enterpriseId, vimage.getOvfid());
         return dto;
     }

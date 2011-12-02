@@ -72,7 +72,7 @@ public class AppsLibraryService
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
         final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
-        final Integer idCategory, final Integer idHypervisorType, final Integer idDatacenter)
+        final String categoryName, final String hypervisorTypeName, final Integer idDatacenter)
     {
         final VirtualImageResourceStub vimageStub =
             APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
@@ -80,12 +80,10 @@ public class AppsLibraryService
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
-        // idCategory == 0 indicate return all the categories
-        final Integer categoryId = idCategory == 0 ? null : idCategory;
 
         DataResult<List<VirtualImage>> listImages =
             vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
-                categoryId, idHypervisorType);
+                categoryName, hypervisorTypeName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -95,7 +93,7 @@ public class AppsLibraryService
      * @param idCategory, if 0 indicate return all the categories
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory,
+        final Integer idEnterprise, final Integer idRepo, final String categoryName,
         final Integer idDatacenter)
     {
         final VirtualImageResourceStub vimageStub =
@@ -104,11 +102,9 @@ public class AppsLibraryService
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
-        // idCategory == 0 indicate return all the categories
-        final Integer categoryId = idCategory == 0 ? null : idCategory;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryId);
+            vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }

@@ -280,7 +280,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
-            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeId",
+            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
                 String.valueOf(HypervisorType.VBOX.id())).get();
 
         assertEquals(response.getStatusCode(), 200);
@@ -309,7 +309,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
-            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeId",
+            resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
                 String.valueOf(HypervisorType.VBOX.id())).get();
 
         assertEquals(response.getStatusCode(), 200);

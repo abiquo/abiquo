@@ -558,7 +558,11 @@ public enum APIError
         "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
-        "PRICING_TIER-3", "This tier is not related to the datacenter indicated")
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
+
+    // HYPERVISOR TYPE
+    NON_EXISTENT_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0",
+        "The requested Hypervisor Type does not exist")
 
     ;
 
@@ -613,8 +617,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

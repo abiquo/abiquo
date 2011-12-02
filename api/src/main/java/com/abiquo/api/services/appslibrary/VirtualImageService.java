@@ -135,7 +135,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
      */
     @Transactional(readOnly = true)
     public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
-        final Integer datacenterId, final Integer categoryId, final Integer hypervisorId)
+        final Integer datacenterId, final String categoryName, final String hypervisorName)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
@@ -145,13 +145,23 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
 
         Category category = null;
         HypervisorType hypervisor = null;
-        if (categoryId != null && categoryId != 0)
+        if (categoryName != null)
         {
-            category = appsLibraryRep.findCategoryById(categoryId);
+            category = appsLibraryRep.findCategoryByName(categoryName);
         }
-        if (hypervisorId != null && hypervisorId != 0)
+        if (hypervisorName != null)
         {
-            hypervisor = HypervisorType.fromId(hypervisorId);
+            Integer hypervisorId = HypervisorType.transformHypervisorTypeToInteger(hypervisorName);
+            if (hypervisorId == null)
+            {
+                addNotFoundErrors(APIError.NON_EXISTENT_HYPERVISOR_TYPE);
+                flushErrors();
+            }
+            else
+            {
+                hypervisor = HypervisorType.transformHypervisorTypeFromInteger(hypervisorId);
+
+            }
         }
 
         return appsLibraryRep.findVirtualImages(enterprise, repository, category, hypervisor);
@@ -414,12 +424,12 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
 
     @Transactional(readOnly = true)
     public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
-        final Integer enterpriseId, final Integer datacenterId, final Integer categoryId)
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        Category category = categoryService.getCategory(categoryId);
+        Category category = categoryService.getCategoryByName(categoryName);
 
         return appsLibraryRep
             .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
