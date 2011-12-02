@@ -28,52 +28,51 @@ import static org.testng.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.testng.annotations.Test;
 
 import redis.clients.jedis.Transaction;
 
-import com.abiquo.server.core.task.Job.JobType;
-
 public class JobDAOTest extends RedisDAOTestBase
 {
     protected JobDAO dao = new JobDAO();
 
+    protected JobGenerator generator = new JobGenerator();
+
     @Test
     public void test_save()
     {
-        Job job = createUniqueJob();
+        Job job = generator.createUniqueInstance();
         save(job);
 
         Job fromDb = dao.findById(job.getId(), jedis);
-        assertSameJob(job, fromDb);
+        generator.assertSameJob(job, fromDb);
     }
 
     @Test
     public void test_saveWithNullFields()
     {
-        Job job = createUniqueJob();
+        Job job = generator.createUniqueInstance();
         job.setId(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = generator.createUniqueInstance();
         job.setDescription(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = generator.createUniqueInstance();
         job.setState(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = generator.createUniqueInstance();
         job.setRollbackState(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = generator.createUniqueInstance();
         job.setType(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = generator.createUniqueInstance();
         job.setParentTaskId(null);
         expectRuntimeOnInsertNullField(job);
     }
@@ -85,7 +84,7 @@ public class JobDAOTest extends RedisDAOTestBase
         data.put("DummyKey0", "A");
         data.put("DummyKey1", "B");
 
-        Job job = createUniqueJob();
+        Job job = generator.createUniqueInstance();
         job.getData().putAll(data);
 
         save(job);
@@ -100,8 +99,7 @@ public class JobDAOTest extends RedisDAOTestBase
     @Test
     public void test_delete()
     {
-        Job job = createUniqueJob();
-        save(job);
+        Job job = generator.createUniqueInstance();
         delete(job);
 
         Job fromDb = dao.findById(job.getId(), jedis);
@@ -111,7 +109,7 @@ public class JobDAOTest extends RedisDAOTestBase
     @Test
     public void test_deleteNonInsertedJob()
     {
-        Job job = createUniqueJob();
+        Job job = generator.createUniqueInstance();
         delete(job);
 
         Job fromDb = dao.findById(job.getId(), jedis);
@@ -148,29 +146,6 @@ public class JobDAOTest extends RedisDAOTestBase
             transaction.discard();
             throw e;
         }
-    }
-
-    protected Job createUniqueJob()
-    {
-        Job job = new Job();
-
-        job.setId(UUID.randomUUID().toString());
-        job.setDescription("blablablabla");
-        job.setType(JobType.CONFIGURE);
-        job.setParentTaskId(UUID.randomUUID().toString());
-
-        return job;
-    }
-
-    protected void assertSameJob(final Job one, final Job other)
-    {
-        assertEquals(one.getId(), other.getId());
-        assertEquals(one.getEntityKey(), other.getEntityKey());
-        assertEquals(one.getType(), other.getType());
-        assertEquals(one.getDescription(), other.getDescription());
-        assertEquals(one.getState(), other.getState());
-        assertEquals(one.getRollbackState(), other.getRollbackState());
-        assertEquals(one.getParentTaskId(), other.getParentTaskId());
     }
 
     protected void expectRuntimeOnInsertNullField(Job job)
