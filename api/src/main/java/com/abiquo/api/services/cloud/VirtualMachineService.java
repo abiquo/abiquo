@@ -483,11 +483,12 @@ public class VirtualMachineService extends DefaultApiService
 
         // We need the VirtualImage
         VirtualImage virtualImage =
-            getVirtualImageAndValidateEnterpriseAndDatacenter(enterpriseId, virtualAppliance.getVirtualDatacenter().getDatacenter()
-                .getId(), vImageId);
+            getVirtualImageAndValidateEnterpriseAndDatacenter(enterpriseId, virtualAppliance
+                .getVirtualDatacenter().getDatacenter().getId(), vImageId);
         checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
         virtualMachine.setVirtualImage(virtualImage);
 
+        setVirtualImageRequirementsIfNotAlreadyDefined(virtualMachine, virtualImage);
         // We check for a suitable conversion (PREMIUM)
         attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
 
@@ -506,11 +507,39 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * Sets the virtual machine HD requirements based on the {@link VirtualImage}
+     * <p>
+     * It also set the required CPU and RAM if it wasn't specified in the requested
+     * {@link VirtualMachineDto}
+     */
+    private void setVirtualImageRequirementsIfNotAlreadyDefined(final VirtualMachine vmachine,
+        final VirtualImage vimage)
+    {
+        if (vmachine.getCpu() == 0)
+        {
+            vmachine.setCpu(vimage.getCpuRequired());
+        }
+        if (vmachine.getRam() == 0)
+        {
+            vmachine.setRam(vimage.getRamRequired());
+        }
+
+        if (vimage.isStateful())
+        {
+            vmachine.setHdInBytes(0);
+        }
+        else
+        {
+            vmachine.setHdInBytes(vimage.getHdRequiredInBytes());
+        }
+    }
+
+    /**
      * This code is semiduplicated from VirtualImageService but can't be used due cross refrerence
      * dep
      */
-    private VirtualImage getVirtualImageAndValidateEnterpriseAndDatacenter(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualImageId)
+    private VirtualImage getVirtualImageAndValidateEnterpriseAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId, final Integer virtualImageId)
     {
 
         Datacenter datacenter = infRep.findById(datacenterId);
