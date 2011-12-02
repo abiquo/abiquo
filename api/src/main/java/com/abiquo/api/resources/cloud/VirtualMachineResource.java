@@ -468,7 +468,7 @@ public class VirtualMachineResource
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
                 .getVirtualMachine().isChefEnabled()));
 
-        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }
@@ -544,7 +544,7 @@ public class VirtualMachineResource
                 .getRepository().getDatacenter().getId(), vimage.getId()));
         }
 
-        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }
@@ -598,7 +598,7 @@ public class VirtualMachineResource
                 .getRepository().getDatacenter().getId(), vimage.getId()));
         }
 
-        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }

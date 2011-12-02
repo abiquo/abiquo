@@ -97,10 +97,16 @@ public class TaskResourceUtils extends AbstractResource
         return dto;
     }
 
-    public static RESTLink buildTasksLink(final RESTLink baseLink)
+    public static SingleResourceTransportDto addTasksLink(SingleResourceTransportDto dto,
+        final RESTLink baseLink)
     {
-        String href = removeEndSlashes(baseLink.getHref());
-        return new RESTLink(TASKS_REL, href.concat(TASKS_PATH));
+        if (dto != null && baseLink != null)
+        {
+            String href = removeEndSlashes(baseLink.getHref());
+            dto.addLink(new RESTLink(TASKS_REL, href.concat(TASKS_PATH)));
+        }
+
+        return dto;
     }
 
     protected static JobsDto transform(List<Job> jobs)
