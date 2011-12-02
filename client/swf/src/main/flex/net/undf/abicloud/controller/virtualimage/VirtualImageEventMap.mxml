@@ -377,7 +377,7 @@
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.enterprise.id, 
             event.repository.id, 
-            event.category.id,
+            event.category.name,
             event.datacenter.id]}">
 
             <resultHandlers>
@@ -415,8 +415,8 @@
             arguments="{[AbiCloudModel.getInstance().loginManager.session, 
             event.enterprise.id, 
             event.repository.id, 
-            event.category.id, 
-            event.hypervisorType.id,
+            event.category.name, 
+            event.hypervisorType.name,
             event.datacenter.id]}">
 
             <resultHandlers>

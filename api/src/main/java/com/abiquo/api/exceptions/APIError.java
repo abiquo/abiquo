@@ -307,7 +307,10 @@ public enum APIError
         "RS-9",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
         "RS-10", "Provided URL is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-11",
-        "The DHCP uri is invalid"),
+        "The DHCP uri is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-12",
+        "The remote service haven't the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
+        "RS-13",
+        "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
 
     // OVF PACKAGE LIST
     OVF_PACKAGE_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0", "OVF Package list name already exist"),
@@ -317,7 +320,8 @@ public enum APIError
         "OVF-PACKAGE-1", "The requested OVF package list does not exist"), OVF_PACKAGE_CANNOT_TRANSFORM(
         "OVF-PACKAGE-2", "Cannot return the OVFPackage"), INVALID_OVF_INDEX_XML("OVF-PACKAGE-3",
         "Can not find the RepositorySpace"), NON_EXISTENT_REPOSITORY_SPACE("OVF-PACKAGE-4",
-        "The requested RepositorySpace does not exist"),
+        "The requested RepositorySpace does not exist"), INVALID_DISK_FORMAT_TYPE("OVF-PACKAGE-5",
+        "Invalid Disk format type URL"),
     // VIRTUAL IMAGE
     VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
         "Virtual image can not be added due invalid allocation units"), VIMAGE_SYNCH_DC_REPO(
@@ -492,7 +496,8 @@ public enum APIError
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(
         "CATEGORY-2", "Duplicated name for the category"), CATEGORY_NOT_ERASABLE("CATEGORY-3",
         "This category is not erasable"), INVALID_CATEGORY_LINK("CATEGORY-4",
-        "Invalid Category identifier in the Category link"),
+        "Invalid Category identifier in the Category link"), CATEGORY_CANNOT_BE_NULL("CATEGORY-5",
+        "Category name cannot be null"),
 
     // ICONS
     ICON_DUPLICATED_PATH("ICON-1", "Duplicated path for an icon"), NON_EXISTENT_ICON("ICON-2",
@@ -608,8 +613,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

@@ -115,7 +115,6 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(ovfPackageDto);
         assertEquals(ovfPackageDto.getDescription(), "ovfPackage_1");
         assertEquals(ovfPackageDto.getDiskFormatTypeUri(), "http://unknown");
-        assertEquals(ovfPackageDto.getName(), "category_1");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})

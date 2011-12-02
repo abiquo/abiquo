@@ -176,7 +176,7 @@ public class OVFPackageInstancesResource
 
         // XXX notify DOWNLOADING
 
-        final String ovfId = diskInfo.getOvfId();
+        final String ovfId = diskInfo.getUrl();
         if (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus() == OVFStatusEnumType.ERROR)
         {
             ovfService.delete(erId, ovfId);
@@ -196,7 +196,7 @@ public class OVFPackageInstancesResource
         diskInfo.setDiskFileSize(diskFile.length());
         ovfService.upload(diskInfo, diskFile, errorMsg);
 
-        return Response.created(URI.create(diskInfo.getOvfId())).build();
+        return Response.created(URI.create(diskInfo.getUrl())).build();
     }
 
     @POST

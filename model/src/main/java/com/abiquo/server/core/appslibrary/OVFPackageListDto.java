@@ -71,14 +71,14 @@ public class OVFPackageListDto extends SingleResourceTransportDto
         this.url = url;
     }
 
-    private List<OVFPackageDto> ovfPackages;
+    private OVFPackagesDto ovfPackages;
 
-    public List<OVFPackageDto> getOvfPackages()
+    public OVFPackagesDto getOvfPackages()
     {
         return ovfPackages; // TODO GET or CREATE
     }
 
-    public void setOvfPackages(final List<OVFPackageDto> ovfPackages)
+    public void setOvfPackages(final OVFPackagesDto ovfPackages)
     {
         this.ovfPackages = ovfPackages;
     }

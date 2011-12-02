@@ -30,14 +30,14 @@ public enum RemoteServiceType
 {
     @Deprecated
     // use TARANTINO
-    VIRTUAL_FACTORY("Virtualization Manager", "virtualfactory", "http://", 80), //
+    VIRTUAL_FACTORY("Virtualization Manager", "tarantino", "http://", 80), //
+    TARANTINO("Virtualization Manager", "tarantino", "http://", 80), //
     STORAGE_SYSTEM_MONITOR("Storage Manager", "ssm", "http://", 80), //
     VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm", "http://", 80), //
     NODE_COLLECTOR("Discovery Manager", "nodecollector", "http://", 80), //
     DHCP_SERVICE("DHCP Service", "dhcp", "omapi://", 7911), //
     BPM_SERVICE("Business Process Manager", "bpm-async", "http://", 80), //
-    APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80), //
-    TARANTINO("Virtualization Manager", "tarantino", "http://", 80);
+    APPLIANCE_MANAGER("Appliance Manager", "am", "http://", 80);
 
     String name;
 
@@ -95,7 +95,7 @@ public enum RemoteServiceType
 
     public boolean checkDatacenterId()
     {
-        return this == BPM_SERVICE || this == TARANTINO;
+        return this == BPM_SERVICE || this == TARANTINO || this == VIRTUAL_FACTORY;
     }
 
     public String fixUri(final URI uri)

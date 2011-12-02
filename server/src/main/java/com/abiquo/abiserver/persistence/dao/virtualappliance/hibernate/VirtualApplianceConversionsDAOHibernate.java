@@ -42,7 +42,8 @@ public class VirtualApplianceConversionsDAOHibernate extends
     HibernateDAO<VirtualApplianceConversionsHB, Integer> implements VirtualApplianceConversionsDAO
 {
 
-    public List<VirtualApplianceConversionsHB> findByConversion(int idConversion)
+    @Override
+    public List<VirtualApplianceConversionsHB> findByConversion(final int idConversion)
     {
         Query query =
             getSession()
@@ -53,8 +54,9 @@ public class VirtualApplianceConversionsDAOHibernate extends
         return query.list();
     }
 
-    public Collection<VirtualappHB> findByPendingAppliances(int idPending,
-        Collection<Integer> appliances)
+    @Override
+    public Collection<VirtualappHB> findByPendingAppliances(final int idPending,
+        final Collection<Integer> appliances)
     {
         return getSession()
             .createQuery(
@@ -62,12 +64,25 @@ public class VirtualApplianceConversionsDAOHibernate extends
             .setParameterList("appliances", appliances).setParameter("idPending", idPending).list();
     }
 
-    public void makeTransientByVirtualAppliance(int idVirtualAppliance)
+    @Override
+    public void makeTransientByVirtualAppliance(final int idVirtualAppliance)
     {
         getSession()
             .createQuery(
                 "delete com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualApplianceConversionsHB vac where vac.virtualAppliance.id = :idAppliance")
             .setParameter("idAppliance", idVirtualAppliance).executeUpdate();
+    }
+
+    @Override
+    public String findDatacenterUUIDByVASConversion(final int idVASC)
+    {
+        Query query =
+            getSession()
+                .createQuery(
+                    "select distinct(dc.uuid) from vappstateful_conversions vasc left outer join virtualapp va on vasc.idVirtualApp = va.idVirtualApp left outer join virtualdatacenter vdc on va.idVirtualDataCenter = vdc.idVirtualdataCenter left outer join datacenter dc on vdc.idDatacenter = dc.idDataCenter where vasc.id = :id");
+        query.setParameter("id", idVASC);
+
+        return (String) query.uniqueResult();
     }
 
 }

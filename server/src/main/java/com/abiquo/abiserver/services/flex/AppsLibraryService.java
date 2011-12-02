@@ -25,16 +25,11 @@ import java.util.List;
 
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
-import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.commands.AppsLibraryCommand;
-import com.abiquo.abiserver.commands.impl.AppsLibraryCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.DatacenterRepositoryResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualImageResourceStubImpl;
-import com.abiquo.abiserver.persistence.DAOFactory;
-import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -49,24 +44,11 @@ import com.abiquo.server.core.appslibrary.IconDto;
 
 public class AppsLibraryService
 {
-    private AppsLibraryCommand appsLibraryCommand;
 
     private final static boolean REPOSITORY_INCLUDE_USAGE = true;
 
     public AppsLibraryService()
     {
-        try
-        {
-
-            appsLibraryCommand =
-                (AppsLibraryCommand) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.commands.impl.AppsLibraryPremiumCommandImpl")
-                    .newInstance();
-        }
-        catch (Exception e)
-        {
-            appsLibraryCommand = new AppsLibraryCommandImpl();
-        }
     }
 
     public DataResult<Repository> getDatacenterRepository(final UserSession userSession,
@@ -316,34 +298,6 @@ public class AppsLibraryService
     {
         return APIStubFactory.getInstance(userSession, new AppsLibraryStubImpl(),
             AppsLibraryStub.class);
-    }
-
-    /**
-     * Returns a proxied {@link AppsLibraryCommand}.
-     * 
-     * @param userSession The user session used by the proxy.
-     * @return The proxied service.
-     */
-    private AppsLibraryCommand proxyService(final UserSession userSession)
-    {
-        return BusinessDelegateProxy.getInstance(userSession, appsLibraryCommand,
-            AppsLibraryCommand.class);
-    }
-
-    private Integer getDatacenterIdByRepository(final Integer idRepository)
-    {
-        Integer idDatacenter;
-
-        final DAOFactory daoF = HibernateDAOFactory.instance();
-
-        daoF.beginConnection();
-
-        idDatacenter =
-            daoF.getRepositoryDAO().findById(idRepository).getDatacenter().getIdDataCenter();
-
-        daoF.endConnection();
-
-        return idDatacenter;
     }
 
     /**

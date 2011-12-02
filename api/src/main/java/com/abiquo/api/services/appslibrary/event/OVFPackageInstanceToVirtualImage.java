@@ -127,7 +127,7 @@ public class OVFPackageInstanceToVirtualImage
 
         for (OVFPackageInstanceDto disk : disks)
         {
-            Enterprise enterprise = entRepo.findById(disk.getIdEnterprise());
+            Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
             if (enterprise != null)
             {
@@ -146,7 +146,7 @@ public class OVFPackageInstanceToVirtualImage
     protected VirtualImage imageFromDisk(final OVFPackageInstanceDto disk,
         final Repository repository)
     {
-        Enterprise enterprise = entRepo.findById(disk.getIdEnterprise());
+        Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
         DiskFormatType diskFormat;
         VirtualImage master = null;
@@ -175,7 +175,7 @@ public class OVFPackageInstanceToVirtualImage
         vimage.setCpuRequired(disk.getCpu());
         vimage.setRamRequired(getRamInMb(disk).intValue());
         vimage.setHdRequiredInBytes(getHdInBytes(disk));
-        vimage.setOvfid(disk.getOvfId());
+        vimage.setOvfid(disk.getUrl());
         vimage.setRepository(repository);
         vimage.setCreationUser(User.SYSTEM_USER.getName());// TODO
         if (master != null)
@@ -196,7 +196,7 @@ public class OVFPackageInstanceToVirtualImage
         }
 
         // try to find in the OVFPackage
-        OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
+        OVFPackage ovf = ovfDao.findByUrl(disk.getUrl());
         return ovf != null ? ovf.getCategory() : appslibraryRep.getDefaultCategory();
     }
 
@@ -208,7 +208,7 @@ public class OVFPackageInstanceToVirtualImage
         }
 
         // try to find in the OVFPackage
-        OVFPackage ovf = ovfDao.findByUrl(disk.getOvfId());
+        OVFPackage ovf = ovfDao.findByUrl(disk.getUrl());
         return ovf != null ? ovf.getIcon() : null;
     }
 

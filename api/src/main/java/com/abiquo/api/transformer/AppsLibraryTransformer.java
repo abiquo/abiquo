@@ -21,16 +21,25 @@
 
 package com.abiquo.api.transformer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.appslibrary.CategoryResource;
+import com.abiquo.api.resources.appslibrary.IconResource;
+import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.util.AbiquoLinkBuilder;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
@@ -38,9 +47,10 @@ import com.abiquo.server.core.appslibrary.OVFPackage;
 import com.abiquo.server.core.appslibrary.OVFPackageDto;
 import com.abiquo.server.core.appslibrary.OVFPackageList;
 import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.OVFPackagesDto;
 
 @Service
-public class AppsLibraryTransformer
+public class AppsLibraryTransformer extends DefaultApiService
 {
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -63,25 +73,11 @@ public class AppsLibraryTransformer
         dto.setUrl(ovfPackage.getUrl());
         dto.setDiskFileSize(ovfPackage.getDiskFileSize());
 
-        if (ovfPackage.getCategory() != null)
-        {
-            dto.setName(ovfPackage.getCategory().getName());
-        }
-        else
-        {
-            dto.setName("Others");
-        }
-
         dto.setDiskFormatTypeUri(ovfPackage.getType().uri);
 
-        // Icon is optional
-        if (ovfPackage.getIcon() != null)
-        {
-            dto.setIconPath(ovfPackage.getIcon().getPath());
-        }
-
         final Integer idEnterprise = ovfPackage.getAppsLibrary().getEnterprise().getId();
-        dto.setLinks(builder.buildOVFPackageLinks(idEnterprise, dto));
+        dto.addLinks(builder.buildOVFPackageLinks(idEnterprise, dto, ovfPackage.getCategory(),
+            ovfPackage.getIcon()));
 
         return dto;
     }
@@ -90,7 +86,7 @@ public class AppsLibraryTransformer
         final IRESTBuilder builder) throws Exception
     {
 
-        List<OVFPackageDto> ovfpackDtoList = new LinkedList<OVFPackageDto>();
+        OVFPackagesDto ovfpackDtoList = new OVFPackagesDto();
         for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
         {
             ovfPack.setAppsLibrary(ovfPackageList.getAppsLibrary());
@@ -117,23 +113,35 @@ public class AppsLibraryTransformer
         DiskFormatType diskFormatType = DiskFormatType.fromURI(ovfDto.getDiskFormatTypeUri());
         if (diskFormatType == null)
         {
-            final String cause =
-                String.format("Invalid DiskFormatType URI [%s]", ovfDto.getDiskFormatTypeUri());
-            throw new Exception(cause);
+            addValidationErrors(APIError.INVALID_DISK_FORMAT_TYPE);
+            flushErrors();
         }
 
-        Category category = appslibraryRep.findCategoryByName(ovfDto.getName());
+        RESTLink categoryLink = ovfDto.searchLink(CategoryResource.CATEGORY);
+        Category category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
         if (category == null)
         {
-            category = new Category(ovfDto.getName());
-            appslibraryRep.insertCategory(category);
+            if (categoryLink.getTitle() == null)
+            {
+                category = appslibraryRep.findCategoryByName("Others");
+            }
+            else
+            {
+                category = new Category(categoryLink.getTitle());
+                appslibraryRep.insertCategory(category);
+            }
         }
 
-        Icon icon = appslibraryRep.findIconByPath(ovfDto.getIconPath());
+        RESTLink iconLink = ovfDto.searchLink(IconResource.ICON);
+        Icon icon = appslibraryRep.findIconByPath(iconLink.getTitle());
         if (icon == null)
         {
-            icon = new Icon("Icon name", ovfDto.getIconPath()); // TODO: icon name
-            appslibraryRep.insertIcon(icon);
+            if (iconLink.getTitle() != null)
+            {
+                icon = new Icon("Icon name", iconLink.getTitle()); // TODO: icon name
+                appslibraryRep.insertIcon(icon);
+            }
+            // icon is optional
         }
 
         OVFPackage pack = new OVFPackage();
@@ -162,7 +170,7 @@ public class AppsLibraryTransformer
         List<OVFPackage> ovfPackList = new LinkedList<OVFPackage>();
         if (ovfDto.getOvfPackages() != null)
         {
-            for (OVFPackageDto ovfPackDto : ovfDto.getOvfPackages())
+            for (OVFPackageDto ovfPackDto : ovfDto.getOvfPackages().getCollection())
             {
                 ovfPackList.add(createPersistenceObject(ovfPackDto));
             }
