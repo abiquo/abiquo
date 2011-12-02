@@ -875,7 +875,7 @@ public class UriTestResolver
     }
 
     public static String resolveStatefulVirtualImagesURIWithCategory(final Integer enterpriseId,
-        final Integer datacenterId, final Integer categoryId)
+        final Integer datacenterId, final String categoryName)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH,
@@ -886,12 +886,11 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values
-            .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
+        values.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, categoryName);
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
-            new String[] {String.valueOf(categoryId)});
+            new String[] {categoryName});
         queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
             new String[] {"true"});
 

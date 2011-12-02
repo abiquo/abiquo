@@ -52,10 +52,10 @@ public class VirtualImagesResource extends AbstractResource
 {
     public final static String VIRTUAL_IMAGES_PATH = "virtualimages";
 
-    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryId";
+    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryName";
 
     public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
-        "hypervisorTypeId";
+        "hypervisorTypeName";
 
     public final static String VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM = "stateful";
 
@@ -69,8 +69,8 @@ public class VirtualImagesResource extends AbstractResource
     public VirtualImagesDto getVirtualImages(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
-        @QueryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM) final Integer categoryId,
-        @QueryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final Integer hypervisorTypeId,
+        @QueryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
+        @QueryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
         @QueryParam(VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -85,15 +85,16 @@ public class VirtualImagesResource extends AbstractResource
         if (stateful == null || !stateful)
         {
             all =
-                service.getVirtualImages(enterpriseId, datacenterId, categoryId, hypervisorTypeId);
+                service.getVirtualImages(enterpriseId, datacenterId, categoryName,
+                    hypervisorTypeName);
         }
         else
         {
-            if (categoryId != null && categoryId != 0)
+            if (categoryName != null)
             {
                 all =
                     service.findStatefulVirtualImagesByCategoryAndDatacenter(enterpriseId,
-                        datacenterId, categoryId);
+                        datacenterId, categoryName);
             }
             else
             {
