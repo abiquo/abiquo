@@ -60,9 +60,11 @@ import org.testng.annotations.Test;
 
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.AllocatorAction;
@@ -91,6 +93,7 @@ import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.Job.JobType;
 import com.abiquo.server.core.task.JobGenerator;
 import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TaskGenerator;
 import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskType;
@@ -219,7 +222,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     protected TaskService taskService;
 
     @Test(groups = "redisaccess")
-    public void test_enric()
+    public void test_asyncTasks()
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
@@ -275,13 +278,69 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         taskService.addTask(deploy);
 
-        // Check for vm
-        ClientResponse response =
-            get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()) + "/tasks");
+        // Test happy path TASKS
+        String vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
+        String tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+
+        ClientResponse response = get(tasksURI);
 
         TasksDto tasks = response.getEntity(TasksDto.class);
-
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+        assertNotNull(tasks);
+        assertEquals(tasks.getCollection().size(), 1);
+
+        RESTLink parent = tasks.searchLink("parent");
+        RESTLink self = tasks.searchLink("self");
+
+        assertNotNull(parent);
+        assertNotNull(self);
+
+        assertEquals(parent.getHref(), vmURI);
+        assertEquals(self.getHref(), tasksURI);
+
+        // Test happy path TASK
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        String taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+
+        TaskDto task = response.getEntity(TaskDto.class);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+        assertNotNull(task);
+
+        parent = task.searchLink("parent");
+        self = task.searchLink("self");
+
+        assertNotNull(parent);
+        assertNotNull(self);
+
+        assertEquals(parent.getHref(), tasksURI);
+        assertEquals(self.getHref(), taskURI);
+
+        // NOT FOUND when invalid VDC
+        vmURI = resolveVirtualMachineURI(vdc.getId() + 1, vapp.getId(), vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+
+        // NOT FOUND when invalid VAPP
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId() + 1, vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+
+        // NOT FOUND when invalid VM
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId() + 1);
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     /**
