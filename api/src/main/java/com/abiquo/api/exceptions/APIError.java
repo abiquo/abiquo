@@ -360,7 +360,8 @@ public enum APIError
         "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
         "VirtualDatacenter param in tier link not found"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
         "TIER-9",
-        "Tier's virtualdatacenter link does not match with the indicated virtualdatacenter"),
+        "Tier's virtualdatacenter link does not match with the indicated virtualdatacenter"), TIER_LINK_WRONG_DATACENTER(
+        "TIER-10", "The Tier does not belong to indicated datacenter"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -456,7 +457,8 @@ public enum APIError
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"), NOT_ASSIGNED_PRICING_TIER_PRICE(
-        "PRICING_TIER-4", "Price is required"),
+        "PRICING_TIER-4", "Price is required"), NOT_TIER_IN_PRICING_TIER("PRICING_TIER_5",
+        "Indicated tier in link does not have relation with this pricing tier"),
 
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
@@ -528,8 +530,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
