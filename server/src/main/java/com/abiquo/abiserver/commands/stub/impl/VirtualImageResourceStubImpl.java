@@ -26,12 +26,12 @@ import static java.lang.String.valueOf;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
@@ -46,10 +46,10 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     VirtualImageResourceStub
 {
 
-    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryId";
+    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryName";
 
     public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
-        "hypervisorTypeId";
+        "hypervisorTypeName";
 
     /**
      * @param idRepo, if 0, indicate stateful images
@@ -57,11 +57,12 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
      */
     @Override
     public DataResult<List<VirtualImage>> getVirtualImageByCategory(final Integer idEnterprise,
-        final Integer datacenterId, final Integer idCategory)
+        final Integer datacenterId, final String categoryName)
     {
-        final Integer idHypervisorType = null;
+        final String hypervisorTypeName = null;
+
         return getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
-            idCategory, idHypervisorType);
+            categoryName, hypervisorTypeName);
     }
 
     /**
@@ -70,8 +71,8 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
      */
     @Override
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        final Integer idEnterprise, final Integer datacenterId, final Integer idCategory,
-        final Integer idHypervisorType)
+        final Integer idEnterprise, final Integer datacenterId, final String categoryName,
+        final String hypervisorTypeName)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
@@ -79,19 +80,19 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         final String uri = createVirtualImagesLink(idEnterprise, datacenterId);
         Resource vimagesResource = resource(uri);
 
-        if (idHypervisorType != null)
+        if (StringUtils.isNotEmpty(hypervisorTypeName))
         {
             vimagesResource =
                 vimagesResource.queryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
-                    valueOf(idHypervisorType));
+                    valueOf(hypervisorTypeName));
 
         }
 
-        if (idCategory != null)
+        if (StringUtils.isNotEmpty(categoryName))
         {
             vimagesResource =
                 vimagesResource.queryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
-                    valueOf(idCategory));
+                    valueOf(categoryName));
         }
 
         ClientResponse response = vimagesResource.get();

@@ -135,9 +135,7 @@ public class VirtualImageResource extends AbstractResource
         final Integer enterpriseId, final Integer dcId, final VirtualImage vimage,
         final String amUri)
     {
-        dto
-            .setLinks(builder
-                .buildVirtualImageLinks(enterpriseId, dcId, vimage, vimage.getMaster()));
+        dto.setLinks(builder.buildVirtualImageLinks(enterpriseId, dcId, vimage, vimage.getMaster()));
         addApplianceManagerLinks(dto, amUri, enterpriseId, vimage.getOvfid());
         return dto;
     }

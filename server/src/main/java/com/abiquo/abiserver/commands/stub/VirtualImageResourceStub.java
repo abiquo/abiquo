@@ -32,17 +32,18 @@ public interface VirtualImageResourceStub
 
     /**
      * @param datacenterId, null indicate stateful images
-     * @param idCategory, null indicate return all the categories
+     * @param categoryName, null indicate return all the categories
      */
-    DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
-        Integer idEnterprise, Integer datacenterId, Integer idCategory, Integer idHypervisorType);
+    public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
+        final Integer idEnterprise, final Integer datacenterId, final String categoryName,
+        final String hypervisorTypeName);
 
     /**
      * @param datacenterId, null indicate stateful images
-     * @param idCategory, null indicate return all the categories
+     * @param categoryName, null indicate return all the categories
      */
-    DataResult<List<VirtualImage>> getVirtualImageByCategory(Integer idEnterprise,
-        Integer datacenterId, Integer idCategory);
+    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final Integer idEnterprise,
+        final Integer datacenterId, final String categoryName);
 
     public DataResult<VirtualImage> editVirtualImage(final Integer idEnterprise,
         final Integer idDatacenter, final VirtualImage vimage);
