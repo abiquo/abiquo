@@ -349,7 +349,8 @@ public enum APIError
         "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
-        "TIER-6", "Can not disable a Tier with associated Storage Pools"),
+        "TIER-6", "Can not disable a Tier with associated Storage Pools"), TIER_LINK_WRONG_DATACENTER(
+        "TIER-7", "The Tier does not belong to indicated datacenter"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -445,7 +446,8 @@ public enum APIError
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"), NOT_ASSIGNED_PRICING_TIER_PRICE(
-        "PRICING_TIER-4", "Price is required"),
+        "PRICING_TIER-4", "Price is required"), NOT_TIER_IN_PRICING_TIER("PRICING_TIER_5",
+        "Indicated tier in link does not have relation with this pricing tier"),
 
     ;
 
