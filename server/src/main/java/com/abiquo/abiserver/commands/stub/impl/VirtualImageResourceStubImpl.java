@@ -240,7 +240,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
 
         String uri = createVirtualImageLink(idEnterprise, idDatacenter, vimage.getId());
 
-        ClientResponse response = put(uri, createDtoObject(vimage));
+        ClientResponse response = put(uri, createDtoObject(vimage, idDatacenter));
 
         if (response.getStatusCode() == 200)
         {
@@ -256,19 +256,18 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private VirtualImageDto createDtoObject(final VirtualImage vimage)
+    private VirtualImageDto createDtoObject(final VirtualImage vimage, final Integer datacenterId)
     {
 
         VirtualImageDto dto = new VirtualImageDto();
 
         Integer enterpriseId = vimage.getIdEnterprise();
-        Integer datacenterId = vimage.getRepository().getId();
 
         dto.setCostCode(vimage.getCostCode());
         dto.setCpuRequired(vimage.getCpuRequired());
         dto.setDescription(vimage.getDescription());
         dto.setDiskFileSize(vimage.getDiskFileSize());
-        dto.setDiskFormatType(vimage.getDiskFormatType().toString());
+        dto.setDiskFormatType(vimage.getDiskFormatType().getName());
         dto.setHdRequired(vimage.getHdRequired());
         dto.setId(vimage.getId());
         dto.setName(vimage.getName());

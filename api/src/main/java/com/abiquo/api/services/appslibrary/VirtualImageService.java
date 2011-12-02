@@ -199,7 +199,6 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setPath(virtualImage.getPath());
         old.setRamRequired(virtualImage.getRamRequired());
         old.setShared(virtualImage.isShared());
-        old.setIcon(null);
         old.setChefEnabled(virtualImage.isChefEnabled());
 
         // retrieve the links
@@ -293,7 +292,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                 flushErrors();
             }
             Integer iconId = Integer.parseInt(map.getFirst(IconResource.ICON));
-            if (!iconId.equals(old.getIcon().getId()))
+            if (old.getIcon() == null || !iconId.equals(old.getIcon().getId()))
             {
                 Icon icon = appsLibraryRep.findIconById(iconId);
                 if (icon == null)
