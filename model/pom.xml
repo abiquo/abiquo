@@ -327,6 +327,8 @@
                                 <include>**/rest/*.class</include>
                                 <incluide>**/*Dto.class</incluide>
                                 <incluide>com/abiquo/model/util/*.class</incluide>
+                                <incluide>**/cloud/VirtualApplianceState.class</incluide>
+                                <incluide>**/cloud/VirtualMachineState.class</incluide>
                             </includes>
                         </configuration>
                     </execution>
