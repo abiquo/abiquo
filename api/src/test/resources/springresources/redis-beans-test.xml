@@ -8,7 +8,7 @@
     </bean>
     
     <!-- Jedis connections pool -->
-    <bean id="jedisPool" class="redis.clients.jedis.JedisPool">
+    <bean id="jedisPool" class="com.abiquo.api.common.JedisPoolForTesting">
     	<constructor-arg>
     		<ref bean="jedisPoolConfig" />
     	</constructor-arg>
