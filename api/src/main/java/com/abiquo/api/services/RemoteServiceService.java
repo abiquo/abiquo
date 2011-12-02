@@ -31,7 +31,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
@@ -41,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
@@ -409,50 +409,6 @@ public class RemoteServiceService extends DefaultApiService
             && remoteService.getDatacenter().getId().equals(datacenterId);
     }
 
-    // public ErrorsDto checkStatus(final RemoteServiceType type, final String url)
-    // {
-    // ErrorsDto configurationErrors = new ErrorsDto();
-    // if (type.canBeChecked())
-    // {
-    // ClientConfig config = new ClientConfig();
-    // config.connectTimeout(5);
-    //
-    // RestClient restClient = new RestClient(config);
-    // Resource checkResource =
-    // restClient.resource(UriHelper.appendPathToBaseUri(url, CHECK_RESOURCE));
-    //
-    // try
-    // {
-    // ClientResponse response = checkResource.get();
-    // if (response.getStatusCode() != 200)
-    // {
-    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-    // + error.getMessage()));
-    // }
-    // }
-    // catch (WebApplicationException e)
-    // {
-    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-    // + error.getMessage() + ", " + e.getMessage()));
-    // }
-    // catch (ClientRuntimeException e)
-    // {
-    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-    // + error.getMessage() + ", " + e.getMessage()));
-    // }
-    // catch (Exception e)
-    // {
-    // APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
-    // configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-    // + error.getMessage() + ", " + e.getMessage()));
-    // }
-    // }
-    // return configurationErrors;
-    // }
-
     public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
         final RemoteServiceType type, final String url)
     {
@@ -501,7 +457,7 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     final String rsDatacenterUuid = response.getEntity(String.class);
 
-                    if (StringUtils.isEmpty(rsDatacenterUuid))
+                    if (!StringUtils.hasText(rsDatacenterUuid))
                     {
                         final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND;
                         configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
@@ -511,8 +467,7 @@ public class RemoteServiceService extends DefaultApiService
                             addConflictErrors(error);
                         }
                     }
-
-                    if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
+                    else if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
                     {
                         final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT;
                         configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
@@ -556,7 +511,7 @@ public class RemoteServiceService extends DefaultApiService
     private boolean isValidDatacenterUuid(final String rsDatacenterId, final Datacenter datacenter)
     {
         final String datacenterUuid = datacenter.getUuid();
-        if (StringUtils.isEmpty(datacenterUuid))
+        if (!StringUtils.hasText(datacenterUuid))
         {
             datacenter.setUuid(rsDatacenterId);
             infrastructureRepo.update(datacenter);

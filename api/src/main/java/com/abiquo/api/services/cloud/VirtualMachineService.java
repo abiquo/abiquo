@@ -656,7 +656,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
-     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
+     * @param forceEnterpriseSoftLimits Do we should take care of the soft limits?
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
      */

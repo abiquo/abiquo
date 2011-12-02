@@ -54,14 +54,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.AllocatorAction;
@@ -86,6 +93,14 @@ import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.NicsDto;
+import com.abiquo.server.core.task.Job;
+import com.abiquo.server.core.task.Job.JobType;
+import com.abiquo.server.core.task.JobGenerator;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TaskDto;
+import com.abiquo.server.core.task.TaskGenerator;
+import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.Constants;
 
 public class VirtualMachineResourceIT extends TestPopulate
@@ -114,6 +129,12 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     @Autowired
     VirtualMachineDAO vmachineDao;
+
+    @Autowired
+    protected TaskService taskService;
+
+    @Autowired
+    protected JedisPool jedisPool;
 
     @BeforeClass
     public static void setUpServer() throws Exception
@@ -156,6 +177,14 @@ public class VirtualMachineResourceIT extends TestPopulate
         datacenter = datacenterGenerator.createUniqueInstance();
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
+    }
+
+    @AfterTest
+    public void clearRedis()
+    {
+        Jedis jedis = jedisPool.getResource();
+        jedis.flushDB();
+        jedisPool.returnResource(jedis);
     }
 
     @Override
@@ -205,6 +234,128 @@ public class VirtualMachineResourceIT extends TestPopulate
             e.printStackTrace();
         }
 
+    }
+
+    @Test(groups = "redisaccess")
+    public void test_redisBackedTasks()
+    {
+        // Create a virtual machine
+        VirtualMachine vm = vmGenerator.createInstance(ent);
+
+        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        Machine machine = vm.getHypervisor().getMachine();
+        machine.setDatacenter(vdc.getDatacenter());
+        machine.setRack(null);
+
+        // Associate it to the created virtual appliance
+        NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
+
+        List<Object> entitiesToSetup = new ArrayList<Object>();
+
+        entitiesToSetup.add(ent);
+        entitiesToSetup.add(datacenter);
+        entitiesToSetup.add(vdc);
+        entitiesToSetup.add(vapp);
+
+        for (Privilege p : vm.getUser().getRole().getPrivileges())
+        {
+            entitiesToSetup.add(p);
+        }
+
+        entitiesToSetup.add(vm.getUser().getRole());
+        entitiesToSetup.add(vm.getUser());
+        entitiesToSetup.add(vm.getVirtualImage().getRepository());
+        entitiesToSetup.add(vm.getVirtualImage().getCategory());
+        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(machine);
+        entitiesToSetup.add(vm.getHypervisor());
+        entitiesToSetup.add(vm);
+        entitiesToSetup.add(nvi);
+
+        setup(entitiesToSetup.toArray());
+
+        // Persist redis data
+        TaskGenerator taskGenerator = new TaskGenerator();
+        JobGenerator jobGenerator = new JobGenerator();
+
+        Job configure = jobGenerator.createUniqueInstance();
+        configure.setType(JobType.CONFIGURE);
+
+        Job poweron = jobGenerator.createUniqueInstance();
+        poweron.setType(JobType.POWER_ON);
+
+        Task deploy = taskGenerator.createUniqueInstance();
+        deploy.setType(TaskType.DEPLOY);
+        deploy.setOwnerId(vm.getId().toString());
+        deploy.setUserId(vm.getUser().getId().toString());
+        deploy.getJobs().add(configure);
+        deploy.getJobs().add(poweron);
+
+        taskService.addTask(deploy);
+
+        // Test happy path TASKS
+        String vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
+        String tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+
+        ClientResponse response = get(tasksURI);
+
+        TasksDto tasks = response.getEntity(TasksDto.class);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+        assertNotNull(tasks);
+        assertEquals(tasks.getCollection().size(), 1);
+
+        RESTLink parent = tasks.searchLink("parent");
+        RESTLink self = tasks.searchLink("self");
+
+        assertNotNull(parent);
+        assertNotNull(self);
+
+        assertEquals(parent.getHref(), vmURI);
+        assertEquals(self.getHref(), tasksURI);
+
+        // Test happy path TASK
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        String taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+
+        TaskDto task = response.getEntity(TaskDto.class);
+        assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
+        assertNotNull(task);
+
+        parent = task.searchLink("parent");
+        self = task.searchLink("self");
+
+        assertNotNull(parent);
+        assertNotNull(self);
+
+        assertEquals(parent.getHref(), tasksURI);
+        assertEquals(self.getHref(), taskURI);
+
+        // NOT FOUND when invalid VDC
+        vmURI = resolveVirtualMachineURI(vdc.getId() + 1, vapp.getId(), vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+
+        // NOT FOUND when invalid VAPP
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId() + 1, vm.getId());
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+
+        // NOT FOUND when invalid VM
+        vmURI = resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId() + 1);
+        tasksURI = vmURI.concat(TaskResourceUtils.TASKS_PATH);
+        taskURI = tasksURI.concat("/").concat(deploy.getTaskId());
+
+        response = get(taskURI);
+        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
     /**

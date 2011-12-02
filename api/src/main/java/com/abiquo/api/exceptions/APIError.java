@@ -407,7 +407,11 @@ public enum APIError
         "TIER-4", "Datacenter parameter in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
-        "TIER-6", "Cannot disable a tier with associated storage pools"),
+        "TIER-6", "Cannot disable a tier with associated storage pools"), TIER_DISABLED("TIER-7",
+        "The requested tier is disabled"), TIER_LINK_VIRTUALDATACENTER_PARAM_NOT_FOUND("TIER-8",
+        "VirtualDatacenter param in tier link not found"), TIER_LINK_VIRTUALDATACENTER_DIFFERENT(
+        "TIER-9",
+        "Tier's virtualdatacenter link does not match with the indicated virtualdatacenter"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -456,7 +460,8 @@ public enum APIError
         "An unexpected error occured while attaching the volume. Please, contact the administrator"), VOLUME_ALREADY_DETACHED(
         "VOL-27", "The volume is already detached"), VOLUME_DETACH_ERROR("VOL-28",
         "An unexpected error occured while detaching the volume. Please, contact the administrator"), VOLUME_RECONFIGURE_ERROR(
-        "VOL-29", "An unexpected error occured while reconfiguring storage"),
+        "VOL-29", "An unexpected error occured while reconfiguring storage"), VOLUME_WRONG_NEW_VIRTUALDATACENTER(
+        "VOL-39", "The volume can only be moved between Virtual Datacenters of the same Datacenter"),
 
     // RULES
     NON_EXISTENT_EER("RULE-1", "The requested restrict shared server rule does not exist"), NON_EXISTENT_FPR(

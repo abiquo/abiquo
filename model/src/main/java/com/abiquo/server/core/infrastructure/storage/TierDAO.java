@@ -51,6 +51,15 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return criteria.list();
     }
 
+    public List<Tier> getEnableTiersByDatacenter(final Integer datacenterId)
+    {
+        Criteria criteria =
+            createCriteria(Restrictions.eq("datacenter.id", datacenterId),
+                Restrictions.eq(Tier.ENABLED_PROPERTY, true));
+
+        return criteria.list();
+    }
+
     public Tier getTierById(final Integer datacenterId, final Integer tierId)
     {
 
