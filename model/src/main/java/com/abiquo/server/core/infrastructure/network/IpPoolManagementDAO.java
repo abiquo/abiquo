@@ -587,31 +587,12 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
 
     public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, Integer firstElem,
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderby,
-        final Boolean asc, NetworkType type)
+        final Boolean asc)
     {
-        NetworkType type2 = type;
-        String query = BY_VDC;
-        if (type != null)
-        {
-
-            if (type.equals(NetworkType.EXTERNAL_UNMANAGED))
-            {
-                type = NetworkType.EXTERNAL;
-                // to check. unecessary because with unmanaged vlan doesn't exist ips
-                type2 = NetworkType.UNMANAGED;
-            }
-            // Get the query that counts the total results.
-            query = BY_VDC + " AND (vn.type = :type OR vn.type  = :type2 )";
-        }
         // Get the query that counts the total results.
-        Query finalQuery = getSession().createQuery(query + " " + defineOrderBy(orderby, asc));
+        Query finalQuery = getSession().createQuery(BY_VDC + " " + defineOrderBy(orderby, asc));
         finalQuery.setParameter("vdc_id", vdcId);
         finalQuery.setParameter("filterLike", has.isEmpty() ? "%" : "%" + has + "%");
-        if (type != null)
-        {
-            finalQuery.setParameter("type", type);
-            finalQuery.setParameter("type2", type2);
-        }
 
         // Check if the page requested is bigger than the last one
         Integer totalResults = finalQuery.list().size();

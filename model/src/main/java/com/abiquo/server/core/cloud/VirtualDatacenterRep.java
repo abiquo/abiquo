@@ -328,7 +328,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
         final Boolean asc, final NetworkType netType)
     {
-        return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc, netType);
+        return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
 
     /**
