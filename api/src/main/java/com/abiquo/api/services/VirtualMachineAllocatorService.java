@@ -59,7 +59,7 @@ import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
  * Virtual machine requirements are defined on the virtual image and additional storage or network
  * configurations.
  * <p>
- * Before select the machine check if the current allowd limits are exceeded.
+ * Before select the machine check if the current allowed limits are exceeded.
  * <p>
  * Enterprise edition support the definition of affinity, exclusion and work load rules.
  * <p>
