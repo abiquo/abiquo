@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
@@ -32,6 +34,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +44,8 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.resources.AbstractResourceWithTasks;
-import com.abiquo.api.services.NetworkService;
-import com.abiquo.api.services.UserService;
+import com.abiquo.api.resources.TaskResourceUtils;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
@@ -62,12 +64,15 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TaskDto;
+import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
-public class VirtualMachineResource extends AbstractResourceWithTasks
+public class VirtualMachineResource
 {
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
@@ -101,16 +106,13 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
     @Autowired
-    VirtualMachineService vmService;
+    private VirtualMachineService vmService;
 
     @Autowired
-    VirtualMachineAllocatorService service;
+    private VirtualMachineAllocatorService service;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
-    NetworkService networkService;
+    private TaskService taskService;
 
     /**
      * Return the virtual appliance if exists.
@@ -456,13 +458,18 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         final User user =
             v.getVirtualMachine().getUser() == null ? null : v.getVirtualMachine().getUser();
         final VirtualImage virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
+
         dto.addLink(restBuilder.buildVirtualImageLink(virtualImage.getEnterprise().getId(),
             virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
+
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
                 .getVirtualMachine().isChefEnabled()));
+
+        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+
         return dto;
     }
 
@@ -536,6 +543,9 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
                 .getRepository().getDatacenter().getId(), vimage.getId()));
         }
+
+        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+
         return dto;
     }
 
@@ -587,6 +597,9 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
                 .getRepository().getDatacenter().getId(), vimage.getId()));
         }
+
+        dto.addLink(TaskResourceUtils.buildTasksLink(dto.getEditLink()));
+
         return dto;
     }
 
@@ -640,9 +653,34 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         return createNodeTransferObject(node, vdcId, vappId, restBuilder);
     }
 
-    @Override
-    protected TaskOwnerType getTaskOwnerType()
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path(TaskResourceUtils.TASKS_PATH)
+    public TasksDto getTasks(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @Context final UriInfo uriInfo) throws Exception
     {
-        return TaskOwnerType.VIRTUAL_MACHINE;
+        vmService.getVirtualMachine(vdcId, vappId, vmId);
+        List<Task> tasks = taskService.findTasks(TaskOwnerType.VIRTUAL_MACHINE, vmId.toString());
+
+        return TaskResourceUtils.transform(tasks, uriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path(TaskResourceUtils.TASK_PATH)
+    public TaskDto getTask(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @PathParam(TaskResourceUtils.TASK) @NotNull final String taskId,
+        @Context final UriInfo uriInfo) throws Exception
+    {
+        vmService.getVirtualMachine(vdcId, vappId, vmId);
+        Task task = taskService.findTask(vmId.toString(), taskId);
+
+        return TaskResourceUtils.transform(task, uriInfo);
     }
 }
