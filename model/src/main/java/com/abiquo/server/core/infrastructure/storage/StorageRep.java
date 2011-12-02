@@ -258,6 +258,11 @@ public class StorageRep extends DefaultRepBase
         return volumeDAO.getVolumesByPool(pool);
     }
 
+    public List<Tier> getEnableTiersByDatacenter(final Integer datacenterId)
+    {
+        return tierDAO.getEnableTiersByDatacenter(datacenterId);
+    }
+
     public List<VolumeManagement> getVolumesByVirtualDatacenter(final VirtualDatacenter vdc)
     {
         return volumeDAO.getVolumesByVirtualDatacenter(vdc);

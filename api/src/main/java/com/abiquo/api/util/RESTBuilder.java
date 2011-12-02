@@ -1273,4 +1273,12 @@ public class RESTBuilder implements IRESTBuilder
         params.put(UserResource.USER, userId.toString());
         return builder.buildRestLink(UserResource.class, UserResource.USER, params);
     }
+
+    @Override
+    public List<RESTLink> buildVirtualDatacenterTierLinks(final Integer virtualDatacenterId,
+        final Integer id)
+    {
+        return null;
+    }
+
 }
