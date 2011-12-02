@@ -28,12 +28,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
 import org.dmtf.schemas.ovf.envelope._1.AbicloudNetworkType;
 import org.dmtf.schemas.ovf.envelope._1.AnnotationSectionType;
 import org.dmtf.schemas.ovf.envelope._1.ContentType;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOption;
+import org.dmtf.schemas.ovf.envelope._1.DHCPOptions;
 import org.dmtf.schemas.ovf.envelope._1.DHCPServiceType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -55,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.hibernate.pojohb.authorization.OneTimeTokenSessionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceHB;
@@ -67,6 +71,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceManagementHB;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.networking.NetworkResolver;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
 import com.abiquo.abiserver.persistence.dao.infrastructure.RemoteServiceDAO;
@@ -493,7 +498,18 @@ public class OVFModelFromVirtualAppliance
 
             Integer numberOfRules = 0;
             OrgNetworkType vlan = vlanDAO.findById(vlanId);
-            VlanNetworkHB vlanHB = vlanDAO.findById(vlanId);
+            VlanNetworkHB vlanHB = (VlanNetworkHB) vlan;
+            DHCPOptions options = new DHCPOptions();
+            Set<DhcpOptionHB> optionsHB = vlanHB.getDhcpOptionsHB();
+            for (DhcpOptionHB opHB : optionsHB)
+            {
+                DHCPOption option = new DHCPOption();
+                option.setValue(NetworkResolver.getDhcpOption(opHB.getNetworkAddress(),
+                    opHB.getMask(), opHB.getGateway()));
+                option.setOpt(opHB.getOption());
+                options.getOption().add(option);
+            }
+            vlan.setDhcpOptions(options);
             Integer idDataCenter = null;
             if (vlanHB.getNetworkType().equals(NetworkType.INTERNAL.name()))
             {

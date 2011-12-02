@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.vo.networking
 {
+	import mx.collections.ArrayCollection;
+	
 	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
 	
 
@@ -54,6 +56,8 @@ package net.undf.abicloud.vo.networking
         public var networkType:String;
         
         public var virtualDatacenter:VirtualDataCenter;
+        
+        public var dhcpOptions:ArrayCollection;
 
         public function VlanNetwork()
         {

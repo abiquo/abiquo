@@ -329,6 +329,8 @@
     </xs:complexType>
     <xs:complexType name="orgNetwork_Type">
         <xs:sequence>
+            <xs:element name="dhcp_options" type="ovf:DHCP_Options"
+                minOccurs="1" maxOccurs="1" />
             <xs:element name="configuration" type="ovf:networkConfiguration_Type"
                 minOccurs="1" maxOccurs="1" />
         </xs:sequence>
@@ -337,9 +339,10 @@
         <xs:attribute ref="ovf:required" />
     </xs:complexType>
     <xs:complexType name="networkConfiguration_Type">
-        <xs:sequence>
+         <xs:sequence>
             <xs:element name="dhcp_service" type="ovf:DHCP_Service_Type" minOccurs="1"
                 maxOccurs="1" />
+            
         </xs:sequence>
         <xs:attribute name="gateway" type="xs:string" use="optional" />
         <xs:attribute name="network_address" type="xs:string" />
@@ -349,6 +352,16 @@
         <xs:attribute name="secondary_DNS" type="xs:string" use="optional" />
         <xs:attribute name="sufix_DNS" type="xs:string" use="optional" />
         <xs:attribute name="fence_mode" type="xs:string" />
+    </xs:complexType>
+     <xs:complexType name="DHCP_Options">
+        <xs:sequence>
+            <xs:element name="option" type="ovf:DHCP_Option" minOccurs="1"
+                maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+     <xs:complexType name="DHCP_Option">
+        <xs:attribute name="value" type="xs:string" />
+        <xs:attribute name="opt" type="xs:int" />
     </xs:complexType>
     <xs:complexType name="DHCP_Service_Type">
         <xs:sequence>

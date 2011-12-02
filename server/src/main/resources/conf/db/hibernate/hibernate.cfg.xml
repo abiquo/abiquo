@@ -50,6 +50,7 @@
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkConfigurationHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/VlanNetworkHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/NetworkHB.hbm.xml" />
+        <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/networking/DhcpOptionHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/service/RemoteServiceHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/metering/MeterHB.hbm.xml" />
         <mapping resource="com/abiquo/abiserver/business/hibernate/pojohb/virtualimage/VirtualImageConversionsHB.hbm.xml" />

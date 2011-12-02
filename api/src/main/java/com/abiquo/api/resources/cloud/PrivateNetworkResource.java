@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
@@ -38,6 +41,9 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -112,9 +118,9 @@ public class PrivateNetworkResource extends AbstractResource
     public static VLANNetworkDto createTransferObject(final VLANNetwork network,
         final Integer virtualDatacenterId, final IRESTBuilder restBuilder) throws Exception
     {
-        VLANNetworkDto dto =
-            ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
-
+        VLANNetworkDto dto = new VLANNetworkDto();
+        // ModelTransformer.transportFromPersistence(VLANNetworkDto.class, network);
+        dto.setName(network.getName());
         dto.setId(network.getId());
         dto.setAddress(network.getConfiguration().getAddress());
         dto.setGateway(network.getConfiguration().getGateway());
@@ -122,10 +128,29 @@ public class PrivateNetworkResource extends AbstractResource
         dto.setPrimaryDNS(network.getConfiguration().getPrimaryDNS());
         dto.setSecondaryDNS(network.getConfiguration().getSecondaryDNS());
         dto.setSufixDNS(network.getConfiguration().getSufixDNS());
+        dto.setTag(network.getTag());
         dto.setType(network.getType());
 
         dto = addLinks(restBuilder, dto, virtualDatacenterId);
 
+        DhcpOptionsDto dtos = new DhcpOptionsDto();
+        for (DhcpOption opt : network.getDhcpOption())
+        {
+            if (opt.getOption() == 121)
+            {
+                dtos.getCollection().add(createTransferObject(opt, restBuilder));
+            }
+        }
+
+        dto.setDhcpOptions(dtos);
+        return dto;
+    }
+
+    private static DhcpOptionDto createTransferObject(final DhcpOption systemProperty,
+        final IRESTBuilder builder) throws Exception
+    {
+        DhcpOptionDto dto =
+            ModelTransformer.transportFromPersistence(DhcpOptionDto.class, systemProperty);
         return dto;
     }
 
@@ -143,6 +168,22 @@ public class PrivateNetworkResource extends AbstractResource
         vlan.getConfiguration().setPrimaryDNS(dto.getPrimaryDNS());
         vlan.getConfiguration().setSecondaryDNS(dto.getSecondaryDNS());
         vlan.getConfiguration().setSufixDNS(dto.getSufixDNS());
+        List<DhcpOption> opts = new ArrayList<DhcpOption>();
+        if (dto.getDhcpOptions() != null)
+        {
+            for (DhcpOptionDto dtoOpt : dto.getDhcpOptions().getCollection())
+            {
+                DhcpOption opt =
+                    new DhcpOption(dtoOpt.getOption(),
+                        dtoOpt.getGateway(),
+                        dtoOpt.getNetworkAddress(),
+                        dtoOpt.getMask(),
+                        dtoOpt.getNetmask());
+                opts.add(opt);
+            }
+        }
+
+        vlan.setDhcpOption(opts);
 
         return vlan;
     }

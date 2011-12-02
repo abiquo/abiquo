@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.network;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -31,6 +32,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -266,6 +269,33 @@ public class VLANNetwork extends DefaultEntityBase
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public final static String ASSOCIATION_TABLE = "vlans_dhcpOption";
+
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = DhcpOption.class, cascade = CascadeType.DETACH)
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idVlan"), inverseJoinColumns = @JoinColumn(name = "idDhcpOption"))
+    private List<DhcpOption> dhcpOptions = new ArrayList<DhcpOption>();
+
+    // ************************* Helper methods ****************************
+
+    public List<DhcpOption> getDhcpOption()
+    {
+        return dhcpOptions;
+    }
+
+    public void setDhcpOption(final List<DhcpOption> dhcpOptions)
+    {
+        this.dhcpOptions = dhcpOptions;
+    }
+
+    public void addDhcpOption(final DhcpOption dhcpOption)
+    {
+        if (dhcpOptions == null)
+        {
+            dhcpOptions = new ArrayList<DhcpOption>();
+        }
+        dhcpOptions.add(dhcpOption);
     }
 
 }

@@ -19,30 +19,33 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
-
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
+package net.undf.abicloud.vo.networking
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED, EXTERNAL_UNMANAGED;
 
-    public static NetworkType fromValue(final String orderBy)
+    import mx.collections.ArrayCollection;
+
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.networking.DhcpOption")]
+    [Bindable]
+    public class DhcpOption
     {
-        for (NetworkType currentOrder : NetworkType.values())
+        public var id:int;
+        
+        public var gateway:String;
+        
+        public var networkAddress:String;
+	    
+	    public var mask:int;
+	    
+	    public var netmask:String;
+
+        public function DhcpOption()
         {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
+            id = 0;
+	        gateway = '';
+	        networkAddress = '';
+	        mask = 0;
+	        netmask = '';
         }
 
-        return null;
     }
 }

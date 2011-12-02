@@ -30,6 +30,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.core.Application;
+        	import mx.managers.PopUpManager;
             import mx.collections.ArrayCollection;
             import mx.utils.StringUtil;
 
@@ -61,6 +63,15 @@
 
             [Bindable]
             private var _isFormValid:Boolean;
+            
+            //Static Rules for DHCP options
+            [Bindable]
+            private var _staticRules:StaticRulesForm;
+            
+            public function get staticRules():ArrayCollection
+            {
+            	return this._staticRules.staticRules;
+            }
 
             public function get isFormValid():Boolean
             {
@@ -91,6 +102,10 @@
                 sufixDNSInput.text = "";
                 defaultNetworkInput.selected = false;
                 getAvailableNetmasks();
+                
+                this._staticRules = new StaticRulesForm();
+                this._staticRules.addEventListener("closePopUp",closeStaticRulesPopUp);
+                this._staticRules.init();
             }
 
 
@@ -202,6 +217,21 @@
                 return StringUtil.substitute("/{0}\t({1})", netmasksCIDR[item.toString()],
                                              item.toString());
             }
+            
+            private function openStaticRules():void
+            {
+                this._staticRules.netmaskDP = netmaskDP;
+                
+                PopUpManager.addPopUp(this._staticRules, Application.application as DisplayObject,
+                                      true);
+                PopUpManager.centerPopUp(this._staticRules);
+              
+            }
+            
+            private function closeStaticRulesPopUp(event:Event):void
+            {
+                PopUpManager.removePopUp(this._staticRules);
+            }
         ]]>
     </mx:Script>
 
@@ -298,6 +328,13 @@
         <mx:TextInput id="sufixDNSInput"
             height="20"
             maxChars="39"/>
+    </mx:FormItem>
+    
+    <mx:FormItem 
+        label="@Resource(bundle='Infrastructure', key='LABEL_STATIC_RULES')">
+       <mx:Button label="@Resource(bundle='Infrastructure', key='LABEL_MANAGE')" id="StaticRulesButton"
+            click="openStaticRules()"
+            height="18"/>
     </mx:FormItem>
 
     <mx:FormItem id="defaultNetworkFormItem"

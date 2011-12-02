@@ -27,7 +27,9 @@ package com.abiquo.abiserver.commands.stub.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response.Status;
 
@@ -40,6 +42,7 @@ import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.networking.IPNetworkRang;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.networking.VlanNetwork;
@@ -55,6 +58,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDto;
 import com.abiquo.server.core.enterprise.DatacentersLimitsDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.EnterprisesDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionsDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 import com.abiquo.server.core.infrastructure.network.NicDto;
@@ -91,7 +96,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         newNet.setNetworkId(dto.getId());
         newNet.setNetworkType(dto.getType().toString());
         newNet.setDefaultNetwork(dto.getDefaultNetwork());
-
+        Set<DhcpOption> dhcpOptions = new HashSet<DhcpOption>();
+        for (DhcpOptionDto opt : dto.getDhcpOptions().getCollection())
+        {
+            dhcpOptions.add(DhcpOption.create(opt));
+        }
+        newNet.setDhcpOptions(dhcpOptions);
         return newNet;
     }
 
@@ -182,7 +192,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult createPublicVlan(final Integer datacenterId, final String networkName,
         final Integer vlanTag, final NetworkConfiguration configuration,
-        final Enterprise enterprise, final boolean unmanaged)
+        final Enterprise enterprise, final boolean unmanaged, final Set<DhcpOption> dhcpOptions)
     {
         DataResult<VlanNetwork> result = new DataResult<VlanNetwork>();
         String uri = createPublicNetworksLink(datacenterId);
@@ -198,6 +208,20 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         dto.setTag(vlanTag);
         dto.setUnmanaged(unmanaged);
 
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        dto.setDhcpOptions(options);
         if (enterprise != null)
         {
             // It is an External network.
@@ -325,7 +349,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult editPublicVlan(final Integer datacenterId, final Integer vlanNetworkId,
         final String vlanName, final Integer vlanTag, final NetworkConfiguration configuration,
-        final Boolean defaultNetwork, final Enterprise enterprise)
+        final Boolean defaultNetwork, final Enterprise enterprise, final Set<DhcpOption> dhcpOptions)
     {
         BasicResult result = new BasicResult();
         String uri = createPublicNetworkLink(datacenterId, vlanNetworkId);
@@ -349,6 +373,20 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             entLink.setHref(createEnterpriseLink(enterprise.getId()));
             dto.addLink(entLink);
         }
+
+        DhcpOptionsDto options = new DhcpOptionsDto();
+        for (DhcpOption opt : dhcpOptions)
+        {
+            DhcpOptionDto dtoOpt = new DhcpOptionDto();
+            dtoOpt.setGateway(opt.getGateway());
+            dtoOpt.setNetworkAddress(opt.getNetworkAddress());
+            dtoOpt.setMask(opt.getMask());
+            dtoOpt.setNetmask(opt.getNetmask());
+            options.add(dtoOpt);
+
+        }
+
+        dto.setDhcpOptions(options);
 
         ClientResponse response = put(uri, dto);
         if (response.getStatusCode() == 200)
@@ -747,7 +785,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public BasicResult getListNetworkPoolByVirtualDatacenter(final Integer vdcId,
         final Integer offset, final Integer numElem, final String filterLike, final String orderBy,
-        final Boolean asc) throws NetworkCommandException
+        final Boolean asc, String type) throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
             new DataResult<ListResponse<IpPoolManagement>>();
@@ -759,6 +797,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numElem);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (type != null && type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
+        if (type != null)
+        {
+            buildRequest.append("&type=" + type);
+        }
+
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -793,7 +840,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     @Override
     public DataResult<ListResponse<IpPoolManagement>> getListNetworkPublicPoolByDatacenter(
         final Integer datacenterId, final Integer offset, final Integer numberOfNodes,
-        final String filterLike, final String orderBy, final Boolean asc)
+        final String filterLike, final String orderBy, final Boolean asc, String type)
         throws NetworkCommandException
     {
         DataResult<ListResponse<IpPoolManagement>> dataResult =
@@ -805,6 +852,11 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         buildRequest.append("&limit=" + numberOfNodes);
         buildRequest.append("&by=" + transformOrderBy(orderBy));
         buildRequest.append("&asc=" + (asc ? "true" : "false"));
+        if (type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
+        buildRequest.append("&type=" + type);
         if (!filterLike.isEmpty())
         {
             buildRequest.append("&has=" + filterLike);
@@ -1130,11 +1182,15 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
     }
 
     @Override
-    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId, final String type)
+    public BasicResult getPublicVlansByDatacenter(final Integer datacenterId, String type)
     {
         DataResult<List<VlanNetwork>> result = new DataResult<List<VlanNetwork>>();
 
         StringBuilder buildRequest = new StringBuilder(createPublicNetworksLink(datacenterId));
+        if (type != null && type.equals("EXTERNAL"))
+        {
+            type = "EXTERNAL_UNMANAGED";
+        }
         buildRequest.append("?type=" + type);
 
         ClientResponse response = get(buildRequest.toString());

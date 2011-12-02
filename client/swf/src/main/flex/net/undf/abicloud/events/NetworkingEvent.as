@@ -23,6 +23,8 @@ package net.undf.abicloud.events
 {
     import flash.events.Event;
     
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.vo.infrastructure.DataCenter;
     import net.undf.abicloud.vo.infrastructure.VirtualMachine;
     import net.undf.abicloud.vo.networking.IPAddress;
@@ -140,6 +142,8 @@ package net.undf.abicloud.events
         public var orderInList:int;
         
         public var available:Boolean;
+        
+        public var staticRules:ArrayCollection;
 
         /* ------------- Constructor ------------- */
         public function NetworkingEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

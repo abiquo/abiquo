@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<general:AbiCloudPopUp 
+	resizeEffect="{myResize}"
+	creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:general="net.undf.abicloud.view.general.*"
+    titleText="@Resource(bundle='Infrastructure', key='POPUP_TITLE_STATIC_RULES')"
+    xmlns:utils="net.undf.abicloud.utils.*">
+
+
+    <mx:Script>
+        <![CDATA[
+        	import mx.controls.dataGridClasses.DataGridColumn;
+        	import net.undf.abicloud.vo.networking.DhcpOption;
+        	import mx.utils.StringUtil;
+        	import mx.managers.PopUpManager;
+        	import mx.events.ResizeEvent;
+        	import net.undf.abicloud.vo.networking.VlanNetwork;
+        	import mx.collections.ArrayCollection;
+        	
+        	private static const netmasksCIDR:Object = { "255.0.0.0": 8, "255.128.0.0": 9, "255.192.0.0": 10, "255.224.0.0": 11, "255.240.0.0": 12,
+                    "255.248.0.0": 13, "255.252.0.0": 14, "255.254.0.0": 15, "255.255.0.0": 16, "255.255.128.0": 17, "255.255.192.0": 18, "255.255.224.0": 19,
+                    "255.255.240.0": 20, "255.255.248.0": 21, "255.255.252.0": 22, "255.255.254.0": 23, "255.255.255.0": 24, "255.255.255.128": 25,
+                    "255.255.255.192": 26, "255.255.255.224": 27, "255.255.255.240": 28, "255.255.255.248": 29, "255.255.255.252": 30, "255.255.255.254": 31,
+                    "255.255.255.255": 32 };
+			
+            [Bindable]
+            private var _staticRules:ArrayCollection;
+            
+            [Bindable]
+            private var _vlanNetwork:VlanNetwork;
+            
+            [Bindable]
+            private var _networkIpIsValid:Boolean;
+            
+            [Bindable]
+            private var _gatewayIpIsValid:Boolean;
+            
+           	public function init(staticRules:ArrayCollection = null):void
+           	{
+           	    if(staticRules){
+	           	    this._staticRules = staticRules;	
+           	    }else{
+           	    	this._staticRules = new ArrayCollection();
+           	    }
+           	    this._networkIpIsValid = false;
+           	    this._gatewayIpIsValid = false;
+           	}		
+            
+            private function onCreationComplete():void{
+                 netmaskInput.selectedIndex = 0;
+                 addressInput.text = '';
+                 gatewayInput.text = '';
+                 validateForm();
+            }
+            
+            [Bindable]
+            private var _netmaskDP:ArrayCollection;
+            
+            public function set netmaskDP(value:ArrayCollection):void{
+                this._netmaskDP = value;
+            }
+			
+			public function get vlanNetwork():VlanNetwork{
+				return this._vlanNetwork;
+			}
+			
+
+			public function set staticRules(value:ArrayCollection):void{
+				this._staticRules = value;	
+			}
+			
+			[Bindable]
+			public function get staticRules():ArrayCollection{
+				return this._staticRules;
+			}
+
+            /**
+             * Cancels Physical Machine creation
+             **/
+            private function close():void
+            {                
+                //Closing the form
+                dispatchEvent(new Event("closePopUp"));
+            }
+
+            private function onAdd():void
+            {  
+            	var dhcpOption:DhcpOption = new DhcpOption();
+            	dhcpOption.gateway = gatewayInput.text;
+            	dhcpOption.networkAddress = addressInput.text;
+            	dhcpOption.netmask = netmaskInput.selectedItem as String;
+            	dhcpOption.mask = netmasksCIDR[netmaskInput.selectedItem.toString()];
+                this._staticRules.addItem(dhcpOption);            	
+            }
+
+           
+            /**
+             * Basic behaivour is as follows:
+             * If user presses the Enter, in any part of this Pop Up (except buttons), it would be
+             * like Accept Button has been pressed
+             */
+            override protected function keyboardHandler(keyboardEvent:KeyboardEvent):void
+            {
+                if (keyboardEvent.target == closeButton)
+                    super.keyboardHandler(keyboardEvent);
+                else
+                {
+                    if (keyboardEvent.keyCode == 13)
+                        onAdd();
+                }
+            }
+
+            /**
+             * Centers this component when it is resized
+             */
+            private function onResize(event:ResizeEvent):void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect starts. For performance purposes
+             */
+            private function onResizeEffectStart():void
+            {
+                //retrieveInfoForm.visible = false;
+            }
+
+            /**
+             * While resizing, we keep the PopUp centered
+             */
+            private function onResizeEffectUpdate():void
+            {
+                PopUpManager.centerPopUp(this);
+            }
+
+            /**
+             * To hide contents when a resize effect ends. For performance purposes
+             */
+            private function onResizeEffectEnd():void
+            {
+                
+            }
+            
+            private function validateForm():void
+            {
+                addButton.enabled = netmaskInput.selectedIndex > -1 
+                               && addressInput.text.length > 0 
+                               && gatewayInput.text.length > 0
+                               && this._gatewayIpIsValid
+                               && this._networkIpIsValid;
+            }
+            
+            private function netmaskComboBoxLabelFunction(item:Object):String
+            {
+                return StringUtil.substitute("/{0}\t({1})", netmasksCIDR[item.toString()],
+                                             item.toString());
+            }
+            
+            private function netmaskComboBoxDataGridLabelFunction(item:DhcpOption, column:DataGridColumn):String
+            {
+                return "/"+item.mask+" ("+item.netmask+")";
+            }
+            
+            private function changeTextColor(type:Boolean , textInput:TextInput):void{
+                if(type){
+                    textInput.setStyle("color","red");
+                    textInput.setStyle("fontWeight","bold");
+                }else{
+                    textInput.setStyle("color",closeButton.getStyle("color"));
+                    textInput.setStyle("fontWeight","normal");
+                } 
+                validateForm();         
+            }
+            
+        ]]>
+    </mx:Script>
+
+    <mx:Resize id="myResize"
+        duration="800"
+        heightTo="{explicitHeight}"
+        widthTo="{explicitWidth}"
+        tweenStart="onResizeEffectStart()"
+        tweenUpdate="onResizeEffectUpdate()"
+        tweenEnd="onResizeEffectEnd()"/>
+    
+    <utils:IPValidator
+        id="networkIpValidator"
+        source="{addressInput}"
+        property="text" required="false"
+        trigger="{addressInput}"
+        triggerEvent="change"
+        allowLocalHost="false"
+        invalid="_networkIpIsValid = false ; changeTextColor(true , addressInput)"
+        valid="_networkIpIsValid = true ; changeTextColor(false , addressInput) "/>
+    
+    <utils:IPValidator
+        id="gatewayIpValidator"
+        source="{gatewayInput}"
+        property="text" required="false"
+        trigger="{gatewayInput}"
+        triggerEvent="change"
+        allowLocalHost="false"
+        invalid="_gatewayIpIsValid = false ; changeTextColor(true , gatewayInput)"
+        valid="_gatewayIpIsValid = true ; changeTextColor(false , gatewayInput) "/>
+   
+    <mx:VBox verticalGap="0" paddingTop="0" width="100%" horizontalAlign="right">    	
+    
+	    <mx:Form width="100%" paddingTop="0">
+	       <mx:Label 
+                fontWeight="bold"
+                text="@Resource(bundle='Infrastructure', key='LABEL_ADD_STATIC_RULE')"/>
+	       
+	       <mx:FormItem 
+                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
+                direction="vertical"
+                required="true">
+                <mx:ComboBox id="netmaskInput"
+                    height="18"
+                    dataProvider="{this._netmaskDP}"
+                    labelFunction="netmaskComboBoxLabelFunction"
+                    change="validateForm()"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                horizontalGap="0"
+                label="@Resource(bundle='Networking', key='LABEL_ADDRESS')"
+                direction="horizontal"
+                required="true">
+
+                <mx:TextInput id="addressInput"
+                    height="20"
+                    maxChars="39"
+                    change="validateForm()"
+                    restrict="0-9.:A-F"/>
+            </mx:FormItem>
+
+            <mx:FormItem 
+                label="@Resource(bundle='Networking', key='LABEL_GATEWAY')"
+                required="true">
+                <mx:TextInput id="gatewayInput"
+                    height="20"
+                    maxChars="39"
+                    change="validateForm()"
+                    restrict="0-9.:A-F"/>
+            </mx:FormItem>
+            
+            <mx:FormItem>
+                <mx:Button id="addButton"
+	                height="18"
+	                label="@Resource(bundle='Common', key='BUTTON_ADD')"
+	                click="onAdd()"/>
+            </mx:FormItem>
+	    </mx:Form>
+	    
+	    <general:GeneralSubPanel 
+            borderStyle="solid" 
+            borderSides="top" 
+	        height="100%"
+	        verticalAlign="middle"
+	        title="@Resource(bundle='Infrastructure',key='LABEL_ADDED_STATIC_RULES')">
+	
+	        <mx:DataGrid id="selectedStaticRulesDataGrid"
+	            width="100%"
+	            rowCount="4"
+	            dataProvider="{this._staticRules}">
+	            <mx:columns>
+	                 <mx:DataGridColumn 
+		                width="30">
+		                <mx:itemRenderer>
+		                    <mx:Component>
+		                        <mx:HBox horizontalAlign="center">
+		                            <mx:Script>
+		                                <![CDATA[
+		                                	import mx.collections.ArrayCollection;
+
+		                                    private function onClickDeleteButton():void
+		                                    {
+		                                        var staticRules:ArrayCollection = StaticRulesForm(outerDocument).staticRules;
+		                                        staticRules.removeItemAt(staticRules.getItemIndex(data));                                           
+		                                    }
+		                                ]]>
+		                            </mx:Script>
+		                            <mx:Button
+		                                id="deleteButton"
+		                                width="19" height="19"
+		                                styleName="DeleteButton"
+		                                click="onClickDeleteButton()"/>
+		                        </mx:HBox>
+		                    </mx:Component>
+		                </mx:itemRenderer>
+		            </mx:DataGridColumn>
+	                 <mx:DataGridColumn
+	                 	width="100"
+	                    sortable="false"
+	                    labelFunction="netmaskComboBoxDataGridLabelFunction"
+	                    headerText="@Resource(bundle='Networking',key='LABEL_NETMASK')"/>
+	                
+	                <mx:DataGridColumn 
+	                    sortable="false"
+	                    dataField="networkAddress"
+	                    headerText="@Resource(bundle='Networking',key='LABEL_ADDRESS')"/>
+	                
+	                <mx:DataGridColumn 
+	                    sortable="false"
+	                    dataField="gateway"
+	                    headerText="@Resource(bundle='Networking', key='LABEL_GATEWAY')"/>
+	                 
+	            </mx:columns>
+	        </mx:DataGrid>
+	
+	    </general:GeneralSubPanel>
+
+    </mx:VBox>
+    <mx:HBox 
+        paddingBottom="10"
+        direction="horizontal">
+        
+
+        <mx:Button id="closeButton"
+            height="18"
+            label="@Resource(bundle='Common', key='BUTTON_CLOSE')"
+            styleName="AlternativeButton"
+            click="close()"/>
+    </mx:HBox>
+    
+    
+
+</general:AbiCloudPopUp>

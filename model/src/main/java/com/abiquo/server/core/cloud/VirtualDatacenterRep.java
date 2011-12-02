@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.abiquo.model.enumerator.NetworkType;
 import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -38,7 +39,6 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
@@ -48,6 +48,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkConfigurationDAO;
 import com.abiquo.server.core.infrastructure.network.NetworkDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 
 @Repository
 public class VirtualDatacenterRep extends DefaultRepBase
@@ -325,7 +326,7 @@ public class VirtualDatacenterRep extends DefaultRepBase
      */
     public List<IpPoolManagement> findIpsByVdc(final Integer vdcId, final Integer firstElem,
         final Integer numElem, final String has, final IpPoolManagement.OrderByEnum orderBy,
-        final Boolean asc)
+        final Boolean asc, final NetworkType netType)
     {
         return ipManagementDAO.findIpsByVdc(vdcId, firstElem, numElem, has, orderBy, asc);
     }
@@ -375,10 +376,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
     public List<IpPoolManagement> findPublicIpsByDatacenter(final Integer datacenterId,
         final Integer startwith, final Integer limit, final String filter,
-        final OrderByEnum orderByEnum, final Boolean descOrAsc)
+        final OrderByEnum orderByEnum, final Boolean descOrAsc, final NetworkType netType)
     {
         return ipManagementDAO.findPublicIpsByDatacenter(datacenterId, startwith, limit, filter,
-            orderByEnum, descOrAsc);
+            orderByEnum, descOrAsc, netType);
     }
 
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,

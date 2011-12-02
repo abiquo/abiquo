@@ -50,6 +50,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.Rasd;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
@@ -153,9 +155,8 @@ public class NetworkService extends DefaultApiService
 
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(),
-                IpPoolManagement.DEFAULT_RESOURCE_NAME,
-                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
+                .valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -225,6 +226,21 @@ public class NetworkService extends DefaultApiService
         checkPrivateAddressAndMaskCoherency(IPAddress.newIPAddress(newVlan.getConfiguration()
             .getAddress()), newVlan.getConfiguration().getMask());
 
+        List<DhcpOption> opts = new ArrayList<DhcpOption>(newVlan.getDhcpOption());
+        for (DhcpOption dhcpOption : newVlan.getDhcpOption())
+        {
+            dhcpOption.setOption(121);
+            datacenterRepo.insertDhcpOption(dhcpOption);
+            DhcpOption dhcpOption2 =
+                new DhcpOption(249,
+                    dhcpOption.getGateway(),
+                    dhcpOption.getNetworkAddress(),
+                    dhcpOption.getMask(),
+                    dhcpOption.getNetmask());
+            datacenterRepo.insertDhcpOption(dhcpOption2);
+            opts.add(dhcpOption2);
+        }
+        newVlan.setDhcpOption(opts);
         // Before to insert the new VLAN, check if we want the vlan as the default one. If it is,
         // put the previous default one as non-default.
         repo.insertNetworkConfig(newVlan.getConfiguration());
@@ -300,6 +316,7 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         repo.deleteVLAN(vlanToDelete);
+        datacenterRepo.deleteAllDhcpOption(vlanToDelete.getDhcpOption());
 
         if (tracer != null)
         {
@@ -377,7 +394,7 @@ public class NetworkService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<IpPoolManagement> getListIpPoolManagementByVdc(final Integer vdcId,
         final Integer firstElem, final Integer numElem, final String has, final String orderBy,
-        final Boolean asc)
+        final Boolean asc, final String type)
     {
         // Check if the orderBy element is actually one of the available ones
         IpPoolManagement.OrderByEnum orderByEnum = IpPoolManagement.OrderByEnum.fromValue(orderBy);
@@ -397,9 +414,22 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
+        NetworkType netType = null;
+        if (type != null && !type.equals("false") && !type.equals("INTERNAL"))
+        {
+            netType = NetworkType.fromValue(type);
+            if (netType == null || netType.equals(NetworkType.INTERNAL))
+            {
+                LOGGER
+                    .info("Bad parameter 'type' in request to get the public networks by a datacenter.");
+                addValidationErrors(APIError.QUERY_NETWORK_TYPE_INVALID_PARAMETER);
+                flushErrors();
+            }
+        }
+
         // Query the list to database.
         List<IpPoolManagement> ips =
-            repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc);
+            repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc, netType);
         LOGGER
             .debug("Returning the list of IPs used by VirtualDatacenter '" + vdc.getName() + "'.");
         return ips;
@@ -445,8 +475,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
-                        vdc.getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
+                        .getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -938,10 +968,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress()
-            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask()
-                .equals(newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
+            newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask().equals(
+                newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -954,8 +984,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway()
-            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
+            oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
@@ -994,6 +1024,24 @@ public class NetworkService extends DefaultApiService
             repo.updateIpManagement(null);
 
         }
+        // set the dhcp option
+        datacenterRepo.deleteAllDhcpOption(oldNetwork.getDhcpOption());
+        List<DhcpOption> opts = new ArrayList<DhcpOption>(newNetwork.getDhcpOption());
+        for (DhcpOption dhcpOption : newNetwork.getDhcpOption())
+        {
+            dhcpOption.setOption(121);
+            datacenterRepo.insertDhcpOption(dhcpOption);
+            DhcpOption dhcpOption2 =
+                new DhcpOption(249,
+                    dhcpOption.getGateway(),
+                    dhcpOption.getNetworkAddress(),
+                    dhcpOption.getMask(),
+                    dhcpOption.getNetmask());
+            datacenterRepo.insertDhcpOption(dhcpOption2);
+            opts.add(dhcpOption2);
+        }
+        oldNetwork.setDhcpOption(opts);
+
         // Set the new values and update the VLAN
         oldNetwork.getConfiguration().setGateway(newNetwork.getConfiguration().getGateway());
         oldNetwork.getConfiguration().setPrimaryDNS(newNetwork.getConfiguration().getPrimaryDNS());
@@ -1323,6 +1371,40 @@ public class NetworkService extends DefaultApiService
         }
         return vm;
 
+    }
+
+    public Collection<DhcpOption> findAllDhcpOptions()
+    {
+        return datacenterRepo.findAllDhcp();
+    }
+
+    public DhcpOption getDhcpOption(final Integer id)
+    {
+        DhcpOption option = datacenterRepo.findDhcpOptionById(id);
+        if (option == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_DHCP_OPTION);
+            flushErrors();
+        }
+
+        return option;
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public DhcpOption addDhcpOption(final DhcpOptionDto dto)
+    {
+        DhcpOption opt =
+            new DhcpOption(dto.getOption(), dto.getGateway(), dto.getNetworkAddress(), dto
+                .getMask(), dto.getNetmask());
+
+        if (!opt.isValid())
+        {
+            addValidationErrors(opt.getValidationErrors());
+            flushErrors();
+        }
+
+        datacenterRepo.insertDhcpOption(opt);
+        return opt;
     }
 
     /**
