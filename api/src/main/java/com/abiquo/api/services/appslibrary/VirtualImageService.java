@@ -168,7 +168,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setDescription(virtualImage.getDescription());
         old.setDiskFileSize(virtualImage.getDiskFileSize());
 
-        DiskFormatType type = DiskFormatType.fromValue(virtualImage.getDiskFormatType());
+        DiskFormatType type = DiskFormatType.fromURI(virtualImage.getDiskFormatType());
 
         old.setDiskFormatType(type);
         old.setHdRequiredInBytes(virtualImage.getHdRequired());
@@ -176,7 +176,6 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setPath(virtualImage.getPath());
         old.setRamRequired(virtualImage.getRamRequired());
         old.setShared(virtualImage.isShared());
-        old.setIcon(null);
         old.setChefEnabled(virtualImage.isChefEnabled());
 
         // retrieve the links
@@ -270,7 +269,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                 flushErrors();
             }
             Integer iconId = Integer.parseInt(map.getFirst(IconResource.ICON));
-            if (!iconId.equals(old.getIcon().getId()))
+            if (old.getIcon() == null || !iconId.equals(old.getIcon().getId()))
             {
                 Icon icon = appsLibraryRep.findIconById(iconId);
                 if (icon == null)
