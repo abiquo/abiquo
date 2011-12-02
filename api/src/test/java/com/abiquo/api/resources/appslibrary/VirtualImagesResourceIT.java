@@ -124,12 +124,22 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
+    /*
+     * @Test public void testGetVirtualImagesRaises404WhenInvalidDatacenter() { String uri =
+     * resolveVirtualImagesURI(ent.getId(), datacenter.getId() + 100); ClientResponse response =
+     * get(uri, SYSADMIN, SYSADMIN); assertError(response, 404, APIError.NON_EXISTENT_DATACENTER); }
+     */
+
     @Test
-    public void testGetVirtualImagesRaises404WhenInvalidDatacenter()
+    public void testGetVirtualImagesRaises400WhenInvalidHypervisorType()
     {
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId() + 100);
+        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        uri += "?hypervisorTypeName=INVALID";
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
+        assertEquals(response.getStatusCode(), 400);
+
+        // TODO: Specific APiError
+        // assertError(response, 400);
     }
 
     @Test
@@ -163,7 +173,8 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         setup(limits);
 
         String uri =
-            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), 50);
+            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
+                "nonexisting");
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
@@ -231,7 +242,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), image
-                .getCategory().getId());
+                .getCategory().getName());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -253,7 +264,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         String uri =
             resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
-                anotherCategory.getId());
+                anotherCategory.getName());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
@@ -281,7 +292,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
-                String.valueOf(HypervisorType.VBOX.id())).get();
+                HypervisorType.VBOX.name()).get();
 
         assertEquals(response.getStatusCode(), 200);
 
@@ -310,7 +321,7 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
         String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
-                String.valueOf(HypervisorType.VBOX.id())).get();
+                HypervisorType.VBOX.name()).get();
 
         assertEquals(response.getStatusCode(), 200);
 

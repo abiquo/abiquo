@@ -561,8 +561,7 @@ public enum APIError
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
 
     // HYPERVISOR TYPE
-    NON_EXISTENT_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0",
-        "The requested Hypervisor Type does not exist")
+    INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid")
 
     ;
 

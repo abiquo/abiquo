@@ -151,16 +151,15 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         }
         if (hypervisorName != null)
         {
-            Integer hypervisorId = HypervisorType.transformHypervisorTypeToInteger(hypervisorName);
-            if (hypervisorId == null)
+            try
             {
-                addNotFoundErrors(APIError.NON_EXISTENT_HYPERVISOR_TYPE);
-                flushErrors();
+                hypervisor = HypervisorType.fromValue(hypervisorName);
             }
-            else
+            catch (Exception ex)
             {
-                hypervisor = HypervisorType.transformHypervisorTypeFromInteger(hypervisorId);
-
+                // Validate the hypervisor type
+                addValidationErrors(APIError.INVALID_HYPERVISOR_TYPE);
+                flushErrors();
             }
         }
 
