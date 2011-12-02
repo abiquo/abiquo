@@ -59,8 +59,8 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin";
 
-    private final static String AM_BASE_URI = "http://localhost:"
-        + String.valueOf(getEmbededServerPort()) + "/am";
+    private final static String AM_BASE_URI =
+        "http://localhost:" + String.valueOf(getEmbededServerPort()) + "/am";
 
     private Enterprise ent;
 
@@ -133,6 +133,9 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void testGetVirtualImagesRaises400WhenInvalidHypervisorType()
     {
+        DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
+        setup(limits);
+
         String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
         uri += "?hypervisorTypeName=INVALID";
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);

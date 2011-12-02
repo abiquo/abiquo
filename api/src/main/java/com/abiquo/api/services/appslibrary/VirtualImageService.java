@@ -177,7 +177,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         old.setDescription(virtualImage.getDescription());
         old.setDiskFileSize(virtualImage.getDiskFileSize());
 
-        DiskFormatType type = DiskFormatType.fromURI(virtualImage.getDiskFormatType());
+        DiskFormatType type = DiskFormatType.fromValue(virtualImage.getDiskFormatType());
 
         old.setDiskFormatType(type);
         old.setHdRequiredInBytes(virtualImage.getHdRequired());

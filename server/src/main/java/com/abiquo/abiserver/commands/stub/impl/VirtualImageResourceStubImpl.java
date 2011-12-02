@@ -267,7 +267,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         dto.setCpuRequired(vimage.getCpuRequired());
         dto.setDescription(vimage.getDescription());
         dto.setDiskFileSize(vimage.getDiskFileSize());
-        dto.setDiskFormatType(vimage.getDiskFormatType().getUri());
+        dto.setDiskFormatType(vimage.getDiskFormatType().getName());
         dto.setHdRequired(vimage.getHdRequired());
         dto.setId(vimage.getId());
         dto.setName(vimage.getName());
