@@ -54,9 +54,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
@@ -126,6 +130,12 @@ public class VirtualMachineResourceIT extends TestPopulate
     @Autowired
     VirtualMachineDAO vmachineDao;
 
+    @Autowired
+    protected TaskService taskService;
+
+    @Autowired
+    protected JedisPool jedisPool;
+
     @BeforeClass
     public static void setUpServer() throws Exception
     {
@@ -167,6 +177,14 @@ public class VirtualMachineResourceIT extends TestPopulate
         datacenter = datacenterGenerator.createUniqueInstance();
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
+    }
+
+    @AfterTest
+    public void clearRedis()
+    {
+        Jedis jedis = jedisPool.getResource();
+        jedis.flushDB();
+        jedisPool.returnResource(jedis);
     }
 
     @Override
@@ -218,11 +236,8 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     }
 
-    @Autowired
-    protected TaskService taskService;
-
     @Test(groups = "redisaccess")
-    public void test_asyncTasks()
+    public void test_redisBackedTasks()
     {
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
