@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +66,17 @@ public class VirtualMachineFactory
     protected InfrastructureRep datacenterRepo;
 
     @Autowired
-    protected SystemPropertyService systemPropertyService;
+    private SystemPropertyService systemPropertyService;
+
+    public VirtualMachineFactory()
+    {
+    }
+
+    public VirtualMachineFactory(final EntityManager em)
+    {
+        this.datacenterRepo = new InfrastructureRep(em);
+        this.systemPropertyService = new SystemPropertyService(em);
+    }
 
     /** The remote desktop min port **/
     public final static int MIN_REMOTE_DESKTOP_PORT = Integer.valueOf(ConfigService

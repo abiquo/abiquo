@@ -24,50 +24,115 @@ package com.abiquo.api.services;
 import javax.jms.ResourceAllocationException;
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.transport.error.CommonError;
-import com.abiquo.scheduler.IAllocator;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.scheduler.ResourceUpgradeUseException;
+import com.abiquo.scheduler.VirtualMachineFactory;
+import com.abiquo.scheduler.check.IMachineCheck;
+import com.abiquo.scheduler.check.MachineCheck;
+import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
-import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
+import com.abiquo.scheduler.workload.VirtualimageAllocationService;
+import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
+import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
+
+/**
+ * Selects the target machine to allocate a virtual machines.
+ * <p>
+ * Virtual machine requirements are defined on the virtual image and additional storage or network
+ * configurations.
+ * <p>
+ * Before select the machine check if the current allowd limits are exceeded.
+ * <p>
+ * Enterprise edition support the definition of affinity, exclusion and work load rules.
+ * <p>
+ * TODO transactional required. read-only
+ * 
+ * @author apuig
+ */
 @Service
 @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+// TODO method level
 public class VirtualMachineAllocatorService extends DefaultApiService
 {
-    @Autowired
-    VirtualMachineDAO vmachineDao;
+    protected final static Logger LOG = LoggerFactory
+        .getLogger(VirtualMachineAllocatorService.class);
+
+    /** If the check machine fails, how many times the allocator try a new target machine. */
+    protected final static Integer RETRIES_AFTER_CHECK = 5;
 
     @Autowired
-    ResourceUpgradeUse upgradeUse;
+    private VirtualApplianceDAO virtualAppDao;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    IAllocator allocator;
+    protected VirtualimageAllocationService allocationService;
+
+    @Autowired
+    protected VirtualMachineFactory vmFactory;
+
+    @Autowired
+    protected IMachineCheck machineChecker;
+
+    @Autowired
+    protected VirtualMachineDAO virtualMachineDao;
+
+    @Autowired
+    protected EnterpriseLimitChecker checkEnterpirse;
+
+    @Autowired
+    protected ResourceUpgradeUse upgradeUse;
+
+    public VirtualMachineAllocatorService()
+    {
+
+    }
+
+    public VirtualMachineAllocatorService(final EntityManager em)
+    {
+        this.virtualAppDao = new VirtualApplianceDAO(em);
+        this.userService = new UserService(em);
+        this.allocationService = new VirtualimageAllocationService();
+        this.vmFactory = new VirtualMachineFactory(em);
+        this.machineChecker = new MachineCheck();
+        this.virtualMachineDao = new VirtualMachineDAO(em);
+        this.checkEnterpirse = new EnterpriseLimitChecker(em);
+        this.upgradeUse = new ResourceUpgradeUse(em);
+
+    }
 
     /**
      * Only perform checks if the resources are increased. Checks the resource limits, check the
      * target machine can hold the new resource requirements and update the target machine usage.
      */
     public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
-        final VirtualMachineDto newVmRequirements, final boolean foreceEnterpriseSoftLimits)
+        final VirtualMachineRequirements increaseRequirements,
+        final boolean foreceEnterpriseSoftLimits)
     {
 
-        VirtualMachine vmachine = vmachineDao.findById(virtualMachineId);
+        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
+        final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+        final Machine machine = vmachine.getHypervisor().getMachine();
+
         userService.checkCurrentEnterpriseForPostMethods(vmachine.getEnterprise());
 
         if (vmachine.getHypervisor() == null || vmachine.getHypervisor().getMachine() == null)
@@ -78,8 +143,23 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         try
         {
-            allocator.checkEditVirtualMachineResources(idVirtualApp, virtualMachineId,
-                newVmRequirements, foreceEnterpriseSoftLimits);
+            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
+
+            boolean check =
+                allocationService.checkVirtualMachineResourceIncrease(machine,
+                    increaseRequirements, idVirtualApp);
+
+            if (!check)
+            {
+                final String cause =
+                    String.format("Current workload rules (RAM and CPU oversubscription) "
+                        + "on the target machine: %s disallow the required resources increment.",
+                        machine.getName());
+                throw new AllocatorException(cause);
+            }
+
+            upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), increaseRequirements);
+
         }
         catch (NotEnoughResourcesException e)
         {
@@ -89,11 +169,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (LimitExceededException limite)
         {
             addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
-        }
-        catch (ResourceAllocationException e)
-        {
-            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
-                virtualMachineId, e));
         }
         catch (AllocatorException e)
         {
@@ -109,24 +184,113 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         {
             flushErrors();
         }
-
-        final int cpuIncrease = newVmRequirements.getCpu() - vmachine.getCpu();
-        final int ramIncrease = newVmRequirements.getRam() - vmachine.getRam();
-
-        upgradeUse.updateUsed(vmachine.getHypervisor().getMachine(), cpuIncrease, ramIncrease);
-
     }
 
+    /**
+     * Creates a virtual machine using some hypervisor on the current virtual appliance datacenter.
+     * 
+     * @param targetImage, target image to deploy (virtual machine template). Determine basic
+     *            resource utilization (CPU, RAM, HD) (additionally repository utilization)
+     * @param resources, additional resources configurations to be added on the virtual machine
+     * @param user, the user performing the virtual machine creation.
+     * @param virtualAppId, the virtual appliance id requiring this virtual machine (contains
+     *            information about the target {@link VirtualDataCenterHB}).
+     * @param foreceEnterpriseSoftLimits, indicating if the virtual appliance should be started even
+     *            when the soft limit is exceeded. if false and the soft limit is reached a
+     *            {@link SoftLimitExceededException} is thrown, otherwise generate a EVENT TRACE.
+     * @return a Virtual Machine based on the provided virtual image on some (best) machine.
+     * @throws AllocatorException, direct subclasses {@link HardLimitExceededException} when the
+     *             current virtual image requirements will exceed the total allowed resource
+     *             reservation, {@link SoftLimitExceededException} on ''foreceEnterpriseSoftLimits''
+     *             = false and the soft limit is exceeded.
+     * @throws ResourceAllocationException, if none of the machines on the datacenter can be used to
+     *             perform this operation.
+     */
     public VirtualMachine allocateVirtualMachine(final Integer virtualMachineId,
-        final Integer idVirtualApp, final Boolean foreceEnterpriseSoftLimits)
+        final Integer idVirtualApp, final VirtualMachineRequirements increaseRequirements,
+        final Boolean foreceEnterpriseSoftLimits)
     {
-        VirtualMachine vmachine = null; // flush errors
+        VirtualMachine allocatedVirtualMachine = null;
+        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
+        final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+
+        userService.checkCurrentEnterpriseForPostMethods(vapp.getEnterprise());
 
         try
         {
-            vmachine =
-                allocator.allocateVirtualMachine(idVirtualApp, virtualMachineId,
-                    foreceEnterpriseSoftLimits);
+            final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
+            final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
+
+            /*
+             * ENTERPRISE LIMIT CHECK
+             */
+            checkLimist(vapp, increaseRequirements, foreceEnterpriseSoftLimits);
+
+            /*
+             * PHYSICAL MACHINE ALLOCATION
+             */
+            Machine targetMachine = null;
+
+            int retry = 0;
+            String errorCause = null;
+            while (targetMachine == null && retry < RETRIES_AFTER_CHECK)
+            {
+                retry++;
+
+                targetMachine =
+                    allocationService.findBestTarget(increaseRequirements, fitPolicy, vapp.getId());
+
+                // TODO udate resources there
+
+                // BEST REAL MACHINE
+                if (machineChecker.check(targetMachine))
+                {
+                    try
+                    {
+                        // CREATE THE VIRTUAL MACHINE
+                        allocatedVirtualMachine =
+                            vmFactory.createVirtualMachine(targetMachine, vmachine);
+
+                        // refresh vmachine with the information added on the VirtualMachineFactory
+                        virtualMachineDao.flush(); // FIXME
+                    }
+                    catch (final NotEnoughResourcesException e)
+                    {
+                        LOG.error("Discarded machine [{}] : Not Enough Resources [{}]",
+                            targetMachine.getName(), e);
+
+                        errorCause =
+                            String.format("Machine : %s error: %s", targetMachine.getName(),
+                                e.getMessage());
+                        targetMachine = null;
+                    }
+                }
+                else
+                {
+                    LOG.error("Machine [{}] is not MANAGED", targetMachine.getName());
+                    errorCause =
+                        String.format("Machine : %s error: %s", targetMachine.getName(),
+                            "is not MANAGED");
+                    targetMachine = null;
+
+                }
+            }// retry until check
+
+            // SOME CANDIDATE ?
+            if (targetMachine == null)
+            {
+                final String cause =
+                    String.format(
+                        "Allocator can not select a machine on the current virtual datacenter. "
+                            + "Last candidate error : %s.", errorCause != null ? errorCause
+                            : "can not be confirmed as MANAGED.");
+                throw new NotEnoughResourcesException(cause);
+            }
+
+            LOG.info("Selected physical machine [{}] to instantiate VirtualMachine [{}]",
+                targetMachine.getName(), vmachine.getName());
+
+            return allocatedVirtualMachine;
 
         }
         catch (NotEnoughResourcesException e)
@@ -137,11 +301,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (LimitExceededException limite)
         {
             addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.name(), limite.toString()));
-        }
-        catch (ResourceAllocationException e)
-        {
-            addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
-                virtualMachineId, e));
         }
         catch (AllocatorException e)
         {
@@ -158,7 +317,24 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             flushErrors();
         }
 
-        return vmachine;
+        return vmachine; // unreachable code
+    }
+
+    /**
+     * <p>
+     * .DO NOT perform any resource limitation check (Enterprise, VDC or DC). As the original
+     * virtual machine running on the original hypervisor will be deallocated one the hypervisor can
+     * be reached.
+     * 
+     * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
+     *         but we wants to move it.
+     */
+    public VirtualMachine allocateHAVirtualMachine(final Integer vmId,
+        final VirtualMachineRequirements requirements, final VirtualMachineState targetState)
+        throws AllocatorException, ResourceAllocationException
+    {
+        LOG.error("community can't *allocateHAVirtualMachine*");
+        return null;
     }
 
     private CommonError createErrorWithExceptionDetails(final APIError apiError,
@@ -181,8 +357,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()), e
-                .getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(vMachine.getId()),
+                e.getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -191,9 +367,17 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
+    /**
+     * Roll back the changes on the target physical machine after the virtual machine is destroyed
+     * (of excluded by some exception on the virtual machine creation on the hypervisor).
+     * 
+     * @param machine, the target machine holding the virtual machine to be undeployed.
+     * @param image, the virtual image requirements to be deallocated.
+     * @throws AllocationException, it there are some problem updating the physical machine
+     */
     public void deallocateVirtualMachine(final Integer idVirtualMachine)
     {
-        VirtualMachine vmachine = vmachineDao.findById(idVirtualMachine);
+        VirtualMachine vmachine = virtualMachineDao.findById(idVirtualMachine);
         userService.checkCurrentEnterpriseForPostMethods(vmachine.getEnterprise());
 
         try
@@ -203,8 +387,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine), e
-                .getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
+                e.getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -215,17 +399,63 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     private String virtualMachineInfo(final Integer vmid)
     {
-        VirtualMachine vm = vmachineDao.findById(vmid);
+        VirtualMachine vm = virtualMachineDao.findById(vmid);
 
-        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(), vm
-            .getUuid());
+        return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
+            vm.getUuid());
     }
 
-    public VirtualMachineRequirements getVirtualMachineRequirements(
-        final VirtualMachine virtualMachine)
+    /** ##### CHECK LIMITS ###### */
+    /**
+     * Check the current allowed Enterprise resource utilization is not exceeded. Overloaded method
+     * because en case of deploying VM is not necessary check VLAN limits.
+     * 
+     * @param vapp, the target virtual appliance.
+     * @param required, the required resources.
+     * @param force, if false the soft limits can not be exceeded (throws an
+     *            SoftLimitExceededException) otherwise only be traced if reached.
+     * @throws ResourceAllocationException, (NotEnoughResources) if there aren't any machine to full
+     *             fits the requirements.
+     * @throws LimitExceededException, it the allowed resources are exceeded.
+     *             {@link HardLimitExceededException} when the current virtual image requirements
+     *             will exceed the total allowed resource reservation,
+     *             {@link SoftLimitExceededException} on ''foreceEnterpriseSoftLimits'' = false and
+     *             the soft limit is exceeded.
+     */
+    protected void checkLimist(final VirtualAppliance vapp,
+        final VirtualMachineRequirements required, final Boolean force)
+        throws LimitExceededException
     {
-        return allocator.getVirtualMachineRequirements(virtualMachine);
 
+        checkLimist(vapp, required, force, true);
+
+    }
+
+    /**
+     * @param vapp
+     * @param required
+     * @param force
+     * @param checkVLAN
+     * @throws LimitExceededException
+     */
+    protected void checkLimist(final VirtualAppliance vapp,
+        final VirtualMachineRequirements required, final Boolean force, final Boolean checkVLAN)
+        throws LimitExceededException
+    {
+
+        checkEnterpirse.checkLimits(vapp.getEnterprise(), required, force, checkVLAN, false);
+
+    }
+
+    /**
+     * Gets the {@link FitPolicy} of the current datacenter.
+     * 
+     * @param idDatacenter, fit policy is based at datacenter level.
+     * @return the default ''Global'' Fit Policy (for any Datacenter).
+     */
+    protected FitPolicy getAllocationFitPolicyOnDatacenter(final Integer idDatacenter)
+    {
+        return FitPolicy.PROGRESSIVE; // community fix the fit policy
     }
 
 }

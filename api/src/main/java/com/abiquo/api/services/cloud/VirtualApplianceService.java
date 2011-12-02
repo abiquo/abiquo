@@ -43,15 +43,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
-import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
 import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
 import com.abiquo.scheduler.limit.VirtualMachinePrice.VirtualMachineCost;
-import com.abiquo.scheduler.limit.VirtualMachineRequirements;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -70,6 +67,7 @@ import com.abiquo.server.core.pricing.PricingCostCode;
 import com.abiquo.server.core.pricing.PricingRep;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.pricing.PricingTier;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -83,38 +81,32 @@ import com.abiquo.tracer.SeverityType;
 @Transactional(readOnly = true)
 public class VirtualApplianceService extends DefaultApiService
 {
-
-    private static final String RESOURCE_URI =
-        "http://schemas.dmtf.org/ovf/envelope/1/virtualApplianceService/virtualApplianceResource";
-
-    @Autowired
-    VirtualDatacenterRep repo;
+    /** The logger object **/
+    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
     @Autowired
-    VirtualDatacenterService vdcService;
+    private VirtualDatacenterRep repo;
 
     @Autowired
-    RemoteServiceService remoteServiceService;
+    private VirtualDatacenterService vdcService;
 
     @Autowired
-    VirtualMachineAllocatorService allocatorService;
+    private UserService userService;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
-    VirtualApplianceRep virtualApplianceRepo;
+    private VirtualApplianceRep virtualApplianceRepo;
 
     @Autowired
     private PricingRep pricingRep;
 
     @Autowired
-    RasdManagementDAO rasdManDao;
+    private RasdManagementDAO rasdManDao;
 
-    VirtualMachineService vmService;
+    @Autowired
+    private VirtualMachineService vmService;
 
-    /** The logger object **/
-    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
+    @Autowired
+    private VirtualMachineRequirementsFactory requirements;
 
     public VirtualApplianceService()
     {
@@ -124,10 +116,13 @@ public class VirtualApplianceService extends DefaultApiService
     public VirtualApplianceService(final EntityManager em)
     {
         this.repo = new VirtualDatacenterRep(em);
-        this.virtualApplianceRepo = new VirtualApplianceRep(em);
         this.vdcService = new VirtualDatacenterService(em);
-        this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
+        this.virtualApplianceRepo = new VirtualApplianceRep(em);
+        this.pricingRep = new PricingRep(em);
+        this.rasdManDao = new RasdManagementDAO(em);
+        this.vmService = new VirtualMachineService(em);
+        this.requirements = new VirtualMachineRequirementsFactory(); // XXX
     }
 
     /**
@@ -176,16 +171,6 @@ public class VirtualApplianceService extends DefaultApiService
             flushErrors();
         }
         return vapp;
-    }
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void addImage(final Integer virtualDatacenterId, final Integer virtualApplianceId,
-        final VirtualImageDto image)
-    {
-
-        /**
-         * TODO
-         */
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -309,8 +294,9 @@ public class VirtualApplianceService extends DefaultApiService
 
         for (NodeVirtualImage node : virtualAppliance.getNodes())
         {
+            final VirtualMachine vmachine = node.getVirtualMachine();
             VirtualMachineRequirements virtualMachineRequirements =
-                allocatorService.getVirtualMachineRequirements(node.getVirtualMachine());
+                requirements.createVirtualMachineRequirements(vmachine);
 
             virtualMachinesCost =
                 addVirtualMachineCost(virtualMachinesCost, node.getVirtualMachine(),

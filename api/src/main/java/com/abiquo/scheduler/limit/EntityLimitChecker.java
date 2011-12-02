@@ -36,6 +36,8 @@ import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.DefaultEntityWithLimits.LimitStatus;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirementsEmpty;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;

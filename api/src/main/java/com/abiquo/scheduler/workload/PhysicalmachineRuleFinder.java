@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.stereotype.Component;
 
 import com.abiquo.server.core.appslibrary.VirtualImage;
@@ -39,9 +41,17 @@ public class PhysicalmachineRuleFinder implements
     SecondPassRuleFinder<VirtualImage, Machine, Integer>
 {
 
+    public PhysicalmachineRuleFinder()
+    {
+    }
+
+    public PhysicalmachineRuleFinder(final EntityManager em)
+    {
+    }
+
     @Override
     public Map<Machine, List<MachineLoadRule>> initializeMachineLoadRuleCache(
-        Collection<Machine> firstPassCandidateMachines)
+        final Collection<Machine> firstPassCandidateMachines)
     {
         // community implementation doesn't apply rules
         return null;

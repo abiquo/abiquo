@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.scheduler.limit;
+package com.abiquo.server.core.scheduler;
 
 /**
  * Any requirement, used to check the current limits (when Editing Enterpirse, Datacenter or
@@ -30,6 +30,6 @@ public class VirtualMachineRequirementsEmpty extends VirtualMachineRequirements
 
     public VirtualMachineRequirementsEmpty()
     {
-        super();
+        super(0l, 0l, 0l, 0l, 0l, 0l, 0l);
     }
 }

@@ -26,6 +26,7 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,19 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
 
     @Autowired
     private CategoryService categoryService;
+
+    public VirtualImageService()
+    {
+    }
+
+    public VirtualImageService(final EntityManager em)
+    {
+        this.repositoryDao = new RepositoryDAO(em);
+        this.infrastructureService = new InfrastructureService(em);
+        this.enterpriseService = new EnterpriseService(em);
+        this.appsLibraryRep = new AppsLibraryRep(em);
+        this.categoryService = new CategoryService(em);
+    }
 
     @Transactional(readOnly = true)
     public Repository getDatacenterRepository(final Integer dcId)

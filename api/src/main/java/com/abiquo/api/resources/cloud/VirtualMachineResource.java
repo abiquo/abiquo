@@ -468,29 +468,6 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
 
     /** ########## DEPRECATED ZONE ########## */
 
-    @PUT
-    @Path("action/allocate")
-    @Deprecated
-    public synchronized VirtualMachineDto allocate(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer virtualMachineId,
-        final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
-        throws Exception
-    {
-        Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
-
-        VirtualMachine vmachine =
-            service.allocateVirtualMachine(virtualMachineId, virtualApplianceId,
-                forceEnterpriseLimits);
-
-        service.updateVirtualMachineUse(virtualApplianceId, vmachine);
-
-        return createTransferObject(vmachine, virtualApplianceId, virtualDatacenterId, restBuilder);
-    }
-
     public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
     {
@@ -588,34 +565,6 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
                 .getRepository().getDatacenter().getId(), vimage.getId()));
         }
         return dto;
-    }
-
-    // TODO forceEnterpriseLimits = true
-
-    @PUT
-    @Path("action/checkedit")
-    @Deprecated
-    public synchronized void checkEditAllocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
-        final VirtualMachineDto vmachine, @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
-
-        service.checkAllocate(virtualApplianceId, virtualMachineId, vmachine, true);
-    }
-
-    @DELETE
-    @Deprecated
-    @Path("action/deallocate")
-    public synchronized void deallocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        service.deallocateVirtualMachine(virtualMachineId);
     }
 
     /**

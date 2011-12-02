@@ -60,6 +60,7 @@ import com.abiquo.server.core.infrastructure.network.NetworkAssignment;
 import com.abiquo.server.core.infrastructure.network.NetworkAssignmentDAO;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
  * Updates the following resource.
@@ -72,35 +73,34 @@ import com.abiquo.server.core.infrastructure.network.VLANNetworkDAO;
 @Component
 public class ResourceUpgradeUse implements IResourceUpgradeUse
 {
-
-    @Autowired
-    InfrastructureRep datacenterRepo;
-
-    @Autowired
-    DatastoreDAO datastoreDao;
-
-    @Autowired
-    VirtualApplianceDAO virtualApplianceDao;
-
-    @Autowired
-    NetworkAssignmentDAO netAssignDao;
-
-    @Autowired
-    IpPoolManagementDAO ipPoolManDao;
-
-    @Autowired
-    VLANNetworkDAO vlanNetworkDao;
-
-    @Autowired
-    RasdDAO rasdDao;
-
-    @Autowired
-    VirtualMachineDAO vmachineDao;
-
-    @Autowired
-    HypervisorDAO hypervisorDao;
-
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
+
+    @Autowired
+    private InfrastructureRep datacenterRepo;
+
+    @Autowired
+    private DatastoreDAO datastoreDao;
+
+    @Autowired
+    private VirtualApplianceDAO virtualApplianceDao;
+
+    @Autowired
+    private NetworkAssignmentDAO netAssignDao;
+
+    @Autowired
+    private IpPoolManagementDAO ipPoolManDao;
+
+    @Autowired
+    private VLANNetworkDAO vlanNetworkDao;
+
+    @Autowired
+    private RasdDAO rasdDao;
+
+    @Autowired
+    private VirtualMachineDAO vmachineDao;
+
+    @Autowired
+    private HypervisorDAO hypervisorDao;
 
     public ResourceUpgradeUse()
     {
@@ -108,19 +108,17 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     // For Testign purposes only
-    public ResourceUpgradeUse(final EntityManager entityManager)
+    public ResourceUpgradeUse(final EntityManager em)
     {
-        assert entityManager != null;
-        assert entityManager.isOpen();
-
-        // this.entityManager = entityManager;
-
-        this.datastoreDao = new DatastoreDAO(entityManager);
-        this.datacenterRepo = new InfrastructureRep(entityManager);
-        this.ipPoolManDao = new IpPoolManagementDAO(entityManager);
-        this.vlanNetworkDao = new VLANNetworkDAO(entityManager);
-        this.netAssignDao = new NetworkAssignmentDAO(entityManager);
-        this.vmachineDao = new VirtualMachineDAO(entityManager);
+        this.datacenterRepo = new InfrastructureRep(em);
+        this.datastoreDao = new DatastoreDAO(em);
+        this.virtualApplianceDao = new VirtualApplianceDAO(em);
+        this.netAssignDao = new NetworkAssignmentDAO(em);
+        this.ipPoolManDao = new IpPoolManagementDAO(em);
+        this.vlanNetworkDao = new VLANNetworkDAO(em);
+        this.rasdDao = new RasdDAO(em);
+        this.vmachineDao = new VirtualMachineDAO(em);
+        this.hypervisorDao = new HypervisorDAO(em);
     }
 
     /**
@@ -377,10 +375,11 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     }
 
     @Override
-    public void updateUsed(final Machine machine, final int cpuIncrease, final int ramIncrease)
+    public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements)
     {
-        machine.setVirtualCpusUsed(machine.getVirtualCpusUsed() + cpuIncrease);
-        machine.setVirtualRamUsedInMb(machine.getVirtualRamUsedInMb() + ramIncrease);
+        machine.setVirtualCpusUsed((int) (machine.getVirtualCpusUsed() + requirements.getCpu()));
+        machine.setVirtualRamUsedInMb((int) (machine.getVirtualRamUsedInMb() + requirements
+            .getRam()));
 
         datacenterRepo.updateMachine(machine);
     }

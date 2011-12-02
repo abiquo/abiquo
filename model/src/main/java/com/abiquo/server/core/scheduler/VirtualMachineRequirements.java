@@ -19,13 +19,14 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.scheduler.limit;
-
-import com.abiquo.server.core.cloud.VirtualMachine;
+package com.abiquo.server.core.scheduler;
 
 /**
- * Holds the virtual image requirements and other additional virtual machine configuration (storage
- * and volumes).
+ * Holds the virtual image requirements and other additional virtual machine configuration
+ * <ul>
+ * <li>{@link VolumeManagementHB}</li>
+ * <li>{@link IpPoolManagementHB}</li>
+ * </ul>
  * 
  * @author apuig
  **/
@@ -52,37 +53,9 @@ public class VirtualMachineRequirements
     /** Required public IP count. */
     protected Long publicIP;
 
-    protected VirtualMachineRequirements()
-    {
-        this.cpu = 0l;
-        this.ram = 0l;
-        this.hd = 0l;
-
-        this.repository = 0l;
-
-        this.storage = 0l;
-        this.publicIP = 0l;
-        this.publicVLAN = 0l;
-    }
-
-    public VirtualMachineRequirements(final VirtualMachine vmachine)
-    {
-        this.cpu = Long.valueOf(vmachine.getCpu());
-        this.ram = Long.valueOf(vmachine.getRam());
-        this.hd =
-            vmachine.getVirtualImage().isStateful() ? 0 : Long.valueOf(vmachine.getHdInBytes());
-
-        this.repository = vmachine.getVirtualImage().getDiskFileSize();
-
-        this.storage = 0l;
-        this.publicIP = 0l;
-        this.publicVLAN = 0l;
-    }
-
     public VirtualMachineRequirements(final Long cpu, final Long ram, final Long hd,
         final Long repository, final Long storage, final Long publicVLAN, final Long publicIP)
     {
-        super();
         this.cpu = cpu;
         this.ram = ram;
         this.hd = hd;
@@ -90,6 +63,17 @@ public class VirtualMachineRequirements
         this.storage = storage;
         this.publicVLAN = publicVLAN;
         this.publicIP = publicIP;
+    }
+
+    public VirtualMachineRequirements(final VirtualMachineRequirements requirements)
+    {
+        this.cpu = requirements.cpu;
+        this.ram = requirements.ram;
+        this.hd = requirements.hd;
+        this.repository = requirements.repository;
+        this.storage = requirements.storage;
+        this.publicVLAN = requirements.publicVLAN;
+        this.publicIP = requirements.publicIP;
     }
 
     public Long getCpu()
@@ -125,6 +109,21 @@ public class VirtualMachineRequirements
     public Long getPublicIP()
     {
         return publicIP;
+    }
+
+    public void setStorage(final Long storage)
+    {
+        this.storage = storage;
+    }
+
+    public void setPublicVLAN(final Long publicVLAN)
+    {
+        this.publicVLAN = publicVLAN;
+    }
+
+    public void setPublicIP(final Long publicIP)
+    {
+        this.publicIP = publicIP;
     }
 
 }
