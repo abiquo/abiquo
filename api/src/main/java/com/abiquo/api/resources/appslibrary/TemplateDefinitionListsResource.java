@@ -37,77 +37,77 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.services.appslibrary.OVFPackageListService;
+import com.abiquo.api.services.appslibrary.TemplateDefinitionListService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 
 @Parent(EnterpriseResource.class)
-@Path(OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH)
+@Path(TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH)
 @Controller
-public class OVFPackageListsResource extends AbstractResource
+public class TemplateDefinitionListsResource extends AbstractResource
 {
-    public static final String OVF_PACKAGE_LISTS_PATH = "appslib/ovfpackagelists";
+    public static final String TEMPLATE_DEFINITION_LISTS_PATH = "appslib/templateDefinitionLists";
 
     @Autowired
-    private OVFPackageListService service;
+    private TemplateDefinitionListService service;
 
     @Autowired
     private AppsLibraryTransformer transformer;
 
     @GET
-    public OVFPackageListsDto getOVFPackageLists(
+    public TemplateDefinitionListsDto getTemplateDefinitionLists(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        List<OVFPackageList> all = service.getOVFPackageListsByEnterprise(idEnterprise);
+        List<TemplateDefinitionList> all = service.getTemplateDefinitionListsByEnterprise(idEnterprise);
 
-        OVFPackageListsDto ovfPackageListsDto = new OVFPackageListsDto();
+        TemplateDefinitionListsDto templateDefListsDto = new TemplateDefinitionListsDto();
 
         Integer totalSize = 0;
         if (all != null && !all.isEmpty())
         {
-            for (OVFPackageList r : all)
+            for (TemplateDefinitionList r : all)
             {
-                ovfPackageListsDto.add(transformer.createTransferObject(r, restBuilder));
+                templateDefListsDto.add(transformer.createTransferObject(r, restBuilder));
             }
             totalSize = all.size();
         }
 
-        ovfPackageListsDto.setTotalSize(totalSize);
+        templateDefListsDto.setTotalSize(totalSize);
 
-        return ovfPackageListsDto;
+        return templateDefListsDto;
     }
 
     /**
-     * if OVF_PACKAGE_POST_QUERY_PARM is set do not use the content body OVFPackageListDto.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.APPLICATION_XML)
-    public OVFPackageListDto postOVFPackageList(
+    public TemplateDefinitionListDto postTemplateDefinitionList(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
-        final OVFPackageListDto ovfPackageList, @Context final IRESTBuilder restBuilder)
+        final TemplateDefinitionListDto templateDefList, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
 
-        OVFPackageList opl = transformer.createPersistenceObject(ovfPackageList);
-        opl = service.addOVFPackageList(opl, idEnterprise);
+        TemplateDefinitionList opl = transformer.createPersistenceObject(templateDefList);
+        opl = service.addTemplateDefinitionList(opl, idEnterprise);
 
         return transformer.createTransferObject(opl, restBuilder);
     }
 
     /**
-     * if OVF_PACKAGE_POST_QUERY_PARM is set do not use the content body OVFPackageListDto.
+     * if TEMPLATE_DEFINITION_POST_QUERY_PARM is set do not use the content body {@link TemplateDefinitionListDto}.
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    public OVFPackageListDto postOVFPackageListWithOVFIndex(
+    public TemplateDefinitionListDto postTemplateDefinitionListFromOVFIndexUrl(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         final String ovfindexURL, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        OVFPackageList opl = service.addOVFPackageList(ovfindexURL, idEnterprise);
+        TemplateDefinitionList opl = service.addTemplateDefinitionList(ovfindexURL, idEnterprise);
 
         return transformer.createTransferObject(opl, restBuilder);
     }

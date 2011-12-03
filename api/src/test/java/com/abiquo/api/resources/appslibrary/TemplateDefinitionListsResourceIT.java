@@ -22,7 +22,7 @@
 package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertError;
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageListsURI;
+import static com.abiquo.api.common.UriTestResolver.resolveTemplateDefinitionListsURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -39,17 +39,17 @@ import org.testng.annotations.Test;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
 @Test(groups = {APPS_INTEGRATION_TESTS})
-public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
+public class TemplateDefinitionListsResourceIT extends AbstractJpaGeneratorIT
 {
 
     private String validURI;
@@ -80,78 +80,78 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void getOVFPackagesListsByEnterprise() throws Exception
+    public void getTemplateDefinitionsListsByEnterprise() throws Exception
     {
 
-        OVFPackageList list = new OVFPackageList("new", "http://listurl.com/index.xml");
+        TemplateDefinitionList list = new TemplateDefinitionList("new", "http://listurl.com/index.xml");
 
-        OVFPackage ovf0 = ovfPackageGenerator.createUniqueInstance();
-        list.addToOvfPackages(ovf0);
+        TemplateDefinition tempDef0 = templateDefGenerator.createUniqueInstance();
+        list.addTemplateDefinition(tempDef0);
 
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
 
-        ovf0.setAppsLibrary(app);
+        tempDef0.setAppsLibrary(app);
         list.setAppsLibrary(app);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(app);
-        entitiesToSetup.add(ovf0.getCategory());
-        entitiesToSetup.add(ovf0.getIcon());
-        entitiesToSetup.add(ovf0);
+        entitiesToSetup.add(tempDef0.getCategory());
+        entitiesToSetup.add(tempDef0.getIcon());
+        entitiesToSetup.add(tempDef0);
         entitiesToSetup.add(list);
         setup(entitiesToSetup.toArray());
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         ClientResponse response = get(validURI, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        OVFPackageListsDto entity = response.getEntity(OVFPackageListsDto.class);
+        TemplateDefinitionListsDto entity = response.getEntity(TemplateDefinitionListsDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 1);
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void getOVFPackagesListsByNonExistentEnterpriseRises404() throws Exception
+    public void getTemplateDefinitionListsByNonExistentEnterpriseRises404() throws Exception
     {
-        validURI = resolveOVFPackageListsURI(2);
+        validURI = resolveTemplateDefinitionListsURI(2);
         ClientResponse response = get(validURI);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createEmptyOVFPackageList()
+    public void createEmptyTemplateDefinitionList()
     {
-        OVFPackageListDto packageList = new OVFPackageListDto(); // empty list
-        packageList.setName("Empty List");
-        packageList.setUrl("http://listurl.com/index.xml");
+        TemplateDefinitionListDto templateDefList = new TemplateDefinitionListDto(); // empty list
+        templateDefList.setName("Empty List");
+        templateDefList.setUrl("http://listurl.com/index.xml");
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
         setup(app);
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
-        ClientResponse response = post(validURI, packageList, SYSADMIN, SYSADMIN);
+        ClientResponse response = post(validURI, templateDefList, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
-        OVFPackageListDto entityPost = response.getEntity(OVFPackageListDto.class);
+        TemplateDefinitionListDto entityPost = response.getEntity(TemplateDefinitionListDto.class);
         assertNotNull(entityPost);
-        assertEquals(packageList.getName(), entityPost.getName());
+        assertEquals(templateDefList.getName(), entityPost.getName());
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createOVFPackageList()
+    public void createTemplateDefinitionList()
     {
 
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
         setup(app);
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/ovfindex.xml";
 
@@ -164,20 +164,20 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 
         assertEquals(response.getStatusCode(), 201);
 
-        OVFPackageListDto entityPost = response.getEntity(OVFPackageListDto.class);
+        TemplateDefinitionListDto entityPost = response.getEntity(TemplateDefinitionListDto.class);
         assertNotNull(entityPost);
         assertEquals(entityPost.getName(), "Abiquo Official Repository");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createOVFPackageListFromOtherXml()
+    public void createTemplateDefinitionListFromOtherXml()
     {
 
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
         setup(app);
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/anyother.xml";
 
@@ -190,20 +190,20 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
 
         assertEquals(response.getStatusCode(), 201);
 
-        OVFPackageListDto entityPost = response.getEntity(OVFPackageListDto.class);
+        TemplateDefinitionListDto entityPost = response.getEntity(TemplateDefinitionListDto.class);
         assertNotNull(entityPost);
         assertEquals(entityPost.getName(), "Abiquo Official Repository");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createOVFPackageListwithBadURLRises404()
+    public void createTemplateDefinitionListwithBadURLRises404()
     {
 
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
         setup(app);
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String badURL = "http://localhost:7979/testovf/nonexistent/ovfindex.xml";
 
@@ -218,14 +218,14 @@ public class OVFPackageListsResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createOVFPackageListBadFormatXMLrises400()
+    public void createTemplateDefinitionListBadFormatXMLrises400()
     {
 
         AppsLibrary app = appsLibraryGenerator.createUniqueInstance();
         app.setEnterprise(enterprise);
         setup(app);
 
-        validURI = resolveOVFPackageListsURI(enterprise.getId());
+        validURI = resolveTemplateDefinitionListsURI(enterprise.getId());
 
         String xmlindexURI = "http://localhost:7979/testovf/invalidovfindex/ovfindex.xml";
 

@@ -28,14 +28,9 @@ import org.apache.commons.lang.StringUtils;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "ovfPackage")
-public class OVFPackageDto extends SingleResourceTransportDto
+@XmlRootElement(name = "templateDefinition")
+public class TemplateDefinitionDto extends SingleResourceTransportDto
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     private Integer id;
 
     private String url;

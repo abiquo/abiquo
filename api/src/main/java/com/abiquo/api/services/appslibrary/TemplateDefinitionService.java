@@ -27,7 +27,6 @@ import java.net.URL;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.core.UriBuilder;
 
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
@@ -48,43 +47,43 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 
 @Service
-public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClient
+public class TemplateDefinitionService extends DefaultApiServiceWithApplianceManagerClient
 {
-    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TemplateDefinitionService.class);
 
     @Autowired
-    private OVFPackageRep repo;
+    private TemplateDefinitionRep repo;
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
-    public OVFPackageService()
+    public TemplateDefinitionService()
     {
 
     }
 
-    public OVFPackageService(final EntityManager em)
+    public TemplateDefinitionService(final EntityManager em)
     {
-        repo = new OVFPackageRep(em);
+        repo = new TemplateDefinitionRep(em);
         entService = new EnterpriseService(em);
         appslibraryRep = new AppsLibraryRep(em);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public List<OVFPackage> getOVFPackagesByEnterprise(final Integer idEnterprise)
+    public List<TemplateDefinition> getTemplateDefinitionsByEnterprise(final Integer idEnterprise)
     {
-        return repo.getOVFPackagesByEnterprise(idEnterprise);
+        return repo.getTemplateDefinitionsByEnterprise(idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public OVFPackage getOVFPackage(final Integer id)
+    public TemplateDefinition getTemplateDefinition(final Integer id)
     {
-        OVFPackage ovfpackage = repo.getOVFPackage(id);
+        TemplateDefinition ovfpackage = repo.getTemplateDefinition(id);
         if (ovfpackage == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE);
@@ -94,54 +93,54 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackage addOVFPackage(final OVFPackage ovfPackage, final Integer idEnterprise)
+    public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef, final Integer idEnterprise)
     {
         Enterprise ent = entService.getEnterprise(idEnterprise);
-        return repo.addOVFPackage(ovfPackage, ent);
+        return repo.addTemplateDefinition(templateDef, ent);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackage modifyOVFPackage(final Integer ovfPackageId, final OVFPackage ovfPackage,
+    public TemplateDefinition updateTemplateDefinition(final Integer templateDefId, final TemplateDefinition templateDef,
         final Integer idEnterprise)
     {
         Enterprise enterprise = entService.getEnterprise(idEnterprise);
-        return repo.modifyOVFPackage(ovfPackageId, ovfPackage, enterprise);
+        return repo.updateTemplateDefinition(templateDefId, templateDef, enterprise);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeOVFPackage(final Integer id)
+    public void removeTemplateDefinition(final Integer id)
     {
-        OVFPackage ovfpackage = repo.getOVFPackage(id);
-        if (ovfpackage == null)
+        TemplateDefinition templateDef = repo.getTemplateDefinition(id);
+        if (templateDef == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE);
             flushErrors();
         }
-        repo.removeOVFPackage(id);
+        repo.removeTemplateDefinition(id);
     }
 
     /** #################### ApplianceManager communications #################### */
     /** #################### */
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public OVFPackageInstanceStateDto getOVFPackageState(final Integer id,
+    public OVFPackageInstanceStateDto getTemplateState(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
-        final String ovfUrl = getOVFPackage(id).getUrl();
+        final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
-        return amClient.getCurrentOVFPackageInstanceStatus(String.valueOf(enterpriseId), ovfUrl);
+        return amClient.getTemplateStatus(String.valueOf(enterpriseId), ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void installOVFPackage(final Integer id, final Integer datacenterId,
+    public void installTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
-        final String ovfUrl = getOVFPackage(id).getUrl();
+        final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
         // checks the repository is writable
@@ -151,12 +150,12 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void uninstallOVFPackage(final Integer id, final Integer datacenterId,
+    public void uninstallTemplateDefinition(final Integer id, final Integer datacenterId,
         final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
-        final String ovfUrl = getOVFPackage(id).getUrl();
+        final String ovfUrl = getTemplateDefinition(id).getUrl();
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
 
         amClient.delete(String.valueOf(enterpriseId), ovfUrl);
@@ -166,7 +165,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
     /** #################### */
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public OVFPackage ovfPackageFromOvfDescription(final OVFDescription descr,
+    public TemplateDefinition transformToTemplateDefinition(final OVFDescription descr,
         final String baseRepositorySpaceURL)
     {
 
@@ -183,7 +182,7 @@ public class OVFPackageService extends DefaultApiServiceWithApplianceManagerClie
             description = description.substring(0, 254);
         }
 
-        OVFPackage pack = new OVFPackage();
+        TemplateDefinition pack = new TemplateDefinition();
         pack.setDescription(description);
         pack.setName(name);
         pack.setProductName(name);

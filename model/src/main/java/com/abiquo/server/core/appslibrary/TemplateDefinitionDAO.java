@@ -34,45 +34,45 @@ import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
-@Repository("jpaOVFPackageDAO")
-public class OVFPackageDAO extends DefaultDAOBase<Integer, OVFPackage>
+@Repository("jpaTemplateDefinitionDAO")
+public class TemplateDefinitionDAO extends DefaultDAOBase<Integer, TemplateDefinition>
 {
 
-    private final static String FIND_BY_ENTERPRISE = "SELECT ovf FROM OVFPackage ovf " //
-        + "WHERE ovf.appsLibrary.enterprise.id = :enterpriseId ";
+    private final static String FIND_BY_ENTERPRISE = "SELECT temDef FROM TemplateDefinition temDef " //
+        + "WHERE temDef.appsLibrary.enterprise.id = :enterpriseId ";
 
-    public OVFPackageDAO()
+    public TemplateDefinitionDAO()
     {
-        super(OVFPackage.class);
+        super(TemplateDefinition.class);
     }
 
-    public OVFPackageDAO(final EntityManager entityManager)
+    public TemplateDefinitionDAO(final EntityManager entityManager)
     {
-        super(OVFPackage.class, entityManager);
+        super(TemplateDefinition.class, entityManager);
     }
 
-    public OVFPackage findByUrl(final String url)
+    public TemplateDefinition findByUrl(final String url)
     {
-        return findUniqueByProperty(OVFPackage.URL_PROPERTY, url);
+        return findUniqueByProperty(TemplateDefinition.URL_PROPERTY, url);
     }
 
     @SuppressWarnings("unchecked")
-    public List<OVFPackage> findByEnterprise(final Integer enterpriseId)
+    public List<TemplateDefinition> findByEnterprise(final Integer enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
         return query.list();
     }
 
-    public List<OVFPackage> findByAppsLibrary(final AppsLibrary appsLibrary)
+    public List<TemplateDefinition> findByAppsLibrary(final AppsLibrary appsLibrary)
     {
         Criteria criteria = createCriteria(sameAppsLibrary(appsLibrary));
-        criteria.addOrder(Order.asc(OVFPackage.NAME_PROPERTY));
+        criteria.addOrder(Order.asc(TemplateDefinition.NAME_PROPERTY));
         return getResultList(criteria);
     }
 
     private static Criterion sameAppsLibrary(final AppsLibrary appsLibrary)
     {
-        return Restrictions.eq(OVFPackage.APPS_LIBRARY_PROPERTY, appsLibrary);
+        return Restrictions.eq(TemplateDefinition.APPS_LIBRARY_PROPERTY, appsLibrary);
     }
 }

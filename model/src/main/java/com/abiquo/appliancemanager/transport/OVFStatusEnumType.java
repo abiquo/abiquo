@@ -24,10 +24,10 @@ package com.abiquo.appliancemanager.transport;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
 
 /**
- * status of a {@link OVFPackage} in a {@link EnterpriseRepositoriesDto}.
+ * status of a {@link TemplateDefinition} in a {@link EnterpriseRepositoriesDto}.
  */
 @XmlType(name = "ovfInstanceStatus")
 @XmlEnum

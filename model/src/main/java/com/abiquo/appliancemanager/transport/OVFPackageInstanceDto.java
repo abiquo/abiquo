@@ -27,18 +27,18 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 /**
- * The materialization of an {@link OVFPackage} of a given {@link Datacenter} and {@link Enterprise}
+ * The materialization of an {@link TemplateDefinition} of a given {@link Datacenter} and {@link Enterprise}
  * .
  */
 @XmlRootElement(name = "ovfInstance")
 @XmlType
-public class OVFPackageInstanceDto extends OVFPackageDto
+public class OVFPackageInstanceDto extends TemplateDefinitionDto
 {
     private static final long serialVersionUID = 6994372893155355385L;
 
@@ -48,7 +48,7 @@ public class OVFPackageInstanceDto extends OVFPackageDto
     /** Optional. Only for vimages instances (bundles) */
     private String masterDiskFilePath;
 
-    /** ######### hardware requirements : TODO move to {@link OVFPackageDto} ######### */
+    /** ######### hardware requirements : TODO move to {@link TemplateDefinitionDto} ######### */
 
     @Deprecated
     /** Use {@link OVFPackageDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the OVFPackageDto*/

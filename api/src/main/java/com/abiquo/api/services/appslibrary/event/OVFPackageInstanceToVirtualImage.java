@@ -38,8 +38,8 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDAO;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDAO;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
@@ -60,7 +60,7 @@ public class OVFPackageInstanceToVirtualImage
     private AppsLibraryRep appslibraryRep;
 
     @Autowired
-    private OVFPackageDAO ovfDao;
+    private TemplateDefinitionDAO ovfDao;
 
     @Autowired
     private EnterpriseRep entRepo;
@@ -196,7 +196,7 @@ public class OVFPackageInstanceToVirtualImage
         }
 
         // try to find in the OVFPackage
-        OVFPackage ovf = ovfDao.findByUrl(disk.getUrl());
+        TemplateDefinition ovf = ovfDao.findByUrl(disk.getUrl());
         return ovf != null ? ovf.getCategory() : appslibraryRep.getDefaultCategory();
     }
 
@@ -208,7 +208,7 @@ public class OVFPackageInstanceToVirtualImage
         }
 
         // try to find in the OVFPackage
-        OVFPackage ovf = ovfDao.findByUrl(disk.getUrl());
+        TemplateDefinition ovf = ovfDao.findByUrl(disk.getUrl());
         return ovf != null ? ovf.getIcon() : null;
     }
 

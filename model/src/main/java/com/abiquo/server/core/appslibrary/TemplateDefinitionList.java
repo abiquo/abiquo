@@ -42,15 +42,15 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = OVFPackageList.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = OVFPackageList.TABLE_NAME)
-public class OVFPackageList extends DefaultEntityBase
+@Table(name = TemplateDefinitionList.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = TemplateDefinitionList.TABLE_NAME)
+public class TemplateDefinitionList extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "ovf_package_list";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    public OVFPackageList()
+    public TemplateDefinitionList()
     {
         // Just for JPA support
     }
@@ -151,56 +151,56 @@ public class OVFPackageList extends DefaultEntityBase
         this.url = url;
     }
 
-    public static final String OVF_PACKAGE_TABLE = "ovf_package_list_has_ovf_package";
+    public static final String TEMPLATE_DEFINITION_TABLE = "ovf_package_list_has_ovf_package";
 
-    public static final String OVF_PACKAGE_PROPERTY = "ovf_packages";
+    public static final String TEMPLATE_DEFINITION_PROPERTY = "templateDefinitions";
 
-    static final String OVF_PACKAGE_ID_COLUMN = "id_ovf_package";
+    static final String TEMPLATE_DEFINITION_ID_COLUMN = "id_ovf_package";
 
-    static final String OVF_PACKAGES_LIST_ID_COLUMN = "id_ovf_package_list";
+    static final String TEMPLATE_DEFINITIONS_LIST_ID_COLUMN = "id_ovf_package_list";
 
-    @ManyToMany(mappedBy = OVFPackage.OVF_PACKAGE_LIST_PROPERTY, fetch = FetchType.LAZY)
-    private List<OVFPackage> ovfPackages = new ArrayList<OVFPackage>();
+    @ManyToMany(mappedBy = TemplateDefinition.TEMPLATE_DEFINITION_LIST_PROPERTY, fetch = FetchType.LAZY)
+    private List<TemplateDefinition> templateDefinitions = new ArrayList<TemplateDefinition>();
 
-    public void setOvfPackages(final List<OVFPackage> ovfPackages)
+    public void setTemplateDefinitions(final List<TemplateDefinition> templateDefinitions)
     {
-        this.ovfPackages = ovfPackages;
+        this.templateDefinitions = templateDefinitions;
     }
 
-    public List<OVFPackage> getOvfPackages()
+    public List<TemplateDefinition> getTemplateDefinitions()
     {
-        if (ovfPackages == null)
+        if (templateDefinitions == null)
         {
-            ovfPackages = new ArrayList<OVFPackage>();
+            templateDefinitions = new ArrayList<TemplateDefinition>();
         }
 
-        return ovfPackages;
+        return templateDefinitions;
     }
 
-    public void addToOvfPackages(final OVFPackage ovfpackage)
+    public void addTemplateDefinition(final TemplateDefinition templateDef)
     {
-        if (ovfPackages == null)
+        if (templateDefinitions == null)
         {
-            ovfPackages = new ArrayList<OVFPackage>();
-            ovfPackages.add(ovfpackage);
-            ovfpackage.addToOvfPackageLists(this);
+            templateDefinitions = new ArrayList<TemplateDefinition>();
+            templateDefinitions.add(templateDef);
+            templateDef.addToTemplateDefinitionLists(this);
         }
-        if (!ovfPackages.contains(ovfpackage))
+        if (!templateDefinitions.contains(templateDef))
         {
-            ovfPackages.add(ovfpackage);
-            ovfpackage.addToOvfPackageLists(this);
+            templateDefinitions.add(templateDef);
+            templateDef.addToTemplateDefinitionLists(this);
         }
     }
 
-    public void removeFromOvfPackages(final OVFPackage ovfpackage)
+    public void removeTemplateDefinition(final TemplateDefinition templateDef)
     {
-        assert ovfpackage != null;
-        assert this.ovfPackages.contains(ovfpackage);
+        assert templateDef != null;
+        assert this.templateDefinitions.contains(templateDef);
 
-        this.ovfPackages.remove(ovfpackage);
+        this.templateDefinitions.remove(templateDef);
     }
 
-    public OVFPackageList(final String name, final String url)
+    public TemplateDefinitionList(final String name, final String url)
     {
         setName(name);
         setUrl(url);

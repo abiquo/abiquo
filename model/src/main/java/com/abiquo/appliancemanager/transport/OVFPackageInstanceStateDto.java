@@ -25,12 +25,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
-import com.abiquo.server.core.appslibrary.OVFPackage;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 /**
- * The materialization state of an {@link OVFPackage} of a given {@link Datacenter} and
+ * The materialization state of an {@link TemplateDefinition} of a given {@link Datacenter} and
  * {@link Enterprise}
  */
 @XmlRootElement(name = "ovfInstanceState")
@@ -42,7 +42,7 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
     private static final long serialVersionUID = -4115162963051770344L;
 
     /**
-     * Original location of the {@link OVFPackage}. Identify the entity combined with the
+     * Original location of the {@link TemplateDefinition}. Identify the entity combined with the
      * {@link Enterprise} identifier (id of the ApplianceManager EnterpriseRepository). Datacenter
      * identifier is implicit in the ApplianceManager context.
      */

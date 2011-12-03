@@ -47,126 +47,127 @@ import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.appslibrary.OVFPackageRep;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionRep;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class OVFPackageListService extends DefaultApiServiceWithApplianceManagerClient
+public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(OVFPackageListService.class);
+    private final static Logger LOGGER = LoggerFactory
+        .getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
 
     @Autowired
-    protected OVFPackageRep repo;
+    protected TemplateDefinitionRep repo;
 
     @Autowired
-    protected OVFPackageService ovfPackageService;
+    protected TemplateDefinitionService templateDefinitionService;
 
-    public OVFPackageListService()
+    public TemplateDefinitionListService()
     {
     }
 
-    public OVFPackageListService(final EntityManager em)
+    public TemplateDefinitionListService(final EntityManager em)
     {
-        repo = new OVFPackageRep(em);
+        repo = new TemplateDefinitionRep(em);
         entService = new EnterpriseService(em);
         appsLibraryDao = new AppsLibraryDAO(em);
-        ovfPackageService = new OVFPackageService(em);
+        templateDefinitionService = new TemplateDefinitionService(em);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public List<OVFPackageList> getOVFPackageLists()
+    public List<TemplateDefinitionList> getOVFPackageLists()
     {
-        return repo.getAllOVFPackageLists();
+        return repo.getTemplateDefinitionLists();
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList addOVFPackageList(final OVFPackageList ovfPackageList,
-        final Integer idEnterprise)
+    public TemplateDefinitionList addTemplateDefinitionList(
+        final TemplateDefinitionList templateDefList, final Integer idEnterprise)
     {
-        final String name = ovfPackageList.getName();
+        final String name = templateDefList.getName();
 
-        OVFPackageList prevlist = null;
+        TemplateDefinitionList prevlist = null;
         Enterprise ent = entService.getEnterprise(idEnterprise);
-        prevlist = repo.findOVFPackageListByNameAndEnterprise(name, ent);
+        prevlist = repo.findTemplateDefinitionListByNameAndEnterprise(name, ent);
 
         if (prevlist != null) // TODO name unique on BBDD
         {
-            addConflictErrors(APIError.OVF_PACKAGE_LIST_NAME_ALREADY_EXIST);
+            addConflictErrors(APIError.TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST);
             flushErrors();
         }
 
         AppsLibrary appsLibrary = appsLibraryDao.findByEnterprise(ent);
 
-        ovfPackageList.setAppsLibrary(appsLibrary);
+        templateDefList.setAppsLibrary(appsLibrary);
 
-        repo.persistList(ovfPackageList);
+        repo.persistTemplateDefinitionList(templateDefList);
 
-        for (OVFPackage ovfPackage : ovfPackageList.getOvfPackages())
+        for (TemplateDefinition templateDefs : templateDefList.getTemplateDefinitions())
         {
-            ovfPackage.addToOvfPackageLists(ovfPackageList);
-            ovfPackageService.addOVFPackage(ovfPackage, idEnterprise);
+            templateDefs.addToTemplateDefinitionLists(templateDefList);
+            templateDefinitionService.addTemplateDefinition(templateDefs, idEnterprise);
         }
 
-        repo.updateList(ovfPackageList);
+        repo.updateTemplateDefinitionList(templateDefList);
 
-        return ovfPackageList;
+        return templateDefList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList addOVFPackageList(final String repositorySpaceURL,
+    public TemplateDefinitionList addTemplateDefinitionList(final String ovfindexURL,
         final Integer idEnterprise)
     {
         // Enterprise ent = entRepo.findById(idEnterprise);
         // AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
-        OVFPackageList ovfPackageList =
-            obtainOVFPackageListFromRepositorySpaceLocation(repositorySpaceURL);
+        TemplateDefinitionList ovfPackageList =
+            obtainTemplateDefinitionListFromOVFIndexUrl(ovfindexURL);
 
-        return addOVFPackageList(ovfPackageList, idEnterprise);
+        return addTemplateDefinitionList(ovfPackageList, idEnterprise);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList getOVFPackageList(final Integer id)
+    public TemplateDefinitionList getTemplateDefinitionList(final Integer id)
     {
-        OVFPackageList ovfPackageList = repo.getOVFPackageList(id);
-        if (ovfPackageList == null)
+        TemplateDefinitionList templateDefinitionList = repo.getTemplateDefinitionList(id);
+        if (templateDefinitionList == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            addNotFoundErrors(APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
             flushErrors();
         }
-        Hibernate.initialize(ovfPackageList.getOvfPackages());
-        return ovfPackageList;
+        Hibernate.initialize(templateDefinitionList.getTemplateDefinitions());
+        return templateDefinitionList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageInstancesStateDto getOVFPackageListInstanceStatus(final Integer id,
+    public OVFPackageInstancesStateDto getTemplateListStatus(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
-        final OVFPackageList ovfPackageList = getOVFPackageList(id);
+        final TemplateDefinitionList templateDefinitionList = getTemplateDefinitionList(id);
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
         final OVFPackageInstancesStateDto stateList = new OVFPackageInstancesStateDto();
 
-        for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
+        for (TemplateDefinition templateDef : templateDefinitionList.getTemplateDefinitions())
         {
             try
             {
-                stateList.add(amClient.getCurrentOVFPackageInstanceStatus(String
-                    .valueOf(enterpriseId), ovfPack.getUrl()));
+                stateList.add(amClient.getTemplateStatus(
+                    String.valueOf(enterpriseId), templateDef.getUrl()));
             }
             catch (Exception e)
             {
                 OVFPackageInstanceStateDto error = new OVFPackageInstanceStateDto();
-                error.setOvfId(ovfPack.getUrl());
+                error.setOvfId(templateDef.getUrl());
                 error.setStatus(OVFStatusEnumType.ERROR);
                 error.setErrorCause(e.toString());
 
@@ -180,24 +181,26 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList updateOVFPackageList(final Integer idEnterprise, final Integer idList)
+    public TemplateDefinitionList updateTemplateDefinitionList(final Integer idEnterprise,
+        final Integer idList)
     {
-        OVFPackageList oldList = repo.getOVFPackageList(idList);
+        TemplateDefinitionList oldList = repo.getTemplateDefinitionList(idList);
 
         if (oldList == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            addNotFoundErrors(APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
             flushErrors();
         }
         final String listUrl = oldList.getUrl();
-        repo.updateList(oldList);
+        repo.updateTemplateDefinitionList(oldList);
 
-        OVFPackageList newList = obtainOVFPackageListFromRepositorySpaceLocation(listUrl);
-        return addOVFPackageList(newList, idEnterprise);
+        TemplateDefinitionList newList = obtainTemplateDefinitionListFromOVFIndexUrl(listUrl);
+        return addTemplateDefinitionList(newList, idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public List<OVFPackageList> getOVFPackageListsByEnterprise(final Integer idEnterprise)
+    public List<TemplateDefinitionList> getTemplateDefinitionListsByEnterprise(
+        final Integer idEnterprise)
     {
 
         Enterprise ent = entService.getEnterprise(idEnterprise);
@@ -207,84 +210,85 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
             flushErrors();
         }
 
-        List<OVFPackageList> ovfPackageList = new ArrayList<OVFPackageList>();
-        ovfPackageList = repo.getOVFPackageListsByEnterprise(idEnterprise);
+        List<TemplateDefinitionList> ovfPackageList = new ArrayList<TemplateDefinitionList>();
+        ovfPackageList = repo.getTemplateDefinitionListsByEnterprise(idEnterprise);
         return ovfPackageList;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList modifyOVFPackageList(final Integer ovfPackageListId,
-        final OVFPackageList ovfPackageList, final Integer idEnterprise)
+    public TemplateDefinitionList updateTemplateDefinitionList(final Integer templateDefListId,
+        final TemplateDefinitionList templateDefList, final Integer idEnterprise)
     {
-        OVFPackageList old = repo.getOVFPackageList(ovfPackageListId);
+        TemplateDefinitionList old = repo.getTemplateDefinitionList(templateDefListId);
 
         if (old == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            addNotFoundErrors(APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
             flushErrors();
         }
 
         // TODO - Apply changes and compare etags
-        old.setName(ovfPackageList.getName());
-        old.setOvfPackages(ovfPackageList.getOvfPackages());
+        old.setName(templateDefList.getName());
+        old.setTemplateDefinitions(templateDefList.getTemplateDefinitions());
 
         Enterprise ent = entService.getEnterprise(idEnterprise);
         AppsLibrary appsLib = appsLibraryDao.findByEnterprise(ent);
         old.setAppsLibrary(appsLib);
-        repo.updateList(old);
+        repo.updateTemplateDefinitionList(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_MODIFIED,
-            "OVFPackage list " + ovfPackageList.getName() + " updated");
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
+            "TemplateDefinitionList " + templateDefList.getName() + " updated");
         return old;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeOVFPackageList(final Integer id)
+    public void removeTemplateDefinitionList(final Integer id)
     {
-        OVFPackageList ovfPackageList = repo.getOVFPackageList(id);
+        TemplateDefinitionList templateDefList = repo.getTemplateDefinitionList(id);
 
-        if (ovfPackageList == null)
+        if (templateDefList == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_OVF_PACKAGE_LIST);
+            addNotFoundErrors(APIError.NON_EXISTENT_TEMPLATE_DEFINITION_LIST);
             flushErrors();
         }
 
-        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.OVF_PACKAGES_LIST_DELETED,
-            "Removing ovf package list " + ovfPackageList.getName());
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.TEMPLATE_DEFINITION_LIST_DELETED,
+            "Removing ovf package list " + templateDefList.getName());
 
-        repo.removeOVFPackageList(ovfPackageList);
+        repo.removeTemplateDefinitionList(templateDefList);
 
     }
 
-    private OVFPackageList obtainOVFPackageListFromRepositorySpaceLocation(String repositorySpaceURL)
+    private TemplateDefinitionList obtainTemplateDefinitionListFromOVFIndexUrl(
+        String ovfindexUrl)
     {
 
-        if (!repositorySpaceURL.endsWith("/ovfindex.xml"))
+        if (!ovfindexUrl.endsWith("/ovfindex.xml"))
         {
-            if (repositorySpaceURL.endsWith("/"))
+            if (ovfindexUrl.endsWith("/"))
             {
-                repositorySpaceURL += "ovfindex.xml";
+                ovfindexUrl += "ovfindex.xml";
             }
             else
             {
-                String suffix = repositorySpaceURL.endsWith(".xml") ? "" : "/ovfindex.xml";
-                repositorySpaceURL += suffix;
+                String suffix = ovfindexUrl.endsWith(".xml") ? "" : "/ovfindex.xml";
+                ovfindexUrl += suffix;
             }
         }
 
-        OVFPackageList list = new OVFPackageList();
+        TemplateDefinitionList list = new TemplateDefinitionList();
 
         RepositorySpace repo = null;
 
         try
         {
-            RepositorySpaceXML repoSpaceXML = RepositorySpaceXML.getInstance();
-            repo = repoSpaceXML.obtainRepositorySpace(repositorySpaceURL);
+            RepositorySpaceXML ovfindexXML = RepositorySpaceXML.getInstance();
+            repo = ovfindexXML.obtainRepositorySpace(ovfindexUrl);
         }
         catch (XMLException e)
         {
             final String cause =
-                String.format("Can not find the RepositorySpace at [%s]", repositorySpaceURL);
+                String.format("Can not find the RepositorySpace at [%s]", ovfindexUrl);
             LOGGER.debug(cause);
             addValidationErrors(APIError.INVALID_OVF_INDEX_XML);
             flushErrors();
@@ -292,7 +296,7 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
         catch (MalformedURLException e)
         {
             final String cause =
-                String.format("Invalid repository space identifier : [%s]", repositorySpaceURL);
+                String.format("Invalid repository space identifier : [%s]", ovfindexUrl);
             LOGGER.debug(cause);
             addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
             flushErrors();
@@ -301,30 +305,31 @@ public class OVFPackageListService extends DefaultApiServiceWithApplianceManager
         catch (IOException e)
         {
             final String cause =
-                String.format("Can not open a connection to : [%s]", repositorySpaceURL);
+                String.format("Can not open a connection to : [%s]", ovfindexUrl);
             LOGGER.debug(cause);
             addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
             flushErrors();
         }
 
         String baseRepositorySpaceURL = "";
-        if (repositorySpaceURL.lastIndexOf('/') != -1)
+        if (ovfindexUrl.lastIndexOf('/') != -1)
         {
             baseRepositorySpaceURL =
-                repositorySpaceURL.substring(0, repositorySpaceURL.lastIndexOf('/'));
+                ovfindexUrl.substring(0, ovfindexUrl.lastIndexOf('/'));
         }
         for (OVFDescription description : repo.getOVFDescription())
         {
 
-            OVFPackage pack =
-                ovfPackageService.ovfPackageFromOvfDescription(description, baseRepositorySpaceURL);
+            TemplateDefinition pack =
+                templateDefinitionService.transformToTemplateDefinition(description,
+                    baseRepositorySpaceURL);
 
-            list.getOvfPackages().add(pack);
+            list.getTemplateDefinitions().add(pack);
 
         }
 
         list.setName(repo.getRepositoryName());
-        list.setUrl(repositorySpaceURL);
+        list.setUrl(ovfindexUrl);
 
         return list;
     }

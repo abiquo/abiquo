@@ -28,7 +28,7 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
+public class TemplateDefinitionGenerator extends DefaultEntityGenerator<TemplateDefinition>
 {
 
     AppsLibraryGenerator appsLibraryGenerator;
@@ -37,7 +37,7 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
 
     IconGenerator iconGenerator;
 
-    public OVFPackageGenerator(final SeedGenerator seed)
+    public TemplateDefinitionGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -50,17 +50,17 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
     }
 
     @Override
-    public void assertAllPropertiesEqual(final OVFPackage obj1, final OVFPackage obj2)
+    public void assertAllPropertiesEqual(final TemplateDefinition obj1, final TemplateDefinition obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, OVFPackage.PRODUCT_VERSION_PROPERTY,
-            OVFPackage.NAME_PROPERTY, OVFPackage.PRODUCT_VENDOR_PROPERTY,
-            OVFPackage.PRODUCT_URL_PROPERTY, OVFPackage.URL_PROPERTY, OVFPackage.TYPE_PROPERTY,
-            OVFPackage.PRODUCT_NAME_PROPERTY, OVFPackage.DISK_FILE_SIZE_PROPERTY,
-            OVFPackage.DESCRIPTION_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, TemplateDefinition.PRODUCT_VERSION_PROPERTY,
+            TemplateDefinition.NAME_PROPERTY, TemplateDefinition.PRODUCT_VENDOR_PROPERTY,
+            TemplateDefinition.PRODUCT_URL_PROPERTY, TemplateDefinition.URL_PROPERTY, TemplateDefinition.TYPE_PROPERTY,
+            TemplateDefinition.PRODUCT_NAME_PROPERTY, TemplateDefinition.DISK_FILE_SIZE_PROPERTY,
+            TemplateDefinition.DESCRIPTION_PROPERTY);
     }
 
     @Override
-    public OVFPackage createUniqueInstance()
+    public TemplateDefinition createUniqueInstance()
     {
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
@@ -70,11 +70,11 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
         return createInstance(appsLibrary, category, icon);
     }
 
-    public OVFPackage createInstance(final AppsLibrary appsLibrary, final Category category,
+    public TemplateDefinition createInstance(final AppsLibrary appsLibrary, final Category category,
         final Icon icon)
     {
-        OVFPackage ovfpackage =
-            new OVFPackage(newString(nextSeed(), 0, 30),
+        TemplateDefinition templateDef =
+            new TemplateDefinition(newString(nextSeed(), 0, 30),
                 newString(nextSeed(), 0, 30),
                 newString(nextSeed(), 0, 30),
                 newString(nextSeed(), 0, 30),
@@ -82,15 +82,15 @@ public class OVFPackageGenerator extends DefaultEntityGenerator<OVFPackage>
                 DiskFormatType.VDI_FLAT,
                 newString(nextSeed(), 0, 30),
                 nextSeed());
-        ovfpackage.setAppsLibrary(appsLibrary);
-        ovfpackage.setCategory(category);
-        ovfpackage.setIcon(icon);
-        return ovfpackage;
+        templateDef.setAppsLibrary(appsLibrary);
+        templateDef.setCategory(category);
+        templateDef.setIcon(icon);
+        return templateDef;
 
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(final OVFPackage entity,
+    public void addAuxiliaryEntitiesToPersist(final TemplateDefinition entity,
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);

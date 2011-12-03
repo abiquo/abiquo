@@ -19,17 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-  package com.abiquo.server.core.appslibrary;
+package com.abiquo.server.core.appslibrary;
 
-  import com.abiquo.server.core.common.DefaultEntityTestBase;
-  import com.softwarementors.bzngine.entities.test.InstanceTester;
+import java.util.List;
 
-  public class OVFPackageListTest extends DefaultEntityTestBase<OVFPackageList>
-  {
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-      @Override
-      protected InstanceTester<OVFPackageList> createEntityInstanceGenerator()
-      {
-          return new OVFPackageListGenerator(getSeed());
-      }
-  }
+import com.abiquo.model.transport.WrapperDto;
+
+/**
+ * Represent a collection of {@link TemplateDefinitionDto}
+ */
+@XmlRootElement(name = "templateDefinitions")
+public class TemplateDefinitionsDto extends WrapperDto<TemplateDefinitionDto>
+{
+
+    private static final long serialVersionUID = -6421402033472232181L;
+
+    @Override
+    @XmlElement(name = "templateDefinition")
+    public List<TemplateDefinitionDto> getCollection()
+    {
+        return collection;
+    }
+}

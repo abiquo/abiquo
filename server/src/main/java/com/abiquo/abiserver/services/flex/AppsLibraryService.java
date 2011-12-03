@@ -127,32 +127,32 @@ public class AppsLibraryService
         final Integer idEnterprise)
     {
 
-        return proxyStub(userSession).getOVFPackageListName(idEnterprise);
+        return proxyStub(userSession).getTemplateDefinitionListNames(idEnterprise);
     }
 
     public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOVFPackageList)
     {
-        return proxyStub(userSession).getOVFPackageList(idEnterprise, nameOVFPackageList);
+        return proxyStub(userSession).getTemplateDefinitionList(idEnterprise, nameOVFPackageList);
     }
 
     public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String ovfpackageListURL)
     {
-        return proxyStub(userSession).createOVFPackageList(idEnterprise, ovfpackageListURL);
+        return proxyStub(userSession).createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, ovfpackageListURL);
     }
 
     public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
 
-        return proxyStub(userSession).refreshOVFPackageList(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession).refreshTemplateDefinitionListFromRepository(idEnterprise, nameOvfpackageList);
     }
 
     public BasicResult deleteOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
-        return proxyStub(userSession).deleteOVFPackageList(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession).deleteTemplateDefinitionList(idEnterprise, nameOvfpackageList);
     }
 
     /** DC specific status. */
@@ -160,7 +160,7 @@ public class AppsLibraryService
         final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).getOVFPackageListState(nameOVFPackageList, idEnterprise,
+        return proxyStub(userSession).getTemplatesState(nameOVFPackageList, idEnterprise,
             idDatacenter);
     }
 
@@ -170,7 +170,7 @@ public class AppsLibraryService
     {
         final List<String> ovfUrls = ovfUrlsIn; // XXX cast to arraylist
 
-        return proxyStub(userSession).getOVFPackagesState(ovfUrls, idEnterprise, idDatacenter);
+        return proxyStub(userSession).getTemplatesState(ovfUrls, idEnterprise, idDatacenter);
 
     }
 
@@ -178,7 +178,7 @@ public class AppsLibraryService
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).getOVFPackageState(ovfUrl, idEnterprise, idDatacenter);
+        return proxyStub(userSession).getTemplateState(ovfUrl, idEnterprise, idDatacenter);
     }
 
     public BasicResult startDownloadOVFPackage(final UserSession userSession,
@@ -186,7 +186,7 @@ public class AppsLibraryService
     {
         final List<String> ovfUrls = idsOvfpackageIn; // XXX cast to arraylist
 
-        return proxyStub(userSession).installOVFPackagesInDatacenter(ovfUrls, idEnterprise,
+        return proxyStub(userSession).installTemplateDefinitionsInDatacenter(ovfUrls, idEnterprise,
             idDatacenter);
     }
 
@@ -194,7 +194,7 @@ public class AppsLibraryService
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).uninstallOVFPackageInDatacenter(ovfUrl, idEnterprise,
+        return proxyStub(userSession).uninstallTemplateDefinitionInDatacenter(ovfUrl, idEnterprise,
             idDatacenter);
     }
 

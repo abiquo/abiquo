@@ -21,7 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackagesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveTemplateDefinitionsURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -39,16 +39,16 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 
 @Test(groups = {APPS_INTEGRATION_TESTS})
-public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
+public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
 {
 
     private static final String SYSADMIN = "sysadmin";
@@ -75,7 +75,7 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void getOVFPackagesLists() throws Exception
+    public void getTemplateDefinitionsLists() throws Exception
     {
         // Resource resource = client.resource(ovfPackagesURI).accept(MediaType.APPLICATION_XML);
 
@@ -84,9 +84,12 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
 
-        OVFPackage ovfPackage0 = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
-        OVFPackage ovfPackage1 = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
-        OVFPackage ovfPackage2 = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
+        TemplateDefinition ovfPackage0 =
+            templateDefGenerator.createInstance(appsLibrary, category, icon);
+        TemplateDefinition ovfPackage1 =
+            templateDefGenerator.createInstance(appsLibrary, category, icon);
+        TemplateDefinition ovfPackage2 =
+            templateDefGenerator.createInstance(appsLibrary, category, icon);
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(category);
@@ -100,18 +103,19 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveOVFPackagesURI(appsLibrary.getEnterprise().getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionsURI(appsLibrary.getEnterprise().getId()), SYSADMIN,
+                SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
-        OVFPackagesDto entity = response.getEntity(OVFPackagesDto.class);
+        TemplateDefinitionsDto entity = response.getEntity(TemplateDefinitionsDto.class);
         assertNotNull(entity);
         assertNotNull(entity.getCollection());
         assertEquals(entity.getCollection().size(), 3);
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void createOVFPackage()
+    public void createTemplateDefinition()
     {
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
@@ -121,7 +125,7 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(appsLibrary);
         setup(entitiesToSetup.toArray());
 
-        OVFPackageDto p = new OVFPackageDto();
+        TemplateDefinitionDto p = new TemplateDefinitionDto();
         p.setDescription("test_created_desc");
         p.setUrl("http://www.abiquo.com");
         p.setDiskFormatTypeUri(DiskFormatType.UNKNOWN.uri); // test this is a
@@ -136,11 +140,12 @@ public class OVFPackagesResourceIT extends AbstractJpaGeneratorIT
         p.addLink(iconLink);
 
         ClientResponse response =
-            post(resolveOVFPackagesURI(appsLibrary.getEnterprise().getId()), p, SYSADMIN, SYSADMIN);
+            post(resolveTemplateDefinitionsURI(appsLibrary.getEnterprise().getId()), p, SYSADMIN,
+                SYSADMIN);
 
         assertEquals(response.getStatusCode(), 201);
 
-        OVFPackageDto entityPost = response.getEntity(OVFPackageDto.class);
+        TemplateDefinitionDto entityPost = response.getEntity(TemplateDefinitionDto.class);
         assertNotNull(entityPost);
         assertEquals(p.getDescription(), entityPost.getDescription());
         assertEquals(p.getDiskFormatTypeUri(), entityPost.getDiskFormatTypeUri());

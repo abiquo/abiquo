@@ -50,10 +50,10 @@ import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageResource;
-import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
@@ -75,8 +75,8 @@ import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
 import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
@@ -362,10 +362,10 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(UsersResource.class, UsersResource.USERS_PATH, params));
 
         // apps library
-        links.add(builder.buildRestLink(OVFPackageListsResource.class,
-            OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
-        links.add(builder.buildRestLink(OVFPackagesResource.class,
-            OVFPackagesResource.OVF_PACKAGES_PATH, params));
+        links.add(builder.buildRestLink(TemplateDefinitionListsResource.class,
+            TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH, params));
+        links.add(builder.buildRestLink(TemplateDefinitionsResource.class,
+            TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH, params));
 
         // action get virtual machines by enterprise
         links.add(builder.buildRelLink(EnterpriseResource.class,
@@ -424,8 +424,8 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildOVFPackageListLinks(final Integer enterpriseId,
-        final OVFPackageListDto ovfPackageList)
+    public List<RESTLink> buildTemplateDefinitionListLinks(final Integer enterpriseId,
+        final TemplateDefinitionListDto templateDefinitionList)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -436,16 +436,16 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
 
-        params.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageList.getId().toString());
+        params.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, templateDefinitionList.getId().toString());
 
-        links.add(builder.buildRestLink(OVFPackageListResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(TemplateDefinitionListResource.class, REL_EDIT, params));
 
         return links;
     }
 
     @Override
-    public List<RESTLink> buildOVFPackageLinks(final Integer enterpriseId,
-        final OVFPackageDto ovfPackage, final Category category, final Icon icon)
+    public List<RESTLink> buildTemplateDefinitionLinks(final Integer enterpriseId,
+        final TemplateDefinitionDto templateDefinition, final Category category, final Icon icon)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -459,8 +459,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
             category.getName(), params));
 
-        params.put(OVFPackageResource.OVF_PACKAGE, ovfPackage.getId().toString());
-        links.add(builder.buildRestLink(OVFPackageResource.class, REL_EDIT, params));
+        params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId().toString());
+        links.add(builder.buildRestLink(TemplateDefinitionResource.class, REL_EDIT, params));
 
         if (icon != null)
         {

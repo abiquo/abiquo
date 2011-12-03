@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeMethod;
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
-import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
 import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
@@ -136,7 +136,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected CategoryGenerator categoryGenerator = new CategoryGenerator(seed);
 
-    protected OVFPackageGenerator ovfPackageGenerator = new OVFPackageGenerator(seed);
+    protected TemplateDefinitionGenerator templateDefGenerator = new TemplateDefinitionGenerator(seed);
 
     protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
 

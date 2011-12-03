@@ -46,15 +46,15 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = OVFPackage.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = OVFPackage.TABLE_NAME)
-public class OVFPackage extends DefaultEntityBase
+@Table(name = TemplateDefinition.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = TemplateDefinition.TABLE_NAME)
+public class TemplateDefinition extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "ovf_package";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    public OVFPackage()
+    public TemplateDefinition()
     {
         // Just for JPA support
     }
@@ -385,48 +385,50 @@ public class OVFPackage extends DefaultEntityBase
     }
 
     /**
-     * OVF Package List Association
+     * {@link TemplateDefinitionListDAO} Association
      */
-    public static final String OVF_PACKAGE_LIST_TABLE = "ovf_package_list_has_ovf_package";
+    public static final String TEMPLATE_DEFINITION_LIST_TABLE = "ovf_package_list_has_ovf_package";
 
-    public static final String OVF_PACKAGE_LIST_PROPERTY = "ovfPackageLists";
+    public static final String TEMPLATE_DEFINITION_LIST_PROPERTY = "templateDefinitionLists";
 
-    static final String OVF_PACKAGE_LIST_ID_COLUMN = "id_ovf_package_list";
+    static final String TEMPLATE_DEFINITION_LIST_ID_COLUMN = "id_ovf_package_list";
 
-    static final String OVF_PACKAGES_ID_COLUMN = "id_ovf_package";
+    static final String TEMPLATE_DEFINITION_ID_COLUMN = "id_ovf_package";
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = OVF_PACKAGE_LIST_TABLE, joinColumns = {@JoinColumn(name = OVF_PACKAGES_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = OVF_PACKAGE_LIST_ID_COLUMN)})
-    private List<OVFPackageList> ovfPackageLists = new ArrayList<OVFPackageList>();
+    @JoinTable(name = TEMPLATE_DEFINITION_LIST_TABLE, joinColumns = {@JoinColumn(name = TEMPLATE_DEFINITION_ID_COLUMN)}, inverseJoinColumns = {@JoinColumn(name = TEMPLATE_DEFINITION_LIST_ID_COLUMN)})
+    private List<TemplateDefinitionList> templateDefinitionLists =
+        new ArrayList<TemplateDefinitionList>();
 
-    public List<OVFPackageList> getOvfPackageLists()
+    public List<TemplateDefinitionList> getTemplateDefinitionLists()
     {
-        if (ovfPackageLists == null)
+        if (templateDefinitionLists == null)
         {
-            ovfPackageLists = new ArrayList<OVFPackageList>();
+            templateDefinitionLists = new ArrayList<TemplateDefinitionList>();
         }
-        return ovfPackageLists;
+        return templateDefinitionLists;
     }
 
-    public void setOvfPackageLists(final List<OVFPackageList> ovfPackageLists)
+    public void setTemplateDefinitionLists(
+        final List<TemplateDefinitionList> templateDefinitionLists)
     {
-        this.ovfPackageLists = ovfPackageLists;
+        this.templateDefinitionLists = templateDefinitionLists;
     }
 
-    public void addToOvfPackageLists(final OVFPackageList list)
+    public void addToTemplateDefinitionLists(final TemplateDefinitionList list)
     {
-        if (ovfPackageLists == null)
+        if (templateDefinitionLists == null)
         {
-            ovfPackageLists = new ArrayList<OVFPackageList>();
+            templateDefinitionLists = new ArrayList<TemplateDefinitionList>();
         }
-        if (!ovfPackageLists.contains(list))
+        if (!templateDefinitionLists.contains(list))
         {
-            ovfPackageLists.add(list);
-            list.addToOvfPackages(this);
+            templateDefinitionLists.add(list);
+            list.addTemplateDefinition(this);
         }
     }
 
-    public OVFPackage(final String name, final String productName, final String productUrl,
+    public TemplateDefinition(final String name, final String productName, final String productUrl,
         final String productVendor, final String productVersion, final DiskFormatType type,
         final String url, final long diskFileSize)
     {

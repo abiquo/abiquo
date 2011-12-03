@@ -21,7 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.UriTestResolver.resolveOVFPackageURI;
+import static com.abiquo.api.common.UriTestResolver.resolveTemplateDefinitionURI;
 import static com.abiquo.testng.TestConfig.APPS_INTEGRATION_TESTS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -39,15 +39,15 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
 import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
-public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
+public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 {
     protected Category category;
 
@@ -55,7 +55,7 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
 
     protected Datacenter datacenter;
 
-    protected OVFPackage ovfPackage;
+    protected TemplateDefinition templateDef;
 
     protected AppsLibrary appsLibrary;
 
@@ -89,95 +89,97 @@ public class OVFPackageResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void getOVFPackage() throws ClientWebException
+    public void getTemplateDefinition() throws ClientWebException
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
-        ovfPackage.setDescription("ovfPackage_1");
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef.setDescription("templateDef_1");
         category.setName("category_1");
-        ovfPackage.setType(DiskFormatType.UNKNOWN);
+        templateDef.setType(DiskFormatType.UNKNOWN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
-        entitiesToSetup.add(ovfPackage);
+        entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());
         ClientResponse response =
-            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
-        OVFPackageDto ovfPackageDto = response.getEntity(OVFPackageDto.class);
-        assertNotNull(ovfPackageDto);
-        assertEquals(ovfPackageDto.getDescription(), "ovfPackage_1");
-        assertEquals(ovfPackageDto.getDiskFormatTypeUri(), "http://unknown");
+        TemplateDefinitionDto templateDefDto = response.getEntity(TemplateDefinitionDto.class);
+        assertNotNull(templateDefDto);
+        assertEquals(templateDefDto.getDescription(), "templateDef_1");
+        assertEquals(templateDefDto.getDiskFormatTypeUri(), "http://unknown");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void modifyOVFPackage() throws ClientWebException
+    public void modifyTemplateDefinition() throws ClientWebException
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
-        entitiesToSetup.add(ovfPackage);
+        entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());
-        ClientResponse response = get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()));
+        ClientResponse response =
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()));
 
         assertEquals(response.getStatusCode(), 200);
 
-        OVFPackageDto ovfPackageDto = response.getEntity(OVFPackageDto.class);
-        assertNotNull(ovfPackageDto);
+        TemplateDefinitionDto templateDefDto = response.getEntity(TemplateDefinitionDto.class);
+        assertNotNull(templateDefDto);
 
         // modifications
-        ovfPackageDto.setDescription("new_description");
+        templateDefDto.setDescription("new_description");
 
         response =
-            put(resolveOVFPackageURI(enterprise.getId(), ovfPackageDto.getId()), ovfPackageDto,
+            put(resolveTemplateDefinitionURI(enterprise.getId(), templateDefDto.getId()), templateDefDto,
                 SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
         response =
-            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
-        OVFPackageDto retrievedPackageDto = response.getEntity(OVFPackageDto.class);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
+        TemplateDefinitionDto retrievedPackageDto = response.getEntity(TemplateDefinitionDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
-    public void deleteOVFPackage() throws ClientWebException
+    public void deleteTemplateDefinition() throws ClientWebException
     {
         appsLibrary = appsLibraryGenerator.createUniqueInstance();
         appsLibrary.setEnterprise(enterprise);
-        ovfPackage = ovfPackageGenerator.createInstance(appsLibrary, category, icon);
-        ovfPackage.setDescription("ovfPackage_1");
-        ovfPackage.setType(DiskFormatType.UNKNOWN);
+        templateDef = templateDefGenerator.createInstance(appsLibrary, category, icon);
+        templateDef.setDescription("templateDef_1");
+        templateDef.setType(DiskFormatType.UNKNOWN);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
         entitiesToSetup.add(appsLibrary);
         entitiesToSetup.add(category);
         entitiesToSetup.add(icon);
-        entitiesToSetup.add(ovfPackage);
+        entitiesToSetup.add(templateDef);
 
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            delete(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+            delete(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
+                SYSADMIN);
 
         assertEquals(response.getStatusCode(), 204);
 
         response =
-            get(resolveOVFPackageURI(enterprise.getId(), ovfPackage.getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 404);
 
     }

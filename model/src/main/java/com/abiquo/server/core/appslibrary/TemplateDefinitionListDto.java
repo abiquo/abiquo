@@ -21,21 +21,22 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "ovfPackageList")
-public class OVFPackageListDto extends SingleResourceTransportDto
+@XmlRootElement(name = "templateDefinitionList")
+public class TemplateDefinitionListDto extends SingleResourceTransportDto
 {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -394035712365582338L;
 
     private Integer id;
+
+    private String name;
+
+    private String url;
+
+    private TemplateDefinitionsDto templateDefinitions;
 
     public Integer getId()
     {
@@ -47,8 +48,6 @@ public class OVFPackageListDto extends SingleResourceTransportDto
         this.id = id;
     }
 
-    private String name;
-
     public String getName()
     {
         return name;
@@ -58,8 +57,6 @@ public class OVFPackageListDto extends SingleResourceTransportDto
     {
         this.name = name;
     }
-
-    private String url;
 
     public String getUrl()
     {
@@ -71,16 +68,14 @@ public class OVFPackageListDto extends SingleResourceTransportDto
         this.url = url;
     }
 
-    private OVFPackagesDto ovfPackages;
-
-    public OVFPackagesDto getOvfPackages()
+    public TemplateDefinitionsDto getTemplateDefinitions()
     {
-        return ovfPackages; // TODO GET or CREATE
+        return templateDefinitions; // TODO GET or CREATE
     }
 
-    public void setOvfPackages(final OVFPackagesDto ovfPackages)
+    public void setTemplateDefinitions(final TemplateDefinitionsDto ovfPackages)
     {
-        this.ovfPackages = ovfPackages;
+        this.templateDefinitions = ovfPackages;
     }
 
 }

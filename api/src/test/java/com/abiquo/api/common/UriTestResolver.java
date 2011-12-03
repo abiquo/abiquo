@@ -56,10 +56,10 @@ import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
 import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageListsResource;
-import com.abiquo.api.resources.appslibrary.OVFPackageResource;
-import com.abiquo.api.resources.appslibrary.OVFPackagesResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
+import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
 import com.abiquo.api.resources.appslibrary.VirtualImageResource;
 import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
@@ -394,11 +394,11 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveOVFPackageListsURI(final Integer enterpriseId)
+    public static String resolveTemplateDefinitionListsURI(final Integer enterpriseId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH);
+                TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -407,28 +407,28 @@ public class UriTestResolver
 
     }
 
-    public static String resolveOVFPackageListURI(final Integer enterpriseId,
+    public static String resolveTemplateDefinitionListURI(final Integer enterpriseId,
         final Integer ovfPackageListId)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH,
-                OVFPackageListResource.OVF_PACKAGE_LIST_PARAM);
+                TemplateDefinitionListsResource.TEMPLATE_DEFINITION_LISTS_PATH,
+                TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageListResource.OVF_PACKAGE_LIST, ovfPackageListId.toString());
+        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, ovfPackageListId.toString());
 
         return resolveURI(template, values);
 
     }
 
-    public static String resolveOVFPackagesURI(final Integer enterpriseId)
+    public static String resolveTemplateDefinitionsURI(final Integer enterpriseId)
     {
 
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackagesResource.OVF_PACKAGES_PATH);
+                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -478,16 +478,16 @@ public class UriTestResolver
     // return resolveURI(template, values);
     // }
 
-    public static String resolveOVFPackageURI(final Integer enterpriseId, final Integer ovfPackageId)
+    public static String resolveTemplateDefinitionURI(final Integer enterpriseId, final Integer ovfPackageId)
     {
 
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                OVFPackagesResource.OVF_PACKAGES_PATH, OVFPackageResource.OVF_PACKAGE_PARAM);
+                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH, TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(OVFPackageResource.OVF_PACKAGE, ovfPackageId.toString());
+        values.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, ovfPackageId.toString());
 
         return resolveURI(template, values);
     }

@@ -35,28 +35,29 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 
-@Repository("jpaOVFPackageListDAO")
-public class OVFPackageListDAO extends DefaultDAOBase<Integer, OVFPackageList>
+@Repository("jpaTemplateDefinitionListDAO")
+public class TemplateDefinitionListDAO extends DefaultDAOBase<Integer, TemplateDefinitionList>
 {
-    private final static String FIND_BY_ENTERPRISE = "SELECT ovflist FROM OVFPackageList ovflist " //
-        + "WHERE ovflist.appsLibrary.enterprise.id = :enterpriseId ";
+    private final static String FIND_BY_ENTERPRISE =
+        "SELECT temDeflist FROM TemplateDefinitionList temDeflist " //
+            + "WHERE temDeflist.appsLibrary.enterprise.id = :enterpriseId ";
 
     private final static String FIND_BY_NAME_AND_ENTERPRISE =
-        "SELECT ovflist FROM OVFPackageList ovflist " //
-            + "WHERE ovflist.appsLibrary.enterprise.id = :enterpriseId and ovflist.name = :nameEnt";
+        "SELECT temDeflist FROM TemplateDefinitionList temDeflist " //
+            + "WHERE temDeflist.appsLibrary.enterprise.id = :enterpriseId and temDeflist.name = :nameEnt";
 
-    public OVFPackageListDAO()
+    public TemplateDefinitionListDAO()
     {
-        super(OVFPackageList.class);
+        super(TemplateDefinitionList.class);
     }
 
-    public OVFPackageListDAO(final EntityManager entityManager)
+    public TemplateDefinitionListDAO(final EntityManager entityManager)
     {
-        super(OVFPackageList.class, entityManager);
+        super(TemplateDefinitionList.class, entityManager);
     }
 
     @SuppressWarnings("unchecked")
-    public List<OVFPackageList> findByEnterprise(final Integer enterpriseId)
+    public List<TemplateDefinitionList> findByEnterprise(final Integer enterpriseId)
     {
         Query query = getSession().createQuery(FIND_BY_ENTERPRISE);
         query.setParameter("enterpriseId", enterpriseId);
@@ -64,25 +65,25 @@ public class OVFPackageListDAO extends DefaultDAOBase<Integer, OVFPackageList>
         return query.list();
     }
 
-    public OVFPackageList findByNameAndEnterprise(final String nameEnt, final Enterprise ent)
+    public TemplateDefinitionList findByNameAndEnterprise(final String nameEnt, final Enterprise ent)
     {
         Query query = getSession().createQuery(FIND_BY_NAME_AND_ENTERPRISE);
         query.setParameter("enterpriseId", ent.getId());
         query.setParameter("nameEnt", nameEnt);
 
-        return (OVFPackageList) query.uniqueResult();
+        return (TemplateDefinitionList) query.uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
-    public List<OVFPackage> findByName(final String name)
+    public List<TemplateDefinition> findByName(final String name)
     {
         Criteria criteria = createCriteria(sameName(name));
-        criteria.addOrder(Order.asc(OVFPackageList.NAME_PROPERTY));
+        criteria.addOrder(Order.asc(TemplateDefinitionList.NAME_PROPERTY));
         return criteria.list();
     }
 
     private static Criterion sameName(final String name)
     {
-        return Restrictions.eq(OVFPackageList.NAME_PROPERTY, name);
+        return Restrictions.eq(TemplateDefinitionList.NAME_PROPERTY, name);
     }
 }

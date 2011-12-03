@@ -35,52 +35,53 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
-import com.abiquo.api.services.appslibrary.OVFPackageService;
+import com.abiquo.api.services.appslibrary.TemplateDefinitionService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 @Parent(EnterpriseResource.class)
-@Path(OVFPackagesResource.OVF_PACKAGES_PATH)
+@Path(TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH)
 @Controller
-public class OVFPackagesResource extends AbstractResource
+public class TemplateDefinitionsResource extends AbstractResource
 {
-    public static final String OVF_PACKAGES_PATH = "appslib/ovfpackages";
+    public static final String TEMPLATE_DEFINITIONS_PATH = "appslib/templateDefinitions";
 
     @Autowired
-    private OVFPackageService service;
+    private TemplateDefinitionService service;
 
     @Autowired
     private AppsLibraryTransformer transformer;
 
     @GET
-    public OVFPackagesDto getOVFPackages(
+    public TemplateDefinitionsDto getTemplateDefinitions(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        List<OVFPackage> all = service.getOVFPackagesByEnterprise(idEnterprise);
+        List<TemplateDefinition> all = service.getTemplateDefinitionsByEnterprise(idEnterprise);
 
-        OVFPackagesDto ovfPackages = new OVFPackagesDto();
+        TemplateDefinitionsDto templateDefs = new TemplateDefinitionsDto();
         if (all != null && !all.isEmpty())
         {
-            for (OVFPackage d : all)
+            for (TemplateDefinition d : all)
             {
-                ovfPackages.add(transformer.createTransferObject(d, restBuilder));
+                templateDefs.add(transformer.createTransferObject(d, restBuilder));
             }
         }
 
-        return ovfPackages;
+        return templateDefs;
     }
 
     @POST
-    public OVFPackageDto postOVFPackage(
-        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise, final OVFPackageDto ovfPackage,
-        @Context final IRESTBuilder restBuilder) throws Exception
+    public TemplateDefinitionDto postTemplateDefinition(
+        @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
+        final TemplateDefinitionDto templateDef, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
-        OVFPackage opl = transformer.createPersistenceObject(ovfPackage);
-        opl = service.addOVFPackage(opl, idEnterprise);
+        TemplateDefinition opl = transformer.createPersistenceObject(templateDef);
+        opl = service.addTemplateDefinition(opl, idEnterprise);
         return transformer.createTransferObject(opl, restBuilder);
     }
 

@@ -247,7 +247,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
      * @param idEnterprise Id of Enterprise to which this {@link OVFPackage} belongs.
      * @return OVFPackageInstanceStatusDto
      */
-    public OVFPackageInstanceStateDto getCurrentOVFPackageInstanceStatus(final String idEnterprise,
+    public OVFPackageInstanceStateDto getTemplateStatus(final String idEnterprise,
         final String ovfId)
     {
         Resource resource = ovfPackage(idEnterprise, ovfId);

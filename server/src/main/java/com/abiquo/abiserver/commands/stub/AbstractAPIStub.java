@@ -110,8 +110,8 @@ public class AbstractAPIStub
             props.put("abiquo.endpoint", apiUri);
 
             context =
-                new AbiquoContextFactory().createContext(token, ImmutableSet
-                    .<Module> of(new NullLoggingModule()), props);
+                new AbiquoContextFactory().createContext(token,
+                    ImmutableSet.<Module> of(new NullLoggingModule()), props);
         }
 
         return context;
@@ -223,8 +223,8 @@ public class AbstractAPIStub
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType).accept(
-            mediaType).post(dto);
+        return resource(uri, user.getUser(), user.getPassword()).contentType(mediaType)
+            .accept(mediaType).post(dto);
     }
 
     protected Resource resource(final String uri)
@@ -275,8 +275,8 @@ public class AbstractAPIStub
     protected ClientResponse delete(final String uri, final String mediaType)
     {
         UserHB user = getCurrentUserCredentials();
-        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType).contentType(
-            mediaType).delete();
+        return resource(uri, user.getUser(), user.getPassword()).accept(mediaType)
+            .contentType(mediaType).delete();
     }
 
     private Resource resource(final String uri, final String user, final String password)
@@ -422,8 +422,8 @@ public class AbstractAPIStub
 
     protected String createEnterpriseLink(final int enterpriseId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}", Collections
-            .singletonMap("enterprise", valueOf(enterpriseId)));
+        return URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}",
+            Collections.singletonMap("enterprise", valueOf(enterpriseId)));
     }
 
     protected String createEnterpriseIPsLink(final int enterpriseId)
@@ -504,7 +504,7 @@ public class AbstractAPIStub
 
     protected String getReservedMachinesUri(final Integer enterpriseId, final Integer machineId)
     {
-        String uri = createEnterpriseLink(enterpriseId);
+        // String uri = createEnterpriseLink(enterpriseId);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", valueOf(enterpriseId));
@@ -516,8 +516,8 @@ public class AbstractAPIStub
 
     protected String createRoleLink(final int roleId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/roles/{role}", Collections.singletonMap(
-            "role", valueOf(roleId)));
+        return URIResolver.resolveURI(apiUri, "admin/roles/{role}",
+            Collections.singletonMap("role", valueOf(roleId)));
     }
 
     protected String createRolesLink()
@@ -544,8 +544,8 @@ public class AbstractAPIStub
 
     protected String createPrivilegeLink(final int privilegeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}", Collections
-            .singletonMap("privilege", valueOf(privilegeId)));
+        return URIResolver.resolveURI(apiUri, "config/privileges/{privilege}",
+            Collections.singletonMap("privilege", valueOf(privilegeId)));
     }
 
     protected String createRoleActionGetPrivilegesURI(final Integer entId)
@@ -577,8 +577,8 @@ public class AbstractAPIStub
 
     protected String createRoleLdapLink(final int roleLdapId)
     {
-        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}", Collections
-            .singletonMap("roleldap", valueOf(roleLdapId)));
+        return URIResolver.resolveURI(apiUri, "admin/rolesldap/{roleldap}",
+            Collections.singletonMap("roleldap", valueOf(roleLdapId)));
     }
 
     protected String createUsersLink(final String enterpriseId)
@@ -590,8 +590,8 @@ public class AbstractAPIStub
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users", Collections
-                .singletonMap("enterprise", enterpriseId));
+            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/users",
+                Collections.singletonMap("enterprise", enterpriseId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)
@@ -648,89 +648,96 @@ public class AbstractAPIStub
         return uri;
     }
 
-    protected String createOVFPackagesLink(final String enterpriseId)
+    protected String createTemplateDefinitionsLink(final String enterpriseId)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackages",
+            URIResolver.resolveURI(apiUri,
+                "admin/enterprises/{enterprise}/appslib/templateDefinitions",
                 Collections.singletonMap("enterprise", enterpriseId));
         return uri;
     }
 
-    protected String createOVFPackageListLink(final String enterpriseId,
-        final String ovfPackageListId)
+    protected String createTemplateDefinitionListLink(final String enterpriseId,
+        final String templateDefinitionListId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseId);
-        params.put("ovfPackageList", ovfPackageListId);
-
-        return resolveURI(apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}", params);
-    }
-
-    protected String createOVFPackageListStatusLink(final String enterpriseId,
-        final String ovfPackageListId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("enterprise", enterpriseId);
-        params.put("ovfPackageList", ovfPackageListId);
+        params.put("templateDefinitionList", templateDefinitionListId);
 
         return resolveURI(
             apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackagelists/{ovfPackageList}/actions/repositoryStatus",
+            "admin/enterprises/{enterprise}/appslib/templateDefinitionLists/{templateDefinitionList}",
             params);
     }
 
-    protected String createOVFPackageListsLink(final String enterpriseId)
+    protected String createTemplateStateFromListLink(final String enterpriseId,
+        final String templateDefinitionListId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseId);
-
-        return resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/ovfpackagelists", params);
-    }
-
-    protected String createOVFPackageLink(final String enterpriseId, final String ovfPackageId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("enterprise", enterpriseId);
-        params.put("ovfPackage", ovfPackageId);
-
-        return resolveURI(apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}", params);
-    }
-
-    protected String createOVFPackageStateLink(final String enterpriseId, final String ovfPackageId)
-    {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("enterprise", enterpriseId);
-        params.put("ovfPackage", ovfPackageId);
+        params.put("templateDefinitionList", templateDefinitionListId);
 
         return resolveURI(
             apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/actions/repositoryStatus",
+            "admin/enterprises/{enterprise}/appslib/templateDefinitionLists/{templateDefinitionList}/actions/repositoryStatus",
             params);
     }
 
-    protected String createOVFPackageInstallLink(final String enterpriseId,
-        final String ovfPackageId)
+    protected String createTemplateDefinitionListsLink(final String enterpriseId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseId);
-        params.put("ovfPackage", ovfPackageId);
+
+        return resolveURI(apiUri, "admin/enterprises/{enterprise}/appslib/templateDefinitionLists",
+            params);
+    }
+
+    protected String createTemplateDefinitionLink(final String enterpriseId,
+        final String templateDefinitionId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("templateDefinition", templateDefinitionId);
 
         return resolveURI(apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+            "admin/enterprises/{enterprise}/appslib/templateDefinitions/{templateDefinition}",
+            params);
+    }
+
+    protected String createTemplateStateLink(final String enterpriseId,
+        final String templateDefinitionId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("templateDefinition", templateDefinitionId);
+
+        return resolveURI(
+            apiUri,
+            "admin/enterprises/{enterprise}/appslib/templateDefinitions/{templateDefinition}/actions/repositoryStatus",
+            params);
+    }
+
+    protected String createTemplateDefinitionInstallLink(final String enterpriseId,
+        final String templateDefinitionId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("enterprise", enterpriseId);
+        params.put("templateDefinition", templateDefinitionId);
+
+        return resolveURI(apiUri,
+            "admin/enterprises/{enterprise}/appslib/templateDefinitions/{templateDefinition}/"
                 + "actions/repositoryInstall", params);
     }
 
-    protected String createOVFPackageUninstallLink(final String enterpriseId,
-        final String ovfPackageId)
+    protected String createTemplateDefinitionUninstallLink(final String enterpriseId,
+        final String templateDefinitionId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", enterpriseId);
-        params.put("ovfPackage", ovfPackageId);
+        params.put("templateDefinition", templateDefinitionId);
 
         return resolveURI(apiUri,
-            "admin/enterprises/{enterprise}/appslib/ovfpackages/{ovfPackage}/"
+            "admin/enterprises/{enterprise}/appslib/templateDefinitions/{templateDefinition}/"
                 + "actions/repositoryUninstall", params);
     }
 
@@ -1532,8 +1539,8 @@ public class AbstractAPIStub
 
     protected String createCurrencyLink(final int currencyId)
     {
-        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}", Collections
-            .singletonMap("currency", valueOf(currencyId)));
+        return URIResolver.resolveURI(apiUri, "config/currencies/{currency}",
+            Collections.singletonMap("currency", valueOf(currencyId)));
     }
 
     protected String createPricingTemplateLink(final int templateId)
@@ -1607,16 +1614,16 @@ public class AbstractAPIStub
 
     protected String createCostCodeLink(final int costCodeId)
     {
-        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}", Collections
-            .singletonMap("costcode", valueOf(costCodeId)));
+        return URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}",
+            Collections.singletonMap("costcode", valueOf(costCodeId)));
     }
 
     protected String createCostCodeCurrenciesLink(final String costCodeId, Integer offset,
         final Integer numResults)
     {
         String uri =
-            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies", Collections
-                .singletonMap("costcode", valueOf(costCodeId)));
+            URIResolver.resolveURI(apiUri, "config/costcodes/{costcode}/currencies",
+                Collections.singletonMap("costcode", valueOf(costCodeId)));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
         if (offset != null && numResults != null)

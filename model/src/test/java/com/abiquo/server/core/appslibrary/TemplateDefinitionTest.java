@@ -21,25 +21,15 @@
 
 package com.abiquo.server.core.appslibrary;
 
-import java.util.List;
+import com.abiquo.server.core.common.DefaultEntityTestBase;
+import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.abiquo.model.transport.WrapperDto;
-
-/**
- * Represent a collection of OVFPackageLists
- */
-@XmlRootElement(name = "ovfPackageLists")
-public class OVFPackageListsDto extends WrapperDto<OVFPackageListDto>
+public class TemplateDefinitionTest extends DefaultEntityTestBase<TemplateDefinition>
 {
-    private static final long serialVersionUID = 3611309393863764211L;
 
     @Override
-    @XmlElement(name = "ovfPackageList")
-    public List<OVFPackageListDto> getCollection()
+    protected InstanceTester<TemplateDefinition> createEntityInstanceGenerator()
     {
-        return collection;
+        return new TemplateDefinitionGenerator(getSeed());
     }
 }

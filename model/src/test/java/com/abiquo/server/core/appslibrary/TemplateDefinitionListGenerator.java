@@ -27,12 +27,12 @@ import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class OVFPackageListGenerator extends DefaultEntityGenerator<OVFPackageList>
+public class TemplateDefinitionListGenerator extends DefaultEntityGenerator<TemplateDefinitionList>
 {
 
     AppsLibraryGenerator appsLibraryGenerator;
 
-    public OVFPackageListGenerator(final SeedGenerator seed)
+    public TemplateDefinitionListGenerator(final SeedGenerator seed)
     {
         super(seed);
 
@@ -41,32 +41,32 @@ public class OVFPackageListGenerator extends DefaultEntityGenerator<OVFPackageLi
     }
 
     @Override
-    public void assertAllPropertiesEqual(final OVFPackageList obj1, final OVFPackageList obj2)
+    public void assertAllPropertiesEqual(final TemplateDefinitionList obj1, final TemplateDefinitionList obj2)
     {
-        AssertEx.assertPropertiesEqualSilent(obj1, obj2, OVFPackageList.NAME_PROPERTY,
-            OVFPackageList.URL_PROPERTY);
+        AssertEx.assertPropertiesEqualSilent(obj1, obj2, TemplateDefinitionList.NAME_PROPERTY,
+            TemplateDefinitionList.URL_PROPERTY);
     }
 
     @Override
-    public OVFPackageList createUniqueInstance()
+    public TemplateDefinitionList createUniqueInstance()
     {
 
-        OVFPackageList oVFPackageList =
+        TemplateDefinitionList templateDefinitionList =
             createInstance(newString(nextSeed(), 0, 30), newString(nextSeed(), 0, 30));
 
         AppsLibrary appsLibrary = appsLibraryGenerator.createUniqueInstance();
-        oVFPackageList.setAppsLibrary(appsLibrary);
+        templateDefinitionList.setAppsLibrary(appsLibrary);
 
-        return oVFPackageList;
+        return templateDefinitionList;
     }
 
-    public OVFPackageList createInstance(final String name, final String url)
+    public TemplateDefinitionList createInstance(final String name, final String url)
     {
-        return new OVFPackageList(name, url);
+        return new TemplateDefinitionList(name, url);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(final OVFPackageList entity,
+    public void addAuxiliaryEntitiesToPersist(final TemplateDefinitionList entity,
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);

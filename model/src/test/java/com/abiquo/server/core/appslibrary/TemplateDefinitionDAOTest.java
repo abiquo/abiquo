@@ -30,7 +30,8 @@ import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class OVFPackageDAOTest extends DefaultDAOTestBase<OVFPackageDAO, OVFPackage>
+public class TemplateDefinitionDAOTest extends
+    DefaultDAOTestBase<TemplateDefinitionDAO, TemplateDefinition>
 {
 
     @Override
@@ -45,15 +46,15 @@ public class OVFPackageDAOTest extends DefaultDAOTestBase<OVFPackageDAO, OVFPack
     }
 
     @Override
-    protected OVFPackageDAO createDao(final EntityManager entityManager)
+    protected TemplateDefinitionDAO createDao(final EntityManager entityManager)
     {
-        return new OVFPackageDAO(entityManager);
+        return new TemplateDefinitionDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<OVFPackage> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<TemplateDefinition> createEntityInstanceGenerator()
     {
-        return new OVFPackageGenerator(getSeed());
+        return new TemplateDefinitionGenerator(getSeed());
     }
 
     @Override
@@ -63,9 +64,9 @@ public class OVFPackageDAOTest extends DefaultDAOTestBase<OVFPackageDAO, OVFPack
     }
 
     @Override
-    public OVFPackageGenerator eg()
+    public TemplateDefinitionGenerator eg()
     {
-        return (OVFPackageGenerator) super.eg();
+        return (TemplateDefinitionGenerator) super.eg();
     }
 
 }
