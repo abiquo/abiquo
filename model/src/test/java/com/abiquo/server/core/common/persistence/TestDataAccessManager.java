@@ -28,7 +28,7 @@ import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -147,7 +147,7 @@ public class TestDataAccessManager
             EnterpriseExclusionRule.class, FitPolicyRule.class, MachineLoadRule.class,
             VirtualAppResources.class, VirtualAppliance.class, RunlistElement.class,
             VirtualMachine.class, TemplateDefinitionList.class, TemplateDefinition.class, AppsLibrary.class,
-            VolumeManagement.class, VirtualImageConversion.class, VirtualImage.class,
+            VolumeManagement.class, VirtualImageConversion.class, VirtualMachineTemplate.class,
             Category.class, Icon.class, IpPoolManagement.class, RasdManagement.class,
             VLANNetwork.class, NetworkConfiguration.class, VirtualDatacenterResources.class,
             VirtualDatacenter.class, DatacenterResources.class, DatacenterLimits.class,

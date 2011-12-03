@@ -161,8 +161,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         {
             try
             {
-                stateList.add(amClient.getTemplateStatus(
-                    String.valueOf(enterpriseId), templateDef.getUrl()));
+                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
+                    templateDef.getUrl()));
             }
             catch (Exception e)
             {
@@ -192,10 +192,10 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             flushErrors();
         }
         final String listUrl = oldList.getUrl();
-        repo.updateTemplateDefinitionList(oldList);
 
         TemplateDefinitionList newList = obtainTemplateDefinitionListFromOVFIndexUrl(listUrl);
-        return addTemplateDefinitionList(newList, idEnterprise);
+        updateTemplateDefinitionList(idList, newList, idEnterprise);
+        return newList;
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -236,8 +236,9 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         old.setAppsLibrary(appsLib);
         repo.updateTemplateDefinitionList(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.TEMPLATE_DEFINITION_LIST_MODIFIED,
-            "TemplateDefinitionList " + templateDefList.getName() + " updated");
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
+            EventType.TEMPLATE_DEFINITION_LIST_MODIFIED, "TemplateDefinitionList "
+                + templateDefList.getName() + " updated");
         return old;
     }
 
@@ -252,15 +253,15 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             flushErrors();
         }
 
-        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.TEMPLATE_DEFINITION_LIST_DELETED,
-            "Removing ovf package list " + templateDefList.getName());
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
+            EventType.TEMPLATE_DEFINITION_LIST_DELETED, "Removing ovf package list "
+                + templateDefList.getName());
 
         repo.removeTemplateDefinitionList(templateDefList);
 
     }
 
-    private TemplateDefinitionList obtainTemplateDefinitionListFromOVFIndexUrl(
-        String ovfindexUrl)
+    private TemplateDefinitionList obtainTemplateDefinitionListFromOVFIndexUrl(String ovfindexUrl)
     {
 
         if (!ovfindexUrl.endsWith("/ovfindex.xml"))
@@ -304,8 +305,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
 
         catch (IOException e)
         {
-            final String cause =
-                String.format("Can not open a connection to : [%s]", ovfindexUrl);
+            final String cause = String.format("Can not open a connection to : [%s]", ovfindexUrl);
             LOGGER.debug(cause);
             addNotFoundErrors(APIError.NON_EXISTENT_REPOSITORY_SPACE);
             flushErrors();
@@ -314,8 +314,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         String baseRepositorySpaceURL = "";
         if (ovfindexUrl.lastIndexOf('/') != -1)
         {
-            baseRepositorySpaceURL =
-                ovfindexUrl.substring(0, ovfindexUrl.lastIndexOf('/'));
+            baseRepositorySpaceURL = ovfindexUrl.substring(0, ovfindexUrl.lastIndexOf('/'));
         }
         for (OVFDescription description : repo.getOVFDescription())
         {

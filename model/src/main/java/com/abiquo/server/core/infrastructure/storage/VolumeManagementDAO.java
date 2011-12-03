@@ -126,7 +126,7 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
 
         crit.add(sameVirtualDatacenter(vdc));
-        crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_IMAGE_PROPERTY));
+        crit.add(Restrictions.isNull(VolumeManagement.VIRTUAL_MACHINE_TEMPLATE_PROPERTY));
         crit.add(Restrictions.eq(VolumeManagement.STATE_PROPERTY, VolumeState.DETACHED));
 
         crit.add(Restrictions.eq("device." + StorageDevice.STORAGE_TECHNOLOGY_PROPERTY,

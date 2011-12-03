@@ -32,7 +32,7 @@ import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -122,10 +122,10 @@ public interface IRESTBuilder
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
         final Integer dcId, final Integer repoId);
 
-    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final VirtualImage image, final VirtualImage master);
+    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualMachineTemplate template, final VirtualMachineTemplate master);
 
-    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+    public RESTLink buildVirtualMachineTemplateLink(final Integer enterpriseId, final Integer dcId,
         final Integer virtualImageId);
 
     /*

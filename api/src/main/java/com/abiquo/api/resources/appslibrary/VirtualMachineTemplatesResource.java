@@ -21,7 +21,7 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.resources.appslibrary.VirtualImageResource.createTransferObject;
+import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.createTransferObject;
 
 import java.util.List;
 
@@ -39,39 +39,39 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
+import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 
 @Parent(DatacenterRepositoryResource.class)
-@Path(VirtualImagesResource.VIRTUAL_IMAGES_PATH)
+@Path(VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH)
 @Controller
-public class VirtualImagesResource extends AbstractResource
+public class VirtualMachineTemplatesResource extends AbstractResource
 {
-    public final static String VIRTUAL_IMAGES_PATH = "virtualimages";
+    public final static String VIRTUAL_MACHINE_TEMPLATES_PATH = "virtualmachinetemplates";
 
-    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryName";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM = "categoryName";
 
-    public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeName";
 
-    public final static String VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM = "stateful";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
 
     @Autowired
-    private VirtualImageService service;
+    private VirtualMachineTemplateService service;
 
     @Autowired
     private InfrastructureService infrastructureService;
 
     @GET
-    public VirtualImagesDto getVirtualImages(
+    public VirtualMachineTemplatesDto getVirtualMachineTemplates(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
-        @QueryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
-        @QueryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
-        @QueryParam(VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO use categoryName and hypervisorType (optinals)
@@ -80,12 +80,12 @@ public class VirtualImagesResource extends AbstractResource
             infrastructureService.getRemoteService(datacenterId,
                 RemoteServiceType.APPLIANCE_MANAGER).getUri();
 
-        List<VirtualImage> all = null;
+        List<VirtualMachineTemplate> all = null;
 
         if (stateful == null || !stateful)
         {
             all =
-                service.getVirtualImages(enterpriseId, datacenterId, categoryName,
+                service.getVirtualMachineTemplates(enterpriseId, datacenterId, categoryName,
                     hypervisorTypeName);
         }
         else
@@ -93,26 +93,26 @@ public class VirtualImagesResource extends AbstractResource
             if (categoryName != null)
             {
                 all =
-                    service.findStatefulVirtualImagesByCategoryAndDatacenter(enterpriseId,
+                    service.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(enterpriseId,
                         datacenterId, categoryName);
             }
             else
             {
-                all = service.findStatefulVirtualImagesByDatacenter(enterpriseId, datacenterId);
+                all = service.findStatefulVirtualMachineTemplatesByDatacenter(enterpriseId, datacenterId);
             }
         }
 
-        VirtualImagesDto imagesDto = new VirtualImagesDto();
+        VirtualMachineTemplatesDto templatessDto = new VirtualMachineTemplatesDto();
 
         if (!CollectionUtils.isEmpty(all))
         {
-            for (VirtualImage vimage : all)
+            for (VirtualMachineTemplate vmtemplate : all)
             {
-                imagesDto.getCollection().add(
-                    createTransferObject(vimage, enterpriseId, datacenterId, amUri, restBuilder));
+                templatessDto.getCollection().add(
+                    createTransferObject(vmtemplate, enterpriseId, datacenterId, amUri, restBuilder));
             }
         }
 
-        return imagesDto;
+        return templatessDto;
     }
 }

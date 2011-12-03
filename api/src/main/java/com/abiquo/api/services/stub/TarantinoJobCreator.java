@@ -50,8 +50,8 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtu
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -272,8 +272,8 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     /**
-     * In community there are no statful image. If some {@link VirtualImageConversion} attached use
-     * his properties when defining the {@link PrimaryDisk}, else use the {@link VirtualImage}
+     * In community there are no statful template. If some {@link VirtualImageConversion} attached use
+     * his properties when defining the {@link PrimaryDisk}, else use the {@link VirtualMachineTemplate}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -303,15 +303,15 @@ public class TarantinoJobCreator extends DefaultApiService
             flushErrors();
         }
 
-        final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final VirtualMachineTemplate vmtemplate = virtualMachine.getVirtualMachineTemplate();
         final HypervisorType htype = virtualMachine.getHypervisor().getType();
 
         final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
 
         final DiskFormatType format =
-            conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
-        final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
-        final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+            conversion != null ? conversion.getTargetType() : vmtemplate.getDiskFormatType();
+        final Long size = conversion != null ? conversion.getSize() : vmtemplate.getDiskFileSize();
+        final String path = conversion != null ? conversion.getTargetPath() : vmtemplate.getPath();
         final DiskControllerType cntrlType = getDiskController(htype, true, false);
 
         if (cntrlType != null && cntrlType == DiskControllerType.SCSI
@@ -322,7 +322,7 @@ public class TarantinoJobCreator extends DefaultApiService
         }
 
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
-            virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
+            virtualMachine.getVirtualMachineTemplate().getRepository().getUrl(), path, datastore,
             repositoryManager.getUri(), cntrlType);
     }
 

@@ -30,20 +30,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.abiquo.model.transport.WrapperDto;
 
 /**
- * Wrapper class anotation for class {@link VirtualImageDto} object
+ * Wrapper class anotation for class {@link VirtualMachineTemplateDto} object
  */
-@XmlRootElement(name = "virtualImages")
-public class VirtualImagesDto extends WrapperDto<VirtualImageDto>
+@XmlRootElement(name = "virtualMachineTemplates")
+public class VirtualMachineTemplatesDto extends WrapperDto<VirtualMachineTemplateDto>
 {
     private static final long serialVersionUID = 1L;
 
     @Override
-    @XmlElement(name = "virtualImage")
-    public List<VirtualImageDto> getCollection()
+    @XmlElement(name = "virtualMachineTemplate")
+    public List<VirtualMachineTemplateDto> getCollection()
     {
         if (collection == null)
         {
-            collection = new ArrayList<VirtualImageDto>();
+            collection = new ArrayList<VirtualMachineTemplateDto>();
         }
         return collection;
     }

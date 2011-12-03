@@ -43,8 +43,8 @@ import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
-import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.URIResolver;
@@ -55,9 +55,9 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -68,7 +68,7 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 @Service
-public class VirtualImageService extends DefaultApiServiceWithApplianceManagerClient
+public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
 {
     @Autowired
     private RepositoryDAO repositoryDao;
@@ -85,11 +85,11 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
     @Autowired
     private CategoryService categoryService;
 
-    public VirtualImageService()
+    public VirtualMachineTemplateService()
     {
     }
 
-    public VirtualImageService(final EntityManager em)
+    public VirtualMachineTemplateService(final EntityManager em)
     {
         this.repositoryDao = new RepositoryDAO(em);
         this.infrastructureService = new InfrastructureService(em);
@@ -122,33 +122,34 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
     }
 
     @Transactional(readOnly = true)
-    public VirtualImage getVirtualImage(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualImageId)
+    public VirtualMachineTemplate getVirtualMachineTemplate(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
         // Check that the enterprise can use the datacenter (also checks enterprise and datacenter
         // exists)
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
-        VirtualImage virtualImage = appsLibraryRep.findVirtualImageById(virtualImageId);
-        if (virtualImage == null)
+        VirtualMachineTemplate virtualMachineTemplate =
+            appsLibraryRep.findVirtualMachineTemplateById(virtualMachineTemplateId);
+        if (virtualMachineTemplate == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALIMAGE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
             flushErrors();
         }
 
-        return virtualImage;
+        return virtualMachineTemplate;
     }
 
     /**
-     * Gets the list of compatible(*) virtual images available in the provided enterprise and
-     * repository.
+     * Gets the list of compatible(*) virtual machine templates available in the provided enterprise
+     * and repository.
      * 
      * @param category null indicate all categories (no filter)
-     * @param hypervisor (*) null indicate no filter compatibles, else return images compatibles or
-     *            with compatible conversions. @see {@link VirtualImageConversionDAO}
+     * @param hypervisor (*) null indicate no filter compatibles, else return machine templates
+     *            compatibles or with compatible conversions. @see {@link VirtualImageConversionDAO}
      */
     @Transactional(readOnly = true)
-    public List<VirtualImage> getVirtualImages(final Integer enterpriseId,
+    public List<VirtualMachineTemplate> getVirtualMachineTemplates(final Integer enterpriseId,
         final Integer datacenterId, final String categoryName, final String hypervisorName)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
@@ -177,37 +178,40 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
             }
         }
 
-        return appsLibraryRep.findVirtualImages(enterprise, repository, category, hypervisor);
+        return appsLibraryRep.findVirtualMachineTemplates(enterprise, repository, category,
+            hypervisor);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualImage updateVirtualImage(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualImageId, final VirtualImageDto virtualImage)
+    public VirtualMachineTemplate updateVirtualMachineTemplate(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId,
+        final VirtualMachineTemplateDto virtualMachineTemplate)
     {
-        VirtualImage old = getVirtualImage(enterpriseId, datacenterId, virtualImageId);
+        VirtualMachineTemplate old =
+            getVirtualMachineTemplate(enterpriseId, datacenterId, virtualMachineTemplateId);
 
-        old.setCostCode(virtualImage.getCostCode());
-        old.setCpuRequired(virtualImage.getCpuRequired());
-        old.setDescription(virtualImage.getDescription());
-        old.setDiskFileSize(virtualImage.getDiskFileSize());
+        old.setCostCode(virtualMachineTemplate.getCostCode());
+        old.setCpuRequired(virtualMachineTemplate.getCpuRequired());
+        old.setDescription(virtualMachineTemplate.getDescription());
+        old.setDiskFileSize(virtualMachineTemplate.getDiskFileSize());
 
-        DiskFormatType type = DiskFormatType.fromValue(virtualImage.getDiskFormatType());
+        DiskFormatType type = DiskFormatType.fromValue(virtualMachineTemplate.getDiskFormatType());
 
         old.setDiskFormatType(type);
-        old.setHdRequiredInBytes(virtualImage.getHdRequired());
-        old.setName(virtualImage.getName());
-        old.setPath(virtualImage.getPath());
-        old.setRamRequired(virtualImage.getRamRequired());
-        old.setShared(virtualImage.isShared());
-        old.setChefEnabled(virtualImage.isChefEnabled());
+        old.setHdRequiredInBytes(virtualMachineTemplate.getHdRequired());
+        old.setName(virtualMachineTemplate.getName());
+        old.setPath(virtualMachineTemplate.getPath());
+        old.setRamRequired(virtualMachineTemplate.getRamRequired());
+        old.setShared(virtualMachineTemplate.isShared());
+        old.setChefEnabled(virtualMachineTemplate.isChefEnabled());
 
         // retrieve the links
-        RESTLink categoryLink = virtualImage.searchLink(CategoryResource.CATEGORY);
-        RESTLink enterpriseLink = virtualImage.searchLink(EnterpriseResource.ENTERPRISE);
+        RESTLink categoryLink = virtualMachineTemplate.searchLink(CategoryResource.CATEGORY);
+        RESTLink enterpriseLink = virtualMachineTemplate.searchLink(EnterpriseResource.ENTERPRISE);
         RESTLink datacenterRepositoryLink =
-            virtualImage.searchLink(DatacenterRepositoryResource.DATACENTER_REPOSITORY);
-        RESTLink iconLink = virtualImage.searchLink(IconResource.ICON);
-        RESTLink masterLink = virtualImage.searchLink("master");
+            virtualMachineTemplate.searchLink(DatacenterRepositoryResource.DATACENTER_REPOSITORY);
+        RESTLink iconLink = virtualMachineTemplate.searchLink(IconResource.ICON);
+        RESTLink masterLink = virtualMachineTemplate.searchLink("master");
 
         // check the links
         if (enterpriseLink != null)
@@ -226,7 +230,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                 Integer.parseInt(map.getFirst(EnterpriseResource.ENTERPRISE));
             if (!enterpriseIdFromLink.equals(enterpriseId))
             {
-                addConflictErrors(APIError.VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED);
+                addConflictErrors(APIError.VMTEMPLATE_ENTERPRISE_CANNOT_BE_CHANGED);
                 flushErrors();
             }
         }
@@ -250,7 +254,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                 Integer.parseInt(map.getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
             if (!datacenterRepositoryId.equals(old.getRepository().getDatacenter().getId()))
             {
-                addConflictErrors(APIError.VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED);
+                addConflictErrors(APIError.VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED);
                 flushErrors();
             }
         }
@@ -304,7 +308,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
             }
         }
 
-        // the cases when the master was null or not null but the new master image is null
+        // the cases when the master was null or not null but the new master template is null
         // allowed
         if (masterLink == null)
         {
@@ -313,8 +317,8 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                 if (tracer != null)
                 {
                     String messageTrace =
-                        "Virtual Image '" + old.getName()
-                            + "' has been converted to a master image '";
+                        "Virtual Machine Template '" + old.getName()
+                            + "' has been converted to a master template '";
                     tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_UPDATE,
                         messageTrace);
                 }
@@ -322,8 +326,8 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
             old.setMaster(null);
         }
 
-        // case when the new master isn't null and the old can be null or the same image or a new
-        // image
+        // case when the new master isn't null and the old can be null or the same template or a new
+        // template
         else
         {
             String buildPath =
@@ -331,88 +335,93 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
                     EnterpriseResource.ENTERPRISE_PARAM,
                     DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
                     DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM,
-                    VirtualImagesResource.VIRTUAL_IMAGES_PATH,
-                    VirtualImageResource.VIRTUAL_IMAGE_PARAM);
+                    VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
+                    VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
             MultivaluedMap<String, String> map =
                 URIResolver.resolveFromURI(buildPath, masterLink.getHref());
 
-            if (map == null || !map.containsKey(VirtualImageResource.VIRTUAL_IMAGE))
+            if (map == null
+                || !map.containsKey(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE))
             {
-                addValidationErrors(APIError.INVALID_VIMAGE_LINK);
+                addValidationErrors(APIError.INVALID_VMTEMPLATE_LINK);
                 flushErrors();
             }
 
-            Integer masterId = Integer.parseInt(map.getFirst(VirtualImageResource.VIRTUAL_IMAGE));
+            Integer masterId =
+                Integer.parseInt(map
+                    .getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
 
             if (old.getMaster() == null || !masterId.equals(old.getMaster().getId()))
             {
-                addConflictErrors(APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED);
+                addConflictErrors(APIError.VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED);
                 flushErrors();
             }
             // if its the same no change is necessary
 
         }
 
-        appsLibraryRep.updateVirtualImage(old);
+        appsLibraryRep.updateVirtualMachineTemplate(old);
 
         return old;
 
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualImageId)
+    public void deleteVirtualMachineTemplate(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
-        VirtualImage vimageToDelete = getVirtualImage(enterpriseId, datacenterId, virtualImageId);
+        VirtualMachineTemplate vmtemplateToDelete =
+            getVirtualMachineTemplate(enterpriseId, datacenterId, virtualMachineTemplateId);
 
         Enterprise ent = enterpriseService.getEnterprise(enterpriseId);
 
-        // all the checks to delete the virtual image
+        // all the checks to delete the virtual machine template
 
-        // TODO check if any virtual appliance is using the image
+        // TODO check if any virtual appliance is using the template
 
-        if (appsLibraryRep.isMaster(vimageToDelete))
+        if (appsLibraryRep.isMaster(vmtemplateToDelete))
         {
-            addConflictErrors(APIError.VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED);
+            addConflictErrors(APIError.VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_DELETED);
             flushErrors();
         }
 
-        if (vimageToDelete.isStateful())
+        if (vmtemplateToDelete.isStateful())
         {
-            addConflictErrors(APIError.VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED);
+            addConflictErrors(APIError.VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED);
             flushErrors();
         }
 
-        if (vimageToDelete.isShared())
+        if (vmtemplateToDelete.isShared())
         {
-            // assert if the enterprise is the enterprise of the virtual image
-            if (!vimageToDelete.getEnterprise().getId().equals(ent.getId()))
+            // assert if the enterprise is the enterprise of the virtual machine template
+            if (!vmtemplateToDelete.getEnterprise().getId().equals(ent.getId()))
             {
-                addConflictErrors(APIError.VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE);
+                addConflictErrors(APIError.VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE);
                 flushErrors();
             }
         }
-        // if the virtual image is shared only the users from same enterprise can delete
+        // if the virtual machine template is shared only the users from same enterprise can delete
         // check if the user is for the same enterprise otherwise deny allegating permissions
 
-        String viOvf = vimageToDelete.getOvfid();
+        String viOvf = vmtemplateToDelete.getOvfid();
 
         if (viOvf == null)
         {
             // this is a bundle of an imported virtual machine (it havent OVF)
-            viOvf = codifyBundleImportedOVFid(vimageToDelete.getPath());
+            viOvf = codifyBundleImportedOVFid(vmtemplateToDelete.getPath());
         }
 
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
         amClient.delete(enterpriseId.toString(), viOvf);
 
         // delete
-        appsLibraryRep.deleteVirtualImage(vimageToDelete);
+        appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 
         if (tracer != null)
         {
             String messageTrace =
-                "Virtual Image '" + vimageToDelete.getName() + "' has been deleted '";
+                "Virtual Machine Template '" + vmtemplateToDelete.getName()
+                    + "' has been deleted '";
             tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_DELETE,
                 messageTrace);
         }
@@ -425,17 +434,17 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
     }
 
     @Transactional(readOnly = true)
-    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Integer enterpriseId,
-        final Integer datacenterId)
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(
+        final Integer enterpriseId, final Integer datacenterId)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
 
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        return appsLibraryRep.findStatefulVirtualImagesByDatacenter(datacenter);
+        return appsLibraryRep.findStatefulVirtualMachineTemplatesByDatacenter(datacenter);
     }
 
     @Transactional(readOnly = true)
-    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
         final Integer enterpriseId, final Integer datacenterId, final String categoryName)
     {
         checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
@@ -444,7 +453,7 @@ public class VirtualImageService extends DefaultApiServiceWithApplianceManagerCl
         Category category = categoryService.getCategoryByName(categoryName);
 
         return appsLibraryRep
-            .findStatefulVirtualImagesByCategoryAndDatacenter(category, datacenter);
+            .findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category, datacenter);
     }
 
     /**

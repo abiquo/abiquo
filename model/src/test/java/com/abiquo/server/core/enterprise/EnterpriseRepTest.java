@@ -30,8 +30,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.common.persistence.DefaultJpaDataAccessTestBase;
 import com.softwarementors.bzngine.engines.jpa.EntityManagerHelper;
@@ -42,7 +42,7 @@ public class EnterpriseRepTest extends DefaultJpaDataAccessTestBase
 
     private EnterpriseGenerator eg;
 
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
     private EnterpriseGenerator eg()
     {
@@ -55,7 +55,7 @@ public class EnterpriseRepTest extends DefaultJpaDataAccessTestBase
     {
         super.methodSetUp();
         this.eg = new EnterpriseGenerator(getSeed());
-        this.virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        this.virtualImageGenerator = new VirtualMachineTemplateGenerator(getSeed());
     }
 
     @Test
@@ -190,7 +190,7 @@ public class EnterpriseRepTest extends DefaultJpaDataAccessTestBase
     public void deleteEnterpriseWithImagesAndConversions()
     {
         Enterprise enterprise = eg().createUniqueInstance();
-        VirtualImage image = virtualImageGenerator.createImageWithConversions(enterprise);
+        VirtualMachineTemplate image = virtualImageGenerator.createVirtualMachineTemplateWithConversions(enterprise);
         ds().persistAll(image.getRepository().getDatacenter(), enterprise, image.getRepository(),
             image.getCategory(), image);
 

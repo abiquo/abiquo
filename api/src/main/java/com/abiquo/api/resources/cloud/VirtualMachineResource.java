@@ -50,7 +50,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -457,9 +457,9 @@ public class VirtualMachineResource
                 .getEnterprise();
         final User user =
             v.getVirtualMachine().getUser() == null ? null : v.getVirtualMachine().getUser();
-        final VirtualImage virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
+        final VirtualMachineTemplate virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
 
-        dto.addLink(restBuilder.buildVirtualImageLink(virtualImage.getEnterprise().getId(),
+        dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise().getId(),
             virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
@@ -514,11 +514,11 @@ public class VirtualMachineResource
             : machine.getId(), enterprise == null ? null : enterprise.getId(), user == null ? null
             : user.getId()));
 
-        final VirtualImage vimage = v.getVirtualImage();
-        if (vimage != null)
+        final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
+        if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-                .getRepository().getDatacenter().getId(), vimage.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
@@ -568,11 +568,11 @@ public class VirtualMachineResource
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
             v.isChefEnabled()));
 
-        final VirtualImage vimage = v.getVirtualImage();
-        if (vimage != null)
+        final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
+        if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-                .getRepository().getDatacenter().getId(), vimage.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());

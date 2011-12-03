@@ -94,9 +94,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vm.setUser(u);
 
         // TODO vdc datacenter and virutal image datacenter ARE NOT THE SAME
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage().getCategory(), vm
-            .getVirtualImage().getRepository().getDatacenter(), vm.getVirtualImage()
-            .getRepository(), vm.getVirtualImage(), vm.getHypervisor().getMachine().getRack(), vm
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualMachineTemplate().getCategory(), vm
+            .getVirtualMachineTemplate().getRepository().getDatacenter(), vm.getVirtualMachineTemplate()
+            .getRepository(), vm.getVirtualMachineTemplate(), vm.getHypervisor().getMachine().getRack(), vm
             .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
@@ -449,7 +449,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         // Assert its capacity is the same than the virtual image
         assertEquals(disk.getSizeInMb(),
-            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
+            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }
@@ -508,7 +508,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         // Assert its capacity is the same than the virtual image
         assertEquals(disk.getSizeInMb(),
-            Long.valueOf(vm.getVirtualImage().getDiskFileSize() / MEGABYTE));
+            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
 
         commitActiveTransaction(em);
     }

@@ -27,27 +27,27 @@ import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 
-public interface VirtualImageResourceStub
+public interface VirtualMachineTemplateResourceStub
 {
 
     /**
-     * @param datacenterId, null indicate stateful images
+     * @param datacenterId, null indicate stateful templates
      * @param categoryName, null indicate return all the categories
      */
-    public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
+    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
         final Integer idEnterprise, final Integer datacenterId, final String categoryName,
         final String hypervisorTypeName);
 
     /**
-     * @param datacenterId, null indicate stateful images
+     * @param datacenterId, null indicate stateful templates
      * @param categoryName, null indicate return all the categories
      */
-    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final Integer idEnterprise,
-        final Integer datacenterId, final String categoryName);
+    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategory(
+        final Integer idEnterprise, final Integer datacenterId, final String categoryName);
 
     public DataResult<VirtualImage> editVirtualImage(final Integer idEnterprise,
         final Integer idDatacenter, final VirtualImage vimage);
 
-    public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualimageId);
+    public BasicResult deleteVirtualMachineTemplate(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualimageId);
 }

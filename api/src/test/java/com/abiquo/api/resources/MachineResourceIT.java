@@ -309,7 +309,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
                 vm.getEnterprise());
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
-        vm.getVirtualImage().getRepository()
+        vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -325,10 +325,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);
@@ -367,9 +367,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         vm.setIdType(VirtualMachine.NOT_MANAGED);
         VirtualMachine vm2 = vmGenerator.createInstance(vm.getHypervisor());
         vm.setIdType(VirtualMachine.MANAGED);
-        vm.getVirtualImage().getRepository()
+        vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
-        vm2.getVirtualImage().getRepository()
+        vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
         VirtualDatacenter vdc =
             vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
@@ -396,10 +396,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getEnterprise());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
         entitiesToSetup.add(vm2.getEnterprise());
         for (Privilege p : vm2.getUser().getRole().getPrivileges())
@@ -408,9 +408,9 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         }
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
-        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);

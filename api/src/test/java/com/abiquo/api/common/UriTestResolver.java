@@ -56,12 +56,12 @@ import com.abiquo.api.resources.appslibrary.DiskFormatTypesResource;
 import com.abiquo.api.resources.appslibrary.HypervisorTypesResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.resources.appslibrary.IconsResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionListsResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
-import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -108,8 +108,8 @@ public class UriTestResolver
             buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
                 EnterpriseResource.ENTERPRISE_PARAM);
 
-        return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
-            enterpriseId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
     }
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
@@ -140,8 +140,8 @@ public class UriTestResolver
         String template =
             buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
 
-        return resolveURI(template, Collections.singletonMap(PrivilegeResource.PRIVILEGE,
-            privilegeId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)
@@ -204,8 +204,8 @@ public class UriTestResolver
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolveRacksURI(final Integer datacenterId)
@@ -213,8 +213,8 @@ public class UriTestResolver
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
                 RacksResource.RACKS_PATH);
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
@@ -388,8 +388,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(DatacenterResource.DATACENTER, datacenterId.toString());
-        values.put(RemoteServiceResource.REMOTE_SERVICE, type.toString().toLowerCase().replace("_",
-            ""));
+        values.put(RemoteServiceResource.REMOTE_SERVICE,
+            type.toString().toLowerCase().replace("_", ""));
 
         return resolveURI(template, values);
     }
@@ -417,7 +417,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, ovfPackageListId.toString());
+        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST,
+            ovfPackageListId.toString());
 
         return resolveURI(template, values);
 
@@ -478,12 +479,14 @@ public class UriTestResolver
     // return resolveURI(template, values);
     // }
 
-    public static String resolveTemplateDefinitionURI(final Integer enterpriseId, final Integer ovfPackageId)
+    public static String resolveTemplateDefinitionURI(final Integer enterpriseId,
+        final Integer ovfPackageId)
     {
 
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH, TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM);
+                TemplateDefinitionsResource.TEMPLATE_DEFINITIONS_PATH,
+                TemplateDefinitionResource.TEMPLATE_DEFINITION_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -497,8 +500,8 @@ public class UriTestResolver
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
                 + RacksResource.RACKS_PATH;
-        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
-            datacenterId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
     }
 
     public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
@@ -834,7 +837,7 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveVirtualImagesURI(final Integer enterpriseId,
+    public static String resolveVirtualMachineTemplatesURI(final Integer enterpriseId,
         final Integer datacenterId)
     {
         String template =
@@ -842,7 +845,7 @@ public class UriTestResolver
                 EnterpriseResource.ENTERPRISE_PARAM, //
                 DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
                 DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -852,7 +855,7 @@ public class UriTestResolver
         return resolveURI(template, values);
     }
 
-    public static String resolveStatefulVirtualImagesURI(final Integer enterpriseId,
+    public static String resolveStatefulVirtualMachineTemplatesURI(final Integer enterpriseId,
         final Integer datacenterId)
     {
         String template =
@@ -860,7 +863,7 @@ public class UriTestResolver
                 EnterpriseResource.ENTERPRISE_PARAM, //
                 DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
                 DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -868,21 +871,22 @@ public class UriTestResolver
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
             new String[] {"true"});
 
         return resolveURI(template, values, queryParams);
     }
 
-    public static String resolveStatefulVirtualImagesURIWithCategory(final Integer enterpriseId,
-        final Integer datacenterId, final String categoryName)
+    public static String resolveStatefulVirtualMachineTemplatesURIWithCategory(
+        final Integer enterpriseId, final Integer datacenterId, final String categoryName)
     {
         String template =
             buildPath(EnterprisesResource.ENTERPRISES_PATH,
                 EnterpriseResource.ENTERPRISE_PARAM, //
                 DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
                 DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-                VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
@@ -890,29 +894,34 @@ public class UriTestResolver
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
 
         Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM,
             new String[] {categoryName});
-        queryParams.put(VirtualImagesResource.VIRTUAL_IMAGE_GET_STATEFUL_QUERY_PARAM,
+        queryParams.put(
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
             new String[] {"true"});
 
         return resolveURI(template, values, queryParams);
     }
 
-    public static String resolveVirtualImageURI(final Integer enterpriseId,
-        final Integer datacenterId, final Integer virtualImageId)
+    public static String resolveVirtualMachineTemplateURI(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
         String template =
-            buildPath(EnterprisesResource.ENTERPRISES_PATH,
+            buildPath(
+                EnterprisesResource.ENTERPRISES_PATH,
                 EnterpriseResource.ENTERPRISE_PARAM, //
                 DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
                 DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-                VirtualImagesResource.VIRTUAL_IMAGES_PATH, VirtualImageResource.VIRTUAL_IMAGE_PARAM);
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
+                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
         values
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
-        values.put(VirtualImageResource.VIRTUAL_IMAGE, String.valueOf(virtualImageId));
+        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE,
+            String.valueOf(virtualMachineTemplateId));
 
         return resolveURI(template, values);
     }
@@ -952,8 +961,8 @@ public class UriTestResolver
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
-        return resolveURI(template, Collections.singletonMap(
-            SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+        return resolveURI(template,
+            Collections.singletonMap(SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
     }
 
     public static String resolveLoginURI()
@@ -972,8 +981,8 @@ public class UriTestResolver
         String template =
             buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
 
-        return resolveURI(template, Collections.singletonMap(CategoryResource.CATEGORY, categoryId
-            .toString()));
+        return resolveURI(template,
+            Collections.singletonMap(CategoryResource.CATEGORY, categoryId.toString()));
     }
 
     public static String resolveCategoriesURI()

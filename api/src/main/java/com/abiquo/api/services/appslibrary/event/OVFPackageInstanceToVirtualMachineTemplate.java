@@ -40,21 +40,21 @@ import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionDAO;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.User;
 
 /**
- * Transforms an {@link OVFPackageInstanceDto} from ApplianceManager into a {@link VirtualImage} in
- * API
+ * Transforms an {@link OVFPackageInstanceDto} from ApplianceManager into a
+ * {@link VirtualMachineTemplate} in API
  */
 @Service
-public class OVFPackageInstanceToVirtualImage
+public class OVFPackageInstanceToVirtualMachineTemplate
 {
-    private final static Logger logger =
-        LoggerFactory.getLogger(OVFPackageInstanceToVirtualImage.class);
+    private final static Logger logger = LoggerFactory
+        .getLogger(OVFPackageInstanceToVirtualMachineTemplate.class);
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -66,12 +66,12 @@ public class OVFPackageInstanceToVirtualImage
     private EnterpriseRep entRepo;
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<VirtualImage> insertVirtualImages(final List<OVFPackageInstanceDto> disks,
-        final Repository repo)
+    public List<VirtualMachineTemplate> insertVirtualMachineTemplates(
+        final List<OVFPackageInstanceDto> disks, final Repository repo)
     {
-        List<VirtualImage> addedvimages = new LinkedList<VirtualImage>();
+        List<VirtualMachineTemplate> addedvmtemplates = new LinkedList<VirtualMachineTemplate>();
         List<OVFPackageInstanceDto> disksToInsert =
-            filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(disks, repo);
+            filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(disks, repo);
 
         // first masters
         for (OVFPackageInstanceDto disk : disksToInsert)
@@ -80,15 +80,16 @@ public class OVFPackageInstanceToVirtualImage
             {
                 try
                 {
-                    VirtualImage vi = imageFromDisk(disk, repo);
-                    appslibraryRep.insertVirtualImage(vi);
+                    VirtualMachineTemplate vi = virtualMachineTemplateFromTemplate(disk, repo);
+                    appslibraryRep.insertVirtualMachineTemplate(vi);
 
-                    addedvimages.add(vi);
-                    logger.info("Inserted virtual image [{}]", vi.getPath());
+                    addedvmtemplates.add(vi);
+                    logger.info("Inserted virtual machine template [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {
-                    logger.error("Can not insert virtual image [{}]", disk.getDiskFilePath());
+                    logger.error("Can not insert virtual machine template [{}]",
+                        disk.getDiskFilePath());
                 }
             }
         }
@@ -100,26 +101,26 @@ public class OVFPackageInstanceToVirtualImage
             {
                 try
                 {
-                    VirtualImage vi = imageFromDisk(disk, repo);
-                    appslibraryRep.insertVirtualImage(vi);
-                    addedvimages.add(vi);
-                    logger.info("Inserted bundle virtual image [{}]", vi.getPath());
+                    VirtualMachineTemplate vi = virtualMachineTemplateFromTemplate(disk, repo);
+                    appslibraryRep.insertVirtualMachineTemplate(vi);
+                    addedvmtemplates.add(vi);
+                    logger.info("Inserted bundle virtual machine template [{}]", vi.getPath());
                 }
                 catch (Exception pe)
                 {
-                    logger
-                        .error("Can not insert bundle virtual image [{}]", disk.getDiskFilePath());
+                    logger.error("Can not insert bundle virtual machine template [{}]",
+                        disk.getDiskFilePath());
                 }
             }
         }
-        return addedvimages;
+        return addedvmtemplates;
     }
 
     /**
-     * Filer already present virtual image paths. Ignore virtual images from not present enterprise
+     * Filer already present virtual machne template paths. Ignore virtual vmtemplates from not present enterprise
      * repository.
      */
-    private List<OVFPackageInstanceDto> filterAlreadyInsertedVirtualImagePathsOrEnterpriseDoNotExist(
+    private List<OVFPackageInstanceDto> filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(
         final List<OVFPackageInstanceDto> disks, final Repository repository)
     {
 
@@ -131,8 +132,8 @@ public class OVFPackageInstanceToVirtualImage
 
             if (enterprise != null)
             {
-                if (!appslibraryRep.existImageWithSamePath(enterprise, repository, disk
-                    .getDiskFilePath()))
+                if (!appslibraryRep.existVirtualMachineTemplateWithSamePath(enterprise, repository,
+                    disk.getDiskFilePath()))
                 {
                     notInsertedDisks.add(disk);
                 }
@@ -143,19 +144,19 @@ public class OVFPackageInstanceToVirtualImage
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    protected VirtualImage imageFromDisk(final OVFPackageInstanceDto disk,
-        final Repository repository)
+    protected VirtualMachineTemplate virtualMachineTemplateFromTemplate(
+        final OVFPackageInstanceDto disk, final Repository repository)
     {
         Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
         DiskFormatType diskFormat;
-        VirtualImage master = null;
+        VirtualMachineTemplate master = null;
 
         if (disk.getMasterDiskFilePath() != null)
         {
             master =
-                appslibraryRep.findVirtualImageByPath(enterprise, repository, disk
-                    .getDiskFilePath());
+                appslibraryRep.findVirtualMachineTemplateByPath(enterprise, repository,
+                    disk.getDiskFilePath());
 
             diskFormat = master.getDiskFormatType();
         }
@@ -166,24 +167,28 @@ public class OVFPackageInstanceToVirtualImage
 
         Category category = getCategory(disk);
 
-        VirtualImage vimage =
-            new VirtualImage(enterprise, disk.getName(), diskFormat, disk.getDiskFilePath(), disk
-                .getDiskFileSize(), category);
+        VirtualMachineTemplate vmtemplate =
+            new VirtualMachineTemplate(enterprise,
+                disk.getName(),
+                diskFormat,
+                disk.getDiskFilePath(),
+                disk.getDiskFileSize(),
+                category);
 
-        vimage.setIcon(getIcon(disk));
-        vimage.setDescription(getDescription(disk));
-        vimage.setCpuRequired(disk.getCpu());
-        vimage.setRamRequired(getRamInMb(disk).intValue());
-        vimage.setHdRequiredInBytes(getHdInBytes(disk));
-        vimage.setOvfid(disk.getUrl());
-        vimage.setRepository(repository);
-        vimage.setCreationUser(User.SYSTEM_USER.getName());// TODO
+        vmtemplate.setIcon(getIcon(disk));
+        vmtemplate.setDescription(getDescription(disk));
+        vmtemplate.setCpuRequired(disk.getCpu());
+        vmtemplate.setRamRequired(getRamInMb(disk).intValue());
+        vmtemplate.setHdRequiredInBytes(getHdInBytes(disk));
+        vmtemplate.setOvfid(disk.getUrl());
+        vmtemplate.setRepository(repository);
+        vmtemplate.setCreationUser(User.SYSTEM_USER.getName());// TODO
         if (master != null)
         {
-            vimage.setMaster(master);
+            vmtemplate.setMaster(master);
         }
 
-        return vimage;
+        return vmtemplate;
     }
 
     private Category getCategory(final OVFPackageInstanceDto disk)

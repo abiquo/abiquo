@@ -22,7 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineStateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
@@ -65,7 +65,7 @@ import redis.clients.jedis.JedisPool;
 import com.abiquo.api.common.UriTestResolver;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.TaskResourceUtils;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
@@ -74,7 +74,7 @@ import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.AllocatorAction;
 import com.abiquo.scheduler.PopulateTestCase;
 import com.abiquo.scheduler.TestPopulate;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -242,7 +242,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -264,9 +264,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -368,8 +368,8 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         VirtualMachine vm2 = vmGenerator.createInstance(ent);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
-        vm2.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
+        vm2.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -396,9 +396,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -411,9 +411,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
-        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());
         entitiesToSetup.add(vm2);
@@ -434,9 +434,9 @@ public class VirtualMachineResourceIT extends TestPopulate
             "edit");
         assertLinkExist(
             vmDto,
-            resolveVirtualImageURI(vm.getVirtualImage().getEnterprise().getId(), vm
-                .getVirtualImage().getRepository().getDatacenter().getId(), vm.getVirtualImage()
-                .getId()), VirtualImageResource.VIRTUAL_IMAGE);
+            resolveVirtualMachineTemplateURI(vm.getVirtualMachineTemplate().getEnterprise().getId(), vm
+                .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm.getVirtualMachineTemplate()
+                .getId()), VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
 
@@ -449,9 +449,9 @@ public class VirtualMachineResourceIT extends TestPopulate
             "edit");
         assertLinkExist(
             vmDto,
-            resolveVirtualImageURI(vm2.getVirtualImage().getEnterprise().getId(), vm2
-                .getVirtualImage().getRepository().getDatacenter().getId(), vm2.getVirtualImage()
-                .getId()), VirtualImageResource.VIRTUAL_IMAGE);
+            resolveVirtualMachineTemplateURI(vm2.getVirtualMachineTemplate().getEnterprise().getId(), vm2
+                .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm2.getVirtualMachineTemplate()
+                .getId()), VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
     }
@@ -480,7 +480,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -499,9 +499,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -532,7 +532,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -551,9 +551,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -589,7 +589,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
 
-        vm.getVirtualImage().getRepository()
+        vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -606,9 +606,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor().getMachine());
         entitiesToSetup.add(vm.getHypervisor());
@@ -650,7 +650,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -669,9 +669,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -695,7 +695,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         VirtualMachine vm = vmGenerator.createInstance(ent);
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -714,9 +714,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -873,7 +873,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     // @Test
     public void getVirtualMachineStateTest()
     {
-        VirtualImage vi = virtualImageGenerator.createInstance(ent, datacenter);
+        VirtualMachineTemplate vi = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
         VirtualMachine vm = vmGenerator.createInstance(vi);
         vm.setState(VirtualMachineState.OFF);
 
@@ -902,7 +902,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser().getEnterprise());
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -926,7 +926,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     public void getVirtualMachineStateLinkTest()
     {
         // Create a virtual machine
-        VirtualImage vi = virtualImageGenerator.createInstance(ent, datacenter);
+        VirtualMachineTemplate vi = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
         VirtualMachine vm = vmGenerator.createInstance(vi);
         vm.setState(VirtualMachineState.OFF);
 
@@ -955,7 +955,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser().getEnterprise());
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -1011,7 +1011,7 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -1036,7 +1036,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     public void deleteVirtualMachineTest()
     {
         // Create a virtual machine
-        VirtualImage vi = virtualImageGenerator.createInstance(ent, datacenter);
+        VirtualMachineTemplate vi = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
         VirtualMachine vm = vmGenerator.createInstance(vi);
         vm.setState(VirtualMachineState.NOT_ALLOCATED);
 
@@ -1089,7 +1089,7 @@ public class VirtualMachineResourceIT extends TestPopulate
     public void deleteVirtualMachineInvalidTest()
     {
         // Create a virtual machine
-        VirtualImage vi = virtualImageGenerator.createInstance(ent, datacenter);
+        VirtualMachineTemplate vi = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
         VirtualMachine vm = vmGenerator.createInstance(vi);
         vm.setState(VirtualMachineState.ON);
 
@@ -1119,7 +1119,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         entitiesToSetup.add(vm.getUser().getEnterprise());
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -1144,7 +1144,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         // Create a virtual machine
         VirtualMachine vm = vmGenerator.createInstance(ent);
 
-        vm.getVirtualImage().getRepository().setDatacenter(datacenter);
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(datacenter);
         Machine machine = vm.getHypervisor().getMachine();
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
@@ -1166,9 +1166,9 @@ public class VirtualMachineResourceIT extends TestPopulate
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);

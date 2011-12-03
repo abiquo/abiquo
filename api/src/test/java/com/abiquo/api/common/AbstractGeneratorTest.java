@@ -38,7 +38,7 @@ import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
@@ -108,7 +108,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected VolumeManagementGenerator volumeManagementGenerator =
         new VolumeManagementGenerator(seed);
 
-    protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
+    protected VirtualMachineTemplateGenerator virtualMachineTemplateGenerator = new VirtualMachineTemplateGenerator(seed);
 
     protected VirtualImageConversionGenerator conversionGenerator =
         new VirtualImageConversionGenerator(seed);

@@ -40,7 +40,7 @@ import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.scheduler.fit.AllocationFitMax;
 import com.abiquo.scheduler.fit.AllocationFitMin;
 import com.abiquo.scheduler.fit.IAllocationFit;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -87,7 +87,7 @@ import com.abiquo.tracer.client.TracerFactory;
  * defined via FitPolicy.
  * 
  * @author pedro.agullo
- * @param RESOURCE: the resource to be assigned to a target (for example, a Virtualimage)
+ * @param RESOURCE: the resource to be assigned to a target (for example, a VirtualMachineTemplate)
  * @param TARGET: the place where we want to assign a resource (for example, a Physicalmachine)
  * @param CONTEXT_DATA: optative additional data that might be convenient or needed to perform
  *            processing.
@@ -134,7 +134,7 @@ public class VirtualimageAllocationService
     private NetworkAssignmentDAO networkAssignmentDao;
 
     @Autowired
-    private SecondPassRuleFinder<VirtualImage, Machine, Integer> ruleFinder;
+    private SecondPassRuleFinder<VirtualMachineTemplate, Machine, Integer> ruleFinder;
 
     public VirtualimageAllocationService()
     {
@@ -351,7 +351,7 @@ public class VirtualimageAllocationService
                     Long.valueOf(machine.getVirtualRamInMb()), 100);
 
             // BYTE to MB
-            Long imageRequiredMb = requirements.getHd() / (1024 * 1024);
+            Long templateRequiredMb = requirements.getHd() / (1024 * 1024);
 
             Long machineAllowedMb = 0L;
             Long machineUsedMb = 0L;
@@ -367,7 +367,7 @@ public class VirtualimageAllocationService
             // machine.getVirtualHardDiskInBytes() / (1024 * 1024);
             // machine.getVirtualHardDiskUsedInBytes() / (1024 * 1024);
 
-            final boolean passHD = pass(machineUsedMb, imageRequiredMb, machineAllowedMb, 100);
+            final boolean passHD = pass(machineUsedMb, templateRequiredMb, machineAllowedMb, 100);
 
             return passCPU && passRAM && passHD;
         }
@@ -489,7 +489,7 @@ public class VirtualimageAllocationService
 
     /**
      * When editing a virtual machine this method checks if the increases resources (setted at
-     * vimage) are allowed by the workload rules.
+     * vmtemplate) are allowed by the workload rules.
      */
     public boolean checkVirtualMachineResourceIncrease(final Machine machine,
         final VirtualMachineRequirements increaseRequirements, final Integer virtualApplianceId)

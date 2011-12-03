@@ -88,10 +88,9 @@ public class VirtualMachineFactory
     protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
     /**
-     * Create a Virtual Machine on the given PhysicalMachine to deploy the given VirtualImage.
+     * Create a Virtual Machine on the given PhysicalMachine to deploy the given VirtualMachineTemplate.
      * 
-     * @param machine, the machine hypervisor will be used to create the new virtual image.
-     * @param image, the virtual image (vm template) to be deployed.
+     * @param machine, the machine hypervisor will be used to create the new virtual machine template.
      * @return a new VirtualMachine instance inside physical to load image.
      *         <p>
      *         TODO: creating default Hypervisor instance
@@ -115,7 +114,7 @@ public class VirtualMachineFactory
 
         if (virtualMachine.getDatastore() == null)
         {
-            final long datastoreRequ = virtualMachine.getVirtualImage().getDiskFileSize();
+            final long datastoreRequ = virtualMachine.getVirtualMachineTemplate().getDiskFileSize();
             final Datastore datastore = selectDatastore(machine, datastoreRequ);
             virtualMachine.setDatastore(datastore);
         }
@@ -143,11 +142,10 @@ public class VirtualMachineFactory
      * 
      * @param physical the physical machine
      * @param session
-     * @param image
      * @return the target datastore where the virtual machine will be deployed
      * @throws SchedulerException
      */
-    private Datastore selectDatastore(final Machine machine, final Long hdImageRequired)
+    private Datastore selectDatastore(final Machine machine, final Long hdDiskRequired)
         throws NotEnoughResourcesException
     {
 
@@ -175,7 +173,7 @@ public class VirtualMachineFactory
             }
         }
 
-        if (betterDatastore == null || freeLargerSize < hdImageRequired)
+        if (betterDatastore == null || freeLargerSize < hdDiskRequired)
         {
             final String cause =
                 "The target physical machine has no datastores enabled with the required free size.";

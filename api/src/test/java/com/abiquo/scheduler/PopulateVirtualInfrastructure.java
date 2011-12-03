@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -107,7 +107,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     IpPoolManagementGenerator ipPoolGen = new IpPoolManagementGenerator(seed);
 
-    VirtualImageGenerator vimageGen = new VirtualImageGenerator(seed);
+    VirtualMachineTemplateGenerator vimageGen = new VirtualMachineTemplateGenerator(seed);
 
     public PopulateVirtualInfrastructure()
     {
@@ -264,7 +264,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
      */
-    private VirtualImage createVirtualImage(final String enterStr, final String vimageDec)
+    private VirtualMachineTemplate createVirtualImage(final String enterStr, final String vimageDec)
     {
         Enterprise enterprise = enterRep.findByName(enterStr);
 
@@ -295,10 +295,10 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
-        VirtualImage vimage =
+        VirtualMachineTemplate vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        appslibraryRep.insertVirtualImage(vimage);
+        appslibraryRep.insertVirtualMachineTemplate(vimage);
 
         return vimage;
     }
@@ -390,7 +390,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = appslibraryRep.findVirtualImageByName(virtualimageName);
+        VirtualMachineTemplate vimage = appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
         assertNotNull("vimage not found " + virtualimageName, vimage);
 
         VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);

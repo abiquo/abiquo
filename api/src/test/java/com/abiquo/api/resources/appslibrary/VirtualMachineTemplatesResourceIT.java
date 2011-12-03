@@ -22,9 +22,9 @@
 package com.abiquo.api.resources.appslibrary;
 
 import static com.abiquo.api.common.Assert.assertError;
-import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURI;
-import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualImagesURIWithCategory;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualMachineTemplatesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveStatefulVirtualMachineTemplatesURIWithCategory;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplatesURI;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -41,9 +41,9 @@ import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.Category;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
-import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -55,7 +55,7 @@ import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Test
-public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
+public class VirtualMachineTemplatesResourceIT extends AbstractJpaGeneratorIT
 {
     private static final String SYSADMIN = "sysadmin";
 
@@ -109,17 +109,17 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void testGetVirtualImagesRaises409WhenNoDatacenterLimits()
+    public void testGetVirtualMachineTemplatesRaises409WhenNoDatacenterLimits()
     {
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
 
     @Test
-    public void testGetVirtualImagesRaises404WhenInvalidEnterprise()
+    public void testGetVirtualMachineTemplatesRaises404WhenInvalidEnterprise()
     {
-        String uri = resolveVirtualImagesURI(ent.getId() + 100, datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
@@ -131,12 +131,12 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
      */
 
     @Test
-    public void testGetVirtualImagesRaises400WhenInvalidHypervisorType()
+    public void testGetVirtualMachineTemplatesRaises400WhenInvalidHypervisorType()
     {
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         setup(limits);
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         uri += "?hypervisorTypeName=INVALID";
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 400);
@@ -146,145 +146,145 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void testGetStatefulVirtualImagesRaises404WhenInvalidDatacenter()
+    public void testGetStatefulVirtualMachineTemplatesRaises404WhenInvalidDatacenter()
     {
-        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId() + 100);
+        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId() + 100);
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_DATACENTER);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesRaises404WhenInvalidEnterprise()
+    public void testGetStatefulVirtualMachineTemplatesRaises404WhenInvalidEnterprise()
     {
-        String uri = resolveStatefulVirtualImagesURI(ent.getId() + 100, datacenter.getId());
+        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId() + 100, datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_ENTERPRISE);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesRaises404WhenNoDatacenterLimits()
+    public void testGetStatefulVirtualMachineTemplatesRaises404WhenNoDatacenterLimits()
     {
-        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 409, APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesRaises404WhenInvalidCategory()
+    public void testGetStatefulVirtualMachineTemplatesRaises404WhenInvalidCategory()
     {
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
         setup(limits);
 
         String uri =
-            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
+            resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 "nonexisting");
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertError(response, 404, APIError.NON_EXISTENT_CATEGORY);
     }
 
     @Test
-    public void testGetVirtualImages()
+    public void testGetVirtualMachineTemplates()
     {
-        VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
-        VirtualImage vi2 = virtualImageGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi1 = virtualMachineTemplateGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi2 = virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         setup(limits, vi1.getCategory(), vi2.getCategory(), vi1, vi2);
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 2);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesWithoutResults()
+    public void testGetStatefulVirtualMachineTemplatesWithoutResults()
     {
-        VirtualImage vi1 = virtualImageGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vi1 = virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
         setup(limits, vi1.getCategory(), vi1);
 
-        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 0);
     }
 
     @Test
-    public void testGetStatefulVirtualImages()
+    public void testGetStatefulVirtualMachineTemplates()
     {
-        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vmtemplate = virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-        setup(limits, image.getCategory(), image);
+        setup(limits, vmtemplate.getCategory(), vmtemplate);
 
-        volume.setVirtualImage(image);
-        update(volume, image);
+        volume.setVirtualMachineTemplate(vmtemplate);
+        update(volume, vmtemplate);
 
-        String uri = resolveStatefulVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveStatefulVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesByCategory()
+    public void testGetStatefulVirtualMachineTemplatesByCategory()
     {
-        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate vmtemplate = virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-        setup(limits, image.getCategory(), image);
+        setup(limits, vmtemplate.getCategory(), vmtemplate);
 
-        volume.setVirtualImage(image);
-        update(volume, image);
+        volume.setVirtualMachineTemplate(vmtemplate);
+        update(volume, vmtemplate);
 
         String uri =
-            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(), image
+            resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(), vmtemplate
                 .getCategory().getName());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
 
     @Test
-    public void testGetStatefulVirtualImagesByCategoryWithoutResults()
+    public void testGetStatefulVirtualMachineTemplatesByCategoryWithoutResults()
     {
         Category anotherCategory = categoryGenerator.createUniqueInstance();
 
-        VirtualImage image = virtualImageGenerator.createInstance(ent, repository);
+        VirtualMachineTemplate template = virtualMachineTemplateGenerator.createInstance(ent, repository);
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
-        setup(limits, image.getCategory(), image, anotherCategory);
+        setup(limits, template.getCategory(), template, anotherCategory);
 
-        volume.setVirtualImage(image);
-        update(volume, image);
+        volume.setVirtualMachineTemplate(template);
+        update(volume, template);
 
         String uri =
-            resolveStatefulVirtualImagesURIWithCategory(ent.getId(), datacenter.getId(),
+            resolveStatefulVirtualMachineTemplatesURIWithCategory(ent.getId(), datacenter.getId(),
                 anotherCategory.getName());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 0);
     }
 
     @Test
-    public void testGetVirtualImagesCompatibles_compatibleConversionNoCompatible()
+    public void testGetVirtualMachineTemplatesCompatibles_compatibleConversionNoCompatible()
     {
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
-        VirtualImage vi1 =
-            virtualImageGenerator.createInstance(ent, repository, DiskFormatType.VDI_FLAT,
+        VirtualMachineTemplate vi1 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository, DiskFormatType.VDI_FLAT,
                 "compatible-vbox");
-        VirtualImage vi2 =
-            virtualImageGenerator.createInstance(ent, repository,
+        VirtualMachineTemplate vi2 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository,
                 DiskFormatType.VMDK_STREAM_OPTIMIZED, "No-compatible-vbox");
 
         VirtualImageConversion conversion1 =
@@ -292,27 +292,27 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         setup(limits, vi1.getCategory(), vi1, vi2.getCategory(), vi2, conversion1);
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
                 HypervisorType.VBOX.name()).get();
 
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
 
     @Test
-    public void testGetVirtualImagesCompatibles_NoCompatibleConversionCompatible()
+    public void testGetVirtualMachineTemplatesCompatibles_NoCompatibleConversionCompatible()
     {
         DatacenterLimits limits = datacenterLimitsGenerator.createInstance(ent, datacenter);
 
-        VirtualImage vi1 =
-            virtualImageGenerator.createInstance(ent, repository,
+        VirtualMachineTemplate vi1 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository,
                 DiskFormatType.VMDK_STREAM_OPTIMIZED, "compatible-vbox");
-        VirtualImage vi2 =
-            virtualImageGenerator.createInstance(ent, repository,
+        VirtualMachineTemplate vi2 =
+            virtualMachineTemplateGenerator.createInstance(ent, repository,
                 DiskFormatType.VMDK_STREAM_OPTIMIZED, "No-compatible-vbox");
 
         VirtualImageConversion conversion1 =
@@ -321,14 +321,14 @@ public class VirtualImagesResourceIT extends AbstractJpaGeneratorIT
 
         setup(limits, vi1.getCategory(), vi1, vi2.getCategory(), vi2, conversion1);
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response =
             resource(uri, SYSADMIN, SYSADMIN).queryParam("hypervisorTypeName",
                 HypervisorType.VBOX.name()).get();
 
         assertEquals(response.getStatusCode(), 200);
 
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
         assertEquals(dto.getCollection().size(), 1);
     }
 

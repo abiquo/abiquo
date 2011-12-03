@@ -189,7 +189,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     /**
      * Creates a virtual machine using some hypervisor on the current virtual appliance datacenter.
      * 
-     * @param targetImage, target image to deploy (virtual machine template). Determine basic
+     * @param targetImage, target vmtemplate to deploy (virtual machine template). Determine basic
      *            resource utilization (CPU, RAM, HD) (additionally repository utilization)
      * @param resources, additional resources configurations to be added on the virtual machine
      * @param user, the user performing the virtual machine creation.
@@ -198,9 +198,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param foreceEnterpriseSoftLimits, indicating if the virtual appliance should be started even
      *            when the soft limit is exceeded. if false and the soft limit is reached a
      *            {@link SoftLimitExceededException} is thrown, otherwise generate a EVENT TRACE.
-     * @return a Virtual Machine based on the provided virtual image on some (best) machine.
+     * @return a Virtual Machine based on the provided virtual machine template on some (best) machine.
      * @throws AllocatorException, direct subclasses {@link HardLimitExceededException} when the
-     *             current virtual image requirements will exceed the total allowed resource
+     *             current virtual machine template requirements will exceed the total allowed resource
      *             reservation, {@link SoftLimitExceededException} on ''foreceEnterpriseSoftLimits''
      *             = false and the soft limit is exceeded.
      * @throws ResourceAllocationException, if none of the machines on the datacenter can be used to
@@ -372,7 +372,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * (of excluded by some exception on the virtual machine creation on the hypervisor).
      * 
      * @param machine, the target machine holding the virtual machine to be undeployed.
-     * @param image, the virtual image requirements to be deallocated.
      * @throws AllocationException, it there are some problem updating the physical machine
      */
     public void deallocateVirtualMachine(final Integer idVirtualMachine)
@@ -417,7 +416,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @throws ResourceAllocationException, (NotEnoughResources) if there aren't any machine to full
      *             fits the requirements.
      * @throws LimitExceededException, it the allowed resources are exceeded.
-     *             {@link HardLimitExceededException} when the current virtual image requirements
+     *             {@link HardLimitExceededException} when the current virtual machine template requirements
      *             will exceed the total allowed resource reservation,
      *             {@link SoftLimitExceededException} on ''foreceEnterpriseSoftLimits'' = false and
      *             the soft limit is exceeded.

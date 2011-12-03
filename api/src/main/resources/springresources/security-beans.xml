@@ -65,20 +65,20 @@
         <security:intercept-url pattern="/admin/enterprises/*/action/externalnetworks/*" method="GET" access="ROLE_ENTERPRISE_ENUMERATE, ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/admin/enterprises/*/action/chefelements" method="GET" access="ROLE_VAPP_CUSTOMISE_SETTINGS" />
         <!-- REPOSITORY -->
-        <!-- Repositories and Virtual Images can be listed by the same people who can create Virtual Apps -->
+        <!-- Repositories and Virtual Machine Templates can be listed by the same people who can create Virtual Apps -->
         <!-- Repositories can be refreshed by the same people who can create Virtual Apps and the Enterprise Admin -->
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP" />
-        <!-- VIRTUAL IMAGES -->
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages" method="OPTIONS" access="ROLE_AUTHENTICATED" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
-        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualimages/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- VIRTUAL MACHINE TEMPLATES -->
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="PUT" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/virtualmachinetemplates/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <!-- USERS -->
         <security:intercept-url pattern="/admin/enterprises/*/users" method="POST" access="ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
         <security:intercept-url pattern="/admin/enterprises/*/users" method="GET" access="ROLE_AUTHENTICATED,ROLE_USERS_VIEW,ROLE_USERS_MANAGE_USERS,ROLE_USERS_MANAGE_OTHER_ENTERPRISES" />
@@ -250,7 +250,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/nodecollector/actions/hypervisor" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/nodecollector/actions/host" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- APPLIANCE MANAGER -->
-       <!-- 
+        <!-- 
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager" method="DELETE" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -264,7 +264,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager/er/*/templateDefinitionInstances/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager/er/*/templateDefinitionInstances/*" method="OPTIONS" access="ROLE_APPLIB_VIEW" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/appliancemanager/er/*/templateDefinitionInstances/*/bundle" method="POST" access="ROLE_VAPP_CREATE_INSTANCE" />
-         -->
+        -->
         <!-- STATISTICS -->
         <security:intercept-url pattern="/admin/statistics" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/statistics/dcsresources" method="GET" access="ROLE_PHYS_DC_RETRIEVE_RESOURCE_USAGE" />

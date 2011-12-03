@@ -34,8 +34,8 @@ public interface IResourceUpgradeUse
      * Increments the physical machine resource utilization
      * 
      * @param machine, the target physical machine to increment its resource utilization.
-     * @param virtualMachine, the new resource requirements (based on its virtual image and
-     *            additional resource configuration).
+     * @param virtualMachine, the new resource requirements (based on its virtual machine template
+     *            and additional resource configuration).
      * @param virtualApplianceId, the virtual appliance the virtual machine belongs to.
      * @throws ResourceUpgradeUseException, if the operation can be performed: there isn't enough
      *             resources to allocate the virtual machine, the virtual appliances is not on any
@@ -56,12 +56,13 @@ public interface IResourceUpgradeUse
      * 
      * @param machine, the target physical machine to decrements its resource utilization.
      * @param virtualMachine, the resource requirements to be deallocated (based on its virtual
-     *            image and additional resource configuration).
+     *            machine template and additional resource configuration).
      */
     public void rollbackUse(VirtualMachine virtual);
 
     /**
      * Increase the ram and cpu resources on the provided machine.
+     * 
      * @param requirements, the increased resources (now only used for CPU and RAM)
      */
     public void updateUsed(final Machine machine, final VirtualMachineRequirements requirements);

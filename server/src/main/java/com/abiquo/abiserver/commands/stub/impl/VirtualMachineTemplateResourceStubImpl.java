@@ -31,7 +31,7 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
-import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineTemplateResourceStub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualimage.Category;
@@ -39,70 +39,70 @@ import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
-import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 
-public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
-    VirtualImageResourceStub
+public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub implements
+    VirtualMachineTemplateResourceStub
 {
 
-    public final static String VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM = "categoryName";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM = "categoryName";
 
-    public final static String VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeName";
 
     /**
-     * @param idRepo, if 0, indicate stateful images
+     * @param idRepo, if 0, indicate stateful templates
      * @param idCategory, if 0 indicate return all the categories
      */
     @Override
-    public DataResult<List<VirtualImage>> getVirtualImageByCategory(final Integer idEnterprise,
+    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategory(final Integer idEnterprise,
         final Integer datacenterId, final String categoryName)
     {
         final String hypervisorTypeName = null;
 
-        return getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
+        return getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
             categoryName, hypervisorTypeName);
     }
 
     /**
-     * @param idRepo, if 0, indicate stateful images
+     * @param idRepo, if 0, indicate stateful templates
      * @param idCategory, if 0 indicate return all the categories
      */
     @Override
-    public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
+    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
         final Integer idEnterprise, final Integer datacenterId, final String categoryName,
         final String hypervisorTypeName)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
 
-        final String uri = createVirtualImagesLink(idEnterprise, datacenterId);
-        Resource vimagesResource = resource(uri);
+        final String uri = createVirtualMachineTemplatesLink(idEnterprise, datacenterId);
+        Resource vmtemplatesResource = resource(uri);
 
         if (StringUtils.isNotEmpty(hypervisorTypeName))
         {
-            vimagesResource =
-                vimagesResource.queryParam(VIRTUAL_IMAGE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
+            vmtemplatesResource =
+                vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
                     valueOf(hypervisorTypeName));
 
         }
 
         if (StringUtils.isNotEmpty(categoryName))
         {
-            vimagesResource =
-                vimagesResource.queryParam(VIRTUAL_IMAGE_GET_CATEGORY_QUERY_PARAM,
+            vmtemplatesResource =
+                vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM,
                     valueOf(categoryName));
         }
 
-        ClientResponse response = vimagesResource.get();
+        ClientResponse response = vmtemplatesResource.get();
 
         if (response.getStatusCode() / 200 == 1)
         {
-            VirtualImagesDto images = response.getEntity(VirtualImagesDto.class);
+            VirtualMachineTemplatesDto templatess = response.getEntity(VirtualMachineTemplatesDto.class);
 
             result.setSuccess(true);
-            result.setData(transformToFlex(images));
+            result.setData(transformToFlex(templatess));
         }
         else
         {
@@ -114,12 +114,12 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public BasicResult deleteVirtualImage(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualimageId)
+    public BasicResult deleteVirtualMachineTemplate(final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualMachineTemplateId)
     {
         BasicResult result = new BasicResult();
 
-        String uri = createVirtualImageLink(enterpriseId, datacenterId, virtualimageId);
+        String uri = createVirtualMachineTemplateLink(enterpriseId, datacenterId, virtualMachineTemplateId);
 
         ClientResponse response = delete(uri);
 
@@ -135,18 +135,18 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private List<VirtualImage> transformToFlex(final VirtualImagesDto images)
+    private List<VirtualImage> transformToFlex(final VirtualMachineTemplatesDto vmtemplates)
     {
         List<VirtualImage> vlst = new LinkedList<VirtualImage>();
-        for (VirtualImageDto image : images.getCollection())
+        for (VirtualMachineTemplateDto template : vmtemplates.getCollection())
         {
-            vlst.add(transformToFlex(image));
+            vlst.add(transformToFlex(template));
         }
 
         return vlst;
     }
 
-    private VirtualImage transformToFlex(final VirtualImageDto vi)
+    private VirtualImage transformToFlex(final VirtualMachineTemplateDto vi)
     {
         VirtualImage img = new VirtualImage();
 
@@ -159,7 +159,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         img.setCpuRequired(vi.getCpuRequired());
         img.setShared(vi.isShared());
         img.setStateful(vi.isShared());
-        img.setOvfId(getLink("ovfpackage", vi.getLinks()).getHref());
+        img.setOvfId(getLink("templatedefinition", vi.getLinks()).getHref());
         img.setDiskFileSize(vi.getDiskFileSize());
         img.setCostCode(vi.getCostCode());
         img.setCategory(createCategoryFromLink(getLink("category", vi.getLinks())));
@@ -238,13 +238,13 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
     {
         final DataResult<VirtualImage> result = new DataResult<VirtualImage>();
 
-        String uri = createVirtualImageLink(idEnterprise, idDatacenter, vimage.getId());
+        String uri = createVirtualMachineTemplateLink(idEnterprise, idDatacenter, vimage.getId());
 
         ClientResponse response = put(uri, createDtoObject(vimage, idDatacenter));
 
         if (response.getStatusCode() == 200)
         {
-            VirtualImageDto dto = response.getEntity(VirtualImageDto.class);
+            VirtualMachineTemplateDto dto = response.getEntity(VirtualMachineTemplateDto.class);
             result.setData(transformToFlex(dto));
             result.setSuccess(Boolean.TRUE);
         }
@@ -256,10 +256,10 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private VirtualImageDto createDtoObject(final VirtualImage vimage, final Integer datacenterId)
+    private VirtualMachineTemplateDto createDtoObject(final VirtualImage vimage, final Integer datacenterId)
     {
 
-        VirtualImageDto dto = new VirtualImageDto();
+        VirtualMachineTemplateDto dto = new VirtualMachineTemplateDto();
 
         Integer enterpriseId = vimage.getIdEnterprise();
 
@@ -287,7 +287,7 @@ public class VirtualImageResourceStubImpl extends AbstractAPIStub implements
         if (vimage.getMaster() != null)
         {
             RESTLink masterLink =
-                new RESTLink("master", createVirtualImageLink(enterpriseId, datacenterId, vimage
+                new RESTLink("master", createVirtualMachineTemplateLink(enterpriseId, datacenterId, vimage
                     .getMaster().getId()));
             dto.addLink(masterLink);
         }

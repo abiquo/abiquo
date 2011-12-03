@@ -64,11 +64,10 @@
                 <ref bean="virtualMachineResource" />
                 <ref bean="virtualMachineNetworkConfigurationResource" />
                 <ref bean="virtualMachineStorageConfigurationResource" />
-                <!-- AM as REST Resource -->
                 <ref bean="datacenterRepositoriesResource" />
                 <ref bean="datacenterRepositoryResource" />
-                <ref bean="virtualImagesResource" />
-                <ref bean="virtualImageResource" />
+                <ref bean="virtualMachineTemplatesResource" />
+                <ref bean="virtualMachineTemplateResource" />
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->

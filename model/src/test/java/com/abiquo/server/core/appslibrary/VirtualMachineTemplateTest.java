@@ -24,12 +24,12 @@ package com.abiquo.server.core.appslibrary;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-public class VirtualImageTest extends DefaultEntityTestBase<VirtualImage>
+public class VirtualMachineTemplateTest extends DefaultEntityTestBase<VirtualMachineTemplate>
 {
 
     @Override
-    protected InstanceTester<VirtualImage> createEntityInstanceGenerator()
+    protected InstanceTester<VirtualMachineTemplate> createEntityInstanceGenerator()
     {
-        return new VirtualImageGenerator(getSeed());
+        return new VirtualMachineTemplateGenerator(getSeed());
     }
 }

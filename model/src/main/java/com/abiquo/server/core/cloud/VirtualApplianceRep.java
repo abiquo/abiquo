@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.cloud.stateful.DiskStatefulConversion;
@@ -129,7 +129,7 @@ public class VirtualApplianceRep extends DefaultRepBase
         return virtualImageConversionDao.findById(id);
     }
 
-    public boolean isVirtualImageConverted(final VirtualImage vImage, final DiskFormatType format)
+    public boolean isVirtualImageConverted(final VirtualMachineTemplate vImage, final DiskFormatType format)
     {
         return virtualImageConversionDao.isVirtualImageConverted(vImage.getId(), format);
     }

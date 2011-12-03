@@ -605,7 +605,8 @@ public class AbstractAPIStub
         return UriHelper.appendQueryParamsToPath(uri, queryParams, false);
     }
 
-    protected String createVirtualImagesLink(final Integer enterpriseId, final Integer datacenterId)
+    protected String createVirtualMachineTemplatesLink(final Integer enterpriseId,
+        final Integer datacenterId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", valueOf(enterpriseId));
@@ -613,23 +614,26 @@ public class AbstractAPIStub
 
         String uri =
             URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
-                + "datacenterrepositories/{datacenterrepository}/virtualimages", params);
+                + "datacenterrepositories/{datacenterrepository}/virtualmachinetemplates", params);
 
         return uri;
     }
 
-    protected String createVirtualImageLink(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualimageId)
+    protected String createVirtualMachineTemplateLink(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("enterprise", valueOf(enterpriseId));
         params.put("datacenterrepository", valueOf(datacenterId));
-        params.put("virtualimage", valueOf(virtualimageId));
+        params.put("virtualmachinetemplate", valueOf(virtualMachineTemplateId));
 
         String uri =
-            URIResolver.resolveURI(apiUri, "admin/enterprises/{enterprise}/"
-                + "datacenterrepositories/{datacenterrepository}/virtualimages/{virtualimage}",
-                params);
+            URIResolver
+                .resolveURI(
+                    apiUri,
+                    "admin/enterprises/{enterprise}/"
+                        + "datacenterrepositories/{datacenterrepository}/virtualmachinetemplates/{virtualmachinetemplate}",
+                    params);
 
         return uri;
     }

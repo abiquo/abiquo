@@ -27,9 +27,9 @@ import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
-import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineTemplateResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.DatacenterRepositoryResourceStubImpl;
-import com.abiquo.abiserver.commands.stub.impl.VirtualImageResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineTemplateResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -74,15 +74,15 @@ public class AppsLibraryService
         final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
         final String categoryName, final String hypervisorTypeName, final Integer idDatacenter)
     {
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
+            vimageStub.getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
                 categoryName, hypervisorTypeName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
@@ -96,15 +96,15 @@ public class AppsLibraryService
         final Integer idEnterprise, final Integer idRepo, final String categoryName,
         final Integer idDatacenter)
     {
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryName);
+            vimageStub.getVirtualMachineTemplateByCategory(idEnterprise, datacenterId, categoryName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -268,9 +268,9 @@ public class AppsLibraryService
         final Integer idDatacenter, final VirtualImage vimage)
     {
 
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         return vimageStub.editVirtualImage(idEnterprise, idDatacenter, vimage);
     }
@@ -279,11 +279,11 @@ public class AppsLibraryService
         final Integer idEnterprise, final Integer idDatacenter, final Integer idVirtualImage)
     {
 
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
-        return vimageStub.deleteVirtualImage(idEnterprise, idDatacenter, idVirtualImage);
+        return vimageStub.deleteVirtualMachineTemplate(idEnterprise, idDatacenter, idVirtualImage);
 
     }
 

@@ -51,20 +51,20 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@Table(name = VirtualImage.TABLE_NAME)
-@org.hibernate.annotations.Table(appliesTo = VirtualImage.TABLE_NAME)
-public class VirtualImage extends DefaultEntityBase
+@Table(name = VirtualMachineTemplate.TABLE_NAME)
+@org.hibernate.annotations.Table(appliesTo = VirtualMachineTemplate.TABLE_NAME)
+public class VirtualMachineTemplate extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "virtualimage";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    public VirtualImage()
+    public VirtualMachineTemplate()
     {
         // Just for JPA support
     }
 
-    public VirtualImage(final Enterprise enterprise, final String name,
+    public VirtualMachineTemplate(final Enterprise enterprise, final String name,
         final DiskFormatType diskFormatType, final String path, final long diskFileSize,
         final Category category)
     {
@@ -77,7 +77,7 @@ public class VirtualImage extends DefaultEntityBase
         this.category = category;
     }
 
-    public VirtualImage(final Enterprise enterprise, final String name,
+    public VirtualMachineTemplate(final Enterprise enterprise, final String name,
         final DiskFormatType diskFormatType, final String path, final long diskFileSize,
         final Category category, final VolumeManagement volume)
     {
@@ -177,7 +177,7 @@ public class VirtualImage extends DefaultEntityBase
     }
 
     /**
-     * This method should be only called from VolumeManagement.setVirtualImage()
+     * This method should be only called from VolumeManagement.setVirtualMachineTemplate()
      */
     public void setStateful(final boolean stateful)
     {
@@ -188,7 +188,7 @@ public class VirtualImage extends DefaultEntityBase
 
     private final static boolean VOLUME_REQUIRED = false;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "virtualImage")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "virtualMachineTemplate")
     private VolumeManagement volume;
 
     @Required(value = VOLUME_REQUIRED)
@@ -198,7 +198,7 @@ public class VirtualImage extends DefaultEntityBase
     }
 
     // Set volume is not available. The link to the volume must be performed by calling
-    // VolumeManagement.setVirtualImage
+    // VolumeManagement.setVirtualMachineTemplate
 
     public final static String SHARED_PROPERTY = "shared";
 
@@ -373,15 +373,15 @@ public class VirtualImage extends DefaultEntityBase
     @JoinColumn(name = MASTER_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_master")
-    private VirtualImage master;
+    private VirtualMachineTemplate master;
 
     @Required(value = MASTER_REQUIRED)
-    public VirtualImage getMaster()
+    public VirtualMachineTemplate getMaster()
     {
         return this.master;
     }
 
-    public void setMaster(final VirtualImage master)
+    public void setMaster(final VirtualMachineTemplate master)
     {
         this.master = master;
     }
@@ -642,7 +642,7 @@ public class VirtualImage extends DefaultEntityBase
 
     public final static String CONVERSIONS_PROPERTY = "conversions";
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "virtualImage")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "virtualMachineTemplate")
     private final List<VirtualImageConversion> conversions =
         new ArrayList<VirtualImageConversion>();
 

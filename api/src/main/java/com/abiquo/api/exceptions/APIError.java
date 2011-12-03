@@ -249,8 +249,8 @@ public enum APIError
         "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
-        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER(
-        "VM-16", "The provided virtual images isn't available in the virtual appliance datacenter"), VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED(
+        "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
+        "VM-16", "The provided virtual images isn't available in the virtual appliance datacenter"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED(
         "VM-17", "The provided virtual image can not be used in the current enterprise"), VIRTUAL_MACHINE_IMAGE_NOT_COMPATIBLE(
         "VM-18", "The virtual image is not compatible and there isn't any compatible conversion"), VIRTUAL_MACHINE_IMAGE_NOT_READY(
         "VM-19",
@@ -324,22 +324,22 @@ public enum APIError
         "Invalid Disk format type URL"),
     // VIRTUAL IMAGE
     VIMAGE_INVALID_ALLOCATION_UNITS("VIMAGE-INVALID-OVF-ALLOCATION-INITS",
-        "Virtual image can not be added due invalid allocation units"), VIMAGE_SYNCH_DC_REPO(
+        "Virtual image can not be added due invalid allocation units"), VMTEMPLATE_SYNCH_DC_REPO(
         "VIMAGE-SYNCH-DATACENTER-REPOSITORY", "Can't obtain downloaded OVF in the datacenter."), VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND(
         "DATACENTER-REPOSITORY-NOT-CREATED",
-        "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VIMAGE_REPOSITORY_CHANGED(
+        "Datacenter haven't the ApplianceManager properly configured. Repository not created."), VMTEMPLATE_REPOSITORY_CHANGED(
         "VIMAGE-REPOSITORY-CHANGED", "Datacenter repository changes its repository location"), VIMAGE_AM_DOWN(
-        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUALIMAGE(
+        "VIMAGE-AM-DOWN", "Check Appliance Manager configuration error"), NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE(
         "VIMAGE-0", "The requested virtual image does not exist"), VIMAGE_IS_NOT_BUNDLE("VIMAGE-1",
-        "Provided virtual image is not a bundle"), INVALID_VIMAGE_LINK("VIMAGE-2",
+        "Provided virtual image is not a bundle"), INVALID_VMTEMPLATE_LINK("VIMAGE-2",
         "Invalid Virtual Image identifier in the Virtual Image link"), INVALID_DATACENTER_RESPOSITORY_LINK(
-        "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VIMAGE_ENTERPRISE_CANNOT_BE_CHANGED(
-        "VIMAGE-4", "Change in Enterprise of the Virtual Image is not allowed"), VIMAGE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
-        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Image is not allowed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_CHANGED(
-        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VIMAGE_MASTER_IMAGE_CANNOT_BE_DELETED(
+        "VIMAGE-3", "Invalid Datacenter Repository identifier in the Datacenter Repository link"), VMTEMPLATE_ENTERPRISE_CANNOT_BE_CHANGED(
+        "VIMAGE-4", "Change in Enterprise of the Virtual Image is not allowed"), VMTEMPLATE_DATACENTER_REPOSITORY_CANNOT_BE_CHANGED(
+        "VIMAGE-5", "Change in Datacenter Repository of a Virtual Image is not allowed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_CHANGED(
+        "VIMAGE-6", "Master Image of a Virtual Image cannot be changed"), VMTEMPLATE_MASTER_TEMPLATE_CANNOT_BE_DELETED(
         "VIMAGE-7",
-        "The requested virtual image is a master image, master images cannot be deleted"), VIMAGE_STATEFUL_IMAGE_CANNOT_BE_DELETED(
-        "VIMAGE-8", "Cannot delete a stateful image"), VIMAGE_SHARED_IMAGE_FROM_OTHER_ENTERPRISE(
+        "The requested virtual image is a master image, master images cannot be deleted"), VMTEMPLATE_STATEFUL_TEMPLATE_CANNOT_BE_DELETED(
+        "VIMAGE-8", "Cannot delete a stateful image"), VMTEMPLATE_SHARED_TEMPLATE_FROM_OTHER_ENTERPRISE(
         "VIMAGE-9",
         "Cannot delete the requested shared virtual image, because it belongs to another enterprise"),
 

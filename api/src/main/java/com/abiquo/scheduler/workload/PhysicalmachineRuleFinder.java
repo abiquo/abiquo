@@ -29,7 +29,7 @@ import javax.persistence.EntityManager;
 
 import org.springframework.stereotype.Component;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.scheduler.MachineLoadRule;
 
@@ -38,7 +38,7 @@ import com.abiquo.server.core.scheduler.MachineLoadRule;
  */
 @Component
 public class PhysicalmachineRuleFinder implements
-    SecondPassRuleFinder<VirtualImage, Machine, Integer>
+    SecondPassRuleFinder<VirtualMachineTemplate, Machine, Integer>
 {
 
     public PhysicalmachineRuleFinder()

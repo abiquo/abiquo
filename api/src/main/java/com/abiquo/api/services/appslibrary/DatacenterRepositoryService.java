@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualImage;
+import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualMachineTemplate;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
@@ -42,7 +42,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
 import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
 import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -53,11 +53,11 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     public static final Logger logger = LoggerFactory.getLogger(DatacenterRepositoryService.class);
 
     @Autowired
-    private OVFPackageInstanceToVirtualImage toimage;
+    private OVFPackageInstanceToVirtualMachineTemplate toVmtemplate;
 
     /**
      * Request the DOWNLOAD {@link OVFPackageInstanceDto} available in the ApplianceManager and
-     * update the {@link VirtualImage} repository with new images.
+     * update the {@link VirtualMachineTemplate} repository with new virtual machine templates.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void synchronizeDatacenterRepository(final Datacenter datacenter,
@@ -107,14 +107,13 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     private Repository checkRepositoryLocation(final Datacenter datacenter,
         final ApplianceManagerResourceStubImpl amStub)
     {
-        final String repositoryLocation =
-            amStub.getRepositoryConfiguration().getLocation();
+        final String repositoryLocation = amStub.getRepositoryConfiguration().getLocation();
 
         final Repository repo = infService.getRepository(datacenter);
 
         if (!repo.getUrl().equalsIgnoreCase(repositoryLocation))
         {
-            addConflictErrors(APIError.VIMAGE_REPOSITORY_CHANGED);
+            addConflictErrors(APIError.VMTEMPLATE_REPOSITORY_CHANGED);
             flushErrors();
         }
 
@@ -136,14 +135,15 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
             }
             catch (ApplianceManagerStubException e)
             {
-                logger.error("Can not initialize VirtualImage from ovf [{}]", ovfid);
+                logger.error("Can not initialize VirtualMachineTemplate from ovf [{}]", ovfid);
             }
         }
 
-        List<VirtualImage> insertedImages = toimage.insertVirtualImages(disks, repo);
+        List<VirtualMachineTemplate> insertedVmtemplates =
+            toVmtemplate.insertVirtualMachineTemplates(disks, repo);
 
-        // Process existing images
-        processExistingImages(insertedImages);
+        // Process existing vmtemplates
+        processExistingVirtualMachineTemplates(insertedVmtemplates);
     }
 
     /**
@@ -169,7 +169,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
         }
         catch (ApplianceManagerStubException e)
         {
-            addConflictErrors(APIError.VIMAGE_SYNCH_DC_REPO);
+            addConflictErrors(APIError.VMTEMPLATE_SYNCH_DC_REPO);
             flushErrors();
         }
 
@@ -177,13 +177,15 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     }
 
     /**
-     * Post process AM existing images.
+     * Post process AM existing vmtemplates.
      * <p>
-     * This method may be overriden in enterprise version to manage virtual image conversions.
+     * This method may be overriden in enterprise version to manage virtual machine template
+     * conversions.
      * 
-     * @param images The existing images.
+     * @param vmtemplates The existing vmtemplates.
      */
-    protected void processExistingImages(final Collection<VirtualImage> images)
+    protected void processExistingVirtualMachineTemplates(
+        final Collection<VirtualMachineTemplate> vmtemplates)
     {
         // Do nothing
     }

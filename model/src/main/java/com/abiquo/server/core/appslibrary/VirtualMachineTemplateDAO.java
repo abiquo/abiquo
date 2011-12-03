@@ -45,27 +45,27 @@ import com.abiquo.server.core.infrastructure.storage.StorageDevice;
 import com.abiquo.server.core.infrastructure.storage.StoragePool;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
-@Repository("jpaVirtualImageDAO")
-/* package */class VirtualImageDAO extends DefaultDAOBase<Integer, VirtualImage>
+@Repository("jpaVirtualMachineTemplateDAO")
+/* package */class VirtualMachineTemplateDAO extends DefaultDAOBase<Integer, VirtualMachineTemplate>
 {
-    public VirtualImageDAO()
+    public VirtualMachineTemplateDAO()
     {
-        super(VirtualImage.class);
+        super(VirtualMachineTemplate.class);
     }
 
-    public VirtualImageDAO(final EntityManager entityManager)
+    public VirtualMachineTemplateDAO(final EntityManager entityManager)
     {
-        super(VirtualImage.class, entityManager);
+        super(VirtualMachineTemplate.class, entityManager);
     }
 
-    public List<VirtualImage> findByEnterprise(final Enterprise enterprise)
+    public List<VirtualMachineTemplate> findByEnterprise(final Enterprise enterprise)
     {
         Criteria criteria = createCriteria(sameEnterpriseOrShared(enterprise));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         return getResultList(criteria);
     }
 
-    public List<VirtualImage> findByEnterpriseAndRepository(final Enterprise enterprise,
+    public List<VirtualMachineTemplate> findByEnterpriseAndRepository(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
         Criteria criteria = createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository));
@@ -73,7 +73,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return getResultList(criteria);
     }
 
-    public List<VirtualImage> findBy(final Enterprise enterprise,
+    public List<VirtualMachineTemplate> findBy(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
         final HypervisorType hypervisor)
     {
@@ -90,11 +90,11 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         }
 
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
+        List<VirtualMachineTemplate> result = getResultList(criteria);
         return result;
     }
 
-    /** Virtual image compatible or some conversion compatible. */
+    /** Virtual Machine Template compatible or some conversion compatible. */
     private Criterion compatibleOrConversions(final HypervisorType hypervisorType,
         final Criteria criteria)
     {
@@ -102,10 +102,10 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
             compatibleConversions(Arrays.asList(hypervisorType.compatibilityTable), criteria));
     }
 
-    /** Virtual image is compatible. */
+    /** Virtual Machine Template is compatible. */
     private Criterion compatible(final List<DiskFormatType> types)
     {
-        return Restrictions.in(VirtualImage.DISKFORMAT_TYPE_PROPERTY, types);
+        return Restrictions.in(VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY, types);
     }
 
     /**
@@ -114,7 +114,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private Criterion compatibleConversions(final List<DiskFormatType> types,
         final Criteria criteria)
     {
-        criteria.createAlias(VirtualImage.CONVERSIONS_PROPERTY, "conversions",
+        criteria.createAlias(VirtualMachineTemplate.CONVERSIONS_PROPERTY, "conversions",
             JoinFragment.LEFT_OUTER_JOIN);
 
         Criterion finished =
@@ -129,12 +129,12 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     /** ######### */
 
-    public VirtualImage findByName(final String name)
+    public VirtualMachineTemplate findByName(final String name)
     {
-        return findUniqueByProperty(VirtualImage.NAME_PROPERTY, name);
+        return findUniqueByProperty(VirtualMachineTemplate.NAME_PROPERTY, name);
     }
 
-    public VirtualImage findByPath(final Enterprise enterprise,
+    public VirtualMachineTemplate findByPath(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
         Criteria criteria =
@@ -150,87 +150,87 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         Criteria criteria =
             createCriteria(sameEnterpriseOrSharedInRepo(enterprise, repository, path));
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
-        List<VirtualImage> result = getResultList(criteria);
+        List<VirtualMachineTemplate> result = getResultList(criteria);
 
         return CollectionUtils.isEmpty(result) ? false : true;
     }
 
-    public List<VirtualImage> findStatefuls()
+    public List<VirtualMachineTemplate> findStatefuls()
     {
-        Criteria criteria = createCriteria(statefulImage());
+        Criteria criteria = createCriteria(statefulVirtualMachineTemplate());
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         return getResultList(criteria);
     }
 
-    public List<VirtualImage> findStatefulsByDatacenter(final Datacenter datacenter)
+    public List<VirtualMachineTemplate> findStatefulsByDatacenter(final Datacenter datacenter)
     {
         Criteria crit = criteriaWithStatefulNavigation();
-        crit.add(statefulImage());
+        crit.add(statefulVirtualMachineTemplate());
         crit.add(sameStatefulDatacenter(datacenter));
-        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+        crit.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
         return getResultList(crit);
     }
 
-    public List<VirtualImage> findStatefulsByCategoryAndDatacenter(final Category category,
+    public List<VirtualMachineTemplate> findStatefulsByCategoryAndDatacenter(final Category category,
         final Datacenter datacenter)
     {
         Criteria crit = criteriaWithStatefulNavigation();
-        crit.add(statefulImage());
+        crit.add(statefulVirtualMachineTemplate());
         crit.add(sameCategory(category));
         crit.add(sameStatefulDatacenter(datacenter));
-        crit.addOrder(Order.asc(VirtualImage.NAME_PROPERTY));
+        crit.addOrder(Order.asc(VirtualMachineTemplate.NAME_PROPERTY));
         return getResultList(crit);
     }
 
-    public List<VirtualImage> findByMaster(final VirtualImage master)
+    public List<VirtualMachineTemplate> findByMaster(final VirtualMachineTemplate master)
     {
         Criteria criteria = createCriteria(sameMaster(master));
         return getResultList(criteria);
     }
 
-    public boolean isMaster(final VirtualImage vImage)
+    public boolean isMaster(final VirtualMachineTemplate vmtemplate)
     {
-        Criteria criteria = createCriteria(sameMaster(vImage));
+        Criteria criteria = createCriteria(sameMaster(vmtemplate));
         return CollectionUtils.isEmpty(getResultList(criteria)) ? false : true;
     }
 
     private static Criterion sameCategory(final Category category)
     {
-        return Restrictions.eq(VirtualImage.CATEGORY_PROPERTY, category);
+        return Restrictions.eq(VirtualMachineTemplate.CATEGORY_PROPERTY, category);
     }
 
     private static Criterion sameEnterprise(final Enterprise enterprise)
     {
-        return Restrictions.eq(VirtualImage.ENTERPRISE_PROPERTY, enterprise);
+        return Restrictions.eq(VirtualMachineTemplate.ENTERPRISE_PROPERTY, enterprise);
     }
 
     private static Criterion sameRepository(
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return Restrictions.eq(VirtualImage.REPOSITORY_PROPERTY, repository);
+        return Restrictions.eq(VirtualMachineTemplate.REPOSITORY_PROPERTY, repository);
     }
 
-    private static Criterion sharedImage()
+    private static Criterion sharedVirtualMachineTemplate()
     {
-        return Restrictions.eq(VirtualImage.SHARED_PROPERTY, true);
+        return Restrictions.eq(VirtualMachineTemplate.SHARED_PROPERTY, true);
     }
 
-    private static Criterion statefulImage()
+    private static Criterion statefulVirtualMachineTemplate()
     {
-        return Restrictions.and(Restrictions.eq(VirtualImage.STATEFUL_PROPERTY, true),
-            Restrictions.isNotNull(VirtualImage.VOLUME_PROPERTY));
+        return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.STATEFUL_PROPERTY, true),
+            Restrictions.isNotNull(VirtualMachineTemplate.VOLUME_PROPERTY));
     }
 
     private static Criterion sameEnterpriseOrShared(final Enterprise enterprise)
     {
-        return Restrictions.or(sameEnterprise(enterprise), sharedImage());
+        return Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate());
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
         return Restrictions.and(sameRepository(repository),
-            Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+            Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
     }
 
     private static Criterion sameEnterpriseOrSharedInRepo(final Enterprise enterprise,
@@ -238,15 +238,15 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     {
         Criterion sameEnterpriseOrSharedInRepo =
             Restrictions.and(sameRepository(repository),
-                Restrictions.or(sameEnterprise(enterprise), sharedImage()));
+                Restrictions.or(sameEnterprise(enterprise), sharedVirtualMachineTemplate()));
 
-        return Restrictions.and(Restrictions.eq(VirtualImage.PATH_PROPERTY, path),
+        return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.PATH_PROPERTY, path),
             sameEnterpriseOrSharedInRepo);
     }
 
-    private static Criterion sameMaster(final VirtualImage vimage)
+    private static Criterion sameMaster(final VirtualMachineTemplate vmtemplate)
     {
-        return Restrictions.eq(VirtualImage.MASTER_PROPERTY, vimage);
+        return Restrictions.eq(VirtualMachineTemplate.MASTER_PROPERTY, vmtemplate);
     }
 
     private static Criterion sameStatefulDatacenter(final Datacenter datacenter)
@@ -257,7 +257,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private Criteria criteriaWithStatefulNavigation()
     {
         Criteria crit = createCriteria();
-        crit.createAlias(VirtualImage.VOLUME_PROPERTY, "volume");
+        crit.createAlias(VirtualMachineTemplate.VOLUME_PROPERTY, "volume");
         crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
         return crit;

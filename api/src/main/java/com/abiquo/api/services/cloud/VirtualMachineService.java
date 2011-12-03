@@ -52,7 +52,7 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -468,7 +468,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine,
-        final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
+        final Integer enterpriseId, final Integer vmtemplateId, final Integer vdcId,
         final Integer vappId)
     {
         // generates the random identifier
@@ -481,16 +481,18 @@ public class VirtualMachineService extends DefaultApiService
 
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
-        // We need the VirtualImage
-        VirtualImage virtualImage =
-            getVirtualImageAndValidateEnterpriseAndDatacenter(enterpriseId, virtualAppliance
-                .getVirtualDatacenter().getDatacenter().getId(), vImageId);
-        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
-        virtualMachine.setVirtualImage(virtualImage);
+        // We need the VirtualMachineTemplate
+        VirtualMachineTemplate virtualMachineTemplate =
+            getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(enterpriseId,
+                virtualAppliance.getVirtualDatacenter().getDatacenter().getId(), vmtemplateId);
+        checkVirtualMachineTemplateCanBeUsed(virtualMachineTemplate, virtualAppliance);
+        virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
 
-        setVirtualImageRequirementsIfNotAlreadyDefined(virtualMachine, virtualImage);
+        setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(virtualMachine,
+            virtualMachineTemplate);
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
+        attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
+            virtualMachine);
 
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
@@ -500,46 +502,47 @@ public class VirtualMachineService extends DefaultApiService
         repo.createVirtualMachine(virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
-        // virtual image is VirtualImageNode
+        // virtual machine template is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
 
         return virtualMachine;
     }
 
     /**
-     * Sets the virtual machine HD requirements based on the {@link VirtualImage}
+     * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
      * <p>
      * It also set the required CPU and RAM if it wasn't specified in the requested
      * {@link VirtualMachineDto}
      */
-    private void setVirtualImageRequirementsIfNotAlreadyDefined(final VirtualMachine vmachine,
-        final VirtualImage vimage)
+    private void setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(
+        final VirtualMachine vmachine, final VirtualMachineTemplate vmtemplate)
     {
         if (vmachine.getCpu() == 0)
         {
-            vmachine.setCpu(vimage.getCpuRequired());
+            vmachine.setCpu(vmtemplate.getCpuRequired());
         }
         if (vmachine.getRam() == 0)
         {
-            vmachine.setRam(vimage.getRamRequired());
+            vmachine.setRam(vmtemplate.getRamRequired());
         }
 
-        if (vimage.isStateful())
+        if (vmtemplate.isStateful())
         {
             vmachine.setHdInBytes(0);
         }
         else
         {
-            vmachine.setHdInBytes(vimage.getHdRequiredInBytes());
+            vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
         }
     }
 
     /**
-     * This code is semiduplicated from VirtualImageService but can't be used due cross refrerence
-     * dep
+     * This code is semiduplicated from VirtualMachineTemplateService but can't be used due cross
+     * refrerence dep
      */
-    private VirtualImage getVirtualImageAndValidateEnterpriseAndDatacenter(
-        final Integer enterpriseId, final Integer datacenterId, final Integer virtualImageId)
+    private VirtualMachineTemplate getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualMachineTemplateId)
     {
 
         Datacenter datacenter = infRep.findById(datacenterId);
@@ -562,14 +565,15 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
-        VirtualImage virtualImage = appsLibRep.findVirtualImageById(virtualImageId);
-        if (virtualImage == null)
+        VirtualMachineTemplate virtualMachineTemplate =
+            appsLibRep.findVirtualMachineTemplateById(virtualMachineTemplateId);
+        if (virtualMachineTemplate == null)
         {
-            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALIMAGE);
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
             flushErrors();
         }
 
-        return virtualImage;
+        return virtualMachineTemplate;
     }
 
     /**
@@ -590,17 +594,19 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /** Checks correct datacenter and enterprise. */
-    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    private void checkVirtualMachineTemplateCanBeUsed(final VirtualMachineTemplate vmtemplate,
+        final VirtualAppliance vapp)
     {
-        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
+        if (vmtemplate.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
             .getDatacenter().getId())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER);
         }
 
-        if (!vimage.isShared() && vimage.getEnterprise().getId() != vapp.getEnterprise().getId())
+        if (!vmtemplate.isShared()
+            && vmtemplate.getEnterprise().getId() != vapp.getEnterprise().getId())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+            addConflictErrors(APIError.VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED);
         }
 
         flushErrors();
@@ -629,10 +635,10 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Creates the {@link NodeVirtualImage} that is the relation of {@link VirtualMachine}
-     * {@link VirtualAppliance} and {@link VirtualImage}.
+     * {@link VirtualAppliance} and {@link VirtualMachineTemplate}.
      * 
      * @param virtualMachine virtual machine to be associated with the virtual appliance. It must
-     *            contain the virtual image.
+     *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
@@ -643,7 +649,7 @@ public class VirtualMachineService extends DefaultApiService
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(virtualMachine.getName(),
                 virtualAppliance,
-                virtualMachine.getVirtualImage(),
+                virtualMachine.getVirtualMachineTemplate(),
                 virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
         logger.debug("Node virtual image created!");
@@ -657,7 +663,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
-    public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
+    public void attachVirtualMachineTemplateConversion(final VirtualDatacenter virtualDatacenter,
         final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.

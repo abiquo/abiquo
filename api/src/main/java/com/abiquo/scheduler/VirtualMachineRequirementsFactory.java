@@ -36,7 +36,7 @@ public class VirtualMachineRequirementsFactory
         long cpu = vmachine.getCpu();
         long ram = vmachine.getRam();
         long hd = vmachine.getHdInBytes();
-        long repository = vmachine.getVirtualImage().getDiskFileSize(); // XXX or conversion
+        long repository = vmachine.getVirtualMachineTemplate().getDiskFileSize(); // XXX or conversion
         // TODO get publicIps number
         // TODO get storage size
         // TODO get volume size

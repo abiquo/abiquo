@@ -18,7 +18,7 @@
         <class>com.abiquo.server.core.appslibrary.AppsLibrary</class>
         <class>com.abiquo.server.core.appslibrary.Icon</class>
         <class>com.abiquo.server.core.appslibrary.Category</class>
-        <class>com.abiquo.server.core.appslibrary.VirtualImage</class>
+        <class>com.abiquo.server.core.appslibrary.VirtualMachineTemplate</class>
         <class>com.abiquo.server.core.appslibrary.VirtualImageConversion</class>
         <class>com.abiquo.server.core.appslibrary.TemplateDefinition</class>
         <class>com.abiquo.server.core.appslibrary.TemplateDefinitionList</class>

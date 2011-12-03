@@ -47,7 +47,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
-public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, VirtualImage>
+public class VirtualMachineTemplateDAOTest extends DefaultDAOTestBase<VirtualMachineTemplateDAO, VirtualMachineTemplate>
 {
     private EnterpriseGenerator enterpriseGenerator;
 
@@ -75,15 +75,15 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     }
 
     @Override
-    protected VirtualImageDAO createDao(final EntityManager entityManager)
+    protected VirtualMachineTemplateDAO createDao(final EntityManager entityManager)
     {
-        return new VirtualImageDAO(entityManager);
+        return new VirtualMachineTemplateDAO(entityManager);
     }
 
     @Override
-    protected PersistentInstanceTester<VirtualImage> createEntityInstanceGenerator()
+    protected PersistentInstanceTester<VirtualMachineTemplate> createEntityInstanceGenerator()
     {
-        return new VirtualImageGenerator(getSeed());
+        return new VirtualMachineTemplateGenerator(getSeed());
     }
 
     @Override
@@ -93,73 +93,73 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     }
 
     @Override
-    public VirtualImageGenerator eg()
+    public VirtualMachineTemplateGenerator eg()
     {
-        return (VirtualImageGenerator) super.eg();
+        return (VirtualMachineTemplateGenerator) super.eg();
     }
 
     @Test
-    public void testFindVirtualImagesByEnterprise()
+    public void testFindVirtualMachineTemplatesByEnterprise()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
-        VirtualImage vi = eg().createInstance(ent);
+        VirtualMachineTemplate vi = eg().createInstance(ent);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findByEnterprise(ent);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates = dao.findByEnterprise(ent);
 
-        assertEquals(images.size(), 1);
+        assertEquals(templates.size(), 1);
     }
 
     @Test
-    public void testFindVirtualImagesByEnterpriseAndRepository()
+    public void testFindVirtualMachineTemplatesByEnterpriseAndRepository()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi = eg().createInstance(ent, repo);
+        VirtualMachineTemplate vi = eg().createInstance(ent, repo);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findByEnterpriseAndRepository(ent, repo);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templatess = dao.findByEnterpriseAndRepository(ent, repo);
 
-        assertEquals(images.size(), 1);
+        assertEquals(templatess.size(), 1);
     }
 
     @Test
-    public void testFindVirtualImageByName()
+    public void testFindVirtualMachineTemplateByName()
     {
-        VirtualImage vi = eg().createUniqueInstance();
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        VirtualImage image = dao.findByName(vi.getName());
-        assertNotNull(image);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplate template = dao.findByName(vi.getName());
+        assertNotNull(template);
 
-        image = dao.findByName("UNEXISTING");
-        assertNull(image);
+        template = dao.findByName("UNEXISTING");
+        assertNull(template);
     }
 
     @Test
-    public void testFindVirtualImageByPath()
+    public void testFindVirtualMachineTemplateByPath()
     {
-        VirtualImage vi = eg().createUniqueInstance();
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        VirtualImage image = dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
-        assertNotNull(image);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplate template = dao.findByPath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
+        assertNotNull(template);
 
         try
         {
@@ -175,13 +175,13 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     @Test
     public void testExistsWithSamePath()
     {
-        VirtualImage vi = eg().createUniqueInstance();
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
         boolean exists =
             dao.existWithSamePath(vi.getEnterprise(), vi.getRepository(), vi.getPath());
         assertTrue(exists);
@@ -190,23 +190,23 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         assertFalse(exists);
     }
 
-    /** Virtual Image hypervisor compatible. */
+    /** Virtual Machine Template hypervisor compatible. */
 
     @Test
     public void testCompatibles_NoCompatible_NoConversions()
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VMDK_FLAT, "compatible-vmx");
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -216,7 +216,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VMDK_FLAT, "compatible-vmx");
 
         VirtualImageConversion conversion1 =
@@ -228,9 +228,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1, conversion2);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -241,7 +241,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VMDK_FLAT, "compatible-vmx");
 
         VirtualImageConversion conversion1 =
@@ -254,9 +254,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1, conversion2);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -266,7 +266,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VMDK_FLAT, "compatible-vmx");
 
         VirtualImageConversion conversion1 =
@@ -278,9 +278,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1, conversion2);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 0);
     }
@@ -290,7 +290,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VDI_SPARSE, "compatible-vmx");
 
         VirtualImageConversion conversion1 =
@@ -300,9 +300,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -313,7 +313,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VDI_SPARSE, "compatible-vmx");
 
         VirtualImageConversion conversion1 =
@@ -324,9 +324,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vmx");
@@ -337,16 +337,16 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VDI_FLAT, "compatible-vbox");
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, vi1);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vbox");
@@ -357,7 +357,7 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
     {
         Enterprise ent = enterpriseGenerator.createUniqueInstance();
         Repository repo = repositoryGenerator.createUniqueInstance();
-        VirtualImage vi1 =
+        VirtualMachineTemplate vi1 =
             eg().createInstance(ent, repo, DiskFormatType.VDI_FLAT, "compatible-vbox");
 
         VirtualImageConversion conversion1 =
@@ -367,9 +367,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         eg().addAuxiliaryEntitiesToPersist(vi1, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi1, conversion1);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
-        List<VirtualImage> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
+        List<VirtualMachineTemplate> compatiblesVbox = dao.findBy(ent, repo, null, HypervisorType.VBOX);
 
         assertEquals(compatiblesVbox.size(), 1);
         assertEquals(compatiblesVbox.get(0).getName(), "compatible-vbox");
@@ -384,23 +384,23 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, statefulVolume);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findStatefuls();
-        assertEquals(images.size(), 1);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates = dao.findStatefuls();
+        assertEquals(templates.size(), 1);
     }
 
     @Test
     public void testFindStatefulsWithoutResults()
     {
-        VirtualImage vi = eg().createUniqueInstance();
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findStatefuls();
-        assertEquals(images.size(), 0);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates = dao.findStatefuls();
+        assertEquals(templates.size(), 0);
     }
 
     @Test
@@ -414,9 +414,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findStatefulsByDatacenter(datacenter);
-        assertEquals(images.size(), 1);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templatess = dao.findStatefulsByDatacenter(datacenter);
+        assertEquals(templatess.size(), 1);
     }
 
     @Test
@@ -429,9 +429,9 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, statefulVolume, anotherDatacenter);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findStatefulsByDatacenter(anotherDatacenter);
-        assertEquals(images.size(), 0);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates = dao.findStatefulsByDatacenter(anotherDatacenter);
+        assertEquals(templates.size(), 0);
     }
 
     @Test
@@ -444,11 +444,11 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         persistAll(ds(), entitiesToPersist, statefulVolume);
 
         Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
-        Category category = statefulVolume.getVirtualImage().getCategory();
+        Category category = statefulVolume.getVirtualMachineTemplate().getCategory();
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images = dao.findStatefulsByCategoryAndDatacenter(category, datacenter);
-        assertEquals(images.size(), 1);
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates = dao.findStatefulsByCategoryAndDatacenter(category, datacenter);
+        assertEquals(templates.size(), 1);
     }
 
     @Test
@@ -461,12 +461,12 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, statefulVolume, anotherDatacenter);
 
-        Category category = statefulVolume.getVirtualImage().getCategory();
+        Category category = statefulVolume.getVirtualMachineTemplate().getCategory();
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images =
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates =
             dao.findStatefulsByCategoryAndDatacenter(category, anotherDatacenter);
-        assertEquals(images.size(), 0);
+        assertEquals(templates.size(), 0);
     }
 
     @Test
@@ -481,10 +481,10 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
 
         Datacenter datacenter = statefulVolume.getStoragePool().getDevice().getDatacenter();
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images =
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates =
             dao.findStatefulsByCategoryAndDatacenter(anotherCategory, datacenter);
-        assertEquals(images.size(), 0);
+        assertEquals(templates.size(), 0);
     }
 
     @Test
@@ -498,52 +498,52 @@ public class VirtualImageDAOTest extends DefaultDAOTestBase<VirtualImageDAO, Vir
         volumeGenerator.addAuxiliaryEntitiesToPersist(statefulVolume, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, statefulVolume, anotherCategory, anotherDatacenter);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
-        List<VirtualImage> images =
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
+        List<VirtualMachineTemplate> templates =
             dao.findStatefulsByCategoryAndDatacenter(anotherCategory, anotherDatacenter);
-        assertEquals(images.size(), 0);
+        assertEquals(templates.size(), 0);
     }
 
     @Test
-    public void testCheckAMasterVirtualImageIsMaster()
+    public void testCheckAMasterVirtualMachineTemplateIsMaster()
     {
-        VirtualImage vi = eg().createUniqueInstance();
-        VirtualImage slave = eg().createSlaveImage(vi);
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
+        VirtualMachineTemplate slave = eg().createSlaveVirtualMachineTemplate(vi);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi, slave);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
         assertTrue(dao.isMaster(vi));
     }
 
     @Test
-    public void testCheckVirtualImageIsMaster()
+    public void testCheckVirtualMachineTemplateIsMaster()
     {
-        VirtualImage vi = eg().createUniqueInstance();
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
         assertFalse(dao.isMaster(vi));
     }
 
     @Test
-    public void testCheckSlaveVirtualImageIsMaster()
+    public void testCheckSlaveVirtualMachineTemplateIsMaster()
     {
-        VirtualImage vi = eg().createUniqueInstance();
-        VirtualImage slave = eg().createSlaveImage(vi);
+        VirtualMachineTemplate vi = eg().createUniqueInstance();
+        VirtualMachineTemplate slave = eg().createSlaveVirtualMachineTemplate(vi);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         eg().addAuxiliaryEntitiesToPersist(vi, entitiesToPersist);
         persistAll(ds(), entitiesToPersist, vi, slave);
 
-        VirtualImageDAO dao = createDaoForRollbackTransaction();
+        VirtualMachineTemplateDAO dao = createDaoForRollbackTransaction();
 
         assertFalse(dao.isMaster(slave));
     }

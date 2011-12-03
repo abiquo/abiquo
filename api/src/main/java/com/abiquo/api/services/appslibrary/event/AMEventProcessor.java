@@ -40,7 +40,7 @@ import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -48,7 +48,7 @@ import com.abiquo.tracer.SeverityType;
 
 /**
  * Receives events from the ApplianceManager indicating new available {@link OVFPackageInstanceDto}
- * and create new {@link VirtualImage}
+ * and create new {@link VirtualMachineTemplate}
  */
 @Service
 public class AMEventProcessor implements AMCallback
@@ -59,7 +59,7 @@ public class AMEventProcessor implements AMCallback
     protected InfrastructureService infService;
 
     @Autowired
-    private OVFPackageInstanceToVirtualImage ovfToVimage;
+    private OVFPackageInstanceToVirtualMachineTemplate ovfToVmtemplate;
 
     @Autowired
     private TracerLogger tracer;
@@ -76,15 +76,15 @@ public class AMEventProcessor implements AMCallback
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     public void onDownload(final OVFPackageInstanceStatusEvent event)
     {
-        logger.debug("Virtual image [{}] added", event.getOvfId());
+        logger.debug("Virtual Machine Template [{}] added", event.getOvfId());
 
         try
         {
             processDownload(event);
 
             final String msg =
-                String.format("Virtual image [%s] added to repository [%s]", event.getOvfId(),
-                    event.getRepositoryLocation());
+                String.format("Virtual Machine Template [%s] added to repository [%s]",
+                    event.getOvfId(), event.getRepositoryLocation());
             tracer.systemLog(SeverityType.INFO, ComponentType.APPLIANCE_MANAGER, EventType.VI_ADD,
                 msg);
 
@@ -92,15 +92,15 @@ public class AMEventProcessor implements AMCallback
         catch (Exception e)
         {
             final String msg =
-                String.format("Virtual image [%s] can not be added to repository [%s]", event
-                    .getOvfId(), event.getRepositoryLocation());
+                String.format("Virtual Machine Template [%s] can not be added to repository [%s]",
+                    event.getOvfId(), event.getRepositoryLocation());
             tracer.systemError(SeverityType.NORMAL, ComponentType.APPLIANCE_MANAGER,
                 EventType.VI_ADD, msg, e);
         }
 
     }
 
-    protected List<VirtualImage> processDownload(final OVFPackageInstanceStatusEvent evnt)
+    protected List<VirtualMachineTemplate> processDownload(final OVFPackageInstanceStatusEvent evnt)
     {
         final String ovfId = evnt.getOvfId();
         final String idEnterp = evnt.getEnterpriseId();
@@ -117,7 +117,7 @@ public class AMEventProcessor implements AMCallback
 
         OVFPackageInstanceDto packageInstance = amStub.getOVFPackageInstance(idEnterp, ovfId);
 
-        return ovfToVimage.insertVirtualImages(Collections.singletonList(packageInstance),
+        return ovfToVmtemplate.insertVirtualMachineTemplates(Collections.singletonList(packageInstance),
             repository);
     }
 
@@ -127,8 +127,8 @@ public class AMEventProcessor implements AMCallback
         logger.debug("VirtualImage [{}] canceled/deleted ", event.getOvfId());
 
         final String msg =
-            String.format("Virtual image [%s] deleted from repository [%s]", event.getOvfId(),
-                event.getRepositoryLocation());
+            String.format("Virtual Machine Template [%s] deleted from repository [%s]",
+                event.getOvfId(), event.getRepositoryLocation());
 
         tracer.systemLog(SeverityType.INFO, ComponentType.APPLIANCE_MANAGER, EventType.VI_DELETE,
             msg);
@@ -142,7 +142,8 @@ public class AMEventProcessor implements AMCallback
         logger.error("VirtualImage download error :" + errorCause);
 
         final String msg =
-            String.format("Error during the virtual image [%s] download to repository [%s]: %s ",
+            String.format(
+                "Error during the virtual machine template [%s] download to repository [%s]: %s ",
                 event.getOvfId(), event.getRepositoryLocation(), errorCause);
 
         tracer.systemLog(SeverityType.CRITICAL, ComponentType.APPLIANCE_MANAGER,

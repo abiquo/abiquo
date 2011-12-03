@@ -380,7 +380,7 @@ public class VirtualApplianceService extends DefaultApiService
     private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine, final PricingTemplate pricing)
     {
-        CostCode cc = pricingRep.findCostCodeById(virtualMachine.getVirtualImage().getCostCode());
+        CostCode cc = pricingRep.findCostCodeById(virtualMachine.getVirtualMachineTemplate().getCostCode());
         PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
         if (pricingCostCode != null)
         {

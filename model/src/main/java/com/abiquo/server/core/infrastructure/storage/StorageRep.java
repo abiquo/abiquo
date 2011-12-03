@@ -31,7 +31,7 @@ import javax.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -128,7 +128,7 @@ public class StorageRep extends DefaultRepBase
         return diskManagementDAO.findHardDisksByVirtualMachine(vm);
     }
 
-    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualImage virtualImage)
+    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualMachineTemplate virtualImage)
     {
         return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
     }
