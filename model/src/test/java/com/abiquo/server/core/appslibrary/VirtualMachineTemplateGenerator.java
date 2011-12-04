@@ -37,15 +37,15 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<VirtualMachineTemplate>
 {
-    private EnterpriseGenerator enterpriseGenerator;
+    private final EnterpriseGenerator enterpriseGenerator;
 
-    private RepositoryGenerator repositoryGenerator;
+    private final RepositoryGenerator repositoryGenerator;
 
-    private CategoryGenerator categoryGenerator;
+    private final CategoryGenerator categoryGenerator;
 
-    private IconGenerator iconGenerator;
+    private final IconGenerator iconGenerator;
 
-    private DatacenterGenerator datacenterGenerator;
+    private final DatacenterGenerator datacenterGenerator;
 
     public VirtualMachineTemplateGenerator(final SeedGenerator seed)
     {
@@ -141,7 +141,7 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
-        return createInstance(enterprise, repository, 0, 0, 0, name, category, DiskFormatType.RAW);
+        return createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired, name, category, DiskFormatType.RAW);
     }
 
     protected VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository,

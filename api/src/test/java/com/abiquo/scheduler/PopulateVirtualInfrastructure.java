@@ -48,6 +48,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.PrivilegeDAO;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -78,6 +80,9 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     @Autowired
     DatacenterLimitsDAO dcLimitsDao;
+
+    @Autowired
+    PrivilegeDAO privilegeDao;
 
     @Autowired
     RepositoryDAO repoDao;
@@ -298,6 +303,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
         VirtualMachineTemplate vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
+        appslibraryRep.insertCategory(vimage.getCategory());
         appslibraryRep.insertVirtualMachineTemplate(vimage);
 
         return vimage;
@@ -390,10 +396,22 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualMachineTemplate vimage = appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
-        assertNotNull("vimage not found " + virtualimageName, vimage);
+        VirtualMachineTemplate vmtemplate =
+            appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
+        assertNotNull("vimage not found " + virtualimageName, vmtemplate);
 
-        VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);
+        VirtualMachine vmachine = vmGen.createInstance(vmtemplate, enterprise, vmachineName);
+
+        for (Privilege p : vmachine.getUser().getRole().getPrivileges())
+        {
+            privilegeDao.persist(p);
+        }
+
+        // set the default vmachine requirements based on the template
+        vmachine.setCpu(vmtemplate.getCpuRequired());
+        vmachine.setRam(vmtemplate.getRamRequired());
+        vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+
         enterRep.insertRole(vmachine.getUser().getRole());
         enterRep.insertUser(vmachine.getUser());
         vdcRep.insertVirtualMachine(vmachine);

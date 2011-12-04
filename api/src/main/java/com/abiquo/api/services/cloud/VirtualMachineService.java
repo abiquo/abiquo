@@ -733,12 +733,7 @@ public class VirtualMachineService extends DefaultApiService
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
              * one of the above fail we cannot allocate the VirtualMachine
              */
-            final VirtualMachineRequirements requirements =
-                vmRequirements.createVirtualMachineRequirements(virtualMachine);
-
-            vmAllocatorService.allocateVirtualMachine(vmId, vappId, requirements,
-                foreceEnterpriseSoftLimits);
-            vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
+            vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
             logger.debug("Allocated!");
 
             lockVirtualMachine(virtualMachine);

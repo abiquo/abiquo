@@ -22,9 +22,9 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineActionGetIPsURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineStateURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineURI;
 import static com.abiquo.testng.TestConfig.BASIC_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestConfig.NETWORK_INTEGRATION_TESTS;
@@ -34,20 +34,13 @@ import static org.testng.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
-import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
-import org.apache.wink.common.internal.utils.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,18 +55,12 @@ import org.testng.annotations.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import com.abiquo.api.common.UriTestResolver;
-import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.error.ErrorDto;
-import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.scheduler.AllocatorAction;
-import com.abiquo.scheduler.PopulateTestCase;
-import com.abiquo.scheduler.TestPopulate;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -103,7 +90,7 @@ import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.Constants;
 
-public class VirtualMachineResourceIT extends TestPopulate
+public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 {
     protected Enterprise ent;
 
@@ -121,7 +108,6 @@ public class VirtualMachineResourceIT extends TestPopulate
 
     private static final int CLIENT_TIMEOUT = 1000000000; // DEBUG
 
-    private static final String FORCE_ENTERPRISE_LIMITS = "true";
 
     static RestClient client;
 
@@ -194,47 +180,6 @@ public class VirtualMachineResourceIT extends TestPopulate
         super.tearDown();
     }
 
-    @Test(enabled = false, dataProvider = TestPopulate.DATA_PROVIDER)
-    public void allocator(final List<String> model)
-    {
-        PopulateTestCase tcase = setUpModel(model);
-
-        LOGGER.info("Running allocator test [{}]", tcase.testName);
-        LOGGER.debug("[{}]", tcase.testDescription);
-
-        for (AllocatorAction action : tcase.actions)
-        {
-            allocatorAction(action);
-        }
-    }
-
-    @Test(dataProvider = TestPopulate.DATA_PROVIDER, enabled = false)
-    public void allocatorConcurrent(final List<String> model)
-    {
-        PopulateTestCase tcase = setUpModel(model);
-
-        LOGGER.info("Running allocator concurrent test [{}]", tcase.testName);
-        LOGGER.debug("[{}]", tcase.testDescription);
-
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-
-        for (AllocatorAction action : tcase.actions)
-        {
-            executor.submit(new AllocatorActionRunner(action));
-        }
-
-        try
-        {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
-            executor.shutdownNow();
-        }
-        catch (InterruptedException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
 
     @Test(groups = "redisaccess")
     public void test_redisBackedTasks()
@@ -730,106 +675,7 @@ public class VirtualMachineResourceIT extends TestPopulate
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
-    class AllocatorActionRunner implements Callable<Boolean>
-    {
-        AllocatorAction action;
 
-        public AllocatorActionRunner(final AllocatorAction action)
-        {
-            this.action = action;
-        }
-
-        @Override
-        public Boolean call() throws AssertionError
-        {
-            allocatorAction(action);
-            return true;
-        }
-    }
-
-    private void allocatorAction(final AllocatorAction action)
-    {
-        Integer virtualDatacenterId = action.virtualDatacenterId;
-        Integer virtualApplianceId = action.virtualApplianceId;
-        Integer virtualMachineId = action.virtualMachineId;
-
-        String vmUrl =
-            UriTestResolver.resolveVirtualMachineURI(virtualDatacenterId, virtualApplianceId,
-                virtualMachineId);
-
-        vmUrl = UriHelper.appendPathToBaseUri(vmUrl, "action/allocate");
-
-        Resource resource =
-            client.resource(vmUrl).contentType(MediaType.TEXT_PLAIN)
-                .accept(MediaType.APPLICATION_XML);
-
-        if (action.allocate)
-        {
-            ClientResponse response = resource.put(FORCE_ENTERPRISE_LIMITS);
-
-            boolean success = response.getStatusCode() / 200 == 1;
-
-            if (!success)
-            {
-                ErrorsDto errors = response.getEntity(ErrorsDto.class);
-
-                boolean noResources = false;
-                boolean limit = false;
-                for (ErrorDto error : errors.getCollection())
-                {
-                    noResources =
-                        noResources
-                            || error.getCode().equalsIgnoreCase(
-                                APIError.NOT_ENOUGH_RESOURCES.getCode());
-
-                    limit =
-                        limit
-                            || error.getCode().equalsIgnoreCase(APIError.LIMIT_EXCEEDED.getCode());
-
-                }
-
-                if (action.targetMachineName.contains("no_resource"))
-                {
-                    Assert.assertTrue(noResources,
-                        String.format("expected no_resource for vmId [%d]", virtualMachineId));
-                }
-                else if (action.targetMachineName.contains("limit"))
-                {
-                    Assert.assertTrue(limit,
-                        String.format("expected limit for vmId [%d]", virtualMachineId));
-                }
-                else
-                {
-                    Assert.fail("For vmId[" + String.valueOf(virtualMachineId) + "]Expected "
-                        + action.targetMachineName + ", but was : " + errors.toString());
-                }
-
-            }// no success
-            else
-            {
-                VirtualMachineDto vmachineDto = response.getEntity(VirtualMachineDto.class);
-
-                Assert.assertTrue(vmachineDto != null, "virtual machine not found");
-
-                final String machineName = vmachineDto.getDescription();
-
-                Assert.assertTrue(action.targetMachineName.contains(machineName), String.format(
-                    "Expected machine was [%s] but selected [%s],\n for vmId [%d]",
-                    action.targetMachineName, machineName, virtualMachineId));
-            } // success
-        }
-        else
-        // deallocate
-        {
-            ClientResponse response = resource.delete();
-
-            boolean success = response.getStatusCode() / 200 == 1;
-
-            Assert.assertTrue(success, "Deallocation fail");
-
-            removeVirtualMachine(virtualMachineId);
-        }
-    }
 
     /**
      * Trace related
