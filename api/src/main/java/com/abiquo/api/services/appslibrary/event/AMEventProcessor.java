@@ -36,9 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
-import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
+import com.abiquo.commons.amqp.impl.am.domain.TemplateStatusEvent;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.infrastructure.Repository;
@@ -47,8 +47,8 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 
 /**
- * Receives events from the ApplianceManager indicating new available {@link OVFPackageInstanceDto}
- * and create new {@link VirtualMachineTemplate}
+ * Receives events from the ApplianceManager indicating new available {@link TemplateDto} and create
+ * new {@link VirtualMachineTemplate}
  */
 @Service
 public class AMEventProcessor implements AMCallback
@@ -59,7 +59,7 @@ public class AMEventProcessor implements AMCallback
     protected InfrastructureService infService;
 
     @Autowired
-    private OVFPackageInstanceToVirtualMachineTemplate ovfToVmtemplate;
+    private TemplateFactory templateFactory;
 
     @Autowired
     private TracerLogger tracer;
@@ -74,7 +74,7 @@ public class AMEventProcessor implements AMCallback
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    public void onDownload(final OVFPackageInstanceStatusEvent event)
+    public void onDownload(final TemplateStatusEvent event)
     {
         logger.debug("Virtual Machine Template [{}] added", event.getOvfId());
 
@@ -100,7 +100,7 @@ public class AMEventProcessor implements AMCallback
 
     }
 
-    protected List<VirtualMachineTemplate> processDownload(final OVFPackageInstanceStatusEvent evnt)
+    protected List<VirtualMachineTemplate> processDownload(final TemplateStatusEvent evnt)
     {
         final String ovfId = evnt.getOvfId();
         final String idEnterp = evnt.getEnterpriseId();
@@ -115,16 +115,16 @@ public class AMEventProcessor implements AMCallback
         ApplianceManagerResourceStubImpl amStub =
             new ApplianceManagerResourceStubImpl(amServiceUri);
 
-        OVFPackageInstanceDto packageInstance = amStub.getOVFPackageInstance(idEnterp, ovfId);
+        TemplateDto packageInstance = amStub.getTemplate(idEnterp, ovfId);
 
-        return ovfToVmtemplate.insertVirtualMachineTemplates(Collections.singletonList(packageInstance),
-            repository);
+        return templateFactory.insertVirtualMachineTemplates(
+            Collections.singletonList(packageInstance), repository);
     }
 
     @Override
-    public void onNotDownload(final OVFPackageInstanceStatusEvent event)
+    public void onNotDownload(final TemplateStatusEvent event)
     {
-        logger.debug("VirtualImage [{}] canceled/deleted ", event.getOvfId());
+        logger.debug("VirtualMachineTemplate [{}] canceled/deleted ", event.getOvfId());
 
         final String msg =
             String.format("Virtual Machine Template [%s] deleted from repository [%s]",
@@ -135,11 +135,11 @@ public class AMEventProcessor implements AMCallback
     }
 
     @Override
-    public void onError(final OVFPackageInstanceStatusEvent event)
+    public void onError(final TemplateStatusEvent event)
     {
         final String errorCause = event.getErrorCause();
 
-        logger.error("VirtualImage download error :" + errorCause);
+        logger.error("VirtualMachineTemplate download error :" + errorCause);
 
         final String msg =
             String.format(
@@ -152,9 +152,9 @@ public class AMEventProcessor implements AMCallback
     }
 
     @Override
-    public void onDownloading(final OVFPackageInstanceStatusEvent event)
+    public void onDownloading(final TemplateStatusEvent event)
     {
-        logger.debug("Downloading VirtualImage [{}]", event.getOvfId());
+        logger.debug("Downloading VirtualMachineTemplate [{}]", event.getOvfId());
     }
 
 }

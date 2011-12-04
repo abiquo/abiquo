@@ -41,9 +41,9 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
@@ -148,14 +148,14 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageInstancesStateDto getTemplateListStatus(final Integer id,
+    public TemplatesStateDto getTemplateListStatus(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
         final TemplateDefinitionList templateDefinitionList = getTemplateDefinitionList(id);
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-        final OVFPackageInstancesStateDto stateList = new OVFPackageInstancesStateDto();
+        final TemplatesStateDto stateList = new TemplatesStateDto();
 
         for (TemplateDefinition templateDef : templateDefinitionList.getTemplateDefinitions())
         {
@@ -166,9 +166,9 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             }
             catch (Exception e)
             {
-                OVFPackageInstanceStateDto error = new OVFPackageInstanceStateDto();
+                TemplateStateDto error = new TemplateStateDto();
                 error.setOvfId(templateDef.getUrl());
-                error.setStatus(OVFStatusEnumType.ERROR);
+                error.setStatus(TemplateStatusEnumType.ERROR);
                 error.setErrorCause(e.toString());
 
                 stateList.add(error);

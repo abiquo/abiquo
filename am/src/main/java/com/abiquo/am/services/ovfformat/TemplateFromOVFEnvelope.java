@@ -46,7 +46,7 @@ import org.dmtf.schemas.wbem.wscim._1.common.CimString;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
@@ -58,7 +58,7 @@ import com.abiquo.ovfmanager.ovf.exceptions.RequiredAttributeException;
 import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.abiquo.ovfmanager.ovf.section.DiskFormat;
 
-public class OVFPackageInstanceFromOVFEnvelope
+public class TemplateFromOVFEnvelope
 {
 
     
@@ -72,14 +72,14 @@ public class OVFPackageInstanceFromOVFEnvelope
         }
         catch (Exception e)// SectionNotPresentException InvalidSectionException
         {
-            throw new AMException(AMError.OVF_INVALID, "missing DiskSection");
+            throw new AMException(AMError.TEMPLATE_INVALID, "missing DiskSection");
         }
 
         List<VirtualDiskDescType> disks = diskSection.getDisk();
 
         if (disks == null || disks.isEmpty() || disks.size() != 1)
         {
-            throw new AMException(AMError.OVF_INVALID, "multiple Disk not supported");
+            throw new AMException(AMError.TEMPLATE_INVALID, "multiple Disk not supported");
         }
 
         return disks.get(0);
@@ -99,19 +99,19 @@ public class OVFPackageInstanceFromOVFEnvelope
      * @throws RepositoryException, if the envelope do not contain the required info to get
      *             VirtualDisk information.
      **/
-    public static OVFPackageInstanceDto getDiskInfo(final String ovfId, final EnvelopeType envelope)
+    public static TemplateDto createTemplateDto(final String ovfId, final EnvelopeType envelope)
     // TODO String userID, String category
         throws AMException
     {
 
-        OVFPackageInstanceDto diskInfo = null;
+        TemplateDto diskInfo = null;
 
         Map<String, VirtualDiskDescType> diskIdToDiskFormat =
             new HashMap<String, VirtualDiskDescType>();
         Map<String, FileType> fileIdToFileType = new HashMap<String, FileType>();
         Map<String, List<String>> diskIdToVSs = new HashMap<String, List<String>>();
-        Map<String, OVFPackageInstanceDto> requiredByVSs =
-            new HashMap<String, OVFPackageInstanceDto>();
+        Map<String, TemplateDto> requiredByVSs =
+            new HashMap<String, TemplateDto>();
         DiskSectionType diskSectionType;
 
         try
@@ -151,7 +151,7 @@ public class OVFPackageInstanceFromOVFEnvelope
             {
 
                 VirtualSystemType vs = (VirtualSystemType) contentType;
-                OVFPackageInstanceDto req = getDiskInfo(vs, diskIdToDiskFormat, diskIdToVSs);
+                TemplateDto req = getDiskInfo(vs, diskIdToDiskFormat, diskIdToVSs);
 
                 requiredByVSs.put(vs.getId(), req);
             }
@@ -162,7 +162,7 @@ public class OVFPackageInstanceFromOVFEnvelope
 
                 for (VirtualSystemType virtualSystemType : virtualSystems)
                 {
-                    OVFPackageInstanceDto req =
+                    TemplateDto req =
                         getDiskInfo(virtualSystemType, diskIdToDiskFormat, diskIdToVSs);
 
                     requiredByVSs.put(virtualSystemType.getId(), req);
@@ -196,13 +196,13 @@ public class OVFPackageInstanceFromOVFEnvelope
 
                 if (diskIdToVSs.size() != 1)
                 {
-                    throw new AMException(AMError.OVF_INVALID, String.format(
+                    throw new AMException(AMError.TEMPLATE_INVALID, String.format(
                         "There are more than one virtual system on the OVF Envelope [%s]", ovfId));
                 }
 
                 for (String vssName : diskIdToVSs.get(diskId))
                 {
-                    diskInfo = new OVFPackageInstanceDto();
+                    diskInfo = new TemplateDto();
                     diskInfo.setName(vssName);
                     diskInfo.setUrl(ovfId);
 
@@ -227,7 +227,7 @@ public class OVFPackageInstanceFromOVFEnvelope
                             + "]");
                     }
 
-                    OVFPackageInstanceDto requirement = requiredByVSs.get(vssName);
+                    TemplateDto requirement = requiredByVSs.get(vssName);
 
                     // XXX disk format ::: diskInfo.setImageType(requirement.getImageType());
 
@@ -248,17 +248,17 @@ public class OVFPackageInstanceFromOVFEnvelope
         catch (EmptyEnvelopeException e)
         {
             String msg = "No VirtualSystem or VirtualSystemCollection exists for this OVF package";
-            throw new AMException(AMError.OVF_INVALID, msg, e);
+            throw new AMException(AMError.TEMPLATE_INVALID, msg, e);
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_INVALID, e);
+            throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
 
         if (diskInfo == null)
         {
             String msg = "No VirtualSystem or VirtualSystemCollection exists for this OVF package";
-            throw new AMException(AMError.OVF_INVALID, msg);
+            throw new AMException(AMError.TEMPLATE_INVALID, msg);
         }
 
         return diskInfo;
@@ -304,12 +304,12 @@ public class OVFPackageInstanceFromOVFEnvelope
     /**
      * TODO TBD
      **/
-    private static OVFPackageInstanceDto getDiskInfo(final VirtualSystemType vsystem,
+    private static TemplateDto getDiskInfo(final VirtualSystemType vsystem,
         final Map<String, VirtualDiskDescType> diskDescByName,
         final Map<String, List<String>> diskIdToVSs) throws IdAlreadyExistsException,
         RequiredAttributeException, SectionNotPresentException
     {
-        OVFPackageInstanceDto dReq = new OVFPackageInstanceDto();
+        TemplateDto dReq = new TemplateDto();
         VirtualHardwareSectionType hardwareSectionType;
 
         try

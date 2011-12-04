@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.services.ErepoFactory;
 import com.abiquo.am.services.notify.AMNotifier;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.ning.http.client.AsyncHandler;
 import com.ning.http.client.HttpResponseBodyPart;
 import com.ning.http.client.HttpResponseHeaders;
@@ -222,7 +222,7 @@ public class DownloadingFile implements AsyncHandler<Boolean>
         // // dao.setState(ovfId, OVFStatusEnumType.DOWNLOAD);
         // AMRedisDao.returnDao(dao);
 
-        notifier.setOVFStatus(erepoId, ovfId, OVFStatusEnumType.DOWNLOAD);
+        notifier.setTemplateStatus(erepoId, ovfId, TemplateStatusEnumType.DOWNLOAD);
     }
 
     /**
@@ -243,9 +243,9 @@ public class DownloadingFile implements AsyncHandler<Boolean>
 
         if (deleteFolder)
         {
-            ErepoFactory.getRepo(erepoId).deleteOVF(ovfId);
+            ErepoFactory.getRepo(erepoId).deleteTemplate(ovfId);
 
-            notifier.setOVFStatus(erepoId, ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
+            notifier.setTemplateStatus(erepoId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
         }
 
     }
@@ -254,7 +254,7 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     {
         isError = true;
         onCancel(false); // NO delete folder (to remain error cause ).
-        notifier.setOVFStatusError(erepoId, ovfId, msg);
+        notifier.setTemplateStatusError(erepoId, ovfId, msg);
     }
 
     public boolean done()

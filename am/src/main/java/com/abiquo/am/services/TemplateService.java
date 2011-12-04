@@ -21,11 +21,11 @@
 
 package com.abiquo.am.services;
 
-import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
-import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
-import static com.abiquo.am.services.OVFPackageConventions.getBundleMasterOvfId;
-import static com.abiquo.am.services.OVFPackageConventions.getBundleSnapshot;
-import static com.abiquo.am.services.OVFPackageConventions.isBundleOvfId;
+import static com.abiquo.am.services.TemplateConventions.OVF_BUNDLE_PATH_IDENTIFIER;
+import static com.abiquo.am.services.TemplateConventions.createBundleOvfId;
+import static com.abiquo.am.services.TemplateConventions.getBundleMasterOvfId;
+import static com.abiquo.am.services.TemplateConventions.getBundleSnapshot;
+import static com.abiquo.am.services.TemplateConventions.isBundleOvfId;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,23 +37,23 @@ import org.springframework.stereotype.Service;
 
 import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.services.download.OVFDocumentFetch;
-import com.abiquo.am.services.download.OVFPackageInstanceDownloader;
-import com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem;
+import com.abiquo.am.services.download.TemplateDownloader;
+import com.abiquo.am.services.filesystem.TemplateFileSystem;
 import com.abiquo.am.services.notify.AMNotifier;
-import com.abiquo.am.services.ovfformat.OVFPackageInstanceFromOVFEnvelope;
-import com.abiquo.am.services.ovfformat.OVFPackageInstanceToOVFEnvelope;
+import com.abiquo.am.services.ovfformat.TemplateFromOVFEnvelope;
+import com.abiquo.am.services.ovfformat.TemplateToOVFEnvelope;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 
 @Service
-public class OVFPackageInstanceService
+public class TemplateService
 {
 
     @Autowired
-    OVFPackageInstanceDownloader downloader;
+    TemplateDownloader downloader;
 
     @Autowired
     AMNotifier notifier;
@@ -66,40 +66,40 @@ public class OVFPackageInstanceService
     public void startDownload(final String erId, final String ovfId)
     {
         // first create the folder in order to allow the creation of ERROR marks.
-        ErepoFactory.getRepo(erId).createOVFPackageFolder(ovfId);
+        ErepoFactory.getRepo(erId).createTemplateFolder(ovfId);
 
         EnvelopeType envelope = fetch.obtainEnvelope(ovfId);
         // TODO check envelope is compatible
 
-        ErepoFactory.getRepo(erId).createOVFPackageFolder(ovfId, envelope);
+        ErepoFactory.getRepo(erId).createTemplateFolder(ovfId, envelope);
 
-        downloader.deployOVFPackage(erId, ovfId, envelope);
+        downloader.deployTemplate(erId, ovfId, envelope);
 
         // sets the current state to start downloading
-        notifier.setOVFStatus(erId, ovfId, OVFStatusEnumType.DOWNLOADING);
+        notifier.setTemplateStatus(erId, ovfId, TemplateStatusEnumType.DOWNLOADING);
     }
 
-    public void upload(final OVFPackageInstanceDto diskinfo, final File diskFile,
+    public void upload(final TemplateDto diskinfo, final File diskFile,
         final String errorMsg) throws IOException, EventException
     {
 
         if (!StringUtils.isBlank(errorMsg))
         {
-            notifier.setOVFStatusError(String.valueOf(diskinfo.getEnterpriseRepositoryId()),
+            notifier.setTemplateStatusError(String.valueOf(diskinfo.getEnterpriseRepositoryId()),
                 diskinfo.getUrl(), errorMsg);
         }
 
-        downloader.uploadOVFPackage(diskinfo, diskFile);
+        downloader.uploadTemplate(diskinfo, diskFile);
 
         // sets the current state to start downloading
-        notifier.setOVFStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo.getUrl(),
-            OVFStatusEnumType.DOWNLOAD);
+        notifier.setTemplateStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo.getUrl(),
+            TemplateStatusEnumType.DOWNLOAD);
     }
 
 
     public void delete(final String erId, final String ovfId)
     {
-        OVFStatusEnumType status = ErepoFactory.getRepo(erId).getOVFStatus(ovfId).getStatus();
+        TemplateStatusEnumType status = ErepoFactory.getRepo(erId).getTemplateStatus(ovfId).getStatus();
 
         boolean requireNotifyError = true;
         switch (status)
@@ -111,7 +111,7 @@ public class OVFPackageInstanceService
 
                 try
                 {
-                    downloader.cancelDeployOVFPackage(ovfId, erId);
+                    downloader.cancelDeployTemplate(ovfId, erId);
                     requireNotifyError = false;
                 }
                 catch (Exception e)
@@ -120,7 +120,7 @@ public class OVFPackageInstanceService
                 }
 
             default:
-                ErepoFactory.getRepo(erId).deleteOVF(ovfId);
+                ErepoFactory.getRepo(erId).deleteTemplate(ovfId);
                 break;
         }
 
@@ -129,20 +129,20 @@ public class OVFPackageInstanceService
             return;
         }
 
-        notifier.setOVFStatus(erId, ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
+        notifier.setTemplateStatus(erId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
     }
 
     /** ######### GET ######### **/
 
 
-    public OVFPackageInstanceStateDto getOVFPackageStatusIncludeProgress(final String ovfId,
+    public TemplateStateDto getTemplateStatusIncludeProgress(final String ovfId,
         final String erId) throws DownloadException
     {
-        OVFPackageInstanceStateDto state = new OVFPackageInstanceStateDto();
+        TemplateStateDto state = new TemplateStateDto();
         state.setOvfId(ovfId);
         
         AMRedisDao dao = AMRedisDao.getDao();
-        OVFStatusEnumType status =  dao.getStatus(erId, ovfId);
+        TemplateStatusEnumType status =  dao.getStatus(erId, ovfId);
         state.setStatus(status);
         switch (status)
         {
@@ -160,22 +160,22 @@ public class OVFPackageInstanceService
         return state;
     }
 
-    public OVFPackageInstanceDto getOVFPackage(final String erId, final String ovfId)
+    public TemplateDto getTemplate(final String erId, final String ovfId)
     {
         final String erepoPath = ErepoFactory.getRepo(erId).path();
 
         if (!isBundleOvfId(ovfId))
         {
-            EnvelopeType envelope = OVFPackageInstanceFileSystem.getEnvelope(erepoPath, ovfId);
+            EnvelopeType envelope = TemplateFileSystem.getEnvelope(erepoPath, ovfId);
 
-            String relativePackagePath = OVFPackageConventions.getRelativePackagePath(ovfId);
+            String relativePackagePath = TemplateConventions.getRelativePackagePath(ovfId);
             relativePackagePath = erId + '/' + relativePackagePath; // FIXME use EnterpriseRepo
 
             envelope = validateOrTryToFix(envelope, ovfId);
 
-            OVFPackageInstanceDto packDto =
-                OVFPackageInstanceFromOVFEnvelope.getDiskInfo(ovfId, envelope);
-            packDto = fixFilePathWithRelativeOVFPackagePath(packDto, relativePackagePath);
+            TemplateDto packDto =
+                TemplateFromOVFEnvelope.createTemplateDto(ovfId, envelope);
+            packDto = fixFilePathWithRelativeTemplatePath(packDto, relativePackagePath);
             packDto.setEnterpriseRepositoryId(Integer.valueOf(erId));
 
             return packDto;
@@ -185,7 +185,7 @@ public class OVFPackageInstanceService
             final String masterOvf = getBundleMasterOvfId(ovfId);
             final String snapshot = getBundleSnapshot(ovfId);
 
-            OVFPackageInstanceDto packDto = getOVFPackage(erId, masterOvf);
+            TemplateDto packDto = getTemplate(erId, masterOvf);
 
             packDto.setName(snapshot + OVF_BUNDLE_PATH_IDENTIFIER + packDto.getName());
 
@@ -216,8 +216,8 @@ public class OVFPackageInstanceService
         }
     }
 
-    private OVFPackageInstanceDto fixFilePathWithRelativeOVFPackagePath(
-        final OVFPackageInstanceDto ovfpi, final String relativePackagePath)
+    private TemplateDto fixFilePathWithRelativeTemplatePath(
+        final TemplateDto ovfpi, final String relativePackagePath)
     {
         ovfpi.setDiskFilePath(relativePackagePath + ovfpi.getDiskFilePath());
 
@@ -228,14 +228,14 @@ public class OVFPackageInstanceService
      * @throws RepositoryException, if some of the Disk files of the bundle do not exist on the
      *             repository.
      */
-    public String createOVFBundle(final OVFPackageInstanceDto diskInfo, final String snapshot)
+    public String createTemplateBundle(final TemplateDto diskInfo, final String snapshot)
     {
 
         final String erId = String.valueOf(diskInfo.getEnterpriseRepositoryId());
         final String ovfIdSnapshot = diskInfo.getUrl();
 
         final EnvelopeType envelopeBundle =
-            OVFPackageInstanceToOVFEnvelope.createEnvelopeFromOVFPackageInstance(diskInfo);
+            TemplateToOVFEnvelope.createOVFEnvelopeFromTemplate(diskInfo);
 
         return ErepoFactory.getRepo(erId).createBundle(ovfIdSnapshot, snapshot, envelopeBundle);
     }

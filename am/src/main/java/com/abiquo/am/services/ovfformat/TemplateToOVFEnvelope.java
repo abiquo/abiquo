@@ -44,7 +44,7 @@ import org.dmtf.schemas.wbem.wscim._1.cim_schema._2.cim_resourceallocationsettin
 
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.ovfmanager.cim.CIMResourceAllocationSettingDataUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
@@ -60,7 +60,7 @@ import com.abiquo.ovfmanager.ovf.section.OVFVirtualHadwareSectionUtils;
 /**
  * Creates an OVF document from a DiskInfo. (Mono disk and Mono virtual system Envelopes)
  */
-public class OVFPackageInstanceToOVFEnvelope
+public class TemplateToOVFEnvelope
 {
 
     /** All the virtual system are created using these type. */
@@ -69,16 +69,16 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use the imageSize
      **/
-    public static EnvelopeType createEnvelopeFromOVFPackageInstance(final OVFPackageInstanceDto disk)
+    public static EnvelopeType createOVFEnvelopeFromTemplate(final TemplateDto template)
     {
         EnvelopeType envelope = new EnvelopeType();
         ReferencesType references = new ReferencesType();
 
-        final String diskPath = disk.getDiskFilePath();
+        final String diskPath = template.getDiskFilePath();
         // final String packRelPath = getRelativePackagePath(disk.getOvfUrl(),
         // String.valueOf(disk.getIdEnterprise()));
 
-        final Long diskSize = disk.getDiskFileSize();
+        final Long diskSize = template.getDiskFileSize();
 
         // final String completPath = packRelPath +'/'+diskPath;
         // System.err.println(packRelPath);
@@ -90,9 +90,9 @@ public class OVFPackageInstanceToOVFEnvelope
                     BigInteger.valueOf(diskSize), null, null);
             OVFReferenceUtils.addFile(references, fileRef);
 
-            DiskSectionType diskSection = createDiskSection(disk);
-            VirtualSystemType vsystem = createVirtualSystem(disk);
-            ProductSectionType product = createProductSection(disk);
+            DiskSectionType diskSection = createDiskSection(template);
+            VirtualSystemType vsystem = createVirtualSystem(template);
+            ProductSectionType product = createProductSection(template);
 
             OVFEnvelopeUtils.addSection(vsystem, product);
             OVFEnvelopeUtils.addSection(envelope, diskSection);
@@ -101,7 +101,7 @@ public class OVFPackageInstanceToOVFEnvelope
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_INSTALL,
+            throw new AMException(AMError.TEMPLATE_INSTALL,
                 "Can not create the OVF from the DiskInfo",
                 e);
         }
@@ -112,8 +112,7 @@ public class OVFPackageInstanceToOVFEnvelope
     /***
      * Use ImageType and HD
      */
-    private static DiskSectionType createDiskSection(final OVFPackageInstanceDto disk)
-        throws Exception
+    private static DiskSectionType createDiskSection(final TemplateDto disk) throws Exception
     {
         DiskFormat format = DiskFormat.fromName(disk.getDiskFileFormat().name());
 
@@ -133,12 +132,11 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use Description and name.
      */
-    private static VirtualSystemType createVirtualSystem(final OVFPackageInstanceDto disk)
-        throws Exception
+    private static VirtualSystemType createVirtualSystem(final TemplateDto disk) throws Exception
     {
         VirtualSystemType vsystem =
-            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(), disk
-                .getDescription());
+            OVFEnvelopeUtils.createVirtualSystem(disk.getName(), disk.getName(),
+                disk.getDescription());
 
         VirtualHardwareSectionType vhs = createVirtualHardwareSection(disk);
 
@@ -150,8 +148,7 @@ public class OVFPackageInstanceToOVFEnvelope
     /**
      * Use Description, Name and IconPath.
      */
-    private static ProductSectionType createProductSection(final OVFPackageInstanceDto disk)
-        throws Exception
+    private static ProductSectionType createProductSection(final TemplateDto disk) throws Exception
     {
         ProductSectionType product = new ProductSectionType();
 
@@ -176,8 +173,8 @@ public class OVFPackageInstanceToOVFEnvelope
      * Use RAM, CPU, HD (and its Units) of the DiskInfo to build a VirtualHadwareSection to be used
      * on the OVF Envelope.
      */
-    private static VirtualHardwareSectionType createVirtualHardwareSection(
-        final OVFPackageInstanceDto disk) throws RequiredAttributeException
+    private static VirtualHardwareSectionType createVirtualHardwareSection(final TemplateDto disk)
+        throws RequiredAttributeException
     {
         VirtualHardwareSectionType vhsection = new VirtualHardwareSectionType();
 
@@ -224,7 +221,7 @@ public class OVFPackageInstanceToOVFEnvelope
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_BOUNDLE, String.format(
+            throw new AMException(AMError.TEMPLATE_BOUNDLE, String.format(
                 "The bundle [%s] can not be created "
                     + "because the original envelope do not exist or do not have Disk Section",
                 snapshot), e);
@@ -235,7 +232,7 @@ public class OVFPackageInstanceToOVFEnvelope
         if (disks.isEmpty())
         {
 
-            throw new AMException(AMError.OVF_BOUNDLE, String.format(
+            throw new AMException(AMError.TEMPLATE_BOUNDLE, String.format(
                 "The bundle [%s] can not be created  because the "
                     + "original envelope do not contains any Disk", snapshot));
         }
@@ -258,7 +255,7 @@ public class OVFPackageInstanceToOVFEnvelope
             }
             catch (IdNotFoundException e)
             {
-                throw new AMException(AMError.OVF_BOUNDLE, String.format(
+                throw new AMException(AMError.TEMPLATE_BOUNDLE, String.format(
                     "The bundle [%s] can not be created because the "
                         + "referenced file Id [%s] is not found on the Envelope", snapshot,
                     diskFileId), e);
@@ -274,7 +271,7 @@ public class OVFPackageInstanceToOVFEnvelope
             if (!bundleFile.exists() || bundleFile.isDirectory())
             {
 
-                throw new AMException(AMError.OVF_BOUNDLE, String.format(
+                throw new AMException(AMError.TEMPLATE_BOUNDLE, String.format(
                     "The bundle [%s] can not be created because the "
                         + "referenced file on [%s] is not found", snapshot, absoluteBundleFileRef));
             }

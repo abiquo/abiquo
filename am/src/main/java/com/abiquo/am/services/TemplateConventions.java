@@ -31,7 +31,7 @@ import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
 
-public class OVFPackageConventions
+public class TemplateConventions
 {
     public final static String OVF_FILE_EXTENSION = ".ovf";
 
@@ -41,9 +41,9 @@ public class OVFPackageConventions
 
     public final static String OVF_BUNDLE_PATH_IDENTIFIER = "-snapshot-";
 
-    public final static String OVF_STATUS_DOWNLOADING_MARK = ".deploing";
+    public final static String TEMPLATE_STATUS_DOWNLOADING_MARK = ".deploing";
 
-    public final static String OVF_STATUS_ERROR_MARK = "deploy.error";
+    public final static String TEMPLATE_STATUS_ERROR_MARK = "deploy.error";
 
     public final static String END_OF_FILE_MARK = "\\Z";
 
@@ -143,7 +143,7 @@ public class OVFPackageConventions
         return customEncode(path);
     }
 
-    public static String getRelativeOVFPath(final String ovfId)
+    public static String getRelativeTemplatePath(final String ovfId)
     {
         assert ovfId.startsWith(OVF_LOCATION_PREFIX);
 
@@ -283,7 +283,7 @@ public class OVFPackageConventions
      * 
      * @return the path where the OVF will be deployed into the current enterprise repository.
      */
-    public static String getOVFPackagePath(final String enterpriseRepositoryPath, final String ovfid)
+    public static String getTemplatePath(final String enterpriseRepositoryPath, final String ovfid)
     {
         return FilenameUtils.concat(enterpriseRepositoryPath, getRelativePackagePath(ovfid));
     }
@@ -296,7 +296,7 @@ public class OVFPackageConventions
     public static String createFileInfo(final String enterpriseRepositoryPath,
         final FileType fileType, final String ovfId)
     {
-        String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
 
         return packagePath + normalizeFileHref(fileType.getHref());
     }
@@ -320,7 +320,7 @@ public class OVFPackageConventions
             }
             catch (MalformedURLException e)
             {
-                throw new AMException(AMError.OVF_INVALID_LOCATION, filehref);
+                throw new AMException(AMError.TEMPLATE_INVALID_LOCATION, filehref);
             }
         }
         else

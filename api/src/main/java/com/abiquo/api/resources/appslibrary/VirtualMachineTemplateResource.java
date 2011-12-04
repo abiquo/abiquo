@@ -153,7 +153,7 @@ public class VirtualMachineTemplateResource extends AbstractResource
         if (ovfid != null)
         {
             ApplianceManagerResourceStub am = new ApplianceManagerResourceStub(amUri);
-            Resource resource = am.ovfPackage(enterpriseId.toString(), ovfid);
+            Resource resource = am.template(enterpriseId.toString(), ovfid);
             String href = resource.getUriBuilder().build(new Object[] {}).toString();
 
             dto.addLink(new RESTLink("templatedefinition", ovfid));

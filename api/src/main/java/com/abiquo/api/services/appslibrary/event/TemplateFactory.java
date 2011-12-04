@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
@@ -47,34 +47,34 @@ import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.User;
 
 /**
- * Transforms an {@link OVFPackageInstanceDto} from ApplianceManager into a
+ * Transforms an {@link TemplateDto} from ApplianceManager into a
  * {@link VirtualMachineTemplate} in API
  */
 @Service
-public class OVFPackageInstanceToVirtualMachineTemplate
+public class TemplateFactory
 {
     private final static Logger logger = LoggerFactory
-        .getLogger(OVFPackageInstanceToVirtualMachineTemplate.class);
+        .getLogger(TemplateFactory.class);
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
     @Autowired
-    private TemplateDefinitionDAO ovfDao;
+    private TemplateDefinitionDAO templateDefDao;
 
     @Autowired
     private EnterpriseRep entRepo;
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<VirtualMachineTemplate> insertVirtualMachineTemplates(
-        final List<OVFPackageInstanceDto> disks, final Repository repo)
+        final List<TemplateDto> disks, final Repository repo)
     {
         List<VirtualMachineTemplate> addedvmtemplates = new LinkedList<VirtualMachineTemplate>();
-        List<OVFPackageInstanceDto> disksToInsert =
+        List<TemplateDto> disksToInsert =
             filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(disks, repo);
 
         // first masters
-        for (OVFPackageInstanceDto disk : disksToInsert)
+        for (TemplateDto disk : disksToInsert)
         {
             if (disk.getMasterDiskFilePath() == null)
             {
@@ -95,7 +95,7 @@ public class OVFPackageInstanceToVirtualMachineTemplate
         }
 
         // second bunded
-        for (OVFPackageInstanceDto disk : disksToInsert)
+        for (TemplateDto disk : disksToInsert)
         {
             if (disk.getMasterDiskFilePath() != null)
             {
@@ -120,13 +120,13 @@ public class OVFPackageInstanceToVirtualMachineTemplate
      * Filer already present virtual machne template paths. Ignore virtual vmtemplates from not present enterprise
      * repository.
      */
-    private List<OVFPackageInstanceDto> filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(
-        final List<OVFPackageInstanceDto> disks, final Repository repository)
+    private List<TemplateDto> filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(
+        final List<TemplateDto> disks, final Repository repository)
     {
 
-        List<OVFPackageInstanceDto> notInsertedDisks = new LinkedList<OVFPackageInstanceDto>();
+        List<TemplateDto> notInsertedDisks = new LinkedList<TemplateDto>();
 
-        for (OVFPackageInstanceDto disk : disks)
+        for (TemplateDto disk : disks)
         {
             Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
@@ -145,7 +145,7 @@ public class OVFPackageInstanceToVirtualMachineTemplate
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     protected VirtualMachineTemplate virtualMachineTemplateFromTemplate(
-        final OVFPackageInstanceDto disk, final Repository repository)
+        final TemplateDto disk, final Repository repository)
     {
         Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
@@ -191,7 +191,7 @@ public class OVFPackageInstanceToVirtualMachineTemplate
         return vmtemplate;
     }
 
-    private Category getCategory(final OVFPackageInstanceDto disk)
+    private Category getCategory(final TemplateDto disk)
     {
 
         String categoryName = disk.getCategoryName();
@@ -200,27 +200,27 @@ public class OVFPackageInstanceToVirtualMachineTemplate
             return appslibraryRep.findByCategoryNameOrCreateNew(disk.getCategoryName());
         }
 
-        // try to find in the OVFPackage
-        TemplateDefinition ovf = ovfDao.findByUrl(disk.getUrl());
-        return ovf != null ? ovf.getCategory() : appslibraryRep.getDefaultCategory();
+        // try to find in the TemplateDefinition
+        TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
+        return templateDef != null ? templateDef.getCategory() : appslibraryRep.getDefaultCategory();
     }
 
-    private Icon getIcon(final OVFPackageInstanceDto disk)
+    private Icon getIcon(final TemplateDto disk)
     {
         if (!StringUtils.isEmpty(disk.getIconPath()))
         {
             return appslibraryRep.findByIconPathOrCreateNew(disk.getIconPath());
         }
 
-        // try to find in the OVFPackage
-        TemplateDefinition ovf = ovfDao.findByUrl(disk.getUrl());
-        return ovf != null ? ovf.getIcon() : null;
+        // try to find in the TemplateDefinition
+        TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
+        return templateDef != null ? templateDef.getIcon() : null;
     }
 
     /*
      * returns a 254 trucated description. TODO in the DAO
      */
-    private String getDescription(final OVFPackageInstanceDto disk)
+    private String getDescription(final TemplateDto disk)
     {
         String truncatedDescription = disk.getDescription();
         if (truncatedDescription.length() > 254) // TODO data truncation
@@ -230,13 +230,13 @@ public class OVFPackageInstanceToVirtualMachineTemplate
         return truncatedDescription;
     }
 
-    private Long getRamInMb(final OVFPackageInstanceDto disk)
+    private Long getRamInMb(final TemplateDto disk)
     {
         BigInteger byteRam = getBytes(String.valueOf(disk.getRam()), disk.getRamSizeUnit().name());
         return byteRam.longValue() / 1048576;
     }
 
-    private Long getHdInBytes(final OVFPackageInstanceDto disk)
+    private Long getHdInBytes(final TemplateDto disk)
     {
         return getBytes(String.valueOf(disk.getHd()), disk.getHdSizeUnit().name()).longValue();
     }

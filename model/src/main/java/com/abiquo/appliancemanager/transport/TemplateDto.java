@@ -33,12 +33,12 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 
 /**
- * The materialization of an {@link TemplateDefinition} of a given {@link Datacenter} and {@link Enterprise}
- * .
+ * The materialization of an {@link TemplateDefinition} of a given {@link Datacenter} and
+ * {@link Enterprise} .
  */
-@XmlRootElement(name = "ovfInstance")
 @XmlType
-public class OVFPackageInstanceDto extends TemplateDefinitionDto
+@XmlRootElement(name = "template")
+public class TemplateDto extends TemplateDefinitionDto
 {
     private static final long serialVersionUID = 6994372893155355385L;
 
@@ -51,7 +51,7 @@ public class OVFPackageInstanceDto extends TemplateDefinitionDto
     /** ######### hardware requirements : TODO move to {@link TemplateDefinitionDto} ######### */
 
     @Deprecated
-    /** Use {@link OVFPackageDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the OVFPackageDto*/
+    /** Use {@link TemplateDefinitionDto} diskFormatTypeUri: TODO use the DiskFormatEnum in the TemplateDefinitionDto*/
     private DiskFormatType diskFileFormat;
 
     @Deprecated
@@ -106,7 +106,7 @@ public class OVFPackageInstanceDto extends TemplateDefinitionDto
     {
         this.diskFileFormat = diskFileFormat;
         this.setDiskFormatTypeUri(diskFileFormat.uri);
-        // FIXME once OVFPackageDto work with Enum
+        // FIXME once TemplateDefinitionDto work with Enum
     }
 
     public String getIconPath()

@@ -29,9 +29,9 @@ import com.abiquo.server.core.appslibrary.TemplateDefinition;
 /**
  * status of a {@link TemplateDefinition} in a {@link EnterpriseRepositoriesDto}.
  */
-@XmlType(name = "ovfInstanceStatus")
+@XmlType(name = "templateStatusType")
 @XmlEnum
-public enum OVFStatusEnumType
+public enum TemplateStatusEnumType
 {
     /** ovf package not found in the enterprise repository */
     NOT_DOWNLOAD,
@@ -47,7 +47,7 @@ public enum OVFStatusEnumType
         return name();
     }
 
-    public static OVFStatusEnumType fromValue(String v)
+    public static TemplateStatusEnumType fromValue(final String v)
     {
         return valueOf(v);
     }

@@ -21,7 +21,7 @@
 
 package com.abiquo.am.services.download;
 
-import static com.abiquo.am.services.OVFPackageConventions.getFileUrl;
+import static com.abiquo.am.services.TemplateConventions.getFileUrl;
 import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_CONNECTION_TIMEOUT;
 import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_IDLE_TIMEOUT;
 import static com.abiquo.appliancemanager.config.AMConfiguration.HTTP_MAX_CONNECTIONS;
@@ -42,16 +42,16 @@ import org.springframework.stereotype.Component;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.ErepoFactory;
-import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.am.services.notify.AMNotifier;
-import com.abiquo.am.services.ovfformat.OVFPackageInstanceToOVFEnvelope;
+import com.abiquo.am.services.ovfformat.TemplateToOVFEnvelope;
 import com.abiquo.appliancemanager.config.AMConfiguration;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.ProxyServer;
@@ -64,9 +64,9 @@ import com.ning.http.client.ProxyServer;
  * @author apuig
  */
 @Component
-public class OVFPackageInstanceDownloader
+public class TemplateDownloader
 {
-    private final static Logger LOG = LoggerFactory.getLogger(OVFPackageInstanceDownloader.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateDownloader.class);
 
     /** used in the {@link DownloadingFile} constructor */
     @Autowired
@@ -79,8 +79,8 @@ public class OVFPackageInstanceDownloader
     private final Map<String, DownloadingFile> inprogress = new HashMap<String, DownloadingFile>();
 
     /**
-     * Make the provided OVF package available on the enterprise repository. Creates a new directory
-     * for the provided OVFPackage into the repository (using the OVF file name), inspect the
+     * Make the provided template available on the enterprise repository. Creates a new directory
+     * for the provided template definition into the repository (using the OVF file name), inspect the
      * OVF-Envelope to download all its File References into its package folder. Also change the
      * envelope to ensure use relative paths on the File ''href''. Sets the OVFState to DOWNLOADING
      * on the OVFIndex.
@@ -91,7 +91,7 @@ public class OVFPackageInstanceDownloader
      * @throws DownloadException, content is not a valid OVF envelope document or any error during
      *             the download of some file on the package.
      */
-    public void deployOVFPackage(final String enterpriseId, final String ovfId,
+    public void deployTemplate(final String enterpriseId, final String ovfId,
         final EnvelopeType envelope)
     {
         LOG.debug("Deploy request [{}]", ovfId);
@@ -107,7 +107,7 @@ public class OVFPackageInstanceDownloader
         }
         catch (IOException e)
         {
-            throw new AMException(AMError.OVF_INSTALL, e);
+            throw new AMException(AMError.TEMPLATE_INSTALL, e);
         }
     }
 
@@ -132,7 +132,7 @@ public class OVFPackageInstanceDownloader
         // TODO prior validation
         if (envelope.getReferences().getFile().size() != 1)
         {
-            throw new AMException(AMError.OVF_INVALID_MULTIPLE_FILES);
+            throw new AMException(AMError.TEMPLATE_INVALID_MULTIPLE_FILES);
         }
 
         final EnterpriseRepositoryService enterpirseRepository = ErepoFactory.getRepo(enterpriseId);
@@ -149,7 +149,7 @@ public class OVFPackageInstanceDownloader
         }
 
         final String destinationPath =
-            OVFPackageConventions.createFileInfo(enterpirseRepository.path(), fileType, ovfId);
+            TemplateConventions.createFileInfo(enterpirseRepository.path(), fileType, ovfId);
 
         final String fileURL = getFileUrl(fileType.getHref(), ovfId);
 
@@ -162,7 +162,7 @@ public class OVFPackageInstanceDownloader
      * @return the OVFid of the just uploaded package
      * @throws IOException
      */
-    public synchronized String uploadOVFPackage(final OVFPackageInstanceDto diskInfo,
+    public synchronized String uploadTemplate(final TemplateDto diskInfo,
         final File diskFile) throws IOException
     {
 
@@ -174,10 +174,10 @@ public class OVFPackageInstanceDownloader
 
         // create and write the OVF Envelope
         EnvelopeType envelope =
-            OVFPackageInstanceToOVFEnvelope.createEnvelopeFromOVFPackageInstance(diskInfo);
+            TemplateToOVFEnvelope.createOVFEnvelopeFromTemplate(diskInfo);
 
-        enterpriseRepository.createOVFPackageFolder(ovfId);
-        enterpriseRepository.createOVFPackageFolder(ovfId, envelope);
+        enterpriseRepository.createTemplateFolder(ovfId);
+        enterpriseRepository.createTemplateFolder(ovfId, envelope);
         enterpriseRepository.copyFileToOVFPackagePath(ovfId, diskFile);
 
         return ovfId;
@@ -189,14 +189,14 @@ public class OVFPackageInstanceDownloader
      * @param ovfId, the OVF package identifier.
      * @throws RepositoryException if the package is not on DOWNLOADING state.
      */
-    public synchronized void cancelDeployOVFPackage(final String ovfId, final String enterpriseId)
+    public synchronized void cancelDeployTemplate(final String ovfId, final String enterpriseId)
     {
         EnterpriseRepositoryService enterpriseRepository = ErepoFactory.getRepo(enterpriseId);
 
-        final OVFPackageInstanceStateDto state = enterpriseRepository.getOVFStatus(ovfId);
-        final OVFStatusEnumType status = state.getStatus();
+        final TemplateStateDto state = enterpriseRepository.getTemplateStatus(ovfId);
+        final TemplateStatusEnumType status = state.getStatus();
 
-        if (status == OVFStatusEnumType.DOWNLOADING)
+        if (status == TemplateStatusEnumType.DOWNLOADING)
         {
 
             if (inprogress.containsKey(ovfId))
@@ -207,13 +207,13 @@ public class OVFPackageInstanceDownloader
             }
             else
             {
-                throw new AMException(AMError.OVF_CANCEL, String.format(
+                throw new AMException(AMError.TEMPLATE_CANCEL, String.format(
                     "Provided OVF[%s] appears as DOWNLOADING but is not beeing deployed", ovfId));
             }
         }
         else
         {
-            throw new AMException(AMError.OVF_CANCEL, String.format(
+            throw new AMException(AMError.TEMPLATE_CANCEL, String.format(
                 "Provided OVF[%s] is not on DOWNLOADING state,"
                     + " its [%s]. So it can not be cancelled", ovfId, status.name()));
         }

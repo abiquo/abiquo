@@ -40,8 +40,8 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.appslibrary.TemplateDefinitionListService;
 import com.abiquo.api.transformer.AppsLibraryTransformer;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinition;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
@@ -116,13 +116,13 @@ public class TemplateDefinitionListResource extends AbstractResource
     }
 
     /**
-     * Get the all {@link OVFPackageInstanceStateDto} in the provided
+     * Get the all {@link TemplateStateDto} in the provided
      * {@link DatacenterRepositoryResource} for all the {@link TemplateDefinition} in the current
      * list.
      */
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)
-    public OVFPackageInstancesStateDto getTemplateStatusList(
+    public TemplatesStateDto getTemplateStatusList(
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionId,
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer idEnterprise,
         @QueryParam(TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_DATACENTER_QUERY_PARAM) final Integer datacenterId,

@@ -57,8 +57,8 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
@@ -177,25 +177,25 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     public void deleteVirtualMachineTemplate()
     {
 
-        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdownloaded = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdownloaded = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);
@@ -248,25 +248,25 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     @Test(groups = {AM_INTEGRATION_TESTS})
     public void deleteSharedVMTemplate()
     {
-        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdownloaded = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdownloaded = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);
@@ -360,25 +360,25 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     public void createOVFandWaitUntilVirtualMachineTemplateCreated()
     {
         final Integer enterpriseId = ent.getId();
-        amclient.createOVFPackageInstance(enterpriseId.toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(enterpriseId.toString(), DEFAULT_OVF);
 
         boolean isdown = false;
         while (!isdown)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(enterpriseId.toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(enterpriseId.toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdown = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdown = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);

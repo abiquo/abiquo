@@ -24,8 +24,8 @@
 				<ref bean="diskFileResource" />
 				<ref bean="enterpriseRepositoriesResource" />
 				<ref bean="enterpriseRepositoryResource" />
-				<ref bean="OVFPackageInstancesResource" />
-				<ref bean="OVFPackageInstanceResource" />
+				<ref bean="templatesResource" />
+				<ref bean="templateResource" />
 			</set>
 		</property>
 	</bean>

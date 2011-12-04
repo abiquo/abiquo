@@ -33,14 +33,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.services.appslibrary.event.OVFPackageInstanceToVirtualMachineTemplate;
+import com.abiquo.api.services.appslibrary.event.TemplateFactory;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -53,10 +53,10 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     public static final Logger logger = LoggerFactory.getLogger(DatacenterRepositoryService.class);
 
     @Autowired
-    private OVFPackageInstanceToVirtualMachineTemplate toVmtemplate;
+    private TemplateFactory toVmtemplate;
 
     /**
-     * Request the DOWNLOAD {@link OVFPackageInstanceDto} available in the ApplianceManager and
+     * Request the DOWNLOAD {@link TemplateDto} available in the ApplianceManager and
      * update the {@link VirtualMachineTemplate} repository with new virtual machine templates.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -124,13 +124,13 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
         final ApplianceManagerResourceStubImpl amStub)
     {
 
-        List<OVFPackageInstanceDto> disks = new LinkedList<OVFPackageInstanceDto>();
+        List<TemplateDto> disks = new LinkedList<TemplateDto>();
         for (String ovfid : getAvailableOVFPackageInstance(idEnterprise, amStub))
         {
             try
             {
-                OVFPackageInstanceDto packageInstance =
-                    amStub.getOVFPackageInstance(String.valueOf(idEnterprise), ovfid);
+                TemplateDto packageInstance =
+                    amStub.getTemplate(String.valueOf(idEnterprise), ovfid);
                 disks.add(packageInstance);
             }
             catch (ApplianceManagerStubException e)
@@ -147,7 +147,7 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
     }
 
     /**
-     * Returns OVF ids of the DOWNLOADED {@link OVFPackageInstanceDto} in the enterprise repository
+     * Returns OVF ids of the DOWNLOADED {@link TemplateDto} in the enterprise repository
      */
     private List<String> getAvailableOVFPackageInstance(final Integer idEnterprise,
         final ApplianceManagerResourceStubImpl amStub)
@@ -156,12 +156,12 @@ public class DatacenterRepositoryService extends DefaultApiServiceWithApplianceM
 
         try
         {
-            OVFPackageInstancesStateDto list =
-                amStub.getOVFPackagInstanceStatusList(idEnterprise.toString());
+            TemplatesStateDto list =
+                amStub.getTemplatesState(idEnterprise.toString());
 
-            for (OVFPackageInstanceStateDto status : list.getCollection())
+            for (TemplateStateDto status : list.getCollection())
             {
-                if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+                if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
                 {
                     ovfids.add(status.getOvfId());
                 }

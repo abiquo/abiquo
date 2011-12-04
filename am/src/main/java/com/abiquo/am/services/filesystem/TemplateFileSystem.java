@@ -21,16 +21,16 @@
 
 package com.abiquo.am.services.filesystem;
 
-import static com.abiquo.am.services.OVFPackageConventions.END_OF_FILE_MARK;
-import static com.abiquo.am.services.OVFPackageConventions.FORMATS_PATH;
-import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_IMPORTED_PREFIX;
-import static com.abiquo.am.services.OVFPackageConventions.OVF_STATUS_DOWNLOADING_MARK;
-import static com.abiquo.am.services.OVFPackageConventions.OVF_STATUS_ERROR_MARK;
-import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
-import static com.abiquo.am.services.OVFPackageConventions.getBundleMasterOvfId;
-import static com.abiquo.am.services.OVFPackageConventions.getBundleSnapshot;
-import static com.abiquo.am.services.OVFPackageConventions.getOVFPackagePath;
-import static com.abiquo.am.services.OVFPackageConventions.getRelativeOVFPath;
+import static com.abiquo.am.services.TemplateConventions.END_OF_FILE_MARK;
+import static com.abiquo.am.services.TemplateConventions.FORMATS_PATH;
+import static com.abiquo.am.services.TemplateConventions.OVF_BUNDLE_IMPORTED_PREFIX;
+import static com.abiquo.am.services.TemplateConventions.TEMPLATE_STATUS_DOWNLOADING_MARK;
+import static com.abiquo.am.services.TemplateConventions.TEMPLATE_STATUS_ERROR_MARK;
+import static com.abiquo.am.services.TemplateConventions.createBundleOvfId;
+import static com.abiquo.am.services.TemplateConventions.getBundleMasterOvfId;
+import static com.abiquo.am.services.TemplateConventions.getBundleSnapshot;
+import static com.abiquo.am.services.TemplateConventions.getRelativeTemplatePath;
+import static com.abiquo.am.services.TemplateConventions.getTemplatePath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,19 +48,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.exceptions.AMError;
-import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.am.services.filesystem.filters.BundleImageFileFilter;
 import com.abiquo.am.services.filesystem.filters.FormatsFilter;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.ovfmanager.ovf.OVFReferenceUtils;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 
-public class OVFPackageInstanceFileSystem
+public class TemplateFileSystem
 {
 
-    private final static Logger LOG = LoggerFactory.getLogger(OVFPackageInstanceFileSystem.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TemplateFileSystem.class);
 
     /**
      * if (diskId == null || diskId.length() == 0) { }// remove all the package
@@ -70,12 +70,12 @@ public class OVFPackageInstanceFileSystem
 
         EnvelopeType envelope;
 
-        String ovfPath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId);
+        String ovfPath = enterpriseRepositoryPath + getRelativeTemplatePath(ovfId);
         File ovfFile = new File(ovfPath);
 
         if (!ovfFile.exists())
         {
-            throw new AMException(AMError.OVF_NOT_FOUND, ovfId);
+            throw new AMException(AMError.TEMPLATE_NOT_FOUND, ovfId);
         }
 
         FileInputStream fileIs = null;
@@ -86,7 +86,7 @@ public class OVFPackageInstanceFileSystem
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_MALFORMED, ovfId, e);
+            throw new AMException(AMError.TEMPLATE_MALFORMED, ovfId, e);
         }
         finally
         {
@@ -106,41 +106,41 @@ public class OVFPackageInstanceFileSystem
         return envelope;
     }
 
-    public static OVFPackageInstanceStateDto getOVFStatus(final String enterpriseRepositoryPath,
+    public static TemplateStateDto getTemplateStatus(final String enterpriseRepositoryPath,
         final String ovfId)
     {
-        final OVFPackageInstanceStateDto state = new OVFPackageInstanceStateDto();
+        final TemplateStateDto state = new TemplateStateDto();
         state.setOvfId(ovfId);
 
-        if (!OVFPackageConventions.isValidOVFLocation(ovfId))
+        if (!TemplateConventions.isValidOVFLocation(ovfId))
         {
-            state.setStatus(OVFStatusEnumType.ERROR);
-            state.setErrorCause(AMError.OVF_INVALID_LOCATION.toString());
+            state.setStatus(TemplateStatusEnumType.ERROR);
+            state.setErrorCause(AMError.TEMPLATE_INVALID_LOCATION.toString());
             return state;
         }
 
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
         final String ovfEnvelopePath =
-            FilenameUtils.concat(enterpriseRepositoryPath, getRelativeOVFPath(ovfId));
+            FilenameUtils.concat(enterpriseRepositoryPath, getRelativeTemplatePath(ovfId));
 
-        File errorMarkFile = new File(packagePath + OVF_STATUS_ERROR_MARK);
+        File errorMarkFile = new File(packagePath + TEMPLATE_STATUS_ERROR_MARK);
         if (errorMarkFile.exists())
         {
-            state.setStatus(OVFStatusEnumType.ERROR);
+            state.setStatus(TemplateStatusEnumType.ERROR);
             state.setErrorCause(readErrorMarkFile(errorMarkFile));
         }
-        else if (new File(packagePath + OVF_STATUS_DOWNLOADING_MARK).exists())
+        else if (new File(packagePath + TEMPLATE_STATUS_DOWNLOADING_MARK).exists())
         {
-            state.setStatus(OVFStatusEnumType.DOWNLOADING);
+            state.setStatus(TemplateStatusEnumType.DOWNLOADING);
 
         }
         else if (!new File(ovfEnvelopePath).exists())
         {
-            state.setStatus(OVFStatusEnumType.NOT_DOWNLOAD);
+            state.setStatus(TemplateStatusEnumType.NOT_DOWNLOAD);
         }
         else
         {
-            state.setStatus(OVFStatusEnumType.DOWNLOAD);
+            state.setStatus(TemplateStatusEnumType.DOWNLOAD);
         }
 
         return state;
@@ -151,12 +151,12 @@ public class OVFPackageInstanceFileSystem
      * 
      * @throws RepositoryException
      */
-    public static synchronized void createOVFStatusMarks(final String enterpriseRepositoryPath,
-        final String ovfId, final OVFStatusEnumType status, final String errorMsg)
+    public static synchronized void createTemplateStatusMarks(final String enterpriseRepositoryPath,
+        final String ovfId, final TemplateStatusEnumType status, final String errorMsg)
     {
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
 
-        clearOVFStatusMarks(packagePath);
+        clearTemplateStatusMarks(packagePath);
 
         File mark = null;
         boolean errorCreate = false;
@@ -172,12 +172,12 @@ public class OVFPackageInstanceFileSystem
                     break;
 
                 case DOWNLOADING:
-                    mark = new File(packagePath + '/' + OVF_STATUS_DOWNLOADING_MARK);
+                    mark = new File(packagePath + '/' + TEMPLATE_STATUS_DOWNLOADING_MARK);
                     errorCreate = !mark.createNewFile();
                     break;
 
                 case ERROR:
-                    mark = new File(packagePath + '/' + OVF_STATUS_ERROR_MARK);
+                    mark = new File(packagePath + '/' + TEMPLATE_STATUS_ERROR_MARK);
                     errorCreate = !mark.createNewFile();
 
                     if (!errorCreate)
@@ -189,34 +189,34 @@ public class OVFPackageInstanceFileSystem
                     break;
 
                 default:
-                    throw new AMException(AMError.OVFPI_UNKNOW_STATUS, status.name());
+                    throw new AMException(AMError.TEMPLATE_UNKNOW_STATUS, status.name());
 
             }// switch
 
         }
         catch (IOException ioe)
         {
-            throw new AMException(AMError.OVFPI_CHANGE_STATUS, mark.getAbsoluteFile()
+            throw new AMException(AMError.TEMPLATE_CHANGE_STATUS, mark.getAbsoluteFile()
                 .getAbsolutePath());
         }
 
         if (errorCreate)
         {
-            throw new AMException(AMError.OVFPI_CHANGE_STATUS, mark.getAbsoluteFile()
+            throw new AMException(AMError.TEMPLATE_CHANGE_STATUS, mark.getAbsoluteFile()
                 .getAbsolutePath());
         }
     }
 
-    private static void clearOVFStatusMarks(final String packagePath)
+    private static void clearTemplateStatusMarks(final String packagePath)
     {
-        File errorMarkFile = new File(packagePath + OVF_STATUS_ERROR_MARK);
-        File downloadingMarkFile = new File(packagePath + OVF_STATUS_DOWNLOADING_MARK);
+        File errorMarkFile = new File(packagePath + TEMPLATE_STATUS_ERROR_MARK);
+        File downloadingMarkFile = new File(packagePath + TEMPLATE_STATUS_DOWNLOADING_MARK);
 
         if (errorMarkFile.exists())
         {
             if (!errorMarkFile.delete())
             {
-                throw new AMException(AMError.OVFPI_CHANGE_STATUS, "removing "
+                throw new AMException(AMError.TEMPLATE_CHANGE_STATUS, "removing "
                     + errorMarkFile.getAbsolutePath());
             }
         }
@@ -225,7 +225,7 @@ public class OVFPackageInstanceFileSystem
         {
             if (!downloadingMarkFile.delete())
             {
-                throw new AMException(AMError.OVFPI_CHANGE_STATUS, "removing "
+                throw new AMException(AMError.TEMPLATE_CHANGE_STATUS, "removing "
                     + downloadingMarkFile.getAbsolutePath());
             }
         }
@@ -260,7 +260,7 @@ public class OVFPackageInstanceFileSystem
         return f;
     }
 
-    public static void copyFileToOVFPackagePath(final String packagePath, final File file)
+    public static void copyFileToTemplatePath(final String packagePath, final File file)
     {
         // Transfer the upload content into the repository file system
         final String filePath = packagePath + file.getName();
@@ -279,7 +279,7 @@ public class OVFPackageInstanceFileSystem
         }
     }
 
-    private static void createOVFPackageFormatsFolder(final String packagePath)
+    private static void createTemplateFormatsFolder(final String packagePath)
     {
 
         final String formatsPath = packagePath + '/' + FORMATS_PATH;
@@ -292,17 +292,17 @@ public class OVFPackageInstanceFileSystem
         {
             if (!formatsFolder.mkdir())
             {
-                throw new AMException(AMError.OVF_INSTALL, "creating format folder");
+                throw new AMException(AMError.TEMPLATE_INSTALL, "creating format folder");
 
             }
         }
     }
 
-    public static void createOVFPackageFolder(final String enterpriseRepositoryPath,
+    public static void createTemplateFolder(final String enterpriseRepositoryPath,
         final String ovfId)
     {
 
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
         // final String packageName = repository.getOVFPackageName(ovfId);
         // should be equals to concatenation
 
@@ -313,12 +313,12 @@ public class OVFPackageInstanceFileSystem
         {
             if (!packFile.mkdirs())
             {
-                throw new AMException(AMError.OVF_INSTALL, packagePath);
+                throw new AMException(AMError.TEMPLATE_INSTALL, packagePath);
 
             }
         }
 
-        createOVFPackageFormatsFolder(packagePath);
+        createTemplateFormatsFolder(packagePath);
     }
 
     /**
@@ -331,7 +331,7 @@ public class OVFPackageInstanceFileSystem
      * @throws RepositoryException, if some error occurs during this process, The package already
      *             was being deployed.
      */
-    public static void writeOVFFileToOVFPackageDir(final String envelopePath,
+    public static void writeOVFEnvelopeToTemplateFolder(final String envelopePath,
         final EnvelopeType envelope)
     {
 
@@ -339,19 +339,19 @@ public class OVFPackageInstanceFileSystem
 
         if (envelopeFile.exists())
         {
-            throw new AMException(AMError.OVF_INSTALL, "already exist");
+            throw new AMException(AMError.TEMPLATE_INSTALL, "already exist");
         }
 
         try
         {
             if (!envelopeFile.createNewFile())
             {
-                throw new AMException(AMError.OVF_INSTALL, envelopePath);
+                throw new AMException(AMError.TEMPLATE_INSTALL, envelopePath);
             }
         }
         catch (IOException e)
         {
-            throw new AMException(AMError.OVF_INSTALL, envelopePath);
+            throw new AMException(AMError.TEMPLATE_INSTALL, envelopePath);
         }
 
         FileOutputStream envelopeStream = null;
@@ -362,7 +362,7 @@ public class OVFPackageInstanceFileSystem
         }
         catch (Exception e1) // IOException or XMLException
         {
-            throw new AMException(AMError.OVF_INSTALL, envelopePath, e1);
+            throw new AMException(AMError.TEMPLATE_INSTALL, envelopePath, e1);
         }
         finally
         {
@@ -374,7 +374,7 @@ public class OVFPackageInstanceFileSystem
                 }
                 catch (IOException e)
                 {
-                    throw new AMException(AMError.OVF_INSTALL, envelopePath);
+                    throw new AMException(AMError.TEMPLATE_INSTALL, envelopePath);
                 }
             }
         }// finally
@@ -401,7 +401,7 @@ public class OVFPackageInstanceFileSystem
         }
     }
 
-    public static void deleteOVFPackage(final String packagePath)
+    public static void deleteTemplate(final String packagePath)
     {
         File packageFile = new File(packagePath);
         String[] bundles = packageFile.list(new BundleImageFileFilter());
@@ -432,7 +432,7 @@ public class OVFPackageInstanceFileSystem
                     }
                     catch (IOException e1)
                     {
-                        throw new AMException(AMError.OVFPI_DELETE,
+                        throw new AMException(AMError.TEMPLATE_DELETE,
                             packageFile.getAbsolutePath(),
                             e1);
                     }
@@ -444,7 +444,7 @@ public class OVFPackageInstanceFileSystem
         else
         {
             final StringBuffer stBuffer = new StringBuffer();
-            stBuffer.append("The selected OVF Package Instance has snapshot instances associates:");
+            stBuffer.append("The selected Template has snapshot instances associates:");
             for (String bund : bundles)
             {
                 stBuffer.append("\n" + bund);
@@ -452,7 +452,7 @@ public class OVFPackageInstanceFileSystem
 
             stBuffer.append("\n It can not be deleted.");
 
-            throw new AMException(AMError.OVFPI_DELETE_INSTANCES, stBuffer.toString());
+            throw new AMException(AMError.TEMPLATE_DELETE_INSTANCES, stBuffer.toString());
         }
     }
 
@@ -469,7 +469,7 @@ public class OVFPackageInstanceFileSystem
 
         if (!importBundleDir.exists() || !importBundleDir.isDirectory())
         {
-            throw new AMException(AMError.OVFPI_SNAPSHOT_IMPORT_NOT_EXIST, ovfId);
+            throw new AMException(AMError.TEMPLATE_SNAPSHOT_IMPORT_NOT_EXIST, ovfId);
         }
 
         try
@@ -488,7 +488,7 @@ public class OVFPackageInstanceFileSystem
         final String masterOvf = getBundleMasterOvfId(ovfId);
         final String snapshot = getBundleSnapshot(ovfId);
 
-        final String packagePath = getOVFPackagePath(enterpriseRepositoryPath, ovfId);
+        final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
         final EnvelopeType envelope = getEnvelope(enterpriseRepositoryPath, masterOvf);
         Set<String> fileLocations = OVFReferenceUtils.getAllReferencedFileLocations(envelope);
 
@@ -531,7 +531,7 @@ public class OVFPackageInstanceFileSystem
             deleteBundleConversion(packagePath, relativePath);
         }// all files
 
-        final String envelopePath = enterpriseRepositoryPath + getRelativeOVFPath(ovfId);
+        final String envelopePath = enterpriseRepositoryPath + getRelativeTemplatePath(ovfId);
         new File(envelopePath).delete();
     }
 }

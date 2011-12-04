@@ -41,7 +41,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
@@ -123,7 +123,7 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     /** #################### */
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public OVFPackageInstanceStateDto getTemplateState(final Integer id,
+    public TemplateStateDto getTemplateState(final Integer id,
         final Integer datacenterId, final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
@@ -146,7 +146,7 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
         // checks the repository is writable
         amClient.getRepository(String.valueOf(enterpriseId), true);
 
-        amClient.createOVFPackageInstance(String.valueOf(enterpriseId), ovfUrl);
+        amClient.installTemplateDefinition(String.valueOf(enterpriseId), ovfUrl);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)

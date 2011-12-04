@@ -31,6 +31,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
 @XmlRootElement(name = "templateDefinition")
 public class TemplateDefinitionDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = -2655629613600887997L;
+
     private Integer id;
 
     private String url;

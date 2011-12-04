@@ -28,7 +28,7 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
@@ -83,7 +83,7 @@ public interface AppsLibraryStub
     public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes();
 
     /**
-     * API will update the {@link OVFPackageInstanceStateDto} the creation state in the provided
+     * API will update the {@link TemplateStateDto} the creation state in the provided
      * datacenter of the (AM datacenter communication)
      */
 

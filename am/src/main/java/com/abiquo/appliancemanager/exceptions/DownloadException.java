@@ -36,18 +36,18 @@ public class DownloadException extends AMException
 
     public DownloadException(String ovfId, String file, String message)
     {
-        super(AMError.OVF_DOWNLOAD, String.format("File [%s] on package [%s] failed.\n%s", file,
+        super(AMError.TEMPLATE_DOWNLOAD, String.format("File [%s] on package [%s] failed.\n%s", file,
             ovfId, message));
     }
 
     public DownloadException(String ovfId, String file, Throwable cause)
     {
-        super(AMError.OVF_DOWNLOAD, String.format("File [%s] on package [%s] failed", file, ovfId),
+        super(AMError.TEMPLATE_DOWNLOAD, String.format("File [%s] on package [%s] failed", file, ovfId),
             cause);
     }
 
     public DownloadException(String message, Throwable cause)
     {
-        super(AMError.OVF_DOWNLOAD, message, cause);
+        super(AMError.TEMPLATE_DOWNLOAD, message, cause);
     }
 }

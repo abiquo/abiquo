@@ -33,8 +33,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 
 public class AMRedisDao
 {
@@ -92,16 +92,16 @@ public class AMRedisDao
 
     /** ########## SET ########## */
 
-    public void init(final String erId, final List<OVFPackageInstanceStateDto> states)
+    public void init(final String erId, final List<TemplateStateDto> states)
     {
         for (String ovfKey : getOvfKeys(erId))
         {
             redis.del(ovfKey);
         }
 
-        for (OVFPackageInstanceStateDto state : states)
+        for (TemplateStateDto state : states)
         {
-            if (state.getStatus() == OVFStatusEnumType.ERROR)
+            if (state.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 setError(erId, state.getOvfId(), state.getErrorCause());
             }
@@ -123,7 +123,7 @@ public class AMRedisDao
         final Integer current = StringUtils.isEmpty(currentSt) ? 0 : Integer.parseInt(currentSt);
         if (current == 0)
         {
-            redis.hset(key(erId, ovfId), STATE, OVFStatusEnumType.DOWNLOADING.name());
+            redis.hset(key(erId, ovfId), STATE, TemplateStatusEnumType.DOWNLOADING.name());
         }
 
         if (current != progress)
@@ -133,11 +133,11 @@ public class AMRedisDao
         return current != progress;
     }
 
-    public void setState(final String erId, final String ovfId, final OVFStatusEnumType state)
+    public void setState(final String erId, final String ovfId, final TemplateStatusEnumType state)
     {
         checkKeyIndex(erId, ovfId);
 
-        if (state == OVFStatusEnumType.NOT_DOWNLOAD)
+        if (state == TemplateStatusEnumType.NOT_DOWNLOAD)
         {
             redis.srem(key(erId), key(erId, ovfId));
             redis.del(key(erId, ovfId));
@@ -153,7 +153,7 @@ public class AMRedisDao
     {
         checkKeyIndex(erId, ovfId);
 
-        redis.hset(key(erId, ovfId), STATE, OVFStatusEnumType.ERROR.name());
+        redis.hset(key(erId, ovfId), STATE, TemplateStatusEnumType.ERROR.name());
         redis.hset(key(erId, ovfId), ERROR, error);
     }
 
@@ -166,15 +166,15 @@ public class AMRedisDao
     }
 
     /** return NOT_FOUND */
-    public OVFStatusEnumType getStatus(final String erId, final String ovfId)
+    public TemplateStatusEnumType getStatus(final String erId, final String ovfId)
     {
         if (!redis.sismember(key(erId), key(erId, ovfId)))
         {
-            return OVFStatusEnumType.NOT_DOWNLOAD;
+            return TemplateStatusEnumType.NOT_DOWNLOAD;
         }
 
         final String current = redis.hget(key(erId, ovfId), STATE);
-        return OVFStatusEnumType.valueOf(current);
+        return TemplateStatusEnumType.valueOf(current);
     }
 
     public String getError(final String erId, final String ovfId)
@@ -182,10 +182,10 @@ public class AMRedisDao
         return redis.hget(key(erId, ovfId), ERROR);
     }
 
-    public List<OVFPackageInstanceStateDto> getAll(final String erId)
+    public List<TemplateStateDto> getAll(final String erId)
     {
-        final List<OVFPackageInstanceStateDto> statusLst =
-            new LinkedList<OVFPackageInstanceStateDto>();
+        final List<TemplateStateDto> statusLst =
+            new LinkedList<TemplateStateDto>();
 
         for (String keyOvf : getOvfKeys(erId))
         {
@@ -198,16 +198,16 @@ public class AMRedisDao
 
     /** ########## ########## */
 
-    private static OVFPackageInstanceStateDto createOVFStatus(final String keyOvf,
+    private static TemplateStateDto createOVFStatus(final String keyOvf,
         final List<String> fields)
     {
-        OVFPackageInstanceStateDto status = new OVFPackageInstanceStateDto();
+        TemplateStateDto status = new TemplateStateDto();
         status.setOvfId(ovfId(keyOvf));
         final String st = fields.get(0);
         final String progress = fields.get(1);
         final String error = fields.get(2);
-        status.setStatus(st != null ? OVFStatusEnumType.valueOf(st)
-            : OVFStatusEnumType.NOT_DOWNLOAD);
+        status.setStatus(st != null ? TemplateStatusEnumType.valueOf(st)
+            : TemplateStatusEnumType.NOT_DOWNLOAD);
         status.setDownloadingProgress(StringUtils.isEmpty(progress) ? null : Double
             .valueOf(progress));
         status.setErrorCause(StringUtils.isEmpty(error) ? null : error);

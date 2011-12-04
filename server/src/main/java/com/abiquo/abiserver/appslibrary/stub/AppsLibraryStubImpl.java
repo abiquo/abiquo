@@ -43,8 +43,8 @@ import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -176,7 +176,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageInstancesStateDto.class)));
+                .getEntity(TemplatesStateDto.class)));
         }
         else
         {
@@ -224,7 +224,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageInstanceStateDto.class)));
+                .getEntity(TemplateStateDto.class)));
         }
         else
         {
@@ -687,11 +687,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     private List<OVFPackageInstanceStatus> createFlexOVFPackageListObject(
-        final OVFPackageInstancesStateDto entity)
+        final TemplatesStateDto entity)
     {
         List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
 
-        for (OVFPackageInstanceStateDto statusDto : entity.getCollection())
+        for (TemplateStateDto statusDto : entity.getCollection())
         {
             statusList.add(createFlexOVFPackageListObject(statusDto));
         }
@@ -700,7 +700,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     protected OVFPackageInstanceStatus createFlexOVFPackageListObject(
-        final OVFPackageInstanceStateDto statusDto)
+        final TemplateStateDto statusDto)
     {
         OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
 

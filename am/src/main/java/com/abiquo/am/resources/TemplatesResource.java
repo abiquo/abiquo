@@ -53,31 +53,31 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.ErepoFactory;
-import com.abiquo.am.services.OVFPackageConventions;
-import com.abiquo.am.services.OVFPackageInstanceService;
+import com.abiquo.am.services.TemplateConventions;
+import com.abiquo.am.services.TemplateService;
 import com.abiquo.am.services.download.OVFDocumentFetch;
 import com.abiquo.am.services.notify.AMNotifier;
-import com.abiquo.am.services.ovfformat.OVFPackageInstanceFromOVFEnvelope;
+import com.abiquo.am.services.ovfformat.TemplateFromOVFEnvelope;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 
 @Parent(EnterpriseRepositoryResource.class)
-@Path(OVFPackageInstancesResource.OVFPI_PATH)
+@Path(TemplatesResource.OVFPI_PATH)
 @Controller
-public class OVFPackageInstancesResource
+public class TemplatesResource
 {
-    private final static Logger LOG = LoggerFactory.getLogger(OVFPackageInstancesResource.class);
+    private final static Logger LOG = LoggerFactory.getLogger(TemplatesResource.class);
 
-    public static final String OVFPI_PATH = ApplianceManagerPaths.OVFPI_PATH;
+    public static final String OVFPI_PATH = ApplianceManagerPaths.TEMPLATE_PATH;
 
     @Autowired
     AMNotifier notifier;
 
     @Autowired
-    OVFPackageInstanceService ovfService;
+    TemplateService templateService;
 
     @Autowired
     OVFDocumentFetch validate;
@@ -87,13 +87,13 @@ public class OVFPackageInstancesResource
      * XXX do not include DOWNLOADING or ERROR status
      */
     @GET
-    public OVFPackageInstancesStateDto getOVFPackageInstancesStatus(
+    public TemplatesStateDto getTemplateStatus(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise)
     {
         // TODO add only DOWNLOADED
 
-        OVFPackageInstancesStateDto list = new OVFPackageInstancesStateDto();
-        list.getCollection().addAll(ErepoFactory.getRepo(idEnterprise).getOVFStates());
+        TemplatesStateDto list = new TemplatesStateDto();
+        list.getCollection().addAll(ErepoFactory.getRepo(idEnterprise).getTemplateStates());
 
         return list;
     }
@@ -102,25 +102,25 @@ public class OVFPackageInstancesResource
      * Never return error. Use GET_STATUS to see errors
      */
     @POST
-    public void downloadOVFPackage(
+    public void downloadTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         final String ovfId)
     {
         LOG.debug("[deploy] {}", ovfId);
 
-        if (!OVFPackageConventions.isValidOVFLocation(ovfId))
+        if (!TemplateConventions.isValidOVFLocation(ovfId))
         {
-            throw new AMException(AMError.OVF_INVALID_LOCATION);
+            throw new AMException(AMError.TEMPLATE_INVALID_LOCATION);
         }
 
-        switch (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus())
+        switch (templateService.getTemplateStatusIncludeProgress(ovfId, erId).getStatus())
         {
             case DOWNLOADING:
             case DOWNLOAD:
-                throw new AMException(AMError.OVF_INSTALL_ALREADY);
+                throw new AMException(AMError.TEMPLATE_INSTALL_ALREADY);
 
             case ERROR:
-                ovfService.delete(erId, ovfId);
+                templateService.delete(erId, ovfId);
                 break;
             default:
                 break;
@@ -128,17 +128,17 @@ public class OVFPackageInstancesResource
 
         if (ovfId.startsWith("upload"))
         {
-            throw new AMException(AMError.OVF_UPLOAD, String.format(
+            throw new AMException(AMError.TEMPLATE_UPLOAD, String.format(
                 "Can not deply an uploaded package %s", ovfId));
         }
 
         try
         {
-            ovfService.startDownload(erId, ovfId);
+            templateService.startDownload(erId, ovfId);
         }
         catch (AMException e)
         {
-            notifier.setOVFStatusError(erId, ovfId, e.toString());
+            notifier.setTemplateStatusError(erId, ovfId, e.toString());
 
             // XXX the request ends successfully but the ovf package status is ERROR
             // throw new AMException(Status.BAD_REQUEST, cause);
@@ -147,18 +147,18 @@ public class OVFPackageInstancesResource
 
     @POST
     @Consumes("multipart/form-data")
-    public Response uploadOVFPackage(@Context final HttpHeaders headers,
+    public Response uploadTemplate(@Context final HttpHeaders headers,
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String erId,
         final InMultiPart mp, @Context final Providers providers) throws IOException,
         EventException
     {
-        OVFPackageInstanceDto diskInfo = null;
+        TemplateDto diskInfo = null;
         String errorMsg = null;
 
         try
         {
             InPart diskInfoPart = mp.next();
-            diskInfo = readOVFPackageInstanceDtoFromMultipart(diskInfoPart, headers, providers);
+            diskInfo = readTemplateDtoFromMultipart(diskInfoPart, headers, providers);
         }
         catch (Exception e)
         {
@@ -171,15 +171,15 @@ public class OVFPackageInstancesResource
                 errorMsg = "Error uploading the image";
             }
 
-            diskInfo.setDiskFilePath(OVFPackageConventions.OVF_STATUS_ERROR_MARK);
+            diskInfo.setDiskFilePath(TemplateConventions.TEMPLATE_STATUS_ERROR_MARK);
         }
 
         // XXX notify DOWNLOADING
 
         final String ovfId = diskInfo.getUrl();
-        if (ovfService.getOVFPackageStatusIncludeProgress(ovfId, erId).getStatus() == OVFStatusEnumType.ERROR)
+        if (templateService.getTemplateStatusIncludeProgress(ovfId, erId).getStatus() == TemplateStatusEnumType.ERROR)
         {
-            ovfService.delete(erId, ovfId);
+            templateService.delete(erId, ovfId);
         }
 
         InPart diskFilePart = mp.next();
@@ -194,20 +194,20 @@ public class OVFPackageInstancesResource
          */
 
         diskInfo.setDiskFileSize(diskFile.length());
-        ovfService.upload(diskInfo, diskFile, errorMsg);
+        templateService.upload(diskInfo, diskFile, errorMsg);
 
         return Response.created(URI.create(diskInfo.getUrl())).build();
     }
 
     @POST
     @Path("actions/validate")
-    public OVFPackageInstanceDto validate(final EnvelopeType envelope)
+    public TemplateDto validate(final EnvelopeType envelope)
     {
-        return OVFPackageInstanceFromOVFEnvelope.getDiskInfo("http://am/validation/OK.ovf",
+        return TemplateFromOVFEnvelope.createTemplateDto("http://am/validation/OK.ovf",
             validate.checkEnvelopeIsValid(envelope));
     }
 
-    private OVFPackageInstanceDto readOVFPackageInstanceDtoFromMultipart(final InPart diskInfoPart,
+    private TemplateDto readTemplateDtoFromMultipart(final InPart diskInfoPart,
         final HttpHeaders headers, final Providers providers) throws Exception
     {
         fixMediaType(diskInfoPart);
@@ -218,8 +218,8 @@ public class OVFPackageInstancesResource
         String json2 = removeFakePath(removeControlChar(json));
         json2 = temporalJsonNameHack(json2);
 
-        return providers.getMessageBodyReader(OVFPackageInstanceDto.class, null, null,
-            MediaType.APPLICATION_JSON_TYPE).readFrom(OVFPackageInstanceDto.class, null, null,
+        return providers.getMessageBodyReader(TemplateDto.class, null, null,
+            MediaType.APPLICATION_JSON_TYPE).readFrom(TemplateDto.class, null, null,
             MediaType.APPLICATION_JSON_TYPE, headers.getRequestHeaders(),
             new ByteArrayInputStream(json2.getBytes()));
 
@@ -237,8 +237,7 @@ public class OVFPackageInstancesResource
     @Deprecated
     private String temporalJsonNameHack(final String jsonin)
     {
-        return jsonin.replaceAll("ovfPackageInstanceDto", "ovfInstance").replaceAll("ovfUrl",
-            "ovfId");
+        return jsonin.replaceAll("ovfPackageInstanceDto", "template").replaceAll("ovfUrl", "ovfId");
     }
 
     /**

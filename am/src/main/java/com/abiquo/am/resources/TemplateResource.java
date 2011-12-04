@@ -21,7 +21,7 @@
 
 package com.abiquo.am.resources;
 
-import static com.abiquo.am.services.OVFPackageConventions.ovfUrl;
+import static com.abiquo.am.services.TemplateConventions.ovfUrl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,22 +50,21 @@ import org.springframework.stereotype.Controller;
 
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.ErepoFactory;
-import com.abiquo.am.services.OVFPackageInstanceService;
-import com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem;
+import com.abiquo.am.services.TemplateService;
+import com.abiquo.am.services.filesystem.TemplateFileSystem;
 import com.abiquo.api.resource.AbstractResource;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.DownloadException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 
-@Parent(OVFPackageInstancesResource.class)
-@Path(OVFPackageInstanceResource.OVFPI_PATH)
+@Parent(TemplatesResource.class)
+@Path(TemplateResource.TEMPLATE_PATH)
 @Controller
-public class OVFPackageInstanceResource extends AbstractResource
+public class TemplateResource extends AbstractResource
 {
-
-    public static final String OVFPI = ApplianceManagerPaths.OVFPI;
+    public static final String TEMPLATE = ApplianceManagerPaths.TEMPLATE;
 
     /**
      * The resource parameter matching configuration.
@@ -73,27 +72,27 @@ public class OVFPackageInstanceResource extends AbstractResource
      * Must override default regular expression in order to be able to match complete URIs as the
      * OVFPackageInstance identifier.
      */
-    public static final String OVFPI_PARAM = "{" + OVFPI + ": .*}"; // FIXME take care of .*
+    public static final String TEMPLATE_PARAM = "{" + TEMPLATE + ": .*}"; // FIXME take care of .*
+
+    public static final String TEMPLATE_PATH = TEMPLATE_PARAM;
 
     /** The resource path. */
-    public static final String OVFPI_PATH = OVFPI_PARAM;
 
     private final static String HEADER_PROGRESS = "progress";
 
     private final static String QUERY_PARAM_GET_FORMAT = "format";
 
     @Autowired
-    OVFPackageInstanceService service;
+    TemplateService service;
 
     @HEAD
-    public Response getOVFPackageDeployProgress(
+    public Response getTemplateDeployProgress(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn) throws DownloadException
+        @PathParam(TemplateResource.TEMPLATE) final String ovfIdIn) throws DownloadException
     {
         final String ovfId = ovfUrl(ovfIdIn);
 
-        OVFPackageInstanceStateDto status =
-            service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
+        TemplateStateDto status = service.getTemplateStatusIncludeProgress(ovfId, idEnterprise);
 
         switch (status.getStatus())
         {
@@ -119,9 +118,9 @@ public class OVFPackageInstanceResource extends AbstractResource
     }
 
     @GET
-    public Response getOVFPackageInstance(@Context final UriInfo uriInfo,
+    public Response getTemplate(@Context final UriInfo uriInfo,
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn,
+        @PathParam(TemplateResource.TEMPLATE) final String ovfIdIn,
         @QueryParam(QUERY_PARAM_GET_FORMAT) final String format)
     {
         // XXX can specify the media type
@@ -130,7 +129,7 @@ public class OVFPackageInstanceResource extends AbstractResource
 
         if (format == null || format.isEmpty() || format.equals("ovfpi"))
         {
-            return Response.ok(getOVFPackageInstance(idEnterprise, ovfId)).build();
+            return Response.ok(getTemplate(idEnterprise, ovfId)).build();
         }
         else if (format.equals("status"))
         {
@@ -142,7 +141,7 @@ public class OVFPackageInstanceResource extends AbstractResource
         }
         else if (format.equals("diskFile"))
         {
-            String diskFilePath = getOVFPackageInstance(idEnterprise, ovfId).getDiskFilePath();
+            String diskFilePath = getTemplate(idEnterprise, ovfId).getDiskFilePath();
 
             String baseUrl = uriInfo.getBaseUri().toASCIIString();
 
@@ -172,35 +171,34 @@ public class OVFPackageInstanceResource extends AbstractResource
      */
     private Response evalStatus(final String idEnterprise, final String ovfId)
     {
-        OVFPackageInstanceStateDto ovfPackageInstanceStatus =
-            getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        TemplateStateDto templateStatus = getTemplateStatus(idEnterprise, ovfId);
 
-        if (ovfPackageInstanceStatus == null)
+        if (templateStatus == null)
         {
             return Response.status(Status.NOT_FOUND).build();
         }
-        if (!StringUtils.isBlank(ovfPackageInstanceStatus.getErrorCause()))
+        if (!StringUtils.isBlank(templateStatus.getErrorCause()))
         {
-            return Response.ok(ovfPackageInstanceStatus).build();
+            return Response.ok(templateStatus).build();
         }
-        if (OVFStatusEnumType.NOT_DOWNLOAD.equals(ovfPackageInstanceStatus.getStatus()))
+        if (TemplateStatusEnumType.NOT_DOWNLOAD.equals(templateStatus.getStatus()))
         {
-            ovfPackageInstanceStatus.setDownloadingProgress(0d);
-            return Response.ok(ovfPackageInstanceStatus).build();
+            templateStatus.setDownloadingProgress(0d);
+            return Response.ok(templateStatus).build();
         }
-        if (OVFStatusEnumType.ERROR.equals(ovfPackageInstanceStatus.getStatus()))
+        if (TemplateStatusEnumType.ERROR.equals(templateStatus.getStatus()))
         {
-            ovfPackageInstanceStatus.setDownloadingProgress(0d);
-            return Response.ok(ovfPackageInstanceStatus).build();
-        }
-
-        if (OVFStatusEnumType.DOWNLOADING.equals(ovfPackageInstanceStatus.getStatus()))
-        {
-            return Response.ok(ovfPackageInstanceStatus).build();
+            templateStatus.setDownloadingProgress(0d);
+            return Response.ok(templateStatus).build();
         }
 
-        ovfPackageInstanceStatus.setDownloadingProgress(100d);
-        return Response.ok(ovfPackageInstanceStatus).build();
+        if (TemplateStatusEnumType.DOWNLOADING.equals(templateStatus.getStatus()))
+        {
+            return Response.ok(templateStatus).build();
+        }
+
+        templateStatus.setDownloadingProgress(100d);
+        return Response.ok(templateStatus).build();
     }
 
     /**
@@ -210,7 +208,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response preBundleOVFPackage(
+    public Response preBundleTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
         final String name)
     {
@@ -220,10 +218,9 @@ public class OVFPackageInstanceResource extends AbstractResource
     }
 
     @POST
-    public Response bundleOVFPackage(
+    public Response bundleTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) final String snapshot,
-        final OVFPackageInstanceDto diskInfo)
+        @PathParam(TemplateResource.TEMPLATE) final String snapshot, final TemplateDto diskInfo)
     {
         // TODO check diskInfo.getEnvelopeId is equals to idEnterprise
 
@@ -231,13 +228,13 @@ public class OVFPackageInstanceResource extends AbstractResource
         URI bundleUri;
         try
         {
-            bundleOVFId = service.createOVFBundle(diskInfo, snapshot);
+            bundleOVFId = service.createTemplateBundle(diskInfo, snapshot);
             bundleUri = new URI(bundleOVFId);
         }
         catch (URISyntaxException e)
         {
             final String cause = String.format("The Bundle URI is not valid [%s]", bundleOVFId);
-            throw new AMException(AMError.OVF_BOUNDLE, cause, e);
+            throw new AMException(AMError.TEMPLATE_BOUNDLE, cause, e);
         }
 
         return Response.created(bundleUri).type(MediaType.TEXT_PLAIN).build(); // XXX location
@@ -247,9 +244,9 @@ public class OVFPackageInstanceResource extends AbstractResource
      * delete
      */
     @DELETE
-    public void deleteOVF(
+    public void deleteTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
-        @PathParam(OVFPackageInstanceResource.OVFPI) final String ovfIdIn)
+        @PathParam(TemplateResource.TEMPLATE) final String ovfIdIn)
     {
         final String ovfId = ovfUrl(ovfIdIn);
 
@@ -260,21 +257,18 @@ public class OVFPackageInstanceResource extends AbstractResource
      * NOT EXPOSED *
      */
     // @Produces({MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
-    private OVFPackageInstanceStateDto getOVFPackageInstanceStatus(final String idEnterprise,
-        final String ovfId)
+    private TemplateStateDto getTemplateStatus(final String idEnterprise, final String ovfId)
     {
-        return service.getOVFPackageStatusIncludeProgress(ovfId, idEnterprise);
+        return service.getTemplateStatusIncludeProgress(ovfId, idEnterprise);
     }
 
-    private OVFPackageInstanceDto getOVFPackageInstance(final String idEnterprise,
-        final String ovfId)
+    private TemplateDto getTemplate(final String idEnterprise, final String ovfId)
     {
-        return service.getOVFPackage(idEnterprise, ovfId);
+        return service.getTemplate(idEnterprise, ovfId);
     }
 
     private EnvelopeType getOVFEnvelope(final String idEnterprise, final String ovfId)
     {
-        return OVFPackageInstanceFileSystem.getEnvelope(ErepoFactory.getRepo(idEnterprise).path(),
-            ovfId);
+        return TemplateFileSystem.getEnvelope(ErepoFactory.getRepo(idEnterprise).path(), ovfId);
     }
 }

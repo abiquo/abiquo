@@ -33,12 +33,10 @@ import com.abiquo.server.core.infrastructure.Datacenter;
  * The materialization state of an {@link TemplateDefinition} of a given {@link Datacenter} and
  * {@link Enterprise}
  */
-@XmlRootElement(name = "ovfInstanceState")
 @XmlType
-// (propOrder = {"ovfId", "status", "downloadingProgress", "downloadingProgress"})
-public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
+@XmlRootElement(name = "templateState")
+public class TemplateStateDto extends SingleResourceTransportDto
 {
-
     private static final long serialVersionUID = -4115162963051770344L;
 
     /**
@@ -51,7 +49,7 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
     /** Current status in the enterprise repository */
 
     // @XmlElement(name = "status")
-    protected OVFStatusEnumType status;
+    protected TemplateStatusEnumType status;
 
     /**
      * If status == DOWNLOADING reports the current creation progress (based on bytes lefts to read
@@ -76,12 +74,12 @@ public class OVFPackageInstanceStateDto extends SingleResourceTransportDto
         this.ovfId = ovfId;
     }
 
-    public OVFStatusEnumType getStatus()
+    public TemplateStatusEnumType getStatus()
     {
         return status;
     }
 
-    public void setStatus(final OVFStatusEnumType status)
+    public void setStatus(final TemplateStatusEnumType status)
     {
         this.status = status;
     }

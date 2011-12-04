@@ -21,12 +21,12 @@
 
 package com.abiquo.am.services.filesystem;
 
-import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
-import static com.abiquo.am.services.OVFPackageConventions.OVF_FILE_EXTENSION;
-import static com.abiquo.am.services.OVFPackageConventions.OVF_LOCATION_PREFIX;
-import static com.abiquo.am.services.OVFPackageConventions.createBundleOvfId;
-import static com.abiquo.am.services.OVFPackageConventions.customDencode;
-import static com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem.getOVFStatus;
+import static com.abiquo.am.services.TemplateConventions.OVF_BUNDLE_PATH_IDENTIFIER;
+import static com.abiquo.am.services.TemplateConventions.OVF_FILE_EXTENSION;
+import static com.abiquo.am.services.TemplateConventions.OVF_LOCATION_PREFIX;
+import static com.abiquo.am.services.TemplateConventions.createBundleOvfId;
+import static com.abiquo.am.services.TemplateConventions.customDencode;
+import static com.abiquo.am.services.filesystem.TemplateFileSystem.getTemplateStatus;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -38,14 +38,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abiquo.am.services.filesystem.filters.BundleImageFileFilter;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 
 /**
  * Run a folder list in another thread in order to cancel if it take too long
  */
 public class EnterpriseRepositoryRefreshWithTimeout implements
-    Callable<List<OVFPackageInstanceStateDto>>
+    Callable<List<TemplateStateDto>>
 {
     private final static Logger LOG = LoggerFactory
         .getLogger(EnterpriseRepositoryRefreshWithTimeout.class);
@@ -68,7 +68,7 @@ public class EnterpriseRepositoryRefreshWithTimeout implements
     }
 
     @Override
-    public List<OVFPackageInstanceStateDto> call() throws Exception
+    public List<TemplateStateDto> call() throws Exception
     {
         return traverseOVFFolderStructure(erPath, relativePath, includeBundles, cleanDeploys,
             erPath);
@@ -81,12 +81,12 @@ public class EnterpriseRepositoryRefreshWithTimeout implements
      *            packages (only used on status = DOWNLOAD).
      * @param relativePath, recursive accumulated folder structure.(empty at the fist call).
      */
-    private List<OVFPackageInstanceStateDto> traverseOVFFolderStructure(final String erPath,
+    private List<TemplateStateDto> traverseOVFFolderStructure(final String erPath,
         final String relativePath, final Boolean includeBundles, final Boolean cleanDeploys,
         final String enterpriseRepositoryPath)
     {
-        final List<OVFPackageInstanceStateDto> ovfids =
-            new LinkedList<OVFPackageInstanceStateDto>();
+        final List<TemplateStateDto> ovfids =
+            new LinkedList<TemplateStateDto>();
         final File currentFile = new File(erPath);
 
         for (File file : currentFile.listFiles())
@@ -105,10 +105,10 @@ public class EnterpriseRepositoryRefreshWithTimeout implements
             else if (file.isFile() && file.getName().endsWith(OVF_FILE_EXTENSION))
             {
                 final String ovfId = OVF_LOCATION_PREFIX + customDencode(recRelativePath);
-                final OVFPackageInstanceStateDto status =
-                    getOVFStatus(enterpriseRepositoryPath, ovfId);
+                final TemplateStateDto status =
+                    getTemplateStatus(enterpriseRepositoryPath, ovfId);
 
-                if (cleanDeploys && status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+                if (cleanDeploys && status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
                 {
                     try
                     {
@@ -132,12 +132,12 @@ public class EnterpriseRepositoryRefreshWithTimeout implements
 
                             final String bundleOvfId = createBundleOvfId(ovfId, snapshot);
 
-                            OVFPackageInstanceStateDto bundleState =
-                                new OVFPackageInstanceStateDto();
+                            TemplateStateDto bundleState =
+                                new TemplateStateDto();
 
                             bundleState.setOvfId(bundleOvfId);
                             bundleState.setMasterOvf(ovfId);
-                            bundleState.setStatus(OVFStatusEnumType.DOWNLOAD);
+                            bundleState.setStatus(TemplateStatusEnumType.DOWNLOAD);
 
                             ovfids.add(bundleState);
                         }

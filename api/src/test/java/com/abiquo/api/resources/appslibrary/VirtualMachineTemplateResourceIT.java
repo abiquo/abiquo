@@ -493,10 +493,10 @@ public class VirtualMachineTemplateResourceIT extends AbstractJpaGeneratorIT
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("erepo", enterpriseId.toString());
-        params.put("ovf", ovf);
+        params.put("template", ovf);
 
         // Must use the URI resolver in the AM in order to encode the ovf parameter
-        return URIResolver.resolveURI(TestServerAndAMListener.AM_URI, "erepos/{erepo}/ovfs/{ovf}",
+        return URIResolver.resolveURI(TestServerAndAMListener.AM_URI, "erepos/{erepo}/templates/{template}",
             params);
     }
 
