@@ -50,7 +50,11 @@ public enum APIError
         "GEN-2", "Invalid xml document, please make sure all the mandatory fields are right"), UNMARSHAL_EXCEPTION(
         "GEN-3", "Invalid xml document"), FORBIDDEN("GEN-4",
         "Not enough permissions to perform this action"), INVALID_CREDENTIALS("GEN-5",
-        "Invalid credentials"),
+        "Invalid credentials"), INVALID_LINK("GEN-6", "Invalid link reference"), WHITE_NAME(
+        "GEN-7", "The property 'name', must not have whitespace at the beginning or the end."), WHITE_SYMBOL(
+        "GEN-8", "The property 'symbol', must not have whitespace at the beginning or the end."), WHITE_DESCRIPTION(
+        "GEN-9",
+        "The property 'description', must not have whitespace at the beginning or the end."),
 
     // INVALID_IP("GEN-4", "Invalid IP"),
     INVALID_PRIVATE_NETWORK_TYPE("GEN-6", "Invalid private network type"), INTERNAL_SERVER_ERROR(
@@ -62,7 +66,9 @@ public enum APIError
     // DATACENTER
     NON_EXISTENT_DATACENTER("DC-0", "The requested datacenter does not exist"), DATACENTER_DUPLICATED_NAME(
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
-        "The current enterprise can't use this datacenter"),
+        "The current enterprise can't use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
+        "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -72,7 +78,9 @@ public enum APIError
         "ENTERPRISE-7", "Enterprise name can't be empty"), ENTERPRISE_WITH_BLOCKED_USER(
         "ENTERPRISE-8",
         "Cannot delete enterprise because some users have roles that cannot be deleted, please change their enterprise before continuing"), MISSING_ENTERPRISE_LINK(
-        "ENTERPRISE-9", "Missing link to the enterprise"),
+        "ENTERPRISE-9", "Missing link to the enterprise"), MISSING_PRICING_TEMPLATE_LINK(
+        "ENTERPRISE-10", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
+        "ENTERPRISE-11", "Missing pricing template parameter"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC("LIMIT-6",
@@ -80,12 +88,12 @@ public enum APIError
         "LIMIT-7", "Duplicated limits by enterprise and datacenter"), LIMITS_NOT_EXIST("LIMIT-8",
         "Limits by enterprise and datacenter don't exist"), //
     ENTERPRISE_LIMIT_EDIT_ARE_SURPRASED("LIMIT-9",
-        "Can not edit resource limits, current enterprise allocation exceeds the new specified limits "
+        "Cannot edit resource limits, current enterprise allocation exceeds the new specified limits "
             + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), //
     DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "LIMIT-10",
-        "Can not edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
+        "Cannot edit resource limits, current enterprise and datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), DATACENTER_LIMIT_DELETE_VDCS(
         "LIMIT-11",
         "Cannot unassign datacenter from enterprise because it is being used by virtual datacenter(s)."),
 
@@ -98,33 +106,88 @@ public enum APIError
         "This datacenter has volumes attached and cannot be deleted without removing them first"), VIRTUAL_DATACENTER_INVALID_NETWORKS(
         "VDC-4", "This datacenter has networks without IPs!"), VIRTUAL_DATACENTER_LIMIT_EDIT_ARE_SURPRASED(
         "VDC-5",
-        "Can not edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
-            + "(see SYSTEM traces in order to determine witch resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
-        "VDC-6", "Virtual Datacenter must be created with a private network"),
+        "Cannot edit resource limits, current virtual datacenter allocation exceeds the new specified limits "
+            + "(see SYSTEM traces in order to determine which resources are on HARD limit)"), VIRTUAL_DATACENTER_MUST_HAVE_NETWORK(
+        "VDC-6", "Virtual Datacenter must be created with a private network"), VIRTUAL_DATACENTER_MINIMUM_VLAN(
+        "VDC-7", "Virtual Datacenter must have at least one private VLAN"),
 
     // VLANS
     VLANS_PRIVATE_MAXIMUM_REACHED("VLAN-0",
-        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME(
+        "You have reached the maximum VLANs you can create in this VirtualDatacenter"), VLANS_DUPLICATED_VLAN_NAME_VDC(
         "VLAN-1", "Can not create two VLANs with the same name in a VirtualDatacenter"), VLANS_PRIVATE_ADDRESS_WRONG(
         "VLAN-2", "Can not use any other address than the private range"), VLANS_TOO_BIG_NETWORK(
-        "VLAN-3", "For performance reasons, Abiquo don't allow to create so big networks"), VLANS_TOO_BIG_NETWORK_II(
+        "VLAN-3",
+        "For performance reasons, Abiquo does not allow the creation of networks with more than 1024 IP addresses (subnet 22 or lower)."), VLANS_TOO_BIG_NETWORK_II(
         "VLAN-4", "This network allows a netmask up to 24. Try a value between 30 and 24"), VLANS_TOO_SMALL_NETWORK(
         "VLAN-5", "The smallest network allowed has a 30 mask. Try a value between 30 and 24"), VLANS_INVALID_NETWORK_AND_MASK(
-        "VLAN-6", "The network does not match with the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
+        "VLAN-6", "The network does not match the mask. Check your request"), VLANS_GATEWAY_OUT_OF_RANGE(
         "VLAN-7", "Gateway address out of range. It must be into the ip range address"), VLANS_NON_EXISTENT_VIRTUAL_NETWORK(
-        "VLAN-8", "The requested virtual network does not exist"),
+        "VLAN-8", "The requested virtual network does not exist"), VLANS_AT_LEAST_ONE_DEFAULT_NETWORK(
+        "VLAN-9", "There must be at least one default VLAN in each Virtual Datacenter"), VLANS_EDIT_INVALID_VALUES(
+        "VLAN-10",
+        "Attributes 'address', 'mask' and 'tag' can not be changed by the Edit process of private VLAN."), VLANS_DEFAULT_NETWORK_CAN_NOT_BE_DELETED(
+        "VLAN-11", "Default VLAN can not be deleted."), VLANS_WITH_USED_IPS_CAN_NOT_BE_DELETED(
+        "VLAN-12", "Can not delete a VLAN with IPs used by Virtual Machines"), VLANS_TAG_MANDATORY_FOR_PUBLIC_VLANS(
+        "VLAN-13", "Field 'tag' is mandatory when you create Public VLANs"), VLANS_WITH_PURCHASED_IPS_CAN_NOT_BE_DELETED(
+        "VLAN-14", "Can not delete a VLAN with IPs purchased by Enterprises"), VLANS_DUPLICATED_VLAN_NAME_DC(
+        "VLAN-15", "Can not create two VLANs with the same name in a Datacenter"), VLANS_TAG_INVALID(
+        "VLAN-16", "VLAN tag out of limits"), VLANS_NON_EXISTENT_PUBLIC_IP("VLAN-17",
+        "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
+        "Only 'quarantine' and 'available' attributes can be modified when editing an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
+        "VLAN-19",
+        "Attributes 'address' and 'mask' can not be changed by the Edit process of public VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
+        "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
+        "This IP address is currently used by a Virtual Machine. Can not be released"), VLANS_PRIVATE_IP_INVALID_LINK(
+        "VLAN-23", "Invalid link to private ip address to create NIC"), VLANS_IP_LINK_INVALID_VDC(
+        "VLAN-24", "Invalid Virtual Datacenter identifier in the IP link"), VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
+        "VLAN-25", "The IP address is already used by another virtual machine"), VLANS_PUBLIC_IP_INVALID_LINK(
+        "VLAN-26", "Invalid link to public ip address to create NIC"), VLANS_IP_CAN_NOT_BE_DEASSIGNED_DUE_CONFIGURATION(
+        "VLAN-27",
+        "Can not release this IP from the virtual machine, because the virtual machine is using its gateway and "
+            + "its VLAN configuration. Please, assign another configuration before to release this IP"), VLANS_NIC_NOT_FOUND(
+        "VLAN-28", "The NIC does not exist"), VLANS_CAN_NOT_DELETE_LAST_NIC("VLAN-29",
+        "Every virtual machine should have at least one NIC"), VLANS_REORDER_NIC_INVALID_LINK(
+        "VLAN-30", "Invalid link to reorder NICs into a Virtual Machine"), VLANS_REORDER_NIC_INVALID_LINK_VALUES(
+        "VLAN-31",
+        "Invalid link values (virtualdatacenter, virtualappliance and/or virtualmachine identifiers) to reorder NICs into a Virtual Machine."), VLANS_IP_EDIT_NOT_AVAILABLE_PURCHASED(
+        "VLAN-32", "Can not set the IP as 'not available' while is purchased by an Enterprise"), VLANS_PUBIC_IP_CAN_NOT_RELEASE(
+        "VLAN-33", "Can not release a Public IP while is assigned to a Virtual Machine"), VLANS_NON_EXISTENT_CONFIGURATION(
+        "VLAN-34", "The configuration does not exist"), VLANS_CAN_NOT_ASSIGN_TO_DEFAULT_ENTERPRISE(
+        "VLAN-35",
+        "Can not assign external VLAN as default because it is not assigned to any enterprise"), VLANS_VIRTUAL_DATACENTER_SHOULD_HAVE_A_DEFAULT_VLAN(
+        "VLAN-36",
+        "Unable to found default VLAN in Virtual Datacenter. Incoherent state in Database"), VLANS_INVALID_ENTERPRISE_LINK(
+        "VLAN-37", "Invalid Enterprise identifier in the Enterprise link"), VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_DATACENTER(
+        "VLAN-38", "The IP address is already assigned to a Virtual Datacenter"), VLANS_WITH_IPS_ASSIGNED_TO_VDC(
+        "VLAN-39", "Can not delete a VLAN with IPs assigned to a Virtual Datacenter"), VLANS_EXTERNAL_VLAN_IN_ANOTHER_DATACENTER(
+        "VLAN-40",
+        "The requested external VLAN belongs to another datacenter where the Virtual Datacenter is"), VLANS_INVALID_IP_FORMAT(
+        "VLAN-41", "IP format is invalid"), VLANS_IP_DOES_NOT_EXISTS("VLAN-42",
+        "The IP does not exists"), VLANS_CANNOT_DELETE_DEFAULT("VLAN-43",
+        "This is the default VLAN for the Virtual Datacenter and cannot be deleted"), VLANS_EXTERNAL_VLAN_OF_ANOTHER_ENTERPRISE(
+        "VLAN-42", "The external VLAN belongs to another enterprise"), VLANS_IP_NOT_AVAILABLE(
+        "VLAN-43", "The IP address is not available to be used by a Virtual Machine"), VLANS_NON_EXISTENT_EXTERNAL_IP(
+        "VLAN-44", "The requested IP object does not exist"), VLANS_ASSIGNED_TO_ANOTHER_VIRTUAL_DATACENTER(
+        "VLAN-45",
+        "Cannot change enterprise because this network is used as default by Virtual Datacenter"), VLANS_NOT_UNMANAGED(
+        "VLAN-46", "The virtual network is not Unmanaged "), VLANS_UNMANAGED_WITH_VM_CAN_NOT_BE_DELETED(
+        "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"),
 
     // VIRTUAL APPLIANCE
-    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"),
+    NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
+        "VAPP-1", "The virtual appliance is not deployed"), VIRTUALAPPLIANCE_NOT_RUNNING("VAPP-2",
+        "The virtual appliance is not running"),
 
     // RACK
     NOT_ASSIGNED_RACK_DATACENTER("RACK-0", "The rack is not assigned to the datacenter"), RACK_DUPLICATED_NAME(
         "RACK-3", "There is already a rack with that name in this datacenter"), NON_EXISTENT_RACK(
-        "RACK-4", "This rack does not exist"), NON_MANAGED_RACK("RACK-5",
+        "RACK-4", "This rack does not exist "), NON_MANAGED_RACK("RACK-5",
         "Machines in this rack can not be discovered"), NON_UCS_RACK("RACK-6",
         "This rack is not an UCS Rack"), RACK_DUPLICATED_IP("RACK-7",
         "There is already a managed rack with this IP defined"), RACK_CONFIG_ERROR("RACK-8",
-        "There is a problem with the details of the UCS Rack"),
+        "There is a problem with the details of the UCS Rack"), RACK_CANNOT_REMOVE_VMS("RACK-9",
+        "Can not remove this rack because there are some virtual machines deployed on it"),
 
     // MACHINE
     NON_EXISTENT_MACHINE("MACHINE-0", "The requested machine does not exist"), NOT_ASSIGNED_MACHINE_DATACENTER_RACK(
@@ -135,12 +198,14 @@ public enum APIError
         "MACHINE-6", "The requested machine could not be contacted"), MACHINE_INVALID_VIRTUAL_SWITCH_NAME(
         "MACHINE-4", "Invalid virtual switch name"), MACHINE_CANNOT_BE_DELETED(
         "MACHINE-7",
-        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."),
+        "Machine can not be removed due it is managed by the high availability engine. Reenable it manually to recover managed state."), MACHINE_INVALID_IPMI_CONF(
+        "MACHINE-8", "Invalid IPMI configuration."), MACHINE_INVALID_IP_RANGE("MACHINE-9",
+        "Invalid ip range"),
 
     HYPERVISOR_EXIST_IP("HYPERVISOR-1",
-        "Invalid hypervisor IP. Already exist an hypervisor with that IP"), HYPERVISOR_EXIST_SERVICE_IP(
+        "Invalid hypervisor IP. There is already a hypervisor with this IP address"), HYPERVISOR_EXIST_SERVICE_IP(
         "HYPERVISOR-2",
-        "Invalid hypervisor service IP. Already exist an hypervisor with that service IP"),
+        "Invalid hypervisor service IP. There is already a hypervisor with this service IP"),
 
     // NETWORK
     NETWORK_INVALID_CONFIGURATION("NET-0",
@@ -156,7 +221,12 @@ public enum APIError
         "The virtual machine is not deployed"), VIRTUAL_MACHINE_STATE_CHANGE_ERROR("VM-4",
         "The virtual machine cannot change the state to the required state"), VIRTUAL_MACHINE_REMOTE_SERVICE_ERROR(
         "VM-5", "The virtual machine cannot change the state due to a communication problem"), VIRTUAL_MACHINE_PAUSE_UNSUPPORTED(
-        "VM-6", "The virtual machine does not support the action PAUSE"),
+        "VM-6", "The virtual machine does not support the action PAUSE"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "VM-7",
+        "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
+        "VM-8", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_INCOHERENT_STATE(
+        "VM-9",
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -166,7 +236,8 @@ public enum APIError
         "Cannot delete a role with associated User"), DELETE_ERROR_WITH_ROLE_LDAP("ROLE-5",
         "Cannot delete a role with associated RoleLdap"), DUPLICATED_ROLE_NAME_ENT("ROLE-6",
         "Cannot create a role with the same name of an existing role for the same enterprise"), DUPLICATED_ROLE_NAME_GEN(
-        "ROLE-7", "Cannot create a global role with the same name of an existing global role"),
+        "ROLE-7", "Cannot create a generic role with the same name of an existing generic role"), HAS_NOT_ENOUGH_PRIVILEGE(
+        "ROLE-8", "Hasn't got enough privileges to manage this role"),
 
     // PRIVILEGE
     NON_EXISTENT_PRIVILEGE("PRIVILEGE-0", "The requested privilege does not exist"),
@@ -250,7 +321,8 @@ public enum APIError
         "SYSPROP-1", "There is already a system property with that name"),
 
     // ALLOCATOR
-    LIMIT_EXCEEDED("LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
+    LIMITS_EXCEEDED("LIMIT-0", "The required resources exceed the allowed limits"), LIMIT_EXCEEDED(
+        "LIMIT-1", "The required resources exceed the allowed limits"), NOT_ENOUGH_RESOURCES(
         "ALLOC-0", "There are not enough resources to create the virtual machine"), //
     ALLOCATOR_ERROR("ALLOC-1", "Can not create virtual machine"), //
 
@@ -292,7 +364,8 @@ public enum APIError
         "NODECOLLECTOR-1", "Nodecollector has raised an error"),
 
     // QUERY PAGGING STANDARD ERRORS
-    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"),
+    QUERY_INVALID_PARAMETER("QUERY-0", "Invalid 'by' parameter"), QUERY_NETWORK_TYPE_INVALID_PARAMETER(
+        "QUERY-1", "Invalid 'type' parameter. Only 'EXTERNAL' or 'PUBLIC' allowed"),
 
     VOLUME_GENERIC_ERROR("VOL-0", "Could not create the volume in the selected tier"), VOLUME_NOT_ENOUGH_RESOURCES(
         "VOL-1", "There are not enough resources in the selected tier to create the volume"), VOLUME_NAME_NOT_FOUND(
@@ -323,7 +396,57 @@ public enum APIError
         "RULE-6", "The load balance type indicated is null or invalid"),
 
     // EVENTS
-    NON_EXISTENT_EVENT("EVENT-1", "The event does not exist")
+    NON_EXISTENT_EVENT("EVENT-1", "The event does not exist"),
+
+    // PRICING TEMPLATE
+    CURRENCY_PARAM_NOT_FOUND("PRICINGTEMPLATE-0", "Missing currency parameter"), ENT_PARAM_NOT_FOUND(
+        "PRICINGTEMPLATE-1", "Missing enterprise parameter"), PRICING_TEMPLATE_DUPLICATED_NAME(
+        "PRICINGTEMPLATE-2", "Duplicated name for Pricing Template"), NON_EXISTENT_PRICING_TEMPLATE(
+        "PRICINGTEMPLATE-3", "The requested Pricing Template does not exist"), DELETE_ERROR_WITH_ENTERPRISE(
+        "PRICINGTEMPLATE-4", "Cannot delete a Pricing Template with associated Enterprise"), PRICING_TEMPLATE_MINIMUM_CHARGE_PERIOD(
+        "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
+        "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
+        "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
+        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
+
+    // CURRENCY
+    NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
+        "CURRENCY-1", "At least one currency is required"), CURRENCY_DUPLICATED_NAME("CURRENCY-2",
+        "Duplicated name for Currency"), CURRENCY_DELETE_ERROR("CURRENCY-3",
+        "Cannot remove currency associated with a Pricing Model"), CURRENCY_NAME_NOT_FOUND(
+        "CURRENCY-4", "Currency name is required"), CURRENCY_SYMBOL_NOT_FOUND("CURRENCY-5",
+        "Currency symbol is required"), CURRENCY_NAME_LONG("CURRENCY-6",
+        "Currency name maximum lenght is 20 characters"), CURRENCY_SYMBOL_LONG("CURRENCY-7",
+        "Currency symbol maximum lenght is 10 characters"), CURRENCY_DIGIT_LONG("CURRENCY-8",
+        "Currency digit maximum value is 9"),
+
+    // COST CODE
+    NON_EXISTENT_COSTCODE("COSTCODE-0", "The requested Cost Code does not exist"), COSTCODE_PARAM_NOT_FOUND(
+        "COSTCODE-1", "Missing  Cost Code parameter"), COSTCODE_DUPLICATED_NAME("COSTCODE-2",
+        "Duplicated name for Cost Code"), COSTCODE_NAME_NOT_FOUND("COSTCODE-3",
+        "Cost Code name is required"), COSTCODE_DESCRITPION_NOT_FOUND("COSTCODE-4",
+        "Cost Code description is required"), COSTCODE_NAME_LONG("COSTCODE-5",
+        "Cost Code name maximum lenght is 20 characters"), COSTCODE_DESCRIPTION_LONG("COSTCODE-6",
+        "Cost Code description maximum lenght is 100 characters"),
+
+    // COST CODE- CURRENCY
+    COSTCODE_CURRENCY_DUPLICATED("COSTCODE_CURRENCY-0",
+        "Duplicated value by Cost Code and Currency"), NON_EXISTENT_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-1", "The requested Cost Code -Currency does not exist"), NOT_ASSIGNED_COSTCODE_CURRENCY(
+        "COSTCODE_CURRENCY-2", "The Cost Code -Currency is not assigned to the Cost Code"), NOT_ASSIGNED_COSTCODE_CURRENCY_PRICE(
+        "COSTCODE_CURRENCY-3", "Price is required"),
+
+    // PRICING - COST CODE
+    PRICING_COSTCODE_DUPLICATED("PRICING_COSTCODE-0",
+        "Duplicated value by Cost Code and PricingTemplate"), NON_EXISTENT_PRICING_COSTCODE(
+        "PRICING_COSTCODE-1", "The requested Cost Code -PricingTemplate does not exist"),
+
+    // PRICING - TIER
+    PRICING_TIER_DUPLICATED("PRICING_TIER-0", "Duplicated value by Tier and PricingTemplate"), NON_EXISTENT_PRICING_TIER(
+        "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
+        "PRICING_TIER-2",
+        "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated")
 
     ;
 

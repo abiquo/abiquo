@@ -25,7 +25,6 @@
 // Generated on: 2010.03.01 at 11:03:17 AM CET 
 //
 
-
 package com.abicloud.model.test.infrastructure;
 
 import java.util.ArrayList;
@@ -36,11 +35,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for Datacenter complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * Java class for Datacenter complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="Datacenter">
@@ -56,49 +55,43 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Datacenter", propOrder = {
-    "machine",
-    "virtualDatacenter"
-})
-public class Datacenter {
+@XmlType(name = "Datacenter", propOrder = {"machine", "virtualDatacenter"})
+public class Datacenter
+{
 
     @XmlElement(name = "Machine", required = true)
     protected List<Machine> machine;
+
     @XmlElement(name = "VirtualDatacenter", required = true)
     protected List<VirtualDatacenter> virtualDatacenter;
+
     @XmlAttribute(name = "Name")
     protected String name;
+
     @XmlAttribute(name = "RemoteServicesBaseURI")
     protected String remoteServicesBaseURI;
 
     /**
      * Gets the value of the machine property.
-     * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the machine property.
-     * 
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the machine property.
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getMachine().add(newItem);
+     * getMachine().add(newItem);
      * </pre>
-     * 
-     * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Machine }
-     * 
-     * 
+     * Objects of the following type(s) are allowed in the list {@link Machine }
      */
-    public List<Machine> getMachine() {
-        if (machine == null) {
+    public List<Machine> getMachine()
+    {
+        if (machine == null)
+        {
             machine = new ArrayList<Machine>();
         }
         return this.machine;
@@ -106,28 +99,23 @@ public class Datacenter {
 
     /**
      * Gets the value of the virtualDatacenter property.
-     * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the virtualDatacenter property.
-     * 
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any
+     * modification you make to the returned list will be present inside the JAXB object. This is
+     * why there is not a <CODE>set</CODE> method for the virtualDatacenter property.
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getVirtualDatacenter().add(newItem);
+     * getVirtualDatacenter().add(newItem);
      * </pre>
-     * 
-     * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link VirtualDatacenter }
-     * 
-     * 
+     * Objects of the following type(s) are allowed in the list {@link VirtualDatacenter }
      */
-    public List<VirtualDatacenter> getVirtualDatacenter() {
-        if (virtualDatacenter == null) {
+    public List<VirtualDatacenter> getVirtualDatacenter()
+    {
+        if (virtualDatacenter == null)
+        {
             virtualDatacenter = new ArrayList<VirtualDatacenter>();
         }
         return this.virtualDatacenter;
@@ -136,48 +124,40 @@ public class Datacenter {
     /**
      * Gets the value of the name property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     /**
      * Sets the value of the name property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setName(String value) {
+    public void setName(String value)
+    {
         this.name = value;
     }
 
     /**
      * Gets the value of the remoteServicesBaseURI property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getRemoteServicesBaseURI() {
+    public String getRemoteServicesBaseURI()
+    {
         return remoteServicesBaseURI;
     }
 
     /**
      * Sets the value of the remoteServicesBaseURI property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setRemoteServicesBaseURI(String value) {
+    public void setRemoteServicesBaseURI(String value)
+    {
         this.remoteServicesBaseURI = value;
     }
 

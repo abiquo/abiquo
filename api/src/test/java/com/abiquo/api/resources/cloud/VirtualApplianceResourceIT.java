@@ -42,7 +42,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.api.transformer.ModelTransformer;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;

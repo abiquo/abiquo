@@ -139,6 +139,7 @@
                     labelOldPasswordInvalid.visible = false;
                     currentPassword.enabled = false;
                     requestPrivilege(this._userToEdit.role);
+                    checkRoleAccess(this._userToEdit.role);
                 }
 
                 nameInput.setFocus();
@@ -232,11 +233,11 @@
                 //Only if passwordInput > 0 else copy the current password
                 if (passwordInput.text.length > 0)
                 {
-                    userCopy.pass = MD5.hash(passwordInput.text);
+                    userCopy.pass = passwordInput.text;
                 }
                 else
                 {
-                    userCopy.pass = this._userToEdit.pass;
+                    userCopy.pass = null;
                 }
 
                 userCopy.email = emailInput.text;
@@ -486,6 +487,17 @@
             		}            		
             	}
             }
+            
+            private function checkRoleAccess(role:Role):void{
+                var event:UserEvent = new UserEvent(UserEvent.CHECK_ROLE_ACCESS);
+                event.role = role;
+                event.callback = setRestrictedRoleAccess;
+                dispatchEvent(event);
+            }
+            
+            private function setRestrictedRoleAccess(value:Boolean):void{
+                roleInput.enabled = value;
+            }
         ]]>
     </mx:Script>
     
@@ -578,7 +590,7 @@
         	includeInLayout="{!this._isUserEditing}">
             <mx:TextInput id="userInput"
                 height="20"
-                maxChars="19"
+                maxChars="128"
                 change="validateForm()"
                 editable="false"/>
         </mx:FormItem>

@@ -65,6 +65,6 @@ public class EventRep extends DefaultRepBase
 
     public Event getEvent(final Integer eventId)
     {
-        return eventDAO.getEventById(eventId);
+        return eventDAO.findById(eventId);
     }
 }

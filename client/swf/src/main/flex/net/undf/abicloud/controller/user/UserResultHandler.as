@@ -108,7 +108,20 @@ package net.undf.abicloud.controller.user
             }
         }       
         
-
+        public function handleCheckRoleAccess(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {           
+                var roleCanBeModified:Boolean = DataResult(result).data as Boolean;
+                 
+                callback(roleCanBeModified);             
+            }
+            else
+            {
+                //There was a problem retrieving the enterprise's resource allocation limits
+                super.handleResult(result);
+            }
+        }
 
         public function handleDeleteUser(result:BasicResult, deletedUser:User):void
         {

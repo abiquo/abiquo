@@ -94,7 +94,7 @@
 
             //The VirtualImage being created or edited
             [Bindable]
-            private var _virtualImage:VirtualImage;
+            protected var _virtualImage:VirtualImage;
 
             private var _uploadProgressTimer:Timer;
 
@@ -105,6 +105,13 @@
             
             [Bindable]
             private var categoriesList:ArrayCollection;
+            
+
+            protected var _costCodeId:int;
+
+            [Bindable]
+            protected var _isEditable:Boolean;
+
 			
             private function onCreationComplete():void
             {
@@ -139,6 +146,7 @@
                 this._uploadProgressTimer.addEventListener(TimerEvent.TIMER_COMPLETE, checkVirtualImageUploadProgress);
 
                 requestDiskFormatTypes();
+                
             }
 
             private function requestDiskFormatTypes():void
@@ -201,8 +209,16 @@
                 this._virtualImage = virtualImage;
                 this.applianceManager = applianceManager;
 
+                this._isEditable = true;
                 if (this._virtualImage)
                 {
+                    //Check if the user can modify a shared image
+	                if(this._virtualImage.shared){
+		                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.ENTERPRISE_ADMINISTER_ALL)){
+		                    this._isEditable = false;
+		                }
+	                }
+                    
                     //Editing an existing Virtual Image
                     titleText = ResourceManager.getInstance().getString("VirtualImage",
                                                                         "POPUP_TITLE_VIRTUALIMAGE_EDIT");
@@ -226,7 +242,8 @@
                                                                                     "id",
                                                                                     _virtualImage.icon);
                     publicImageInput.selected = this._virtualImage.shared == 1;
-                    costInput.text = this._virtualImage.costCode;
+                    
+                    this._costCodeId = this._virtualImage.costCode;
                 }
                 else
                 {
@@ -284,7 +301,7 @@
                     else
                         updatedValues.shared = 0; 
                         
-                    updatedValues.costCode = costInput.text;                   
+                    updatedValues.costCode = this._costCodeId;                   
 
                     //Announcing that user wants to edit a Virtual Image
                     virtualImageEvent = new VirtualImageEvent(VirtualImageEvent.EDIT_VIRTUAL_IMAGE);
@@ -310,7 +327,7 @@
                     ovfPackageInstanceDTO.description = descriptionInput.text;
                     ovfPackageInstanceDTO.idEnterprise = AbiCloudModel.getInstance().loginManager.user.enterprise.id;
                     ovfPackageInstanceDTO.idUser = AbiCloudModel.getInstance().loginManager.user.id;
-                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).alias;
+                    ovfPackageInstanceDTO.diskFileFormat = DiskFormatType(diskFormatTypeInput.selectedItem).name;
                     ovfPackageInstanceDTO.categoryName = Category(categoryInput.selectedItem).name;
                     if (iconsList.selectedIndex > -1)
                         ovfPackageInstanceDTO.iconPath = Icon(iconsList.selectedItem).path;
@@ -657,6 +674,7 @@
                 required="true">
                 <mx:TextInput id="nameInput"
                     height="20"
+                    editable="{this._isEditable}"
                     maxChars="155"
                     change="validateForm()"/>
             </mx:FormItem>
@@ -666,6 +684,7 @@
                 required="true">
                 <mx:TextArea id="descriptionInput"
                     height="20"
+                    editable="{this._isEditable}"
                     maxChars="255"
                     change="validateForm()"/>
             </mx:FormItem>
@@ -708,6 +727,7 @@
                 required="true">
                 <mx:ComboBox id="categoryInput"
                     height="18"
+                    enabled="{this._isEditable}"
                     labelField="name"
                     dataProvider="{categoriesList}"
                     change="validateForm()"
@@ -717,8 +737,9 @@
             <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
                 <mx:NumericStepper id="cpuInput"
                     width="100" height="20"
+                    enabled="{this._isEditable}"
                     change="validateForm()"
-                    minimum="1" maximum="32" stepSize="1"/>
+                    minimum="1" maximum="1024" stepSize="1"/>
             </mx:FormItem>
 
             <mx:FormItem 
@@ -726,6 +747,7 @@
                 direction="horizontal">
                 <mx:NumericStepper id="ramInput"
                     width="100" height="20"
+                    enabled="{this._isEditable}"
                     minimum="0"
                     change="validateForm()"
                     maximum="{ramUnitsSelector.selectedItem.maximum}"
@@ -734,6 +756,7 @@
                 <mx:ComboBox id="ramUnitsSelector"
                     width="80" height="18"
                     labelField="label"
+                    enabled="{this._isEditable}"
                     change="validateForm()"
                     dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
                     selectedIndex="0"/>
@@ -745,6 +768,7 @@
                 <mx:NumericStepper id="hdInput"
                     width="100" height="20"
                     change="validateForm()"
+                    enabled="{this._isEditable}"
                     minimum="0" maximum="{hdUnitsSelector.selectedItem.maximum}"
                     stepSize="{hdUnitsSelector.selectedItem.stepSize}"/>
 
@@ -752,6 +776,7 @@
                     width="80" height="18"
                     labelField="label"
                     change="validateForm()"
+                    enabled="{this._isEditable}"
                     dataProvider="{AbiCloudModel.hdUnitsSelectorDP}"
                     selectedIndex="3"/>
             </mx:FormItem>
@@ -768,6 +793,7 @@
                     width="100%" height="85"
                     dataProvider="{virtualImageManager.icons}"
                     change="validateForm()"
+                    selectable="{this._isEditable}"
                     itemRenderer="net.undf.abicloud.view.virtualimage.components.icon.IconListItemRenderer"/>
 
                 <mx:HBox 
@@ -776,11 +802,12 @@
                     verticalAlign="middle">
                     <mx:Button id="addIconButton"
                         styleName="AddButton"
+                        enabled="{this._isEditable}"
                         toolTip="@Resource(bundle='Common', key='BUTTON_NEW_TOOLTIP')"
                         click="addIcon()"/>
 
                     <mx:Button id="deleteIconButton"
-                        enabled="{iconsList.selectedIndex > -1}"
+                        enabled="{iconsList.selectedIndex > -1 &amp;&amp; this._isEditable}"
                         styleName="RemoveButton"
                         toolTip="@Resource(bundle='Common', key='BUTTON_DEL_TOOLTIP')"
                         click="askIconDeletion()"/>
@@ -789,7 +816,7 @@
                         width="100%" height="6"/>
 
                     <mx:Button id="editIconButton"
-                        enabled="{iconsList.selectedIndex > -1}"
+                        enabled="{iconsList.selectedIndex > -1  &amp;&amp; this._isEditable}"
                         styleName="ConfigurationButton"
                         toolTip="@Resource(bundle='Common', key='BUTTON_EDIT_TOOLTIP')"
                         click="editIcon()"/>
@@ -812,10 +839,11 @@
                 label="@Resource(bundle='VirtualImage', key='LABEL_COST_CODE')"
                 includeInLayout="{this._virtualImage != null}"
                 visible="{this._virtualImage != null}">
-                <mx:TextInput id="costInput"
-                    height="18"
-                    maxChars="50"
-                    change="validateForm()"/>
+                <mx:ComboBox id="costInput"
+                	prompt="@Resource(bundle='Common',key='LABEL_NOT_AVAILABLE')"
+                	enabled="{costInput.dataProvider}"
+                	labelField="name"
+                    height="18"/>
             </mx:FormItem>
         </mx:Form>
 

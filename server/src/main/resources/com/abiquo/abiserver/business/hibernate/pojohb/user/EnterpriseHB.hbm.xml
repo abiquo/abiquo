@@ -15,7 +15,7 @@
         <property name="isReservationRestricted" type="boolean">
             <column name="isReservationRestricted" />
         </property>
-        <set name="dcLimits" lazy="false" cascade="all-delete-orphan">
+        <set name="dcLimits" cascade="all-delete-orphan" lazy="false">
             <key>
                 <column name="idEnterprise" not-null="true" />
             </key>

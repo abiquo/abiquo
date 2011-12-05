@@ -26,6 +26,7 @@ package com.abiquo.abiserver.persistence.hibernate;
 
 import java.net.URISyntaxException;
 
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -37,7 +38,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.HypervisorH
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.PhysicalmachineHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.RackHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.networking.DHCPServiceHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.IpPoolManagementHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkAssignmentHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.NetworkConfigurationHB;
@@ -78,13 +78,11 @@ import com.abiquo.abiserver.persistence.dao.infrastructure.hibernate.RackDAOHibe
 import com.abiquo.abiserver.persistence.dao.infrastructure.hibernate.RemoteServiceDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.dao.metering.hibernate.MeterDAOHibernate;
-import com.abiquo.abiserver.persistence.dao.networking.DHCPServiceDAO;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkAssigmntDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkConfigurationDAO;
 import com.abiquo.abiserver.persistence.dao.networking.NetworkDAO;
 import com.abiquo.abiserver.persistence.dao.networking.VlanNetworkDAO;
-import com.abiquo.abiserver.persistence.dao.networking.hibernate.DHCPServiceDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.networking.hibernate.IpPoolManagementDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.networking.hibernate.NetworkAssigmntDAOHibernate;
 import com.abiquo.abiserver.persistence.dao.networking.hibernate.NetworkConfigurationDAOHibernate;
@@ -234,13 +232,26 @@ public class HibernateDAOFactory implements DAOFactory
     @Override
     public void beginConnection()
     {
-        getSessionFactory().getCurrentSession().beginTransaction();
+        beginConnection(false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.abiquo.abiserver.persistence.DAOFactory#endConnection()
-     */
+    @Override
+    public void beginConnection(final boolean readOnly)
+    {
+        if (readOnly)
+        {
+            getSessionFactory().getCurrentSession().setFlushMode(FlushMode.MANUAL);
+        }
+        else
+        {
+            getSessionFactory().getCurrentSession().setFlushMode(FlushMode.AUTO);
+        }
+        getSessionFactory().getCurrentSession().beginTransaction();
+    }/*
+      * (non-Javadoc)
+      * @see com.abiquo.abiserver.persistence.DAOFactory#endConnection()
+      */
+
     @Override
     public void endConnection()
     {
@@ -502,12 +513,6 @@ public class HibernateDAOFactory implements DAOFactory
         {
             throw new RuntimeException("Can not instantiate DAO: " + daoClass, ex);
         }
-    }
-
-    @Override
-    public DHCPServiceDAO getDHCPServiceDAO()
-    {
-        return (DHCPServiceDAO) instantiateDAO(DHCPServiceDAOHibernate.class, DHCPServiceHB.class);
     }
 
     @Override

@@ -48,14 +48,41 @@
 
             [Bindable]
             private var _vlanNetwork:VlanNetwork;
+            
+            [Bindable]
+            private var _enterprise:Enterprise;
+
+            private var _networkType:String;
+
 
             public function set vlanNetwork(value:VlanNetwork):void
             {
                 _vlanNetwork = value;
+                if(_vlanNetwork){
+	                switch(_vlanNetwork.networkType){
+	                	case VlanNetwork.EXTERNAL:
+	                	  this._networkType = resourceManager.getString('NetworkingPremium','LABEL_EXTERNAL_VLAN');
+	                	  break;
+	                	case VlanNetwork.PUBLIC:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_PUBLIC_VLAN');
+                          break;
+                        case VlanNetwork.INTERNAL:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_INTERNAL_VLAN');
+                          break;
+                        case VlanNetwork.UNMANAGED:
+                          this._networkType = resourceManager.getString('NetworkingPremium','LABEL_UNMANAGED');
+                          break;
+	                }
+                }
             }
             
-            [Bindable]
-            public var enterprise:Enterprise;
+            public function set enterprise(value:Enterprise):void{
+            	this._enterprise = value;
+            }
+            
+            public function get enterprise():Enterprise{
+            	return this._enterprise;
+            }
 
 
         ]]>
@@ -104,7 +131,7 @@
                 </mx:FormItem>
 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_TAG')">
-                    <mx:Label text="{_vlanNetwork.vlanTag.toString()}"/>
+                    <mx:Label text="{_vlanNetwork.vlanTag ? _vlanNetwork.vlanTag.toString():resourceManager.getString('Networking','LABEL_UNASSIGNED')}"/>
                 </mx:FormItem>
             </mx:Form>
 
@@ -113,9 +140,9 @@
                 horizontalScrollPolicy="off" verticalScrollPolicy="off">
 
                  <mx:FormItem label="@Resource(bundle='User', key='LABEL_ENTERPRISE')"
-                 	includeInLayout="{enterprise}"
-                 	visible="{enterprise}">
-                    <mx:Label text="{enterprise.name}"/>
+                 	includeInLayout="{this._enterprise != null}"
+                 	visible="{this._enterprise != null}">
+                    <mx:Label text="{this._enterprise.name}"/>
                 </mx:FormItem>
                 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_PRIMARY_DNS')">
@@ -128,6 +155,10 @@
 
                 <mx:FormItem label="@Resource(bundle='Networking', key='LABEL_DNS_SUFIX')">
                     <mx:Label text="{_vlanNetwork.configuration.sufixDNS}"/>
+                </mx:FormItem>
+                
+                <mx:FormItem label="@Resource(bundle='Infrastructure', key='LABEL_TYPE')">
+                    <mx:Label text="{this._networkType}"/>
                 </mx:FormItem>
             </mx:Form>
         </mx:HBox>

@@ -120,7 +120,7 @@ public class TestPopulate extends AbstractJpaGeneratorIT
     public PopulateTestCase setUpModel(List<String> model)
     {
         setup();
-        
+
         return populateReader.readModel(model);
     }
 
@@ -128,7 +128,7 @@ public class TestPopulate extends AbstractJpaGeneratorIT
     {
         populateReader.removeVirtualMachine(virtualMachineId);
     }
-    
+
     protected void runningVirtualMachine(Integer virtualMachineId)
     {
         populateReader.runningVirtualMachine(virtualMachineId);

@@ -392,7 +392,9 @@ package net.undf.abicloud.controller.virtualappliance
             if (result.success)
             {
                 //Announcing that the state of a Virtual Appliance has been changed
-                //AbiCloudModel.getInstance().virtualApplianceManager.changeVirtualApplianceState(this._virtualApplianceReturnedByServer);
+                var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.CHECK_VIRTUAL_DATACENTERS_AND_APPLIANCES_BY_ENTERPRISE);
+                virtualApplianceEvent.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+                Application.application.dispatchEvent(virtualApplianceEvent);
             }
             else
             {
@@ -635,7 +637,21 @@ package net.undf.abicloud.controller.virtualappliance
                 super.handleResultInBackground(result);
             }
         }
-
-
+        
+        public function handleGetVirtualApplianceLogs(result:BasicResult, callback:Function):void
+        {
+            if (result.success)
+            {
+                //Returning the list of logs retrieved
+                var logs:ArrayCollection = DataResult(result).data as ArrayCollection;
+                callback(logs);
+            }
+            else
+            {
+                //There was a problem forcing the virtual appliance refresh
+                super.handleResult(result);
+            }
+        }
+        
     }
 }

@@ -57,8 +57,8 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DatastoreService;
-import com.abiquo.api.transformer.ModelTransformer;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreDto;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -114,11 +114,11 @@ public class DatastoreResource
             throw new NotFoundException(APIError.DATASTORE_NOT_ASSIGNED_TO_MACHINE);
         }
     }
-    
+
     // Create the persistence object.
     public static Datastore createPersistenceObject(DatastoreDto dto) throws Exception
     {
-        return ModelTransformer.persistenceFromTransport(Datastore.class, dto);        
+        return ModelTransformer.persistenceFromTransport(Datastore.class, dto);
     }
 
 }

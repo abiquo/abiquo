@@ -2,9 +2,7 @@ package com.abiquo.server.core.enterprise;
 
 import javax.persistence.EntityManager;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;

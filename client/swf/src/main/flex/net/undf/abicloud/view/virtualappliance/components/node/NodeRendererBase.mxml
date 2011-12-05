@@ -40,6 +40,9 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.events.VirtualApplianceEvent;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+        	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
         	import net.undf.abicloud.vo.user.PrivilegeType;
         	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
         	import mx.states.State;
@@ -97,6 +100,8 @@
                        
             [Bindable]
             private var _pendingStatus:String;
+            
+            private var _canBeModified:Boolean;
 
 
             
@@ -106,6 +111,9 @@
                 && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.VAPP_ASSIGN_VOLUME)){
                 	SecuredPrivilegeAccess.checkElementAccess("removeEditButton","condition",showConfigurationButton,buttonsContainer);
                 }
+                
+                //Listener for virtualMachine state changes
+                AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE,updateState);
             }
             
             /**
@@ -139,6 +147,7 @@
             {
                 this._node = value;
                 this._infoToolTip = "";
+                this._canBeModified = true;
 
                 //Setting information sources, depending of the type of
                 //the node that has been setted
@@ -385,13 +394,32 @@
                 connectionEvent.connector = this._connector;
                 this._connector.dispatchEvent(connectionEvent);
             }
+            
+            
+            private function updateState(event:VirtualApplianceEvent):void{
+            	this._canBeModified = true;
+            	if(event && event.virtualMachine){
+                    if(NodeVirtualImage(this._node) && NodeVirtualImage(this._node).virtualMachine){
+                    	if(NodeVirtualImage(this._node).virtualMachine.id == event.virtualMachine.id){
+                    		if(event.virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
+                    			this._canBeModified = false;
+                    		}
+                    	}
+                    }            		
+            	}
+            	
+            }
 
             /**
              * When user rolls over the NodeRenderer, we show more options
              **/
             private function onRollOver():void
             {
-                buttonsContainer.visible = true;
+                if(this._node && this._node is NodeVirtualImage && NodeVirtualImage(this._node).virtualMachine){
+	                buttonsContainer.visible = this._canBeModified && NodeVirtualImage(this._node).virtualMachine.state.id != net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS;
+                }else{
+                	buttonsContainer.visible = true;
+                }
             }
 
             /**
@@ -454,6 +482,11 @@
                 else
                 {
                     var nodeRendererEvent:NodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_CONFIGURATION_REQUESTED);
+                    nodeRendererEvent.nodeRenderer = this;
+                    dispatchEvent(nodeRendererEvent);
+                    
+                    //Dispatching event to inform that this NodeRenderer has been selected by the user
+                    nodeRendererEvent = new NodeRendererEvent(NodeRendererEvent.NODERENDERER_SELECTED);
                     nodeRendererEvent.nodeRenderer = this;
                     dispatchEvent(nodeRendererEvent);
                 }
@@ -572,8 +605,7 @@
         text="{this._nodeNameSource}" truncateToFit="true"
         doubleClickEnabled="true"
         mouseDown="stopMouseDownUpPropagation(event)"
-        mouseUp="stopMouseDownUpPropagation(event)"
-        doubleClick="onDoubleClickNameLabel()"/>
+        mouseUp="stopMouseDownUpPropagation(event)"/>
 
     <mx:TextInput id="nameInput"
         width="95%" height="18"

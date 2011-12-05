@@ -42,11 +42,14 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.spring.security.SecurityService;
 import com.abiquo.api.util.IRESTBuilder;
+import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachinesDto;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseDto;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserDto;
+import com.abiquo.server.core.enterprise.UserWithRoleDto;
 
 @Parent(UsersResource.class)
 @Path(UserResource.USER_PARAM)
@@ -57,7 +60,7 @@ public class UserResource extends AbstractResource
 
     public static final String USER_PARAM = "{" + USER + "}";
 
-    public static final String USER_ACTION_GET_VIRTUALMACHINES = "/action/virtualmachines";
+    public static final String USER_ACTION_GET_VIRTUALMACHINES_PATH = "action/virtualmachines";
 
     @Autowired
     UserService service;
@@ -77,7 +80,7 @@ public class UserResource extends AbstractResource
         @PathParam(USER) final Integer userId, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
-        if (!securityService.hasPrivilege(SecurityService.USERS_VIEW))
+        if (!securityService.hasPrivilege(Privileges.USERS_VIEW))
         {
             User currentUser = service.getCurrentUser();
             if (currentUser.getId().equals(userId))
@@ -88,7 +91,7 @@ public class UserResource extends AbstractResource
             else
             {
                 // throws access denied exception
-                securityService.requirePrivilege(SecurityService.USERS_VIEW);
+                securityService.requirePrivilege(Privileges.USERS_VIEW);
             }
 
         }
@@ -127,7 +130,7 @@ public class UserResource extends AbstractResource
     }
 
     @GET
-    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES)
+    @Path(UserResource.USER_ACTION_GET_VIRTUALMACHINES_PATH)
     public VirtualMachinesDto getVirtualMachines(
         @PathParam(EnterpriseResource.ENTERPRISE) final Integer enterpriseId,
         @PathParam(UserResource.USER) final Integer userId, @Context final IRESTBuilder restBuilder)
@@ -148,6 +151,23 @@ public class UserResource extends AbstractResource
     {
         user.setLinks(restBuilder.buildUserLinks(enterpriseId, roleId, user));
         return user;
+    }
+
+    private static UserWithRoleDto addLinks(final IRESTBuilder restBuilder,
+        final UserWithRoleDto user, final Integer enterpriseId, final Integer roleId)
+    {
+        user.setLinks(restBuilder.buildUserLinks(enterpriseId, roleId, user));
+        return user;
+    }
+
+    public static UserWithRoleDto createUsersTransferObjectWithRole(final User user,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        UserWithRoleDto u = createUserTransferObjectWithRole(user, restBuilder);
+
+        u = addLinks(restBuilder, u, user.getEnterprise().getId(), user.getRole().getId());
+
+        return u;
     }
 
     public static UserDto createTransferObject(final User user, final IRESTBuilder restBuilder)
@@ -175,6 +195,30 @@ public class UserResource extends AbstractResource
         u.setDescription(user.getDescription());
         u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
         u.setAuthType(user.getAuthType().name());
+
+        return u;
+    }
+
+    public static UserWithRoleDto createUserTransferObjectWithRole(final User user,
+        final IRESTBuilder restBuilder) throws Exception
+    {
+        UserWithRoleDto u = new UserWithRoleDto();
+
+        u.setId(user.getId());
+        u.setActive(user.getActive());
+        u.setEmail(user.getEmail());
+        u.setLocale(user.getLocale());
+        u.setName(user.getName());
+        u.setPassword(user.getPassword());
+        u.setSurname(user.getSurname());
+        u.setNick(user.getNick());
+        u.setDescription(user.getDescription());
+        u.setAvailableVirtualDatacenters(user.getAvailableVirtualDatacenters());
+        u.setAuthType(user.getAuthType().name());
+
+        EnterpriseDto e =
+            EnterpriseResource.createTransferObject(user.getEnterprise(), restBuilder);
+        u.setEnterprise(e);
 
         return u;
     }

@@ -26,7 +26,6 @@
 // Generated on: 2010.12.24 at 11:14:06 AM CET 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -34,11 +33,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for VirtualSystemDto complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * Java class for VirtualSystemDto complex type.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType name="VirtualSystemDto">
@@ -53,86 +52,73 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "VirtualSystemDto", propOrder = {
-    "uuid",
-    "vport",
-    "status"
-})
-public class VirtualSystemDto
-    extends ComputerSystemType
+@XmlType(name = "VirtualSystemDto", propOrder = {"uuid", "vport", "status"})
+public class VirtualSystemDto extends ComputerSystemType
 {
 
     @XmlElement(required = true)
     protected String uuid;
+
     protected long vport;
+
     @XmlElement(required = true)
     protected VirtualSystemStatusEnumType status;
 
     /**
      * Gets the value of the uuid property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
      */
-    public String getUuid() {
+    public String getUuid()
+    {
         return uuid;
     }
 
     /**
      * Sets the value of the uuid property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * @param value allowed object is {@link String }
      */
-    public void setUuid(String value) {
+    public void setUuid(String value)
+    {
         this.uuid = value;
     }
 
     /**
      * Gets the value of the vport property.
-     * 
      */
-    public long getVport() {
+    public long getVport()
+    {
         return vport;
     }
 
     /**
      * Sets the value of the vport property.
-     * 
      */
-    public void setVport(long value) {
+    public void setVport(long value)
+    {
         this.vport = value;
     }
 
     /**
      * Gets the value of the status property.
      * 
-     * @return
-     *     possible object is
-     *     {@link VirtualSystemStatusEnumType }
-     *     
+     * @return possible object is {@link VirtualSystemStatusEnumType }
      */
-    public VirtualSystemStatusEnumType getStatus() {
+    public VirtualSystemStatusEnumType getStatus()
+    {
         return status;
     }
 
     /**
      * Sets the value of the status property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link VirtualSystemStatusEnumType }
-     *     
+     * @param value allowed object is {@link VirtualSystemStatusEnumType }
      */
-    public void setStatus(VirtualSystemStatusEnumType value) {
+    public void setStatus(VirtualSystemStatusEnumType value)
+    {
         this.status = value;
     }
 

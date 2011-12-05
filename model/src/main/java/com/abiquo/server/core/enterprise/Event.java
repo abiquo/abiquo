@@ -6,8 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
@@ -18,24 +16,9 @@ import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = Event.TABLE_NAME)
-@NamedQueries( {@NamedQuery(name = Event.EVENT_BY_FILTER, query = Event.BY_FILTER)})
 public class Event extends DefaultEntityBase
 {
     public static final String TABLE_NAME = "metering";
-
-    public static final String EVENT_BY_FILTER = "EVENT.BY_FILTER";
-
-    public static final String BY_FILTER =
-        "SELECT event FROM Event event WHERE (event.timestamp BETWEEN :datefrom AND :dateto)"
-            + " AND event.datacenter LIKE :datacenter AND event.rack LIKE :rack"
-            + " AND event.physicalMachine LIKE :physicalmachine AND event.storageSystem LIKE :storagesystem"
-            + " AND event.storagePool LIKE :storagepool AND event.volume LIKE :volume"
-            + " AND event.network LIKE :network AND event.subnet LIKE :subnet"
-            + " AND event.enterprise LIKE :enterprise AND event.user LIKE :user"
-            + " AND event.virtualDatacenter LIKE :virtualdatacenter AND event.virtualApp LIKE :virtualapp"
-            + " AND event.virtualMachine LIKE :virtualmachine AND event.severity LIKE :severity"
-            + " AND event.performedBy LIKE :performedby AND event.actionPerformed LIKE :actionperformed"
-            + " AND event.component LIKE :component ORDER BY event.timestamp DESC";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
@@ -198,32 +181,32 @@ public class Event extends DefaultEntityBase
         this.storagePool = storagePool;
     }
 
-    public final static String STRACKTRACE_PROPERTY = "stacktrace";
+    public final static String STACKTRACE_PROPERTY = "stacktrace";
 
-    private final static boolean STRACKTRACE_REQUIRED = false;
+    private final static boolean STACKTRACE_REQUIRED = false;
 
-    private final static int STRACKTRACE_LENGTH_MIN = 0;
+    private final static int STACKTRACE_LENGTH_MIN = 0;
 
-    private final static int STRACKTRACE_LENGTH_MAX = 255;
+    private final static int STACKTRACE_LENGTH_MAX = 255;
 
-    private final static boolean STRACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
+    private final static boolean STACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
-    private final static String STRACKTRACE_COLUMN = "stacktrace";
+    private final static String STACKTRACE_COLUMN = "stacktrace";
 
-    @Column(name = STRACKTRACE_COLUMN, nullable = !STRACKTRACE_REQUIRED, length = STRACKTRACE_LENGTH_MAX, columnDefinition = "TEXT")
+    @Column(name = STACKTRACE_COLUMN, nullable = !STACKTRACE_REQUIRED, length = STACKTRACE_LENGTH_MAX, columnDefinition = "TEXT")
     private String stacktrace;
 
-    @Required(value = STRACKTRACE_REQUIRED)
-    @Length(min = STRACKTRACE_LENGTH_MIN, max = STRACKTRACE_LENGTH_MAX)
-    @LeadingOrTrailingWhitespace(allowed = STRACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
+    @Required(value = STACKTRACE_REQUIRED)
+    @Length(min = STACKTRACE_LENGTH_MIN, max = STACKTRACE_LENGTH_MAX)
+    @LeadingOrTrailingWhitespace(allowed = STACKTRACE_LEADING_OR_TRAILING_WHITESPACES_ALLOWED)
     public String getStacktrace()
     {
         return this.stacktrace;
     }
 
-    public void setStacktrace(final String stracktrace)
+    public void setStacktrace(final String stacktrace)
     {
-        this.stacktrace = stracktrace;
+        this.stacktrace = stacktrace;
     }
 
     public final static String TIMESTAMP_PROPERTY = "timestamp";

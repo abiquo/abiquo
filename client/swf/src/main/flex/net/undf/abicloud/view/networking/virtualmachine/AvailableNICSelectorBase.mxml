@@ -31,6 +31,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.networking.VlanNetwork;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.vo.networking.IPPoolManagement;
         	import net.undf.abicloud.events.NetworkingEvent;
@@ -50,6 +52,9 @@
             [Bindable]
             protected var _virtualDatacenter:VirtualDataCenter;
 
+            //The related VirtualAppliance
+            protected var _virtualAppliance:VirtualAppliance;
+            
             //The VirtualMachine to assign a new NIC
             protected var _virtualMachine:VirtualMachine;
 
@@ -59,27 +64,50 @@
 
                 privateNICSelector = new PrivateNICSelector();
                 privateNICSelector.addEventListener("onAssignNicToVirtualMachine",onAssignNicToVirtualMachine);
+                privateNICSelector.addEventListener("onAssignExternalNicToVirtualMachine",onAssignExternalNicToVirtualMachine);
                 privateNICSelector.addEventListener("close", onClose);
 
                 toggledContainer.addContent(privateNICSelector, ResourceManager.getInstance().getString("Networking",
-                                                                                                        "LABEL_PRIVATE"));
+                                                                                                        "LABEL_PRIVATE_EXTERNAL"));
             }
             
             public function onAssignNicToVirtualMachine(evt:Event):void{
             	 //Assign the selected NIC to the Virtual Machine
                var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_NIC_TO_VIRTUAL_MACHINE);
-                event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
-                event.virtualMachine = _virtualMachine;
-                dispatchEvent(event);
+               event.virtualDatacenter = _virtualDatacenter;
+               event.virtualAppliance = _virtualAppliance;
+               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
+               event.virtualMachine = _virtualMachine;
+               dispatchEvent(event);
 
-                privateNICSelector.close();
+               privateNICSelector.close();
             }
+            
+            public function onAssignExternalNicToVirtualMachine(evt:Event):void{
+                 //Assign the selected NIC to the Virtual Machine
+               var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_EXTERNAL_NIC_TO_VIRTUAL_MACHINE);
+               event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
+               event.virtualDatacenter = _virtualDatacenter;
+               event.virtualAppliance = _virtualAppliance;
+               if(!privateNICSelector.availableIPList.selectedItem){
+               	    var ipPoolManagement:IPPoolManagement = new IPPoolManagement();
+               	    ipPoolManagement.vlanNetworkId = VlanNetwork(privateNICSelector.vlanList.selectedItem).vlanNetworkId;
+               	    event.ipPoolManagement = ipPoolManagement;
+               }else{
+	               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
+               }
+               event.virtualMachine = _virtualMachine;
+               dispatchEvent(event);
 
-            public function init(virtualDatacenter:VirtualDataCenter, virtualMachine:VirtualMachine):void
+               privateNICSelector.close();
+            }
+            
+            public function init(virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance, virtualMachine:VirtualMachine):void
             {
                 toggledContainer.selectedIndex = 0;
 
                 _virtualDatacenter = virtualDatacenter;
+                _virtualAppliance = virtualAppliance;
                 _virtualMachine = virtualMachine;
 
                 privateNICSelector.init(_virtualDatacenter, _virtualMachine);

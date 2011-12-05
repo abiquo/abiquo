@@ -45,7 +45,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 
 import com.abiquo.api.common.BooleanTypeFactory;
 
-@TestExecutionListeners( {DependencyInjectionTestExecutionListener.class,
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class,
 TransactionalTestExecutionListener.class})
 @ContextConfiguration(locations = {"classpath:springresources/applicationContext-test.xml"})
 public abstract class AbstractJpaDBUnitTest extends AbstractTransactionalTestNGSpringContextTests

@@ -34,7 +34,7 @@ public class NodeType
     public final static int STORAGE = 2;
 
     public final static int NETWORK = 3;
-    
+
     private int id;
 
     private String name;

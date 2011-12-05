@@ -24,10 +24,8 @@
 
 <mx:HBox 
     width="100%" height="100%"
-    paddingBottom="6"
-    paddingLeft="6"
-    paddingRight="6"
     paddingTop="6"
+    verticalGap="0"
     verticalAlign="top"
     verticalScrollPolicy="off" horizontalScrollPolicy="off"
     xmlns:mx="http://www.adobe.com/2006/mxml">
@@ -233,22 +231,25 @@
                 alpha="1"/>
         </mx:entries>
     </mx:RadialGradient>
-
-    <mx:Label text="RAM (MB)"/>
-    <mx:PieChart id="ramChart"
-        width="33%" height="100%"
-        dataProvider="{_ramChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
+    <mx:VBox width="33%" 
+    	horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="RAM (MB)" width="100%"/>    	
+	    <mx:PieChart id="ramChart"
+	    	paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+	        width="100%" height="100%"
+	        dataProvider="{_ramChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 
 
 
@@ -257,23 +258,26 @@
         horizontalCenter="0"
         styleName="PhysicalMachineRendererStateVRule"
         />
-
-    <mx:Label text="CPU (V-CPU)"/>
-    <mx:PieChart id="cpuChart"
-        width="33%" height="100%"
-        dataProvider="{_cpuChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
-
+    
+    <mx:VBox width="33%" 
+        horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="CPU (V-CPU)" width="100%"/>
+	    <mx:PieChart id="cpuChart"
+	        paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+            width="100%" height="100%"
+	        dataProvider="{_cpuChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial, oversubscrivedColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 
     <mx:VRule 
         width="1" height="100%"
@@ -281,21 +285,24 @@
         styleName="PhysicalMachineRendererStateVRule"/>
 
 
-    <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_HD') + ' (GB)'}"/>
-
-    <mx:PieChart id="hdChart"
-        width="33%" height="100%"
-        dataProvider="{_hdChartDP}"
-        showDataTips="true"
-        dataTipFunction="pieChart_dataTipFunction">
-
-        <mx:series>
-            <mx:PieSeries labelPosition="none"
-                field="data"
-                nameField="label"
-                filters="{[]}"
-                fills="{[usedColorRadial, freeColorRadial]}"/>
-        </mx:series>
-    </mx:PieChart>
-
+    <mx:VBox width="33%" 
+        horizontalAlign="center" height="100%" verticalGap="0">
+	    <mx:Label text="{ResourceManager.getInstance().getString('Infrastructure', 'LABEL_HD') + ' (GB)'}" width="100%"/>
+	
+	    <mx:PieChart id="hdChart"
+	       paddingBottom="0" paddingTop="0" paddingLeft="0" paddingRight="0"
+            width="100%" height="100%"
+	        dataProvider="{_hdChartDP}"
+	        showDataTips="true"
+	        dataTipFunction="pieChart_dataTipFunction">
+	
+	        <mx:series>
+	            <mx:PieSeries labelPosition="none"
+	                field="data"
+	                nameField="label"
+	                filters="{[]}"
+	                fills="{[usedColorRadial, freeColorRadial]}"/>
+	        </mx:series>
+	    </mx:PieChart>
+    </mx:VBox>
 </mx:HBox>

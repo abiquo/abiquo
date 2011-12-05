@@ -70,7 +70,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @Produces("application/ovfpackageenvelope-xml")
     public OVFPackageInstanceDto getOVFPackageInstance(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @PathParam(OVF_PACKAGE_INSTANCE) String ovfUrl, @Context IRESTBuilder restBuilder)
         throws Exception
@@ -96,7 +96,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @Produces("application/ovfpackage-octet-stream")
     public String downloadOVFPackageInstance(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @PathParam(OVF_PACKAGE_INSTANCE) String ovfUrl, @Context IRESTBuilder restBuilder)
     {
@@ -126,7 +126,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @Produces("application/ovfpackagestatus-xml")
     public OVFPackageInstanceStatusDto getOVFPackageInstanceStatus(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @PathParam(OVF_PACKAGE_INSTANCE) String ovfUrl, @Context IRESTBuilder restBuilder)
     {
@@ -152,7 +152,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @DELETE
     public OVFPackageInstanceStatusDto deleteOVFPackageInstance(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @PathParam(OVF_PACKAGE_INSTANCE) String ovfUrl, @Context IRESTBuilder restBuilder)
     {
@@ -168,7 +168,7 @@ public class OVFPackageInstanceResource extends AbstractResource
     @Path(BUNDLE_ACTION)
     public OVFPackageInstanceDto createBundle(
         @PathParam(DatacenterResource.DATACENTER) Integer datacenterId,
-        @PathParam(AMResource.AM_SERVICE_TYPE) String serviceType,
+        @PathParam(AMResource.AM_SERVICE_PATH) String serviceType,
         @PathParam(EnterpriseResource.ENTERPRISE) String idEnterprise,
         @PathParam(OVF_PACKAGE_INSTANCE) String ovfUrl, @Context IRESTBuilder restBuilder)
     {

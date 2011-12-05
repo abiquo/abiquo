@@ -52,11 +52,14 @@
                 <ref bean="ipAddressesResource" />
                 <ref bean="eventsResource" />
                 <ref bean="eventResource" />
+                <ref bean="pricingTemplatesResource" />
+                <ref bean="pricingTemplateResource" />
                 <!-- -->
                 <ref bean="virtualAppliancesResource" />
                 <ref bean="virtualApplianceResource" />
                 <ref bean="virtualMachinesResource" />
                 <ref bean="virtualMachineResource" />
+                <ref bean="virtualMachineNetworkConfigurationResource" />
                 <!-- AM as REST Resource -->
                 <ref bean="AMResource" />
                 <ref bean="enterpriseRepositoryResource" />
@@ -90,4 +93,5 @@
             </list>
         </property>
     </bean>
+    <bean class="com.abiquo.api.spring.BeanLoader" factory-method="getInstance" />
 </beans>

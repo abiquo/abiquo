@@ -67,11 +67,11 @@ public class HypervisorGenerator extends DefaultEntityGenerator<Hypervisor>
         HypervisorType type = newEnum(HypervisorType.class, nextSeed());
         return createInstance(machine, type);
     }
-    
+
     public Hypervisor createReservedHypervisor(Enterprise enterprise)
     {
         Machine machine = machineGenerator.createReservedMachine(enterprise);
-        
+
         return createInstance(machine);
     }
 

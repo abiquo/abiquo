@@ -46,8 +46,8 @@ public class InitiatorMappingGenerator extends DefaultEntityGenerator<InitiatorM
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, InitiatorMapping.TARGET_LUN_PROPERTY,
             InitiatorMapping.TARGET_IQN_PROPERTY, InitiatorMapping.INITIATOR_IQN_PROPERTY);
 
-        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(), obj2
-            .getVolumeManagement());
+        volumeGenerator.assertAllPropertiesEqual(obj1.getVolumeManagement(),
+            obj2.getVolumeManagement());
     }
 
     @Override

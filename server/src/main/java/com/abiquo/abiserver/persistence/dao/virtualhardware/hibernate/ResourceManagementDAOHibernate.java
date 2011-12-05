@@ -42,7 +42,8 @@ public class ResourceManagementDAOHibernate extends HibernateDAO<ResourceManagem
     implements ResourceManagementDAO
 {
 
-    public static final String GET_RESOURCE_MANAGEMENT_ETHERNET_BY_MAC = "GET_RESOURCE_MANAGEMENT_ETHERNET_BY_MAC";
+    public static final String GET_RESOURCE_MANAGEMENT_ETHERNET_BY_MAC =
+        "GET_RESOURCE_MANAGEMENT_ETHERNET_BY_MAC";
 
     @Override
     public ResourceManagementHB getResourceManagementPrivateEthernetByVS(VirtualmachineHB vmHB)

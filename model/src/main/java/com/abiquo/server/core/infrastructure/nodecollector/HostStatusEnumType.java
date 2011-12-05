@@ -26,19 +26,19 @@
 // Generated on: 2011.05.26 at 09:05:37 AM CEST 
 //
 
-
 package com.abiquo.server.core.infrastructure.nodecollector;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for HostStatusEnumType.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
+ * Java class for HostStatusEnumType.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * 
  * <pre>
  * &lt;simpleType name="HostStatusEnumType">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
@@ -49,33 +49,35 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
- * 
  */
 @XmlType(name = "HostStatusEnumType")
 @XmlEnum
-public enum HostStatusEnumType {
+public enum HostStatusEnumType
+{
 
     @XmlEnumValue("managed")
-    MANAGED("managed"),
-    @XmlEnumValue("not_managed")
-    NOT_MANAGED("not_managed"),
-    @XmlEnumValue("provisioned")
-    PROVISIONED("provisioned"),
-    @XmlEnumValue("stopped")
+    MANAGED("managed"), @XmlEnumValue("not_managed")
+    NOT_MANAGED("not_managed"), @XmlEnumValue("provisioned")
+    PROVISIONED("provisioned"), @XmlEnumValue("stopped")
     STOPPED("stopped");
     private final String value;
 
-    HostStatusEnumType(String v) {
+    HostStatusEnumType(String v)
+    {
         value = v;
     }
 
-    public String value() {
+    public String value()
+    {
         return value;
     }
 
-    public static HostStatusEnumType fromValue(String v) {
-        for (HostStatusEnumType c: HostStatusEnumType.values()) {
-            if (c.value.equals(v)) {
+    public static HostStatusEnumType fromValue(String v)
+    {
+        for (HostStatusEnumType c : HostStatusEnumType.values())
+        {
+            if (c.value.equals(v))
+            {
                 return c;
             }
         }

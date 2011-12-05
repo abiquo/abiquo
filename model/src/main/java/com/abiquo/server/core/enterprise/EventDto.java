@@ -3,10 +3,15 @@ package com.abiquo.server.core.enterprise;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
-@XmlRootElement(name = "")
+@XmlRootElement(name = "event")
+@XmlType(propOrder = {"id", "component", "actionPerformed", "performedBy", "storagePool",
+"stacktrace", "timestamp", "virtualApp", "datacenter", "virtualDatacenter", "enterprise",
+"storageSystem", "network", "physicalMachine", "rack", "virtualMachine", "volume", "subnet",
+"severity", "user"})
 public class EventDto extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = 1L;
@@ -71,16 +76,16 @@ public class EventDto extends SingleResourceTransportDto
         this.storagePool = storagePool;
     }
 
-    private String stracktrace;
+    private String stacktrace;
 
-    public String getStracktrace()
+    public String getStacktrace()
     {
-        return stracktrace;
+        return stacktrace;
     }
 
-    public void setStracktrace(final String stracktrace)
+    public void setStacktrace(final String stacktrace)
     {
-        this.stracktrace = stracktrace;
+        this.stacktrace = stacktrace;
     }
 
     private Date timestamp;

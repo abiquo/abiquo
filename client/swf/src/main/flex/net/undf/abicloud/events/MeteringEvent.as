@@ -31,10 +31,16 @@ package net.undf.abicloud.events
         public static const GET_EVENT_TYPES:String = "getEventTypesMeteringEvent";
 
         public static const GET_SEVERITY_TYPES:String = "getSeverityTypesMeteringEvent";
+        
+        public static const LOAD_STATISTICS:String = "loadStatisticsMeteringEvent";
 
         public var filter:Object;
 
         public var maxResults:int;
+        
+        public var statistic_type:String;
+        
+        public var inProgress:Boolean;
 
         /* ------------- Constructor ------------- */
         public function MeteringEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

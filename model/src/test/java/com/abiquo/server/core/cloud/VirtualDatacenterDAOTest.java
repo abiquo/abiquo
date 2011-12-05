@@ -30,7 +30,8 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 @Test
-public class VirtualDatacenterDAOTest extends DefaultDAOTestBase<VirtualDatacenterDAO, VirtualDatacenter>
+public class VirtualDatacenterDAOTest extends
+    DefaultDAOTestBase<VirtualDatacenterDAO, VirtualDatacenter>
 {
 
     @BeforeMethod

@@ -34,7 +34,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.abiquo.abiserver.business.hibernate.pojohb.metering.MeterHB;
-import com.abiquo.abiserver.business.hibernate.pojohb.user.RoleHB;
+import com.abiquo.abiserver.business.hibernate.pojohb.user.UserHB;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.persistence.dao.metering.MeterDAO;
 import com.abiquo.abiserver.persistence.hibernate.HibernateDAO;
@@ -55,7 +55,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
     @SuppressWarnings("unchecked")
     @Override
     public List<MeterHB> findAllByFilter(final HashMap<String, String> filter,
-        final List<String> performedbyList, final Integer numrows, final RoleHB role)
+        final List<String> performedbyList, final Integer numrows, final UserHB user)
         throws PersistenceException
     {
         Integer numberOfParameters = 0;
@@ -89,7 +89,8 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
 
         stringQuery.append("where timestamp between '").append(fromdateFilter).append("' and '")
-            .append(todateFilter).append("'");
+            .append(todateFilter).append("' and timestamp > '")
+            .append(user.getCreationDate().toString()).append("'");
 
         // create all the filters from the HashMap information. Due all of them are included in the
         // query, we need to
@@ -129,7 +130,8 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         }
         if (filter.containsKey("enterprise"))
         {
-            stringQuery.append(" and enterprise like '%" + replaceApostrophe(filter.get("enterprise")) + "%'");
+            stringQuery.append(" and enterprise like '%"
+                + replaceApostrophe(filter.get("enterprise")) + "%'");
         }
         if (filter.containsKey("user"))
         {
@@ -164,11 +166,19 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
         if (filter.containsKey("component"))
         {
             stringQuery.append(" and component like '%" + filter.get("component") + "%'");
-        }   
+        }
 
         // if (role != Role.SYS_ADMIN)
-        if (!SecurityService.isCloudAdmin(role.toPojo()))
+        if (!SecurityService.isCloudAdmin(user.getRoleHB().toPojo()))
         {
+            if (!SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ENTERPRISE, user
+                .getRoleHB().toPojo())
+                && !SecurityService.hasPrivilege(SecurityService.EVENTLOG_VIEW_ALL, user
+                    .getRoleHB().toPojo()))
+            {
+                stringQuery.append(" and idUser = " + user.getIdUser());
+            }
+
             if (performedbyList != null && !performedbyList.isEmpty())
             {
                 // performedby filter
@@ -201,7 +211,7 @@ public class MeterDAOHibernate extends HibernateDAO<MeterHB, Long> implements Me
 
         return listOfMeters;
     }
-    
+
     private final String replaceApostrophe(final String name)
     {
         return name.replaceAll("'", "''");

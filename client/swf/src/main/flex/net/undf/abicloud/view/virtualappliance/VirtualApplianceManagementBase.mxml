@@ -98,6 +98,7 @@
             protected var _virtualAppliance:VirtualAppliance;
 
             //The current Virtual DataCenter where we are
+            [Bindable]
             protected var _currentVirtualDataCenter:VirtualDataCenter;
 
             //This component is currently displaying more info from this NodeRenderer
@@ -199,6 +200,8 @@
             {
                 isShowing = true;
                 requestCategories();
+                //Update the virtualAppliance object
+                checkVirtualAppliance();
             }
 
             public function willHide():void
@@ -670,14 +673,19 @@
             	hideNodeInfoContainer();
             }
 
-            private function powerOnVirtualAppliance():void
+            protected function powerOnVirtualAppliance():void
             {
                 var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.START_VIRTUALAPPLIANCE);
 
                 virtualApplianceEvent.virtualAppliance = _virtualAppliance;
                 dispatchEvent(virtualApplianceEvent);
 
-                startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
+                startPowerOnProcess();
+            }
+            
+            protected function startPowerOnProcess(event:Event = null):void
+            {
+            	startBackgroundUpdates(AbiCloudModel.getInstance().configurationManager.config.client_virtual_virtualApplianceDeployingUpdateInterval.value);
                 hideNodeInfoContainer();
             }
 
@@ -1051,6 +1059,8 @@
                     <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                         width="100%"
                         top="10" bottom="0"
+                        virtualDatacenter="{_currentVirtualDataCenter}"
+                        virtualAppliance="{_virtualAppliance}"
                         usedBy="{VirtualMachineRendererBase.USED_BY_VIRTUAL_APPLIANCE_MANAGEMENT}"/>
                 </mx:Canvas>
             </mx:Canvas>

@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -29,12 +30,14 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaRackDAO")
 /* package */class RackDAO extends DefaultDAOBase<Integer, Rack>
@@ -45,37 +48,80 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         super(Rack.class);
     }
 
-    public RackDAO(EntityManager entityManager)
+    public RackDAO(final EntityManager entityManager)
     {
         super(Rack.class, entityManager);
     }
-    
-    private static Criterion sameDatacenter(Datacenter datacenter)
+
+    private static Criterion sameDatacenter(final Datacenter datacenter)
     {
         assert datacenter != null;
 
         return Restrictions.eq(Rack.DATACENTER_PROPERTY, datacenter);
     }
 
-    private static Criterion equalName(String name)
+    private static Criterion equalName(final String name)
     {
         assert !StringUtils.isEmpty(name);
 
         return Restrictions.eq(Rack.NAME_PROPERTY, name);
     }
 
-    public List<Rack> findRacks(Datacenter datacenter)
+    public List<Rack> findRacks(final Datacenter datacenter)
+    {
+        return findRacks(datacenter, null);
+    }
+
+    private final static String QUERY_GET_FILTERED_RACKS = //
+        "SELECT  r.idRack, r.idDataCenter, r.name, r.shortDescription, r.largeDescription, r.vlan_id_min, r.vlan_id_max, "
+            + "r.vlans_id_avoided, r.vlan_per_vdc_expected, r.nrsq, r.haEnabled, r.version_c FROM " //
+            + "rack r LEFT OUTER JOIN datacenter dc ON r.idDatacenter = dc.idDatacenter "
+            + "WHERE dc.idDatacenter = :idDatacenter " //
+            + "AND (r.name like :filter "
+            + "OR r.idRack in (SELECT pms.idRack FROM physicalmachine pms LEFT OUTER JOIN enterprise ent ON pms.idEnterprise = ent.idEnterprise "
+            + "WHERE ent.name like :filter OR pms.name like :filter ) " + ")";
+
+    public List<Rack> findRacks(final Datacenter datacenter, final String filter)
     {
         assert datacenter != null;
         assert isManaged2(datacenter);
 
+        if (filter != null && !filter.isEmpty())
+        {
+            Query query = getSession().createSQLQuery(QUERY_GET_FILTERED_RACKS);
+            query.setParameter("idDatacenter", datacenter.getId());
+            query.setString("filter", "%" + filter + "%");
+
+            List<Rack> racks = getSQLQueryResults(getSession(), query, Rack.class, 0);
+            return racks;
+
+        }
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.addOrder(Order.asc(Rack.NAME_PROPERTY));
         List<Rack> result = getResultList(criteria);
         return result;
     }
 
-    public List<Rack> findRacksWithHAEnabled(Datacenter datacenter)
+    @SuppressWarnings("unchecked")
+    private <T> List<T> getSQLQueryResults(final Session session, final Query query,
+        final Class<T> objectClass, final int idFieldPosition)
+    {
+        List<T> result = new ArrayList<T>();
+        List<Object[]> sqlResult = query.list();
+
+        if (sqlResult != null && !sqlResult.isEmpty())
+        {
+            for (Object[] res : sqlResult)
+            {
+                T obj = (T) session.get(objectClass, (Integer) res[idFieldPosition]);
+                result.add(obj);
+            }
+        }
+
+        return result;
+    }
+
+    public List<Rack> findRacksWithHAEnabled(final Datacenter datacenter)
     {
         Criteria criteria = createCriteria(sameDatacenter(datacenter));
         criteria.add(Restrictions.eq(Rack.HAENABLED_PROPERTY, true));
@@ -86,7 +132,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return result;
     }
 
-    public boolean existsAnyWithDatacenterAndName(Datacenter datacenter, String name)
+    public boolean existsAnyWithDatacenterAndName(final Datacenter datacenter, final String name)
     {
         assert datacenter != null;
         assert !StringUtils.isEmpty(name);
@@ -94,7 +140,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return existsAnyByCriterions(sameDatacenter(datacenter), equalName(name));
     }
 
-    public boolean existsAnyOtherWithDatacenterAndName(Rack rack, String name)
+    public boolean existsAnyOtherWithDatacenterAndName(final Rack rack, final String name)
     {
         assert rack != null;
         assert !StringUtils.isEmpty(name);
@@ -127,7 +173,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
      * Obtains the racks (prefiltered by target datacenter and virtualdatacenter) with minimal VLANS
      * // and with vms deployed
      */
-    public List<Integer> getRackIdByMinVLANCount(int idDatacenter)
+    public List<Integer> getRackIdByMinVLANCount(final int idDatacenter)
     {
         SQLQuery query = getSession().createSQLQuery(SQL_RACK_IDS_BY_MIN_VLAN_COUNT);
         query.setInteger("idDatacenter", idDatacenter);
@@ -140,7 +186,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
             "FROM NetworkAssignment vn WHERE " + //
             "vn.rack.id = :idRack";
 
-    public Long getNumberOfDeployedVlanNetworks(Integer rackId)
+    public Long getNumberOfDeployedVlanNetworks(final Integer rackId)
     {
         Query query = getSession().createQuery(COUNT_DEPLOYED_VLA);
         query.setInteger("idRack", rackId);
@@ -152,14 +198,15 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 
     /**
      * Return the Rack by datacenter id and rack id.
+     * 
      * @param datacenterId
      * @param rackId
      * @return
      */
-    public Rack findByIds(Integer datacenterId, Integer rackId)
+    public Rack findByIds(final Integer datacenterId, final Integer rackId)
     {
         return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq(Rack.ID_PROPERTY, rackId));
+            Restrictions.eq(PersistentEntity.ID_PROPERTY, rackId));
     }
 
     private final static String HQL_NOT_MANAGED_RACKS_BY_DATACENTER = //
@@ -173,10 +220,39 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
      * @param datacenter
      * @return List<Rack>
      */
-    public List<Rack> findAllNotManagedRacksByDatacenter(Integer datacenterId)
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId)
     {
-        Query q = getSession().createQuery(HQL_NOT_MANAGED_RACKS_BY_DATACENTER);
+        return findAllNotManagedRacksByDatacenter(datacenterId, null);
+    }
+
+    public List<Rack> findAllNotManagedRacksByDatacenter(final Integer datacenterId,
+        final String filter)
+    {
+        String hql = HQL_NOT_MANAGED_RACKS_BY_DATACENTER;
+        if (filter != null && !filter.isEmpty())
+        {
+            hql += " AND nmr.name like :filter";
+        }
+
+        Query q = getSession().createQuery(hql);
         q.setInteger("idDatacenter", datacenterId);
+        if (filter != null && !filter.isEmpty())
+        {
+            q.setString("filter", "%" + filter + "%");
+        }
+
         return q.list();
+    }
+
+    private final String QUERY_USED_VDRP = "SELECT vm.vdrpPort " + //
+        "FROM com.abiquo.server.core.cloud.VirtualMachine vm " + //
+        "WHERE vm.hypervisor.machine.rack = :rack ";
+
+    @SuppressWarnings("unchecked")
+    public List<Integer> findUsedVrdpPorts(final Rack rack)
+    {
+        Query query = getSession().createQuery(QUERY_USED_VDRP);
+        query.setParameter("rack", rack);
+        return query.list();
     }
 }

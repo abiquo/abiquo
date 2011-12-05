@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -30,40 +30,34 @@ public class EventDAO extends DefaultDAOBase<Integer, Event>
         super(Event.class, entityManager);
     }
 
-    @SuppressWarnings("unchecked")
+    // @SuppressWarnings("unchecked")
+    // public List<Event> getEventos(final FilterOptions filterOptions,
+    // final HashMap<String, String> filters)
+    // {
+    // // TODO : Redo method MeterDAOHibernate.findAllByFilter()
+    //
+    // Query query = getEntityManager().createNamedQuery(Event.EVENT_BY_FILTER);
+    //
+    // // Add parameters
+    // query = setParameters(query, filters);
+    //
+    // Integer size = query.getResultList().size();
+    //
+    // query.setFirstResult(filterOptions.getStartwith());
+    // query.setMaxResults(filterOptions.getLimit());
+    //
+    // PagedList<Event> eventsList = new PagedList<Event>(query.getResultList());
+    // eventsList.setTotalResults(size);
+    // eventsList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
+    // eventsList.setCurrentElement(filterOptions.getStartwith());
+    //
+    // return eventsList;
+    // }
+
     public List<Event> getEvents(final FilterOptions filterOptions,
         final HashMap<String, String> filters)
     {
-        // TODO : Redo method MeterDAOHibernate.findAllByFilter()
-
-        Query query = getEntityManager().createNamedQuery(Event.EVENT_BY_FILTER);
-
-        // Add parameters
-        query = setParameters(query, filters);
-
-        Integer size = query.getResultList().size();
-
-        query.setFirstResult(filterOptions.getStartwith());
-        query.setMaxResults(filterOptions.getLimit());
-
-        PagedList<Event> eventsList = new PagedList<Event>(query.getResultList());
-        eventsList.setTotalResults(size);
-        eventsList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
-        eventsList.setCurrentElement(filterOptions.getStartwith());
-
-        return eventsList;
-    }
-
-    public Event getEventById(final Integer eventId)
-    {
-        Criteria criteria = createCriteria(Restrictions.eq("id", eventId));
-        Object obj = criteria.uniqueResult();
-        return (Event) obj;
-    }
-
-    private Query setParameters(final Query query, final HashMap<String, String> filters)
-    {
-        Query queryWithParams = query;
+        Criteria crit = createCriteria();
 
         // Create Dates
         Timestamp dateFrom =
@@ -74,18 +68,33 @@ public class EventDAO extends DefaultDAOBase<Integer, Event>
             filters.containsKey("dateto") && !"%".equals(filters.get("dateto")) ? convertDate(
                 filters.get("dateto"), 86400) : new Timestamp(new Date().getTime());
 
-        queryWithParams.setParameter("datefrom", dateFrom);
-        queryWithParams.setParameter("dateto", dateTo);
+        crit.add(Restrictions.between(Event.TIMESTAMP_PROPERTY, dateFrom, dateTo));
 
+        // Remove the dates filters from the Map to avoid adding them again later
         filters.remove("datefrom");
         filters.remove("dateto");
 
+        // Add all others filters
         for (Entry<String, String> filter : filters.entrySet())
         {
-            queryWithParams.setParameter(filter.getKey(), replaceApostrophe(filter.getValue()));
+            if (!filter.getValue().equals("%"))
+            {
+                crit.add(Restrictions.like(filter.getKey(), replaceApostrophe(filter.getValue()),
+                    MatchMode.ANYWHERE));
+            }
         }
 
-        return queryWithParams;
+        Integer size = crit.list().size();
+
+        crit.setFirstResult(filterOptions.getStartwith());
+        crit.setMaxResults(filterOptions.getLimit());
+
+        PagedList<Event> eventsList = new PagedList<Event>(crit.list());
+        eventsList.setTotalResults(size);
+        eventsList.setPageSize(filterOptions.getLimit() > size ? size : filterOptions.getLimit());
+        eventsList.setCurrentElement(filterOptions.getStartwith());
+
+        return getResultList(crit);
     }
 
     private final String replaceApostrophe(final String name)

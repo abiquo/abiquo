@@ -23,8 +23,10 @@ package com.abiquo.server.core.infrastructure.network;
 
 import java.util.List;
 
+import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
+import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -35,20 +37,23 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
 
     private VLANNetworkGenerator vlanNetworkGenerator;
 
-    private DhcpGenerator dhcpGenerator;
+    private RasdManagementGenerator rasdmGenerator;
 
     private VirtualDatacenterGenerator vdcGenerator;
 
-    private RasdManagementGenerator rasdmGenerator;
+    private VirtualApplianceGenerator vappGenerator;
+
+    private VirtualMachineGenerator vmGenerator;
 
     public IpPoolManagementGenerator(final SeedGenerator seed)
     {
         super(seed);
 
         vlanNetworkGenerator = new VLANNetworkGenerator(seed);
-        dhcpGenerator = new DhcpGenerator(seed);
-        rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
+        rasdmGenerator = new RasdManagementGenerator(seed);
+        vappGenerator = new VirtualApplianceGenerator(seed);
+        vmGenerator = new VirtualMachineGenerator(seed);
     }
 
     @Override
@@ -58,7 +63,6 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
             IpPoolManagement.MAC_PROPERTY, IpPoolManagement.CONFIGURATION_GATEWAY_PROPERTY,
             IpPoolManagement.QUARANTINE_PROPERTY, IpPoolManagement.IP_PROPERTY);
 
-        dhcpGenerator.assertAllPropertiesEqual(obj1.getDhcp(), obj2.getDhcp());
         vlanNetworkGenerator.assertAllPropertiesEqual(obj1.getVlanNetwork(), obj2.getVlanNetwork());
         rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
     }
@@ -85,13 +89,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         String networkName = newString(nextSeed(), 0, 255);
 
         IpPoolManagement ipPoolManagement =
-            new IpPoolManagement(vlan.getConfiguration().getDhcp(),
-                vlan,
-                mac,
-                name,
-                ip,
-                networkName,
-                IpPoolManagement.Type.PRIVATE);
+            new IpPoolManagement(vlan, mac, name, ip, networkName, IpPoolManagement.Type.PRIVATE);
 
         ipPoolManagement.setVirtualDatacenter(vdc);
 
@@ -107,13 +105,7 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         String networkName = newString(nextSeed(), 0, 255);
 
         IpPoolManagement ipPoolManagement =
-            new IpPoolManagement(vlan.getConfiguration().getDhcp(),
-                vlan,
-                mac,
-                name,
-                ip,
-                networkName,
-                IpPoolManagement.Type.PRIVATE);
+            new IpPoolManagement(vlan, mac, name, ip, networkName, IpPoolManagement.Type.PRIVATE);
 
         ipPoolManagement.setVirtualDatacenter(vdc);
 
@@ -125,10 +117,6 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
-
-        Dhcp dhcp = entity.getDhcp();
-        dhcpGenerator.addAuxiliaryEntitiesToPersist(dhcp, entitiesToPersist);
-        entitiesToPersist.add(dhcp);
 
         VLANNetwork vlanNetwork = entity.getVlanNetwork();
         vlanNetworkGenerator.addAuxiliaryEntitiesToPersist(vlanNetwork, entitiesToPersist);

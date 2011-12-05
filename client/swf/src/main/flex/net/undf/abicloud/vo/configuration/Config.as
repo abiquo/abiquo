@@ -25,6 +25,7 @@ package net.undf.abicloud.vo.configuration
 	
 	import net.undf.abicloud.vo.systemproperties.SystemProperty;
 
+	[Bindable]
 	public dynamic class Config extends ObjectProxy
 	{
 		public var defaultTheme:String = "abicloudDefault";
@@ -78,6 +79,9 @@ package net.undf.abicloud.vo.configuration
 		public var client_virtual_virtualImagesRefreshConversionsInterval:SystemProperty; 
 		public var client_main_enterpriseLogoURL:SystemProperty;
 		public var client_main_billingUrl:SystemProperty;
+		public var client_logout_url:SystemProperty;
+		public var client_main_disableChangePassword:SystemProperty;
+		public var client_main_allowLogout:SystemProperty;
 		
 		//wiki links
 		public var client_wiki_showHelp:SystemProperty;
@@ -115,6 +119,7 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_vm_createInstance:SystemProperty;
 		public var client_wiki_vm_createStateful:SystemProperty;
 		public var client_wiki_vm_captureVirtualMachine:SystemProperty;
+		public var client_wiki_vm_deployInfo:SystemProperty;
 		
 		public var client_wiki_apps_uploadVM:SystemProperty;
 		
@@ -126,7 +131,11 @@ package net.undf.abicloud.vo.configuration
 		public var client_wiki_config_general:SystemProperty;
 		public var client_wiki_config_heartbeat:SystemProperty;
 		public var client_wiki_config_registration:SystemProperty;	
-		public var client_wiki_config_licence:SystemProperty;		
+		public var client_wiki_config_licence:SystemProperty;	
+		
+		public var client_wiki_pricing_createTemplate:SystemProperty;
+		public var client_wiki_pricing_createCostCode:SystemProperty;	
+		public var client_wiki_pricing_createCurrency:SystemProperty;
 		
 
 		private var propertiesIndex:Array;

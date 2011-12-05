@@ -32,14 +32,13 @@ import javax.persistence.Table;
 
 import com.abiquo.server.core.common.DefaultEntityBase;
 
-
 /**
-* @author apuig
+ * @author apuig
  */
 @Entity
 @Table(name = "category")
-public class Category extends DefaultEntityBase implements Serializable, PersistenceDto 
-{   
+public class Category extends DefaultEntityBase implements Serializable, PersistenceDto
+{
     private static final long serialVersionUID = 305970249598840365L;
 
     @Id
@@ -50,14 +49,13 @@ public class Category extends DefaultEntityBase implements Serializable, Persist
     private String name;
 
     private Integer isErasable;
-    
+
     private Integer isDefault;
-    
-    
+
     public Category()
     {
     }
-    
+
     public Category(String name)
     {
         setName(name);
