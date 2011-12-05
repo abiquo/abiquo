@@ -105,7 +105,7 @@ public class TemplateDto extends TemplateDefinitionDto
     public void setDiskFileFormat(final DiskFormatType diskFileFormat)
     {
         this.diskFileFormat = diskFileFormat;
-        this.setDiskFormatTypeUri(diskFileFormat.uri);
+        this.setDiskFormatType(String.valueOf(diskFileFormat.getAlias()));
         // FIXME once TemplateDefinitionDto work with Enum
     }
 
