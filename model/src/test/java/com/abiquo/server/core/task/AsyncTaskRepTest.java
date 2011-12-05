@@ -27,78 +27,37 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
-import com.abiquo.server.core.task.Job.JobType;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
-import com.abiquo.server.core.task.enums.TaskState;
-import com.abiquo.server.core.task.enums.TaskType;
 
-@Test(groups = "redisaccess")
-public class AsyncTaskRepTest
+public class AsyncTaskRepTest extends RedisRepoTestBase
 {
-    protected AsyncTaskRep repo = new AsyncTaskRep();
+    protected TaskGenerator taskGenerator = new TaskGenerator();
 
-    protected JedisPool jedisPool;
-
-    @BeforeTest
-    public void testSetUp() throws Exception
-    {
-        Field jobDaoField = AsyncTaskRep.class.getDeclaredField("jobDao");
-        Field taskDaoField = AsyncTaskRep.class.getDeclaredField("taskDao");
-        Field repoField = AsyncTaskRep.class.getDeclaredField("jedisPool");
-
-        jobDaoField.setAccessible(true);
-        taskDaoField.setAccessible(true);
-        repoField.setAccessible(true);
-
-        jobDaoField.set(repo, JobDAO.class.newInstance());
-        taskDaoField.set(repo, TaskDAO.class.newInstance());
-
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setTestOnBorrow(true);
-
-        jedisPool = new JedisPool(jedisPoolConfig, "localhost");
-        repoField.set(repo, jedisPool);
-    }
-
-    @AfterTest
-    public void testTearDown()
-    {
-        Jedis jedis = jedisPool.getResource();
-        jedis.flushDB();
-        jedisPool.returnResource(jedis);
-    }
+    protected JobGenerator jobGenerator = new JobGenerator();
 
     @Test
     public void test_saveTask()
     {
-        Task task = createUniqueTask();
+        Task task = taskGenerator.createUniqueInstance();
         repo.save(task);
 
         Task fromDb = repo.findTask(task.getTaskId());
-        assertSameTask(task, fromDb);
+        taskGenerator.assertSameTask(task, fromDb);
     }
 
     @Test
     public void test_saveTaskWithJobs()
     {
-        Task task = createUniqueTask();
-        Job j0 = createUniqueJob();
-        Job j1 = createUniqueJob();
-        Job j2 = createUniqueJob();
+        Task task = taskGenerator.createUniqueInstance();
+        Job j0 = jobGenerator.createUniqueInstance();
+        Job j1 = jobGenerator.createUniqueInstance();
+        Job j2 = jobGenerator.createUniqueInstance();
 
         task.getJobs().add(j0);
         task.getJobs().add(j1);
@@ -116,10 +75,10 @@ public class AsyncTaskRepTest
     @Test
     public void test_findTaskByJobId()
     {
-        Task task = createUniqueTask();
-        Job j0 = createUniqueJob();
-        Job j1 = createUniqueJob();
-        Job j2 = createUniqueJob();
+        Task task = taskGenerator.createUniqueInstance();
+        Job j0 = jobGenerator.createUniqueInstance();
+        Job j1 = jobGenerator.createUniqueInstance();
+        Job j2 = jobGenerator.createUniqueInstance();
 
         task.getJobs().add(j0);
         task.getJobs().add(j1);
@@ -127,32 +86,32 @@ public class AsyncTaskRepTest
 
         repo.save(task);
 
-        assertSameTask(repo.findTaskByJobId(j0.getId()), task);
-        assertSameTask(repo.findTaskByJobId(j1.getId()), task);
-        assertSameTask(repo.findTaskByJobId(j2.getId()), task);
+        taskGenerator.assertSameTask(repo.findTaskByJobId(j0.getId()), task);
+        taskGenerator.assertSameTask(repo.findTaskByJobId(j1.getId()), task);
+        taskGenerator.assertSameTask(repo.findTaskByJobId(j2.getId()), task);
         assertNull(repo.findTaskByJobId("blabla"), null);
     }
 
     @Test
     public void test_saveTaskWithNullFields()
     {
-        Task task = createUniqueTask();
+        Task task = taskGenerator.createUniqueInstance();
         task.setTaskId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = taskGenerator.createUniqueInstance();
         task.setOwnerId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = taskGenerator.createUniqueInstance();
         task.setType(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = taskGenerator.createUniqueInstance();
         task.setUserId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = taskGenerator.createUniqueInstance();
         task.setState(null);
         expectRuntimeOnInsertNullField(task);
     }
@@ -160,7 +119,7 @@ public class AsyncTaskRepTest
     @Test
     public void test_deleteTask()
     {
-        Task task = createUniqueTask();
+        Task task = taskGenerator.createUniqueInstance();
         repo.save(task);
         repo.delete(task);
 
@@ -171,10 +130,10 @@ public class AsyncTaskRepTest
     @Test
     public void test_deleteTaskWithJobs()
     {
-        Task task = createUniqueTask();
-        Job j0 = createUniqueJob();
-        Job j1 = createUniqueJob();
-        Job j2 = createUniqueJob();
+        Task task = taskGenerator.createUniqueInstance();
+        Job j0 = jobGenerator.createUniqueInstance();
+        Job j1 = jobGenerator.createUniqueInstance();
+        Job j2 = jobGenerator.createUniqueInstance();
 
         task.getJobs().add(j0);
         task.getJobs().add(j1);
@@ -199,11 +158,11 @@ public class AsyncTaskRepTest
     @Test
     public void test_saveJob()
     {
-        Job job = createUniqueJob();
+        Job job = jobGenerator.createUniqueInstance();
         repo.save(job);
 
         Job fromDb = repo.findJob(job.getId());
-        assertSameJob(job, fromDb);
+        jobGenerator.assertSameJob(job, fromDb);
     }
 
     @Test
@@ -213,7 +172,7 @@ public class AsyncTaskRepTest
         data.put("DummyKey0", "A");
         data.put("DummyKey1", "B");
 
-        Job job = createUniqueJob();
+        Job job = jobGenerator.createUniqueInstance();
         job.getData().putAll(data);
 
         repo.save(job);
@@ -228,23 +187,23 @@ public class AsyncTaskRepTest
     @Test
     public void test_saveJobWithNullFields()
     {
-        Job job = createUniqueJob();
+        Job job = jobGenerator.createUniqueInstance();
         job.setId(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = jobGenerator.createUniqueInstance();
         job.setDescription(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = jobGenerator.createUniqueInstance();
         job.setState(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = jobGenerator.createUniqueInstance();
         job.setRollbackState(null);
         expectRuntimeOnInsertNullField(job);
 
-        job = createUniqueJob();
+        job = jobGenerator.createUniqueInstance();
         job.setType(null);
         expectRuntimeOnInsertNullField(job);
     }
@@ -252,16 +211,16 @@ public class AsyncTaskRepTest
     @Test
     public void test_finTaskByOwnerId()
     {
-        Task task0 = createUniqueTask();
-        Task task1 = createUniqueTask();
+        Task task0 = taskGenerator.createUniqueInstance();
+        Task task1 = taskGenerator.createUniqueInstance();
 
         task0.setOwnerId("A");
         task1.setOwnerId("A");
 
-        Task task2 = createUniqueTask();
+        Task task2 = taskGenerator.createUniqueInstance();
         task2.setOwnerId("B");
 
-        Task task3 = createUniqueTask();
+        Task task3 = taskGenerator.createUniqueInstance();
         task3.setOwnerId("C");
 
         repo.save(task0);
@@ -283,28 +242,6 @@ public class AsyncTaskRepTest
         assertEquals(tasks.get(0).getTaskId(), task3.getTaskId());
     }
 
-    protected Task createUniqueTask()
-    {
-        Task task = new Task();
-
-        task.setOwnerId(UUID.randomUUID().toString());
-        task.setTaskId(UUID.randomUUID().toString());
-        task.setUserId(UUID.randomUUID().toString());
-        task.setType(TaskType.POWER_ON);
-        task.setState(TaskState.STARTED);
-
-        return task;
-    }
-
-    protected void assertSameTask(final Task one, final Task other)
-    {
-        assertEquals(one.getTaskId(), other.getTaskId());
-        assertEquals(one.getOwnerId(), other.getOwnerId());
-        assertEquals(one.getUserId(), other.getUserId());
-        assertEquals(one.getType(), other.getType());
-        assertEquals(one.getState(), other.getState());
-    }
-
     protected void expectRuntimeOnInsertNullField(Task task)
     {
         try
@@ -316,28 +253,6 @@ public class AsyncTaskRepTest
         {
             assertTrue(true);
         }
-    }
-
-    protected Job createUniqueJob()
-    {
-        Job job = new Job();
-
-        job.setId(UUID.randomUUID().toString());
-        job.setDescription("blablablabla");
-        job.setType(JobType.CONFIGURE);
-        job.setParentTaskId(UUID.randomUUID().toString());
-
-        return job;
-    }
-
-    protected void assertSameJob(final Job one, final Job other)
-    {
-        assertEquals(one.getId(), other.getId());
-        assertEquals(one.getEntityKey(), other.getEntityKey());
-        assertEquals(one.getType(), other.getType());
-        assertEquals(one.getDescription(), other.getDescription());
-        assertEquals(one.getState(), other.getState());
-        assertEquals(one.getRollbackState(), other.getRollbackState());
     }
 
     protected void expectRuntimeOnInsertNullField(Job job)

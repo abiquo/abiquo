@@ -30,8 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -48,6 +48,8 @@ import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseRep;
+import com.abiquo.server.core.enterprise.Privilege;
+import com.abiquo.server.core.enterprise.PrivilegeDAO;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Rack;
@@ -80,6 +82,9 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     DatacenterLimitsDAO dcLimitsDao;
 
     @Autowired
+    PrivilegeDAO privilegeDao;
+
+    @Autowired
     RepositoryDAO repoDao;
 
     @Autowired
@@ -107,7 +112,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
 
     IpPoolManagementGenerator ipPoolGen = new IpPoolManagementGenerator(seed);
 
-    VirtualImageGenerator vimageGen = new VirtualImageGenerator(seed);
+    VirtualMachineTemplateGenerator vimageGen = new VirtualMachineTemplateGenerator(seed);
 
     public PopulateVirtualInfrastructure()
     {
@@ -264,7 +269,7 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     /**
      * @param vimageDec, vi1:d1,1,2,10 (VirtualImage)
      */
-    private VirtualImage createVirtualImage(final String enterStr, final String vimageDec)
+    private VirtualMachineTemplate createVirtualImage(final String enterStr, final String vimageDec)
     {
         Enterprise enterprise = enterRep.findByName(enterStr);
 
@@ -295,10 +300,11 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             hdRequired = Integer.parseInt(frg[3]) * GB_TO_MB * 1014 * 1024; // bytes
         }
 
-        VirtualImage vimage =
+        VirtualMachineTemplate vimage =
             vimageGen.createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired,
                 virtualimageName);
-        appslibraryRep.insertVirtualImage(vimage);
+        appslibraryRep.insertCategory(vimage.getCategory());
+        appslibraryRep.insertVirtualMachineTemplate(vimage);
 
         return vimage;
     }
@@ -390,10 +396,22 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
             createIpMan(vnicName, vlanName, vdc);
         }
 
-        VirtualImage vimage = appslibraryRep.findVirtualImageByName(virtualimageName);
-        assertNotNull("vimage not found " + virtualimageName, vimage);
+        VirtualMachineTemplate vmtemplate =
+            appslibraryRep.findVirtualMachineTemplateByName(virtualimageName);
+        assertNotNull("vimage not found " + virtualimageName, vmtemplate);
 
-        VirtualMachine vmachine = vmGen.createInstance(vimage, enterprise, vmachineName);
+        VirtualMachine vmachine = vmGen.createInstance(vmtemplate, enterprise, vmachineName);
+
+        for (Privilege p : vmachine.getUser().getRole().getPrivileges())
+        {
+            privilegeDao.persist(p);
+        }
+
+        // set the default vmachine requirements based on the template
+        vmachine.setCpu(vmtemplate.getCpuRequired());
+        vmachine.setRam(vmtemplate.getRamRequired());
+        vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+
         enterRep.insertRole(vmachine.getUser().getRole());
         enterRep.insertUser(vmachine.getUser());
         vdcRep.insertVirtualMachine(vmachine);

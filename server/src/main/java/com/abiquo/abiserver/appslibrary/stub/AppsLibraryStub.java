@@ -28,10 +28,10 @@ import com.abiquo.abiserver.pojo.virtualimage.Category;
 import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 public interface AppsLibraryStub
 {
@@ -39,21 +39,21 @@ public interface AppsLibraryStub
     /**
      * OVFPackages
      */
-    public DataResult<List<String>> getOVFPackageListName(final Integer idEnterprise);
+    public DataResult<List<String>> getTemplateDefinitionListNames(final Integer idEnterprise);
 
-    DataResult<OVFPackageList> getOVFPackageList(final Integer idEnterprise,
+    DataResult<OVFPackageList> getTemplateDefinitionList(final Integer idEnterprise,
         final String nameOVFPackageList);
 
-    public DataResult<OVFPackageList> createOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> createTemplateDefinitionListFromOVFIndexUrl(final Integer idEnterprise,
         final String ovfpackageListURL);
 
-    public DataResult<OVFPackageList> refreshOVFPackageList(final Integer idEnterprise,
+    public DataResult<OVFPackageList> refreshTemplateDefinitionListFromRepository(final Integer idEnterprise,
         final String nameOvfpackageList);
 
-    public BasicResult deleteOVFPackageList(final Integer idEnterprise,
+    public BasicResult deleteTemplateDefinitionList(final Integer idEnterprise,
         final String nameOvfpackageList);
 
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList);
+    public TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise, final String nameOVFPackageList);
 
     /**
      * ICONS
@@ -83,22 +83,22 @@ public interface AppsLibraryStub
     public DataResult<List<com.abiquo.abiserver.pojo.virtualimage.DiskFormatType>> getDiskFormatTypes();
 
     /**
-     * API will update the {@link OVFPackageInstanceStateDto} the creation state in the provided
+     * API will update the {@link TemplateStateDto} the creation state in the provided
      * datacenter of the (AM datacenter communication)
      */
 
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(
         String nameOVFPackageList, Integer idEnterprise, Integer datacenterId);
 
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(List<String> ovfUrls,
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(List<String> ovfUrls,
         Integer idEnterprise, Integer datacenterId);
 
-    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(String ovfUrl,
+    public DataResult<OVFPackageInstanceStatus> getTemplateState(String ovfUrl,
         Integer idEnterprise, Integer datacenterId);
 
-    public BasicResult installOVFPackagesInDatacenter(List<String> ovfUrls, Integer idEnterprise,
+    public BasicResult installTemplateDefinitionsInDatacenter(List<String> ovfUrls, Integer idEnterprise,
         Integer datacenterId);
 
-    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(String ovfUrl,
+    public DataResult<OVFPackageInstanceStatus> uninstallTemplateDefinitionInDatacenter(String ovfUrl,
         Integer idEnterprise, Integer datacenterId);
 }

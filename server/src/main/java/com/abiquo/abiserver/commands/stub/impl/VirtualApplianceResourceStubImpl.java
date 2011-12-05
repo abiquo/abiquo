@@ -61,7 +61,7 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
@@ -419,8 +419,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         dto.setRam(virtualMachine.getRam());
         dto.setState(VirtualMachineState.NOT_ALLOCATED);
         dto.setUuid(virtualMachine.getUUID());
-        dto.addLink(new RESTLink("virtualimage", createVirtualImageLink(node.getVirtualImage()
-            .getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
+        dto.addLink(new RESTLink("virtualmachinetemplate", createVirtualMachineTemplateLink(node
+            .getVirtualImage().getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
 
         dto.addLink(new RESTLink("enterprise", createEnterpriseLink(virtualAppliance
             .getEnterprise().getId())));
@@ -538,8 +538,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 if (imageResponse.getStatusCode() == Status.OK.getStatusCode())
                 {
 
-                    VirtualImageDto virtualImageDto =
-                        imageResponse.getEntity(VirtualImageDto.class);
+                    VirtualMachineTemplateDto virtualImageDto =
+                        imageResponse.getEntity(VirtualMachineTemplateDto.class);
                     VirtualImage image = dtoToVirtualImage(virtualImageDto);
                     nodeVirtualImage.setVirtualImage(image);
                     virtualMachine.setVirtualImage(image);
@@ -554,7 +554,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         return nodeVirtualImages;
     }
 
-    private VirtualImage dtoToVirtualImage(final VirtualImageDto virtualImageDto)
+    private VirtualImage dtoToVirtualImage(final VirtualMachineTemplateDto virtualImageDto)
     {
         VirtualImage vm = new VirtualImage();
         vm.setChefEnabled(virtualImageDto.isChefEnabled());

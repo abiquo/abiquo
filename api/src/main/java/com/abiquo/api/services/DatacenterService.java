@@ -126,8 +126,7 @@ public class DatacenterService extends DefaultApiService
         if (repo.existsAnyDatacenterWithName(datacenter.getName()))
         {
             tracer.log(SeverityType.MINOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                "Another datacenter with the name '" + datacenter.getName()
-                    + "' already exists. Please choose a different name.");
+                "datacenter.repeated", datacenter.getName());
             addConflictErrors(APIError.DATACENTER_DUPLICATED_NAME);
             flushErrors();
         }
@@ -163,13 +162,12 @@ public class DatacenterService extends DefaultApiService
                     PricingTier pricingTier = new PricingTier(zero, pt, tier);
                     repo.insertPricingTier(pricingTier);
                 }
-
             }
         }
 
         // Log the event
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE, "Datacenter '"
-            + datacenter.getName() + "' has been created in " + datacenter.getLocation());
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
+            "datacenter.created", datacenter.getName(), datacenter.getLocation());
 
         return datacenter;
     }

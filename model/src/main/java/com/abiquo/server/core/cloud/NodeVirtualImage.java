@@ -30,7 +30,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
@@ -43,7 +43,7 @@ public class NodeVirtualImage extends Node
     public static final String TABLE_NAME = "nodevirtualimage";
 
     public NodeVirtualImage(final String name, final VirtualAppliance virtualAppliance,
-        final VirtualImage virtualImage, final VirtualMachine virtualMachine)
+        final VirtualMachineTemplate virtualImage, final VirtualMachine virtualMachine)
     {
         super(DISCRIMINATOR);
 
@@ -66,15 +66,15 @@ public class NodeVirtualImage extends Node
     @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualImage;
 
     @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    public VirtualMachineTemplate getVirtualImage()
     {
         return this.virtualImage;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualImage(final VirtualMachineTemplate virtualImage)
     {
         this.virtualImage = virtualImage;
     }

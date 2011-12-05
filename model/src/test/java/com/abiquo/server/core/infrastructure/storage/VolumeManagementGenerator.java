@@ -24,8 +24,8 @@ package com.abiquo.server.core.infrastructure.storage;
 import java.util.List;
 import java.util.UUID;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
@@ -44,7 +44,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
     private VirtualDatacenterGenerator vdcGenerator;
 
-    private VirtualImageGenerator imageGenerator;
+    private VirtualMachineTemplateGenerator imageGenerator;
 
     public VolumeManagementGenerator(final SeedGenerator seed)
     {
@@ -52,7 +52,7 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         poolGenerator = new StoragePoolGenerator(seed);
         rasdmGenerator = new RasdManagementGenerator(seed);
         vdcGenerator = new VirtualDatacenterGenerator(seed);
-        imageGenerator = new VirtualImageGenerator(seed);
+        imageGenerator = new VirtualMachineTemplateGenerator(seed);
     }
 
     @Override
@@ -65,9 +65,9 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
         rasdmGenerator.assertAllPropertiesEqual(obj1, obj2);
 
         // Optional properties
-        if (obj1.getVirtualImage() != null)
+        if (obj1.getVirtualMachineTemplate() != null)
         {
-            imageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
+            imageGenerator.assertAllPropertiesEqual(obj1.getVirtualMachineTemplate(), obj2.getVirtualMachineTemplate());
         }
     }
 
@@ -154,8 +154,8 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
     private VolumeManagement addStatefulImageToVolume(final VolumeManagement volume,
         final Datacenter datacenter)
     {
-        VirtualImage image = imageGenerator.createInstance(datacenter);
-        volume.setVirtualImage(image);
+        VirtualMachineTemplate image = imageGenerator.createInstance(datacenter);
+        volume.setVirtualMachineTemplate(image);
         return volume;
     }
 
@@ -171,9 +171,9 @@ public class VolumeManagementGenerator extends DefaultEntityGenerator<VolumeMana
 
         rasdmGenerator.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        if (entity.getVirtualImage() != null)
+        if (entity.getVirtualMachineTemplate() != null)
         {
-            VirtualImage virtualImage = entity.getVirtualImage();
+            VirtualMachineTemplate virtualImage = entity.getVirtualMachineTemplate();
             imageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
             entitiesToPersist.add(virtualImage);
         }

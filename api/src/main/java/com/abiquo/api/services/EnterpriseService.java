@@ -60,6 +60,7 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.RoleLdap;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.MachineDto;
 import com.abiquo.server.core.pricing.PricingRep;
@@ -75,7 +76,7 @@ public class EnterpriseService extends DefaultApiService
     private VirtualDatacenterRep vdcRepo;
 
     @Autowired
-    private MachineService machineService;
+    private InfrastructureRep infraRep;
 
     @Autowired
     PricingRep pricingRep;
@@ -98,7 +99,7 @@ public class EnterpriseService extends DefaultApiService
     {
         repo = new EnterpriseRep(em);
         vdcRepo = new VirtualDatacenterRep(em);
-        machineService = new MachineService(em);
+        infraRep = new InfrastructureRep(em);
         userService = new UserService(em);
         datacenterService = new DatacenterService(em);
     }
@@ -364,7 +365,13 @@ public class EnterpriseService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Machine reserveMachine(final Integer machineId, final Integer enterpriseId)
     {
-        Machine machine = machineService.getMachine(machineId);
+        Machine machine = infraRep.findMachineById(machineId);
+        if (machine == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_MACHINE);
+            flushErrors();
+        }
+
         Enterprise enterprise = getEnterprise(enterpriseId);
         repo.reserveMachine(machine, enterprise);
 

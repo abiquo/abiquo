@@ -22,7 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
-import static com.abiquo.api.resources.appslibrary.VirtualImageResource.VIRTUAL_IMAGE;
+import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.Collection;
@@ -46,13 +46,13 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
-import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -134,9 +134,9 @@ public class VirtualMachinesResource extends AbstractResource
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
-        final VirtualImage vimage = vm.getVirtualImage();
-        vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-            .getRepository().getDatacenter().getId(), vimage.getId()));
+        final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
+        vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+            .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         return vmDto;
     }
 
@@ -164,13 +164,13 @@ public class VirtualMachinesResource extends AbstractResource
             getLinkId(virtualMachineDto.searchLink(ENTERPRISE),
                 EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
                 ENTERPRISE, APIError.NON_EXISTENT_ENTERPRISE);
-        final Integer vImageId =
-            getLinkId(virtualMachineDto.searchLink(VIRTUAL_IMAGE), virtualImageTemplatePath(),
-                VirtualImageResource.VIRTUAL_IMAGE_PARAM, VIRTUAL_IMAGE,
-                APIError.NON_EXISTENT_VIRTUAL_IMAGE);
+        final Integer vmtemplateId =
+            getLinkId(virtualMachineDto.searchLink(VIRTUAL_MACHINE_TEMPLATE), virtualMachineTemplatePath(),
+                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM, VIRTUAL_MACHINE_TEMPLATE,
+                APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
 
         final VirtualMachine virtualMachine =
-            service.createVirtualMachine(vm, enterpriseId, vImageId, vdcId, vappId);
+            service.createVirtualMachine(vm, enterpriseId, vmtemplateId, vdcId, vappId);
 
         final VirtualMachineDto vappsDto =
             VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder);
@@ -178,14 +178,14 @@ public class VirtualMachinesResource extends AbstractResource
         return vappsDto;
     }
 
-    /** Do not include the virtual image param, will be added later. **/
-    private String virtualImageTemplatePath()
+    /** Do not include the virtual machine template param, will be added later. **/
+    private String virtualMachineTemplatePath()
     {
         return buildPath(EnterprisesResource.ENTERPRISES_PATH,
             EnterpriseResource.ENTERPRISE_PARAM, //
             DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
             DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-            VirtualImagesResource.VIRTUAL_IMAGES_PATH);
+            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
     }
 
     /**

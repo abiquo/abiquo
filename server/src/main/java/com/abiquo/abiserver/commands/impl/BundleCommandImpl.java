@@ -646,7 +646,7 @@ public class BundleCommandImpl extends BasicCommand implements BundleCommand
                     ApplianceManagerResourceStubImpl amStub =
                         new ApplianceManagerResourceStubImpl(amServiceUri);
 
-                    amStub.preBundleOVFPackage(String.valueOf(idEnterprise), name);
+                    amStub.preBundleTemplate(String.valueOf(idEnterprise), name);
                 }
                 catch (Exception e)
                 {

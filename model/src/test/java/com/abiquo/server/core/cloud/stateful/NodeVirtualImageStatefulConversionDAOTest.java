@@ -28,7 +28,7 @@ import javax.persistence.EntityManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -81,7 +81,7 @@ public class NodeVirtualImageStatefulConversionDAOTest extends
         VirtualApplianceStatefulConversion vasc = nvisc.getVirtualApplianceStatefulConversion();
         Enterprise ent = vasc.getVirtualAppliance().getVirtualDatacenter().getEnterprise();
         Datacenter dc = vasc.getVirtualAppliance().getVirtualDatacenter().getDatacenter();
-        VirtualImage vi = nvisc.getNodeVirtualImage().getVirtualImage();
+        VirtualMachineTemplate vi = nvisc.getNodeVirtualImage().getVirtualImage();
         VirtualMachine vm = nvisc.getNodeVirtualImage().getVirtualMachine();
 
         vasc.getUser().setEnterprise(ent);

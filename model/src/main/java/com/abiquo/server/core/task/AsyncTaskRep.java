@@ -143,7 +143,18 @@ public class AsyncTaskRep
 
         try
         {
-            return taskDao.findByOwnerId(type, ownerId, jedis);
+            List<Task> tasks = taskDao.findByOwnerId(type, ownerId, jedis);
+
+            for (Task task : tasks)
+            {
+                if (task != null)
+                {
+                    task.getJobs().addAll(
+                        jobDao.findJobs(taskDao.getTaskJobsEntityKey(task.getIdAsString()), jedis));
+                }
+            }
+
+            return tasks;
         }
         finally
         {

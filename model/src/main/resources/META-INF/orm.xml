@@ -72,10 +72,10 @@
     <orm:entity class="com.abiquo.server.core.appslibrary.AppsLibrary"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.Icon"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.Category"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.appslibrary.VirtualImage"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.VirtualMachineTemplate"></orm:entity>
     <orm:entity class="com.abiquo.server.core.appslibrary.VirtualImageConversion"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackage"></orm:entity>
-    <orm:entity class="com.abiquo.server.core.appslibrary.OVFPackageList"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.TemplateDefinition"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.appslibrary.TemplateDefinitionList"></orm:entity>
     <!-- end: appliance manager -->
      <!-- pricing -->
     <orm:entity class="com.abiquo.server.core.pricing.PricingTemplate"></orm:entity>

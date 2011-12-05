@@ -36,7 +36,7 @@ import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.appslibrary.DatacenterRepositoryService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
+import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
@@ -69,7 +69,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     private DatacenterRepositoryService repoService;
 
     @Autowired
-    private VirtualImageService vimageService;
+    private VirtualMachineTemplateService vmtemplateService;
 
     @Autowired
     private InfrastructureService infService;
@@ -81,7 +81,7 @@ public class DatacenterRepositoryResource extends AbstractResource
      * Return the remote repository if exists.
      * 
      * @param refresh, communicate with the EnterpriseRepositoryResource (ApplianceManager
-     *            datacenter service) to add vimages include in the repository filesystem.
+     *            datacenter service) to add vmtemplates include in the repository filesystem.
      * @param includeUsage, communicate with the EnterpriseRepositoryResource (ApplianceManager
      *            datacenter service) in order to include the repository filesytem usage.
      */
@@ -95,7 +95,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     {
         // TODO check enterprise can use the datacenter
 
-        Repository repo = vimageService.getDatacenterRepository(dcId);
+        Repository repo = vmtemplateService.getDatacenterRepository(dcId);
 
         final String amUri =
             infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();

@@ -28,6 +28,7 @@ import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.server.core.common.DefaultEntityCurrentUsed;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.DefaultEntityWithLimits.LimitStatus;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 public class LimitExceededException extends AllocatorException
 {

@@ -31,8 +31,8 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 @Repository("jpaIconDAO")
 /* package */class IconDAO extends DefaultDAOBase<Integer, Icon>
 {
-    private static final String VIRTUALIMAGES_BY_ICON =
-        "FROM com.abiquo.server.core.appslibrary.VirtualImage WHERE icon = :icon";
+    private static final String VIRTUAL_MACHINE_TEMPLATESS_BY_ICON =
+        "FROM com.abiquo.server.core.appslibrary.VirtualMachineTemplate WHERE icon = :icon";
 
     public IconDAO()
     {
@@ -49,9 +49,9 @@ import com.abiquo.server.core.common.persistence.DefaultDAOBase;
         return findUniqueByProperty(Icon.PATH_PROPERTY, path);
     }
 
-    public boolean iconInUseByVirtualImages(final Icon icon)
+    public boolean iconInUseByVirtualMachineTemplates(final Icon icon)
     {
-        Query query = getSession().createQuery(VIRTUALIMAGES_BY_ICON);
+        Query query = getSession().createQuery(VIRTUAL_MACHINE_TEMPLATESS_BY_ICON);
         query.setParameter("icon", icon);
         return !query.list().isEmpty();
     }

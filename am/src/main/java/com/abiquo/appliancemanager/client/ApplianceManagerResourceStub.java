@@ -34,15 +34,15 @@ import com.abiquo.appliancemanager.util.URIResolver;
 
 public class ApplianceManagerResourceStub
 {
-    private RestClient client;
+    private final RestClient client;
 
-    private RestClient clientTimeout;
+    private final RestClient clientTimeout;
 
     private final String serviceUri;
 
     private final static String REPOSITORY_PATH = "erepo";
 
-    private final static String OVFPACKAGEINSTANCE_PATH = "ovf";
+    private final static String TEMPLATE_PATH = "template";
 
     /**
      * Timeout only of ''slow nfs filesystem access'' (getting the repository usage or refresh the
@@ -62,7 +62,7 @@ public class ApplianceManagerResourceStub
         this.clientTimeout = new RestClient(confTimeout);
     }
 
-    public Resource ovfPackage(final String idEnterprise, String ovfid)
+    public Resource template(final String idEnterprise, String ovfid)
     {
 
         if (ovfid.startsWith("http://"))
@@ -73,19 +73,19 @@ public class ApplianceManagerResourceStub
         Map<String, String> params;
         params = new HashMap<String, String>();
         params.put(REPOSITORY_PATH, idEnterprise);
-        params.put(OVFPACKAGEINSTANCE_PATH, ovfid);
+        params.put(TEMPLATE_PATH, ovfid);
 
-        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs/{ovf}", params);
+        String url = URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates/{template}", params);
 
         Resource resource = client.resource(url);
 
         return resource;
     }
 
-    Resource ovfPackages(final String idEnterprise)
+    Resource templates(final String idEnterprise)
     {
         final String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs",
+            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates",
                 Collections.singletonMap("erepo", idEnterprise));
 
         Resource resource = client.resource(url);
@@ -93,10 +93,10 @@ public class ApplianceManagerResourceStub
         return resource;
     }
 
-    Resource ovfPackagesTimeout(final String idEnterprise)
+    Resource templatesTimeout(final String idEnterprise)
     {
         final String url =
-            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/ovfs",
+            URIResolver.resolveURI(serviceUri, "erepos/{erepo}/templates",
                 Collections.singletonMap("erepo", idEnterprise));
 
         Resource resource = clientTimeout.resource(url);

@@ -43,8 +43,8 @@ import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackage;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageInstanceStatus;
 import com.abiquo.abiserver.pojo.virtualimage.OVFPackageList;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.error.ErrorDto;
@@ -56,21 +56,21 @@ import com.abiquo.server.core.appslibrary.DiskFormatTypeDto;
 import com.abiquo.server.core.appslibrary.DiskFormatTypesDto;
 import com.abiquo.server.core.appslibrary.IconDto;
 import com.abiquo.server.core.appslibrary.IconsDto;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListsDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListsDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryStub
 {
 
     private static final Logger logger = LoggerFactory.getLogger(AppsLibraryStubImpl.class);
 
-    public static final String OVF_PACKAGE_LISTS_PATH = "appslib/ovfpackagelists";
-
     public static final String ENTERPRISES_PATH = "admin/enterprises";
 
-    public static final String OVF_PACKAGE_PATH = "appslib/ovfpackages";
+    public static final String TEMPLATE_DEFINITION_PATH = "appslib/templateDefinitions";
+
+    public static final String TEMPLATE_DEFINITION_LISTS_PATH = "appslib/templateDefinitionList";
 
     @Override
     public DataResult<Icon> createIcon(final IconDto icon)
@@ -101,19 +101,19 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<OVFPackageList> createOVFPackageList(final Integer idEnterprise,
-        final String ovfpackageListURL)
+    public DataResult<OVFPackageList> createTemplateDefinitionListFromOVFIndexUrl(
+        final Integer idEnterprise, final String ovfindexURL)
     {
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        String uri = createOVFPackageListsLink(idEnterprise.toString());
+        String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
 
         // Resource resource = createResourceOVFPackageLists(idEnterprise);
         // resource.queryParam("ovfindexURL", ovfpackageListURL);
 
         ClientResponse response =
             resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).post(
-                ovfpackageListURL);
+                ovfindexURL);
         final Integer httpStatus = response.getStatusCode();
 
         if (httpStatus / 200 != 1)
@@ -124,22 +124,24 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageListDto.class)));
+                .getEntity(TemplateDefinitionListDto.class)));
         }
 
         return result;
     }
 
     @Override
-    public BasicResult deleteOVFPackageList(final Integer idEnterprise,
-        final String nameOvfpackageList)
+    public BasicResult deleteTemplateDefinitionList(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
 
         BasicResult result = new BasicResult();
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOvfpackageList);
+        final Integer templateDefinitionListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
-        String uri = createOVFPackageListLink(idEnterprise.toString(), idOvfPackageList.toString());
+        String uri =
+            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
         ClientResponse response = delete(uri);
 
         final Integer httpStatus = response.getStatusCode();
@@ -156,15 +158,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackageListState(
-        final String nameOVFPackageList, final Integer idEnterprise, final Integer datacenterId)
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(
+        final String templateDefinitionListName, final Integer idEnterprise,
+        final Integer datacenterId)
     {
         final DataResult<List<OVFPackageInstanceStatus>> result =
             new DataResult<List<OVFPackageInstanceStatus>>();
 
-        final Integer listId = getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        final Integer listId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
         final String uri =
-            createOVFPackageListStatusLink(idEnterprise.toString(), String.valueOf(listId));
+            createTemplateStateFromListLink(idEnterprise.toString(), String.valueOf(listId));
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
@@ -172,7 +176,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageInstancesStateDto.class)));
+                .getEntity(TemplatesStateDto.class)));
         }
         else
         {
@@ -184,15 +188,15 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<List<OVFPackageInstanceStatus>> getOVFPackagesState(
-        final List<String> ovfUrls, final Integer idEnterprise, final Integer datacenterId)
+    public DataResult<List<OVFPackageInstanceStatus>> getTemplatesState(final List<String> ovfUrls,
+        final Integer idEnterprise, final Integer datacenterId)
     {
         final DataResult<List<OVFPackageInstanceStatus>> result =
             new DataResult<List<OVFPackageInstanceStatus>>();
         final List<OVFPackageInstanceStatus> list = new LinkedList<OVFPackageInstanceStatus>();
-        for (String ovfUrl : ovfUrls)
+        for (String templateDefinitionUrl : ovfUrls)
         {
-            list.add(getOVFPackageState(ovfUrl, idEnterprise, datacenterId).getData());
+            list.add(getTemplateState(templateDefinitionUrl, idEnterprise, datacenterId).getData());
         }
 
         result.setSuccess(Boolean.TRUE);
@@ -201,16 +205,18 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<OVFPackageInstanceStatus> getOVFPackageState(final String ovfUrl,
-        final Integer idEnterprise, final Integer datacenterId)
+    public DataResult<OVFPackageInstanceStatus> getTemplateState(
+        final String templateDefinitionUrl, final Integer idEnterprise, final Integer datacenterId)
     {
         final DataResult<OVFPackageInstanceStatus> result =
             new DataResult<OVFPackageInstanceStatus>();
 
-        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageStateLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
+            createTemplateStateLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
@@ -218,7 +224,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageInstanceStateDto.class)));
+                .getEntity(TemplateStateDto.class)));
         }
         else
         {
@@ -230,12 +236,13 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public BasicResult installOVFPackagesInDatacenter(final List<String> ovfUrls,
-        final Integer idEnterprise, final Integer datacenterId)
+    public BasicResult installTemplateDefinitionsInDatacenter(
+        final List<String> templateDefinitionUrls, final Integer idEnterprise,
+        final Integer datacenterId)
     {
-        for (String ovfUrl : ovfUrls)
+        for (String templateDefUrl : templateDefinitionUrls)
         {
-            installOVFPackageInDatacenter(ovfUrl, idEnterprise, datacenterId);
+            installTemplateDefinitionInDatacenter(templateDefUrl, idEnterprise, datacenterId);
         }
 
         BasicResult result = new BasicResult();
@@ -243,13 +250,15 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    private void installOVFPackageInDatacenter(final String ovfUrl, final Integer idEnterprise,
-        final Integer datacenterId)
+    private void installTemplateDefinitionInDatacenter(final String templateDefinitionUrl,
+        final Integer idEnterprise, final Integer datacenterId)
     {
-        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageInstallLink(String.valueOf(idEnterprise), String.valueOf(ovfPackageId));
+            createTemplateDefinitionInstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -258,21 +267,23 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         if (response.getStatusCode() / 200 != 1)
         {
-            logger.error("Can't install OVFPackage {} in dc {}", ovfUrl, datacenterId);
+            logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
+                datacenterId);
             // error cause will be shown with getOVFPackageState
         }
     }
 
     @Override
-    public DataResult<OVFPackageInstanceStatus> uninstallOVFPackageInDatacenter(
-        final String ovfUrl, final Integer idEnterprise, final Integer datacenterId)
+    public DataResult<OVFPackageInstanceStatus> uninstallTemplateDefinitionInDatacenter(
+        final String templateDefinitionUrl, final Integer idEnterprise, final Integer datacenterId)
     {
 
-        final Integer ovfPackageId = getOvfPackageIdByUrl(ovfUrl, idEnterprise);
+        final Integer templateDefinitionId =
+            getTemplateDefinitionIdByUrl(templateDefinitionUrl, idEnterprise);
 
         final String uri =
-            createOVFPackageUninstallLink(String.valueOf(idEnterprise), String
-                .valueOf(ovfPackageId));
+            createTemplateDefinitionUninstallLink(String.valueOf(idEnterprise), String
+                .valueOf(templateDefinitionId));
 
         Resource resource = resource(uri).contentType(MediaType.TEXT_PLAIN);
         ClientResponse response = resource.post(String.valueOf(datacenterId));
@@ -281,7 +292,8 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         if (response.getStatusCode() / 200 != 1)
         {
-            logger.error("Can't install OVFPackage {} in dc {}", ovfUrl, datacenterId);
+            logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
+                datacenterId);
             // error cause will be shown with getOVFPackageState
         }
 
@@ -289,14 +301,15 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public DataResult<OVFPackageList> getOVFPackageList(final Integer idEnterprise,
-        final String nameOVFPackageList)
+    public DataResult<OVFPackageList> getTemplateDefinitionList(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
 
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
-        String uri = createOVFPackageListLink(idEnterprise.toString(), idOvfPackageList.toString());
+        final Integer templateDefListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
+        String uri =
+            createTemplateDefinitionListLink(idEnterprise.toString(), templateDefListId.toString());
 
         ClientResponse response = get(uri);
 
@@ -304,7 +317,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
-                .getEntity(OVFPackageListDto.class)));
+                .getEntity(TemplateDefinitionListDto.class)));
         }
         else
         {
@@ -314,37 +327,38 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    private Integer getOVFPackageListIdFromName(final Integer idEnterprise, final String packageName)
+    private Integer getTemplateDefinitionListIdFromName(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
-        OVFPackageListsDto packageLists = getOVFPackageLists(idEnterprise);
+        TemplateDefinitionListsDto packageLists = getTemplateDefinitionLists(idEnterprise);
 
-        for (OVFPackageListDto list : packageLists.getCollection())
+        for (TemplateDefinitionListDto list : packageLists.getCollection())
         {
             final String listName = list.getName();
-            if (packageName.equalsIgnoreCase(listName))
+            if (templateDefinitionListName.equalsIgnoreCase(listName))
             {
                 return list.getId();
             }
         }
 
         final String cause =
-            String.format("Can not locat OVFPackageList named [%s] for enterprise [%s]",
-                packageName, idEnterprise);
+            String.format("Can not locat TemplateDescriptionList named [%s] for enterprise [%s]",
+                templateDefinitionListName, idEnterprise);
         final Response response = Response.status(Status.NOT_FOUND).entity(cause).build();
         throw new WebApplicationException(response);
     }
 
     @Override
-    public DataResult<List<String>> getOVFPackageListName(final Integer idEnterprise)
+    public DataResult<List<String>> getTemplateDefinitionListNames(final Integer idEnterprise)
     {
         DataResult<List<String>> result = new DataResult<List<String>>();
 
-        List<String> packageNameList = new LinkedList<String>();
+        List<String> templateDefListNames = new LinkedList<String>();
 
-        OVFPackageListsDto packageLists = new OVFPackageListsDto();
+        TemplateDefinitionListsDto listsDto = new TemplateDefinitionListsDto();
         try
         {
-            packageLists = getOVFPackageLists(idEnterprise);
+            listsDto = getTemplateDefinitionLists(idEnterprise);
         }
         catch (WebApplicationException e)
         {
@@ -353,50 +367,50 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             return result;
         }
 
-        if (packageLists == null || packageLists.getCollection().size() == 0)
+        if (listsDto == null || listsDto.getCollection().size() == 0)
         {
-            DataResult<OVFPackageList> defaultList = addDefaultOVFPackageList(idEnterprise);
+            DataResult<OVFPackageList> defaultList = addDefaultTemplateDefinitionList(idEnterprise);
             if (defaultList == null)
             {
                 result.setSuccess(Boolean.FALSE);
                 return result;
             }
-            packageNameList.add(defaultList.getData().getName());
+            templateDefListNames.add(defaultList.getData().getName());
         }
-        for (OVFPackageListDto list : packageLists.getCollection())
+        for (TemplateDefinitionListDto list : listsDto.getCollection())
         {
-            packageNameList.add(list.getName());
+            templateDefListNames.add(list.getName());
         }
         result.setSuccess(Boolean.TRUE);
-        result.setData(packageNameList);
+        result.setData(templateDefListNames);
 
         return result;
     }
 
-    private DataResult<OVFPackageList> addDefaultOVFPackageList(final Integer idEnterprise)
+    private DataResult<OVFPackageList> addDefaultTemplateDefinitionList(final Integer idEnterprise)
     {
-        String defaultRepositorySpace =
-            AbiConfigManager.getInstance().getAbiConfig().getDefaultRepositorySpace();
-        if (defaultRepositorySpace == null || defaultRepositorySpace.isEmpty())
+        String defaultTemplateRepository =
+            AbiConfigManager.getInstance().getAbiConfig().getDefaultTemplateRepository();
+        if (defaultTemplateRepository == null || defaultTemplateRepository.isEmpty())
         {
             logger.debug("There aren't any default repository space defined");
             return null;
         }
         else
         {
-            logger.debug("Adding default repository space at [{}]", defaultRepositorySpace);
+            logger.debug("Adding default repository space at [{}]", defaultTemplateRepository);
             DataResult<OVFPackageList> list =
-                createOVFPackageList(idEnterprise, defaultRepositorySpace);
+                createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, defaultTemplateRepository);
             return list;
 
         }
     }
 
     // XXX not used on the AppsLibraryCommand
-    private OVFPackageListsDto getOVFPackageLists(final Integer idEnterprise)
+    private TemplateDefinitionListsDto getTemplateDefinitionLists(final Integer idEnterprise)
     {
 
-        String uri = createOVFPackageListsLink(idEnterprise.toString());
+        String uri = createTemplateDefinitionListsLink(idEnterprise.toString());
         ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
@@ -405,20 +419,21 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackageListsDto.class);
+        return response.getEntity(TemplateDefinitionListsDto.class);
     }
 
     @Override
-    public DataResult<OVFPackageList> refreshOVFPackageList(final Integer idEnterprise,
-        final String nameOvfpackageList)
+    public DataResult<OVFPackageList> refreshTemplateDefinitionListFromRepository(
+        final Integer idEnterprise, final String templateDefintionListName)
     {
         DataResult<OVFPackageList> result = new DataResult<OVFPackageList>();
 
-        final Integer idList = getOVFPackageListIdFromName(idEnterprise, nameOvfpackageList);
-        OVFPackageListDto list = new OVFPackageListDto();
+        final Integer idList =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefintionListName);
+        TemplateDefinitionListDto list = new TemplateDefinitionListDto();
         try
         {
-            list = refreshOVFPackageList(idEnterprise, idList);
+            list = refreshTemplateDefintionListFromRepository(idEnterprise, idList);
         }
         catch (WebApplicationException e)
         {
@@ -432,10 +447,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
     }
 
-    private OVFPackageListDto refreshOVFPackageList(final Integer idEnterprise, final Integer idList)
+    private TemplateDefinitionListDto refreshTemplateDefintionListFromRepository(
+        final Integer idEnterprise, final Integer idList)
     {
 
-        String uri = createOVFPackageListLink(idEnterprise.toString(), idList.toString());
+        String uri = createTemplateDefinitionListLink(idEnterprise.toString(), idList.toString());
         ClientResponse response =
             resource(uri).accept(MediaType.APPLICATION_XML).contentType(MediaType.TEXT_PLAIN).put(
                 null);
@@ -446,7 +462,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackageListDto.class);
+        return response.getEntity(TemplateDefinitionListDto.class);
     }
 
     @Deprecated
@@ -471,12 +487,15 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     @Override
-    public OVFPackagesDto getOVFPackages(final Integer idEnterprise, final String nameOVFPackageList)
+    public TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise,
+        final String templateDefinitionListName)
     {
-        final Integer idOvfPackageList =
-            getOVFPackageListIdFromName(idEnterprise, nameOVFPackageList);
+        final Integer templateDefinitionListId =
+            getTemplateDefinitionListIdFromName(idEnterprise, templateDefinitionListName);
 
-        String uri = createOVFPackageLink(idEnterprise.toString(), idOvfPackageList.toString());
+        String uri =
+            createTemplateDefinitionLink(idEnterprise.toString(), templateDefinitionListId
+                .toString());
         ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
@@ -486,7 +505,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackagesDto.class);
+        return response.getEntity(TemplateDefinitionsDto.class);
     }
 
     @Override
@@ -616,17 +635,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             .fromId(diskFormatTypeDto.getId()));
     }
 
-    protected OVFPackageList createFlexOVFPackageListObject(final OVFPackageListDto listDto)
+    protected OVFPackageList createFlexOVFPackageListObject(final TemplateDefinitionListDto listDto)
     {
         OVFPackageList list = new OVFPackageList();
         list.setName(listDto.getName());
-        list.setUrl("unused URL"); // TODO missing URL
+        list.setUrl(listDto.getUrl());
 
         List<OVFPackage> packs = new LinkedList<OVFPackage>();
 
-        if (listDto.getOvfPackages() != null)
+        if (listDto.getTemplateDefinitions() != null)
         {
-            for (OVFPackageDto packDto : listDto.getOvfPackages().getCollection())
+            for (TemplateDefinitionDto packDto : listDto.getTemplateDefinitions().getCollection())
             {
                 packs.add(createFlexOVFPackageObject(packDto));
             }
@@ -636,7 +655,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return list;
     }
 
-    protected OVFPackage createFlexOVFPackageObject(final OVFPackageDto packDto)
+    protected OVFPackage createFlexOVFPackageObject(final TemplateDefinitionDto packDto)
     {
         OVFPackage pack = new OVFPackage();
         if (packDto.getName() != null)
@@ -648,7 +667,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             pack.setCategory("Others");
         }
         pack.setDescription(packDto.getDescription());
-        pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatTypeUri()).name());
+        pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatType()).name());
         pack.setDiskSizeMb(packDto.getDiskFileSize());
         RESTLink iconLink = packDto.searchLink("icon");
         if (iconLink != null)
@@ -668,11 +687,11 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     private List<OVFPackageInstanceStatus> createFlexOVFPackageListObject(
-        final OVFPackageInstancesStateDto entity)
+        final TemplatesStateDto entity)
     {
         List<OVFPackageInstanceStatus> statusList = new LinkedList<OVFPackageInstanceStatus>();
 
-        for (OVFPackageInstanceStateDto statusDto : entity.getCollection())
+        for (TemplateStateDto statusDto : entity.getCollection())
         {
             statusList.add(createFlexOVFPackageListObject(statusDto));
         }
@@ -681,7 +700,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     protected OVFPackageInstanceStatus createFlexOVFPackageListObject(
-        final OVFPackageInstanceStateDto statusDto)
+        final TemplateStateDto statusDto)
     {
         OVFPackageInstanceStatus status = new OVFPackageInstanceStatus();
 
@@ -699,13 +718,14 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
     }
 
     // TODO the client should use IDS for OVFPackages .... then this code MUST die
-    private Integer getOvfPackageIdByUrl(final String ovfUrl, final Integer idEnterprise)
+    private Integer getTemplateDefinitionIdByUrl(final String templateDefinitionUrl,
+        final Integer idEnterprise)
     {
-        List<OVFPackageDto> ovfs = getAllOVFPackages(idEnterprise).getCollection();
+        List<TemplateDefinitionDto> ovfs = getTemplateDefinitions(idEnterprise).getCollection();
 
-        for (OVFPackageDto ovf : ovfs)
+        for (TemplateDefinitionDto ovf : ovfs)
         {
-            if (ovfUrl.equalsIgnoreCase(ovf.getUrl()))
+            if (templateDefinitionUrl.equalsIgnoreCase(ovf.getUrl()))
             {
                 return ovf.getId();
             }
@@ -713,9 +733,9 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return null; // TODO FAIL ... see the TODO above, if there is a related bug fix it first
     }
 
-    private OVFPackagesDto getAllOVFPackages(final Integer idEnterprise)
+    private TemplateDefinitionsDto getTemplateDefinitions(final Integer idEnterprise)
     {
-        String uri = createOVFPackagesLink(idEnterprise.toString());
+        String uri = createTemplateDefinitionsLink(idEnterprise.toString());
         ClientResponse response = get(uri);
 
         final Integer httpStatus = response.getStatusCode();
@@ -725,7 +745,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             throw new WebApplicationException(response(response));
         }
 
-        return response.getEntity(OVFPackagesDto.class);
+        return response.getEntity(TemplateDefinitionsDto.class);
     }
 
     /**

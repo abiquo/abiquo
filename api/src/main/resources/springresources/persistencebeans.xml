@@ -46,10 +46,10 @@
                 <ref bean="privilegeResource" />
                 <ref bean="usersResource" />
                 <ref bean="userResource" />
-                <ref bean="OVFPackageListsResource" />
-                <ref bean="OVFPackageListResource" />
-                <ref bean="OVFPackagesResource" />
-                <ref bean="OVFPackageResource" />
+                <ref bean="templateDefinitionListsResource" />
+                <ref bean="templateDefinitionListResource" />
+                <ref bean="templateDefinitionsResource" />
+                <ref bean="templateDefinitionResource" />
                 <ref bean="virtualDatacentersResource" />
                 <ref bean="virtualDatacenterResource" />
                 <ref bean="privateNetworksResource" />
@@ -64,11 +64,10 @@
                 <ref bean="virtualMachineResource" />
                 <ref bean="virtualMachineNetworkConfigurationResource" />
                 <ref bean="virtualMachineStorageConfigurationResource" />
-                <!-- AM as REST Resource -->
                 <ref bean="datacenterRepositoriesResource" />
                 <ref bean="datacenterRepositoryResource" />
-                <ref bean="virtualImagesResource" />
-                <ref bean="virtualImageResource" />
+                <ref bean="virtualMachineTemplatesResource" />
+                <ref bean="virtualMachineTemplateResource" />
                 <ref bean="datastoresResource" />
                 <ref bean="datastoreResource" />
                 <!-- Configuration -->

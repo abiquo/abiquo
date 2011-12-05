@@ -22,6 +22,8 @@ package com.abiquo.api.services.config;
 
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,6 +41,16 @@ public class SystemPropertyService extends DefaultApiService
 {
     @Autowired
     private SystemPropertyRep repo;
+    
+   
+    public SystemPropertyService()
+    {
+        
+    }
+    public SystemPropertyService(final EntityManager em)
+    {
+        this.repo = new SystemPropertyRep(em);
+    }
 
     public Collection<SystemProperty> getSystemProperties()
     {

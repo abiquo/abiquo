@@ -212,8 +212,8 @@ public enum EventType implements Serializable
         "Category deleted"),
 
     // OVF PACKAGES LISTS
-    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), OVF_PACKAGES_LIST_DELETED(
-        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), OVF_PACKAGES_LIST_MODIFIED(
+    OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), TEMPLATE_DEFINITION_LIST_DELETED(
+        1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), TEMPLATE_DEFINITION_LIST_MODIFIED(
         1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified") //
     ;
 

@@ -23,8 +23,8 @@ package com.abiquo.server.core.cloud;
 
 import java.util.List;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.enterprise.UserGenerator;
@@ -37,7 +37,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
 
     private VirtualMachineGenerator vmGenerator;
 
-    private VirtualImageGenerator imageGenerator;
+    private VirtualMachineTemplateGenerator imageGenerator;
 
     private UserGenerator userGenerator;
 
@@ -46,7 +46,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         super(seed);
         vappGenerator = new VirtualApplianceGenerator(seed);
         vmGenerator = new VirtualMachineGenerator(seed);
-        imageGenerator = new VirtualImageGenerator(seed);
+        imageGenerator = new VirtualMachineTemplateGenerator(seed);
         userGenerator = new UserGenerator(seed);
     }
 
@@ -77,7 +77,7 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
         return createInstance(vapp, vm);
     }
 
-    public NodeVirtualImage createInstance(final VirtualImage image)
+    public NodeVirtualImage createInstance(final VirtualMachineTemplate image)
     {
         VirtualAppliance vapp =
             vappGenerator.createInstance(image.getEnterprise(), image.getRepository()
@@ -95,14 +95,14 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
 
     public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user)
     {
-        VirtualImage image =
+        VirtualMachineTemplate image =
             imageGenerator.createInstance(vapp.getEnterprise(), vapp.getVirtualDatacenter()
                 .getDatacenter());
         return createInstance(vapp, user, image);
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance vapp, final User user,
-        final VirtualImage image)
+        final VirtualMachineTemplate image)
     {
         VirtualMachine vm = vmGenerator.createInstance(image, vapp.getEnterprise(), user, "TestVM");
         return createInstance(vapp, vm, image);
@@ -111,11 +111,11 @@ public class NodeVirtualImageGenerator extends DefaultEntityGenerator<NodeVirtua
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine vMachine)
     {
-        return createInstance(virtualAppliance, vMachine, vMachine.getVirtualImage());
+        return createInstance(virtualAppliance, vMachine, vMachine.getVirtualMachineTemplate());
     }
 
     public NodeVirtualImage createInstance(final VirtualAppliance virtualAppliance,
-        final VirtualMachine vMachine, final VirtualImage vImage)
+        final VirtualMachine vMachine, final VirtualMachineTemplate vImage)
     {
         String name = newString(nextSeed(), Node.NAME_LENGTH_MIN, Node.NAME_LENGTH_MAX);
         return new NodeVirtualImage(name, virtualAppliance, vImage, vMachine);

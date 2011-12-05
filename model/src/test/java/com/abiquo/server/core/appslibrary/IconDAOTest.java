@@ -36,14 +36,14 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
 public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
 {
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
     @Override
     @BeforeMethod
     protected void methodSetUp()
     {
         super.methodSetUp();
-        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        virtualImageGenerator = new VirtualMachineTemplateGenerator(getSeed());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
 
         IconDAO dao = createDaoForRollbackTransaction();
 
-        boolean result = dao.iconInUseByVirtualImages(icon);
+        boolean result = dao.iconInUseByVirtualMachineTemplates(icon);
         assertFalse(result);
     }
 
@@ -103,7 +103,7 @@ public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
     public void testIconInUseByVirtualImages()
     {
         Icon icon = eg().createUniqueInstance();
-        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        VirtualMachineTemplate virtualImage = virtualImageGenerator.createUniqueInstance();
         virtualImage.setIcon(icon);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
@@ -112,7 +112,7 @@ public class IconDAOTest extends DefaultDAOTestBase<IconDAO, Icon>
 
         IconDAO dao = createDaoForRollbackTransaction();
 
-        boolean result = dao.iconInUseByVirtualImages(icon);
+        boolean result = dao.iconInUseByVirtualMachineTemplates(icon);
         assertTrue(result);
     }
 }

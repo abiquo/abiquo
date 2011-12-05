@@ -72,6 +72,18 @@ public class CategoryService extends DefaultApiService
         return category;
     }
 
+    @Transactional(readOnly = true)
+    public Category getCategoryByName(final String categoryName)
+    {
+        Category category = appslibraryRep.findCategoryByName(categoryName);
+        if (category == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
+        return category;
+    }
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Category addCategory(final Category category)
     {
