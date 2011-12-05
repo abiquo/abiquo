@@ -274,8 +274,12 @@
             
             private function checkSingleSignOn():void{ 
        	
+				//var urlString:String = ExternalInterface.call('window.location.href.toString');
 				var urlString:String = ExternalInterface.call('window.location.href.toString');
 				var parameters:Array = urlString.split("?");
+				
+				var token:String = ExternalInterface.call("checkAuthentication");
+				Alert.show("token : "+token);
 				
 				//we save the current URL, for the logout process
 				AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
