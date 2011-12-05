@@ -66,11 +66,11 @@ public class AppsLibraryTransformer extends DefaultApiService
         dto.setUrl(templateDef.getUrl());
         dto.setDiskFileSize(templateDef.getDiskFileSize());
 
-        dto.setDiskFormatTypeUri(templateDef.getType().uri);
+        dto.setDiskFormatType(String.valueOf(templateDef.getType().name()));
 
         final Integer idEnterprise = templateDef.getAppsLibrary().getEnterprise().getId();
-        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto,
-            templateDef.getCategory(), templateDef.getIcon()));
+        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto, templateDef
+            .getCategory(), templateDef.getIcon()));
 
         return dto;
     }
@@ -101,7 +101,7 @@ public class AppsLibraryTransformer extends DefaultApiService
     public TemplateDefinition createPersistenceObject(final TemplateDefinitionDto templateDef)
         throws Exception
     {
-        DiskFormatType diskFormatType = DiskFormatType.fromURI(templateDef.getDiskFormatTypeUri());
+        DiskFormatType diskFormatType = DiskFormatType.fromValue(templateDef.getDiskFormatType());
         if (diskFormatType == null)
         {
             addValidationErrors(APIError.INVALID_DISK_FORMAT_TYPE);
@@ -155,14 +155,15 @@ public class AppsLibraryTransformer extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinitionList createPersistenceObject(final TemplateDefinitionListDto templateDefListDto)
-        throws Exception
+    public TemplateDefinitionList createPersistenceObject(
+        final TemplateDefinitionListDto templateDefListDto) throws Exception
     {
 
         List<TemplateDefinition> templateDefinitions = new LinkedList<TemplateDefinition>();
         if (templateDefListDto.getTemplateDefinitions() != null)
         {
-            for (TemplateDefinitionDto templateDefDto : templateDefListDto.getTemplateDefinitions().getCollection())
+            for (TemplateDefinitionDto templateDefDto : templateDefListDto.getTemplateDefinitions()
+                .getCollection())
             {
                 templateDefinitions.add(createPersistenceObject(templateDefDto));
             }
