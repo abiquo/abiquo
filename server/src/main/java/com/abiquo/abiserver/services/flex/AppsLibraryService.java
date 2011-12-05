@@ -218,14 +218,6 @@ public class AppsLibraryService
     {
 
         return proxyStub(userSession).getDiskFormatTypes();
-        /*
-         * DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
-         * AppsLibraryCommand proxyService = proxyService(userSession); try { List<DiskFormatType>
-         * disksFormat = proxyService.getDiskFormatTypes(userSession); result.setData(disksFormat);
-         * result.setSuccess(true); } catch (UserSessionException e) { result.setSuccess(false);
-         * result.setMessage(e.getMessage()); result.setResultCode(e.getResult().getResultCode()); }
-         * return result;
-         */
     }
 
     // todo con idRepo
