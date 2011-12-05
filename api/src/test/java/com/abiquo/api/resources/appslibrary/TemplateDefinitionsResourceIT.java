@@ -128,7 +128,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         TemplateDefinitionDto p = new TemplateDefinitionDto();
         p.setDescription("test_created_desc");
         p.setUrl("http://www.abiquo.com");
-        p.setDiskFormatTypeUri(DiskFormatType.UNKNOWN.uri); // test this is a
+        p.setDiskFormatType(String.valueOf(DiskFormatType.UNKNOWN.name())); // test this is a
         // necessary
         // field
         RESTLink categoryLink = new RESTLink(CategoryResource.CATEGORY, "");
@@ -148,7 +148,7 @@ public class TemplateDefinitionsResourceIT extends AbstractJpaGeneratorIT
         TemplateDefinitionDto entityPost = response.getEntity(TemplateDefinitionDto.class);
         assertNotNull(entityPost);
         assertEquals(p.getDescription(), entityPost.getDescription());
-        assertEquals(p.getDiskFormatTypeUri(), entityPost.getDiskFormatTypeUri());
+        assertEquals(p.getDiskFormatType(), entityPost.getDiskFormatType());
         assertEquals(p.getName(), entityPost.getName());
     }
 }
