@@ -21,10 +21,6 @@
 
 package com.abiquo.server.core.task;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -48,17 +44,20 @@ public class TaskDto extends SingleResourceTransportDto
 
     protected TaskState state;
 
-    protected List<JobDto> jobs;
+    protected JobsDto jobs;
 
     public TaskDto()
     {
-        jobs = new ArrayList<JobDto>();
     }
 
-    @XmlElement(name = "job")
-    public List<JobDto> getJobs()
+    public JobsDto getJobs()
     {
         return jobs;
+    }
+
+    public void setJobs(JobsDto jobs)
+    {
+        this.jobs = jobs;
     }
 
     public String getOwnerId()

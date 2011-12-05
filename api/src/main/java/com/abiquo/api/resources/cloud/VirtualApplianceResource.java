@@ -44,7 +44,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
@@ -185,7 +185,7 @@ public class VirtualApplianceResource
     public void addImage(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        final VirtualImageDto image)
+        final VirtualMachineTemplateDto vmtemplate)
     {
         /**
          * TODO

@@ -27,50 +27,49 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.testng.annotations.Test;
 
 import redis.clients.jedis.Transaction;
 
 import com.abiquo.server.core.task.enums.TaskOwnerType;
-import com.abiquo.server.core.task.enums.TaskState;
-import com.abiquo.server.core.task.enums.TaskType;
 
 public class TaskDAOTest extends RedisDAOTestBase
 {
     protected TaskDAO dao = new TaskDAO();
 
+    protected TaskGenerator generator = new TaskGenerator();
+
     @Test
     public void test_save()
     {
-        Task task = createUniqueTask();
+        Task task = generator.createUniqueInstance();
         save(task);
 
         Task fromDb = dao.findById(task.getTaskId(), jedis);
-        assertSameTask(task, fromDb);
+        generator.assertSameTask(task, fromDb);
     }
 
     @Test
     public void test_saveWithNullFields()
     {
-        Task task = createUniqueTask();
+        Task task = generator.createUniqueInstance();
         task.setTaskId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = generator.createUniqueInstance();
         task.setOwnerId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = generator.createUniqueInstance();
         task.setType(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = generator.createUniqueInstance();
         task.setUserId(null);
         expectRuntimeOnInsertNullField(task);
 
-        task = createUniqueTask();
+        task = generator.createUniqueInstance();
         task.setState(null);
         expectRuntimeOnInsertNullField(task);
     }
@@ -78,7 +77,7 @@ public class TaskDAOTest extends RedisDAOTestBase
     @Test
     public void test_delete()
     {
-        Task task = createUniqueTask();
+        Task task = generator.createUniqueInstance();
         save(task);
         delete(task);
 
@@ -89,7 +88,7 @@ public class TaskDAOTest extends RedisDAOTestBase
     @Test
     public void test_deleteNonInsertedTask()
     {
-        Task task = createUniqueTask();
+        Task task = generator.createUniqueInstance();
         delete(task);
 
         Task fromDb = dao.findById(task.getTaskId(), jedis);
@@ -99,16 +98,16 @@ public class TaskDAOTest extends RedisDAOTestBase
     @Test
     public void test_finByOwnerId()
     {
-        Task task0 = createUniqueTask();
-        Task task1 = createUniqueTask();
+        Task task0 = generator.createUniqueInstance();
+        Task task1 = generator.createUniqueInstance();
 
         task0.setOwnerId("A");
         task1.setOwnerId("A");
 
-        Task task2 = createUniqueTask();
+        Task task2 = generator.createUniqueInstance();
         task2.setOwnerId("B");
 
-        Task task3 = createUniqueTask();
+        Task task3 = generator.createUniqueInstance();
         task3.setOwnerId("C");
 
         save(task0);
@@ -160,28 +159,6 @@ public class TaskDAOTest extends RedisDAOTestBase
             transaction.discard();
             throw e;
         }
-    }
-
-    protected Task createUniqueTask()
-    {
-        Task task = new Task();
-
-        task.setOwnerId(UUID.randomUUID().toString());
-        task.setTaskId(UUID.randomUUID().toString());
-        task.setUserId(UUID.randomUUID().toString());
-        task.setType(TaskType.POWER_ON);
-        task.setState(TaskState.STARTED);
-
-        return task;
-    }
-
-    protected void assertSameTask(final Task one, final Task other)
-    {
-        assertEquals(one.getTaskId(), other.getTaskId());
-        assertEquals(one.getOwnerId(), other.getOwnerId());
-        assertEquals(one.getUserId(), other.getUserId());
-        assertEquals(one.getType(), other.getType());
-        assertEquals(one.getState(), other.getState());
     }
 
     protected void expectRuntimeOnInsertNullField(Task task)

@@ -48,23 +48,15 @@ import com.abiquo.api.resources.cloud.DisksResource;
 import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
 import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.api.services.MachineService;
-import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.StorageService;
-import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
-import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
-import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
@@ -75,22 +67,31 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
-import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -99,61 +100,46 @@ import com.abiquo.tracer.SeverityType;
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService extends DefaultApiService
 {
-    @Autowired
-    protected VirtualMachineRep repo;
-
-    @Autowired
-    protected VirtualDatacenterRep vdcRepo;
-
-    @Autowired
-    protected VirtualApplianceService vappService;
-
-    @Autowired
-    protected RemoteServiceService remoteServiceService;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    protected EnterpriseService enterpriseService;
-
-    @Autowired
-    protected VirtualMachineAllocatorService vmAllocatorService;
-
-    @Autowired
-    protected VirtualDatacenterService vdcService;
-
-    @Autowired
-    protected MachineService machineService;
-
-    @Autowired
-    protected NetworkService ipService;
-
-    @Autowired
-    protected StorageRep storageRep;
-
-    @Autowired
-    protected InfrastructureRep infRep;
-
-    @Autowired
-    protected VirtualImageService vimageService;
-
-    @Autowired
-    protected TarantinoService tarantino;
-
-    @Deprecated
-    // job creator should be used ONLY inside the TarantinoService
-    @Autowired
-    protected TarantinoJobCreator jobCreator;
-
-    @Autowired
-    protected TaskService tasksService;
-
     /** The logger object **/
     private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
 
     @Autowired
-    protected StorageService storageService;
+    protected VirtualMachineRep repo;
+
+    @Autowired
+    protected VirtualApplianceRep vappRep;
+
+    @Autowired
+    private RemoteServiceService remoteServiceService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private EnterpriseRep enterpriseRep;
+
+    @Autowired
+    private VirtualMachineAllocatorService vmAllocatorService;
+
+    @Autowired
+    private VirtualMachineRequirementsFactory vmRequirements;
+
+    @Autowired
+    private VirtualDatacenterService vdcService;
+
+    @Autowired
+    private InfrastructureRep infRep;
+
+    @Autowired
+    private AppsLibraryRep appsLibRep;
+
+    @Autowired
+    private TarantinoService tarantino;
+
+    @Deprecated
+    // job creator should be used ONLY inside the TarantinoService
+    @Autowired
+    private TarantinoJobCreator jobCreator;
 
     public VirtualMachineService()
     {
@@ -163,13 +149,17 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachineService(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
-        this.storageService = new StorageService(em);
-        this.vdcRepo = new VirtualDatacenterRep(em);
-        this.vappService = new VirtualApplianceService(em);
+        this.vappRep = new VirtualApplianceRep(em);
+        this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
+        this.enterpriseRep = new EnterpriseRep(em);
+        this.vmAllocatorService = new VirtualMachineAllocatorService(em);
+        this.vmRequirements = new VirtualMachineRequirementsFactory(); // XXX
+        this.vdcService = new VirtualDatacenterService(em);
         this.infRep = new InfrastructureRep(em);
-        this.storageRep = new StorageRep(em);
-        vdcService = new VirtualDatacenterService(em);
+        this.appsLibRep = new AppsLibraryRep(em);
+        this.tarantino = new TarantinoService(em);
+        this.jobCreator = new TarantinoJobCreator(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -211,7 +201,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -221,6 +211,25 @@ public class VirtualMachineService extends DefaultApiService
         }
         logger.debug("virtual machine {} found", vmId);
         return vm;
+    }
+
+    /**
+     * This method is semi-duplicated from VirtualApplianceService, but bean can not be used due
+     * cross references
+     */
+    private VirtualAppliance getVirtualApplianceAndCheckVirtualDatacenter(final Integer vdcId,
+        final Integer vappId)
+    {
+        // checks vdc exist
+        vdcService.getVirtualDatacenter(vdcId);
+
+        VirtualAppliance vapp = vappRep.findById(vappId);
+        if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        return vapp;
     }
 
     public VirtualMachine getVirtualMachine(final Integer vmId)
@@ -282,7 +291,8 @@ public class VirtualMachineService extends DefaultApiService
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         logger.debug("Check for permissions");
         // The user must have the proper permission
@@ -298,7 +308,11 @@ public class VirtualMachineService extends DefaultApiService
         {
             // There might be different hardware needs. This call also recalculate.
             logger.debug("Updating the hardware needs in DB for virtual machine {}", vmId);
-            vmAllocatorService.checkAllocate(vappId, virtualMachine, newVirtualMachine, false);
+            VirtualMachineRequirements requirements =
+                vmRequirements.createVirtualMachineRequirements(virtualMachine,
+                    newVirtualMachine);
+            vmAllocatorService.checkAllocate(vappId, vmId, requirements, false);
+
             logger.debug("Updated the hardware needs in DB for virtual machine {}", vmId);
         }
 
@@ -491,7 +505,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine,
-        final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
+        final Integer enterpriseId, final Integer vmtemplateId, final Integer vdcId,
         final Integer vappId)
     {
         // generates the random identifier
@@ -499,20 +513,23 @@ public class VirtualMachineService extends DefaultApiService
         virtualMachine.setName("ABQ_" + virtualMachine.getUuid());
 
         // We need the Enterprise
-        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
+        Enterprise enterprise = getEnterpriseAndValidateUser(enterpriseId);
         virtualMachine.setEnterprise(enterprise);
 
         VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
 
-        // We need the VirtualImage
-        VirtualImage virtualImage =
-            vimageService.getVirtualImage(enterpriseId, virtualAppliance.getVirtualDatacenter()
-                .getDatacenter().getId(), vImageId);
-        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
-        virtualMachine.setVirtualImage(virtualImage);
+        // We need the VirtualMachineTemplate
+        VirtualMachineTemplate virtualMachineTemplate =
+            getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(enterpriseId,
+                virtualAppliance.getVirtualDatacenter().getDatacenter().getId(), vmtemplateId);
+        checkVirtualMachineTemplateCanBeUsed(virtualMachineTemplate, virtualAppliance);
+        virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
 
+        setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(virtualMachine,
+            virtualMachineTemplate);
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
+        attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
+            virtualMachine);
 
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
@@ -522,24 +539,111 @@ public class VirtualMachineService extends DefaultApiService
         repo.createVirtualMachine(virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
-        // virtual image is VirtualImageNode
+        // virtual machine template is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
 
         return virtualMachine;
     }
 
-    /** Checks correct datacenter and enterprise. */
-    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    /**
+     * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
+     * <p>
+     * It also set the required CPU and RAM if it wasn't specified in the requested
+     * {@link VirtualMachineDto}
+     */
+    private void setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(
+        final VirtualMachine vmachine, final VirtualMachineTemplate vmtemplate)
     {
-        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
-            .getDatacenter().getId())
+        if (vmachine.getCpu() == 0)
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+            vmachine.setCpu(vmtemplate.getCpuRequired());
+        }
+        if (vmachine.getRam() == 0)
+        {
+            vmachine.setRam(vmtemplate.getRamRequired());
         }
 
-        if (!vimage.isShared() && vimage.getEnterprise().getId() != vapp.getEnterprise().getId())
+        if (vmtemplate.isStateful())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+            vmachine.setHdInBytes(0);
+        }
+        else
+        {
+            vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+        }
+    }
+
+    /**
+     * This code is semiduplicated from VirtualMachineTemplateService but can't be used due cross
+     * refrerence dep
+     */
+    private VirtualMachineTemplate getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualMachineTemplateId)
+    {
+
+        Datacenter datacenter = infRep.findById(datacenterId);
+        Enterprise enterprise = enterpriseRep.findById(enterpriseId);
+
+        if (datacenter == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+        }
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+        }
+        flushErrors();
+
+        DatacenterLimits limits = infRep.findDatacenterLimits(enterprise, datacenter);
+        if (limits == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualMachineTemplate virtualMachineTemplate =
+            appsLibRep.findVirtualMachineTemplateById(virtualMachineTemplateId);
+        if (virtualMachineTemplate == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
+            flushErrors();
+        }
+
+        return virtualMachineTemplate;
+    }
+
+    /**
+     * This code is semiduplicated from EnterpriseService but can't be used due cross refrerence dep
+     */
+    private Enterprise getEnterpriseAndValidateUser(final Integer id)
+    {
+        Enterprise enterprise = enterpriseRep.findById(id);
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+            flushErrors();
+        }
+
+        // userService.checkEnterpriseAdminCredentials(enterprise);
+        userService.checkCurrentEnterprise(enterprise);
+        return enterprise;
+    }
+
+    /** Checks correct datacenter and enterprise. */
+    private void checkVirtualMachineTemplateCanBeUsed(final VirtualMachineTemplate vmtemplate,
+        final VirtualAppliance vapp)
+    {
+        if (vmtemplate.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
+            .getDatacenter().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER);
+        }
+
+        if (!vmtemplate.isShared()
+            && vmtemplate.getEnterprise().getId() != vapp.getEnterprise().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_ALLOWED);
         }
 
         flushErrors();
@@ -559,7 +663,8 @@ public class VirtualMachineService extends DefaultApiService
     private VirtualAppliance checkVdcVappAndPrivilege(final VirtualMachine virtualMachine,
         final Integer vdcId, final Integer vappId)
     {
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         return virtualAppliance;
@@ -567,10 +672,10 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Creates the {@link NodeVirtualImage} that is the relation of {@link VirtualMachine}
-     * {@link VirtualAppliance} and {@link VirtualImage}.
+     * {@link VirtualAppliance} and {@link VirtualMachineTemplate}.
      * 
      * @param virtualMachine virtual machine to be associated with the virtual appliance. It must
-     *            contain the virtual image.
+     *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
@@ -581,7 +686,7 @@ public class VirtualMachineService extends DefaultApiService
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(virtualMachine.getName(),
                 virtualAppliance,
-                virtualMachine.getVirtualImage(),
+                virtualMachine.getVirtualMachineTemplate(),
                 virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
         logger.debug("Node virtual image created!");
@@ -595,7 +700,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
-    public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
+    public void attachVirtualMachineTemplateConversion(final VirtualDatacenter virtualDatacenter,
         final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
@@ -623,7 +728,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId VirtualDatacenter id
      * @param vappId VirtualAppliance id
      * @param vmId VirtualMachine id
-     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
+     * @param forceEnterpriseSoftLimits Do we should take care of the soft limits?
      * @param restBuilder injected restbuilder context parameter
      * @throws Exception
      */
@@ -653,7 +758,8 @@ public class VirtualMachineService extends DefaultApiService
         logger.debug("Remote services are ok!");
 
         // Tasks needs the definition of the virtual machine
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         logger
             .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
@@ -665,7 +771,6 @@ public class VirtualMachineService extends DefaultApiService
              * one of the above fail we cannot allocate the VirtualMachine
              */
             vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
-            vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
             logger.debug("Allocated!");
 
             lockVirtualMachine(virtualMachine);
@@ -715,26 +820,6 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    private RemoteService findRemoteServiceWithTypeInDatacenter(
-        final VirtualDatacenter virtualDatacenter)
-    {
-        List<RemoteService> services =
-            infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-        RemoteService vsmRS = null;
-        if (!services.isEmpty())
-        {
-            // Only one remote service of each type by datacenter.
-            vsmRS = services.get(0);
-        }
-        else
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
-            flushErrors();
-        }
-        return vsmRS;
-    }
-
     public void closeProducerChannel(final TarantinoRequestProducer producer)
     {
         try
@@ -758,7 +843,6 @@ public class VirtualMachineService extends DefaultApiService
                 EventType.VM_DEPLOY,
                 "Error closing the producer channel with error:. The error message was "
                     + e.getMessage());
-
         }
     }
 
@@ -942,7 +1026,8 @@ public class VirtualMachineService extends DefaultApiService
         checkRemoteServicesByVirtualDatacenter(vdcId);
         logger.debug("Remote services are ok!");
 
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         try
         {
@@ -996,172 +1081,6 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    private void undeployInDb(final VirtualMachine virtualMachine)
-    {
-        logger.debug("The virtual machine state to NOT_DEPLOYED");
-        virtualMachine.setState(VirtualMachineState.ALLOCATED);
-        // Hypervisor == null in order to delete the relation between
-        // virtualMachine
-        // and physicalMachine
-        virtualMachine.setHypervisor(null);
-        // Datastore == null in order to delete the relation virtualmachine
-        // datastore
-        virtualMachine.setDatastore(null);
-
-        repo.update(virtualMachine);
-        logger.debug("The state is valid  undeploy");
-    }
-
-    /**
-     * Resumes a {@link VirtualMachine}. This involves some steps. <br>
-     * <ol>
-     * <li>Select a machine to allocate the virtual machine</li>
-     * <li>Check limits</li>
-     * <li>Check resources</li>
-     * <li>Check remote services</li>
-     * <li>In premium call initiator</li>
-     * <li>Subscribe to VSM</li>
-     * <li>Build the Task DTO</li>
-     * <li>Build the Configure DTO</li>
-     * <li>Build the Power On DTO</li>
-     * <li>Enqueue in tarantino</li>
-     * <li>Register in redis</li>
-     * <li>Add Task DTO to rabbitmq</li>
-     * <li>Enable the resource <code>Progress<code></li>
-     * </ol>
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void resumeVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId,
-        final Boolean foreceEnterpriseSoftLimits)
-    {
-        logger.debug("Starting the deploy of the virtual machine {}", vmId);
-        // We need to operate with concrete and this also check that the VirtualMachine belongs to
-        // those VirtualAppliance and VirtualDatacenter
-        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
-
-        logger.debug("Check for permissions");
-        // The user must have the proper permission
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        logger.debug("Permission granted");
-
-        logger
-            .debug("Checking the virtual machine state. It must be in either NOT_ALLOCATED or NOT_DEPLOYED");
-        // If the machine is already allocated we did compute its resources consume before, now
-        // we've been doubling it
-        checkVirtualMachineStateAllowsDeploy(virtualMachine);
-        logger.debug("The state is valid for deploy");
-
-        logger
-            .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
-        /*
-         * Select a machine to allocate the virtual machine, Check limits, Check resources If one of
-         * the above fail we cannot allocate the VirtualMachine
-         */
-        vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
-        vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
-        logger.debug("Allocated!");
-
-        logger.debug("Check remote services");
-        // The remote services must be up for this Datacenter if we are to deploy
-        checkRemoteServicesByVirtualDatacenter(vdcId);
-        logger.debug("Remote services are ok!");
-
-        logger.debug("Registering the machine VSM");
-        // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
-        VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
-        RemoteService vsmRS = findRemoteServiceWithTypeInDatacenter(virtualDatacenter);
-        machineService.getVsm().unsubscribe(vsmRS, virtualMachine);
-        logger.debug("Machine registered!");
-
-        logger.debug("Creating the DatacenterTask");
-
-        // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
-        // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        DatacenterTasks deployTask = new DatacenterTasks();
-
-        // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
-        // so Task 1 and its job would be 1.1, another 1.2
-        deployTask.setId(virtualMachine.getUuid());
-
-        // Tasks needs the definition of the virtual machine
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
-        VirtualMachineDescriptionBuilder vmDesc =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
-
-        logger.debug("Configure the hypervisor connection");
-        // Hypervisor connection related configuration
-        HypervisorConnection hypervisorConnection =
-            jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
-        logger.debug("Hypervisor connection configuration done");
-
-        logger.debug("Apply state job");
-        ApplyVirtualMachineStateOp stateJob =
-            jobCreator.applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, VirtualMachineStateTransition.RESUME);
-        logger.debug("Apply state job done with id {}", stateJob.getId());
-
-        // The jobs are to be rolled back
-        deployTask.setDependent(Boolean.TRUE);
-        deployTask.getJobs().add(stateJob);
-
-        TarantinoRequestProducer producer =
-            new TarantinoRequestProducer(virtualDatacenter.getDatacenter().getName());
-
-        try
-        {
-            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
-                virtualMachine.getId());
-            producer.openChannel();
-            logger.trace("Deploying of the virtual machine id {} to tarantino: channel opened",
-                virtualMachine.getId());
-            logger.trace("Deploying of the virtual machine id {} to tarantino: published to amqp",
-                virtualMachine.getId());
-            producer.publish(deployTask);
-            logger.trace(
-                "Deploying of the virtual machine id {} to tarantino: published successfully",
-                virtualMachine.getId());
-        }
-        catch (Exception e)
-        {
-
-            logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
-                + e.getMessage());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
-
-            // There is no point in continue
-            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
-            flushErrors();
-        }
-        finally
-        {
-            closeProducerChannel(producer);
-        }
-        logger.info("Deploying of the virtual machine id {} in tarantino!", virtualMachine.getId());
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-            "Deploy of the virtual machine with name " + virtualMachine.getName()
-                + " enqueued successfully!");
-        // For the Admin to know all errors
-        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-            "The enqueuing in Tarantino was OK.");
-    }
-
     /**
      * Changes the state of the VirtualMachine to the state passed
      * 
@@ -1190,7 +1109,8 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachineStateTransition validMachineStateChange =
             validMachineStateChange(virtualMachine, state);
 
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
         VirtualMachineDescriptionBuilder machineDescriptionBuilder =
             jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
@@ -1242,7 +1162,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
@@ -1266,7 +1186,7 @@ public class VirtualMachineService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<NodeVirtualImage> getNodeVirtualImages(final Integer vdcId, final Integer vappId)
     {
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vapp == null)
         {

@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 import com.abiquo.am.data.AMRedisDao;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.am.services.ErepoFactory;
-import com.abiquo.am.services.filesystem.OVFPackageInstanceFileSystem;
+import com.abiquo.am.services.filesystem.TemplateFileSystem;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
 import com.abiquo.appliancemanager.exceptions.EventException;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMProducer;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
 import com.abiquo.ovfmanager.ovf.exceptions.IdNotFoundException;
@@ -58,13 +58,13 @@ public class AMNotifier extends AMProducer
      * @throws RepositoryException
      * @throws EventException
      */
-    public void setOVFStatus(final String erId, final String ovfId, final OVFStatusEnumType status)
+    public void setTemplateStatus(final String erId, final String ovfId, final TemplateStatusEnumType status)
     {
-        assert status != OVFStatusEnumType.ERROR;
+        assert status != TemplateStatusEnumType.ERROR;
 
         final String enterpriseRepositoryPath = ErepoFactory.getRepo(erId).path();
 
-        OVFPackageInstanceFileSystem.createOVFStatusMarks(enterpriseRepositoryPath, ovfId, status,
+        TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId, status,
             null);
 
         notifyOVFStatusEvent(erId, ovfId, status, null);
@@ -79,22 +79,22 @@ public class AMNotifier extends AMProducer
      * @throws EventException
      * @throws RepositoryException
      */
-    public void setOVFStatusError(final String erId, final String ovfId, final String errorMessage)
+    public void setTemplateStatusError(final String erId, final String ovfId, final String errorMessage)
     {
         assert errorMessage != null;
 
         final String enterpriseRepositoryPath = ErepoFactory.getRepo(erId).path();
 
-        OVFPackageInstanceFileSystem.createOVFStatusMarks(enterpriseRepositoryPath, ovfId,
-            OVFStatusEnumType.ERROR, errorMessage);
+        TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId,
+            TemplateStatusEnumType.ERROR, errorMessage);
 
-        notifyOVFStatusEvent(erId, ovfId, OVFStatusEnumType.ERROR, errorMessage);
+        notifyOVFStatusEvent(erId, ovfId, TemplateStatusEnumType.ERROR, errorMessage);
     }
 
     private void notifyOVFStatusEvent(final String erId, final String ovfId,
-        final OVFStatusEnumType status, final String errorMsg)
+        final TemplateStatusEnumType status, final String errorMsg)
     {
-        assert status != OVFStatusEnumType.ERROR || errorMsg != null;
+        assert status != TemplateStatusEnumType.ERROR || errorMsg != null;
 
         AMRedisDao dao = AMRedisDao.getDao();
         dao.setState(erId, ovfId, status);

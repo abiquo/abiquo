@@ -64,14 +64,14 @@ public class AppsLibrary extends DefaultEntityBase
     /**
      * List of OVFPackageLists
      */
-    @OneToMany(cascade = CascadeType.ALL, targetEntity = OVFPackageList.class, fetch = FetchType.LAZY, mappedBy = "appsLibrary")
-    private List<OVFPackageList> ovfPackageLists;
+    @OneToMany(cascade = CascadeType.ALL, targetEntity = TemplateDefinitionList.class, fetch = FetchType.LAZY, mappedBy = "appsLibrary")
+    private List<TemplateDefinitionList> ovfPackageLists;
 
     /**
      * List of OVFPackages
      */
-    @OneToMany(cascade = CascadeType.ALL, targetEntity = OVFPackage.class, fetch = FetchType.LAZY, mappedBy = "appsLibrary")
-    private List<OVFPackage> ovfPackages;
+    @OneToMany(cascade = CascadeType.ALL, targetEntity = TemplateDefinition.class, fetch = FetchType.LAZY, mappedBy = "appsLibrary")
+    private List<TemplateDefinition> ovfPackages;
 
     @Id
     @GeneratedValue
@@ -105,22 +105,22 @@ public class AppsLibrary extends DefaultEntityBase
         this.enterprise = enterprise;
     }
 
-    public List<OVFPackageList> getOvfPackageLists()
+    public List<TemplateDefinitionList> getOvfPackageLists()
     {
         return ovfPackageLists;
     }
 
-    public void setOvfPackageLists(final List<OVFPackageList> ovfPackageLists)
+    public void setOvfPackageLists(final List<TemplateDefinitionList> ovfPackageLists)
     {
         this.ovfPackageLists = ovfPackageLists;
     }
 
-    public List<OVFPackage> getOvfPackages()
+    public List<TemplateDefinition> getOvfPackages()
     {
         return ovfPackages;
     }
 
-    public void setOvfPackages(final List<OVFPackage> ovfPackages)
+    public void setOvfPackages(final List<TemplateDefinition> ovfPackages)
     {
         this.ovfPackages = ovfPackages;
     }

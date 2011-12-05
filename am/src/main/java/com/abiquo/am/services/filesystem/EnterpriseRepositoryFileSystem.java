@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.abiquo.am.exceptions.AMError;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 import com.abiquo.appliancemanager.exceptions.AMException;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
 
 public class EnterpriseRepositoryFileSystem
 {
@@ -71,15 +71,15 @@ public class EnterpriseRepositoryFileSystem
         }
     }
 
-    public static List<OVFPackageInstanceStateDto> getAllOVF(final String enterpriseRepositoryPath,
+    public static List<TemplateStateDto> getAllOVF(final String enterpriseRepositoryPath,
         final boolean includeBundeles)
     {
-        List<OVFPackageInstanceStateDto> availableOvs = null;
+        List<TemplateStateDto> availableOvs = null;
 
         // TODO consider global thread limit
         final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        final Future<List<OVFPackageInstanceStateDto>> futureAvailable =
+        final Future<List<TemplateStateDto>> futureAvailable =
             executor.submit(new EnterpriseRepositoryRefreshWithTimeout(//
             new File(enterpriseRepositoryPath).getAbsolutePath(),
                 new String(),
@@ -183,7 +183,7 @@ public class EnterpriseRepositoryFileSystem
         {
             if (destinationMark.exists())
             {
-                throw new AMException(AMError.OVF_INSTALL_ALREADY, destinationPath);
+                throw new AMException(AMError.TEMPLATE_INSTALL_ALREADY, destinationPath);
             }
         }
 
@@ -212,7 +212,7 @@ public class EnterpriseRepositoryFileSystem
         }
         catch (FileNotFoundException e)
         {
-            throw new AMException(AMError.OVF_INSTALL, e);
+            throw new AMException(AMError.TEMPLATE_INSTALL, e);
         }
     }
 

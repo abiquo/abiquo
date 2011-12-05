@@ -60,6 +60,30 @@ public class TaskService extends DefaultApiService
         return task;
     }
 
+    public Task findTask(final String ownerId, final String taskId)
+    {
+        Task task = repo.findTask(taskId);
+
+        if (task == null)
+        {
+            LOGGER.error("Error retrieving the task: {} does not exist", taskId);
+            addNotFoundErrors(APIError.NON_EXISTENT_TASK);
+            flushErrors();
+        }
+
+        if (!ownerId.equals(task.getOwnerId()))
+        {
+            LOGGER.error(String.format(
+                "Error retrieving the task: %s. Owner %s not match task owner %s", taskId, ownerId,
+                task.getOwnerId()));
+
+            addNotFoundErrors(APIError.NON_EXISTENT_TASK);
+            flushErrors();
+        }
+
+        return task;
+    }
+
     public Task addTask(final Task task)
     {
         return repo.save(task);

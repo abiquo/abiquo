@@ -44,7 +44,6 @@ import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
 import com.abiquo.scheduler.limit.LimitExceededException;
-import com.abiquo.scheduler.limit.VirtualMachineRequirements;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
@@ -60,6 +59,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
  * Implements all the business logic for storage features.

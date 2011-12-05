@@ -21,6 +21,8 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.List;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
@@ -32,6 +34,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +44,15 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.resources.AbstractResourceWithTasks;
-import com.abiquo.api.services.NetworkService;
-import com.abiquo.api.services.UserService;
+import com.abiquo.api.resources.TaskResourceUtils;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -63,12 +66,15 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.TaskDto;
+import com.abiquo.server.core.task.TasksDto;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 @Parent(VirtualMachinesResource.class)
 @Controller
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
-public class VirtualMachineResource extends AbstractResourceWithTasks
+public class VirtualMachineResource
 {
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
@@ -102,16 +108,13 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
     @Autowired
-    VirtualMachineService vmService;
+    private VirtualMachineService vmService;
 
     @Autowired
-    VirtualMachineAllocatorService service;
+    private VirtualMachineAllocatorService service;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
-    NetworkService networkService;
+    private TaskService taskService;
 
     /**
      * Return the virtual appliance if exists.
@@ -456,41 +459,23 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
                 .getEnterprise();
         final User user =
             v.getVirtualMachine().getUser() == null ? null : v.getVirtualMachine().getUser();
-        final VirtualImage virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
-        dto.addLink(restBuilder.buildVirtualImageLink(virtualImage.getEnterprise().getId(),
+        final VirtualMachineTemplate virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
+
+        dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise().getId(),
             virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
+
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
                 .getVirtualMachine().isChefEnabled()));
+
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
+
         return dto;
     }
 
     /** ########## DEPRECATED ZONE ########## */
-
-    @PUT
-    @Path("action/allocate")
-    @Deprecated
-    public synchronized VirtualMachineDto allocate(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer virtualDatacenterId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer virtualMachineId,
-        final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
-        throws Exception
-    {
-        Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
-
-        VirtualMachine vmachine =
-            service.allocateVirtualMachine(virtualMachineId, virtualApplianceId,
-                forceEnterpriseLimits);
-
-        service.updateVirtualMachineUse(virtualApplianceId, vmachine);
-
-        return createTransferObject(vmachine, virtualApplianceId, virtualDatacenterId, restBuilder);
-    }
 
     public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
@@ -531,12 +516,15 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             : machine.getId(), enterprise == null ? null : enterprise.getId(), user == null ? null
             : user.getId()));
 
-        final VirtualImage vimage = v.getVirtualImage();
-        if (vimage != null)
+        final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
+        if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-                .getRepository().getDatacenter().getId(), vimage.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
+
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
+
         return dto;
     }
 
@@ -582,16 +570,12 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
             v.isChefEnabled()));
 
-        final VirtualImage vimage = v.getVirtualImage();
-        if (vimage != null)
+        final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
+        if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-                .getRepository().getDatacenter().getId(), vimage.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
-        return dto;
-    }
-
-    // TODO forceEnterpriseLimits = true
 
     @DELETE
     @Deprecated
@@ -602,6 +586,9 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         service.deallocateVirtualMachine(virtualMachineId);
+        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
+
+        return dto;
     }
 
     /**
@@ -626,9 +613,34 @@ public class VirtualMachineResource extends AbstractResourceWithTasks
         return createNodeTransferObject(node, vdcId, vappId, restBuilder);
     }
 
-    @Override
-    public TaskOwnerType getTaskOwnerType()
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path(TaskResourceUtils.TASKS_PATH)
+    public TasksDto getTasks(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @Context final UriInfo uriInfo) throws Exception
     {
-        return TaskOwnerType.VIRTUAL_MACHINE;
+        vmService.getVirtualMachine(vdcId, vappId, vmId);
+        List<Task> tasks = taskService.findTasks(TaskOwnerType.VIRTUAL_MACHINE, vmId.toString());
+
+        return TaskResourceUtils.transform(tasks, uriInfo);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    @Path(TaskResourceUtils.TASK_PATH)
+    public TaskDto getTask(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @PathParam(TaskResourceUtils.TASK) @NotNull final String taskId,
+        @Context final UriInfo uriInfo) throws Exception
+    {
+        vmService.getVirtualMachine(vdcId, vappId, vmId);
+        Task task = taskService.findTask(vmId.toString(), taskId);
+
+        return TaskResourceUtils.transform(task, uriInfo);
     }
 }

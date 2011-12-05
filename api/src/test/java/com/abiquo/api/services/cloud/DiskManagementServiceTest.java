@@ -95,9 +95,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         vm.setUser(u);
 
         // TODO vdc datacenter and virutal image datacenter ARE NOT THE SAME
-        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualImage().getCategory(), vm
-            .getVirtualImage().getRepository().getDatacenter(), vm.getVirtualImage()
-            .getRepository(), vm.getVirtualImage(), vm.getHypervisor().getMachine().getRack(), vm
+        setup(vdc.getDatacenter(), vdc, dclimit, vapp, vm.getVirtualMachineTemplate().getCategory(), vm
+            .getVirtualMachineTemplate().getRepository().getDatacenter(), vm.getVirtualMachineTemplate()
+            .getRepository(), vm.getVirtualMachineTemplate(), vm.getHypervisor().getMachine().getRack(), vm
             .getHypervisor().getMachine(), vm.getHypervisor(), vm, nvi);
 
         SecurityContextHolder.getContext().setAuthentication(new BasicUserAuthentication());
@@ -358,6 +358,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
+        // Assert its capacity is the same than the virtual image
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
 
         service.registerHardDiskIntoVMInDatabase(vdc.getId(), vapp.getId(), vm.getId(), 100000);
     }
@@ -395,6 +398,30 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         commitActiveTransaction(em);
 
+    }
+
+    /**
+     * Check by default there is a disk into virtual machine corresponding to virtual image's disk.
+     * and its diskOrder is always 0
+     */
+    @Test(enabled = false)
+    public void getDiskDefaultTest()
+    {
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+        service = new StorageService(em);
+        DiskManagement disk = service.getHardDiskByVM(vdc.getId(), vapp.getId(), vm.getId(), 0);
+
+        // Assert this disk has always the 'attachmentOrder' 0
+        assertEquals(disk.getAttachmentOrder(), 0L);
+
+        // Assert is 'readOnly'
+        assertEquals(disk.getReadOnly(), Boolean.TRUE);
+
+        // Assert its capacity is the same than the virtual image
+        assertEquals(disk.getSizeInMb(),
+            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
+
+        commitActiveTransaction(em);
     }
 
     /**

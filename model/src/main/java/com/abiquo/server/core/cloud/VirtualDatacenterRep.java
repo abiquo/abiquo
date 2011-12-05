@@ -118,10 +118,10 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public NodeVirtualImage associateToVirtualAppliance(final String name,
         final VirtualMachine vmachine, final VirtualAppliance vapp)
     {
-        assert vmachine.getVirtualImage() != null;
+        assert vmachine.getVirtualMachineTemplate() != null;
 
         NodeVirtualImage nvi =
-            new NodeVirtualImage(name, vapp, vmachine.getVirtualImage(), vmachine);
+            new NodeVirtualImage(name, vapp, vmachine.getVirtualMachineTemplate(), vmachine);
 
         nodeviDao.persist(nvi);
 

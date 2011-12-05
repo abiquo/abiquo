@@ -52,9 +52,9 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         super(VirtualImageConversion.class, entityManager);
     }
 
-    private static Criterion sameImage(final VirtualImage image)
+    private static Criterion sameImage(final VirtualMachineTemplate image)
     {
-        return Restrictions.eq(VirtualImageConversion.VIRTUAL_IMAGE_PROPERTY, image);
+        return Restrictions.eq(VirtualImageConversion.VIRTUAL_MACHINE_TEMPLATE_PROPERTY, image);
     }
 
     private static Criterion targetFormatIn(final DiskFormatType... formats)
@@ -80,7 +80,7 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
      *         the most suitable format.
      */
     @SuppressWarnings("unchecked")
-    public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
+    public List<VirtualImageConversion> compatilbeConversions(final VirtualMachineTemplate virtualImage,
         final HypervisorType hypervisorType)
     {
         final Criterion compat =
@@ -114,7 +114,7 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
     @Deprecated
     // use selectConversion TODO delthis
     @SuppressWarnings("unchecked")
-    public VirtualImageConversion getUnbundledConversion(final VirtualImage image,
+    public VirtualImageConversion getUnbundledConversion(final VirtualMachineTemplate image,
         final DiskFormatType format)
     {
         // There can be no images
@@ -136,23 +136,22 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         return null;
     }
 
-    public boolean isConverted(final VirtualImage image, final DiskFormatType targetType)
+    public boolean isConverted(final VirtualMachineTemplate image, final DiskFormatType targetType)
     {
         final Criterion compat = Restrictions.and(sameImage(image), targetFormatIn(targetType));
         return !createCriteria(compat).list().isEmpty();
     }
 
-    public Collection<VirtualImageConversion> findByVirtualImage(final VirtualImage virtualImage)
+    public Collection<VirtualImageConversion> findByVirtualImage(final VirtualMachineTemplate virtualImage)
     {
         final Criteria criteria = createCriteria().add(sameImage(virtualImage));
         return criteria.list();
     }
 
-    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE =
-        "SELECT "
-            + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
-            + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
-            + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
+    private final String VIRTUALIMAGECONVERSION_BY_NODEVIRTUALIMAGE = "SELECT "
+        + "vic FROM com.abiquo.server.core.appslibrary.VirtualImageConversion vic, "
+        + "com.abiquo.server.core.cloud.NodeVirtualImage nvi "
+        + "WHERE nvi.id = :idVirtualImageConversion AND nvi.virtualImage.id = vic.virtualImage.id";
 
     public Collection<VirtualImageConversion> findByVirtualImageConversionByNodeVirtualImage(
         final NodeVirtualImage nodeVirtualImage)
@@ -161,5 +160,16 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
         query.setParameter("idVirtualImageConversion", nodeVirtualImage.getId());
 
         return query.list();
+    }
+
+    private final String DATACENTERUUID_BY_VIRTUALIMAGECONVERSION =
+        "select distinct(dc.uuid) from virtualimage_conversions vic left outer join virtualimage vi on vic.idImage = vi.idImage left outer join repository rep on vi.idRepository = rep.idRepository left outer join datacenter dc on rep.idDataCenter = dc.idDatacenter where vic.id = :idVirtualImageConversion";
+
+    public String getDatacenterUUIDByVirtualImageConversionID(final Integer idVirtualImageConversion)
+    {
+        Query query = getSession().createQuery(DATACENTERUUID_BY_VIRTUALIMAGECONVERSION);
+        query.setParameter("idVirtualImageConversion", idVirtualImageConversion);
+
+        return (String) query.uniqueResult();
     }
 }
