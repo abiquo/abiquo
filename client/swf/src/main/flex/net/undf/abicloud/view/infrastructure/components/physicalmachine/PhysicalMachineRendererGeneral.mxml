@@ -229,6 +229,7 @@
             width="100" height="17"
             styleName="PhysicalMachinesRendererGeneralNumericStepper"
             minimum="1" stepSize="1" includeInLayout="{_editMode}"
+            maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
             visible="{_editMode}"/>
     </mx:FormItem>
 

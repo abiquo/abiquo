@@ -730,6 +730,7 @@
 
             <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
                 <mx:NumericStepper id="cpuInput"
+                	maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
                     width="100" height="20"
                     enabled="{this._isEditable}"
                     change="validateForm()"

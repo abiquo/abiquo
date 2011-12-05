@@ -249,6 +249,7 @@
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
             <mx:NumericStepper id="cpuInput"
                 width="100" height="20"
+                maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
                 minimum="1" stepSize="1"/>
         </mx:FormItem>
 

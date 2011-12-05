@@ -704,6 +704,7 @@
                                 width="75" height="17"
                                 fontSize="10"
                                 minimum="1" stepSize="1"
+                                maximum="{AbiCloudModel.MAX_NUMBER_OF_CPU}"
                                 includeInLayout="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"
                                 visible="{this._editMode &amp;&amp; this._virtualMachine.state.id != State.RUNNING &amp;&amp; this._virtualMachine.state.id != State.PAUSED}"/>
                         </mx:FormItem>
