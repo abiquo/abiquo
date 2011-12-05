@@ -419,8 +419,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         dto.setRam(virtualMachine.getRam());
         dto.setState(VirtualMachineState.NOT_ALLOCATED);
         dto.setUuid(virtualMachine.getUUID());
-        dto.addLink(new RESTLink("virtualimage", createVirtualMachineTemplateLink(node.getVirtualImage()
-            .getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
+        dto.addLink(new RESTLink("virtualmachinetemplate", createVirtualMachineTemplateLink(node
+            .getVirtualImage().getIdEnterprise(), datacenterId, node.getVirtualImage().getId())));
 
         dto.addLink(new RESTLink("enterprise", createEnterpriseLink(virtualAppliance
             .getEnterprise().getId())));

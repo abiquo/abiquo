@@ -127,9 +127,9 @@ public class TarantinoService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
                 "Failed to enqueue task in Tarantino. Rabbitmq might be "
-                    + "down or not configured. The error message was " + ex.getMessage(), ex);
+                    + "down or not configured. The error message was " + ex.getMessage());
 
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
@@ -160,8 +160,8 @@ public class TarantinoService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
-                "Error closing the producer channel with error: " + ex.getMessage(), ex);
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
+                "Error closing the producer channel with error: " + ex.getMessage());
 
         }
     }
