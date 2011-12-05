@@ -51,18 +51,20 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM =
         "hypervisorTypeName";
 
+    public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
+
     /**
      * @param idRepo, if 0, indicate stateful templates
      * @param idCategory, if 0 indicate return all the categories
      */
     @Override
-    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategory(final Integer idEnterprise,
-        final Integer datacenterId, final String categoryName)
+    public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategory(
+        final Integer idEnterprise, final Integer datacenterId, final String categoryName)
     {
         final String hypervisorTypeName = null;
 
-        return getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
-            categoryName, hypervisorTypeName);
+        return getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise,
+            datacenterId, categoryName, hypervisorTypeName, false);
     }
 
     /**
@@ -72,7 +74,7 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
     @Override
     public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
         final Integer idEnterprise, final Integer datacenterId, final String categoryName,
-        final String hypervisorTypeName)
+        final String hypervisorTypeName, final Boolean includeStateful)
 
     {
         final DataResult<List<VirtualImage>> result = new DataResult<List<VirtualImage>>();
@@ -83,7 +85,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         if (StringUtils.isNotEmpty(hypervisorTypeName))
         {
             vmtemplatesResource =
-                vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
+                vmtemplatesResource.queryParam(
+                    VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM,
                     valueOf(hypervisorTypeName));
 
         }
@@ -95,11 +98,19 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
                     valueOf(categoryName));
         }
 
+        if (includeStateful)
+        {
+            vmtemplatesResource =
+                vmtemplatesResource.queryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM,
+                    valueOf(true));
+        }
+
         ClientResponse response = vmtemplatesResource.get();
 
         if (response.getStatusCode() / 200 == 1)
         {
-            VirtualMachineTemplatesDto templatess = response.getEntity(VirtualMachineTemplatesDto.class);
+            VirtualMachineTemplatesDto templatess =
+                response.getEntity(VirtualMachineTemplatesDto.class);
 
             result.setSuccess(true);
             result.setData(transformToFlex(templatess));
@@ -114,12 +125,13 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
     }
 
     @Override
-    public BasicResult deleteVirtualMachineTemplate(final Integer enterpriseId, final Integer datacenterId,
-        final Integer virtualMachineTemplateId)
+    public BasicResult deleteVirtualMachineTemplate(final Integer enterpriseId,
+        final Integer datacenterId, final Integer virtualMachineTemplateId)
     {
         BasicResult result = new BasicResult();
 
-        String uri = createVirtualMachineTemplateLink(enterpriseId, datacenterId, virtualMachineTemplateId);
+        String uri =
+            createVirtualMachineTemplateLink(enterpriseId, datacenterId, virtualMachineTemplateId);
 
         ClientResponse response = delete(uri);
 
@@ -256,7 +268,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         return result;
     }
 
-    private VirtualMachineTemplateDto createDtoObject(final VirtualImage vimage, final Integer datacenterId)
+    private VirtualMachineTemplateDto createDtoObject(final VirtualImage vimage,
+        final Integer datacenterId)
     {
 
         VirtualMachineTemplateDto dto = new VirtualMachineTemplateDto();
@@ -287,8 +300,8 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         if (vimage.getMaster() != null)
         {
             RESTLink masterLink =
-                new RESTLink("master", createVirtualMachineTemplateLink(enterpriseId, datacenterId, vimage
-                    .getMaster().getId()));
+                new RESTLink("master", createVirtualMachineTemplateLink(enterpriseId, datacenterId,
+                    vimage.getMaster().getId()));
             dto.addLink(masterLink);
         }
         if (vimage.getCategory() != null)

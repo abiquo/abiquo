@@ -36,7 +36,7 @@ public interface VirtualMachineTemplateResourceStub
      */
     public DataResult<List<VirtualImage>> getVirtualMachineTemplateByCategoryAndHypervisorCompatible(
         final Integer idEnterprise, final Integer datacenterId, final String categoryName,
-        final String hypervisorTypeName);
+        final String hypervisorTypeName, final Boolean includeStateful);
 
     /**
      * @param datacenterId, null indicate stateful templates
