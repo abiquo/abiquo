@@ -95,7 +95,7 @@ public class AMEventProcessor implements AMCallback
                 String.format("Virtual Machine Template [%s] can not be added to repository [%s]",
                     event.getOvfId(), event.getRepositoryLocation());
             tracer.systemError(SeverityType.NORMAL, ComponentType.APPLIANCE_MANAGER,
-                EventType.VI_ADD, msg, e);
+                EventType.VI_ADD, e, msg);
         }
 
     }
