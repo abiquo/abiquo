@@ -56,19 +56,13 @@ import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
-import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.model.transport.error.ErrorDto;
-import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -77,6 +71,7 @@ import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
+import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
@@ -90,7 +85,6 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
-import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -108,6 +102,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     protected VirtualApplianceRep vappRep;
+    
+    @Autowired
+    protected VirtualDatacenterRep vdcRep;
 
     @Autowired
     private RemoteServiceService remoteServiceService;
@@ -150,6 +147,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         this.repo = new VirtualMachineRep(em);
         this.vappRep = new VirtualApplianceRep(em);
+        this.vdcRep = new VirtualDatacenterRep(em);
         this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
         this.enterpriseRep = new EnterpriseRep(em);
@@ -1273,7 +1271,7 @@ public class VirtualMachineService extends DefaultApiService
 
             Integer diskId = Integer.parseInt(pathValues.getFirst(DiskResource.DISK));
 
-            DiskManagement disk = vdcRepo.findHardDiskByVirtualDatacenter(vdc, diskId);
+            DiskManagement disk = vdcRep.findHardDiskByVirtualDatacenter(vdc, diskId);
             if (disk == null)
             {
                 String errorCode = APIError.HD_NON_EXISTENT_HARD_DISK.getCode();
@@ -1301,7 +1299,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     protected VirtualDatacenter getVirtualDatacenter(final Integer vdcId)
     {
-        VirtualDatacenter vdc = vdcRepo.findById(vdcId);
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
         if (vdc == null)
         {
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);

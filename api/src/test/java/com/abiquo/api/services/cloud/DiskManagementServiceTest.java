@@ -358,9 +358,6 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
-        // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(),
-            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
 
         service.registerHardDiskIntoVMInDatabase(vdc.getId(), vapp.getId(), vm.getId(), 100000);
     }

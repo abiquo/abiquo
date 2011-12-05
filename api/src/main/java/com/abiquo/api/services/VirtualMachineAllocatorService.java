@@ -22,6 +22,7 @@
 package com.abiquo.api.services;
 
 import javax.jms.ResourceAllocationException;
+import javax.persistence.EntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

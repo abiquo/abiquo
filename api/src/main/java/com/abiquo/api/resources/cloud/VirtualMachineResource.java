@@ -51,7 +51,6 @@ import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -576,17 +575,6 @@ public class VirtualMachineResource
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
                 .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
-
-    @DELETE
-    @Deprecated
-    @Path("action/deallocate")
-    public synchronized void deallocate(
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
-        @Context final IRESTBuilder restBuilder) throws Exception
-    {
-        service.deallocateVirtualMachine(virtualMachineId);
-        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }
