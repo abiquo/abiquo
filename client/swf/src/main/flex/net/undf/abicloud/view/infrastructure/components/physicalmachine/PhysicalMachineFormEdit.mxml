@@ -276,7 +276,7 @@
         <mx:FormItem label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')">
             <mx:NumericStepper id="cpuInput"
                 width="100" height="20"
-                minimum="1" maximum="32" stepSize="1"
+                minimum="1" stepSize="1"
                 change="validateForm()"/>
         </mx:FormItem>
 
