@@ -167,7 +167,7 @@ public class VirtualImageConversionDAO extends DefaultDAOBase<Integer, VirtualIm
 
     public String getDatacenterUUIDByVirtualImageConversionID(final Integer idVirtualImageConversion)
     {
-        Query query = getSession().createQuery(DATACENTERUUID_BY_VIRTUALIMAGECONVERSION);
+        Query query = getSession().createSQLQuery(DATACENTERUUID_BY_VIRTUALIMAGECONVERSION);
         query.setParameter("idVirtualImageConversion", idVirtualImageConversion);
 
         return (String) query.uniqueResult();
