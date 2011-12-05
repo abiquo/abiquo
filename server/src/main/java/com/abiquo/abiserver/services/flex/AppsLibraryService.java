@@ -27,9 +27,9 @@ import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStub;
 import com.abiquo.abiserver.appslibrary.stub.AppsLibraryStubImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.DatacenterRepositoryResourceStub;
-import com.abiquo.abiserver.commands.stub.VirtualImageResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineTemplateResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.DatacenterRepositoryResourceStubImpl;
-import com.abiquo.abiserver.commands.stub.impl.VirtualImageResourceStubImpl;
+import com.abiquo.abiserver.commands.stub.impl.VirtualMachineTemplateResourceStubImpl;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -72,20 +72,18 @@ public class AppsLibraryService
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategoryAndHypervisorCompatible(
         final UserSession userSession, final Integer idEnterprise, final Integer idRepo,
-        final Integer idCategory, final Integer idHypervisorType, final Integer idDatacenter)
+        final String categoryName, final String hypervisorTypeName, final Integer idDatacenter)
     {
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
-        // idCategory == 0 indicate return all the categories
-        final Integer categoryId = idCategory == 0 ? null : idCategory;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualImageByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
-                categoryId, idHypervisorType);
+            vimageStub.getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
+                categoryName, hypervisorTypeName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -95,20 +93,18 @@ public class AppsLibraryService
      * @param idCategory, if 0 indicate return all the categories
      */
     public DataResult<List<VirtualImage>> getVirtualImageByCategory(final UserSession userSession,
-        final Integer idEnterprise, final Integer idRepo, final Integer idCategory,
+        final Integer idEnterprise, final Integer idRepo, final String categoryName,
         final Integer idDatacenter)
     {
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         // idRepo == 0 --> stateful
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
-        // idCategory == 0 indicate return all the categories
-        final Integer categoryId = idCategory == 0 ? null : idCategory;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualImageByCategory(idEnterprise, datacenterId, categoryId);
+            vimageStub.getVirtualMachineTemplateByCategory(idEnterprise, datacenterId, categoryName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -131,32 +127,32 @@ public class AppsLibraryService
         final Integer idEnterprise)
     {
 
-        return proxyStub(userSession).getOVFPackageListName(idEnterprise);
+        return proxyStub(userSession).getTemplateDefinitionListNames(idEnterprise);
     }
 
     public DataResult<OVFPackageList> getOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOVFPackageList)
     {
-        return proxyStub(userSession).getOVFPackageList(idEnterprise, nameOVFPackageList);
+        return proxyStub(userSession).getTemplateDefinitionList(idEnterprise, nameOVFPackageList);
     }
 
     public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String ovfpackageListURL)
     {
-        return proxyStub(userSession).createOVFPackageList(idEnterprise, ovfpackageListURL);
+        return proxyStub(userSession).createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, ovfpackageListURL);
     }
 
     public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
 
-        return proxyStub(userSession).refreshOVFPackageList(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession).refreshTemplateDefinitionListFromRepository(idEnterprise, nameOvfpackageList);
     }
 
     public BasicResult deleteOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
-        return proxyStub(userSession).deleteOVFPackageList(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession).deleteTemplateDefinitionList(idEnterprise, nameOvfpackageList);
     }
 
     /** DC specific status. */
@@ -164,7 +160,7 @@ public class AppsLibraryService
         final UserSession userSession, final String nameOVFPackageList, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).getOVFPackageListState(nameOVFPackageList, idEnterprise,
+        return proxyStub(userSession).getTemplatesState(nameOVFPackageList, idEnterprise,
             idDatacenter);
     }
 
@@ -174,7 +170,7 @@ public class AppsLibraryService
     {
         final List<String> ovfUrls = ovfUrlsIn; // XXX cast to arraylist
 
-        return proxyStub(userSession).getOVFPackagesState(ovfUrls, idEnterprise, idDatacenter);
+        return proxyStub(userSession).getTemplatesState(ovfUrls, idEnterprise, idDatacenter);
 
     }
 
@@ -182,7 +178,7 @@ public class AppsLibraryService
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).getOVFPackageState(ovfUrl, idEnterprise, idDatacenter);
+        return proxyStub(userSession).getTemplateState(ovfUrl, idEnterprise, idDatacenter);
     }
 
     public BasicResult startDownloadOVFPackage(final UserSession userSession,
@@ -190,7 +186,7 @@ public class AppsLibraryService
     {
         final List<String> ovfUrls = idsOvfpackageIn; // XXX cast to arraylist
 
-        return proxyStub(userSession).installOVFPackagesInDatacenter(ovfUrls, idEnterprise,
+        return proxyStub(userSession).installTemplateDefinitionsInDatacenter(ovfUrls, idEnterprise,
             idDatacenter);
     }
 
@@ -198,7 +194,7 @@ public class AppsLibraryService
         final UserSession userSession, final String ovfUrl, final Integer idEnterprise,
         final Integer idDatacenter)
     {
-        return proxyStub(userSession).uninstallOVFPackageInDatacenter(ovfUrl, idEnterprise,
+        return proxyStub(userSession).uninstallTemplateDefinitionInDatacenter(ovfUrl, idEnterprise,
             idDatacenter);
     }
 
@@ -272,9 +268,9 @@ public class AppsLibraryService
         final Integer idDatacenter, final VirtualImage vimage)
     {
 
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
         return vimageStub.editVirtualImage(idEnterprise, idDatacenter, vimage);
     }
@@ -283,11 +279,11 @@ public class AppsLibraryService
         final Integer idEnterprise, final Integer idDatacenter, final Integer idVirtualImage)
     {
 
-        final VirtualImageResourceStub vimageStub =
-            APIStubFactory.getInstance(userSession, new VirtualImageResourceStubImpl(),
-                VirtualImageResourceStub.class);
+        final VirtualMachineTemplateResourceStub vimageStub =
+            APIStubFactory.getInstance(userSession, new VirtualMachineTemplateResourceStubImpl(),
+                VirtualMachineTemplateResourceStub.class);
 
-        return vimageStub.deleteVirtualImage(idEnterprise, idDatacenter, idVirtualImage);
+        return vimageStub.deleteVirtualMachineTemplate(idEnterprise, idDatacenter, idVirtualImage);
 
     }
 

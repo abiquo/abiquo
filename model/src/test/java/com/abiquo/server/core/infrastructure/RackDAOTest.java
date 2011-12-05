@@ -187,12 +187,12 @@ public class RackDAOTest extends DefaultDAOTestBase<RackDAO, Rack>
     {
         VirtualMachine vm1 = vmgenerator.createUniqueInstance();
         VirtualMachine vm2 =
-            vmgenerator.createInstance(vm1.getVirtualImage(), vm1.getEnterprise(),
+            vmgenerator.createInstance(vm1.getVirtualMachineTemplate(), vm1.getEnterprise(),
                 vm1.getHypervisor(), vm1.getUser(), "test");
 
         // FIXME: Fix virtual image fields until we have the changes in the VirtualImage API
         Category category = new Category("test-category");
-        vm1.getVirtualImage().setCategory(category);
+        vm1.getVirtualMachineTemplate().setCategory(category);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         vmgenerator.addAuxiliaryEntitiesToPersist(vm1, entitiesToPersist);

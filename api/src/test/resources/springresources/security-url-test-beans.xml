@@ -36,7 +36,9 @@
     <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
         <property name="replacements">
             <map>
+            <!-- 
                 <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
+			-->
             </map>
         </property>
     </bean>

@@ -46,8 +46,8 @@ import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.chef.RunlistElement;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -119,27 +119,27 @@ public class VirtualMachine extends DefaultEntityBase
 
     //
 
-    public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PROPERTY = "virtualMachineTemplate";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
+    private final static boolean VIRTUAL_MACHINE_TEMPLATE_REQUIRED = false;
 
-    private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
+    private final static String VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN, nullable = !VIRTUAL_IMAGE_REQUIRED)
+    @JoinColumn(name = VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN, nullable = !VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
     @ManyToOne(fetch = FetchType.LAZY)
     // , cascade = CascadeType.ALL)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualimage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualMachineTemplate;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    @Required(value = VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
+    public VirtualMachineTemplate getVirtualMachineTemplate()
     {
-        return this.virtualImage;
+        return this.virtualMachineTemplate;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        this.virtualImage = virtualImage;
+        this.virtualMachineTemplate = virtualMachineTemplate;
     }
 
     //
@@ -606,36 +606,36 @@ public class VirtualMachine extends DefaultEntityBase
 
     public boolean isChefEnabled()
     {
-        return getVirtualImage().isChefEnabled() && getEnterprise().isChefEnabled();
+        return getVirtualMachineTemplate().isChefEnabled() && getEnterprise().isChefEnabled();
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final Hypervisor hypervisor, final VirtualImage virtualImage, final UUID uuid,
+        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate, final UUID uuid,
         final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
         setUser(user);
         setHypervisor(hypervisor);
-        setVirtualImage(virtualImage);
+        setVirtualMachineTemplate(virtualMachineTemplate);
         setUuid(uuid.toString());
         setIdType(typeId);
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final VirtualImage virtualImage, final UUID uuid, final Integer typeId)
+        final VirtualMachineTemplate virtualMachineTemplate, final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
         setUser(user);
-        setVirtualImage(virtualImage);
+        setVirtualMachineTemplate(virtualMachineTemplate);
         setUuid(uuid.toString());
         setIdType(typeId);
     }
 
     /**
      * This method is intended to clone a {@link VirtualMachine} that shares a reference to a
-     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualImage} . The
+     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} . The
      * {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}.
      * 
      * @see java.lang.Object#clone()
@@ -665,7 +665,7 @@ public class VirtualMachine extends DefaultEntityBase
         virtualMachine.setVdrpIP(vdrpIP);
         virtualMachine.setVdrpPort(vdrpPort);
         // Not editable
-        virtualMachine.setVirtualImage(virtualImage);
+        virtualMachine.setVirtualMachineTemplate(virtualMachineTemplate);
         return virtualMachine;
     }
 }

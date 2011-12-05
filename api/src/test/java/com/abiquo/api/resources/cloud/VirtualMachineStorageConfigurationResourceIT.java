@@ -38,7 +38,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
@@ -78,7 +78,7 @@ public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGen
         vapp = vappGenerator.createInstance(vdc);
         vapp.setState(VirtualApplianceState.NOT_DEPLOYED);
 
-        VirtualImage vimage = virtualImageGenerator.createInstance(e, vdc.getDatacenter());
+        VirtualMachineTemplate vimage = virtualMachineTemplateGenerator.createInstance(e, vdc.getDatacenter());
         vm = vmGenerator.createInstance(vimage);
 
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);

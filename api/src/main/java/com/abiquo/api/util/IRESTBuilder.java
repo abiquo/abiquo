@@ -30,9 +30,9 @@ import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryDto;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -101,11 +101,11 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildUserLinks(Integer enterpriseId, Integer roleId, UserDto user);
 
-    public List<RESTLink> buildOVFPackageListLinks(Integer datacenterId,
-        OVFPackageListDto ovfPackageList);
+    public List<RESTLink> buildTemplateDefinitionListLinks(Integer datacenterId,
+        TemplateDefinitionListDto templateDefinitionList);
 
-    public List<RESTLink> buildOVFPackageLinks(Integer enterpriseId, OVFPackageDto ovfPackage,
-        Category category, Icon icon);
+    public List<RESTLink> buildTemplateDefinitionLinks(Integer enterpriseId,
+        TemplateDefinitionDto templateDefinition, Category category, Icon icon);
 
     public List<RESTLink> buildVirtualDatacenterLinks(VirtualDatacenter vdc, Integer datacenterId,
         Integer enterpriseId);
@@ -122,10 +122,10 @@ public interface IRESTBuilder
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
         final Integer dcId, final Integer repoId);
 
-    public List<RESTLink> buildVirtualImageLinks(final Integer enterpriseId, final Integer dcId,
-        final VirtualImage image, final VirtualImage master);
+    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId, final Integer dcId,
+        final VirtualMachineTemplate template, final VirtualMachineTemplate master);
 
-    public RESTLink buildVirtualImageLink(final Integer enterpriseId, final Integer dcId,
+    public RESTLink buildVirtualMachineTemplateLink(final Integer enterpriseId, final Integer dcId,
         final Integer virtualImageId);
 
     /*
@@ -233,4 +233,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualDatacenterDiskLinks(DiskManagement disk);
 
     public RESTLink buildUserLink(Integer enterpriseId, Integer userId);
+
+    public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
+
 }

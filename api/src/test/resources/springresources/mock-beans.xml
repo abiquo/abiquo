@@ -3,7 +3,6 @@
     <bean id="beanReplacementsTest" class="com.abiquo.api.spring.BeanReplacementProcessor">
         <property name="replacements">
             <map>
-                <entry key="virtualMachineAllocatorService" value="virtualMachineAllocatorTestService" />
                 <entry key="vsmServiceStub" value="vsmServiceStubMock" />
                 <entry key="infrastructureService" value="infrastructureTestService" />
                 <entry key="nodecollectorServiceStub" value="nodecollectorServiceStubMock" />

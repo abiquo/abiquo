@@ -23,8 +23,8 @@ package com.abiquo.appliancemanager;
 
 import static com.abiquo.appliancemanager.AMConsumerTestListener.assertEventsEmpty;
 import static com.abiquo.appliancemanager.AMConsumerTestListener.expectedEvents;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOAD;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.NOT_DOWNLOAD;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.DOWNLOAD;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.NOT_DOWNLOAD;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestServerListener.BASE_URI;
 
@@ -42,7 +42,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
+import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.testng.TestServerListener;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -86,7 +86,7 @@ public class ApplianceManagerUploadIT
     public void test_CreateUpload() throws Exception
     {
 
-        OVFPackageInstanceDto info = ApplianceManagerAsserts.createTestDiskInfoUpload(ovfId);
+        TemplateDto info = ApplianceManagerAsserts.createTestDiskInfoUpload(ovfId);
         File file = ApplianceManagerAsserts.createUploadTempFile();
 
         uploadOVFPackageInstance("1", info, file, true);
@@ -99,13 +99,13 @@ public class ApplianceManagerUploadIT
 
     }
 
-    private void uploadOVFPackageInstance(final String idEnterprise,
-        final OVFPackageInstanceDto diskInfo, final File diskFile, final boolean blocking)
-        throws IOException, InterruptedException, ExecutionException
+    private void uploadOVFPackageInstance(final String idEnterprise, final TemplateDto diskInfo,
+        final File diskFile, final boolean blocking) throws IOException, InterruptedException,
+        ExecutionException
     {
 
         final String ovfsposturl =
-            String.format("%s/erepos/%s/ovfs", TestServerListener.BASE_URI, idEnterprise);
+            String.format("%s/erepos/%s/templates", TestServerListener.BASE_URI, idEnterprise);
 
         AsyncHttpClient httpClient = uploadClient();
         ListenableFuture<com.ning.http.client.Response> resFuture =
@@ -124,14 +124,14 @@ public class ApplianceManagerUploadIT
     }
 
     private com.ning.http.client.Request uploadParts(final String ovfsPostUrl,
-        final OVFPackageInstanceDto diskInfo, final File diskFile)
+        final TemplateDto diskInfo, final File diskFile)
     {
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         JacksonJaxbJsonProvider jaxbjson = new JacksonJaxbJsonProvider();
         try
         {
-            jaxbjson.writeTo(diskInfo, OVFPackageInstanceDto.class, null, null,
+            jaxbjson.writeTo(diskInfo, TemplateDto.class, null, null,
                 MediaType.APPLICATION_JSON_TYPE, null, output);
         }
         catch (IOException e)
@@ -143,7 +143,7 @@ public class ApplianceManagerUploadIT
         builder.setUrl(ovfsPostUrl);
 
         final String jsonString =
-            new String("{ovfInstance: " + new String(output.toByteArray()) + " }"); // FIXME
+            new String("{template: " + new String(output.toByteArray()) + " }"); // FIXME
         builder.addBodyPart(new StringPart("diskInfo", jsonString));
         builder.addBodyPart(new FilePart("diskFile", diskFile, "application/octet-stream", null));
         // TODO doesn't work as serialization in amqp difers for rest providers (missing ovfinstance

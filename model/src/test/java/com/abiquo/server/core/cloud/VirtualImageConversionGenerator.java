@@ -25,21 +25,21 @@ import java.util.List;
 
 import com.abiquo.model.enumerator.ConversionState;
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualImageConversionGenerator extends DefaultEntityGenerator<VirtualImageConversion>
 {
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
     public VirtualImageConversionGenerator(final SeedGenerator seed)
     {
         super(seed);
-        virtualImageGenerator = new VirtualImageGenerator(seed);
+        virtualImageGenerator = new VirtualMachineTemplateGenerator(seed);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
     @Override
     public VirtualImageConversion createUniqueInstance()
     {
-        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        VirtualMachineTemplate virtualImage = virtualImageGenerator.createUniqueInstance();
 
         VirtualImageConversion virtualImageConversion =
             new VirtualImageConversion(virtualImage, DiskFormatType.UNKNOWN, newString(nextSeed(),
@@ -68,7 +68,7 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
     }
 
     /** FINISHED */
-    public VirtualImageConversion createInstance(final VirtualImage vimage,
+    public VirtualImageConversion createInstance(final VirtualMachineTemplate vimage,
         final DiskFormatType targetFormat)
     {
         VirtualImageConversion virtualImageConversion =
@@ -86,7 +86,7 @@ public class VirtualImageConversionGenerator extends DefaultEntityGenerator<Virt
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 
-        VirtualImage virtualImage = entity.getVirtualImage();
+        VirtualMachineTemplate virtualImage = entity.getVirtualMachineTemplate();
         virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
         entitiesToPersist.add(virtualImage);
     }

@@ -42,7 +42,7 @@ import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.model.validation.IscsiPath;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -102,7 +102,7 @@ public class VolumeManagement extends RasdManagement
     public static final String AVAILABLES =
         "SELECT vol FROM VolumeManagement vol LEFT JOIN vol.virtualMachine vm "
             + "WHERE vol.virtualDatacenter.id = :vdcId AND vm IS NULL "
-            + "AND vol.virtualImage IS NULL AND vol.rasd.elementName like :filterLike "
+            + "AND vol.virtualMachineTemplate IS NULL AND vol.rasd.elementName like :filterLike "
             + "AND vol NOT IN (SELECT stateful.volume FROM DiskStatefulConversion stateful)";
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
@@ -157,37 +157,37 @@ public class VolumeManagement extends RasdManagement
         getRasd().setPoolId(storagePool.getId());
     }
 
-    public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PROPERTY = "virtualMachineTemplate";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = false;
+    private final static boolean VIRTUAL_MACHINE_TEMPLATE_REQUIRED = false;
 
-    private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
+    private final static String VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
+    @JoinColumn(name = VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_" + TABLE_NAME + "_virtualImage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualMachineTemplate;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    @Required(value = VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
+    public VirtualMachineTemplate getVirtualMachineTemplate()
     {
-        return this.virtualImage;
+        return this.virtualMachineTemplate;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        this.virtualImage = virtualImage;
+        this.virtualMachineTemplate = virtualMachineTemplate;
 
-        if (virtualImage != null)
+        if (virtualMachineTemplate != null)
         {
-            this.virtualImage.setStateful(true);
-            this.virtualImage.setPath(getIdScsi());
+            this.virtualMachineTemplate.setStateful(true);
+            this.virtualMachineTemplate.setPath(getIdScsi());
         }
     }
 
     public boolean isStateful()
     {
-        return virtualImage != null;
+        return virtualMachineTemplate != null;
     }
 
     public final static String ID_SCSI_PROPERTY = "idScsi";
@@ -220,8 +220,8 @@ public class VolumeManagement extends RasdManagement
         getRasd().setConnection(idScsi);
         if (isStateful())
         {
-            // If the volume is stateful update the virtual image too
-            this.virtualImage.setPath(idScsi);
+            // If the volume is stateful update the virtual machine template too
+            this.virtualMachineTemplate.setPath(idScsi);
         }
     }
 

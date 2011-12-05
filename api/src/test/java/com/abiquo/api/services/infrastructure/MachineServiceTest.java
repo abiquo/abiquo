@@ -37,7 +37,7 @@ import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.services.stub.VsmServiceStubMock;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -93,7 +93,7 @@ public class MachineServiceTest extends AbstractUnitTest
             remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR,
                 datacenter);
 
-        VirtualImage image = virtualImageGenerator.createInstance(vdc.getEnterprise());
+        VirtualMachineTemplate image = virtualMachineTemplateGenerator.createInstance(vdc.getEnterprise());
         VirtualAppliance vapp = virtualApplianceGenerator.createInstance(vdc);
         VirtualMachine vm =
             vmGenerator.createInstance(image, vdc.getEnterprise(), hypervisor, u, "vm_test");

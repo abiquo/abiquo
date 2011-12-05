@@ -22,6 +22,8 @@ package com.abiquo.server.core.config;
 
 import java.util.Collection;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -33,17 +35,26 @@ public class SystemPropertyRep extends DefaultRepBase
     @Autowired
     private SystemPropertyDAO dao;
 
-    public SystemProperty findById(Integer id)
+    public SystemPropertyRep()
+    {
+    }
+
+    public SystemPropertyRep(final EntityManager em)
+    {
+        this.dao = new SystemPropertyDAO(em);
+    }
+
+    public SystemProperty findById(final Integer id)
     {
         return this.dao.findById(id);
     }
 
-    public SystemProperty findByName(String name)
+    public SystemProperty findByName(final String name)
     {
         return this.dao.findByName(name);
     }
 
-    public Collection<SystemProperty> findByComponent(String component)
+    public Collection<SystemProperty> findByComponent(final String component)
     {
         return this.dao.findByComponent(component);
     }
@@ -53,29 +64,29 @@ public class SystemPropertyRep extends DefaultRepBase
         return this.dao.findAll();
     }
 
-    public void insert(SystemProperty systemProperty)
+    public void insert(final SystemProperty systemProperty)
     {
         this.dao.persist(systemProperty);
         this.dao.flush();
     }
 
-    public void delete(SystemProperty systemProperty)
+    public void delete(final SystemProperty systemProperty)
     {
         this.dao.remove(systemProperty);
         this.dao.flush();
     }
 
-    public void update(SystemProperty systemProperty)
+    public void update(final SystemProperty systemProperty)
     {
         this.dao.flush();
     }
 
-    public boolean existsAnyWithName(String name)
+    public boolean existsAnyWithName(final String name)
     {
         return dao.existsAnyWithName(name);
     }
 
-    public boolean existsAnyOtherWithName(SystemProperty systemProperty, String name)
+    public boolean existsAnyOtherWithName(final SystemProperty systemProperty, final String name)
     {
         return dao.existsAnyOtherWithName(systemProperty, name);
     }

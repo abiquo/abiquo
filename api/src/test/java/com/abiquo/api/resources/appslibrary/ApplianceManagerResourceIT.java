@@ -21,13 +21,12 @@
 
 package com.abiquo.api.resources.appslibrary;
 
-import static com.abiquo.api.common.Assert.assertError;
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterRepositoryURI;
 import static com.abiquo.api.common.UriTestResolver.resolveDatacenterURI;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImagesURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplatesURI;
 import static com.abiquo.api.resources.RemoteServiceResource.createPersistenceObject;
 import static com.abiquo.testng.TestConfig.AM_INTEGRATION_TESTS;
 import static com.abiquo.testng.TestConfig.getParameter;
@@ -52,21 +51,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.api.resources.DatacenterResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoryDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageDto;
-import com.abiquo.server.core.appslibrary.VirtualImagesDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplatesDto;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -96,8 +93,8 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     // "http://rs.bcn.abiquo.com/m0n0wall/description.ovf";
     // "http://abiquo-repository.abiquo.com/m0n0wall/m0n0wall-1.3b18-i386-monolithicFlat.1.5.ovf";
 
-    protected final static String REPO_PATH =
-        getParameter("abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
+    protected final static String REPO_PATH = getParameter(
+        "abiquo.appliancemanager.localRepositoryPath", "/tmp/testrepo");
 
     private RemoteServiceDto amDto()
     {
@@ -177,28 +174,28 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {AM_INTEGRATION_TESTS})
-    public void deleteVirtualImage()
+    public void deleteVirtualMachineTemplate()
     {
 
-        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdownloaded = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdownloaded = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);
@@ -226,18 +223,19 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
             e.printStackTrace();
         }
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
 
-        for (VirtualImageDto vimage : dto.getCollection())
+        for (VirtualMachineTemplateDto vmtemplate : dto.getCollection())
         {
-            String uriVimage =
-                resolveVirtualImageURI(ent.getId(), datacenter.getId(), vimage.getId());
-            ClientResponse resp = get(uriVimage, SYSADMIN, SYSADMIN);
+            String uriVmtemplate =
+                resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(),
+                    vmtemplate.getId());
+            ClientResponse resp = get(uriVmtemplate, SYSADMIN, SYSADMIN);
             assertEquals(response.getStatusCode(), 200);
 
-            resp = delete(uriVimage, SYSADMIN, SYSADMIN);
+            resp = delete(uriVmtemplate, SYSADMIN, SYSADMIN);
             assertEquals(resp.getStatusCode(), 200);
 
             resp = get(uri, SYSADMIN, SYSADMIN);
@@ -248,27 +246,27 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test(groups = {AM_INTEGRATION_TESTS})
-    public void deleteSharedImage()
+    public void deleteSharedVMTemplate()
     {
-        amclient.createOVFPackageInstance(ent.getId().toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(ent.getId().toString(), DEFAULT_OVF);
 
         boolean isdownloaded = false;
         while (!isdownloaded)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(ent.getId().toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(ent.getId().toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdownloaded = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdownloaded = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);
@@ -296,24 +294,25 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
             e.printStackTrace();
         }
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
 
-        for (VirtualImageDto vimage : dto.getCollection())
+        for (VirtualMachineTemplateDto vmtmplate : dto.getCollection())
         {
-            String uriVimage =
-                resolveVirtualImageURI(ent.getId(), datacenter.getId(), vimage.getId());
-            ClientResponse resp = get(uriVimage, SYSADMIN, SYSADMIN);
+            String uriVmtemplate =
+                resolveVirtualMachineTemplateURI(ent.getId(), datacenter.getId(), vmtmplate.getId());
+            ClientResponse resp = get(uriVmtemplate, SYSADMIN, SYSADMIN);
             assertEquals(response.getStatusCode(), 200);
 
-            VirtualImageDto vimageDto = resp.getEntity(VirtualImageDto.class);
-            vimageDto.setShared(Boolean.TRUE);
+            VirtualMachineTemplateDto vmtemplateDto =
+                resp.getEntity(VirtualMachineTemplateDto.class);
+            vmtemplateDto.setShared(Boolean.TRUE);
 
-            resp = put(uriVimage, vimageDto, SYSADMIN, SYSADMIN);
+            resp = put(uriVmtemplate, vmtemplateDto, SYSADMIN, SYSADMIN);
             assertEquals(resp.getStatusCode(), 200);
 
-            resp = delete(uriVimage, SYSADMIN, SYSADMIN);
+            resp = delete(uriVmtemplate, SYSADMIN, SYSADMIN);
             assertEquals(resp.getStatusCode(), 200);
 
             resp = get(uri, SYSADMIN, SYSADMIN);
@@ -358,28 +357,28 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void createOVFandWaitUntilVirtualImageCreated()
+    public void createOVFandWaitUntilVirtualMachineTemplateCreated()
     {
         final Integer enterpriseId = ent.getId();
-        amclient.createOVFPackageInstance(enterpriseId.toString(), DEFAULT_OVF);
+        amclient.installTemplateDefinition(enterpriseId.toString(), DEFAULT_OVF);
 
         boolean isdown = false;
         while (!isdown)
         {
-            OVFPackageInstanceStateDto status =
-                amclient.getOVFPackageInstanceStatus(enterpriseId.toString(), DEFAULT_OVF);
+            TemplateStateDto status =
+                amclient.getTemplateStatus(enterpriseId.toString(), DEFAULT_OVF);
 
-            if (status.getStatus() == OVFStatusEnumType.ERROR)
+            if (status.getStatus() == TemplateStatusEnumType.ERROR)
             {
                 isdown = true;
                 assertNull(status.getErrorCause());
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOAD)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOAD)
             {
                 LOG.info("Download {}", DEFAULT_OVF);
                 isdown = true;
             }
-            else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+            else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
             {
                 LOG.info("{} Installing {}", status.getDownloadingProgress().toString(),
                     DEFAULT_OVF);
@@ -408,32 +407,32 @@ public class ApplianceManagerResourceIT extends AbstractJpaGeneratorIT
             e.printStackTrace();
         }
 
-        String uri = resolveVirtualImagesURI(ent.getId(), datacenter.getId());
+        String uri = resolveVirtualMachineTemplatesURI(ent.getId(), datacenter.getId());
         ClientResponse response = get(uri, SYSADMIN, SYSADMIN);
-        VirtualImagesDto dto = response.getEntity(VirtualImagesDto.class);
+        VirtualMachineTemplatesDto dto = response.getEntity(VirtualMachineTemplatesDto.class);
 
-        assertVirtualImageExist(dto.getCollection(), DEFAULT_OVF);
+        assertVirtualMachineTemplateExist(dto.getCollection(), DEFAULT_OVF);
     }
 
-    private static void assertVirtualImageExist(final List<VirtualImageDto> vimages,
-        final String ovfurl)
+    private static void assertVirtualMachineTemplateExist(
+        final List<VirtualMachineTemplateDto> vmtemplates, final String ovfurl)
     {
-        for (VirtualImageDto dto : vimages)
+        for (VirtualMachineTemplateDto dto : vmtemplates)
         {
-            RESTLink ovfpackage = dto.searchLink("ovfpackage");
+            RESTLink ovfpackage = dto.searchLink("templatedefinition");
             if (ovfpackage.getHref().equalsIgnoreCase(ovfurl))
             {
                 return;
             }
         }
 
-        fail("virtual image not found " + ovfurl);
+        fail("virtual machine template not found " + ovfurl);
     }
 
     private static String amEnterpriseRepositoryUrl(final Integer enterpriseId)
     {
-        return String.format("%s/erepos/%s", TestServerAndAMListener.AM_URI, enterpriseId
-            .toString());
+        return String.format("%s/erepos/%s", TestServerAndAMListener.AM_URI,
+            enterpriseId.toString());
     }
 
 }

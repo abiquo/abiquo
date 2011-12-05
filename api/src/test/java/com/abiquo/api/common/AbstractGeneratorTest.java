@@ -37,8 +37,8 @@ import org.testng.annotations.BeforeMethod;
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
-import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
@@ -108,7 +108,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected VolumeManagementGenerator volumeManagementGenerator =
         new VolumeManagementGenerator(seed);
 
-    protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
+    protected VirtualMachineTemplateGenerator virtualMachineTemplateGenerator =
+        new VirtualMachineTemplateGenerator(seed);
 
     protected VirtualImageConversionGenerator conversionGenerator =
         new VirtualImageConversionGenerator(seed);
@@ -136,7 +137,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected CategoryGenerator categoryGenerator = new CategoryGenerator(seed);
 
-    protected OVFPackageGenerator ovfPackageGenerator = new OVFPackageGenerator(seed);
+    protected TemplateDefinitionGenerator templateDefGenerator =
+        new TemplateDefinitionGenerator(seed);
 
     protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
 
@@ -233,6 +235,45 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
         em.getTransaction().commit();
         em.close();
+    }
+
+    public void tearDownButNoCloseEntityManager()
+    {
+        String[] entities =
+            {"ip_pool_management", "volume_management", "diskstateful_conversions",
+            "initiator_mapping", "rasd_management", "rasd", "nodevirtualimage", "nodenetwork",
+            "nodestorage", "noderelationtype", "node", "virtualmachine", "virtualimage",
+            "virtualimage_conversions", "node_virtual_image_stateful_conversions",
+            "virtual_appliance_conversions", "virtualapp", "vappstateful_conversions",
+            "virtualdatacenter", "vlan_network", "vlan_network_assignment",
+            "network_configuration", "chef_runlist", "storage_pool", "tier", "storage_device",
+            "remote_service", "datastore_assignment", "datastore", "hypervisor",
+            "workload_machine_load_rule", "physicalmachine", "rack", "ucs_rack", "datacenter",
+            "repository", "workload_fit_policy_rule", "network", "session", "user",
+            "roles_privileges", "role_ldap", "role", "privilege", "enterprise",
+            "enterprise_limits_by_datacenter", "workload_enterprise_exclusion_rule",
+            "ovf_package_list_has_ovf_package", "ovf_package", "ovf_package_list", "category",
+            "apps_library", "license", "system_properties", "vdc_enterprise_stats",
+            "vapp_enterprise_stats", "dc_enterprise_stats", "enterprise_resources_stats",
+            "cloud_usage_stats", "log", "metering", "tasks", "alerts", "heartbeatlog", "icon",
+            "repository", "register", "costCodeCurrency", "pricingCostCode", "pricingTier",
+            "pricingTemplate", "currency", "costCode"};
+
+        tearDownButNoCloseEntityManager(entities);
+    }
+
+    protected void tearDownButNoCloseEntityManager(final String... entities)
+    {
+        EntityManager em = getEntityManager();
+        rollbackActiveTransaction(em);
+        em.getTransaction().begin();
+
+        for (String entity : entities)
+        {
+            em.createNativeQuery("delete from " + entity).executeUpdate();
+        }
+
+        em.getTransaction().commit();
     }
 
     private EntityManagerFactory getEntityManagerFactory()

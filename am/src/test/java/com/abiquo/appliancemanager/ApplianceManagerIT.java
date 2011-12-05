@@ -25,10 +25,10 @@ import static com.abiquo.appliancemanager.AMConsumerTestListener.assertEventsEmp
 import static com.abiquo.appliancemanager.AMConsumerTestListener.expectedEvents;
 import static com.abiquo.appliancemanager.ApplianceManagerAsserts.createBundleDiskFile;
 import static com.abiquo.appliancemanager.ApplianceManagerAsserts.createTestDiskInfoBundle;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOAD;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.DOWNLOADING;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.ERROR;
-import static com.abiquo.appliancemanager.transport.OVFStatusEnumType.NOT_DOWNLOAD;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.DOWNLOAD;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.DOWNLOADING;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.ERROR;
+import static com.abiquo.appliancemanager.transport.TemplateStatusEnumType.NOT_DOWNLOAD;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovfId;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_fileNotFound;
 import static com.abiquo.testng.OVFRemoteRepositoryListener.ovf_invalidDiskFormat;
@@ -51,8 +51,8 @@ import org.testng.annotations.Test;
 
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.EnterpriseRepositoryDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.appliancemanager.transport.RepositoryConfigurationDto;
 
 @Test(groups = {AM_INTEGRATION_TESTS})
@@ -144,7 +144,7 @@ public class ApplianceManagerIT
 
         try
         {
-            client.createOVFPackageInstance(idEnterprise, ovfId);
+            client.installTemplateDefinition(idEnterprise, ovfId);
             fail("Duplicated ovf instance");
         }
         catch (Exception e)
@@ -161,8 +161,8 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateInvalidOvfUrl()
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_invalidUrl);
-        asserts.ovfStatus(ovf_invalidUrl, OVFStatusEnumType.ERROR);
+        client.installTemplateDefinition(idEnterprise, ovf_invalidUrl);
+        asserts.ovfStatus(ovf_invalidUrl, TemplateStatusEnumType.ERROR);
 
         // client.delete(idEnterprise, ovf_invalidUrl);
 
@@ -172,7 +172,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateOvfNotFound() throws Exception
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_notFound);
+        client.installTemplateDefinition(idEnterprise, ovf_notFound);
 
         asserts.waitUnitlExpected(ovf_notFound, ERROR);
 
@@ -186,7 +186,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateFileNotFound() throws Exception
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_fileNotFound);
+        client.installTemplateDefinition(idEnterprise, ovf_fileNotFound);
 
         asserts.waitUnitlExpected(ovf_fileNotFound, ERROR);
 
@@ -198,7 +198,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateInvalidDiskFormat() throws Exception
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_invalidDiskFormat);
+        client.installTemplateDefinition(idEnterprise, ovf_invalidDiskFormat);
 
         asserts.waitUnitlExpected(ovf_invalidDiskFormat, ERROR);
 
@@ -210,7 +210,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateMalformed() throws Exception
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_malformed);
+        client.installTemplateDefinition(idEnterprise, ovf_malformed);
 
         asserts.waitUnitlExpected(ovf_malformed, ERROR);
 
@@ -223,7 +223,7 @@ public class ApplianceManagerIT
     @Test(enabled = false)
     public void test_ErrorCreateMultidisk() throws Exception
     {
-        client.createOVFPackageInstance(idEnterprise, ovf_multiDisk);
+        client.installTemplateDefinition(idEnterprise, ovf_multiDisk);
 
         asserts.waitUnitlExpected(ovf_multiDisk, ERROR);
 
@@ -241,7 +241,7 @@ public class ApplianceManagerIT
         asserts.installOvfAndWaitCompletion(ovfId);
         asserts.ovfInstanceExist(ovfId);
 
-        OVFPackageInstanceDto ovfDto = createTestDiskInfoBundle(ovfId, snapshot);
+        TemplateDto ovfDto = createTestDiskInfoBundle(ovfId, snapshot);
 
         final String ovfBundle = ovfDto.getUrl();
         asserts.ovfInstanceNoExist(ovfBundle);
@@ -249,7 +249,7 @@ public class ApplianceManagerIT
         // client.preBundleOVFPackage(idEnterprise, snapshot);
 
         createBundleDiskFile(ovfId, snapshot);
-        client.bundleOVFPackage(idEnterprise, snapshot, ovfDto);
+        client.bundleTemplate(idEnterprise, snapshot, ovfDto);
 
         asserts.ovfInstanceExist(ovfBundle);
 

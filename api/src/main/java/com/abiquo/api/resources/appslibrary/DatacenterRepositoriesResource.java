@@ -37,7 +37,7 @@ import org.springframework.stereotype.Controller;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.services.InfrastructureService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
+import com.abiquo.api.services.appslibrary.VirtualMachineTemplateService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.appslibrary.DatacenterRepositoriesDto;
@@ -52,7 +52,7 @@ public class DatacenterRepositoriesResource extends AbstractResource
     public static final String DATACENTER_REPOSITORIES_PATH = "datacenterrepositories";
 
     @Autowired
-    private VirtualImageService vimageService;
+    private VirtualMachineTemplateService vmtemplateService;
 
     @Autowired
     private InfrastructureService infService;
@@ -64,7 +64,7 @@ public class DatacenterRepositoriesResource extends AbstractResource
     {
         DatacenterRepositoriesDto reposDto = new DatacenterRepositoriesDto();
 
-        List<Repository> all = vimageService.getDatacenterRepositories(enterpId);
+        List<Repository> all = vmtemplateService.getDatacenterRepositories(enterpId);
 
         if (all != null && !all.isEmpty())
         {
