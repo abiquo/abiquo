@@ -215,9 +215,10 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             throw new ResourceUpgradeUseException("Can not update resource use" + e.getMessage());
         }
 
-        if (getAllocationFitPolicyOnDatacenter(
-            virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
-            FitPolicy.PROGRESSIVE))
+        if (virtualMachine.getHypervisor() != null
+            && getAllocationFitPolicyOnDatacenter(
+                virtualMachine.getHypervisor().getMachine().getDatacenter().getId()).equals(
+                FitPolicy.PROGRESSIVE))
         {
             allocator.adjustPoweredMachinesInRack(virtualMachine.getHypervisor().getMachine()
                 .getRack());
