@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.abiquo.abicloud</groupId>
         <artifactId>client</artifactId>
-        <version>1.8.5-HF5</version>
+        <version>1.8.5-HF6-SNAPSHOT</version>
     </parent>
     <!-- Project properties -->
     <properties>
