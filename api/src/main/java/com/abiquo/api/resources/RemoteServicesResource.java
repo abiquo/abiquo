@@ -69,6 +69,7 @@ public class RemoteServicesResource extends AbstractResource
             }
         }
 
+        remoteServices.setLinks(restBuilder.buildRemoteServicesLinks(datacenterId));
         return remoteServices;
     }
 
@@ -83,4 +84,5 @@ public class RemoteServicesResource extends AbstractResource
 
         return RemoteServiceResource.addLinks(restBuilder, persistentService, datacenterId);
     }
+
 }

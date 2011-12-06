@@ -37,6 +37,7 @@
                 <ref bean="machinesResource" />
                 <ref bean="machineResource" />
                 <ref bean="remoteServicesResource" />
+                <ref bean="remoteServicesActionResource" />
                 <ref bean="remoteServiceResource" />
                 <ref bean="enterprisesResource" />
                 <ref bean="enterpriseResource" />

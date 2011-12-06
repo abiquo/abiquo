@@ -53,7 +53,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualmachineHB;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
-import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
@@ -122,9 +121,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
     }
 
     private IInfrastructureWS infrastructureWS;
-
-    // TODO autowire
-    private final RemoteServicesCommand rsCommand = new RemoteServicesCommandImpl();
 
     public InfrastructureCommandImpl()
     {

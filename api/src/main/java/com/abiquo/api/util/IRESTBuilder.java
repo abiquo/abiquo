@@ -122,8 +122,9 @@ public interface IRESTBuilder
     public List<RESTLink> buildDatacenterRepositoryLinks(final Integer enterpriseId,
         final Integer dcId, final Integer repoId);
 
-    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId, final Integer dcId,
-        final VirtualMachineTemplate template, final VirtualMachineTemplate master);
+    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
+        final Integer dcId, final VirtualMachineTemplate template,
+        final VirtualMachineTemplate master);
 
     public RESTLink buildVirtualMachineTemplateLink(final Integer enterpriseId, final Integer dcId,
         final Integer virtualImageId);
@@ -235,5 +236,7 @@ public interface IRESTBuilder
     public RESTLink buildUserLink(Integer enterpriseId, Integer userId);
 
     public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
+
+    public List<RESTLink> buildRemoteServicesLinks(Integer datacenterId);
 
 }

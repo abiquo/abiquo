@@ -21,14 +21,26 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.List;
+
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 
 public interface RemoteServicesResourceStub
 {
+    public DataResult<List<RemoteService>> getAllRemoteServices(final UserSession userSession,
+        final Integer idDataCenter);
+
     public DataResult<RemoteService> addRemoteService(RemoteService remoteService);
 
     public DataResult<RemoteService> modifyRemoteService(RemoteService remoteService);
 
     public DataResult<Boolean> deleteRemoteService(RemoteService remoteService);
+
+    public DataResult<List<RemoteService>> getRemoteServices(Integer idDatacenter, String type);
+
+    public DataResult<Boolean> checkRemoteService(Integer idDatacenter, String type);
+
+    public DataResult<Boolean> checkRemoteService(Integer idDatacenter, String type, String uri);
 }
