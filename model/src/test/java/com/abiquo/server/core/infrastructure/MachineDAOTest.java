@@ -628,7 +628,7 @@ public class MachineDAOTest extends DefaultDAOTestBase<MachineDAO, Machine>
     public void testLargeSwitchNameFail()
     {
         Machine machine = this.createUniqueEntity();
-        machine.setVirtualSwitch(new BigInteger(1004, new Random()).toString(32));
+        machine.setVirtualSwitch(new BigInteger(4444, new Random()).toString(32));
         ds().persistAll(machine);
     }
 }
