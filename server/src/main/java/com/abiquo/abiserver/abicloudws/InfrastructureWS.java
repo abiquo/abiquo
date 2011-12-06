@@ -47,7 +47,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
+// import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
@@ -83,8 +83,9 @@ import com.sun.ws.management.client.exceptions.FaultException;
  */
 public class InfrastructureWS implements IInfrastructureWS
 {
-    private final static String IDVIRTUALAPP_SQL_BY_VM = "SELECT n.idVirtualApp "
-        + "FROM node n, nodevirtualimage ni " + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
+    private final static String IDVIRTUALAPP_SQL_BY_VM =
+        "SELECT n.idVirtualApp " + "FROM node n, nodevirtualimage ni "
+            + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
 
     /** The logger object */
     private final static Logger logger = LoggerFactory.getLogger(InfrastructureWS.class);
@@ -100,8 +101,8 @@ public class InfrastructureWS implements IInfrastructureWS
 
     static final ResourceManager resourceManager = new ResourceManager(InfrastructureWS.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     private static Integer bugTimeout;
 
@@ -175,7 +176,7 @@ public class InfrastructureWS implements IInfrastructureWS
             }
             else
             {
-                throw new VirtualFactoryHealthException("The virtual machine health check don't pass");
+                throw new VirtualFactoryHealthException("The virtual machine did not pass the health check.");
             }
 
         }
@@ -397,8 +398,8 @@ public class InfrastructureWS implements IInfrastructureWS
         SelectorSetType selector = createSelectorId(virtualMachine.getUUID());
         String destination = getDestinationFromVM(virtualMachine);
         Resource[] resources =
-            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI,
-                abiConfig.getTimeout(), selector);
+            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI, abiConfig
+                .getTimeout(), selector);
         Resource resource = resources[0];
         return resource;
 
@@ -461,7 +462,7 @@ public class InfrastructureWS implements IInfrastructureWS
         }
         catch (Exception e)
         {
-            String msg = "An error was occurred when refreshing the virtual appliance";
+            String msg = "An error occurred when refreshing the virtual appliance";
             logger.debug(msg, e);
             basicResult.setSuccess(true);
             throw new Exception(msg, e);
@@ -478,7 +479,7 @@ public class InfrastructureWS implements IInfrastructureWS
      */
     public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
-        logger.info("Refreshing the virtual machine state: {}", virtualMachine.getId());
+        logger.info("Forcing refresh of the virtual machine state: {}", virtualMachine.getId());
         BasicResult result = new BasicResult();
         VirtualappHB virtualappHBPojo = null;
         Session session = null;
@@ -488,29 +489,24 @@ public class InfrastructureWS implements IInfrastructureWS
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
             Query query = session.createSQLQuery(IDVIRTUALAPP_SQL_BY_VM);
-            query.setString("id", (virtualMachine.getId()).toString());
+            query.setString("id", virtualMachine.getId().toString());
             Integer virtualApplianceId = (Integer) query.uniqueResult();
             virtualappHBPojo =
                 (VirtualappHB) session.get("VirtualappExtendedHB", virtualApplianceId);
             VirtualAppliance vapp = virtualappHBPojo.toPojo();
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromVA(vapp);
-            EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
-        }
-        catch (EventingException e)
-        {
-            logger
-                .warn(
-                    "An error was occurred when invokin a pulling subscribing to recover the VA events: {}",
-                    e);
+            // EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
         }
         catch (PersistenceException e)
         {
-            logger.trace("Exists a problem finding the VirtualSystemMonitor", e.getStackTrace()[0]);
+            logger.trace("An error occurred when retrieving the VirtualSystemMonitor", e
+                .getStackTrace()[0]);
         }
         catch (RemoteServiceException e)
         {
-            logger.trace("Exists a problem finding the VirtualSystemMonitor", e.getStackTrace()[0]);
+            logger.trace("An error occurred when contacting the VirtualSystemMonitor", e
+                .getStackTrace()[0]);
         }
 
         result.setSuccess(true);
@@ -583,8 +579,7 @@ public class InfrastructureWS implements IInfrastructureWS
         }
 
         String logMessage =
-            (message == null) ? exceptionMessage : message + "(Caused by: " + exceptionMessage
-                + ")";
+            message == null ? exceptionMessage : message + "(Caused by: " + exceptionMessage + ")";
 
         traceLog(vm, event, logMessage);
 

@@ -82,7 +82,6 @@ import com.abiquo.abiserver.commands.stub.impl.VirtualApplianceResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualDatacenterResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.HardLimitExceededException;
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.exception.NotEnoughResourcesException;
@@ -1216,19 +1215,19 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         // suscribed.
                         if (nodeVi.getVirtualImageHB().getRepository() != null)
                         {
-                            try
-                            {
-                                // Unsubscribing the deleted virtual machine
-                                EventingSupport.unsubscribeEvent(nodeVi.getVirtualMachineHB()
-                                    .toPojo(), virtualSystemMonitor);
-                            }
-                            catch (EventingException e)
-                            {
-                                logger
-                                    .info(
-                                        "As in the unsubscription message we are not following the WS-eventing standard this exception could be thrown:{}",
-                                        e);
-                            }
+                            // try
+                            // {
+                            // // Unsubscribing the deleted virtual machine
+                            // EventingSupport.unsubscribeEvent(nodeVi.getVirtualMachineHB()
+                            // .toPojo(), virtualSystemMonitor);
+                            // }
+                            // catch (EventingException e)
+                            // {
+                            // logger
+                            // .info(
+                            // "As in the unsubscription message we are not following the WS-eventing standard this exception could be thrown:{}",
+                            // e);
+                            // }
                         }
                     }
                     updatenodesList.add(node);

@@ -461,7 +461,9 @@ public class TarantinoJobCreator extends DefaultApiService
      * 
      * @param virtualMachine The virtual machine to reconfigure.
      * @param builder The original configuration for the virtual machine.
-     * @param currentState State of the {@link VirtualMachine} at the start of the undeploy.
+     * @param currentState State of the {@link VirtualMachine} at the start of the undeploy. The
+     *            state of this {@link VirtualMachine} at this point is
+     *            {@link VirtualMachineState#LOCKED}.
      * @return The reconfigure task.
      */
     public DatacenterTasks undeployTask(final VirtualMachine virtualMachine,
@@ -523,4 +525,26 @@ public class TarantinoJobCreator extends DefaultApiService
 
         return applyStateTask;
     }
+
+    // /**
+    // * Creates a undeploy task. The Job id identifies this job and is neede to create the ids of
+    // the
+    // * items. It is hyerarchic so Task 1 and its job would be 1.1, another 1.2 <br>
+    // * <br>
+    // * If it is ON we shutdown the virtual machine.
+    // *
+    // * @param virtualMachine The virtual machine to reconfigure.
+    // * @param builder The original configuration for the virtual machine.
+    // * @param currentState State of the {@link VirtualMachine} at the start of the undeploy. The
+    // * state of this {@link VirtualMachine} at this point is
+    // * {@link VirtualMachineState#LOCKED}.
+    // * @return The reconfigure task.
+    // */
+    // public UndeployTaskBuilder undeployAsyncTask(final VirtualMachine virtualMachine,
+    // final VirtualMachineDescriptionBuilder builder, final VirtualMachineState currentState)
+    // {
+    // UndeployTaskBuilder tasksBuilder = new UndeployTaskBuilder();
+    //
+    // return tasksBuilder.undeployTask(virtualMachine, builder, currentState);
+    // }
 }

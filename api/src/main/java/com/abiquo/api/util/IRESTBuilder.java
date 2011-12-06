@@ -239,4 +239,5 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildRemoteServicesLinks(Integer datacenterId);
 
+    public List<RESTLink> buildPrivilegeListLink(PrivilegeDto privilege);
 }

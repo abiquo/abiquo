@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
@@ -119,6 +120,9 @@ public class VirtualMachineService extends DefaultApiService
     // job creator should be used ONLY inside the TarantinoService
     @Autowired
     private TarantinoJobCreator jobCreator;
+
+    @Autowired
+    private NetworkService ipService;
 
     public VirtualMachineService()
     {
@@ -417,7 +421,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Delete a {@link VirtualMachine}.
+     * Delete a {@link VirtualMachine}. And the {@link Node}.
      * 
      * @param virtualMachine to delete. void
      */
@@ -450,6 +454,12 @@ public class VirtualMachineService extends DefaultApiService
         logger.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         logger.trace("Deleted node virtual image!");
+
+        // Does it has volumes? PREMIUM
+        detachVolumesFromVirtualMachine(virtualMachine);
+        logger.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
+
         repo.deleteVirtualMachine(virtualMachine);
         tracer
             .log(
@@ -459,6 +469,16 @@ public class VirtualMachineService extends DefaultApiService
                 "Delete of the virtual appliance with name "
                     + virtualMachine.getName()
                     + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
+    }
+
+    /**
+     * This method is properly documented in the premium edition.
+     * 
+     * @param virtualMachine void
+     */
+    protected void detachVolumesFromVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        // PREMIUM
     }
 
     /**
@@ -504,6 +524,10 @@ public class VirtualMachineService extends DefaultApiService
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual machine template is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
+
+        // We must add the default NIC. This is the very next free IP in the virtual datacenter's
+        // default VLAN
+        ipService.assignDefaultNICToVirtualMachine(virtualMachine.getId());
 
         return virtualMachine;
     }

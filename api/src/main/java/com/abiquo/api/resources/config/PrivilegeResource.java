@@ -96,6 +96,7 @@ public class PrivilegeResource extends AbstractResource
         dto.setName(systemProperty.getName());
         dto.setId(systemProperty.getId());
 
+        dto.setLinks(builder.buildPrivilegeLink(dto));
         return dto;
     }
 

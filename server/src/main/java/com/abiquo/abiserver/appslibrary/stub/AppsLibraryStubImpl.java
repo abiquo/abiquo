@@ -116,7 +116,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 ovfindexURL);
         final Integer httpStatus = response.getStatusCode();
 
-        if (httpStatus / 200 != 1)
+        if (httpStatus != 200)
         {
             populateErrors(response, result, "createOVFPackageList");
         }
@@ -370,9 +370,14 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         if (listsDto == null || listsDto.getCollection().size() == 0)
         {
             DataResult<OVFPackageList> defaultList = addDefaultTemplateDefinitionList(idEnterprise);
-            if (defaultList == null)
+            if (defaultList == null || !defaultList.getSuccess())
             {
                 result.setSuccess(Boolean.FALSE);
+                String message =
+                    defaultList != null ? defaultList.getMessage()
+                        : "Cannot add default respository";
+                result.setMessage(message);
+
                 return result;
             }
             templateDefListNames.add(defaultList.getData().getName());
@@ -393,12 +398,13 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             AbiConfigManager.getInstance().getAbiConfig().getDefaultTemplateRepository();
         if (defaultTemplateRepository == null || defaultTemplateRepository.isEmpty())
         {
-            logger.debug("There aren't any default repository space defined");
+            logger.debug("There is no default remote repository space defined");
             return null;
         }
         else
         {
-            logger.debug("Adding default repository space at [{}]", defaultTemplateRepository);
+            logger.debug("Adding default remote repository space at [{}]",
+                defaultTemplateRepository);
             DataResult<OVFPackageList> list =
                 createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, defaultTemplateRepository);
             return list;
