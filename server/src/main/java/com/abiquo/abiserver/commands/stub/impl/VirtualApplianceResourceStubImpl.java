@@ -55,6 +55,8 @@ import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualhardware.ResourceAllocationLimit;
+import com.abiquo.abiserver.pojo.virtualimage.Category;
+import com.abiquo.abiserver.pojo.virtualimage.Icon;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
@@ -556,25 +558,53 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     private VirtualImage dtoToVirtualImage(final VirtualMachineTemplateDto virtualImageDto)
     {
-        VirtualImage vm = new VirtualImage();
-        vm.setChefEnabled(virtualImageDto.isChefEnabled());
-        vm.setCostCode(virtualImageDto.getCostCode());
-        vm.setCpuRequired(virtualImageDto.getCpuRequired());
-        vm.setCreationDate(virtualImageDto.getCreationDate());
-        vm.setCreationUser(virtualImageDto.getCreationUser());
-        vm.setDescription(virtualImageDto.getDescription());
-        vm.setDiskFileSize(virtualImageDto.getDiskFileSize());
-        vm.setDiskFormatType(new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
-            .fromValue(virtualImageDto.getDiskFormatType())));
-        vm.setHdRequired(virtualImageDto.getHdRequired());
-        vm.setId(virtualImageDto.getId());
-        vm.setName(virtualImageDto.getName());
-        // vm.setOvfId(virtualImageDto.);
-        vm.setPath(virtualImageDto.getPath());
-        vm.setRamRequired(virtualImageDto.getRamRequired());
-        vm.setShared(virtualImageDto.isShared());
-        // vm.setStateful(virtualImageDto.);
-        return vm;
+        VirtualImage image = new VirtualImage();
+        image.setChefEnabled(virtualImageDto.isChefEnabled());
+        image.setCostCode(virtualImageDto.getCostCode());
+        image.setCpuRequired(virtualImageDto.getCpuRequired());
+        image.setCreationDate(virtualImageDto.getCreationDate());
+        image.setCreationUser(virtualImageDto.getCreationUser());
+        image.setDescription(virtualImageDto.getDescription());
+        image.setDiskFileSize(virtualImageDto.getDiskFileSize());
+        image
+            .setDiskFormatType(new com.abiquo.abiserver.pojo.virtualimage.DiskFormatType(DiskFormatType
+                .fromValue(virtualImageDto.getDiskFormatType())));
+        image.setHdRequired(virtualImageDto.getHdRequired());
+        image.setId(virtualImageDto.getId());
+        image.setName(virtualImageDto.getName());
+        image.setPath(virtualImageDto.getPath());
+        image.setRamRequired(virtualImageDto.getRamRequired());
+        image.setShared(virtualImageDto.isShared());
+
+        // Image is stateful if it is linked to a volume
+        image.setStateful(virtualImageDto.searchLink("volume") != null);
+
+        // Captured images may not have a category
+        RESTLink categoryLink = virtualImageDto.searchLink("category");
+        if (categoryLink != null)
+        {
+            Category category = new Category();
+            category.setName(categoryLink.getTitle());
+            image.setCategory(category);
+        }
+
+        // Captured images may not have an icon
+        RESTLink iconlLink = virtualImageDto.searchLink("icon");
+        if (iconlLink != null)
+        {
+            Icon icon = new Icon();
+            icon.setPath(iconlLink.getTitle());
+            image.setIcon(icon);
+        }
+
+        // Captured images may not have a template definition
+        RESTLink templateDefinitionLink = virtualImageDto.searchLink("templatedefinition");
+        if (templateDefinitionLink != null)
+        {
+            image.setOvfId(templateDefinitionLink.getHref());
+        }
+
+        return image;
 
     }
 
