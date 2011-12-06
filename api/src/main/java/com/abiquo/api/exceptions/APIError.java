@@ -313,7 +313,8 @@ public enum APIError
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
 
     // OVF PACKAGE LIST
-    TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0", "OVF Package list name already exist"),
+    TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
+        "OVF Package list name already exist"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -390,7 +391,11 @@ public enum APIError
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(
-        "VSM-1", "An error occurred when shutting down the monitored physical machine"),
+        "VSM-1", "An error occurred when shutting down the monitored physical machine"), SUBSCRIPTION_PROBLEM(
+        "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
+        "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
+        "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
+        "VSM-5", "A VSMClient instance cannot be returned from connection pool."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(
