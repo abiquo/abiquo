@@ -59,8 +59,8 @@ import com.abiquo.tracer.SeverityType;
 public class TemplateDefinitionListService extends DefaultApiServiceWithApplianceManagerClient
 {
 
-    private final static Logger LOGGER = LoggerFactory
-        .getLogger(TemplateDefinitionListService.class);
+    private final static Logger LOGGER =
+        LoggerFactory.getLogger(TemplateDefinitionListService.class);
 
     @Autowired
     protected AppsLibraryDAO appsLibraryDao;
@@ -148,8 +148,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplatesStateDto getTemplateListStatus(final Integer id,
-        final Integer datacenterId, final Integer enterpriseId)
+    public TemplatesStateDto getTemplateListStatus(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
@@ -161,8 +161,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         {
             try
             {
-                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId),
-                    templateDef.getUrl()));
+                stateList.add(amClient.getTemplateStatus(String.valueOf(enterpriseId), templateDef
+                    .getUrl()));
             }
             catch (Exception e)
             {
@@ -181,7 +181,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinitionList updateTemplateDefinitionList(final Integer idEnterprise,
+    public TemplateDefinitionList refreshTemplateDefinitionList(final Integer idEnterprise,
         final Integer idList)
     {
         TemplateDefinitionList oldList = repo.getTemplateDefinitionList(idList);
@@ -194,8 +194,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         final String listUrl = oldList.getUrl();
 
         TemplateDefinitionList newList = obtainTemplateDefinitionListFromOVFIndexUrl(listUrl);
-        updateTemplateDefinitionList(idList, newList, idEnterprise);
-        return newList;
+        removeTemplateDefinitionList(idList, true);
+        return addTemplateDefinitionList(newList, idEnterprise);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
@@ -243,7 +243,7 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void removeTemplateDefinitionList(final Integer id)
+    public void removeTemplateDefinitionList(final Integer id, final boolean refresh)
     {
         TemplateDefinitionList templateDefList = repo.getTemplateDefinitionList(id);
 
@@ -253,10 +253,12 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
             flushErrors();
         }
 
-        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
-            EventType.TEMPLATE_DEFINITION_LIST_DELETED, "Removing ovf package list "
-                + templateDefList.getName());
-
+        if (!refresh)
+        {
+            tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
+                EventType.TEMPLATE_DEFINITION_LIST_DELETED, "Removing ovf package list "
+                    + templateDefList.getName());
+        }
         repo.removeTemplateDefinitionList(templateDefList);
 
     }

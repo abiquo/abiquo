@@ -54,8 +54,8 @@ public class TemplateDefinitionListResource extends AbstractResource
 
     public static final String TEMPLATE_DEFINITION_LIST = "templateDefinitionList";
 
-    public static final String TEMPLATE_DEFINITION_LIST_PARAM = "{" + TEMPLATE_DEFINITION_LIST
-        + "}";
+    public static final String TEMPLATE_DEFINITION_LIST_PARAM =
+        "{" + TEMPLATE_DEFINITION_LIST + "}";
 
     public static final String TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH =
         "actions/repositoryStatus";
@@ -103,7 +103,7 @@ public class TemplateDefinitionListResource extends AbstractResource
     {
         TemplateDefinitionList d;
 
-        d = service.updateTemplateDefinitionList(idEnterprise, templateDefinitionListId);
+        d = service.refreshTemplateDefinitionList(idEnterprise, templateDefinitionListId);
 
         return transformer.createTransferObject(d, restBuilder);
     }
@@ -112,13 +112,12 @@ public class TemplateDefinitionListResource extends AbstractResource
     public void deleteTemplateDefinitionList(
         @PathParam(TEMPLATE_DEFINITION_LIST) final Integer templateDefinitionListId)
     {
-        service.removeTemplateDefinitionList(templateDefinitionListId);
+        service.removeTemplateDefinitionList(templateDefinitionListId, false);
     }
 
     /**
-     * Get the all {@link TemplateStateDto} in the provided
-     * {@link DatacenterRepositoryResource} for all the {@link TemplateDefinition} in the current
-     * list.
+     * Get the all {@link TemplateStateDto} in the provided {@link DatacenterRepositoryResource} for
+     * all the {@link TemplateDefinition} in the current list.
      */
     @GET
     @Path(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST_REPOSITORY_STATUS_PATH)

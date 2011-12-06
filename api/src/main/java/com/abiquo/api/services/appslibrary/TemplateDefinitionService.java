@@ -93,15 +93,16 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef, final Integer idEnterprise)
+    public TemplateDefinition addTemplateDefinition(final TemplateDefinition templateDef,
+        final Integer idEnterprise)
     {
         Enterprise ent = entService.getEnterprise(idEnterprise);
         return repo.addTemplateDefinition(templateDef, ent);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public TemplateDefinition updateTemplateDefinition(final Integer templateDefId, final TemplateDefinition templateDef,
-        final Integer idEnterprise)
+    public TemplateDefinition updateTemplateDefinition(final Integer templateDefId,
+        final TemplateDefinition templateDef, final Integer idEnterprise)
     {
         Enterprise enterprise = entService.getEnterprise(idEnterprise);
         return repo.updateTemplateDefinition(templateDefId, templateDef, enterprise);
@@ -123,8 +124,8 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
     /** #################### */
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public TemplateStateDto getTemplateState(final Integer id,
-        final Integer datacenterId, final Integer enterpriseId)
+    public TemplateStateDto getTemplateState(final Integer id, final Integer datacenterId,
+        final Integer enterpriseId)
     {
         checkEnterpriseAndDatacenter(enterpriseId, datacenterId);
 
@@ -237,7 +238,10 @@ public class TemplateDefinitionService extends DefaultApiServiceWithApplianceMan
 
             for (FileType file : envelope.getReferences().getFile())
             {
-                accSize += file.getSize().longValue();
+                if (file.getSize() != null)
+                {
+                    accSize += file.getSize().longValue();
+                }
             }
 
             return accSize / (1024 * 1024);
