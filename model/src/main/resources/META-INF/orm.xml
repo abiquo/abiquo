@@ -24,6 +24,7 @@
     <!-- networking -->
     <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkConfiguration"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.VLANNetwork"></orm:entity>
+     <orm:entity class="com.abiquo.server.core.infrastructure.network.DhcpOption"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.Network"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.IpPoolManagement"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkAssignment"></orm:entity>
