@@ -393,12 +393,13 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             AbiConfigManager.getInstance().getAbiConfig().getDefaultTemplateRepository();
         if (defaultTemplateRepository == null || defaultTemplateRepository.isEmpty())
         {
-            logger.debug("There aren't any default repository space defined");
+            logger.debug("There is no default remote repository space defined");
             return null;
         }
         else
         {
-            logger.debug("Adding default repository space at [{}]", defaultTemplateRepository);
+            logger.debug("Adding default remote repository space at [{}]",
+                defaultTemplateRepository);
             DataResult<OVFPackageList> list =
                 createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, defaultTemplateRepository);
             return list;

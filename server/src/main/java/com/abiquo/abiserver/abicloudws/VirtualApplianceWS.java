@@ -92,8 +92,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     private static final ResourceManager resourceManager =
         new ResourceManager(VirtualApplianceWS.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     IInfrastructureWS infrastructureWS;
 
@@ -129,9 +129,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
-                    .newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -151,7 +150,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         Resource resource;
 
         BasicResult result = new BasicResult(); // TODO throw Exception on
-                                                // reportError
+        // reportError
 
         try
         {
@@ -380,7 +379,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 OVFModelFactory.createOVFModelFromVirtualAppliance().createVirtualApplication(
                     virtualAppliance);
 
-            logger.info("Checking the Virtual Appliance");
+            logger.info("Checking the Virtual Appliance: [" + virtualAppliance.getId() + " - "
+                + virtualAppliance.getName());
 
             Boolean resultCheck = checkVirtualAppliance(virtualAppliance);
             result.setSuccess(resultCheck);
@@ -405,7 +405,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage("The health check for this virtual appliance was not successful");
                 return result;
             }
 
@@ -649,7 +649,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 // The nodes crashed will not be rechecked
                 if (nodeVi.getModified() == Node.NODE_ERASED)
                 {
-                    logger.info("Checking Virtual machine before the VM operation");
+                    logger.info("Checking Virtual Machine before the VM operation");
                     Boolean checkResult =
                         infrastructureWS.checkVirtualSystem(nodeVi.getVirtualMachine());
                     if (!checkResult)
@@ -661,7 +661,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         }
         if (!checkTotalResult)
         {
-            throw new VirtualFactoryHealthException("The nodes removed don't pass the health check");
+            throw new VirtualFactoryHealthException("The nodes removed did not pass the health check");
         }
 
         return true;
@@ -684,10 +684,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         }
         catch (EventingException e)
         {
-            logger
-                .warn(
-                    "An error was occurred when invokin a pulling subscribing to recover the VA events: {}",
-                    e);
+            logger.warn("An error occurred when subscribing to retrieve the VA events: {}", e);
         }
 
         result.setSuccess(true);
@@ -748,7 +745,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
+                result.setMessage(virtualAppliance.getId() + " - " + virtualAppliance.getName()
+                    + ": Operation cannot be performed.");
                 return result;
             }
         }
