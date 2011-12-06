@@ -29,6 +29,7 @@
     <orm:entity class="com.abiquo.server.core.infrastructure.network.Network"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.IpPoolManagement"></orm:entity>
     <orm:entity class="com.abiquo.server.core.infrastructure.network.NetworkAssignment"></orm:entity>
+    <orm:entity class="com.abiquo.server.core.infrastructure.network.DhcpOption"></orm:entity>
     <!-- end: networking -->
     <!-- cloud infrastructure -->
     <orm:entity class="com.abiquo.server.core.cloud.Hypervisor"></orm:entity>
