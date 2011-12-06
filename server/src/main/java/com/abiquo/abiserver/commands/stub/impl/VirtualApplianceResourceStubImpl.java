@@ -531,7 +531,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             nodeVirtualImage.setPosY(dto.getY());
             nodeVirtualImage.setId(dto.getNodeId());
             nodeVirtualImage.setVirtualMachine(virtualMachine);
-            RESTLink virtualImage = dto.searchLink("virtualimage");
+            RESTLink virtualImage = dto.searchLink("virtualmachinetemplate");
             if (virtualImage != null)
             {
                 ClientResponse imageResponse = get(virtualImage.getHref());
