@@ -22,12 +22,16 @@ package com.abiquo.api.tracer;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Service;
 
 import com.abiquo.api.tracer.hierarchy.HierarchyProcessor;
@@ -54,6 +58,11 @@ public class TracerLogger
     @Resource(name = "hierarchyProcessorFactory")
     private HierarchyProcessor hierarchyProcessor;
 
+    /** The resource bundle with the application messages. */
+
+    @Autowired
+    private MessageSource messages;
+
     /** The RabbitMQ producer */
     private TracerProducer producer = new TracerProducer();
 
@@ -66,11 +75,11 @@ public class TracerLogger
      * @param message The message to trace.
      */
     public void log(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message)
+        final EventType event, final String message, final Object... args)
     {
         try
         {
-            Trace trace = getTrace(severity, component, event, message);
+            Trace trace = getTrace(severity, component, event, message, args);
             LOGGER.info(trace.toString());
             processHierarchy(trace);
             publishTrace(trace);
@@ -95,9 +104,9 @@ public class TracerLogger
      * @param message The message to trace.
      */
     public void systemLog(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message)
+        final EventType event, final String message, final Object... args)
     {
-        Trace trace = getSystemTrace(severity, component, event, message);
+        Trace trace = getSystemTrace(severity, component, event, message, args);
         LOGGER.info(trace.toString());
         publishTrace(trace);
     }
@@ -117,17 +126,17 @@ public class TracerLogger
      * @param message The message to trace.
      */
     public void logFromContext(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message)
+        final EventType event, final String message, final Object... args)
     {
 
         TracerContext tracerContext = TracerContextHolder.getContext();
         if (tracerContext.getUserId() != null)
         {
-            log(severity, component, event, message);
+            log(severity, component, event, message, args);
         }
         else
         {
-            systemLog(severity, component, event, message);
+            systemLog(severity, component, event, message, args);
         }
     }
 
@@ -145,9 +154,9 @@ public class TracerLogger
      * @param ex The error.
      */
     public void systemError(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message, final Throwable error)
+        final EventType event, final Throwable error, final String message, final Object... args)
     {
-        Trace trace = getSystemTrace(severity, component, event, message);
+        Trace trace = getSystemTrace(severity, component, event, message, args);
         LOGGER.error(trace.toString(), error);
         publishTrace(trace);
     }
@@ -184,7 +193,7 @@ public class TracerLogger
     }
 
     private Trace getTrace(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message)
+        final EventType event, final String message, final Object... args)
     {
         TracerContext tracerContext = TracerContextHolder.getContext();
         Trace trace = new Trace();
@@ -197,13 +206,13 @@ public class TracerLogger
         trace.setEnterpriseName(tracerContext.getEnterpriseName());
         trace.setUserId(tracerContext.getUserId());
         trace.setUsername(tracerContext.getUsername());
-        trace.setMessage(message);
+        trace.setMessage(getMessage(message, args));
 
         return trace;
     }
 
     private Trace getSystemTrace(final SeverityType severity, final ComponentType component,
-        final EventType event, final String message)
+        final EventType event, final String message, final Object... args)
     {
         Trace trace = new Trace();
 
@@ -212,8 +221,30 @@ public class TracerLogger
         trace.setEvent(event.name());
         trace.setEnterpriseName(Enterprise.SYSTEM_ENTERPRISE.getName());
         trace.setUsername(User.SYSTEM_USER.getName());
-        trace.setMessage(message);
+        trace.setMessage(getMessage(message, args));
 
         return trace;
+    }
+
+    private String getMessage(final String code, final Object... args)
+    {
+        if (messages == null)
+        {
+            // Maybe null in unit tests that manually instantiate this class.
+            // Just return the code to avoid making tests fail.
+            return code;
+        }
+
+        try
+        {
+            return messages.getMessage(code, args, Locale.getDefault());
+        }
+        catch (NoSuchMessageException ex)
+        {
+            // TODO If no message was found, return the code as the message
+            // When all tracer messages are migrated to the resource bundle file
+            // this exception should be propagated instead of returning a valid value
+            return code;
+        }
     }
 }

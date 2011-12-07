@@ -25,7 +25,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 
 @XmlRootElement(name = "templateDefinition")
@@ -49,13 +48,9 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
 
     private String productVersion;
 
-    private DiskFormatType type;
-
-    private String diskFormatTypeUri;
+    private String diskFormatType;
 
     private long diskFileSize;
-
-    private String iconPath;
 
     public Integer getId()
     {
@@ -117,14 +112,14 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
         this.url = url;
     }
 
-    public DiskFormatType getType()
+    public String getDiskFormatType()
     {
-        return type;
+        return diskFormatType;
     }
 
-    public void setType(final DiskFormatType type)
+    public void setDiskFormatType(final String type)
     {
-        this.type = type;
+        this.diskFormatType = type;
     }
 
     public String getProductName()
@@ -155,15 +150,5 @@ public class TemplateDefinitionDto extends SingleResourceTransportDto
     public void setDescription(final String description)
     {
         this.description = StringUtils.strip(description);
-    }
-
-    public String getDiskFormatTypeUri()
-    {
-        return diskFormatTypeUri;
-    }
-
-    public void setDiskFormatTypeUri(final String diskFormatTypeUri)
-    {
-        this.diskFormatTypeUri = diskFormatTypeUri;
     }
 }

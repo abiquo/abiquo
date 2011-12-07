@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -59,6 +57,7 @@ public class TestPopulate extends AbstractGeneratorTest
     @Override
     public void setup()
     {
+        // this is necessary to run as test group
         super.setup();
     }
 
@@ -66,7 +65,8 @@ public class TestPopulate extends AbstractGeneratorTest
     @Override
     public void tearDown()
     {
-        super.tearDownButNoCloseEntityManager();
+        // this is necessary to run as test group
+        super.tearDown();
     }
 
     @DataProvider(name = DATA_PROVIDER)
@@ -138,35 +138,9 @@ public class TestPopulate extends AbstractGeneratorTest
         return model;
     }
 
-    // /
     public PopulateTestCase setUpModel(final List<String> model)
     {
-        // // tearDown();
-        //
-        // try
-        // {
-        // EntityManager em = getEntityManager();
-        // rollbackActiveTransaction(em);
-        // if (!em.getTransaction().isActive())
-        // {
-        // em.getTransaction().begin();
-        // }
-        // // em.getTransaction().commit();
-        // // em.close();
-        //
-        // // EntityManager em = getEntityManagerWithAnActiveTransaction();
-        // }
-        // catch (Exception e)
-        // {
-        // // TODO: handle exception
-        // }
-        EntityManager em = getEntityManager();
-        if (!em.isOpen())
-        {
-            em.getTransaction().begin();
-        }
-        PopulateTestCase testcase = populateReader.readModel(model);
-        return testcase;
+        return populateReader.readModel(model);
     }
 
     protected void removeVirtualMachine(final Integer virtualMachineId)

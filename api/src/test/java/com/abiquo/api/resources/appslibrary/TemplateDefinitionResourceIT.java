@@ -107,14 +107,15 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
 
         setup(entitiesToSetup.toArray());
         ClientResponse response =
-            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
+                SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
 
         TemplateDefinitionDto templateDefDto = response.getEntity(TemplateDefinitionDto.class);
         assertNotNull(templateDefDto);
         assertEquals(templateDefDto.getDescription(), "templateDef_1");
-        assertEquals(templateDefDto.getDiskFormatTypeUri(), "http://unknown");
+        assertEquals(templateDefDto.getDiskFormatType(), "UNKNOWN");
     }
 
     @Test(groups = {APPS_INTEGRATION_TESTS})
@@ -144,12 +145,13 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         templateDefDto.setDescription("new_description");
 
         response =
-            put(resolveTemplateDefinitionURI(enterprise.getId(), templateDefDto.getId()), templateDefDto,
-                SYSADMIN, SYSADMIN);
+            put(resolveTemplateDefinitionURI(enterprise.getId(), templateDefDto.getId()),
+                templateDefDto, SYSADMIN, SYSADMIN);
 
         assertEquals(response.getStatusCode(), 200);
         response =
-            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
+                SYSADMIN);
         TemplateDefinitionDto retrievedPackageDto = response.getEntity(TemplateDefinitionDto.class);
         assertEquals(retrievedPackageDto.getDescription(), "new_description");
     }
@@ -179,7 +181,8 @@ public class TemplateDefinitionResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), 204);
 
         response =
-            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN, SYSADMIN);
+            get(resolveTemplateDefinitionURI(enterprise.getId(), templateDef.getId()), SYSADMIN,
+                SYSADMIN);
         assertEquals(response.getStatusCode(), 404);
 
     }

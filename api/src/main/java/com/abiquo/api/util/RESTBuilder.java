@@ -136,6 +136,8 @@ public class RESTBuilder implements IRESTBuilder
 
     public static final String LAST = "last";
 
+    private static final String REL_SELF = "self";
+
     protected LinkBuilders linkProcessor;
 
     @Override
@@ -304,7 +306,21 @@ public class RESTBuilder implements IRESTBuilder
             Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        links.add(builder.buildRestLink(PrivilegeResource.class, REL_EDIT, params));
+        links.add(builder.buildRestLink(PrivilegeResource.class, REL_SELF, params));
+
+        return links;
+    }
+
+    @Override
+    public List<RESTLink> buildPrivilegeListLink(final PrivilegeDto privilege)
+    {
+        List<RESTLink> links = new ArrayList<RESTLink>();
+
+        Map<String, String> params =
+            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilege.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(PrivilegeResource.class, "privilege", params));
 
         return links;
     }

@@ -75,13 +75,13 @@ public class RemoteServiceClient
 
             if (response.getStatusCode() != 200)
             {
-                throw new RemoteServiceException("Ping exception when trying to contact " + url);
+                throw new RemoteServiceException("Ping failed when trying to contact " + url);
             }
         }
         catch (ClientRuntimeException e)
         {
             // Mostly caused by ConnectException
-            throw new RemoteServiceException("Ping exception when trying to contact " + url + ": "
+            throw new RemoteServiceException("Ping failed when trying to contact " + url + ": "
                 + e.getMessage());
         }
     }

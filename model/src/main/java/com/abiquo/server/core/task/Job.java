@@ -143,4 +143,12 @@ public class Job extends RedisEntityBase
     {
         this.parentTaskId = parentTaskId;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+            "Job id: '%s' Job type: '%s' Task id: '%s' State: '%s' Rollback state: '%s'", getId(),
+            getType().name(), getParentTaskId(), getState().name(), getRollbackState().name());
+    }
 }

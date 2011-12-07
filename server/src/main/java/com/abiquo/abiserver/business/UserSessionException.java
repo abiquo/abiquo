@@ -40,15 +40,15 @@ public class UserSessionException extends RuntimeException
 
         if (paramResult.getResultCode() == BasicResult.SESSION_INVALID)
         {
-            paramResult.setMessage("Invalid Session. Please Log In again");
+            paramResult.setMessage("Invalid Session. Please log in again");
         }
         else if (paramResult.getResultCode() == BasicResult.SESSION_TIMEOUT)
         {
-            paramResult.setMessage("Session timeout. Please Log In again");
+            paramResult.setMessage("Session timeout. Please log in again");
         }
         else if (paramResult.getResultCode() == BasicResult.SESSION_MAX_NUM_REACHED)
         {
-            paramResult.setMessage("Too many users logged in the same time. Please wait");
+            paramResult.setMessage("Too many users logged in at the same time. Please wait");
         }
         else if (paramResult.getResultCode() == BasicResult.NOT_AUTHORIZED
             || paramResult.getMessage().equals("Forbidden"))
@@ -57,7 +57,8 @@ public class UserSessionException extends RuntimeException
         }
         else
         {
-            paramResult.setMessage("Unhandled session exception");
+            paramResult
+                .setMessage("Unhandled session exception. Please contact the cloud administrator");
         }
 
         setResult(paramResult);

@@ -22,6 +22,7 @@
 package com.abiquo.api.services.stub;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 import javax.persistence.EntityManager;
 
@@ -36,8 +37,11 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.TaskService;
+import com.abiquo.api.services.UserService;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.commons.amqp.impl.tarantino.domain.dto.BaseJob;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -46,6 +50,9 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.task.Job;
+import com.abiquo.server.core.task.Task;
+import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -63,6 +70,9 @@ public class TarantinoService extends DefaultApiService
     private final static Logger logger = LoggerFactory.getLogger(TarantinoService.class);
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private RemoteServiceService remoteServiceService;
 
     @Autowired
@@ -70,6 +80,9 @@ public class TarantinoService extends DefaultApiService
 
     @Autowired
     private TarantinoJobCreator jobCreator;
+
+    @Autowired
+    private TaskService taskService;
 
     public TarantinoService()
     {
@@ -81,6 +94,7 @@ public class TarantinoService extends DefaultApiService
         remoteServiceService = new RemoteServiceService(em);
         jobCreator = new TarantinoJobCreator(em);
         vsm = new VsmServiceStub();
+        taskService = new TaskService();
     }
 
     /**
@@ -127,9 +141,9 @@ public class TarantinoService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
                 "Failed to enqueue task in Tarantino. Rabbitmq might be "
-                    + "down or not configured. The error message was " + ex.getMessage(), ex);
+                    + "down or not configured. The error message was " + ex.getMessage());
 
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
@@ -160,8 +174,8 @@ public class TarantinoService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
-                "Error closing the producer channel with error: " + ex.getMessage(), ex);
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
+                "Error closing the producer channel with error: " + ex.getMessage());
 
         }
     }
@@ -212,6 +226,10 @@ public class TarantinoService extends DefaultApiService
         {
             DatacenterTasks deployTask =
                 jobCreator.deployTask(virtualMachine, virtualMachineDesciptionBuilder);
+
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addTask(deployTask, String.valueOf(virtualMachine.getId()), TaskType.DEPLOY);
             send(datacenter, deployTask, EventType.VM_DEPLOY);
 
             return deployTask.getId();
@@ -278,6 +296,11 @@ public class TarantinoService extends DefaultApiService
             DatacenterTasks deployTask =
                 jobCreator.undeployTask(virtualMachine, virtualMachineDesciptionBuilder,
                     currentState);
+
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addTask(deployTask, String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
+
             send(datacenter, deployTask, EventType.VM_UNDEPLOY);
 
             return deployTask.getId();
@@ -321,6 +344,37 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
+     * Adds a task to redis. This task become available for all the resources implementing
+     * {@link AbstractResourceWithTasks}.
+     * 
+     * @param virtualMachine
+     * @param deployTask void
+     */
+    private void addTask(final DatacenterTasks datacenterTask, final String ownerId,
+        final TaskType taskType)
+    {
+        Task task = new Task();
+        task.setOwnerId(ownerId);
+        task.setTaskId(datacenterTask.getId());
+        task.setTimestamp(Calendar.getInstance().getTimeInMillis());
+        task.setType(taskType);
+        task.setUserId(String.valueOf(userService.getCurrentUser().getId()));
+
+        for (BaseJob j : datacenterTask.getJobs())
+        {
+            Job job = new Job();
+            job.setParentTaskId(datacenterTask.getId());
+            job.setTimestamp(Calendar.getInstance().getTimeInMillis());
+            job.setId(j.getId());
+            // FIXME
+            // datacenterTasks
+            // job.setType(j.);
+            task.getJobs().add(job);
+        }
+        taskService.addTask(task);
+    }
+
+    /**
      * Creates and sends a deploy operation.
      * 
      * @param virtualMachine The virtual machine to reconfigure.
@@ -341,6 +395,10 @@ public class TarantinoService extends DefaultApiService
             DatacenterTasks deployTask =
                 jobCreator.applyStateTask(virtualMachine, virtualMachineDesciptionBuilder,
                     machineStateTransition);
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            TaskType taskType = getTaskTypeFromTransition(machineStateTransition);
+            addTask(deployTask, String.valueOf(virtualMachine.getId()), taskType);
             send(datacenter, deployTask, EventType.VM_STATE);
 
             return deployTask.getId();
@@ -373,6 +431,63 @@ public class TarantinoService extends DefaultApiService
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
+        }
+        return null;
+    }
+
+    /**
+     * Return the {@link TaskType} that is related to this {@link VirtualMachineStateTransition}. <br>
+     * <br>
+     * Null if empty.
+     * 
+     * @param machineStateTransition the current.
+     * @return TaskType
+     */
+    private TaskType getTaskTypeFromTransition(
+        final VirtualMachineStateTransition machineStateTransition)
+    {
+        switch (machineStateTransition)
+        {
+            case CONFIGURE:
+            {
+                return TaskType.DEPLOY;
+            }
+            case DECONFIGURE:
+            {
+                return TaskType.UNDEPLOY;
+            }
+            case POWEROFF:
+            {
+                return TaskType.POWER_OFF;
+            }
+            case POWERON:
+            {
+                return TaskType.POWER_ON;
+            }
+            case PAUSE:
+            {
+                return TaskType.PAUSE;
+            }
+            case RESUME:
+            {
+                return TaskType.RESET;
+            }
+            case SNAPSHOT:
+            {
+                return TaskType.SNAPSHOT;
+            }
+            case RECONFIGURE:
+            {
+                return TaskType.RECONFIGURE;
+            }
+            case RESET:
+            {
+                return TaskType.RESET;
+            }
+            default:
+            {
+                logger.error("Error unknown transition: " + machineStateTransition);
+            }
         }
         return null;
     }

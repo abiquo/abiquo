@@ -32,18 +32,9 @@
             <param-value>/WEB-INF/flex/services-config.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet>
-        <display-name>AMSink</display-name>
-        <servlet-name>AMSink</servlet-name>
-        <servlet-class>com.abiquo.abiserver.eventing.AMSink</servlet-class>
-    </servlet>
+    </servlet>    
     <servlet-mapping>
         <servlet-name>MessageBrokerServlet</servlet-name>
         <url-pattern>/messagebroker/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>AMSink</servlet-name>
-        <url-pattern>/AMSink</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -269,4 +269,17 @@ public class VirtualApplianceResource
 
     }
 
+    @GET
+    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    public String getPriceVirtualAppliance(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        // VirtualAppliancePriceDto virtualAppliancePriceDto =
+        // service.getPriceVirtualAppliance(vdcId, vappId);
+        // return virtualAppliancePriceDto;
+        String virtualAppliancePrice = service.getPriceVirtualApplianceText(vdcId, vappId);
+        return virtualAppliancePrice;
+    }
 }

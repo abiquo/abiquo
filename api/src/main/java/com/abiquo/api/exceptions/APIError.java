@@ -391,7 +391,11 @@ public enum APIError
     // VIRTUAL SYSTEM MONITOR
 
     MONITOR_PROBLEM("VSM-0", "An error occurred when monitoring the physical machine"), UNMONITOR_PROBLEM(
-        "VSM-1", "An error occurred when shutting down the monitored physical machine"),
+        "VSM-1", "An error occurred when shutting down the monitored physical machine"), SUBSCRIPTION_PROBLEM(
+        "VSM-2", "An error occurred when subscribing the virtual machine"), UNSUBSCRIPTION_PROBLEM(
+        "VSM-3", "An error occurred when unsubscribing the virtual machine"), REFRESH_STATE_PROBLEM(
+        "VSM-4", "An error occurred when refreshing the virtual machine state"), VSMCLIENTFROMPOOL_PROBLEM(
+        "VSM-5", "A VSMClient instance cannot be returned from connection pool."),
 
     // LICENSE
     LICENSE_UNEXISTING("LICENSE-0", "The requested license does not exist"), LICENSE_INVALID(

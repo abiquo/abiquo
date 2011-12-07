@@ -59,8 +59,6 @@ import com.abiquo.abiserver.commands.stub.EnterprisesResourceStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
-import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.InvalidIPAddressException;
 import com.abiquo.abiserver.exception.PersistenceException;
@@ -405,17 +403,17 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             "http://" + hypervisor.getIp() + ":" + hypervisor.getPort() + "/";
 
         HypervisorType hypervisorType = hypervisor.toPojoHB().getType();
-        try
-        {
-            EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisorType,
-                virtualSystemMonitorAddress, user, password);
-        }
-        catch (EventingException e)
-        {
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "createPhysicalMachine", e);
-            return dataResult;
-        }
+        // try
+        // {
+        // EventingSupport.monitorPhysicalMachine(virtualSystemAddress, hypervisorType,
+        // virtualSystemMonitorAddress, user, password);
+        // }
+        // catch (EventingException e)
+        // {
+        // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+        // "createPhysicalMachine", e);
+        // return dataResult;
+        // }
 
         try
         {
@@ -513,16 +511,16 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             traceLog(SeverityType.CRITICAL, ComponentType.MACHINE, EventType.MACHINE_CREATE,
                 userSession, physicalMachine.getDataCenter(), null, e.getMessage(), null,
                 (Rack) physicalMachine.getAssignedTo(), physicalMachine, null, null);
-            try
-            {
-                EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
-                    virtualSystemMonitorAddress, user, password);
-            }
-            catch (EventingException e1)
-            {
-                errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                    "createPhysicalMachine", e1);
-            }
+            // try
+            // {
+            // EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisorType,
+            // virtualSystemMonitorAddress, user, password);
+            // }
+            // catch (EventingException e1)
+            // {
+            // errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
+            // "createPhysicalMachine", e1);
+            // }
         }
         return dataResult;
 
@@ -582,20 +580,20 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromPhysicalMachine(physicalMachine);
 
-            for (VirtualmachineHB vm : vms)
-            {
-                try
-                {
-                    EventingSupport.unsubscribe(vm.getName(), virtualSystemMonitorAddress);
-                }
-                catch (EventingException e)
-                {
-                    logger.debug(e.getMessage());
-                }
-            }
+            // for (VirtualmachineHB vm : vms)
+            // {
+            // try
+            // {
+            // EventingSupport.unsubscribe(vm.getName(), virtualSystemMonitorAddress);
+            // }
+            // catch (EventingException e)
+            // {
+            // logger.debug(e.getMessage());
+            // }
+            // }
 
-            EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
-                virtualSystemMonitorAddress, user, password);
+            // EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
+            // virtualSystemMonitorAddress, user, password);
 
             factory.endConnection();
 
@@ -2037,7 +2035,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 RemoteServiceUtils.getVirtualSystemMonitor(vmHB.getHypervisor()
                     .getPhysicalMachine().getDataCenter().getIdDataCenter());
 
-            EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
+            // EventingSupport.unsubscribeEvent(vmPojo, virtualSystemMonitorAddress);
         }
     }
 
@@ -2051,7 +2049,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 RemoteServiceUtils.getVirtualSystemMonitor(vm.getHypervisor().getPhysicalMachine()
                     .getDataCenter().getIdDataCenter());
 
-            EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
+            // EventingSupport.subscribeEvent(vmPojo, virtualSystemMonitorAddress);
         }
     }
 

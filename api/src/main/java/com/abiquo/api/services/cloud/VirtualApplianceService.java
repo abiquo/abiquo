@@ -78,7 +78,6 @@ import com.abiquo.tracer.SeverityType;
  * @author jdevesa@abiquo.com
  */
 @Service
-@Transactional(readOnly = true)
 public class VirtualApplianceService extends DefaultApiService
 {
     /** The logger object **/
@@ -131,12 +130,15 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
@@ -149,6 +151,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -201,10 +204,6 @@ public class VirtualApplianceService extends DefaultApiService
             tracer
                 .log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
                     "Delete of the virtual appliance with name " + dto.getName());
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                EventType.VAPP_CREATE,
-                "Delete of the virtual appliance with name " + dto.getName(),
-                new Exception(sb.toString()));
             addValidationErrors(vapp.getValidationErrors());
             flushErrors();
         }
@@ -240,6 +239,7 @@ public class VirtualApplianceService extends DefaultApiService
         return vapp;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
     {
         String price = "";
@@ -273,6 +273,7 @@ public class VirtualApplianceService extends DefaultApiService
         return price;// + "\n";
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliancePriceDto getPriceVirtualAppliance(
         final VirtualAppliance virtualAppliance, final PricingTemplate pricingTemplate)
     {
@@ -329,6 +330,7 @@ public class VirtualApplianceService extends DefaultApiService
         return aNumber.setScale(significantDigits, BigDecimal.ROUND_UP);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
         final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine,
@@ -377,10 +379,12 @@ public class VirtualApplianceService extends DefaultApiService
         return virtualMachinesCost;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine, final PricingTemplate pricing)
     {
-        CostCode cc = pricingRep.findCostCodeById(virtualMachine.getVirtualMachineTemplate().getCostCode());
+        CostCode cc =
+            pricingRep.findCostCodeById(virtualMachine.getVirtualMachineTemplate().getCostCode());
         PricingCostCode pricingCostCode = pricingRep.findPricingCostCode(cc, pricing);
         if (pricingCostCode != null)
         {
@@ -392,6 +396,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void getAdditionalStorageCost(
         final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final Collection<RasdManagement> resources, final PricingTemplate pricing)
@@ -416,7 +421,13 @@ public class VirtualApplianceService extends DefaultApiService
         }
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    /**
+     * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
+     * 
+     * @param vdcId {@link VirtualDatacenter}
+     * @param vappId {@link VirtualAppliance}
+     * @return List<String>
+     */
     public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
@@ -517,16 +528,6 @@ public class VirtualApplianceService extends DefaultApiService
                     + virtualAppliance.getName()
                     + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
                     + virtualAppliance.getState().name());
-            tracer
-                .systemError(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_APPLIANCE,
-                    EventType.VAPP_CREATE,
-                    "Delete of the virtual appliance with name " + virtualAppliance.getName()
-                        + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
-                        + virtualAppliance.getState().name(),
-                    new Exception(" failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
-                        + virtualAppliance.getState().name()));
             addConflictErrors(APIError.VIRTUALAPPLIANCE_NOT_RUNNING);
             flushErrors();
         }
@@ -542,19 +543,14 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 if (n.getVirtualImage().getRepository() == null)
                 {
-                    tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
-                        EventType.VAPP_DELETE, "Delete of the virtual appliance with name "
-                            + virtualAppliance.getName()
-                            + " failed with due having non managed virtual images");
                     tracer
-                        .systemError(
+                        .log(
                             SeverityType.CRITICAL,
                             ComponentType.VIRTUAL_APPLIANCE,
-                            EventType.VAPP_CREATE,
+                            EventType.VAPP_DELETE,
                             "Delete of the virtual appliance with name "
                                 + virtualAppliance.getName()
-                                + " failed with due to having non managed images. And not forcing the delete",
-                            new Exception(" failed with due to having non managed images. And not forcing the delete"));
+                                + " failed with due to having non managed images and not forcing the delete");
                     logger
                         .error(
                             "Deleting the virtual appliance with name {} failed since there is non managed virtual images.",

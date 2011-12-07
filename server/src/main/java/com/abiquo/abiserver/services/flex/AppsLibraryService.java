@@ -79,11 +79,11 @@ public class AppsLibraryService
                 VirtualMachineTemplateResourceStub.class);
 
         // idRepo == 0 --> stateful
-        final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
+        final Boolean includeStateful = idRepo == null || idRepo == 0;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise, datacenterId,
-                categoryName, hypervisorTypeName);
+            vimageStub.getVirtualMachineTemplateByCategoryAndHypervisorCompatible(idEnterprise,
+                idDatacenter, categoryName, hypervisorTypeName, includeStateful);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -104,7 +104,8 @@ public class AppsLibraryService
         final Integer datacenterId = idRepo == 0 ? null : idDatacenter;
 
         DataResult<List<VirtualImage>> listImages =
-            vimageStub.getVirtualMachineTemplateByCategory(idEnterprise, datacenterId, categoryName);
+            vimageStub
+                .getVirtualMachineTemplateByCategory(idEnterprise, datacenterId, categoryName);
 
         return fixVirtaulImageRepositroyAndEnterprise(listImages, idEnterprise, idRepo);
     }
@@ -139,20 +140,23 @@ public class AppsLibraryService
     public DataResult<OVFPackageList> createOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String ovfpackageListURL)
     {
-        return proxyStub(userSession).createTemplateDefinitionListFromOVFIndexUrl(idEnterprise, ovfpackageListURL);
+        return proxyStub(userSession).createTemplateDefinitionListFromOVFIndexUrl(idEnterprise,
+            ovfpackageListURL);
     }
 
     public DataResult<OVFPackageList> refreshOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
 
-        return proxyStub(userSession).refreshTemplateDefinitionListFromRepository(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession).refreshTemplateDefinitionListFromRepository(idEnterprise,
+            nameOvfpackageList);
     }
 
     public BasicResult deleteOVFPackageList(final UserSession userSession,
         final Integer idEnterprise, final String nameOvfpackageList)
     {
-        return proxyStub(userSession).deleteTemplateDefinitionList(idEnterprise, nameOvfpackageList);
+        return proxyStub(userSession)
+            .deleteTemplateDefinitionList(idEnterprise, nameOvfpackageList);
     }
 
     /** DC specific status. */
@@ -214,14 +218,6 @@ public class AppsLibraryService
     {
 
         return proxyStub(userSession).getDiskFormatTypes();
-        /*
-         * DataResult<List<DiskFormatType>> result = new DataResult<List<DiskFormatType>>();
-         * AppsLibraryCommand proxyService = proxyService(userSession); try { List<DiskFormatType>
-         * disksFormat = proxyService.getDiskFormatTypes(userSession); result.setData(disksFormat);
-         * result.setSuccess(true); } catch (UserSessionException e) { result.setSuccess(false);
-         * result.setMessage(e.getMessage()); result.setResultCode(e.getResult().getResultCode()); }
-         * return result;
-         */
     }
 
     // todo con idRepo

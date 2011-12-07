@@ -335,6 +335,7 @@ public class VolumeManagement extends RasdManagement
 
         getRasd().setGeneration(null);
         setVirtualMachine(null);
+        setVirtualAppliance(null);
         setState(VolumeState.DETACHED);
     }
 

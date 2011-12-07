@@ -58,32 +58,11 @@ public class VSMClient
     private String basePath;
 
     /**
-     * Creates a new client for the given host and port.
-     * 
-     * @param host The target host.
-     * @param port The target port.
-     */
-    public VSMClient(final String host, final int port)
-    {
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.readTimeout(0);
-        clientConfig.connectTimeout(0);
-
-        client = new RestClient(clientConfig);
-        basePath = "http://" + host + ":" + port + "/" + DEFAULT_CONTEXT_PATH;
-
-        if (!isValidURI(basePath))
-        {
-            throw new IllegalArgumentException("The provided parameters do not conform a valid URL.");
-        }
-    }
-
-    /**
-     * Creates a new client for the given URI.
+     * Initializes an existent instance for the given URI.
      * 
      * @param uri The target URI.
      */
-    public VSMClient(String uri)
+    public VSMClient initialize(String uri)
     {
         if (!isValidURI(uri))
         {
@@ -106,6 +85,31 @@ public class VSMClient
         {
             throw new IllegalArgumentException("The provided parameter is not a valid URL.");
         }
+
+        return this;
+    }
+
+    /**
+     * Initializes an existent instance for the given host and port.
+     * 
+     * @param host The target host.
+     * @param port The target port.
+     */
+    public VSMClient initialize(final String host, final int port)
+    {
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.readTimeout(0);
+        clientConfig.connectTimeout(0);
+
+        client = new RestClient(clientConfig);
+        basePath = "http://" + host + ":" + port + "/" + DEFAULT_CONTEXT_PATH;
+
+        if (!isValidURI(basePath))
+        {
+            throw new IllegalArgumentException("The provided parameters do not conform a valid URL.");
+        }
+
+        return this;
     }
 
     /**
