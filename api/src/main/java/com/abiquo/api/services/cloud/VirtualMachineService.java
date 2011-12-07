@@ -502,11 +502,10 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
-        logger.trace("Deleted node virtual image!");
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        logger.debug("Detached the virtual machine's volumes with UUID {}",
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
