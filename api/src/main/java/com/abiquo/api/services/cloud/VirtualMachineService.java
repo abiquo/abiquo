@@ -21,7 +21,6 @@
 
 package com.abiquo.api.services.cloud;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -41,11 +40,11 @@ import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
-import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -123,6 +122,9 @@ public class VirtualMachineService extends DefaultApiService
 
     @Autowired
     private NetworkService ipService;
+
+    @Autowired
+    private TaskService tasksService;
 
     public VirtualMachineService()
     {
@@ -771,7 +773,8 @@ public class VirtualMachineService extends DefaultApiService
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
             logger.info("Generating the link to the status! {}", virtualMachine.getId());
-            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+            String location = tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+            return location;
         }
         catch (APIException e)
         {
@@ -805,32 +808,6 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         return null;
-    }
-
-    public void closeProducerChannel(final TarantinoRequestProducer producer)
-    {
-        try
-        {
-            if (producer == null)
-            {
-                return;
-            }
-            producer.closeChannel();
-        }
-        catch (IOException e)
-        {
-            logger.error("Error closing the producer channel with error: " + e.getMessage());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer.systemLog(
-                SeverityType.CRITICAL,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "Error closing the producer channel with error:. The error message was "
-                    + e.getMessage());
-        }
     }
 
     /**
@@ -1026,7 +1003,7 @@ public class VirtualMachineService extends DefaultApiService
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-            String location =
+            String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
             logger.info("Undeploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
@@ -1037,7 +1014,7 @@ public class VirtualMachineService extends DefaultApiService
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_UNDEPLOY, "The enqueuing in Tarantino was OK.");
 
-            return location;
+            return idAsyncTask;
 
         }
         catch (APIException e)
