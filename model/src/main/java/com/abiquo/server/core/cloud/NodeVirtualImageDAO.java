@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -47,11 +48,9 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         super(NodeVirtualImage.class, entityManager);
     }
 
-    private Criteria sameVirtualMachine(final VirtualMachine vmachine)
+    private Criterion sameVirtualMachine(final VirtualMachine vmachine)
     {
-        Criteria crit = createNestedCriteria(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY);
-        crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, vmachine.getId()));
-        return crit;
+        return Restrictions.eq(NodeVirtualImage.VIRTUAL_MACHINE_PROPERTY + ".id", vmachine.getId());
     }
 
     public VirtualAppliance findVirtualAppliance(final VirtualMachine vmachine)
@@ -63,7 +62,7 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
 
     public NodeVirtualImage findByVirtualMachine(final VirtualMachine vmachine)
     {
-        Criteria criteria = sameVirtualMachine(vmachine);
+        Criteria criteria = createCriteria(sameVirtualMachine(vmachine));
         return (NodeVirtualImage) criteria.uniqueResult();
     }
 

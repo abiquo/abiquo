@@ -21,7 +21,6 @@
 
 package com.abiquo.abiserver.healthcheck;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,8 +34,6 @@ import com.abiquo.abicloud.taskservice.model.Task;
 import com.abiquo.abicloud.taskservice.model.TaskMethod;
 import com.abiquo.abiserver.abicloudws.RemoteServiceUtils;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.VirtualappHB;
-import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.persistence.dao.virtualappliance.VirtualApplianceDAO;
@@ -78,29 +75,30 @@ public class VSMSubscriber
                 String virtualSystemMonitor =
                     RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualappHB.toPojo());
 
-                try
-                {
-                    // Refresh the subscriptions for each virtual appliance
-                    EventingSupport.subscribeToAllVA(virtualappHB.toPojo(), virtualSystemMonitor);
-                }
-                catch (EventingException e)
-                {
-                    if (e.getCause() instanceof IOException)
-                    {
-                        LOGGER
-                            .error(
-                                "[FATAL] The server can not refresh VSM subsciptions at [{}] : caused by {}",
-                                virtualSystemMonitor, e);
-                        TaskServiceFactory.getService().schedule(VSMSubscriber.class);
-                    }
-                    else
-                    {
-                        LOGGER
-                            .debug(
-                                "An error was occurred when refreshing the VSM subscriptions caused by:",
-                                e);
-                    }
-                }
+                // try
+                // {
+                // TODO Refresh the subscriptions for each virtual appliance
+                // EventingSupport.subscribeToAllVA(virtualappHB.toPojo(),
+                // virtualSystemMonitor);
+                // }
+                // catch (EventingException e)
+                // {
+                // if (e.getCause() instanceof IOException)
+                // {
+                // LOGGER
+                // .error(
+                // "[FATAL] The server can not refresh VSM subsciptions at [{}] : caused by {}",
+                // virtualSystemMonitor, e);
+                // TaskServiceFactory.getService().schedule(VSMSubscriber.class);
+                // }
+                // else
+                // {
+                // LOGGER
+                // .debug(
+                // "An error was occurred when refreshing the VSM subscriptions caused by:",
+                // e);
+                // }
+                // }
             }
 
             HibernateDAOFactory.instance().endConnection();

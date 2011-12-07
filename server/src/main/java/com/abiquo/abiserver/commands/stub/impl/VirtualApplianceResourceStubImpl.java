@@ -31,6 +31,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
+import org.jclouds.abiquo.domain.DomainWrapper;
+import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.UserSessionException;
@@ -61,7 +63,6 @@ import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
-import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -697,32 +698,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    @Override
-    public BasicResult createVirtualAppliance(final VirtualAppliance virtualAppliance)
-    {
-        DataResult<VirtualAppliance> result = new DataResult<VirtualAppliance>();
-
-        /** Prepare the request. */
-        VirtualApplianceDto dto = createVirtualApplianceDtoObject(virtualAppliance);
-        String uri = createVirtualAppliancesLink(virtualAppliance.getVirtualDataCenter().getId());
-
-        ClientResponse response = post(uri, dto);
-
-        if (response.getStatusCode() == 201)
-        {
-            VirtualApplianceDto networkDto = response.getEntity(VirtualApplianceDto.class);
-            result.setData(dtoToVirtualAppliance(networkDto,
-                virtualAppliance.getVirtualDataCenter(), result));
-            result.setSuccess(Boolean.TRUE);
-        }
-        else
-        {
-            populateErrors(response, result, "createVirtualAppliance");
-        }
-
-        return result;
-    }
-
     protected VirtualApplianceDto createVirtualApplianceDtoObject(
         final VirtualAppliance virtualAppliance)
     {
@@ -835,53 +810,52 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         return apps;
     }
 
-    @Override
-    public BasicResult deleteVirtualAppliance(final VirtualAppliance virtualAppliance,
-        final boolean forceDelete)
-    {
-        BasicResult result = new BasicResult();
-        result.setSuccess(Boolean.TRUE);
-        Map<String, String[]> queryParams = new HashMap<String, String[]>();
-        String link =
-            createVirtualApplianceUrl(virtualAppliance.getVirtualDataCenter().getId(),
-                virtualAppliance.getId());
-
-        if (forceDelete)
-        {
-            queryParams.put("force", new String[] {String.valueOf(forceDelete)});
-        }
-        ClientResponse response = delete(link);
-        // When not forcing the deletion fail images non managed
-
-        if (response.getStatusCode() == Status.CONFLICT.getStatusCode())
-        {
-
-            result.setSuccess(false);
-            ErrorsDto errors = response.getEntity(ErrorsDto.class);
-            if (errors.getCollection() != null && !errors.getCollection().isEmpty())
-            {
-                for (ErrorDto e : errors.getCollection())
-                {
-                    // There are not managed Machines
-                    if ("VAPP-4".equals(e.getCode()))
-                    {
-                        result.setResultCode(BasicResult.NOT_MANAGED_VIRTUAL_IMAGE);
-                        return result;
-                    }
-                }
-                populateErrors(response, result, "deleteVirtualAppliance");
-            }
-
-        }
-
-        if (response.getStatusCode() != Status.NO_CONTENT.getStatusCode())
-        {
-            populateErrors(response, result, "deleteVirtualAppliance");
-
-        }
-
-        return result;
-    }
+    // public BasicResult deleteVirtualAppliance(final VirtualAppliance virtualAppliance,
+    // final boolean forceDelete)
+    // {
+    // BasicResult result = new BasicResult();
+    // result.setSuccess(Boolean.TRUE);
+    // Map<String, String[]> queryParams = new HashMap<String, String[]>();
+    // String link =
+    // createVirtualApplianceUrl(virtualAppliance.getVirtualDataCenter().getId(),
+    // virtualAppliance.getId());
+    //
+    // if (forceDelete)
+    // {
+    // queryParams.put("force", new String[] {String.valueOf(forceDelete)});
+    // }
+    // ClientResponse response = delete(link);
+    // // When not forcing the deletion fail images non managed
+    //
+    // if (response.getStatusCode() == Status.CONFLICT.getStatusCode())
+    // {
+    //
+    // result.setSuccess(false);
+    // ErrorsDto errors = response.getEntity(ErrorsDto.class);
+    // if (errors.getCollection() != null && !errors.getCollection().isEmpty())
+    // {
+    // for (ErrorDto e : errors.getCollection())
+    // {
+    // // There are not managed Machines
+    // if ("VAPP-4".equals(e.getCode()))
+    // {
+    // result.setResultCode(BasicResult.NOT_MANAGED_VIRTUAL_IMAGE);
+    // return result;
+    // }
+    // }
+    // populateErrors(response, result, "deleteVirtualAppliance");
+    // }
+    //
+    // }
+    //
+    // if (response.getStatusCode() != Status.NO_CONTENT.getStatusCode())
+    // {
+    // populateErrors(response, result, "deleteVirtualAppliance");
+    //
+    // }
+    //
+    // return result;
+    // }
 
     @Override
     public VirtualmachineHB allocate(final Integer virtualDatacenterId,
@@ -959,4 +933,77 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             "cloud/virtualdatacenters/{virtualDatacenter}/vapps/{vapp}", params);
     }
 
+    @Override
+    public BasicResult createVirtualAppliance(final VirtualAppliance virtualAppliance)
+    {
+        DataResult<VirtualAppliance> result = new DataResult<VirtualAppliance>();
+
+        try
+        {
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            VirtualDatacenter vdc =
+                getApiClient().getCloudService().getVirtualDatacenter(
+                    virtualAppliance.getVirtualDataCenter().getId());
+
+            // The only data a virtual appliance has is the name
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                org.jclouds.abiquo.domain.cloud.VirtualAppliance.builder(getApiClient(), vdc)
+                    .name(virtualAppliance.getName()).build();
+            // Here we actually perform the request to create the virtual appliance
+            vapp.save();
+
+            result.setData(dtoToVirtualAppliance(vapp.unwrap(),
+                virtualAppliance.getVirtualDataCenter(), result));
+            result.setSuccess(Boolean.TRUE);
+        }
+        catch (Exception e)
+        {
+            populateErrors(e, result, "createVirtualAppliance");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
+
+    @Override
+    public BasicResult deleteVirtualAppliance(final VirtualAppliance virtualAppliance,
+        final boolean forceDelete)
+    {
+        BasicResult result = new BasicResult();
+        try
+        {
+
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            VirtualDatacenter vdc =
+                getApiClient().getCloudService().getVirtualDatacenter(
+                    virtualAppliance.getVirtualDataCenter().getId());
+
+            VirtualApplianceDto dto =
+                getApiClient().getApi().getCloudClient()
+                    .getVirtualAppliance(vdc.unwrap(), virtualAppliance.getId());
+
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                DomainWrapper.wrap(getApiClient(),
+                    org.jclouds.abiquo.domain.cloud.VirtualAppliance.class, dto);
+
+            // Here we actually perform the request to delete the virtual appliance
+            vapp.delete(forceDelete);
+
+            result.setSuccess(Boolean.TRUE);
+        }
+        catch (Exception e)
+        {
+            populateErrors(e, result, "deleteVirtualAppliance");
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+
+        return result;
+    }
 }

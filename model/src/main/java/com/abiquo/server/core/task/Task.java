@@ -120,4 +120,13 @@ public class Task extends RedisEntityBase
     {
         this.state = state;
     }
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+            "Task id: '%s' Task type: '%s' Owner id: '%s' Owner type: '%s' State: '%s'",
+            getTaskId(), getType().name(), getOwnerId(), getType().getOwnerType().name(),
+            getState().name());
+    }
 }

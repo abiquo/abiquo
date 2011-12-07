@@ -18,32 +18,38 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-package com.abiquo.api.services.stub;
 
-import static org.mockito.Mockito.mock;
+package com.abiquo.api.pools.impl;
 
-import org.springframework.stereotype.Service;
+import org.apache.commons.pool.BasePoolableObjectFactory;
+import org.apache.commons.pool.impl.GenericObjectPool;
+import org.springframework.stereotype.Component;
 
-import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
- * Mock class to simulate the VSM behavior.
- * 
- * @author pnavarro
+ * @author enric.ruiz@abiquo.com
  */
-@Service
-public class VsmServiceStubMock extends VsmServiceStub
+@Component(value = "vSMClientPool")
+public class VSMClientPool extends GenericObjectPool
 {
-    @Override
-    protected VSMClient getClientFromPool(RemoteService service)
+    public VSMClientPool()
     {
-        return mock(VSMClient.class);
+        super(new PoolableVSMClientFactory());
     }
 
-    @Override
-    protected void returnClientToPool(VSMClient client)
+    public VSMClient borrowObject(String uri) throws Exception
     {
-        // Do nothing
+        VSMClient client = (VSMClient) super.borrowObject();
+        return client.initialize(uri);
+    }
+
+    private static class PoolableVSMClientFactory extends BasePoolableObjectFactory
+    {
+        @Override
+        public Object makeObject() throws Exception
+        {
+            return new VSMClient();
+        }
     }
 }

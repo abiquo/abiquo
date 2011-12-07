@@ -645,6 +645,7 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         while (!ip.equals(lastIP))
         {
             IpPoolManagement ippool = ipGenerator.createInstance(vdc, vlan, ip.toString());
+            lists.add(ippool.getRasd());
             lists.add(ippool);
             ip = ip.nextIPAddress();
         }

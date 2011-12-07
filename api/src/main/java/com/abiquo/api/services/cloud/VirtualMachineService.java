@@ -21,7 +21,6 @@
 
 package com.abiquo.api.services.cloud;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -39,12 +38,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
-import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
@@ -119,6 +119,12 @@ public class VirtualMachineService extends DefaultApiService
     // job creator should be used ONLY inside the TarantinoService
     @Autowired
     private TarantinoJobCreator jobCreator;
+
+    @Autowired
+    private NetworkService ipService;
+
+    @Autowired
+    private TaskService tasksService;
 
     public VirtualMachineService()
     {
@@ -417,7 +423,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Delete a {@link VirtualMachine}.
+     * Delete a {@link VirtualMachine}. And the {@link Node}.
      * 
      * @param virtualMachine to delete. void
      */
@@ -450,6 +456,12 @@ public class VirtualMachineService extends DefaultApiService
         logger.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         logger.trace("Deleted node virtual image!");
+
+        // Does it has volumes? PREMIUM
+        detachVolumesFromVirtualMachine(virtualMachine);
+        logger.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
+
         repo.deleteVirtualMachine(virtualMachine);
         tracer
             .log(
@@ -459,6 +471,16 @@ public class VirtualMachineService extends DefaultApiService
                 "Delete of the virtual appliance with name "
                     + virtualMachine.getName()
                     + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
+    }
+
+    /**
+     * This method is properly documented in the premium edition.
+     * 
+     * @param virtualMachine void
+     */
+    protected void detachVolumesFromVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        // PREMIUM
     }
 
     /**
@@ -504,6 +526,10 @@ public class VirtualMachineService extends DefaultApiService
         // The entity that defines the relation between a virtual machine, virtual applicance and
         // virtual machine template is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
+
+        // We must add the default NIC. This is the very next free IP in the virtual datacenter's
+        // default VLAN
+        ipService.assignDefaultNICToVirtualMachine(virtualMachine.getId());
 
         return virtualMachine;
     }
@@ -747,7 +773,8 @@ public class VirtualMachineService extends DefaultApiService
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
             logger.info("Generating the link to the status! {}", virtualMachine.getId());
-            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+            String location = tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+            return location;
         }
         catch (APIException e)
         {
@@ -781,32 +808,6 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         return null;
-    }
-
-    public void closeProducerChannel(final TarantinoRequestProducer producer)
-    {
-        try
-        {
-            if (producer == null)
-            {
-                return;
-            }
-            producer.closeChannel();
-        }
-        catch (IOException e)
-        {
-            logger.error("Error closing the producer channel with error: " + e.getMessage());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer.systemLog(
-                SeverityType.CRITICAL,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "Error closing the producer channel with error:. The error message was "
-                    + e.getMessage());
-        }
     }
 
     /**
@@ -1002,7 +1003,7 @@ public class VirtualMachineService extends DefaultApiService
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-            String location =
+            String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
             logger.info("Undeploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
@@ -1013,7 +1014,7 @@ public class VirtualMachineService extends DefaultApiService
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_UNDEPLOY, "The enqueuing in Tarantino was OK.");
 
-            return location;
+            return idAsyncTask;
 
         }
         catch (APIException e)

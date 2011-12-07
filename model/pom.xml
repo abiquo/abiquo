@@ -329,6 +329,7 @@
                                 <incluide>com/abiquo/model/util/*.class</incluide>
                                 <incluide>**/cloud/VirtualApplianceState.class</incluide>
                                 <incluide>**/cloud/VirtualMachineState.class</incluide>
+                                <incluide>**/cloud/VirtualMachineStateTransition.class</incluide>
                             </includes>
                         </configuration>
                     </execution>

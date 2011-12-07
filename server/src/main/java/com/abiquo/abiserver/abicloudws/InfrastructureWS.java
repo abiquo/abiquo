@@ -47,7 +47,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAl
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
+// import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
@@ -496,11 +496,7 @@ public class InfrastructureWS implements IInfrastructureWS
             VirtualAppliance vapp = virtualappHBPojo.toPojo();
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromVA(vapp);
-            EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
-        }
-        catch (EventingException e)
-        {
-            logger.warn("An error occurred when subscribing to retrieve the VA events: {}", e);
+            // EventingSupport.subscribePullEventToVM(virtualMachine, virtualSystemMonitorAddress);
         }
         catch (PersistenceException e)
         {
