@@ -70,6 +70,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP" />
         <!-- VIRTUAL MACHINE TEMPLATES -->
@@ -141,6 +142,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
