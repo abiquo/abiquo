@@ -1318,7 +1318,7 @@ public class NetworkService extends DefaultApiService
         rasd.setAutomaticDeallocation(0);
         rasd.setAddress(ip.getMac());
         rasd.setParent(ip.getNetworkName());
-        rasd.setResourceSubType(String.valueOf(ip.getType().ordinal()));
+        rasd.setResourceSubType(String.valueOf(ip.getVlanNetwork().getType().ordinal()));
         // Configuration Name sets the order in the virtual machine, put it in the last place.
         rasd.setConfigurationName(String.valueOf(repo.findIpsByVirtualMachine(vm).size()));
 
