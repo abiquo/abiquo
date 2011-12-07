@@ -898,6 +898,20 @@ public class InfrastructureService extends DefaultApiService
         return m.getState();
     }
 
+    public void isStonithUp(final Integer datacenterId, final String ip, final String user,
+        final String password, final Integer port)
+    {
+
+        RemoteService nodecollector =
+            getRemoteService(datacenterId, RemoteServiceType.NODE_COLLECTOR);
+
+        if (!nodecollectorServiceStub.isStonithUp(nodecollector, ip, port, user, password))
+        {
+            addValidationErrors(APIError.MACHINE_INVALID_IPMI_CONF);
+            flushErrors();
+        }
+    }
+
     public void checkAvailableCores(final Machine machine)
     {
         // PREMIUM

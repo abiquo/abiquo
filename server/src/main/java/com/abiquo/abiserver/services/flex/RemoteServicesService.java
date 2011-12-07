@@ -21,16 +21,16 @@
 
 package com.abiquo.abiserver.services.flex;
 
+import static com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.getCommunityServices;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.RemoteServicesCommand;
 import com.abiquo.abiserver.commands.impl.RemoteServicesCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.RemoteServicesResourceStubImpl;
-import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
@@ -52,10 +52,10 @@ public class RemoteServicesService
         remoteCommand = new RemoteServicesCommandImpl();
     }
 
-    protected RemoteServicesCommand proxyCommand(final UserSession userSession)
+    protected RemoteServicesResourceStub proxyStub(final UserSession userSession)
     {
-        return BusinessDelegateProxy.getInstance(userSession, remoteCommand,
-            RemoteServicesCommand.class);
+        return APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
+            RemoteServicesResourceStub.class);
     }
 
     /**
@@ -67,11 +67,7 @@ public class RemoteServicesService
      */
     public BasicResult addRemoteService(final UserSession userSession, final RemoteService rs)
     {
-        RemoteServicesResourceStub proxy =
-            APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
-                RemoteServicesResourceStub.class);
-
-        return proxy.addRemoteService(rs);
+        return proxyStub(userSession).addRemoteService(rs);
     }
 
     /**
@@ -83,51 +79,7 @@ public class RemoteServicesService
      */
     public BasicResult updateRemoteService(final UserSession userSession, final RemoteService rs)
     {
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            return proxied.updateRemoteService(userSession, rs);
-        }
-        catch (UserSessionException e)
-        {
-            return e.getResult();
-        }
-    }
-
-    /**
-     * Gets a remote service's configuration data
-     * 
-     * @param userSession
-     * @param id
-     * @return
-     */
-    public DataResult<RemoteService> getRemoteService(final UserSession userSession,
-        final Integer id)
-    {
-        DataResult<RemoteService> dataResult = new DataResult<RemoteService>();
-
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            RemoteService rs = proxied.getRemoteService(userSession, id);
-            dataResult.setData(rs);
-            dataResult.setSuccess(true);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setMessage(e.getCause().getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).modifyRemoteService(rs);
     }
 
     /**
@@ -141,65 +93,7 @@ public class RemoteServicesService
     public DataResult<List<RemoteService>> getRemoteServicesByType(final UserSession userSession,
         final Integer idDataCenter, final String remoteServiceType)
     {
-        DataResult<List<RemoteService>> dataResult = new DataResult<List<RemoteService>>();
-
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            List<RemoteService> rsList =
-                proxied.getRemoteServicesByType(userSession, idDataCenter, remoteServiceType);
-            dataResult.setData(rsList);
-            dataResult.setSuccess(true);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setMessage(e.getCause().getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
-
-        return dataResult;
-
-    }
-
-    /**
-     * Lists all remote services defined for a datacenter
-     * 
-     * @param userSession
-     * @param idDataCenter
-     * @return
-     */
-    public DataResult<List<RemoteService>> getAllRemoteServices(final UserSession userSession,
-        final Integer idDataCenter)
-    {
-        DataResult<List<RemoteService>> dataResult = new DataResult<List<RemoteService>>();
-
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            List<RemoteService> rsList = proxied.getAllRemoteServices(userSession, idDataCenter);
-            dataResult.setData(rsList);
-            dataResult.setSuccess(true);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setMessage(e.getCause().getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).getRemoteServices(idDataCenter, remoteServiceType);
     }
 
     /**
@@ -210,30 +104,10 @@ public class RemoteServicesService
      * @param id
      * @return
      */
-    public DataResult<Boolean> checkRemoteService(final UserSession userSession, final Integer id)
+    public DataResult<Boolean> checkRemoteService(final UserSession userSession,
+        final Integer datacenterId, final String type)
     {
-        DataResult<Boolean> dataResult = new DataResult<Boolean>();
-
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            boolean success = proxied.checkRemoteService(userSession, id);
-            dataResult.setData(new Boolean(success));
-            dataResult.setSuccess(true);
-        }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setMessage(e.getCause().getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
-        return dataResult;
-
+        return proxyStub(userSession).checkRemoteService(datacenterId, type);
     }
 
     /**
@@ -247,33 +121,12 @@ public class RemoteServicesService
      * @return
      */
     public DataResult<Boolean> checkRemoteService(final UserSession userSession,
-        final String protocol, final String domainName, final Integer port,
-        final String serviceMapping, final String remoteServiceType)
+        final Integer datacenterId, final String protocol, final String domainName,
+        final Integer port, final String serviceMapping, final String remoteServiceType)
     {
-        DataResult<Boolean> dataResult = new DataResult<Boolean>();
 
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        try
-        {
-            boolean success =
-                proxied.checkRemoteService(userSession, RemoteService.getFullUri(protocol,
-                    domainName, port, serviceMapping),
-                    com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType
-                        .valueOf(remoteServiceType));
-
-            dataResult.setData(new Boolean(success));
-            dataResult.setSuccess(true);
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
-
-        return dataResult;
-
+        return proxyStub(userSession).checkRemoteService(datacenterId, remoteServiceType,
+            RemoteService.getFullUri(protocol, domainName, port, serviceMapping));
     }
 
     /**
@@ -286,9 +139,7 @@ public class RemoteServicesService
     public DataResult<Boolean> deleteRemoteService(final UserSession userSession,
         final RemoteService remoteService)
     {
-        RemoteServicesCommand proxied = proxyCommand(userSession);
-
-        return proxied.deleteRemoteService(userSession, remoteService);
+        return proxyStub(userSession).deleteRemoteService(remoteService);
     }
 
     /**
@@ -301,26 +152,21 @@ public class RemoteServicesService
     {
         DataResult<List<RemoteServiceType>> dataResult = new DataResult<List<RemoteServiceType>>();
 
-        RemoteServicesCommand proxied = proxyCommand(userSession);
+        List<RemoteServiceType> remoteServicesTypes = new ArrayList<RemoteServiceType>();
 
-        try
+        for (com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType rst : getServiceTypes())
         {
-            List<RemoteServiceType> rsList = proxied.getRemoteServiceTypes(userSession);
-            dataResult.setData(rsList);
-            dataResult.setSuccess(true);
+            remoteServicesTypes.add(new RemoteServiceType(rst));
         }
-        catch (InfrastructureCommandException e)
-        {
-            dataResult.setMessage(e.getCause().getMessage());
-        }
-        catch (UserSessionException e)
-        {
-            dataResult.setSuccess(false);
-            dataResult.setMessage(e.getMessage());
-            dataResult.setResultCode(e.getResult().getResultCode());
-        }
+
+        dataResult.setData(remoteServicesTypes);
+        dataResult.setSuccess(true);
 
         return dataResult;
     }
 
+    protected com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType[] getServiceTypes()
+    {
+        return getCommunityServices();
+    }
 }

@@ -44,6 +44,6 @@ public interface VirtualApplianceConversionsDAO extends DAO<VirtualApplianceConv
 
     public void makeTransientByVirtualAppliance(int idVirtualAppliance);
 
-    String findDatacenterUUIDByVASConversion(int idVASC);
+    public String findDatacenterUUIDByVASConversion(int idVASC);
 
 }

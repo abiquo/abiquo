@@ -1109,15 +1109,15 @@ public class AbstractAPIStub
         params.put("password", password);
         params.put("port", port.toString());
 
-        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        String uri = "admin/datacenters/{datacenter}/";
         if (includeMachineId)
         {
-            uri += "{machine}/action/checkState?sync=true";
+            uri += "racks/{rack}/machines/{machine}/action/checkState?sync=true";
         }
         else
         {
             uri +=
-                "action/checkState?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
+                "action/checkmachinestate?ip={ip}&hypervisor={hypervisor}&user={user}&password={password}&port={port}";
         }
 
         return resolveURI(apiUri, uri, params);
@@ -1145,14 +1145,14 @@ public class AbstractAPIStub
         params.put("password", password);
         params.put("port", port.toString());
 
-        String uri = "admin/datacenters/{datacenter}/racks/{rack}/machines/";
+        String uri = "admin/datacenters/{datacenter}/";
         if (includeMachineId)
         {
-            uri += "{machine}/action/checkIpmi";
+            uri += "racks/{rack}/machines/{machine}/action/checkIpmi";
         }
         else
         {
-            uri += "action/checkIpmi?ip={ip}&user={user}&password={password}&port={port}";
+            uri += "action/checkmachineipmi?ip={ip}&user={user}&password={password}&port={port}";
         }
 
         return resolveURI(apiUri, uri, params);
