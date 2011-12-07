@@ -1187,7 +1187,7 @@ CREATE TABLE  `kinton`.`metering` (
   `idRack` int(15) unsigned default NULL,
   `rack` varchar(20) default NULL,
   `idPhysicalMachine` int(20) unsigned default NULL,
-  `physicalmachine` varchar(30) default NULL,
+  `physicalmachine` varchar(256) default NULL,
   `idStorageSystem` int(10) unsigned default NULL,
   `storageSystem` varchar(256) default NULL,
   `idStoragePool` varchar(40) default NULL,
