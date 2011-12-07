@@ -120,9 +120,14 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     }
 
+
     /**
-     * Only perform checks if the resources are increased. Checks the resource limits, check the
-     * target machine can hold the new resource requirements and update the target machine usage.
+     * Check if we can allocate the new virtual machine according to the new values.
+     * 
+     * @param idVirtualApp
+     * @param vmachine
+     * @param newvmachine
+     * @param foreceEnterpriseSoftLimits
      */
     public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
         final VirtualMachineRequirements increaseRequirements,
@@ -162,7 +167,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
-                virtualMachineId, e));
+                vmachine.getId(), e));
         }
         catch (LimitExceededException limite)
         {
@@ -171,12 +176,12 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (AllocatorException e)
         {
             addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));
+                vmachine.getId(), e));
         }
         catch (Exception e)
         {
             addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));
+                vmachine.getId(), e));
         }
         finally
         {

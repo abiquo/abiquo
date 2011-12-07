@@ -34,8 +34,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
 
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -45,6 +50,10 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
+@FilterDefs({@FilterDef(name = RasdManagement.NOT_TEMP),
+    @FilterDef(name = RasdManagement.ONLY_TEMP)})
+@Filters({@Filter(name = RasdManagement.NOT_TEMP, condition = "temporal is null"),
+    @Filter(name = RasdManagement.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = RasdManagement.TABLE_NAME)
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "idResourceType", discriminatorType = DiscriminatorType.STRING)
@@ -55,6 +64,8 @@ public class RasdManagement extends DefaultEntityBase
 
     public static final String TABLE_NAME = "rasd_management";
 
+    public static final String NOT_TEMP = "rasdmanagement_not_temp";
+    public static final String ONLY_TEMP = "rasdmanagement_only_temp";
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     protected RasdManagement()
@@ -201,6 +212,28 @@ public class RasdManagement extends DefaultEntityBase
         this.rasd = rasd;
     }
 
+    public final static String TEMPORAL_PROPERTY = "temporal";
+
+    private final static String TEMPORAL_COLUMN = "temporal";
+
+    private final static int TEMPORAL_MIN = 1;
+
+    private final static int TEMPORAL_MAX = Integer.MAX_VALUE;
+
+    @Column(name = TEMPORAL_COLUMN, nullable = true)
+    @Range(min = TEMPORAL_MIN, max = TEMPORAL_MAX)
+    private Integer temporal;
+
+    public Integer getTemporal()
+    {
+        return this.temporal;
+    }
+
+    public void setTemporal(final Integer temporal)
+    {
+        this.temporal = temporal;
+    }
+    
     // **************************** Rasd delegating methods ***************************
 
     public String getDescription()

@@ -78,7 +78,6 @@ import com.abiquo.tracer.SeverityType;
  * @author jdevesa@abiquo.com
  */
 @Service
-@Transactional(readOnly = true)
 public class VirtualApplianceService extends DefaultApiService
 {
     /** The logger object **/
@@ -131,12 +130,15 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vdcId identifier of the virtualdatacenter.
      * @return the list of {@link VirtualAppliance} pojo
      */
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<VirtualAppliance> getVirtualAppliancesByVirtualDatacenter(final Integer vdcId)
     {
         VirtualDatacenter vdc = vdcService.getVirtualDatacenter(vdcId);
         return (List<VirtualAppliance>) repo.findVirtualAppliancesByVirtualDatacenter(vdc);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualApplianceByVirtualMachine(final VirtualMachine virtualMachine)
     {
         return virtualApplianceRepo.findVirtualApplianceByVirtualMachine(virtualMachine);
@@ -149,6 +151,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -236,6 +239,7 @@ public class VirtualApplianceService extends DefaultApiService
         return vapp;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String getPriceVirtualApplianceText(final Integer vdcId, final Integer vappId)
     {
         String price = "";
@@ -269,6 +273,7 @@ public class VirtualApplianceService extends DefaultApiService
         return price;// + "\n";
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public VirtualAppliancePriceDto getPriceVirtualAppliance(
         final VirtualAppliance virtualAppliance, final PricingTemplate pricingTemplate)
     {
@@ -325,6 +330,7 @@ public class VirtualApplianceService extends DefaultApiService
         return aNumber.setScale(significantDigits, BigDecimal.ROUND_UP);
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private Map<VirtualMachineCost, BigDecimal> addVirtualMachineCost(
         final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine,
@@ -373,6 +379,7 @@ public class VirtualApplianceService extends DefaultApiService
         return virtualMachinesCost;
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void getCostCodeCost(final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final VirtualMachine virtualMachine, final PricingTemplate pricing)
     {
@@ -389,6 +396,7 @@ public class VirtualApplianceService extends DefaultApiService
 
     }
 
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private void getAdditionalStorageCost(
         final Map<VirtualMachineCost, BigDecimal> virtualMachinesCost,
         final Collection<RasdManagement> resources, final PricingTemplate pricing)
@@ -413,7 +421,13 @@ public class VirtualApplianceService extends DefaultApiService
         }
     }
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    /**
+     * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
+     * 
+     * @param vdcId {@link VirtualDatacenter}
+     * @param vappId {@link VirtualAppliance}
+     * @return List<String>
+     */
     public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);

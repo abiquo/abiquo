@@ -70,6 +70,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="GET" access="ROLE_VDC_MANAGE_VAPP" />
+        <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="DELETE" access="ROLE_VDC_MANAGE_VAPP" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/datacenterrepositories/*/actions/refresh" method="PUT" access="ROLE_USERS_MANAGE_ENTERPRISE,ROLE_VDC_MANAGE_VAPP" />
         <!-- VIRTUAL MACHINE TEMPLATES -->
@@ -141,6 +142,7 @@
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/**" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
+        <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*" method="DELETE" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="GET" access="ROLE_APPLIB_VIEW " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="PUT" access="ROLE_APPLIB_ALLOW_MODIFY " />
         <security:intercept-url pattern="/admin/enterprises/*/appslib/templateDefinitionLists/*/actions/*" method="POST" access="ROLE_APPLIB_ALLOW_MODIFY " />
@@ -307,7 +309,6 @@
 
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/defaultvlan" method="PUT" access="ROLE_VDC_MANAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/defaultvlan" method="GET" access="ROLE_VDC_MANAGE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/action/volumes" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase/*" method="GET" access="ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/publicips/topurchase/*" method="PUT" access="ROLE_VDC_MANAGE_NETWORK" />
@@ -319,9 +320,6 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/statefulcandidates" method="GET" access="ROLE_VAPP_CREATE_STATEFUL" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/attached" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/detached" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
-        <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/action/available" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="DELETE" access="ROLE_PHYS_DC_ALLOW_MODIFY_STORAGE,ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
@@ -331,6 +329,12 @@
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*/action/initiatormappings" method="OPTIONS" access="ROLE_AUTHENTICATED" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*/action/initiatormappings/*" method="GET" access="ROLE_VDC_MANAGE_STORAGE" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/volumes/*/action/initiatormappings/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <!-- DISKS -->
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="POST" access="ROLE_VDC_MANAGE_STORAGE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks" method="OPTIONS" access="ROLE_AUTHENTICATED" />       
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks/*" method="DELETE" access="ROLE_VDC_MANAGE_STORAGE" />
+        <security:intercept-url pattern="/cloud/virtualdatacenters/*/disks/*" method="GET" access="ROLE_VDC_MANAGE_STORAGE,ROLE_VDC_ENUMERATE" />
         <!-- PRIVATE NETWORKS -->
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="POST" access="ROLE_VDC_MANAGE_NETWORK" />
         <security:intercept-url pattern="/cloud/virtualdatacenters/*/privatenetworks" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS,ROLE_VDC_ENUMERATE" />

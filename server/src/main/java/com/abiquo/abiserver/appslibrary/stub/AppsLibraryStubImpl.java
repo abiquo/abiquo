@@ -81,7 +81,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = post(uri, icon);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 201)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
@@ -116,7 +116,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
                 ovfindexURL);
         final Integer httpStatus = response.getStatusCode();
 
-        if (httpStatus != 200)
+        if (httpStatus != 201)
         {
             populateErrors(response, result, "createOVFPackageList");
         }
@@ -146,7 +146,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         final Integer httpStatus = response.getStatusCode();
 
-        if (httpStatus / 200 != 1)
+        if (httpStatus != 204)
         {
             populateErrors(response, result, "deleteOVFPackageList");
         }
@@ -172,7 +172,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
@@ -181,7 +181,6 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         else
         {
             populateErrors(response, result, "getOVFPackageList");
-            // TODO getOVFPackageListStatus messages
         }
 
         return result;
@@ -220,7 +219,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 201)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
@@ -265,7 +264,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 
-        if (response.getStatusCode() / 200 != 1)
+        if (response.getStatusCode() != 200)
         {
             logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
                 datacenterId);
@@ -290,7 +289,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
 
-        if (response.getStatusCode() / 200 != 1)
+        if (response.getStatusCode() != 200)
         {
             logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
                 datacenterId);
@@ -313,7 +312,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = get(uri);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
@@ -523,7 +522,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = delete(uri);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 204)
         {
             result.setSuccess(Boolean.TRUE);
         }
@@ -549,7 +548,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = put(uri, iconDto);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 201)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexIconObject(response.getEntity(IconDto.class)));
@@ -572,7 +571,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = get(uri);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
             IconsDto icons = response.getEntity(IconsDto.class);
@@ -612,7 +611,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = get(uri);
 
-        if (response.getStatusCode() / 200 == 1)
+        if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
             DiskFormatTypesDto diskFormatTypes = response.getEntity(DiskFormatTypesDto.class);
@@ -819,7 +818,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = delete(uri);
 
-        if (response.getStatusCode() == 200)
+        if (response.getStatusCode() == 204)
         {
             result.setSuccess(Boolean.TRUE);
         }

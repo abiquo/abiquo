@@ -36,6 +36,8 @@ ALTER TABLE `kinton`.`network_configuration` DROP COLUMN `dhcp_service_id`;
 
 DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 
+ALTER TALBE `kinton`.`virtualmachine` ADD COLUMN `temporal` int(10) unsigned default NULL;
+ALTER TALBE `kinton`.`rasd_management` ADD COLUMN `temporal` int(10) unsigned default NULL;
 
 -- ---------------------------------------------- --
 --                 TABLE CREATION                 --
@@ -251,6 +253,11 @@ UNLOCK TABLES;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
 
 UPDATE `kinton`.`virtualimage` set creation_user = 'ABIQUO-BEFORE-2.0', creation_date = CURRENT_TIMESTAMP;
+
+/* ABICLOUDPREMIUM-2878 - For consistency porpouse, changed vharchar(30) to varchar(256) */
+ALTER TABLE `kinton`.`metering` MODIFY COLUMN `physicalmachine` VARCHAR(256)  CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+
+
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --

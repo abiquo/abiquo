@@ -57,7 +57,7 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
  * 
  * @author jdevesa
  */
-@Test(groups = {STORAGE_UNIT_TESTS}, enabled = false)
+@Test(groups = {STORAGE_UNIT_TESTS})
 public class DiskManagementServiceTest extends AbstractUnitTest
 {
     private static long MEGABYTE = 1048576;
@@ -70,11 +70,12 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     protected VirtualDatacenter vdc;
 
     protected VirtualMachine vm;
+    
 
     @BeforeMethod(groups = {STORAGE_UNIT_TESTS})
-    public void setUpVirtualMachine()
+    public void setUp()
     {
-        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        Enterprise e = enterpriseGenerator.createInstanceNoLimits("test enterprise");
         Role r = roleGenerator.createInstance();
         User u = userGenerator.createInstance(e, r, "basicUser", "basicUser");
         setup(e, r, u);
@@ -110,9 +111,9 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     }
 
     /**
-     * Check the creation works.
+     * Check the creation of the disk at virtual datacenter works.
      */
-    @Test(enabled = false)
+    @Test
     public void createDiskTest()
     {
         // retrieve them
@@ -120,24 +121,21 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         service = new StorageService(em);
 
         // Assert there is only one disk
-        List<DiskManagement> disks =
-            service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
-        assertEquals(disks.size(), 1);
-
         // create a new one
-        service.allocateHardDiskIntoVM(vdc.getId(), vapp.getId(), vm.getId(), 12000);
+        service.createHardDisk(vdc.getId(), 12000L);
 
         // Assert disk has been created
-        disks = service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
-        assertEquals(disks.size(), 2);
+        List<DiskManagement> disks = service.getListOfHardDisksByVirtualDatacenter(vdc.getId());
+        assertEquals(disks.size(), 1);
 
+        assertEquals(disks.get(0).getSizeInMb(), Long.valueOf(12000L));
         commitActiveTransaction(em);
     }
 
     /**
      * Expect a NotFoundException when creating disk and the virtual datacenter does not exist.
      */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
+    @Test(expectedExceptions = {NotFoundException.class})
     public void createDiskRaiseNotFoundWhenRandomVDCIdTest()
     {
         Integer randomId;
@@ -149,126 +147,68 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
-
-        service.allocateHardDiskIntoVM(randomId, vapp.getId(), vm.getId(), 12000);
-    }
-
-    /**
-     * Expect a NotFoundException when creating disk and the virtual appliance does not exist.
-     */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
-    public void createDiskRaiseNotFoundWhenRandomVappIdTest()
-    {
-        Integer randomId;
-        do
-        {
-            randomId = new Random().nextInt(10000);
-        }
-        while (randomId.equals(vapp.getId()));
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.allocateHardDiskIntoVM(vdc.getId(), randomId, vm.getId(), 12000);
-    }
-
-    /**
-     * Expect a NotFoundException when creating disk and the virtual datacenter does not exist.
-     */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
-    public void createDiskRaiseNotFoundWhenRandomVirtualMachineIdTest()
-    {
-        Integer randomId;
-        do
-        {
-            randomId = new Random().nextInt(10000);
-        }
-        while (randomId.equals(vdc.getId()));
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.allocateHardDiskIntoVM(vdc.getId(), vapp.getId(), randomId, 12000);
+        service.createHardDisk(randomId, 100000L);
     }
 
     /**
      * Ensure the service raises bad request exceptions when adding a disk with negative values.
      */
-    @Test(expectedExceptions = {BadRequestException.class}, enabled = false)
+    @Test(expectedExceptions = {BadRequestException.class})
     public void createDiskRaisesBadRequestWhenCreatingADiskWithNegativeValuesTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
 
-        service.allocateHardDiskIntoVM(vdc.getId(), vapp.getId(), vm.getId(), -1);
+        service.createHardDisk(vdc.getId(), -1L);
     }
 
     /**
      * Ensure the service raises bad request exceptions when adding a disk with null values.
      */
-    @Test(expectedExceptions = {BadRequestException.class}, enabled = false)
+    @Test(expectedExceptions = {BadRequestException.class})
     public void createDiskRaisesBadRequestWhenCreatingADiskWithNullValuesTest()
     {
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
 
-        service.allocateHardDiskIntoVM(vdc.getId(), vapp.getId(), vm.getId(), null);
+        service.createHardDisk(vdc.getId(), null);
     }
 
     /**
-     * Ensure service raises bad request exceptions when adding a disk with the machine in
-     * incoherent state
+     * Check the deletion of disks works.
      */
-    @Test(expectedExceptions = {ConflictException.class}, enabled = false)
-    public void createDiskRaisesConflictWhenVirtualMachineIncoherentStateTest()
-    {
-        // set the virtual machine state as 'RUNNING'
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        vm.setState(VirtualMachineState.ON);
-        update(vm);
-        commitActiveTransaction(em);
-
-        em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.allocateHardDiskIntoVM(vdc.getId(), vapp.getId(), vm.getId(), 100000);
-    }
-
-    /**
-     * Check the creation works.
-     */
-    @Test(enabled = false)
+    @Test
     public void deleteDiskTest()
     {
-        DiskManagement inputDisk1 = new DiskManagement(vdc, 7000L);
+        DiskManagement inputDisk1 = diskGenerator.createInstance(vdc);
         setup(inputDisk1.getRasd(), inputDisk1);
 
         // retrieve them
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
 
-        // Assert there is only one disk
-        List<DiskManagement> disks =
-            service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
-        assertEquals(disks.size(), 2);
-
         // delete the first one
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(),
-            Long.valueOf(inputDisk1.getAttachmentOrder()).intValue());
-
+        service.deleteHardDisk(vdc.getId(), inputDisk1.getId());
         // Assert disk has been created
-        disks = service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
-        assertEquals(disks.size(), 1);
-
         commitActiveTransaction(em);
+        
+        em = getEntityManagerWithAnActiveTransaction();
+        // assert it has been deleted.
+        service = new StorageService(em);
+        assertEquals(service.getListOfHardDisksByVirtualDatacenter(vdc.getId()).size(), 0);
+
+
     }
 
     /**
      * Expect a NotFoundException when deleting disk and the virtual datacenter does not exist.
      */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
+    @Test(expectedExceptions = {NotFoundException.class})
     public void deleteDiskRaiseNotFoundWhenRandomVDCIdTest()
     {
+        DiskManagement inputDisk1 = diskGenerator.createInstance(vdc);
+        setup(inputDisk1.getRasd(), inputDisk1);
+        
         Integer randomId;
         do
         {
@@ -277,96 +217,73 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         while (randomId.equals(vdc.getId()));
 
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.deleteHardDisk(randomId, vapp.getId(), vm.getId(), 1);
-    }
-
-    /**
-     * Expect a NotFoundException when deleting disk and the virtual appliance does not exist.
-     */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
-    public void deleteDiskRaiseNotFoundWhenRandomVappIdTest()
-    {
-        Integer randomId;
-        do
+        try
         {
-            randomId = new Random().nextInt(10000);
+            service = new StorageService(em);
+            service.deleteHardDisk(randomId, inputDisk1.getId());
         }
-        while (randomId.equals(vapp.getId()));
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.deleteHardDisk(vdc.getId(), randomId, vm.getId(), 1);
-    }
-
-    /**
-     * Expect a NotFoundException when deleting disk and the virtual machine does not exist.
-     */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
-    public void deleteDiskRaiseNotFoundWhenRandomVirtualMachineIdTest()
-    {
-        Integer randomId;
-        do
+        finally
         {
-            randomId = new Random().nextInt(10000);
+            rollbackActiveTransaction(em);
         }
-        while (randomId.equals(vm.getId()));
-
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), randomId, 1);
     }
 
     /**
-     * Expect a NotFoundException when deleting disk and the disk does not exist.
+     * Expect a NotFoundException when deleting disk and the virtual disk id does not exist.
      */
-    @Test(expectedExceptions = {NotFoundException.class}, enabled = false)
+    @Test(expectedExceptions = {NotFoundException.class})
     public void deleteDiskRaiseNotFoundWhenRandomDiskIdTest()
     {
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
 
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(), 1);
+        DiskManagement inputDisk1 = diskGenerator.createInstance(vdc);
+        setup(inputDisk1.getRasd(), inputDisk1);
+        Integer randomId;
+        do
+        {
+            randomId = new Random().nextInt(10000);
+        }
+        while (randomId.equals(inputDisk1.getId()));
+        
+        EntityManager em = getEntityManagerWithAnActiveTransaction();
+
+        try
+        {
+            service = new StorageService(em);
+            service.deleteHardDisk(vdc.getId(), randomId);
+        }
+        finally
+        {
+            rollbackActiveTransaction(em);
+        }
     }
 
     /**
      * Ensure service raises bad request exceptions when removing a disk with the machine in
      * incoherent state
      */
-    @Test(expectedExceptions = {ConflictException.class}, enabled = false)
-    public void deleteDiskRaisesConflictWhenVirtualMachineIncoherentStateTest()
+    @Test(expectedExceptions = {ConflictException.class})
+    public void deleteDiskRaisesConflictWhenVirtualMachineIsAssignedTest()
     {
         // set the virtual machine state as 'RUNNING'
         EntityManager em = getEntityManagerWithAnActiveTransaction();
         vm.setState(VirtualMachineState.ON);
         update(vm);
-        commitActiveTransaction(em);
+        
+        DiskManagement disk = diskGenerator.createInstance(vdc);
+        disk.setVirtualMachine(vm);
+        setup(disk.getRasd(), disk);
 
         em = getEntityManagerWithAnActiveTransaction();
         service = new StorageService(em);
 
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(), 0);
-    }
-
-    /**
-     * Ensure service raises bad request exceptions when removing the first disk
-     */
-    @Test(expectedExceptions = {ConflictException.class}, enabled = false)
-    public void deleteDiskRaisesConflictWhenRemovingReadOnlyDiskTest()
-    {
-        // set the virtual machine state as 'RUNNING'
-        EntityManager em = getEntityManagerWithAnActiveTransaction();
-        vm.setState(VirtualMachineState.ON);
-        update(vm);
-        commitActiveTransaction(em);
-
-        em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-
-        service.deleteHardDisk(vdc.getId(), vapp.getId(), vm.getId(), 0);
+        try
+        {
+            service.deleteHardDisk(vdc.getId(), disk.getId());
+        }
+        finally
+        { 
+            rollbackActiveTransaction(em);
+        } 
     }
 
     /**
@@ -427,33 +344,24 @@ public class DiskManagementServiceTest extends AbstractUnitTest
     }
 
     /**
-     * Check by default there is a disk into virtual machine corresponding to virtual image's disk.
+     * Ensure service raises bad request exceptions when adding a disk with the machine in
+     * incoherent state
      */
-    @Test(enabled = false)
-    public void getAllDisksByDefaultTest()
+    @Test(expectedExceptions = {ConflictException.class}, enabled = false)
+    public void attachDiskRaisesConflictWhenVirtualMachineIncoherentStateTest()
     {
+        // set the virtual machine state as 'RUNNING'
         EntityManager em = getEntityManagerWithAnActiveTransaction();
-        service = new StorageService(em);
-        List<DiskManagement> defaultDisks =
-            service.getListOfHardDisksByVM(vdc.getId(), vapp.getId(), vm.getId());
-
-        // Assert there is only one disk
-        assertEquals(defaultDisks.size(), 1);
-
-        // Assert this disk has always the 'attachmentOrder' 0
-        DiskManagement disk = defaultDisks.get(0);
-        assertEquals(disk.getAttachmentOrder(), 0L);
-
-        // Assert is 'readOnly'
-        assertEquals(disk.getReadOnly(), Boolean.TRUE);
-
-        // Assert its capacity is the same than the virtual image
-        assertEquals(disk.getSizeInMb(),
-            Long.valueOf(vm.getVirtualMachineTemplate().getDiskFileSize() / MEGABYTE));
-
+        vm.setState(VirtualMachineState.ON);
+        update(vm);
         commitActiveTransaction(em);
-    }
 
+        em = getEntityManagerWithAnActiveTransaction();
+        service = new StorageService(em);
+
+        service.registerHardDiskIntoVMInDatabase(vdc.getId(), vapp.getId(), vm.getId(), 100000);
+    }
+    
     /**
      * Setup a couple of extra hard disks, and check they are retrieved ok.
      */
