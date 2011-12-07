@@ -773,8 +773,7 @@ public class VirtualMachineService extends DefaultApiService
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
             logger.info("Generating the link to the status! {}", virtualMachine.getId());
-            String location = tarantino.deployVirtualMachine(virtualMachine, vmDesc);
-            return location;
+            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
         }
         catch (APIException e)
         {

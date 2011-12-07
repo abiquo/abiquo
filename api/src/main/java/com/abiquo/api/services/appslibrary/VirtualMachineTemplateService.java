@@ -145,7 +145,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
      * and repository.
      * 
      * @param category null indicate all categories (no filter)
-     * @param hypervisor (*) null indicate no filter compatibles, else return machine templates
+     * @param connection (*) null indicate no filter compatibles, else return machine templates
      *            compatibles or with compatible conversions. @see {@link VirtualImageConversionDAO}
      */
     @Transactional(readOnly = true)
