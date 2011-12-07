@@ -53,7 +53,7 @@ public @interface RemoteService
 {
     boolean required() default true;
 
-    String message() default "must be one of the following values { VIRTUAL_FACTORY, TARANTINO, STORAGE_SYSTEM_MONITOR, VIRTUAL_SYSTEM_MONITOR, NODE_COLLECTOR, DHCP_SERVICE, BPM_SERVICE, APPLIANCE_MANAGER, virtual_factory, tarantino, storage_system_monitor, virtual_system_monitor, node_collector, dhcp_service, bpm_service, appliance_manager }";
+    String message() default "must be one of the following values { VIRTUALFACTORY, TARANTINO, STORAGESYSTEMMONITOR, VIRTUALSYSTEMMONITOR, NODECOLLECTOR, DHCPSERVICE, BPMSERVICE, APPLIANCEMANAGER, virtualfactory, tarantino, storagesystemmonitor, virtualsystemmonitor, nodecollector, dhcpservice, bpmservice, appliancemanager }";
 
     Class< ? >[] groups() default {};
 
@@ -82,7 +82,7 @@ public @interface RemoteService
             {
                 for (RemoteServiceType currentType : RemoteServiceType.values())
                 {
-                    if (currentType.name().equalsIgnoreCase(value))
+                    if (currentType.name().replace("_", "").equalsIgnoreCase(value))
                     {
                         valid = true;
                         break;

@@ -69,7 +69,6 @@ public class RemoteServicesResource extends AbstractResource
             }
         }
 
-        remoteServices.setLinks(restBuilder.buildRemoteServicesLinks(datacenterId));
         return remoteServices;
     }
 

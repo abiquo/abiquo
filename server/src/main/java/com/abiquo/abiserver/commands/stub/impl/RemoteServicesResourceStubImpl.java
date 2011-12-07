@@ -21,6 +21,7 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import org.jclouds.abiquo.predicates.infrastructure.RemoteServicePredicates;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
-import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -45,56 +45,34 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
 {
 
     @Override
-    @Deprecated
-    public DataResult<List<RemoteService>> getAllRemoteServices(final UserSession userSession,
-        final Integer idDataCenter)
+    public DataResult<RemoteService> addRemoteService(final RemoteService remoteService)
     {
-        DataResult<List<RemoteService>> result = new DataResult<List<RemoteService>>();
-        result.setData(new ArrayList<RemoteService>());
+        DataResult<RemoteService> result = new DataResult<RemoteService>();
 
         try
         {
-            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDataCenter);
-            List<org.jclouds.abiquo.domain.infrastructure.RemoteService> all =
-                dc.listRemoteServices();
-
-            for (org.jclouds.abiquo.domain.infrastructure.RemoteService rs : all)
-            {
-                result.getData().add(RemoteService.create(rs.unwrap(), idDataCenter));
-            }
-
+            Datacenter dc =
+                getApiClient().getAdministrationService().getDatacenter(
+                    remoteService.getIdDataCenter());
+            org.jclouds.abiquo.domain.infrastructure.RemoteService rs =
+                org.jclouds.abiquo.domain.infrastructure.RemoteService
+                    .builder(getApiClient(), dc)
+                    .ip(remoteService.getDomainName())
+                    .type(
+                        RemoteServiceType.valueOf(remoteService.getRemoteServiceType().toString()))
+                    .port(remoteService.getPort()).build();
+            rs.save();
+            result.setData(RemoteService.create(rs.unwrap(), remoteService.getIdDataCenter()));
             result.setSuccess(Boolean.TRUE);
         }
         catch (Exception ex)
         {
-            populateErrors(ex, result, "getAllRemoteServices");
+            populateErrors(ex, result, "addRemoteService");
         }
         finally
         {
             releaseApiClient();
         }
-
-        return result;
-    }
-
-    @Override
-    public DataResult<RemoteService> addRemoteService(final RemoteService remoteService)
-    {
-        DataResult<RemoteService> result = new DataResult<RemoteService>();
-
-        // TODO SCG wait for tarantino total integration and decision for remote servicemapping
-        // try
-        // {
-        // Datacenter dc =
-        // getApiClient().getAdministrationService().getDatacenter(
-        // remoteService.getIdDataCenter());
-        // org.jclouds.abiquo.domain.infrastructure.RemoteService
-        // .builder(getApiClient(), dc).ip(remoteService.getDomainName())
-        // .type(RemoteServiceType.valueFromName(remoteService.getRemoteServiceType().getName()))
-        // .build().save();
-        // }
-        // catch (Exception ex){populateErrors(ex, result, "addRemoteService");}
-        // finally{releaseApiClient();}
 
         RemoteServiceDto dto = getApiResource(remoteService);
 
@@ -262,8 +240,7 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         try
         {
             Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDatacenter);
-            // TODO implement
-            result.setData(null);
+            result.setData(dc.canUseRemoteService(RemoteServiceType.valueOf(type), new URL(uri)));
             result.setSuccess(Boolean.TRUE);
         }
         catch (Exception ex)

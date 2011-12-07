@@ -237,7 +237,5 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
 
-    public List<RESTLink> buildRemoteServicesLinks(Integer datacenterId);
-
     public List<RESTLink> buildPrivilegeListLink(PrivilegeDto privilege);
 }

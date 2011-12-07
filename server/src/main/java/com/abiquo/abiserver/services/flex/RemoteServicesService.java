@@ -97,20 +97,6 @@ public class RemoteServicesService
     }
 
     /**
-     * Lists all remote services defined for a datacenter
-     * 
-     * @param userSession
-     * @param idDataCenter
-     * @return
-     */
-    @Deprecated
-    public DataResult<List<RemoteService>> getAllRemoteServices(final UserSession userSession,
-        final Integer idDataCenter)
-    {
-        return proxyStub(userSession).getAllRemoteServices(userSession, idDataCenter);
-    }
-
-    /**
      * Checks an existing remote service's availability. The availability is saved for further
      * consults.
      * 

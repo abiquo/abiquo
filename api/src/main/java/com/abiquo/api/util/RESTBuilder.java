@@ -42,7 +42,6 @@ import com.abiquo.api.resources.MachinesResource;
 import com.abiquo.api.resources.RackResource;
 import com.abiquo.api.resources.RacksResource;
 import com.abiquo.api.resources.RemoteServiceResource;
-import com.abiquo.api.resources.RemoteServicesActionResource;
 import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.UserResource;
@@ -191,6 +190,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
+            params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -258,20 +266,6 @@ public class RESTBuilder implements IRESTBuilder
                 MachineResource.MACHINE_ACTION_POWER_OFF_REL, params));
         }
 
-        return links;
-    }
-
-    @Override
-    public List<RESTLink> buildRemoteServicesLinks(final Integer datacenterId)
-    {
-        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
-        List<RESTLink> links = new ArrayList<RESTLink>();
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(DatacenterResource.DATACENTER, datacenterId.toString());
-
-        links.add(builder.buildRestLink(RemoteServicesActionResource.class,
-            InfrastructureService.CHECK_RESOURCE, InfrastructureService.CHECK_RESOURCE, params));
         return links;
     }
 
