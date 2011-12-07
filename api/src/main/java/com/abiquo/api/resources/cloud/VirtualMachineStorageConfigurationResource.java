@@ -237,7 +237,18 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
         @NotNull final LinksDto hdRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO: apply Albert configuration changes.
+        Object result = service.changeHardDisks(vdcId, vappId, vmId, hdRefs);
+
+        // The attach method may return a Tarantino task identifier if the operation requires a
+        // reconfigure. Otherwise it will return null.
+        if (result != null)
+        {
+            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+            response.setStatusUrlLink("http://status");
+            response.setEntity(result);
+            return response;
+        }
+
         return null;
     }
 

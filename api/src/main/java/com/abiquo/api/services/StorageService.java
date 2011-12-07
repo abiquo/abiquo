@@ -25,7 +25,6 @@
 package com.abiquo.api.services;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -55,11 +54,10 @@ import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
-import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 /**
  * Implements all the business logic for storage features.
@@ -69,34 +67,7 @@ import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 @Service
 public class StorageService extends DefaultApiService
 {
-    /**
-     * Static class to specify the operation
-     * to execute for a Disk.
-     * 
-     * @author jaume.devesa@abiquo.com
-     */
-    public static class DiskOp
-    {
-        public static enum Op
-        {
-            ATTACH, DETACH
-        };
-
-        public DiskManagement disk;
-
-        public Op type;
-
-        public DiskOp(final DiskManagement disk, final Op type)
-        {
-            super();
-            this.disk = disk;
-            this.type = type;
-        }
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageService.class);
-
-    private static long MEGABYTE = 1048576;
 
     @Autowired
     protected InfrastructureRep datacenterRepo;
@@ -113,7 +84,7 @@ public class StorageService extends DefaultApiService
 
     @Autowired
     protected VirtualDatacenterRep vdcRepo;
-    
+
     @Autowired
     protected VirtualMachineService vmService;
 
@@ -122,7 +93,7 @@ public class StorageService extends DefaultApiService
     {
 
     }
-    
+
     /**
      * Auxiliar constructor for test purposes. Haters gonna hate 'bzengine'. And his creator as
      * well...
@@ -149,7 +120,7 @@ public class StorageService extends DefaultApiService
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance
      * @param vmId identifier of the virtual machine
-     * @param disks list of disks to attach.
+     * @param hdRefs list of links to disks to attach.
      * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
      *         otherwise.
      */
@@ -159,10 +130,10 @@ public class StorageService extends DefaultApiService
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
-        VirtualMachine vm = getVirtualMachine(vapp, vmId);
-        
+        VirtualMachine oldvm = getVirtualMachine(vapp, vmId);
+
+        VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        
         for (DiskManagement disk : disks)
         {
             // if the hard disk is already attached to another virtual machine
@@ -173,15 +144,15 @@ public class StorageService extends DefaultApiService
                 flushErrors();
             }
             disk.setVirtualAppliance(vapp);
-            disk.setVirtualMachine(vm);
-            disk.setAttachmentOrder(getFreeAttachmentSlot(vm));
-            
-            vm.getDisks().add(disk);
+            disk.setVirtualMachine(newvm);
+            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
+
+            newvm.getDisks().add(disk);
         }
-        
-        return vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, vm);
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
-    
+
     /**
      * Detach all the list of disks from a Virtual Machine.
      * <p>
@@ -201,10 +172,52 @@ public class StorageService extends DefaultApiService
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
-        
-        vm.getDisks().clear();
-        
-        return vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, vm);
+
+        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        newVm.getDisks().clear();
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+    }
+
+    /**
+     * Set the list of disks from a Virtual Machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object changeHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId,
+        final LinksDto hdRefs)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        VirtualMachine newvm = vmService.createBackUpObject(vm);
+        List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
+        for (DiskManagement disk : disks)
+        {
+            // if the hard disk is already attached to another virtual machine
+            // , raise a conflict error.
+            if (disk.getVirtualMachine() != null)
+            {
+                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
+                flushErrors();
+            }
+            disk.setVirtualAppliance(vapp);
+            disk.setVirtualMachine(newvm);
+            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
+        }
+        newvm.setDisks(disks);
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
     }
 
     /**
@@ -219,8 +232,7 @@ public class StorageService extends DefaultApiService
      * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
      *         otherwise.
      */
-    
-    
+
     /**
      * Creates a new resource {@link DiskManagement} associated to a virtual machine.
      * 
@@ -249,7 +261,7 @@ public class StorageService extends DefaultApiService
 
         DiskManagement disk = new DiskManagement(vdc, sizeInMb);
         validate(disk);
-        // vdcRepo.insertHardDisk(disk);
+        repo.insertHardDisk(disk);
 
         // Trace
         if (tracer != null)
@@ -297,9 +309,8 @@ public class StorageService extends DefaultApiService
         if (tracer != null)
         {
             String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of "
-                    + disk.getSizeInMb() + "MB has been deleted from VirtualDatacenter '"
-                    + vdc.getName() + "'.";
+                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
+                    + "MB has been deleted from VirtualDatacenter '" + vdc.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
                 EventType.HARD_DISK_DELETE, messageTrace);
         }
@@ -408,8 +419,8 @@ public class StorageService extends DefaultApiService
     }
 
     /**
-     * Attaches a new Hard Disk inside a Virtual Machine into Database.
-     * The disk should already be attached to the virtual machine.
+     * Attaches a new Hard Disk inside a Virtual Machine into Database. The disk should already be
+     * attached to the virtual machine.
      * 
      * @param vdcId identifier of the virtual datacenter.
      * @param vappId identifier of the virtual appliance.
@@ -418,8 +429,8 @@ public class StorageService extends DefaultApiService
      * @return the created object {@link DiskManagement}
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public DiskManagement registerHardDiskIntoVMInDatabase(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskId)
+    public DiskManagement registerHardDiskIntoVMInDatabase(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer diskId)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
@@ -475,8 +486,8 @@ public class StorageService extends DefaultApiService
      * @param diskId identifier of the disk
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void unregisterHardDiskFromVMInDatabase(final Integer vdcId, final Integer vappId, final Integer vmId,
-        final Integer diskId)
+    public void unregisterHardDiskFromVMInDatabase(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskId)
     {
 
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
@@ -506,14 +517,13 @@ public class StorageService extends DefaultApiService
         disk.setVirtualAppliance(null);
         disk.setVirtualMachine(null);
         vdcRepo.updateDisk(disk);
-        
+
         // Trace
         if (tracer != null)
         {
             String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of "
-                    + disk.getSizeInMb() + "MB has been released from virtual machine '"
-                    + vm.getName() + "'.";
+                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
+                    + "MB has been released from virtual machine '" + vm.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
                 EventType.HARD_DISK_UNASSIGN, messageTrace);
         }

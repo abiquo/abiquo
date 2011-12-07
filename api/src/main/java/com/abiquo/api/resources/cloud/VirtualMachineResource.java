@@ -153,11 +153,17 @@ public class VirtualMachineResource
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        AcceptedRequestDto request = new AcceptedRequestDto();
-        request.setStatusUrlLink(link);
-        request.setEntity(dto);
+        
+        if (link != null)
+        {
+            AcceptedRequestDto request = new AcceptedRequestDto();
+            request.setStatusUrlLink(link);
+            request.setEntity(dto);
 
-        return request;
+            return request;
+        }
+        
+        return null;
     }
 
     /**

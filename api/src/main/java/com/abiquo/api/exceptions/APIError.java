@@ -313,7 +313,8 @@ public enum APIError
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
 
     // OVF PACKAGE LIST
-    TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0", "OVF Package list name already exist"),
+    TEMPLATE_DEFINITION_LIST_NAME_ALREADY_EXIST("OVF-PACKAGE-LIST-0",
+        "OVF Package list name already exist"),
 
     // OVF PACKAGE
     NON_EXISTENT_OVF_PACKAGE("OVF-PACKAGE-0", "The requested OVF package does not exist"), NON_EXISTENT_TEMPLATE_DEFINITION_LIST(
@@ -476,11 +477,10 @@ public enum APIError
         "HD-2",
         "Disk 0 comes from the Virtual Image and can not be deleted from the Virtual Machine"), HD_INVALID_DISK_SIZE(
         "HD-3", "Invalid disk size."), HD_CURRENTLY_ALLOCATED("HD-4",
-        "Can not perform this action because hard disk is currently attached to a virtual machine"),
-        HD_ATTACH_INVALID_LINK("HD-5",
-        "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
+        "Can not perform this action because hard disk is currently attached to a virtual machine"), HD_ATTACH_INVALID_LINK(
+        "HD-5", "Invalid link to the hard disk to attach"), HD_ATTACH_INVALID_VDC_LINK("HD-6",
         "Invalid virtual datacenter in the link to the volume to attach"),
-        
+
     // Chef
     CHEF_ERROR_GETTING_RECIPES("CHEF-0",
         "Could not get the list of available recipes for the enterprise"), CHEF_ERROR_GETTING_ROLES(
@@ -500,7 +500,9 @@ public enum APIError
 
     // Parsing links
     LINKS_INVALID_LINK("LNK-0", "Invalid link. Check out documentation"), LINKS_ONLY_ACCEPTS_ONE_LINK(
-        "LNK-1", "Number of links invalid: This resource only accepts a single link"),
+        "LNK-1", "Number of links invalid: This resource only accepts a single link"), LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND(
+        "LNK-2", "Virtual Machine Template link with rel 'virtualmachinetemplate' is mandatory "), LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI(
+        "LNK-3", "Virtual Machine Template invalid link"),
 
     // CATEGORY
     NON_EXISTENT_CATEGORY("CATEGORY-1", "The requested category does not exist"), CATEGORY_DUPLICATED_NAME(

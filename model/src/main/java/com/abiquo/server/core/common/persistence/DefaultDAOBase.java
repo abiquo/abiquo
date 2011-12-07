@@ -27,14 +27,18 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.GenericEnityBase;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.bzngine.dao.hibernate.JpaHibernateDaoBase;
+import com.softwarementors.bzngine.engines.hibernate.HibernateEntityManagerHelper;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
 public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEnityBase<I>> extends
@@ -150,5 +154,22 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
         criteria.setProjection(Projections.rowCount());
 
         return (Long) criteria.uniqueResult();
+    }
+    
+    /**
+     * Overrides the bzengine getSession and
+     * adds the filters.
+     */
+    @Override
+    protected Session getSession() 
+    {
+        
+      Session session = super.getSession();
+      
+      // enable filters where not return the temporal entities.
+      session.enableFilter(VirtualMachine.NOT_TEMP);
+      session.enableFilter(RasdManagement.NOT_TEMP);
+      
+      return session;
     }
 }

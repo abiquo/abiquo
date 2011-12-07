@@ -42,6 +42,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -60,6 +65,10 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
+@FilterDefs({@FilterDef(name = VirtualMachine.NOT_TEMP),
+@FilterDef(name = VirtualMachine.ONLY_TEMP)})
+@Filters({@Filter(name = VirtualMachine.NOT_TEMP, condition = "temporal is null"),
+@Filter(name = VirtualMachine.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = VirtualMachine.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = VirtualMachine.TABLE_NAME)
 @NamedQueries({@NamedQuery(name = "VIRTUAL_MACHINE.BY_VAPP", query = VirtualMachine.BY_VAPP),
@@ -79,6 +88,11 @@ public class VirtualMachine extends DefaultEntityBase
     public static final int MANAGED = 1;
 
     public static final int NOT_MANAGED = 0;
+
+    /* Name of the filters we use to return the virtual machine temporals or not */
+    public static final String NOT_TEMP = "virtualmachine_not_temp";
+
+    public static final String ONLY_TEMP = "virtualmachine_only_temp";
 
     public VirtualMachine()
     {
@@ -557,6 +571,28 @@ public class VirtualMachine extends DefaultEntityBase
         this.password = password;
     }
 
+    public final static String TEMPORAL_PROPERTY = "temporal";
+
+    private final static String TEMPORAL_COLUMN = "temporal";
+
+    private final static int TEMPORAL_MIN = 1;
+
+    private final static int TEMPORAL_MAX = Integer.MAX_VALUE;
+
+    @Column(name = TEMPORAL_COLUMN, nullable = true)
+    @Range(min = TEMPORAL_MIN, max = TEMPORAL_MAX)
+    private Integer temporal = null;
+
+    public Integer getTemporal()
+    {
+        return this.temporal;
+    }
+
+    public void setTemporal(final Integer temporal)
+    {
+        this.temporal = temporal;
+    }
+
     /** List of disks */
     @OneToMany(cascade = CascadeType.REMOVE, targetEntity = DiskManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
@@ -571,7 +607,7 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.disks = disks;
     }
-    
+
     /** List of volumes */
     @OneToMany(cascade = CascadeType.REMOVE, targetEntity = VolumeManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
@@ -586,7 +622,7 @@ public class VirtualMachine extends DefaultEntityBase
     {
         this.volumes = volumes;
     }
-    
+
     /** List of ips */
     @OneToMany(cascade = CascadeType.REMOVE, targetEntity = IpPoolManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
@@ -642,8 +678,8 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate, final UUID uuid,
-        final Integer typeId)
+        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate,
+        final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
@@ -667,8 +703,9 @@ public class VirtualMachine extends DefaultEntityBase
 
     /**
      * This method is intended to clone a {@link VirtualMachine} that shares a reference to a
-     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} . The
-     * {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}.
+     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} .
+     * The {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}
+     * .
      * 
      * @see java.lang.Object#clone()
      */

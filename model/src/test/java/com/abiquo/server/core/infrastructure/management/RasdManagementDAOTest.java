@@ -27,10 +27,12 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Session;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineDAO;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
@@ -232,5 +234,103 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
 
         assertNotNull(disks);
         assertEquals(disks.size(), 0);
+    }
+    
+    /**
+     * Create five machines, three with the temporal value set, and two without the temporal values
+     * set. Check the default behaviour (check {@link VirtualMachine} entity filters) is to return
+     * only the ones without the temporal values.
+     */
+    @Test
+    public void findAllWithNotTemporalFilters()
+    {
+        createFiveResourcesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        
+        RasdManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<RasdManagement> all = dao.findAll();
+        assertEquals(all.size(), 2);
+    }
+    
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP}.
+     * Check the behaviour ({@link RasdManagement} entity filters) is to return
+     * all the resources.
+     * 
+     * Whatever happens, enable the filter
+     */
+    @Test
+    public void findAllWithoutFilters()
+    {
+        createFiveResourcesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        RasdManagementDAO dao = createDaoForRollbackTransaction();
+        
+        try
+        {
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(RasdManagement.NOT_TEMP);
+            List<RasdManagement> all = dao.findAll();
+            assertEquals(all.size(), 5);
+        }
+        finally
+        {
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(RasdManagement.NOT_TEMP);
+        }
+    }
+
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP} and enable the {@link RasdManagement.ONLY_TEMP} one.
+     * Check the behaviour ({@link RasdManagement} entity filters) is to return
+     * only the ones with the temporal values.
+     * 
+     * Whatever happens, enable the filter
+     */
+    @Test
+    public void findAllOnlyTempFilters()
+    {
+        createFiveResourcesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        RasdManagementDAO dao = createDaoForRollbackTransaction();
+        
+        try
+        {
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(RasdManagement.NOT_TEMP);
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(RasdManagement.ONLY_TEMP);
+            List<RasdManagement> all = dao.findAll();
+            assertEquals(all.size(), 3);
+        }
+        finally
+        {
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(RasdManagement.NOT_TEMP);
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(RasdManagement.ONLY_TEMP);
+        }
+    }
+    
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set.
+     */
+    private void createFiveResourcesWithTemporalAndNotTemporalValueSetAndPersistThem()
+    {
+        RasdManagement rm1 = eg().createUniqueInstance();
+        rm1.setTemporal(23);
+        List<Object> resourceList = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(rm1, resourceList);
+
+        RasdManagement rm2 = eg().createUniqueInstance();
+        rm2.setTemporal(24);
+        eg().addAuxiliaryEntitiesToPersist(rm2, resourceList);
+
+        RasdManagement rm3 = eg().createUniqueInstance();
+        rm3.setTemporal(35);
+        eg().addAuxiliaryEntitiesToPersist(rm3, resourceList);
+
+        RasdManagement rm4 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm4, resourceList);
+
+        RasdManagement rm5 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm5, resourceList);
+
+        persistAll(ds(), resourceList, rm1, rm2, rm3, rm4, rm5);
     }
 }

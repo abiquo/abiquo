@@ -49,6 +49,8 @@ import com.abiquo.server.core.util.network.IPNetworkRang;
 public class PrivateNetworkResource extends AbstractResource
 {
     public static final String PRIVATE_NETWORK = "privatenetwork";
+    
+    public static final String PRIVATE_IP = "privateip";
 
     public static final String PRIVATE_NETWORK_PARAM = "{" + PRIVATE_NETWORK + "}";
 

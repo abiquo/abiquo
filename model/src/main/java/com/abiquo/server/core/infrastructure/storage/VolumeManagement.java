@@ -107,7 +107,7 @@ public class VolumeManagement extends RasdManagement
 
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
-    protected VolumeManagement()
+    public VolumeManagement()
     {
         // Just for JPA support
     }
@@ -214,7 +214,7 @@ public class VolumeManagement extends RasdManagement
         return this.idScsi;
     }
 
-    private void setIdScsi(final String idScsi)
+    public void setIdScsi(final String idScsi)
     {
         this.idScsi = idScsi;
         getRasd().setConnection(idScsi);
@@ -239,7 +239,7 @@ public class VolumeManagement extends RasdManagement
     }
 
     // Must not be used. Use the state change methods
-    private void setState(final VolumeState state)
+    public void setState(final VolumeState state)
     {
         this.state = state;
     }
