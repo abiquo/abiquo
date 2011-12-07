@@ -257,7 +257,9 @@ public enum APIError
         "The virtual image have some compatible conversion but aren't ready (in progress or failed)"), VIRTUAL_MACHINE_MUST_BE_NON_MANAGED(
         "VM-20", "To perform this action, the virtual machine must be in NON_MANAGED state"), NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS(
         "VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
-        "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"),
+        "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"), VIRTUAL_MACHINE_BACKUP_NOT_FOUND(
+        "VM-23",
+        "Can't restore the original virtual machine (after a failed reconfigure), the original virutual machine info was not found."),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(

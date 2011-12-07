@@ -22,6 +22,8 @@
 package com.abiquo.api.services.cloud;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,6 +72,12 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.management.RasdDAO;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -110,7 +118,7 @@ public class VirtualMachineService extends DefaultApiService
     private InfrastructureRep infRep;
 
     @Autowired
-    private AppsLibraryRep appsLibRep;
+    protected AppsLibraryRep appsLibRep;
 
     @Autowired
     private TarantinoService tarantino;
@@ -145,6 +153,9 @@ public class VirtualMachineService extends DefaultApiService
         this.appsLibRep = new AppsLibraryRep(em);
         this.tarantino = new TarantinoService(em);
         this.jobCreator = new TarantinoJobCreator(em);
+
+        //
+        this.rasdDao = new RasdManagementDAO(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -1168,5 +1179,91 @@ public class VirtualMachineService extends DefaultApiService
     {
         virtualMachine.setState(VirtualMachineState.UNKNOWN);
         repo.update(virtualMachine);
+    }
+
+    /**
+     * Gets the temporally backup of the {@link VirtualMachine} (in order to restore its values).
+     */
+    public VirtualMachine getBackupVirtualMachine(final VirtualMachine vmachine)
+    {
+        // FIXME deactivate the filter
+        VirtualMachine vmbackup = null;// FIXME repo.get
+
+        if (vmbackup == null)
+        {
+            addNotFoundErrors(APIError.VIRTUAL_MACHINE_BACKUP_NOT_FOUND);
+            flushErrors();
+        }
+
+        return vmbackup;
+    }
+
+    @Autowired
+    protected RasdManagementDAO rasdDao;
+
+    /**
+     * 
+     * */
+    public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
+        final VirtualMachine rollbackVm)
+    {
+
+        // backup virtual machine properties
+        updatedVm.setCpu(rollbackVm.getCpu());
+        updatedVm.setDatastore(rollbackVm.getDatastore());
+        updatedVm.setDescription(rollbackVm.getDescription());
+        updatedVm.setEnterprise(rollbackVm.getEnterprise());
+        updatedVm.setHdInBytes(rollbackVm.getHdInBytes());
+        updatedVm.setHighDisponibility(rollbackVm.getHighDisponibility());
+        updatedVm.setHypervisor(rollbackVm.getHypervisor());
+        updatedVm.setIdType(rollbackVm.getIdType());
+        updatedVm.setName(rollbackVm.getName());
+        updatedVm.setPassword(rollbackVm.getPassword());
+        updatedVm.setRam(rollbackVm.getRam());
+        // updatedVm.setState(VirtualMachineState.LOCKED);
+        updatedVm.setSubState(rollbackVm.getSubState());
+        updatedVm.setUser(rollbackVm.getUser());
+        updatedVm.setUuid(rollbackVm.getUuid());
+        updatedVm.setVdrpIP(rollbackVm.getVdrpIP());
+        updatedVm.setVdrpPort(rollbackVm.getVdrpPort());
+        updatedVm.setVirtualImageConversion(rollbackVm.getVirtualImageConversion());
+        updatedVm.setVirtualMachineTemplate(rollbackVm.getVirtualMachineTemplate());
+
+        List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
+        // List<VolumeManagement> updatedVolumes = updatedVm.getv
+        // List<DiskManagement> updatedDisks = updatedVm.getDisks();
+        // List<IpPoolManagement> updatedIps = updatedVm.geti
+
+        // TODO update filters
+        List<RasdManagement> rollbackResources = rollbackVm.getRasdManagements();
+        // List<VolumeManagement> rollbackVolumes = rollbackVm.getv
+        // List<DiskManagement> rollbackDisks = rollbackVm.getDisks();
+        // List<IpPoolManagement> rollbackIps = rollbackVm.geti
+        // TODO restore default filters
+
+        //
+        List<RasdManagement> effectiveResources = new LinkedList<RasdManagement>();
+
+        for (RasdManagement resoruceRollback : rollbackResources)
+        {
+            if (resoruceRollback.isValid()) // FIXME isTemporal
+            {
+
+                rasdDao.remove(resoruceRollback.getTemporal());
+            }
+            else
+            {
+                effectiveResources.add(resoruceRollback);
+            }
+        }
+
+        updatedVm.setRasdManagements(effectiveResources);
+
+        repo.update(updatedVm); // remove orphans !!!
+        repo.deleteVirtualMachine(rollbackVm);
+
+        // TODO check temporal not set in updatedVm
+
+        return updatedVm;
     }
 }

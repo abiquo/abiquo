@@ -53,7 +53,10 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -570,6 +573,25 @@ public class VirtualMachine extends DefaultEntityBase
         this.disks = disks;
     }
 
+    /**
+     * List all {@link RasdManagement} (including {@link DiskManagement}, {@link IpPoolManagement}
+     * and {@link VolumeManagement} )
+     */
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, targetEntity = RasdManagement.class)
+    private List<RasdManagement> rasdManagements;
+
+    public List<RasdManagement> getRasdManagements()
+    {
+        return rasdManagements;
+    }
+
+    public void setRasdManagements(final List<RasdManagement> rasdManagements)
+    {
+        this.rasdManagements = rasdManagements;
+    }
+
+    /* CHEF runlist */
+
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";
 
     public static final String CHEF_RUNLIST_PROPERTY = "runlist";
@@ -610,8 +632,8 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
-        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate, final UUID uuid,
-        final Integer typeId)
+        final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate,
+        final UUID uuid, final Integer typeId)
     {
         setName(name);
         setEnterprise(enterprise);
@@ -635,8 +657,9 @@ public class VirtualMachine extends DefaultEntityBase
 
     /**
      * This method is intended to clone a {@link VirtualMachine} that shares a reference to a
-     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} . The
-     * {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}.
+     * {@link Datastore}, {@link Enterprise}, {@link User} and the {@link VirtualMachineTemplate} .
+     * The {@link Datastore} and the {@link Enterprise} are not editable in a {@link VirtualMachine}
+     * .
      * 
      * @see java.lang.Object#clone()
      */
