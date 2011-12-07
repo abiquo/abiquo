@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
 import com.abiquo.vsm.client.VSMClient;
 
 /**
+ * {@link GenericObjectPool} for VSMClient.
+ * 
  * @author enric.ruiz@abiquo.com
  */
 @Component(value = "vSMClientPool")
