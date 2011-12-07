@@ -56,6 +56,7 @@ import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -452,7 +453,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
 
-        params.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, templateDefinitionList.getId().toString());
+        params.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, templateDefinitionList
+            .getId().toString());
 
         links.add(builder.buildRestLink(TemplateDefinitionListResource.class, REL_EDIT, params));
 
@@ -475,7 +477,8 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(CategoryResource.class, null, CategoryResource.CATEGORY,
             category.getName(), params));
 
-        params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId().toString());
+        params.put(TemplateDefinitionResource.TEMPLATE_DEFINITION, templateDefinition.getId()
+            .toString());
         links.add(builder.buildRestLink(TemplateDefinitionResource.class, REL_EDIT, params));
 
         if (icon != null)
@@ -782,12 +785,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterRepositoryResource.class, REL_EDIT, params));
         links.add(builder.buildRestLink(VirtualMachineTemplatesResource.class,
             VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH, params));
+        links.add(builder.buildRestLink(DatacenterRepositoryResource.class,
+            DatacenterRepositoryResource.DATACENTER_REPOSITORY_REFRESH_PATH, "refresh", params));
 
         return links;
     }
 
-    protected List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId, final Integer dcId,
-        final VirtualMachineTemplate vmtemplate, final VirtualMachineTemplate master, final AbiquoLinkBuilder builder)
+    protected List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
+        final Integer dcId, final VirtualMachineTemplate vmtemplate,
+        final VirtualMachineTemplate master, final AbiquoLinkBuilder builder)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
 
@@ -812,8 +818,10 @@ public class RESTBuilder implements IRESTBuilder
         categoryLink.setTitle(vmtemplate.getCategory().getName());
         links.add(categoryLink);
 
-        params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, vmtemplate.getId().toString());
-        RESTLink vmtemplateLink = builder.buildRestLink(VirtualMachineTemplateResource.class, REL_EDIT, params);
+        params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, vmtemplate.getId()
+            .toString());
+        RESTLink vmtemplateLink =
+            builder.buildRestLink(VirtualMachineTemplateResource.class, REL_EDIT, params);
         vmtemplateLink.setTitle(vmtemplate.getName());
         links.add(vmtemplateLink);
 
@@ -833,7 +841,8 @@ public class RESTBuilder implements IRESTBuilder
             // Master's enterprise may differ from the current virtual machine template.
             // Datacenter repository id will be the same (the id of the datacenter)
             params.put(EnterpriseResource.ENTERPRISE, master.getEnterprise().getId().toString());
-            params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, master.getId().toString());
+            params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, master.getId()
+                .toString());
             RESTLink masterLink =
                 builder.buildRestLink(VirtualMachineTemplateResource.class, "master", params);
             masterLink.setTitle(master.getName());
@@ -844,8 +853,9 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
-    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId, final Integer dcId,
-        final VirtualMachineTemplate template, final VirtualMachineTemplate master)
+    public List<RESTLink> buildVirtualMachineTemplateLinks(final Integer enterpriseId,
+        final Integer dcId, final VirtualMachineTemplate template,
+        final VirtualMachineTemplate master)
     {
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         return buildVirtualMachineTemplateLinks(enterpriseId, dcId, template, master, builder);
@@ -860,7 +870,8 @@ public class RESTBuilder implements IRESTBuilder
         Map<String, String> params = new HashMap<String, String>();
         params.put(EnterpriseResource.ENTERPRISE, enterpriseId.toString());
         params.put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, dcId.toString());
-        params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, virtualMachineTemplateId.toString());
+        params.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE,
+            virtualMachineTemplateId.toString());
 
         return builder.buildRestLink(VirtualMachineTemplateResource.class,
             VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, params);
@@ -1270,8 +1281,18 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildVirtualDatacenterDiskLinks(final DiskManagement disk)
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, disk.getVirtualDatacenter()
+            .getId().toString());
+        params.put(DiskResource.DISK, disk.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+        links.add(builder.buildRestLink(DiskResource.class, REL_EDIT, params));
+
+        return links;
     }
 
     @Override

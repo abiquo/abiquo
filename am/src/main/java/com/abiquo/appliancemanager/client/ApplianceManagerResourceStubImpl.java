@@ -55,7 +55,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
     private void checkResponse(final ClientResponse response)
     {
         final Integer httpStatus = response.getStatusCode();
-        if (httpStatus / 200 != 1)
+        if (httpStatus != 200)
         {
             String cause = null;
             try

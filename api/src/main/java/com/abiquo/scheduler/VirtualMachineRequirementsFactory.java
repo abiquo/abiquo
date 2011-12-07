@@ -44,7 +44,7 @@ public class VirtualMachineRequirementsFactory
     }
 
     public VirtualMachineRequirements createVirtualMachineRequirements(
-        final VirtualMachine vmachine, final VirtualMachineDto newVmRequirements)
+        final VirtualMachine vmachine, final VirtualMachine newVmRequirements)
     {
         long cpu = (long) newVmRequirements.getCpu() - vmachine.getCpu();
         long ram = (long) newVmRequirements.getRam() - vmachine.getRam();
