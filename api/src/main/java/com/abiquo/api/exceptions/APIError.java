@@ -134,7 +134,7 @@ public enum APIError
         "The requested IP object does not exist"), VLANS_IP_EDIT_INVALID_VALUES("VLAN-18",
         "Only 'quarantine' and 'available' attributes can be modified when editing an IP"), VLANS_PUBLIC_EDIT_INVALID_VALUES(
         "VLAN-19",
-        "Attributes 'address' and 'mask' can not be changed by the Edit process of public VLAN."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
+        "Attributes 'address' and 'mask' cannot be changed by the edit process of Public, External and Unmanaged Network."), VLANS_PUBLIC_IP_NOT_TO_BE_PURCHASED(
         "VLAN-20", "The IP does not exist or is not available"), VLANS_PUBLIC_IP_NOT_PURCHASED(
         "VLAN-21", "The IP does not exist or is not purchased"), VLANS_PUBLIC_IP_BUSY("VLAN-22",
         "This IP address is currently used by a Virtual Machine. Can not be released"), VLANS_PRIVATE_IP_INVALID_LINK(
@@ -171,7 +171,8 @@ public enum APIError
         "VLAN-45",
         "Cannot change enterprise because this network is used as default by Virtual Datacenter"), VLANS_NOT_UNMANAGED(
         "VLAN-46", "The virtual network is not Unmanaged "), VLANS_UNMANAGED_WITH_VM_CAN_NOT_BE_DELETED(
-        "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"),
+        "VLAN-47", "Cannot delete Unmanaged Networks associated with Virtual Machines"), VLANS_MISSING_ENTERPRISE_LINK(
+        "VLAN-48", "Missing link to the enterprise"),
 
     // VIRTUAL APPLIANCE
     NON_EXISTENT_VIRTUALAPPLIANCE("VAPP-0", "The requested virtual appliance does not exist"), VIRTUALAPPLIANCE_NOT_DEPLOYED(
