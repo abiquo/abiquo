@@ -37,6 +37,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.GenericEnityBase;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.bzngine.dao.hibernate.JpaHibernateDaoBase;
 import com.softwarementors.bzngine.engines.hibernate.HibernateEntityManagerHelper;
 import com.softwarementors.bzngine.entities.PersistentEntity;
@@ -168,7 +171,9 @@ public abstract class DefaultDAOBase<I extends Serializable, T extends GenericEn
       
       // enable filters where not return the temporal entities.
       session.enableFilter(VirtualMachine.NOT_TEMP);
-      session.enableFilter(RasdManagement.NOT_TEMP);
+      session.enableFilter(VolumeManagement.NOT_TEMP);
+      session.enableFilter(IpPoolManagement.NOT_TEMP);
+      session.enableFilter(DiskManagement.NOT_TEMP);
       
       return session;
     }

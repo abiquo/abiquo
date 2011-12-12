@@ -31,6 +31,8 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.abiquo.model.util.redis.RedisDAOTestBase;
+
 import redis.clients.jedis.Transaction;
 
 public class JobDAOTest extends RedisDAOTestBase

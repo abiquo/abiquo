@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 
 import redis.clients.jedis.Transaction;
 
+import com.abiquo.model.util.redis.RedisDAOTestBase;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 public class TaskDAOTest extends RedisDAOTestBase

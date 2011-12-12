@@ -240,26 +240,6 @@ public class VirtualDatacenterResourceIT extends AbstractJpaGeneratorIT
         assertErrors(response, 409, APIError.VIRTUAL_DATACENTER_CONTAINS_RESOURCES);
     }
 
-    @Test(groups = {NETWORK_INTEGRATION_TESTS})
-    public void deleteVirtualDatacenterWithIps()
-    {
-        VirtualDatacenter vdc = vdcGenerator.createUniqueInstance();
-        IpPoolManagement ip = ipGenerator.createInstance(vdc, vdc.getNetwork());
-        RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.DHCP_SERVICE,
-                vdc.getDatacenter());
-
-        List<Object> entitiesToPersist = new ArrayList<Object>();
-        ipGenerator.addAuxiliaryEntitiesToPersist(ip, entitiesToPersist);
-        entitiesToPersist.add(ip);
-
-        setup(entitiesToPersist.toArray());
-
-        ClientResponse response =
-            delete(resolveVirtualDatacenterURI(vdc.getId()), SYSADMIN, SYSADMIN);
-        assertEquals(response.getStatusCode(), 204);
-    }
-
     // TESTS refered to the action of GET IPs by VDC
 
     /**

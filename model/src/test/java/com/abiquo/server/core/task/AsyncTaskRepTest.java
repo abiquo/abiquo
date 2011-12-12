@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.abiquo.model.util.redis.RedisRepoTestBase;
 import com.abiquo.server.core.task.enums.TaskOwnerType;
 
 public class AsyncTaskRepTest extends RedisRepoTestBase
