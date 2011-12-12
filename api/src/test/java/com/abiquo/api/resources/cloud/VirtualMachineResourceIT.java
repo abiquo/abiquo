@@ -108,7 +108,6 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
 
     private static final int CLIENT_TIMEOUT = 1000000000; // DEBUG
 
-
     static RestClient client;
 
     final static Logger LOGGER = LoggerFactory.getLogger(VirtualMachineResourceIT.class);
@@ -179,7 +178,6 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
     {
         super.tearDown();
     }
-
 
     @Test(groups = "redisaccess")
     public void test_redisBackedTasks()
@@ -379,9 +377,11 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
             "edit");
         assertLinkExist(
             vmDto,
-            resolveVirtualMachineTemplateURI(vm.getVirtualMachineTemplate().getEnterprise().getId(), vm
-                .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm.getVirtualMachineTemplate()
-                .getId()), VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
+            resolveVirtualMachineTemplateURI(
+                vm.getVirtualMachineTemplate().getEnterprise().getId(), vm
+                    .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm
+                    .getVirtualMachineTemplate().getId()),
+            VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
 
@@ -394,9 +394,10 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
             "edit");
         assertLinkExist(
             vmDto,
-            resolveVirtualMachineTemplateURI(vm2.getVirtualMachineTemplate().getEnterprise().getId(), vm2
-                .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm2.getVirtualMachineTemplate()
-                .getId()), VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
+            resolveVirtualMachineTemplateURI(vm2.getVirtualMachineTemplate().getEnterprise()
+                .getId(), vm2.getVirtualMachineTemplate().getRepository().getDatacenter().getId(),
+                vm2.getVirtualMachineTemplate().getId()),
+            VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
     }
@@ -675,8 +676,6 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
-
-
     /**
      * Trace related
      */
@@ -840,7 +839,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
 
         RemoteService rs =
-            remoteServiceGenerator.createInstance(RemoteServiceType.VIRTUAL_FACTORY, datacenter);
+            remoteServiceGenerator.createInstance(RemoteServiceType.TARANTINO, datacenter);
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(datacenter);

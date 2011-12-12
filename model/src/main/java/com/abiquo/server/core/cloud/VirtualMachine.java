@@ -46,7 +46,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.FilterDefs;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -58,6 +57,7 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -641,6 +641,24 @@ public class VirtualMachine extends DefaultEntityBase
     public void setIps(final List<IpPoolManagement> ips)
     {
         this.ips = ips;
+    }
+
+    /**
+     * List all {@link RasdManagement} (including {@link DiskManagement}, {@link IpPoolManagement}
+     * and {@link VolumeManagement} )
+     */
+    // do not orphanRemoval = true,
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
+    private List<RasdManagement> rasdManagements;
+
+    public List<RasdManagement> getRasdManagements()
+    {
+        return rasdManagements;
+    }
+
+    public void setRasdManagements(final List<RasdManagement> rasdManagements)
+    {
+        this.rasdManagements = rasdManagements;
     }
 
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";

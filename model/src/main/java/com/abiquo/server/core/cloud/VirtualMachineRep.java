@@ -227,4 +227,8 @@ public class VirtualMachineRep extends DefaultRepBase
         nodeVirtualImageDAO.remove(nodeVirtualImage);
     }
 
+    public VirtualMachine findBackup(final VirtualMachine vmachine)
+    {
+        return dao.findBackup(vmachine);
+    }
 }
