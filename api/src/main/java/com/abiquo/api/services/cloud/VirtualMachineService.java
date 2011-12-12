@@ -1334,6 +1334,9 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
+        Integer entId = null;
+        Integer dcId = null;
+        Integer templId = null;
         try
         {
             MultivaluedMap<String, String> pathValues =
@@ -1348,14 +1351,13 @@ public class VirtualMachineService extends DefaultApiService
                 throw new BadRequestException(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI);
             }
 
-            Integer entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
-            Integer dcId =
+            entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
+            dcId =
                 Integer.valueOf(pathValues
                     .getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
-            Integer templId =
+            templId =
                 Integer.valueOf(pathValues
                     .getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
-            return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);
         }
         catch (Exception e)
         {
@@ -1364,10 +1366,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
-        // it will never catch here, but flushErrors doesn't guarantee the thrown of an exception
-        // at compile time.
-        return null;
-
+        return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);
     }
 
     /**
