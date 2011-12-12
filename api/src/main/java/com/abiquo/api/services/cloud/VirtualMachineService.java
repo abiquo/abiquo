@@ -502,11 +502,11 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
         repo.deleteNodeVirtualImage(nodeVirtualImage);
         LOGGER.trace("Deleted node virtual image!");
-        logger.trace("Deleted node virtual image!");
+        LOGGER.trace("Deleted node virtual image!");
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        logger.debug("Detached the virtual machine's volumes with UUID {}",
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
@@ -1347,6 +1347,9 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         
+        Integer entId = null;
+        Integer dcId = null;
+        Integer templId = null;
         try
         {
             MultivaluedMap<String, String> pathValues =
@@ -1361,10 +1364,9 @@ public class VirtualMachineService extends DefaultApiService
                 throw new BadRequestException(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI);
             }
             
-            Integer entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
-            Integer dcId = Integer.valueOf(pathValues.getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
-            Integer templId = Integer.valueOf(pathValues.getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
-            return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);
+            entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
+            dcId = Integer.valueOf(pathValues.getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
+            templId = Integer.valueOf(pathValues.getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
         }
         catch(Exception e)
         {
@@ -1373,10 +1375,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         
-        // it will never catch here, but flushErrors doesn't guarantee the thrown of an exception
-        // at compile time.
-        return null;
-        
+        return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);       
     }
 
     /**

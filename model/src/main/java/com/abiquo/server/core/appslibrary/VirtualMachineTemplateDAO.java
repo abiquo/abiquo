@@ -46,7 +46,8 @@ import com.abiquo.server.core.infrastructure.storage.StoragePool;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 @Repository("jpaVirtualMachineTemplateDAO")
-/* package */class VirtualMachineTemplateDAO extends DefaultDAOBase<Integer, VirtualMachineTemplate>
+/* package */class VirtualMachineTemplateDAO extends
+    DefaultDAOBase<Integer, VirtualMachineTemplate>
 {
     public VirtualMachineTemplateDAO()
     {
@@ -164,6 +165,7 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
     public List<VirtualMachineTemplate> findStatefulsByDatacenter(final Datacenter datacenter)
     {
+
         Criteria crit = criteriaWithStatefulNavigation();
         crit.add(statefulVirtualMachineTemplate());
         crit.add(sameStatefulDatacenter(datacenter));
@@ -171,8 +173,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return getResultList(crit);
     }
 
-    public List<VirtualMachineTemplate> findStatefulsByCategoryAndDatacenter(final Category category,
-        final Datacenter datacenter)
+    public List<VirtualMachineTemplate> findStatefulsByCategoryAndDatacenter(
+        final Category category, final Datacenter datacenter)
     {
         Criteria crit = criteriaWithStatefulNavigation();
         crit.add(statefulVirtualMachineTemplate());
@@ -257,8 +259,8 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     private Criteria criteriaWithStatefulNavigation()
     {
         Criteria crit = createCriteria();
-        crit.createAlias(VirtualMachineTemplate.VOLUME_PROPERTY, "volume");
-        crit.createAlias("volume." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
+        crit.createAlias(VirtualMachineTemplate.VOLUME_PROPERTY, "vl");
+        crit.createAlias("vl." + VolumeManagement.STORAGE_POOL_PROPERTY, "pool");
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
         return crit;
     }

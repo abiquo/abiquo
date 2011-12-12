@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.Session;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,6 +39,7 @@ import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.softwarementors.bzngine.engines.jpa.test.configuration.EntityManagerFactoryForTesting;
 import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 
@@ -249,5 +251,103 @@ public class VolumeManagementDAOTest extends
         VolumeManagement vol = dao.getVolumeByRasd(rasd);
 
         eg().assertAllPropertiesEqual(vol, volume);
+    }
+    
+    /**
+     * Create five machines, three with the temporal value set, and two without the temporal values
+     * set. Check the default behaviour (check {@link VirtualMachine} entity filters) is to return
+     * only the ones without the temporal values.
+     */
+    @Test
+    public void findAllWithNotTemporalFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+
+        List<VolumeManagement> all = dao.findAll();
+        assertEquals(all.size(), 2);
+    }
+    
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP}.
+     * Check the behaviour ({@link RasdManagement} entity filters) is to return
+     * all the resources.
+     * 
+     * Whatever happens, enable the filter
+     */
+    @Test
+    public void findAllWithoutFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+        
+        try
+        {
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(VolumeManagement.NOT_TEMP);
+            List<VolumeManagement> all = dao.findAll();
+            assertEquals(all.size(), 5);
+        }
+        finally
+        {
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(VolumeManagement.NOT_TEMP);
+        }
+    }
+
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set. Disable the filter {@link RasdManagement.NOT_TEMP} and enable the {@link RasdManagement.ONLY_TEMP} one.
+     * Check the behaviour ({@link RasdManagement} entity filters) is to return
+     * only the ones with the temporal values.
+     * 
+     * Whatever happens, enable the filter
+     */
+    @Test
+    public void findAllOnlyTempFilters()
+    {
+        createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem();
+        VolumeManagementDAO dao = createDaoForRollbackTransaction();
+        
+        try
+        {
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(VolumeManagement.NOT_TEMP);
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(VolumeManagement.ONLY_TEMP);
+            List<VolumeManagement> all = dao.findAll();
+            assertEquals(all.size(), 3);
+        }
+        finally
+        {
+            ((Session) dao.getEntityManager().getDelegate()).enableFilter(VolumeManagement.NOT_TEMP);
+            ((Session) dao.getEntityManager().getDelegate()).disableFilter(VolumeManagement.ONLY_TEMP);
+        }
+    }
+    
+    /**
+     * Create five resources, three with the temporal value set, and two without the temporal values
+     * set.
+     */
+    private void createFiveVolumesWithTemporalAndNotTemporalValueSetAndPersistThem()
+    {
+        VolumeManagement rm1 = eg().createUniqueInstance();
+        rm1.setTemporal(23);
+        List<Object> resourceList = new ArrayList<Object>();
+        eg().addAuxiliaryEntitiesToPersist(rm1, resourceList);
+
+        VolumeManagement rm2 = eg().createUniqueInstance();
+        rm2.setTemporal(24);
+        eg().addAuxiliaryEntitiesToPersist(rm2, resourceList);
+
+        VolumeManagement rm3 = eg().createUniqueInstance();
+        rm3.setTemporal(35);
+        eg().addAuxiliaryEntitiesToPersist(rm3, resourceList);
+
+        VolumeManagement rm4 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm4, resourceList);
+
+        VolumeManagement rm5 = eg().createUniqueInstance();
+        eg().addAuxiliaryEntitiesToPersist(rm5, resourceList);
+
+        persistAll(ds(), resourceList, rm1, rm2, rm3, rm4, rm5);
     }
 }

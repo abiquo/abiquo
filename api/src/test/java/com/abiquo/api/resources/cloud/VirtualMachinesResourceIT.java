@@ -326,14 +326,15 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createVirtualMachineSharedVirtualMachineTemplateDifferentEnterprise()
     {
-        Enterprise otherEnt = enterpriseGenerator.createUniqueInstance();
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        
+        DatacenterLimits otherDcLimits = datacenterLimitsGenerator.createInstance(datacenter);
+        Enterprise otherEnt = otherDcLimits.getEnterprise();
         VirtualMachineTemplate otherVmtemplate =
             virtualMachineTemplateGenerator.createInstance(otherEnt, datacenter);
         otherVmtemplate.setShared(true);
-
-        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
-            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
-        setup(otherEnt, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
+        setup(otherEnt, otherDcLimits, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
             otherVmtemplate);
 
         IPAddress ip =
@@ -387,7 +388,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
      * Attempts to create a virtual machine using a malformed vmtemplate link
      */
     @Test
-    public void createVirtualMachine404VirtualMachineTemplateMissingLink()
+    public void createVirtualMachine400VirtualMachineTemplateInvalidLink()
     {
         setup(ent, datacenter, dcallowed, vdc.getNetwork(),
             vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
@@ -405,7 +406,7 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     /**
