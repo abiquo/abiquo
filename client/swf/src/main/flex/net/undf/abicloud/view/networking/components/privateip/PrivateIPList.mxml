@@ -157,7 +157,7 @@
                 }
 
 
-                if (event != null)
+                if (event != null && this.visible)
                 {
                     event.listRequest = listRequest;
                     event.callback = setPrivateIPs;
@@ -322,8 +322,7 @@
             minimum="1" snapInterval="1"
             maximum="{int(Math.ceil(totalNumIPs / IP_RESULTS_PER_PAGE))}"
             liveDragging="true" showDataTip="false"
-            change="onChangeIpPaginator()"
-            mouseDown="onMouseDownIpPaginator()"/>
+            change="onChangeIpPaginator()"/>
     </mx:Canvas>
 
 </mx:VBox>
