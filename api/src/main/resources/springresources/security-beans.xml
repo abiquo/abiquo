@@ -163,6 +163,9 @@
         <security:intercept-url pattern="/admin/datacenters/*/action/discoversingle" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/discovermultiple" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/hypervisor" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/checkremoteservice" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/checkmachinestate" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
+        <security:intercept-url pattern="/admin/datacenters/*/action/checkmachineipmi" method="GET" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <security:intercept-url pattern="/admin/datacenters/*/action/updateusedresources" method="PUT" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
         <!-- RACKS -->
         <security:intercept-url pattern="/admin/datacenters/*/racks" method="POST" access="ROLE_PHYS_DC_ALLOW_MODIFY_SERVERS" />
@@ -238,6 +241,7 @@
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices" method="POST" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices" method="GET" access="ROLE_PHYS_DC_ENUMERATE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices" method="OPTIONS" access="ROLE_AUTHENTICATED" />
+        <security:intercept-url pattern="/admin/datacenters/*/remoteservices/action/check" method="GET" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/*" method="GET" access="ROLE_PHYS_DC_RETRIEVE_DETAILS" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/*" method="DELETE" access="ROLE_PHYS_DC_MANAGE" />
         <security:intercept-url pattern="/admin/datacenters/*/remoteservices/*" method="OPTIONS" access="ROLE_AUTHENTICATED" />

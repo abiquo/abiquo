@@ -45,6 +45,7 @@ import com.abiquo.vsm.model.transport.VirtualMachinesDto;
  * Client stub to connect to the VSM module.
  * 
  * @author ibarrera
+ * @author enric.ruiz@abiquo.com
  */
 public class VSMClient
 {

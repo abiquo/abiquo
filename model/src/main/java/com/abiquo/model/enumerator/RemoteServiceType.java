@@ -121,7 +121,7 @@ public enum RemoteServiceType
     {
         for (RemoteServiceType element : RemoteServiceType.values())
         {
-            if (name.replaceAll("_", "").equalsIgnoreCase(element.toString().replaceAll("_", "")))
+            if (name.replaceAll("_", "").equalsIgnoreCase(element.name().replaceAll("_", "")))
             {
                 return element;
             }

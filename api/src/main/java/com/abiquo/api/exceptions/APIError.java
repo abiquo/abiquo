@@ -298,18 +298,19 @@ public enum APIError
         "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",
         "This datacenter already has a storage pool assigned"), REMOTE_SERVICE_TYPE_EXISTS("RS-6",
         "This datacenter already has a remote service of that type"), REMOTE_SERVICE_CONNECTION_FAILED(
-        "RS-7", "Failed connection to the remote service"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
+        "RS-7", "Failed connection to the remote service"), REMOTE_SERVICE_CANNOT_BE_CHECKED(
+        "RS-8", "This remote service is not avilable to be checked"), APPLIANCE_MANAGER_REPOSITORY_ALREADY_DEFINED(
         "AM-0",
         "The repository exported by the current appliance manager is being used in another datacenter"), APPLIANCE_MANAGER_REPOSITORY_IN_USE(
         "AM-1",
         "The current repository holds virtual images being used on some virtual appliances, so it is not possible to remove this remote service. You can modify the appliance manager but only if the same repository is used."), REMOTE_SERVICE_STORAGE_REMOTE_WITH_POOLS(
-        "RS-8", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
-        "RS-9",
+        "RS-9", "Cannot delete a storage manager with associated storage pools"), REMOTE_SERVICE_IS_BEING_USED(
+        "RS-10",
         "Cannot delete a Virtual System Monitor or DHCP Service. There are virtual machines deployed."), REMOTE_SERVICE_WRONG_URL(
-        "RS-10", "Provided URL is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-11",
-        "The DHCP uri is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-12",
+        "RS-11", "Provided URL is not valid"), REMOTE_SERVICE_DHCP_WRONG_URI("RS-12",
+        "The DHCP uri is invalid"), REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND("RS-13",
         "The remote service haven't the *abiquo.datacenter.id* property set"), REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT(
-        "RS-13",
+        "RS-14",
         "The remote service is configured with a different datacenter UUID, please adjust the *abiquo.datacenter.id* property in the remote service."),
 
     // OVF PACKAGE LIST

@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.common;
+package com.abiquo.model.util.redis;
 
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
@@ -28,7 +28,8 @@ import redis.clients.jedis.JedisPool;
 
 public class JedisPoolForTesting extends JedisPool
 {
-    public final int DB_TEST_NUMBER = 1;
+    public final int REDIS_DB_TEST_NUMBER = Integer.valueOf(System.getProperty(
+        "abiquo.test.redis.db", "1"));
 
     public JedisPoolForTesting(Config poolConfig, String host, int port, int timeout,
         String password)
@@ -60,7 +61,7 @@ public class JedisPoolForTesting extends JedisPool
     public Jedis getResource()
     {
         Jedis jedis = super.getResource();
-        jedis.select(DB_TEST_NUMBER);
+        jedis.select(REDIS_DB_TEST_NUMBER);
 
         return jedis;
     }

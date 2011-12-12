@@ -191,6 +191,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
+            params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -484,8 +493,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
 
         }
 
@@ -1253,8 +1262,8 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineStorageConfigurationResource.DISK, String.valueOf(disk
-            .getAttachmentOrder()));
+        params.put(VirtualMachineStorageConfigurationResource.DISK,
+            String.valueOf(disk.getAttachmentOrder()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
