@@ -1386,7 +1386,9 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.remoteServicesService}"
             method="checkRemoteService"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService.idRemoteService]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.dataCenter.id,
+            event.remoteService.remoteServiceType.valueOf]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"
@@ -1419,7 +1421,12 @@
         <!-- Make call to the server here -->
         <RemoteObjectInvoker instance="{services.remoteServicesService}"
             method="checkRemoteService"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.remoteService.protocol, event.remoteService.domainName, event.remoteService.port, event.remoteService.serviceMapping, event.remoteService.remoteServiceType.valueOf]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.remoteService.protocol, 
+            event.remoteService.domainName, 
+            event.remoteService.port, 
+            event.remoteService.serviceMapping, 
+            event.remoteService.remoteServiceType.valueOf]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"
