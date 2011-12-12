@@ -45,6 +45,7 @@ import com.abiquo.abiserver.persistence.hibernate.HibernateDAOFactory;
  * @author ibarrera
  */
 @Task(interval = 1, timeUnit = TimeUnit.MINUTES)
+@Deprecated
 public class VSMSubscriber
 {
     /** The logger. */

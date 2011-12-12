@@ -211,7 +211,7 @@ public class PopulateInfrastructureModelTest
         RemoteServiceHB vf = new RemoteServiceHB();
 
         vf.setIdDataCenter(datacenter.getIdDataCenter());
-        vf.setRemoteServiceType(RemoteServiceType.VIRTUAL_FACTORY);
+        vf.setRemoteServiceType(RemoteServiceType.TARANTINO);
 
         vf.setUri(virtualFactoryURL);
 

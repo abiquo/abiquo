@@ -21,6 +21,7 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -242,6 +243,12 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
             Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDatacenter);
             result.setData(dc.canUseRemoteService(RemoteServiceType.valueOf(type), new URL(uri)));
             result.setSuccess(Boolean.TRUE);
+        }
+        catch (MalformedURLException ex)
+        {
+            result.setData(Boolean.FALSE);
+            result.setSuccess(Boolean.FALSE);
+            result.setMessage(String.format("Inavlid url to check ({})", uri));
         }
         catch (Exception ex)
         {

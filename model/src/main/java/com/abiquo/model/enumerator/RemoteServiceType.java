@@ -28,9 +28,9 @@ import org.apache.wink.common.internal.utils.UriHelper;
 
 public enum RemoteServiceType
 {
-    @Deprecated
+    // @Deprecated
     // use TARANTINO
-    VIRTUAL_FACTORY("Virtualization Manager", "tarantino", "http://", 80), //
+    // VIRTUAL_FACTORY("Virtualization Manager", "tarantino", "http://", 80), //
     TARANTINO("Virtualization Manager", "tarantino", "http://", 80), //
     STORAGE_SYSTEM_MONITOR("Storage Manager", "ssm", "http://", 80), //
     VIRTUAL_SYSTEM_MONITOR("Monitor Manager", "vsm", "http://", 80), //
@@ -89,13 +89,12 @@ public enum RemoteServiceType
 
     public boolean checkUniqueness()
     {
-        return this == APPLIANCE_MANAGER || this == VIRTUAL_FACTORY || this == BPM_SERVICE
-            || this == TARANTINO;
+        return this == APPLIANCE_MANAGER || this == BPM_SERVICE || this == TARANTINO;
     }
 
     public boolean checkDatacenterId()
     {
-        return this == BPM_SERVICE || this == TARANTINO || this == VIRTUAL_FACTORY;
+        return this == BPM_SERVICE || this == TARANTINO;
     }
 
     public String fixUri(final URI uri)

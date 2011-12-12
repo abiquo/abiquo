@@ -185,6 +185,7 @@
             {
                 var event:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.CHECK_REMOTE_SERVICE);
                 event.remoteService = remoteServiceList.selectedItem as RemoteService;
+                event.dataCenter = this._datacenter;
                 dispatchEvent(event);
             }
 

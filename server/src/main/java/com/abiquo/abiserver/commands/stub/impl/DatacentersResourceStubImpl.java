@@ -303,13 +303,13 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         {
             return RemoteServiceType.STORAGE_SYSTEM_MONITOR;
         }
-        else if (rst.equals(RemoteServiceType.VIRTUAL_FACTORY.getServiceMapping()))
-        {
-            return RemoteServiceType.VIRTUAL_FACTORY;
-        }
         else if (rst.equals(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR.getServiceMapping()))
         {
             return RemoteServiceType.VIRTUAL_SYSTEM_MONITOR;
+        }
+        else if (rst.equals(RemoteServiceType.TARANTINO.getServiceMapping()))
+        {
+            return RemoteServiceType.TARANTINO;
         }
         return null;
     }
