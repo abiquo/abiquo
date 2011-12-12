@@ -33,6 +33,8 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1490,4 +1492,40 @@ public class VirtualMachineService extends DefaultApiService
         return tmp;
     }
 
+    /*
+     * @param vmId
+     * @return VirtualMachine with DC.
+     */
+    public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
+    {
+        VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+        if (virtualMachine.getHypervisor() != null)
+        {
+            Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
+        }
+        if (virtualMachine.getEnterprise() != null)
+        {
+            Hibernate.initialize(virtualMachine.getEnterprise());
+        }
+        if (virtualMachine.getDatastore() != null)
+        {
+            Hibernate.initialize(virtualMachine.getDatastore());
+        }
+        if (virtualMachine.getVirtualMachineTemplate() != null)
+        {
+            Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
+        }
+        return virtualMachine;
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateVirtualMachineBySystem(final VirtualMachine vm)
+    {
+        repo.update(vm);
+    }
 }
