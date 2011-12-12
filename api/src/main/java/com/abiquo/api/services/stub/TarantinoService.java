@@ -142,8 +142,7 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
-                "Failed to enqueue task in Tarantino. Rabbitmq might be "
-                    + "down or not configured. The error message was " + ex.getMessage());
+                "tarantino.sendError", ex.getMessage());
 
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
@@ -154,7 +153,7 @@ public class TarantinoService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, event,
-            "Task enqueued successfully to Tarantinio");
+            "tarantino.taskEnqueued");
     }
 
     /**
@@ -175,7 +174,7 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
-                "Error closing the producer channel with error: " + ex.getMessage());
+                "tarantino.closeProducer", ex.getMessage());
 
         }
     }
@@ -252,13 +251,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "tarantino.deployVMError", e.getMessage());
 
             // We need to unsuscribe the machine
             logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -323,13 +317,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
 
             // We need to unsuscribe the machine
             logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
@@ -420,13 +409,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);

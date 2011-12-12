@@ -24,7 +24,6 @@ package com.abiquo.api.services.cloud;
 import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -66,7 +65,6 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
-import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
@@ -274,7 +272,7 @@ public class VirtualMachineService extends DefaultApiService
         repo.insert(virtualMachine);
     }
 
-    /**
+/**
      * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine} object
      * and sends the object to the method {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine).
      * 
@@ -285,8 +283,8 @@ public class VirtualMachineService extends DefaultApiService
      * @return the link to the asnyncronous task.
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public String reconfigureVirtualMachine(Integer vdcId, Integer vappId, Integer vmId,
-        VirtualMachineDto dto)
+    public String reconfigureVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final VirtualMachineDto dto)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
@@ -316,14 +314,12 @@ public class VirtualMachineService extends DefaultApiService
      *            to.
      * @param vapp {@link VirtualAppliance} object where the virtual machine to reconfigure belongs
      *            to.
-     * @param newValues {@link VirtualMachine} exactly as we want to be after the
-     *            reconfigure.
+     * @param newValues {@link VirtualMachine} exactly as we want to be after the reconfigure.
      * @return a String containing the URI where to check the progress.
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm,
-        final VirtualMachine newValues)
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -346,8 +342,8 @@ public class VirtualMachineService extends DefaultApiService
                 vmRequirements.createVirtualMachineRequirements(vm, newValues);
             vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
-                newValues.getId());
+            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}", newValues
+                .getId());
 
             LOGGER
                 .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -359,7 +355,7 @@ public class VirtualMachineService extends DefaultApiService
         // Before to update the virtualmachine to new values, create the tarantino descriptor
         VirtualMachineDescriptionBuilder virtualMachineTarantino =
             jobCreator.toTarantinoDto(vm, vapp);
-        
+
         // update the old virtual machine with the new virtual machine values.
         // and set the ID of the backupmachine (which has the old values) for recovery purposes.
         LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
@@ -367,21 +363,21 @@ public class VirtualMachineService extends DefaultApiService
         repo.update(vm);
         LOGGER.debug("Updated virtual machine {}", vm.getId());
 
-        // next step: 
+        // next step:
 
         // it is required a tarantino Task ?
         if (vm.getState() == VirtualMachineState.OFF)
         {
-            return null; 
+            return null;
         }
 
         VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-             jobCreator.toTarantinoDto(vm, vapp);
+            jobCreator.toTarantinoDto(vm, vapp);
 
         // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
         return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
-         newVirtualMachineTarantino);
+            newVirtualMachineTarantino);
     }
 
     /**
@@ -390,7 +386,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param old old virtual machine instance
      * @param vmnew new virtual machine values
      */
-    private void updateVirtualMachineToNewValues(VirtualMachine old, final VirtualMachine vmnew)
+    private void updateVirtualMachineToNewValues(final VirtualMachine old,
+        final VirtualMachine vmnew)
     {
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
@@ -491,9 +488,8 @@ public class VirtualMachineService extends DefaultApiService
                     "Delete virtual machine error, the State must be NOT_ALLOCATED or UNKNOWN but was {}",
                     virtualMachine.getState().name());
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
-                "Delete of the virtual appliance with name " + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
-                    + virtualMachine.getState().name());
+                "virtualMachine.deleteFailed", virtualMachine.getName(), virtualMachine.getState()
+                    .name());
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
         }
@@ -505,18 +501,12 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
-            virtualMachine.getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
+            .getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
-        tracer
-            .log(
-                SeverityType.INFO,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DELETE,
-                "Delete of the virtual appliance with name "
-                    + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
+            "virtualMachine.deleteFailedInvalidNotDeployed", virtualMachine.getName());
     }
 
     /**
@@ -535,28 +525,28 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine to create. void
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine createVirtualMachine(final Integer vdcId,
-        final Integer vappId, final VirtualMachineDto dto)
+    public VirtualMachine createVirtualMachine(final Integer vdcId, final Integer vappId,
+        final VirtualMachineDto dto)
     {
         VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        
+
         // First we get from dto. All the values wi
-        VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, dto); 
+        VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
         virtualMachine.setName("ABQ_" + virtualMachine.getUuid());
-        
+
         // Set the user and enterprise
         virtualMachine.setUser(userService.getCurrentUser());
         virtualMachine.setEnterprise(userService.getCurrentUser().getEnterprise());
-        
+
         // We check for a suitable conversion (PREMIUM)
         attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
             virtualMachine);
-        
+
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
 
@@ -657,10 +647,8 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Create node virtual image with name virtual machine: {}"
             + virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
-            new NodeVirtualImage(virtualMachine.getName(),
-                virtualAppliance,
-                virtualMachine.getVirtualMachineTemplate(),
-                virtualMachine);
+            new NodeVirtualImage(virtualMachine.getName(), virtualAppliance, virtualMachine
+                .getVirtualMachineTemplate(), virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
         LOGGER.debug("Node virtual image created!");
     }
@@ -778,8 +766,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
+                EventType.VM_DEPLOY, "virtualMachine.deploy", e.toString());
             LOGGER
                 .error(
                     "Error deploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -811,7 +798,7 @@ public class VirtualMachineService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
             // For the Admin to know all errors
             traceAdminErrors(rsErrors, SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Remote Service is down or not configured", true);
+                EventType.VM_DEPLOY, "remoteServices.down", true);
 
             // There is no point in continue
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -835,7 +822,7 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Virtual Machine is already deployed or Allocated.");
+                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated");
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
             flushErrors();
         }
@@ -899,12 +886,11 @@ public class VirtualMachineService extends DefaultApiService
             default:
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
+                    EventType.VM_UNDEPLOY, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY
+                        .getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    "The Virtual Machine is in a state in which cannot be undeployed.");
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
                 addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
                 flushErrors();
 
@@ -988,14 +974,13 @@ public class VirtualMachineService extends DefaultApiService
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
-            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
-                virtualMachine.getId());
+            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!", virtualMachine
+                .getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
-                "Undeploy of the virtual machine with name " + virtualMachine.getName()
-                    + " enqueued successfully!");
+                "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "The enqueuing in Tarantino was OK.");
+                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
 
             return idAsyncTask;
 
@@ -1013,8 +998,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1067,11 +1051,10 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.info("Applying the new state of the virtual machine id {} in tarantino!",
             virtualMachine.getId());
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "Applying the state of the virtual machine with name " + virtualMachine.getName()
-                + " enqueued successfully!");
+            "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "The enqueuing in Tarantino was OK. The virtual machine is locked");
+            "virtualMachine.applyVirtualMachineTarantinoEnqueued");
 
         lockVirtualMachine(virtualMachine);
         // tasksService.
@@ -1095,8 +1078,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
-                    r.getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
+                    .getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -1172,7 +1155,7 @@ public class VirtualMachineService extends DefaultApiService
             addUnexpectedErrors(APIError.STATUS_BAD_REQUEST);
             flushErrors();
         }
-        
+
         vm.setVirtualMachineTemplate(getVirtualMachineTemplateFromDto(dto));
         setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(vm, vm.getVirtualMachineTemplate());
         vm.setDisks(getHardDisksFromDto(vdc, dto));
@@ -1243,9 +1226,10 @@ public class VirtualMachineService extends DefaultApiService
 
         return disks;
     }
-    
+
     /**
-     * Validates the given object with links to a NIC and returns the referenced list of {@link IpPoolManagement}.
+     * Validates the given object with links to a NIC and returns the referenced list of
+     * {@link IpPoolManagement}.
      * 
      * @param links The links to validate the hard disk.
      * @param expectedVirtualDatacenter The expected virtual datacenter to be found in the link.
@@ -1260,7 +1244,7 @@ public class VirtualMachineService extends DefaultApiService
         // Validate and load each volume from the link list
         for (RESTLink link : dto.searchLinks(PrivateNetworkResource.PRIVATE_IP))
         {
-         // Parse the URI with the expected parameters and extract the identifier values.
+            // Parse the URI with the expected parameters and extract the identifier values.
             String buildPath =
                 buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
                     VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
@@ -1298,7 +1282,8 @@ public class VirtualMachineService extends DefaultApiService
             {
                 String errorCode = APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK.getCode();
                 String message =
-                    APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK.getMessage() + ": Vlan id " + vlanId;
+                    APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK.getMessage() + ": Vlan id "
+                        + vlanId;
                 CommonError error = new CommonError(errorCode, message);
                 addNotFoundErrors(error);
                 continue;
@@ -1313,7 +1298,7 @@ public class VirtualMachineService extends DefaultApiService
                 addNotFoundErrors(error);
                 continue;
             }
-            
+
             ips.add(ip);
         }
 
@@ -1322,30 +1307,33 @@ public class VirtualMachineService extends DefaultApiService
 
         return ips;
     }
-    
+
     /**
      * Get the object {@link VirtualMachineTemplate} from the input dto.
      * 
      * @param dto the object that should have the link to a virtual machine template.
      * @return the found {@link virtualMachineTemplateObject}
      */
-    public VirtualMachineTemplate getVirtualMachineTemplateFromDto(final SingleResourceTransportDto dto)
+    public VirtualMachineTemplate getVirtualMachineTemplateFromDto(
+        final SingleResourceTransportDto dto)
     {
-        String vmTemplatePath = buildPath(EnterprisesResource.ENTERPRISES_PATH,
-            EnterpriseResource.ENTERPRISE_PARAM, //
-            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
-            DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, 
-            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
-            VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
-            
+        String vmTemplatePath =
+            buildPath(
+                EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM,
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
+                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
+
         RESTLink link = dto.searchLink(VIRTUAL_MACHINE_TEMPLATE);
-        
+
         if (link == null)
         {
             addValidationErrors(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND);
             flushErrors();
         }
-        
+
         Integer entId = null;
         Integer dcId = null;
         Integer templId = null;
@@ -1353,28 +1341,32 @@ public class VirtualMachineService extends DefaultApiService
         {
             MultivaluedMap<String, String> pathValues =
                 URIResolver.resolveFromURI(vmTemplatePath, link.getHref());
-        
-            // URI needs to have an identifier to a ENTERPRISE, another to a DATACENTER_REPOSITORY and another one to the TEMPLATE
-            if (pathValues == null
-                || !pathValues.containsKey(EnterpriseResource.ENTERPRISE)
+
+            // URI needs to have an identifier to a ENTERPRISE, another to a DATACENTER_REPOSITORY
+            // and another one to the TEMPLATE
+            if (pathValues == null || !pathValues.containsKey(EnterpriseResource.ENTERPRISE)
                 || !pathValues.containsKey(DatacenterRepositoryResource.DATACENTER_REPOSITORY)
                 || !pathValues.containsKey(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE))
             {
                 throw new BadRequestException(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI);
             }
-            
+
             entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
-            dcId = Integer.valueOf(pathValues.getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
-            templId = Integer.valueOf(pathValues.getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
+            dcId =
+                Integer.valueOf(pathValues
+                    .getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
+            templId =
+                Integer.valueOf(pathValues
+                    .getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             // unhandled exception parsing the uri
             addValidationErrors(APIError.LINKS_INVALID_LINK);
             flushErrors();
         }
-        
-        return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);       
+
+        return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);
     }
 
     /**
@@ -1442,11 +1434,11 @@ public class VirtualMachineService extends DefaultApiService
             disktmp.setVirtualAppliance(disk.getVirtualAppliance());
             disktmp.setVirtualDatacenter(disk.getVirtualDatacenter());
             disktmp.setVirtualMachine(disk.getVirtualMachine());
-            
+
             disksTemp.add(disktmp);
         }
         tmp.setDisks(disksTemp);
-        
+
         // Backup NICs
         List<IpPoolManagement> ipsTemp = new ArrayList<IpPoolManagement>();
         for (IpPoolManagement ip : vm.getIps())
@@ -1460,7 +1452,7 @@ public class VirtualMachineService extends DefaultApiService
             ipTmp.setVirtualAppliance(ip.getVirtualAppliance());
             ipTmp.setVirtualDatacenter(ip.getVirtualDatacenter());
             ipTmp.setVirtualMachine(ip.getVirtualMachine());
-            
+
             ipTmp.setName(ip.getName());
             ipTmp.setVlanNetwork(ip.getVlanNetwork());
             ipTmp.setMac(ip.getMac());
@@ -1469,11 +1461,11 @@ public class VirtualMachineService extends DefaultApiService
             ipTmp.setNetworkName(ip.getNetworkName());
             ipTmp.setQuarantine(ip.getQuarantine());
             ipTmp.setIp(ip.getIp());
-            
+
             ipsTemp.add(ipTmp);
         }
         tmp.setIps(ipsTemp);
-        
+
         // Backup Volumes
         List<VolumeManagement> volsTemp = new ArrayList<VolumeManagement>();
         for (VolumeManagement vol : vm.getVolumes())
@@ -1487,7 +1479,7 @@ public class VirtualMachineService extends DefaultApiService
             volTmp.setVirtualAppliance(vol.getVirtualAppliance());
             volTmp.setVirtualDatacenter(vol.getVirtualDatacenter());
             volTmp.setVirtualMachine(vol.getVirtualMachine());
-            
+
             volTmp.setStoragePool(vol.getStoragePool());
             volTmp.setVirtualMachineTemplate(vol.getVirtualMachineTemplate());
             volTmp.setIdScsi(vol.getIdScsi());
