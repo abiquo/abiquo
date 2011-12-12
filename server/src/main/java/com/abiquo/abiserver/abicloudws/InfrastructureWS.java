@@ -46,8 +46,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualappliance.Virtualap
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceAllocationSettingData;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
-import com.abiquo.abiserver.eventing.EventingException;
-// import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
@@ -83,9 +81,8 @@ import com.sun.ws.management.client.exceptions.FaultException;
  */
 public class InfrastructureWS implements IInfrastructureWS
 {
-    private final static String IDVIRTUALAPP_SQL_BY_VM =
-        "SELECT n.idVirtualApp " + "FROM node n, nodevirtualimage ni "
-            + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
+    private final static String IDVIRTUALAPP_SQL_BY_VM = "SELECT n.idVirtualApp "
+        + "FROM node n, nodevirtualimage ni " + "WHERE n.idNode = ni.idNode and ni.idVM = :id";
 
     /** The logger object */
     private final static Logger logger = LoggerFactory.getLogger(InfrastructureWS.class);
@@ -101,8 +98,8 @@ public class InfrastructureWS implements IInfrastructureWS
 
     static final ResourceManager resourceManager = new ResourceManager(InfrastructureWS.class);
 
-    private final ErrorManager errorManager =
-        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager = ErrorManager
+        .getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     private static Integer bugTimeout;
 
@@ -231,6 +228,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * @param virtualMachine the virtual machine to delete
      * @return a basic result
      */
+    @Override
     public BasicResult deleteVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = null;
@@ -263,6 +261,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#editVirtualMachine(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult editVirtualMachine(final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
@@ -398,8 +397,8 @@ public class InfrastructureWS implements IInfrastructureWS
         SelectorSetType selector = createSelectorId(virtualMachine.getUUID());
         String destination = getDestinationFromVM(virtualMachine);
         Resource[] resources =
-            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI, abiConfig
-                .getTimeout(), selector);
+            ResourceFactory.find(destination, AbiCloudConstants.RESOURCE_URI,
+                abiConfig.getTimeout(), selector);
         Resource resource = resources[0];
         return resource;
 
@@ -425,7 +424,7 @@ public class InfrastructureWS implements IInfrastructureWS
         for (RemoteService remoteService : remoteServices)
         {
             if (com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType
-                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.VIRTUAL_FACTORY)
+                .valueOf(remoteService.getRemoteServiceType().getValueOf()) == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.TARANTINO)
             {
                 destination = remoteService.getUri();
                 break;
@@ -477,6 +476,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#forceRefreshVirtualMachineState(com.abiquo
      * .abiserver.pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public BasicResult forceRefreshVirtualMachineState(final VirtualMachine virtualMachine)
     {
         logger.info("Forcing refresh of the virtual machine state: {}", virtualMachine.getId());
@@ -500,13 +500,13 @@ public class InfrastructureWS implements IInfrastructureWS
         }
         catch (PersistenceException e)
         {
-            logger.trace("An error occurred when retrieving the VirtualSystemMonitor", e
-                .getStackTrace()[0]);
+            logger.trace("An error occurred when retrieving the VirtualSystemMonitor",
+                e.getStackTrace()[0]);
         }
         catch (RemoteServiceException e)
         {
-            logger.trace("An error occurred when contacting the VirtualSystemMonitor", e
-                .getStackTrace()[0]);
+            logger.trace("An error occurred when contacting the VirtualSystemMonitor",
+                e.getStackTrace()[0]);
         }
 
         result.setSuccess(true);
@@ -519,6 +519,7 @@ public class InfrastructureWS implements IInfrastructureWS
      * com.abiquo.abiserver.abicloudws.IInfrastructureWS#checkVirtualSystem(com.abiquo.abiserver
      * .pojo.infrastructure.VirtualMachine)
      */
+    @Override
     public Boolean checkVirtualSystem(final VirtualMachine virtualMachine)
     {
         return true;

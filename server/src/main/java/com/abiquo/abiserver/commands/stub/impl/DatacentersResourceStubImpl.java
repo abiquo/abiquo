@@ -307,6 +307,10 @@ public class DatacentersResourceStubImpl extends AbstractAPIStub implements Data
         {
             return RemoteServiceType.VIRTUAL_SYSTEM_MONITOR;
         }
+        else if (rst.equals(RemoteServiceType.TARANTINO.getServiceMapping()))
+        {
+            return RemoteServiceType.TARANTINO;
+        }
         return null;
     }
 }
