@@ -91,6 +91,7 @@
             public function set racks(value:ArrayCollection):void
             {
                 this._racks = value;
+                selectedInfrastructureElement = null;
             }
 
             //Selected InfrastructureElement by the User in the Infrastructure Tree
