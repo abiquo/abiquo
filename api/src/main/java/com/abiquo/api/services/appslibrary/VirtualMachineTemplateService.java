@@ -316,11 +316,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             {
                 if (tracer != null)
                 {
-                    String messageTrace =
-                        "Virtual Machine Template '" + old.getName()
-                            + "' has been converted to a master template '";
                     tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_UPDATE,
-                        messageTrace);
+                        "virtualMachineTemplate.convertedToMaster", old.getName());
                 }
             }
             old.setMaster(null);
@@ -419,11 +416,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         if (tracer != null)
         {
-            String messageTrace =
-                "Virtual Machine Template '" + vmtemplateToDelete.getName()
-                    + "' has been deleted '";
             tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_DELETE,
-                messageTrace);
+                "virtualMachineTemplate.deleted", vmtemplateToDelete.getName());
         }
 
     }
@@ -452,8 +446,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
         Category category = categoryService.getCategoryByName(categoryName);
 
-        return appsLibraryRep
-            .findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category, datacenter);
+        return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category,
+            datacenter);
     }
 
     /**
