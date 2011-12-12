@@ -20,12 +20,14 @@
  */
 package com.abiquo.api.eventing;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +37,15 @@ import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDAO;
+import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
 
 //TODO @Task 
-//TODO Propagation??
+//@Task(interval = 1, timeUnit = TimeUnit.MINUTES) -> Only once at the beggining
+//@Service("vsmSubscriber")
+@Task
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VSMSubscriber
 {
@@ -54,6 +60,12 @@ public class VSMSubscriber
     protected VirtualMachineDAO vMachineDAO;
 
     @Autowired
+    protected VirtualMachineRep vMachineRep; // TODO: include findVirtualMachinesByDatacenter
+
+    @Autowired
+    protected InfrastructureRep infraRep;
+
+    @Autowired
     protected VsmServiceStub vsmStub;
 
     @Autowired
@@ -63,7 +75,6 @@ public class VSMSubscriber
      * Attempts an VSM subscription for each VA. If subscription succeeds the task is unsheduled.
      * Gets all VM Deployed and subscribes to VSM
      */
-    // TODO @TaskMethod
     public void subscribe()
     {
         try
@@ -73,19 +84,25 @@ public class VSMSubscriber
             // Subscriptions should work. If process fails, the task will be rescheduled.
             // XXX TaskServiceFactory.getService().unschedule(VSMSubscriber.class);
 
+
             // Get the Virtual appliance list
-            // TODO: findAllVMDeployed (query)
-            // TODO: OPTIMIZE -> can we recover all VMs by Datacenter? or PMachine?
-            // Better OPTIMIZE -> Hash with RemoteServices found by DC
-            List<VirtualMachine> vMachines = vMachineDAO.findAll();
-            
-            for (VirtualMachine vMachine : vMachines)
+            // OPTIMIZED -> we recover all VMs by Datacenter? or PMachine?
+            Collection<Datacenter> allDCs = infraRep.findAll();
+            for (Datacenter datacenter : allDCs)
             {
-                Datacenter datacenter = vMachine.getHypervisor().getMachine().getDatacenter();
                 RemoteService remoteService =
                     remoteServiceService.getRemoteService(datacenter.getId(),
                         RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-                vsmStub.subscribe(remoteService, vMachine);
+                List<VirtualMachine> vMachines =
+                    vMachineDAO.findVirtualMachinesByDatacenter(datacenter.getId());
+                for (VirtualMachine vMachine : vMachines)
+                {
+                    if (vMachine.isDeployed())
+                    {
+                        vsmStub.subscribe(remoteService, vMachine);
+                    }
+                }
+
             }
 
         }
@@ -93,6 +110,8 @@ public class VSMSubscriber
         {
             LOGGER.error("An error was occurred when refreshing the VSM subscriptions caused by:",
                 e);
+            // tracer.log(Seve, component, event, message, args)
+            // Task should be re-scheduled
         }
     }
 }
