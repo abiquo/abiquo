@@ -30,8 +30,7 @@ public class Job extends RedisEntityBase
 {
     public enum JobState
     {
-        PENDING, STARTED, DONE, FAILED, ROLLBACK_PENDING, ROLLBACK_STARTED, ROLLBACK_DONE
-
+        PENDING, STARTED, DONE, FAILED, ROLLBACK_STARTED, ROLLBACK_DONE, UNKNOWN
     };
 
     public enum JobType
@@ -60,7 +59,7 @@ public class Job extends RedisEntityBase
         this.data = new HashMap<String, String>();
 
         this.state = JobState.PENDING;
-        this.rollbackState = JobState.PENDING;
+        this.rollbackState = JobState.UNKNOWN;
     }
 
     @Override
