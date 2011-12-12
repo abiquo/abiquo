@@ -42,6 +42,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.binding.utils.BindingUtils;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.view.general.components.info.InfoIcon;
         	import flash.net.navigateToURL;
@@ -70,6 +71,7 @@
              **/
             private final function onPreInitialize():void
             {
+            	BindingUtils.bindProperty(this, "updateShowIcon", AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp,"value")
                 //Creating Icon
                 _popUpIcon = new Image();
                 _popUpIcon.source = _iconSource;
@@ -90,20 +92,29 @@
                 header.setStyle("horizontalAlign", "left");
                 header.addChild(_popUpIcon);
                 header.addChild(_title);
+                header.addChild(_iconInfo);                	
                 
-                //Show only if required
-                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 1){
-	                header.addChild(_iconInfo);                	
+                if(AbiCloudModel.getInstance().configurationManager.config.client_wiki_showHelp.value == 0){
+                	_iconInfo.hideIconInfo();
                 }
 
                 header.addEventListener(MouseEvent.MOUSE_DOWN, headerMouseDown_handler);
                 header.addEventListener(MouseEvent.MOUSE_UP, headerMouseUp_hanlder);
-                addEventListener(KeyboardEvent.KEY_DOWN, showIconInfo);
-                addEventListener(KeyboardEvent.KEY_UP, hideIconInfo);
                 this.addChildAt(header, 0);
 
                 //Registering Keyboard events, for standard application behaivor
                 this.addEventListener(KeyboardEvent.KEY_UP, keyboardHandler);
+            }
+            
+            public function set updateShowIcon(value:int):void
+            {
+            	if(_iconInfo){
+	            	if(value == 0){
+		            	_iconInfo.hideIconInfo();
+	            	}else{
+	            		_iconInfo.showIconInfo();
+	            	}
+            	}
             }
 
             /**
@@ -120,22 +131,6 @@
             private function headerMouseUp_hanlder(mouseEvent:MouseEvent):void
             {
                 stopDrag();
-            }
-            
-            /**
-             * Show the info icon if user presses the CTRL key
-             */
-            private function showIconInfo(keyboardEvent:KeyboardEvent):void
-            {
-                //this._iconInfo.showIconInfo(keyboardEvent.ctrlKey);
-            }
-
-            /**
-             * Hide the info icon
-             */
-            private function hideIconInfo(keyboardEvent:KeyboardEvent):void
-            {
-                //this._iconInfo.hideIconInfo();
             }
             
             
@@ -157,7 +152,7 @@
             {
                 this._iconSource = source;
             }
-
+            
             /**
              * We replicate here the behaivor described in AbiCloud.mxml, since Events dispatched from a PopUp
              * do not propagate outside
