@@ -318,6 +318,7 @@ public class VolumeManagement extends RasdManagement
 
     // ********************************** Volume state transitions ********************************
 
+    @Override
     public void attach(final int sequence, final VirtualMachine vm)
     {
         if (state != VolumeState.DETACHED)
@@ -336,6 +337,7 @@ public class VolumeManagement extends RasdManagement
         setState(VolumeState.ATTACHED);
     }
 
+    @Override
     public void detach()
     {
         if (state != VolumeState.ATTACHED)
@@ -350,6 +352,7 @@ public class VolumeManagement extends RasdManagement
         setState(VolumeState.DETACHED);
     }
 
+    @Override
     public boolean isAttached()
     {
         return state == VolumeState.ATTACHED && getVirtualMachine() != null;

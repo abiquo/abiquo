@@ -47,7 +47,7 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
     }
 
     @Override
-    protected VirtualMachineDAO createDao(EntityManager entityManager)
+    protected VirtualMachineDAO createDao(final EntityManager entityManager)
     {
         return new VirtualMachineDAO(entityManager);
     }
@@ -73,19 +73,17 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
     public void findAllWithNotTemporalFilters()
     {
         createFiveMachinesWithTemporalAndNotTemporalValueSetAndPersistThem();
-        
+
         VirtualMachineDAO dao = createDaoForRollbackTransaction();
 
         List<VirtualMachine> all = dao.findAll();
         assertEquals(all.size(), 2);
     }
-    
+
     /**
      * Create five machines, three with the temporal value set, and two without the temporal values
-     * set. Disable the filter {@VirtualMachine.NOT_TEMP}.
-     * Check the behaviour (check {@link VirtualMachine} entity filters) is to return
-     * all the machines.
-     * 
+     * set. Disable the filter {@VirtualMachine.NOT_TEMP}. Check the
+     * behaviour (check {@link VirtualMachine} entity filters) is to return all the machines.
      * Whatever happens, enable the filter
      */
     @Test
@@ -93,7 +91,7 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
     {
         createFiveMachinesWithTemporalAndNotTemporalValueSetAndPersistThem();
         VirtualMachineDAO dao = createDaoForRollbackTransaction();
-        
+
         try
         {
             ((Session) dao.getEntityManager().getDelegate()).disableFilter(VirtualMachine.NOT_TEMP);
@@ -108,10 +106,9 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
 
     /**
      * Create five machines, three with the temporal value set, and two without the temporal values
-     * set. Disable the filter {@VirtualMachine.NOT_TEMP} and enable the {@VirtualMachine.ONLY_TEMP} one.
-     * Check the behaviour (check {@link VirtualMachine} entity filters) is to return
-     * only the ones with the temporal values.
-     * 
+     * set. Disable the filter {@VirtualMachine.NOT_TEMP} and enable the
+     * {@VirtualMachine.ONLY_TEMP} one. Check the behaviour (check
+     * {@link VirtualMachine} entity filters) is to return only the ones with the temporal values.
      * Whatever happens, enable the filter
      */
     @Test
@@ -119,7 +116,7 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
     {
         createFiveMachinesWithTemporalAndNotTemporalValueSetAndPersistThem();
         VirtualMachineDAO dao = createDaoForRollbackTransaction();
-        
+
         try
         {
             ((Session) dao.getEntityManager().getDelegate()).disableFilter(VirtualMachine.NOT_TEMP);
@@ -130,10 +127,11 @@ public class VirtualMachineDAOTest extends DefaultDAOTestBase<VirtualMachineDAO,
         finally
         {
             ((Session) dao.getEntityManager().getDelegate()).enableFilter(VirtualMachine.NOT_TEMP);
-            ((Session) dao.getEntityManager().getDelegate()).disableFilter(VirtualMachine.ONLY_TEMP);
+            ((Session) dao.getEntityManager().getDelegate())
+                .disableFilter(VirtualMachine.ONLY_TEMP);
         }
     }
-    
+
     /**
      * Create five machines, three with the temporal value set, and two without the temporal values
      * set.
