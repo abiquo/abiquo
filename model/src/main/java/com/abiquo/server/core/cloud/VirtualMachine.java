@@ -643,7 +643,7 @@ public class VirtualMachine extends DefaultEntityBase
      * and {@link VolumeManagement} )
      */
     // do not orphanRemoval = true,
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = RasdManagement.class)
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
     private List<RasdManagement> rasdManagements;
 
     public List<RasdManagement> getRasdManagements()
