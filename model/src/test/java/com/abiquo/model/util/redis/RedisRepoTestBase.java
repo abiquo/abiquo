@@ -19,13 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.server.core.task;
+package com.abiquo.model.util.redis;
 
 import java.lang.reflect.Field;
 
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import com.abiquo.server.core.task.AsyncTaskRep;
+import com.abiquo.server.core.task.JobDAO;
+import com.abiquo.server.core.task.TaskDAO;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -55,7 +59,7 @@ public abstract class RedisRepoTestBase
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setTestOnBorrow(true);
 
-        jedisPool = new JedisPool(jedisPoolConfig, "localhost");
+        jedisPool = new JedisPoolForTesting(jedisPoolConfig, "localhost");
         repoField.set(repo, jedisPool);
     }
 
