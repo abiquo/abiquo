@@ -219,7 +219,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
 
         ClientResponse response = resource(uri).queryParam("datacenterId", datacenterId).get();
 
-        if (response.getStatusCode() == 201)
+        if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
             result.setData(createFlexOVFPackageListObject(response
