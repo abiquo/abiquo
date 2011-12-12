@@ -31,7 +31,6 @@ public class Job extends RedisEntityBase
     public enum JobState
     {
         PENDING, STARTED, DONE, FAILED, ROLLBACK_STARTED, ROLLBACK_DONE, UNKNOWN
-
     };
 
     public enum JobType
