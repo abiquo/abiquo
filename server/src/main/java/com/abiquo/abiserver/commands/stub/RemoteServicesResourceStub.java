@@ -23,6 +23,7 @@ package com.abiquo.abiserver.commands.stub;
 
 import java.util.List;
 
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 
@@ -38,5 +39,5 @@ public interface RemoteServicesResourceStub
 
     public DataResult<Boolean> checkRemoteService(Integer idDatacenter, String type);
 
-    public DataResult<Boolean> checkRemoteService(Integer idDatacenter, String type, String uri);
+    public DataResult<Boolean> checkRemoteService(UserSession userSession, String type, String uri);
 }

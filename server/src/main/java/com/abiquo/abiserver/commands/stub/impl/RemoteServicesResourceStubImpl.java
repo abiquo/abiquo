@@ -30,9 +30,12 @@ import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.infrastructure.Datacenter;
 import org.jclouds.abiquo.predicates.infrastructure.RemoteServicePredicates;
 
+import com.abiquo.abiserver.abicloudws.RemoteServiceClient;
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
+import com.abiquo.abiserver.exception.RemoteServiceException;
+import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.service.RemoteService;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -233,30 +236,51 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public DataResult<Boolean> checkRemoteService(final Integer idDatacenter, final String type,
+    public DataResult<Boolean> checkRemoteService(final UserSession userSession, final String type,
         final String uri)
     {
         DataResult<Boolean> result = new DataResult<Boolean>();
 
+        RemoteServiceType rsType = RemoteServiceType.valueOf(type);
+
+        // If a Remote Service cannot be checked by definition, we assume it is
+        // OK
+        if (!rsType.canBeChecked())
+        {
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.TRUE);
+            return result;
+        }
+
         try
         {
-            Datacenter dc = getApiClient().getAdministrationService().getDatacenter(idDatacenter);
-            result.setData(dc.canUseRemoteService(RemoteServiceType.valueOf(type), new URL(uri)));
-            result.setSuccess(Boolean.TRUE);
+            new URL(uri);
         }
         catch (MalformedURLException ex)
         {
-            result.setData(Boolean.FALSE);
             result.setSuccess(Boolean.FALSE);
-            result.setMessage(String.format("Inavlid url to check ({})", uri));
+            result.setData(Boolean.FALSE);
+            result.setMessage("Inavlid url to check (" + uri + ")");
+            return result;
         }
-        catch (Exception ex)
+
+        RemoteServiceClient remoteServiceClient = new RemoteServiceClient(uri);
+        try
         {
-            populateErrors(ex, result, "checkRemoteService");
+            remoteServiceClient.ping();
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.TRUE);
         }
-        finally
+        catch (RemoteServiceException ex)
         {
-            releaseApiClient();
+            result.setSuccess(Boolean.TRUE);
+            result.setData(Boolean.FALSE);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            result.setSuccess(Boolean.FALSE);
+            result.setData(Boolean.FALSE);
+            result.setMessage(ex.getMessage());
         }
 
         return result;
