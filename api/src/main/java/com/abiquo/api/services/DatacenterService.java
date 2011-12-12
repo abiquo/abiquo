@@ -223,18 +223,14 @@ public class DatacenterService extends DefaultApiService
             for (ErrorDto error : responseRemoteService.getConfigErrors().getCollection())
             {
                 tracer.log(SeverityType.MAJOR, ComponentType.DATACENTER, EventType.DC_CREATE,
-                    "Datacenter '" + datacenter.getName() + ": " + error.getMessage());
+                    "datacenter.createError", datacenter.getName(), error.getMessage());
             }
         }
         else
         {
             // Log the event
-            tracer.log(
-                SeverityType.INFO,
-                ComponentType.DATACENTER,
-                EventType.DC_CREATE,
-                "Datacenter '" + datacenter.getName() + "' has been created in "
-                    + datacenter.getLocation());
+            tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_CREATE,
+                "datacenter.created", datacenter.getName(), datacenter.getLocation());
         }
 
         return responseRemoteService;
@@ -271,9 +267,8 @@ public class DatacenterService extends DefaultApiService
 
         repo.update(old);
 
-        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY, "Datacenter '"
-            + old.getName() + "' has been modified [Name: " + datacenter.getName()
-            + ", Situation: " + datacenter.getLocation() + "]");
+        tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_MODIFY,
+            "datacenter.modified", old.getName(), datacenter.getName(), datacenter.getLocation());
 
         return old;
     }
@@ -358,12 +353,12 @@ public class DatacenterService extends DefaultApiService
                 LOGGER.debug("Deleting datacenter");
 
                 tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    "Datacenter " + datacenter.getName() + " deleted");
+                    "datacenter.removed", datacenter.getName());
             }
             else
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                    "Cannot delete datacenter with storage devices associated");
+                    "datacenter.withStorageDevices");
                 addConflictErrors(APIError.DATACENTER_DELETE_STORAGE);
                 flushErrors();
             }
@@ -371,7 +366,7 @@ public class DatacenterService extends DefaultApiService
         else
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.DATACENTER, EventType.DC_DELETE,
-                "Cannot delete datacenter with virtual datacenters associated");
+                "datacenter.withVDC");
             addConflictErrors(APIError.DATACENTER_DELETE_VIRTUAL_DATACENTERS);
             flushErrors();
         }

@@ -266,12 +266,8 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "A new hard disk VLAN of " + sizeInMb
-                    + " MB has been created as a resource in VirtualDatacenter '" + vdc.getName()
-                    + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.HARD_DISK_CREATE, messageTrace);
+                EventType.HARD_DISK_CREATE, "hardDisk.created", sizeInMb, vdc.getName());
         }
 
         return disk;
@@ -308,11 +304,9 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
-                    + "MB has been deleted from VirtualDatacenter '" + vdc.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.HARD_DISK_DELETE, messageTrace);
+                EventType.HARD_DISK_DELETE, "hardDisk.deleted", disk.getId(), disk.getSizeInMb(),
+                vdc.getName());
         }
     }
 
@@ -466,12 +460,9 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + createdDisk.getId() + "' and size of "
-                    + createdDisk.getSizeInMb() + "MB has been assigned to virtual machine '"
-                    + vm.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, messageTrace);
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -521,11 +512,9 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
-                    + "MB has been released from virtual machine '" + vm.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_UNASSIGN, messageTrace);
+                EventType.HARD_DISK_UNASSIGN, "hardDisk.released", disk.getId(),
+                disk.getSizeInMb(), vm.getName());
         }
     }
 
@@ -541,8 +530,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());

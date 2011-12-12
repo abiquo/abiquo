@@ -112,11 +112,11 @@ public class RemoteServicesService
      * @return
      */
     public DataResult<Boolean> checkRemoteService(final UserSession userSession,
-        final Integer datacenterId, final String protocol, final String domainName,
-        final Integer port, final String serviceMapping, final String remoteServiceType)
+        final String protocol, final String domainName, final Integer port,
+        final String serviceMapping, final String remoteServiceType)
     {
 
-        return proxyStub(userSession).checkRemoteService(datacenterId, remoteServiceType,
+        return proxyStub(userSession).checkRemoteService(userSession, remoteServiceType,
             RemoteService.getFullUri(protocol, domainName, port, serviceMapping));
     }
 

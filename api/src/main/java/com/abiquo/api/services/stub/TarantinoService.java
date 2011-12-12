@@ -22,7 +22,6 @@
 package com.abiquo.api.services.stub;
 
 import java.io.IOException;
-import java.util.Calendar;
 
 import javax.persistence.EntityManager;
 
@@ -39,9 +38,10 @@ import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.tasks.util.DatacenterTaskBuilder;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
+import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
-import com.abiquo.commons.amqp.impl.tarantino.domain.dto.BaseJob;
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
@@ -50,7 +50,6 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.task.Job;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.ComponentType;
@@ -70,9 +69,6 @@ public class TarantinoService extends DefaultApiService
     private final static Logger logger = LoggerFactory.getLogger(TarantinoService.class);
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private RemoteServiceService remoteServiceService;
 
     @Autowired
@@ -80,6 +76,9 @@ public class TarantinoService extends DefaultApiService
 
     @Autowired
     private TarantinoJobCreator jobCreator;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private TaskService taskService;
@@ -142,8 +141,7 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
-                "Failed to enqueue task in Tarantino. Rabbitmq might be "
-                    + "down or not configured. The error message was " + ex.getMessage());
+                "tarantino.sendError", ex.getMessage());
 
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
@@ -154,7 +152,7 @@ public class TarantinoService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, event,
-            "Task enqueued successfully to Tarantinio");
+            "tarantino.taskEnqueued");
     }
 
     /**
@@ -175,7 +173,7 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
-                "Error closing the producer channel with error: " + ex.getMessage());
+                "tarantino.closeProducer", ex.getMessage());
 
         }
     }
@@ -224,12 +222,20 @@ public class TarantinoService extends DefaultApiService
 
         try
         {
-            DatacenterTasks deployTask =
-                jobCreator.deployTask(virtualMachine, virtualMachineDesciptionBuilder);
 
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
+
+            DatacenterTasks deployTask =
+                builder.add(VirtualMachineStateTransition.CONFIGURE)
+                    .add(VirtualMachineStateTransition.POWERON).buildTarantinoTask();
             // We retrieve the progress from task service. We add it before just in case the task is
             // performed before we actually add it to redis
-            addTask(deployTask, String.valueOf(virtualMachine.getId()), TaskType.DEPLOY);
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                TaskType.DEPLOY));
             send(datacenter, deployTask, EventType.VM_DEPLOY);
 
             return deployTask.getId();
@@ -252,13 +258,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "tarantino.deployVMError", e.getMessage());
 
             // We need to unsuscribe the machine
             logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -270,6 +271,18 @@ public class TarantinoService extends DefaultApiService
             flushErrors();
         }
         return null;
+    }
+
+    /**
+     * Adds a task to redis. This task become available for all the resources implementing
+     * {@link AbstractResourceWithTasks}.
+     * 
+     * @param task
+     * @param deployTask void
+     */
+    private void addAsyncTask(final Task task)
+    {
+        taskService.addTask(task);
     }
 
     /**
@@ -293,13 +306,22 @@ public class TarantinoService extends DefaultApiService
 
         try
         {
-            DatacenterTasks deployTask =
-                jobCreator.undeployTask(virtualMachine, virtualMachineDesciptionBuilder,
-                    currentState);
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
 
+            if (VirtualMachineState.ON.equals(currentState))
+            {
+                builder.add(VirtualMachineStateTransition.POWEROFF);
+            }
+            DatacenterTasks deployTask =
+                builder.add(VirtualMachineStateTransition.DECONFIGURE).buildTarantinoTask();
             // We retrieve the progress from task service. We add it before just in case the task is
             // performed before we actually add it to redis
-            addTask(deployTask, String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY);
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                TaskType.UNDEPLOY));
 
             send(datacenter, deployTask, EventType.VM_UNDEPLOY);
 
@@ -323,13 +345,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
 
             // We need to unsuscribe the machine
             logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
@@ -341,37 +358,6 @@ public class TarantinoService extends DefaultApiService
             flushErrors();
         }
         return null;
-    }
-
-    /**
-     * Adds a task to redis. This task become available for all the resources implementing
-     * {@link AbstractResourceWithTasks}.
-     * 
-     * @param virtualMachine
-     * @param deployTask void
-     */
-    private void addTask(final DatacenterTasks datacenterTask, final String ownerId,
-        final TaskType taskType)
-    {
-        Task task = new Task();
-        task.setOwnerId(ownerId);
-        task.setTaskId(datacenterTask.getId());
-        task.setTimestamp(Calendar.getInstance().getTimeInMillis());
-        task.setType(taskType);
-        task.setUserId(String.valueOf(userService.getCurrentUser().getId()));
-
-        for (BaseJob j : datacenterTask.getJobs())
-        {
-            Job job = new Job();
-            job.setParentTaskId(datacenterTask.getId());
-            job.setTimestamp(Calendar.getInstance().getTimeInMillis());
-            job.setId(j.getId());
-            // FIXME
-            // datacenterTasks
-            // job.setType(j.);
-            task.getJobs().add(job);
-        }
-        taskService.addTask(task);
     }
 
     /**
@@ -392,13 +378,18 @@ public class TarantinoService extends DefaultApiService
 
         try
         {
-            DatacenterTasks deployTask =
-                jobCreator.applyStateTask(virtualMachine, virtualMachineDesciptionBuilder,
-                    machineStateTransition);
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
+
+            DatacenterTasks deployTask = builder.add(machineStateTransition).buildTarantinoTask();
             // We retrieve the progress from task service. We add it before just in case the task is
             // performed before we actually add it to redis
-            TaskType taskType = getTaskTypeFromTransition(machineStateTransition);
-            addTask(deployTask, String.valueOf(virtualMachine.getId()), taskType);
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                getTaskTypeFromTransition(machineStateTransition)));
+
             send(datacenter, deployTask, EventType.VM_STATE);
 
             return deployTask.getId();
@@ -420,13 +411,8 @@ public class TarantinoService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
             // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -441,7 +427,7 @@ public class TarantinoService extends DefaultApiService
      * Null if empty.
      * 
      * @param machineStateTransition the current.
-     * @return TaskType
+     * @return JobType
      */
     private TaskType getTaskTypeFromTransition(
         final VirtualMachineStateTransition machineStateTransition)
@@ -488,7 +474,7 @@ public class TarantinoService extends DefaultApiService
             {
                 logger.error("Error unknown transition: " + machineStateTransition);
             }
+                return null;
         }
-        return null;
     }
 }

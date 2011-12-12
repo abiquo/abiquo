@@ -56,10 +56,10 @@ public class DatacenterTaskBuilder
 
     protected DatacenterTasks tarantinoTask;
 
-    public DatacenterTaskBuilder(VirtualMachineDefinition definition,
-        HypervisorConnection hypervisor)
+    public DatacenterTaskBuilder(final VirtualMachineDefinition definition,
+        final HypervisorConnection hypervisor, final String userId)
     {
-        init(definition, hypervisor);
+        init(definition, hypervisor, userId);
     }
 
     /**
@@ -69,13 +69,15 @@ public class DatacenterTaskBuilder
      * @param hypervisor {@link HypervisorConnection} to use
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder init(VirtualMachineDefinition definition,
-        HypervisorConnection hypervisor)
+    public DatacenterTaskBuilder init(final VirtualMachineDefinition definition,
+        final HypervisorConnection hypervisor, final String userId)
     {
         this.tarantinoTask = new DatacenterTasks();
+        this.tarantinoTask.setDependent(Boolean.TRUE);
 
         this.asyncTask = new Task();
         this.asyncTask.setTaskId(this.tarantinoTask.getId());
+        this.asyncTask.setUserId(userId);
 
         this.definition = definition;
         this.hypervisor = hypervisor;
@@ -119,7 +121,7 @@ public class DatacenterTaskBuilder
      * @param transition The transition type to create
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder add(VirtualMachineStateTransition transition)
+    public DatacenterTaskBuilder add(final VirtualMachineStateTransition transition)
     {
         switch (transition)
         {
@@ -136,7 +138,8 @@ public class DatacenterTaskBuilder
                 job.setTransaction(toCommonsTransition(transition));
 
                 this.tarantinoTask.addDatacenterJob(job);
-                this.asyncTask.getJobs().add(createRedisJob(job.getId(), JobType.POWER_ON));
+                this.asyncTask.getJobs().add(
+                    createRedisJob(job.getId(), this.getTaskTypeFromTransition(transition)));
 
                 break;
 
@@ -156,7 +159,7 @@ public class DatacenterTaskBuilder
      * @param newDefition The virtualmachine redefinition
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder addReconfigure(VirtualMachineDefinition newDefition)
+    public DatacenterTaskBuilder addReconfigure(final VirtualMachineDefinition newDefition)
     {
         ReconfigureVirtualMachineOp job = new ReconfigureVirtualMachineOp();
         job.setVirtualMachine(definition);
@@ -175,7 +178,7 @@ public class DatacenterTaskBuilder
      * @param destinationDisk The destination disk for the snapshot
      * @return The {@link DatacenterTaskBuilder} self
      */
-    public DatacenterTaskBuilder addSnapshot(DiskSnapshot destinationDisk)
+    public DatacenterTaskBuilder addSnapshot(final DiskSnapshot destinationDisk)
     {
         SnapshotVirtualMachineOp job = new SnapshotVirtualMachineOp();
         job.setVirtualMachine(definition);
@@ -212,7 +215,7 @@ public class DatacenterTaskBuilder
      * @param transition The transition to translate
      * @return The {@link StateTransition} translation
      */
-    protected StateTransition toCommonsTransition(VirtualMachineStateTransition transition)
+    protected StateTransition toCommonsTransition(final VirtualMachineStateTransition transition)
     {
         switch (transition)
         {
@@ -253,4 +256,62 @@ public class DatacenterTaskBuilder
                 throw new InvalidParameterException();
         }
     }
+
+    /**
+     * Return the {@link JobType} that is related to this {@link VirtualMachineStateTransition}. <br>
+     * <br>
+     * Null if empty.
+     * 
+     * @param machineStateTransition the current.
+     * @return JobType
+     */
+    public JobType getTaskTypeFromTransition(
+        final VirtualMachineStateTransition machineStateTransition)
+    {
+        switch (machineStateTransition)
+        {
+            case CONFIGURE:
+            {
+                return JobType.CONFIGURE;
+            }
+            case DECONFIGURE:
+            {
+                return JobType.DECONFIGURE;
+            }
+            case POWEROFF:
+            {
+                return JobType.POWER_OFF;
+            }
+            case POWERON:
+            {
+                return JobType.POWER_ON;
+            }
+            case PAUSE:
+            {
+                return JobType.PAUSE;
+            }
+            case RESUME:
+            {
+                return JobType.RESET;
+            }
+            case SNAPSHOT:
+            {
+                return JobType.SNAPSHOT;
+            }
+            case RECONFIGURE:
+            {
+                return JobType.RECONFIGURE;
+            }
+            case RESET:
+            {
+                return JobType.RESET;
+            }
+            default:
+            {
+                throw new InvalidParameterException("Error unknown transition: "
+                    + machineStateTransition);
+            }
+        }
+    }
 }
+

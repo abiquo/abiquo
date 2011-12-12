@@ -24,7 +24,6 @@ package com.abiquo.api.services.cloud;
 import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +34,8 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,6 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
-import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
@@ -502,9 +502,8 @@ public class VirtualMachineService extends DefaultApiService
                     "Delete virtual machine error, the State must be NOT_ALLOCATED or UNKNOWN but was {}",
                     virtualMachine.getState().name());
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
-                "Delete of the virtual appliance with name " + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
-                    + virtualMachine.getState().name());
+                "virtualMachine.deleteFailed", virtualMachine.getName(), virtualMachine.getState()
+                    .name());
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
         }
@@ -520,14 +519,8 @@ public class VirtualMachineService extends DefaultApiService
             virtualMachine.getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
-        tracer
-            .log(
-                SeverityType.INFO,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DELETE,
-                "Delete of the virtual appliance with name "
-                    + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
+            "virtualMachine.deleteFailedInvalidNotDeployed", virtualMachine.getName());
     }
 
     /**
@@ -789,8 +782,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
+                EventType.VM_DEPLOY, "virtualMachine.deploy", e.toString());
             LOGGER
                 .error(
                     "Error deploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -822,7 +814,7 @@ public class VirtualMachineService extends DefaultApiService
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
             // For the Admin to know all errors
             traceAdminErrors(rsErrors, SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Remote Service is down or not configured", true);
+                EventType.VM_DEPLOY, "remoteServices.down", true);
 
             // There is no point in continue
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -846,7 +838,7 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Virtual Machine is already deployed or Allocated.");
+                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated");
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
             flushErrors();
         }
@@ -914,8 +906,7 @@ public class VirtualMachineService extends DefaultApiService
                     APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    "The Virtual Machine is in a state in which cannot be undeployed.");
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
                 addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
                 flushErrors();
 
@@ -1002,11 +993,10 @@ public class VirtualMachineService extends DefaultApiService
             LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
-                "Undeploy of the virtual machine with name " + virtualMachine.getName()
-                    + " enqueued successfully!");
+                "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "The enqueuing in Tarantino was OK.");
+                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
 
             return idAsyncTask;
 
@@ -1024,8 +1014,7 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString());
             LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
@@ -1078,11 +1067,10 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.info("Applying the new state of the virtual machine id {} in tarantino!",
             virtualMachine.getId());
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "Applying the state of the virtual machine with name " + virtualMachine.getName()
-                + " enqueued successfully!");
+            "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "The enqueuing in Tarantino was OK. The virtual machine is locked");
+            "virtualMachine.applyVirtualMachineTarantinoEnqueued");
 
         lockVirtualMachine(virtualMachine);
         // tasksService.
@@ -1519,7 +1507,6 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /*
-     * Gets the temporally backup of the {@link VirtualMachine} (in order to restore its values).
      */
     public VirtualMachine getBackupVirtualMachine(final VirtualMachine vmachine)
     {
@@ -1663,5 +1650,42 @@ public class VirtualMachineService extends DefaultApiService
             }
         }
         return null;
+    }
+
+    /*
+     * @param vmId
+     * @return VirtualMachine with DC.
+     */
+    public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
+    {
+        VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+        if (virtualMachine.getHypervisor() != null)
+        {
+            Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
+        }
+        if (virtualMachine.getEnterprise() != null)
+        {
+            Hibernate.initialize(virtualMachine.getEnterprise());
+        }
+        if (virtualMachine.getDatastore() != null)
+        {
+            Hibernate.initialize(virtualMachine.getDatastore());
+        }
+        if (virtualMachine.getVirtualMachineTemplate() != null)
+        {
+            Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
+        }
+        return virtualMachine;
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateVirtualMachineBySystem(final VirtualMachine vm)
+    {
+        repo.update(vm);
     }
 }
