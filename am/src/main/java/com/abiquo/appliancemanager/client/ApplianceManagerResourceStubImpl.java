@@ -52,10 +52,10 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         super(baseUrl);
     }
 
-    private void checkResponse(final ClientResponse response)
+    private void checkResponse(final ClientResponse response, final int expectedStatus)
     {
         final Integer httpStatus = response.getStatusCode();
-        if (httpStatus != 200)
+        if (httpStatus != expectedStatus)
         {
             String cause = null;
             try
@@ -81,7 +81,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
         // default queryParam(FORAMT, "ovfpi")
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(TemplateDto.class);
     }
@@ -92,7 +92,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "envelope").get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(EnvelopeType.class);
     }
@@ -103,7 +103,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(TemplatesStateDto.class);
     }
@@ -114,7 +114,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(RepositoryConfigurationDto.class);
     }
@@ -125,7 +125,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
     }
 
     public EnterpriseRepositoryDto getRepository(final String idEnterprise)
@@ -142,7 +142,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(EnterpriseRepositoryDto.class);
     }
@@ -153,7 +153,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).delete();
 
-        checkResponse(response);
+        checkResponse(response, 204);
     }
 
     /**
@@ -167,7 +167,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         ClientResponse response =
             resource.accept(MEDIA_TYPE).contentType(MediaType.TEXT_PLAIN).post(ovfId);
 
-        checkResponse(response);
+        checkResponse(response, 204);
 
     }
 
@@ -184,7 +184,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
 
         ClientResponse response = resource.accept(MEDIA_TYPE).queryParam(FORAMT, "status").get();
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(TemplateStateDto.class);
         // final int httpStatus = response.getStatusCode();
@@ -203,7 +203,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         ClientResponse response =
             resource.accept(MediaType.TEXT_PLAIN).contentType(MediaType.TEXT_PLAIN).post(name);
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(String.class);
     }
@@ -223,7 +223,7 @@ public class ApplianceManagerResourceStubImpl extends ApplianceManagerResourceSt
         ClientResponse response =
             resource.accept(MediaType.TEXT_PLAIN).contentType(MEDIA_TYPE).post(diskInfo);
 
-        checkResponse(response);
+        checkResponse(response, 200);
 
         return response.getEntity(String.class);
     }

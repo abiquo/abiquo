@@ -98,7 +98,7 @@
                 BindingUtils.bindSetter(uriChange,applianceManagerInput,"isUriValid");
 
                 if (!virtualFactoryType)
-                    virtualFactoryType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_FACTORY);
+                    virtualFactoryType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.TARANTINO);
                 if (!virtualSystemMonitorType)
                     virtualSystemMonitorType = AbiCloudModel.getInstance().infrastructureManager.getRemoteServiceTypeById(RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
                 if (!applianceManagerType)
