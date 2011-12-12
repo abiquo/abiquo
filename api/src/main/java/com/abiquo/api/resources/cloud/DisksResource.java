@@ -72,7 +72,7 @@ public class DisksResource extends AbstractResource
     /**
      * Exposes the method to query all the extra disks generated into a virtual datacenter.
      * 
-     * @param vdcId identifeir of the virtual datacenter
+     * @param vdcId identifier of the virtual datacenter
      * @param restBuilder a Context-injected object to create the links of the Dto
      * @return a instance of {@link DisksManagementDto}. Is the wrapper list for
      *         {@link DiskManagementDto} object.

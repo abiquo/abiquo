@@ -34,6 +34,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datastore;
@@ -143,4 +144,24 @@ public class DiskManagement extends RasdManagement
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 
+    @Override
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void detach()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isAttached()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

@@ -149,7 +149,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * Gets the configured DCHP in the datacenter to set its URL in the
      * {@link com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.NetworkConfiguration}
      */
-    private void addDhcpConfiguration(final Integer datacenterId,
+    public void addDhcpConfiguration(final Integer datacenterId,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         // TODO 2.0 will support manual DHCP configuration
@@ -272,8 +272,9 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     /**
-     * In community there are no statful template. If some {@link VirtualImageConversion} attached use
-     * his properties when defining the {@link PrimaryDisk}, else use the {@link VirtualMachineTemplate}
+     * In community there are no statful template. If some {@link VirtualImageConversion} attached
+     * use his properties when defining the {@link PrimaryDisk}, else use the
+     * {@link VirtualMachineTemplate}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -283,9 +284,18 @@ public class TarantinoJobCreator extends DefaultApiService
     public void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
-        String datastore =
-            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
-                .getDatastore().getDirectory());
+        String datastore;
+        if (virtualMachine.getDatastore().getDirectory() != null
+            && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+        {
+            datastore =
+                FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                    .getDatastore().getDirectory());
+        }
+        else
+        {
+            datastore = virtualMachine.getDatastore().getRootPath();
+        }
 
         // Repository Manager address
         List<RemoteService> services =

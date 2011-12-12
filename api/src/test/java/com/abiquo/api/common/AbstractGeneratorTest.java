@@ -67,6 +67,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
@@ -145,6 +146,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected IconGenerator iconGenerator = new IconGenerator(seed);
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
+    
+    protected DiskManagementGenerator diskGenerator = new DiskManagementGenerator(seed);
 
     protected InitiatorMappingGenerator initiatorMappingGenerator =
         new InitiatorMappingGenerator(seed);

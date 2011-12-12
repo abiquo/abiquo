@@ -492,6 +492,10 @@ public class RemoteServiceService extends DefaultApiService
                 }
             }
         }
+        else if (flushErrors)
+        {
+            addConflictErrors(APIError.REMOTE_SERVICE_CANNOT_BE_CHECKED);
+        }
 
         if (flushErrors)
         {

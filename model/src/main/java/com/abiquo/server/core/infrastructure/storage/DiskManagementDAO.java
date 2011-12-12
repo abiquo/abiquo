@@ -101,7 +101,7 @@ public class DiskManagementDAO extends DefaultDAOBase<Integer, DiskManagement>
      * @param diskOrder sequence order inside the virtual machine of the disk
      * @return the found {@link DiskManagement}
      */
-    public DiskManagement findHardDisksByVirtualMachine(final VirtualMachine vm,
+    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
         final Integer diskId)
     {
         Query finalQuery = getSession().createQuery(GET_DISK_INTO_VIRTUALMACHINE);

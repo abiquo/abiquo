@@ -36,6 +36,8 @@ ALTER TABLE `kinton`.`network_configuration` DROP COLUMN `dhcp_service_id`;
 
 DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 
+ALTER TALBE `kinton`.`virtualmachine` ADD COLUMN `temporal` int(10) unsigned default NULL;
+ALTER TALBE `kinton`.`rasd_management` ADD COLUMN `temporal` int(10) unsigned default NULL;
 
 -- ---------------------------------------------- --
 --                 TABLE CREATION                 --

@@ -36,6 +36,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -370,6 +371,27 @@ public class IpPoolManagement extends RasdManagement
 
             return null;
         }
+    }
+
+    @Override
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void detach()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isAttached()
+    {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

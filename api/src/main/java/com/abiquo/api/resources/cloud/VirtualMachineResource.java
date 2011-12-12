@@ -50,6 +50,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -92,18 +93,18 @@ public class VirtualMachineResource
 
     public static final String VIRTUAL_MACHINE_STATE = "/state";
 
-    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
-
-    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
-
-    public static final String VIRTUAL_MACHINE_STATE_REL = "state";
-
     // Chef constants to help link builders. Method implementation are premium.
     public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
 
     public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
+
+    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
+
+    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
+
+    public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
     @Autowired
     private VirtualMachineService vmService;
@@ -152,11 +153,17 @@ public class VirtualMachineResource
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
     {
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        AcceptedRequestDto request = new AcceptedRequestDto();
-        request.setStatusUrlLink(link);
-        request.setEntity(dto);
+        
+        if (link != null)
+        {
+            AcceptedRequestDto request = new AcceptedRequestDto();
+            request.setStatusUrlLink(link);
+            request.setEntity(dto);
 
-        return request;
+            return request;
+        }
+        
+        return null;
     }
 
     /**
@@ -574,8 +581,6 @@ public class VirtualMachineResource
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
                 .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
-
-        TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
     }

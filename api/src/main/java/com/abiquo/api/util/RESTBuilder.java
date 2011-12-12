@@ -56,6 +56,7 @@ import com.abiquo.api.resources.appslibrary.TemplateDefinitionResource;
 import com.abiquo.api.resources.appslibrary.TemplateDefinitionsResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
 import com.abiquo.api.resources.cloud.IpAddressesResource;
 import com.abiquo.api.resources.cloud.PrivateNetworkResource;
 import com.abiquo.api.resources.cloud.PrivateNetworksResource;
@@ -190,6 +191,15 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
+            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
+            params));
+        links.add(builder.buildRestLink(DatacenterResource.class,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI,
+            DatacenterResource.ACTION_MACHINES_CHECK_IPMI_REL, params));
 
         // links.add(builder.buildRestLink(OVFPackageListsResource.class,
         // OVFPackageListsResource.OVF_PACKAGE_LISTS_PATH, params));
@@ -483,8 +493,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
 
         }
 
@@ -1252,8 +1262,8 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineStorageConfigurationResource.DISK, String.valueOf(disk
-            .getAttachmentOrder()));
+        params.put(VirtualMachineStorageConfigurationResource.DISK,
+            String.valueOf(disk.getAttachmentOrder()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
@@ -1280,8 +1290,18 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildVirtualDatacenterDiskLinks(final DiskManagement disk)
     {
-        // TODO Auto-generated method stub
-        return null;
+        List<RESTLink> links = new ArrayList<RESTLink>();
+        Map<String, String> params = new HashMap<String, String>();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, disk.getVirtualDatacenter()
+            .getId().toString());
+        params.put(DiskResource.DISK, disk.getId().toString());
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+        links.add(builder.buildRestLink(DiskResource.class, REL_EDIT, params));
+
+        return links;
     }
 
     @Override

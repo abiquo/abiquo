@@ -158,48 +158,13 @@ public class VirtualMachinesResource extends AbstractResource
         throws Exception
     {
 
-        final VirtualMachine vm = createVirtualMachineFromDto(virtualMachineDto);
-
-        final Integer enterpriseId =
-            getLinkId(virtualMachineDto.searchLink(ENTERPRISE),
-                EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                ENTERPRISE, APIError.NON_EXISTENT_ENTERPRISE);
-        final Integer vmtemplateId =
-            getLinkId(virtualMachineDto.searchLink(VIRTUAL_MACHINE_TEMPLATE), virtualMachineTemplatePath(),
-                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM, VIRTUAL_MACHINE_TEMPLATE,
-                APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
-
         final VirtualMachine virtualMachine =
-            service.createVirtualMachine(vm, enterpriseId, vmtemplateId, vdcId, vappId);
+            service.createVirtualMachine(vdcId, vappId, virtualMachineDto);
 
         final VirtualMachineDto vappsDto =
             VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder);
 
         return vappsDto;
-    }
-
-    /** Do not include the virtual machine template param, will be added later. **/
-    private String virtualMachineTemplatePath()
-    {
-        return buildPath(EnterprisesResource.ENTERPRISES_PATH,
-            EnterpriseResource.ENTERPRISE_PARAM, //
-            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
-            DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-            VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH);
-    }
-
-    /**
-     * Creates a {@link VirtualMachine} out of the {@link VirtualMachineDto}.
-     * 
-     * @param virtualMachineDto
-     * @return
-     * @throws Exception VirtualMachine
-     */
-    private VirtualMachine createVirtualMachineFromDto(final VirtualMachineDto virtualMachineDto)
-        throws Exception
-    {
-        return ModelTransformer.persistenceFromTransport(VirtualMachine.class, virtualMachineDto);
-
     }
 
     @GET

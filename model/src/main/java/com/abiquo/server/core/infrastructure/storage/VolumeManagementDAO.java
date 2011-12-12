@@ -160,8 +160,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
         queryWithOrder.setString("poolId", sp.getId());
-        queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
-            + filters.getFilter() + "%");
+        queryWithOrder.setString("filterLike",
+            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = queryWithOrder.list().size();
 
@@ -193,8 +193,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
         queryWithOrder.setInteger("vdcId", vdc.getId());
-        queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
-            + filters.getFilter() + "%");
+        queryWithOrder.setString("filterLike",
+            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = queryWithOrder.list().size();
 
@@ -228,8 +228,8 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
                 SQL_VOLUME_MANAGEMENT_GET_VOLUMES_FROM_ENTERPRISE
                     + defineOrderBy(orderByEnum.getColumnSQL(), filters.getAsc()));
         query.setParameter("idEnterprise", id);
-        query.setParameter("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
-            + filters.getFilter() + "%");
+        query.setParameter("filterLike",
+            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = getSQLQueryResults(getSession(), query, VolumeManagement.class, 0).size();
 
@@ -262,10 +262,17 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
         // Add order filter to the query
         Query queryWithOrder = getSession().createQuery(req);
         queryWithOrder.setInteger("vdcId", vdc.getId());
-        queryWithOrder.setString("filterLike", filters.getFilter().isEmpty() ? "%" : "%"
-            + filters.getFilter() + "%");
+        queryWithOrder.setString("filterLike",
+            filters.getFilter().isEmpty() ? "%" : "%" + filters.getFilter() + "%");
 
         Integer size = queryWithOrder.list().size();
+
+        // Limit 0 means no size filter
+        if (filters.getLimit() == 0)
+        {
+            filters.setLimit(size);
+            filters.setStartwith(0);
+        }
 
         queryWithOrder.setFirstResult(filters.getStartwith());
         queryWithOrder.setMaxResults(filters.getLimit());

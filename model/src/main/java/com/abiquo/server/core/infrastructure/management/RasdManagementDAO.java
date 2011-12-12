@@ -96,4 +96,18 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
 
         return getResultList(crit);
     }
+
+    public void enableTemporalOnlyFilter()
+    {
+        getSession().disableFilter(RasdManagement.NOT_TEMP);
+        getSession().enableFilter(RasdManagement.ONLY_TEMP);
+
+    }
+
+    public void disabledTemporalOnlyFilter()
+    {
+        getSession().enableFilter(RasdManagement.NOT_TEMP);
+        getSession().disableFilter(RasdManagement.ONLY_TEMP);
+    }
+
 }
