@@ -194,9 +194,18 @@ public class TarantinoJobCreator extends DefaultApiService
 
         List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
 
-        String datastore =
-            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
-                .getDatastore().getDirectory());
+        String datastore;
+        if (virtualMachine.getDatastore().getDirectory() != null
+            && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+        {
+            datastore =
+                FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                    .getDatastore().getDirectory());
+        }
+        else
+        {
+            datastore = virtualMachine.getDatastore().getRootPath();
+        }
 
         DiskControllerType cntrlType =
             getDiskController(virtualMachine.getHypervisor().getType(), false, false);

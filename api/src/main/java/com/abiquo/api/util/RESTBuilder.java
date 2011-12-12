@@ -1324,4 +1324,17 @@ public class RESTBuilder implements IRESTBuilder
         return null;
     }
 
+    @Override
+    public RESTLink buildVirtualMachineLink(final Integer vdc, final Integer vapp, final Integer vm)
+    {
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        Map params = new HashMap();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc);
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vapp);
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm);
+
+        return builder.buildRestLink(VirtualMachineResource.class, "", params);
+    }
+
 }

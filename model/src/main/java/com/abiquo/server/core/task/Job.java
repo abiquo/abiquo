@@ -59,7 +59,8 @@ public class Job extends RedisEntityBase
         this.data = new HashMap<String, String>();
 
         this.state = JobState.PENDING;
-        this.rollbackState = JobState.UNKNOWN;
+        this.rollbackState = JobState.PENDING;
+        description = "";
     }
 
     @Override
@@ -73,7 +74,7 @@ public class Job extends RedisEntityBase
         return id;
     }
 
-    public void setId(String id)
+    public void setId(final String id)
     {
         this.id = id;
     }
@@ -83,7 +84,7 @@ public class Job extends RedisEntityBase
         return type;
     }
 
-    public void setType(JobType type)
+    public void setType(final JobType type)
     {
         this.type = type;
     }
@@ -93,7 +94,7 @@ public class Job extends RedisEntityBase
         return state;
     }
 
-    public void setState(JobState state)
+    public void setState(final JobState state)
     {
         this.state = state;
     }
@@ -103,7 +104,7 @@ public class Job extends RedisEntityBase
         return rollbackState;
     }
 
-    public void setRollbackState(JobState rollbackState)
+    public void setRollbackState(final JobState rollbackState)
     {
         this.rollbackState = rollbackState;
     }
@@ -113,7 +114,7 @@ public class Job extends RedisEntityBase
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -128,7 +129,7 @@ public class Job extends RedisEntityBase
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp)
+    public void setTimestamp(final long timestamp)
     {
         this.timestamp = timestamp;
     }
@@ -138,7 +139,7 @@ public class Job extends RedisEntityBase
         return parentTaskId;
     }
 
-    public void setParentTaskId(String parentTaskId)
+    public void setParentTaskId(final String parentTaskId)
     {
         this.parentTaskId = parentTaskId;
     }
