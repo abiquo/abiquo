@@ -41,17 +41,28 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+//import com.abiquo.abicloud.taskservice.factory.TaskServiceFactory;
+//import com.abiquo.abicloud.taskservice.factory.TaskServiceException;
 
 //TODO @Task 
 //@Task(interval = 1, timeUnit = TimeUnit.MINUTES) -> Only once at the beggining
-//@Service("vsmSubscriber")
-@Task
+/**
+ * Implements Virtual System Monitor subscription initialization and checks.
+ * 
+ * @author daniel.estevez
+ */
+@Service("vsmSubscriber")
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VSMSubscriber
 {
 
     /** The logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VSMSubscriber.class);
+
+    /**
+     * We assure we only execute subscriptions once. TO BE Changed?
+     */
+    private static boolean executed = false;
 
     @Autowired
     protected TracerLogger tracer;
@@ -81,8 +92,13 @@ public class VSMSubscriber
         {
             LOGGER.info("Refreshing Virtual System Monitor subscriptions");
 
+
             // Subscriptions should work. If process fails, the task will be rescheduled.
-            // XXX TaskServiceFactory.getService().unschedule(VSMSubscriber.class);
+            // TaskServiceFactory.getService().unschedule(VSMSubscriber.class);
+
+            LOGGER.info("VSMSubscriber.executed is now : " + VSMSubscriber.executed);
+            if (VSMSubscriber.executed)
+                return;
 
 
             // Get the Virtual appliance list
@@ -102,8 +118,12 @@ public class VSMSubscriber
                         vsmStub.subscribe(remoteService, vMachine);
                     }
                 }
-
             }
+
+            // Task finished ok. It should be unscheduled
+            LOGGER
+                .info("VSMSubscriber.executed set to TRUERefreshing Virtual System Monitor subscriptions");
+            VSMSubscriber.executed = true;
 
         }
         catch (HibernateException e)
@@ -112,6 +132,7 @@ public class VSMSubscriber
                 e);
             // tracer.log(Seve, component, event, message, args)
             // Task should be re-scheduled
+            // TaskServiceFactory.getService().schedule(VSMSubscriber.class);
         }
     }
 }
