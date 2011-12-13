@@ -41,6 +41,9 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.tracer.ComponentType;
+import com.abiquo.tracer.EventType;
+import com.abiquo.tracer.SeverityType;
 
 /**
  * Implements Virtual System Monitor subscription initialization and checks.
@@ -126,10 +129,8 @@ public class VSMSubscriber
         {
             LOGGER.error("An error was occurred when refreshing the VSM subscriptions caused by:",
                 e);
-            // tracer.log(SeverityType., ComponentType., event, message, args)
-            // tracer.log(Seve, component, event, message, args)
-            // Task should be re-scheduled
-            // TaskServiceFactory.getService().schedule(VSMSubscriber.class);
+            tracer.log(SeverityType.MAJOR, ComponentType.API, EventType.REMOTE_SERVICES_CHECK,
+                "vsm.subscriber.error", e.getCause());
 
             // Uncomment this to enable only-at-the-beginning execution
             /**
