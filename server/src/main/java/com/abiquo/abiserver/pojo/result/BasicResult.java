@@ -65,6 +65,8 @@ public class BasicResult
 
     private int resultCode;
 
+    private String errorCode;
+
     public BasicResult()
     {
         success = false;
@@ -77,7 +79,7 @@ public class BasicResult
         return success;
     }
 
-    public void setSuccess(Boolean success)
+    public void setSuccess(final Boolean success)
     {
         this.success = success;
     }
@@ -87,7 +89,7 @@ public class BasicResult
         return message;
     }
 
-    public void setMessage(String message)
+    public void setMessage(final String message)
     {
         this.message = message;
     }
@@ -97,9 +99,19 @@ public class BasicResult
         return resultCode;
     }
 
-    public void setResultCode(int resultCode)
+    public void setResultCode(final int resultCode)
     {
         this.resultCode = resultCode;
+    }
+
+    public String getErrorCode()
+    {
+        return errorCode;
+    }
+
+    public void setErrorCode(final String errorCode)
+    {
+        this.errorCode = errorCode;
     }
 
 }
