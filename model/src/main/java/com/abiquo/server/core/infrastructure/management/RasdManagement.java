@@ -56,7 +56,7 @@ import com.softwarementors.validation.constraints.Required;
 public class RasdManagement extends DefaultEntityBase
 {
     /** The first attachment sequence number to be used. */
-    public static final int FIRST_ATTACHMENT_SEQUENCE = 1;
+    public static final int FIRST_ATTACHMENT_SEQUENCE = 0;
 
     public static final String TABLE_NAME = "rasd_management";
 
@@ -261,18 +261,23 @@ public class RasdManagement extends DefaultEntityBase
 
     public void attach(final int sequence, final VirtualMachine vm)
     {
-        // TODO make it abstract
+        throw new UnsupportedOperationException("Must call concrete subclass attach method");
+    }
+    
+    public void attach(final int sequence, final VirtualMachine vm, final VirtualAppliance vapp)
+    {
+        attach(sequence, vm);
+        setVirtualAppliance(vapp);
     }
 
     public void detach()
     {
-        // TODO make it abstract
+        throw new UnsupportedOperationException("Must call concrete subclass dettach method");
     }
 
     public boolean isAttached()
     {
-        // TODO make it abstract
-        return false;
+        throw new UnsupportedOperationException("Must call concrete subclass 'isAttached' method");
     }
 
 }
