@@ -34,7 +34,6 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1992,6 +1991,12 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
     {
         VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+
+        if (virtualMachine == null)
+        {
+            return null;
+        }
+
         if (virtualMachine.getHypervisor() != null)
         {
             Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
@@ -2008,6 +2013,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
         }
+
         return virtualMachine;
     }
 
