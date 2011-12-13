@@ -681,6 +681,8 @@
 
                 <virtualmachine:VirtualMachineRenderer id="virtualMachineRenderer"
                 	type="INFRASTRUCTURE"
+                	datacenter="{this._dataCenter}"
+                	rack="{this._physicalMachine.assignedTo as Rack}"
                 	physicalMachine="{this._physicalMachine}"
                 	hypervisor="{physicalMachineRenderer.hypervisor}"
                     width="100%" height="100%"
