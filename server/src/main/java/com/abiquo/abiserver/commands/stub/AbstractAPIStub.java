@@ -365,6 +365,7 @@ public class AbstractAPIStub
         {
             ErrorsDto errors = response.getEntity(ErrorsDto.class);
             result.setMessage(errors.toString());
+            result.setErrorCode(errors.getCollection().get(0).getCode());
             if (errors.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
@@ -389,6 +390,7 @@ public class AbstractAPIStub
         {
             AbiquoException abiquoException = (AbiquoException) ex;
             result.setMessage(abiquoException.getMessage());
+            result.setErrorCode(abiquoException.getErrors().get(0).getCode());
             if (abiquoException.hasError("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
