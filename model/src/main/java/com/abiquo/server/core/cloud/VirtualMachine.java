@@ -600,7 +600,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of disks */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = DiskManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = DiskManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<DiskManagement> disks;
 
@@ -615,7 +615,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of volumes */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = VolumeManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = VolumeManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<VolumeManagement> volumes;
 
@@ -630,7 +630,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of ips */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = IpPoolManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = IpPoolManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<IpPoolManagement> ips;
 

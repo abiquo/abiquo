@@ -159,21 +159,25 @@ public class DiskManagement extends RasdManagement
     @Override
     public void attach(final int sequence, final VirtualMachine vm)
     {
-        // TODO Auto-generated method stub
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
 
+        setAttachmentOrder(sequence);
+        setVirtualMachine(vm);
     }
 
     @Override
     public void detach()
     {
-        // TODO Auto-generated method stub
-
+        setVirtualMachine(null);
+        setVirtualAppliance(null);
     }
 
     @Override
     public boolean isAttached()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return getVirtualMachine() != null;
     }
 }
