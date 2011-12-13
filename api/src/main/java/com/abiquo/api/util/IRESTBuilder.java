@@ -236,4 +236,6 @@ public interface IRESTBuilder
 
     public List<RESTLink> buildVirtualDatacenterTierLinks(Integer virtualDatacenterId, Integer id);
 
+    public RESTLink buildMovedVolumeLinks(VolumeManagement movedVolume);
+
 }

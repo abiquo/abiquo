@@ -465,8 +465,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
-                .getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
+                icon.getPath(), params));
 
         }
 
@@ -1226,8 +1226,8 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineStorageConfigurationResource.DISK, String.valueOf(disk
-            .getAttachmentOrder()));
+        params.put(VirtualMachineStorageConfigurationResource.DISK,
+            String.valueOf(disk.getAttachmentOrder()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
@@ -1278,6 +1278,13 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildVirtualDatacenterTierLinks(final Integer virtualDatacenterId,
         final Integer id)
     {
+        return null;
+    }
+
+    @Override
+    public RESTLink buildMovedVolumeLinks(final VolumeManagement movedVolume)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 
