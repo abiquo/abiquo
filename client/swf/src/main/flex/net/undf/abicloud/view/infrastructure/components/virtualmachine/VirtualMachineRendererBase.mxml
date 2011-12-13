@@ -69,18 +69,32 @@
             * To access from Infrastructure
             * *****/
             
-            protected var _datacenter:DataCenter;
+            private var _datacenter:DataCenter;
             
             public function set datacenter(value:DataCenter):void
             {
                 this._datacenter = value;
+                dispatchEvent(new Event("datacenterChange"));
             }
             
-            protected var _rack:Rack;
+            [Bindable(event="datacenterChange")]
+            public function get datacenter():DataCenter
+            {
+                return this._datacenter;
+            }
+            
+            private var _rack:Rack;
             
             public function set rack(value:Rack):void
             {
                 this._rack = value;
+                dispatchEvent(new Event("rackChange"));
+            }
+            
+            [Bindable(event="rackChange")]
+            public function get rack():Rack
+            {
+                return this._rack;
             }
             
             protected var _physicalMachine:PhysicalMachine;
@@ -88,6 +102,13 @@
             public function set physicalMachine(value:PhysicalMachine):void
             {
             	this._physicalMachine = value;
+            	dispatchEvent(new Event("physicalMachineChange"));
+            }
+            
+            [Bindable(event="physicalMachineChange")]
+            public function get physicalMachine():PhysicalMachine
+            {
+                return this._physicalMachine;
             }
             
             /*******

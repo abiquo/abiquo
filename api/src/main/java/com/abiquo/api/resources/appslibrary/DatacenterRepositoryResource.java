@@ -95,7 +95,7 @@ public class DatacenterRepositoryResource extends AbstractResource
     {
         // TODO check enterprise can use the datacenter
 
-        Repository repo = vmtemplateService.getDatacenterRepository(dcId);
+        Repository repo = vmtemplateService.getDatacenterRepository(dcId, enterpId);
 
         final String amUri =
             infService.getRemoteService(dcId, RemoteServiceType.APPLIANCE_MANAGER).getUri();
