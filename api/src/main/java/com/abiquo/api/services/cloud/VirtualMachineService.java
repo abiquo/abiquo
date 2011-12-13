@@ -33,7 +33,6 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -344,8 +343,8 @@ public class VirtualMachineService extends DefaultApiService
                 vmRequirements.createVirtualMachineRequirements(vm, newValues);
             vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}", newValues
-                .getId());
+            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
+                newValues.getId());
 
             LOGGER
                 .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -503,8 +502,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
@@ -649,8 +648,10 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Create node virtual image with name virtual machine: {}"
             + virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
-            new NodeVirtualImage(virtualMachine.getName(), virtualAppliance, virtualMachine
-                .getVirtualMachineTemplate(), virtualMachine);
+            new NodeVirtualImage(virtualMachine.getName(),
+                virtualAppliance,
+                virtualMachine.getVirtualMachineTemplate(),
+                virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
         LOGGER.debug("Node virtual image created!");
     }
@@ -888,8 +889,8 @@ public class VirtualMachineService extends DefaultApiService
             default:
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY
-                        .getMessage());
+                    EventType.VM_UNDEPLOY,
+                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
@@ -976,8 +977,8 @@ public class VirtualMachineService extends DefaultApiService
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
-            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!", virtualMachine
-                .getId());
+            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
+                virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
                 "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
@@ -1080,8 +1081,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
-                    .getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -1499,6 +1500,12 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
     {
         VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+
+        if (virtualMachine == null)
+        {
+            return null;
+        }
+
         if (virtualMachine.getHypervisor() != null)
         {
             Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
@@ -1515,6 +1522,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
         }
+
         return virtualMachine;
     }
 
