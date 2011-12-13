@@ -192,7 +192,7 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc)
     {
 
-        List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
+        List<DiskManagement> hardDisks = virtualMachine.getDisks();
 
         String datastore;
         if (virtualMachine.getDatastore().getDirectory() != null
@@ -398,11 +398,7 @@ public class TarantinoJobCreator extends DefaultApiService
     public void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
-
-        List<IpPoolManagement> ipPoolManagementByMachine =
-            vdcRep.findIpsByVirtualMachine(virtualMachine);
-
-        for (IpPoolManagement i : ipPoolManagementByMachine)
+        for (IpPoolManagement i : virtualMachine.getIps())
         {
             if (i.getConfigureGateway())
             {

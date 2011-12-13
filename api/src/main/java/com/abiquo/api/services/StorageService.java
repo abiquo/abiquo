@@ -134,21 +134,8 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        for (DiskManagement disk : disks)
-        {
-            // if the hard disk is already attached to another virtual machine
-            // , raise a conflict error.
-            if (disk.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
-                flushErrors();
-            }
-            disk.setVirtualAppliance(vapp);
-            disk.setVirtualMachine(newvm);
-            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
-
-            newvm.getDisks().add(disk);
-        }
+        
+        newvm.getDisks().addAll(disks);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
@@ -202,19 +189,7 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        for (DiskManagement disk : disks)
-        {
-            // if the hard disk is already attached to another virtual machine
-            // , raise a conflict error.
-            if (disk.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
-                flushErrors();
-            }
-            disk.setVirtualAppliance(vapp);
-            disk.setVirtualMachine(newvm);
-            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
-        }
+        
         newvm.setDisks(disks);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
@@ -453,7 +428,7 @@ public class StorageService extends DefaultApiService
         }
         createdDisk.setVirtualAppliance(vapp);
         createdDisk.setVirtualMachine(vm);
-        createdDisk.setAttachmentOrder(getFreeAttachmentSlot(vm));
+        createdDisk.setAttachmentOrder(repo.findDisksAndVolumesByVirtualMachine(vm).size());
 
         vdcRepo.updateDisk(createdDisk);
 
@@ -554,40 +529,6 @@ public class StorageService extends DefaultApiService
             addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.getCode(), ex.toString()));
             flushErrors();
         }
-    }
-
-    /**
-     * Get the next free attachment slot to be used to attach a disk or volume to the virtual
-     * machine.
-     * 
-     * @param vm The virtual machine where the disk will be attached.
-     * @return The free slot to use.
-     */
-    protected int getFreeAttachmentSlot(final VirtualMachine vm)
-    {
-        // The list is already ordered by attachment ascendent order
-        List< ? extends RasdManagement> attachments = repo.findDisksAndVolumesByVirtualMachine(vm);
-
-        // In Hyper-v only 2 attached volumes are allowed
-        if (vm.getHypervisor() != null && vm.getHypervisor().getType() == HypervisorType.HYPERV_301
-            && attachments.size() >= 2)
-        {
-            addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
-            flushErrors();
-        }
-
-        // Find the first free slot
-        for (int i = 0; i < attachments.size(); i++)
-        {
-            long sequence = attachments.get(i).getAttachmentOrder();
-            if (sequence != i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE)
-            {
-                return i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE; // Found gap
-            }
-        }
-
-        // If no gap was found, use the next sequence
-        return attachments.size() + RasdManagement.FIRST_ATTACHMENT_SEQUENCE;
     }
 
     /**

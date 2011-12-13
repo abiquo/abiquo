@@ -81,8 +81,7 @@ public class NetworkService extends DefaultApiService
      * @param ip {@link IpPoolManagement} entity that will store this rasd.
      * @return the created Rasd entity.
      */
-    public static Rasd createRasdEntity(final VirtualMachine vm, final IpPoolManagement ip,
-        final Integer order)
+    public static Rasd createRasdEntity(final VirtualMachine vm, final IpPoolManagement ip)
     {
         // create the Rasd object.
         Rasd rasd =
@@ -97,8 +96,6 @@ public class NetworkService extends DefaultApiService
         rasd.setAddress(ip.getMac());
         rasd.setParent(ip.getNetworkName());
         rasd.setResourceSubType(String.valueOf(ip.getVlanNetwork().getType().ordinal()));
-        // Configuration Name sets the order in the virtual machine, put it in the last place.
-        rasd.setConfigurationName(String.valueOf(order));
 
         return rasd;
     }
@@ -186,12 +183,11 @@ public class NetworkService extends DefaultApiService
                 ip.setName(ip.getMac() + "_host");
         }
 
-        Rasd rasd = createRasdEntity(vm, ip, 0);
+        Rasd rasd = createRasdEntity(vm, ip);
         repo.insertRasd(rasd);
-
         ip.setRasd(rasd);
-        ip.setVirtualAppliance(vapp);
-        ip.setVirtualMachine(vm);
+        
+        ip.attach(0, vm, vapp);
         repo.updateIpManagement(ip);
 
         return;
@@ -221,25 +217,9 @@ public class NetworkService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
-        for (IpPoolManagement ip : ips)
-        {
-            // check if the ip address is already defined to a virtual machine
-            if (ip.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
-                flushErrors();
-            }
 
-            Rasd rasd = createRasdEntity(newvm, ip, repo.findIpsByVirtualMachine(newvm).size());
-            repo.insertRasd(rasd);
-
-            ip.setRasd(rasd);
-            ip.setVirtualAppliance(vapp);
-            ip.setVirtualMachine(newvm);
-
-            newvm.getIps().add(ip);
-        }
-
+        newvm.getIps().addAll(ips);
+        
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
 
@@ -267,23 +247,6 @@ public class NetworkService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
-        for (IpPoolManagement ip : ips)
-        {
-            // check if the ip address is already defined to a virtual machine
-            if (ip.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.VLANS_IP_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
-                flushErrors();
-            }
-
-            Rasd rasd = createRasdEntity(newvm, ip, repo.findIpsByVirtualMachine(newvm).size());
-            repo.insertRasd(rasd);
-
-            ip.setRasd(rasd);
-            ip.setVirtualAppliance(vapp);
-            ip.setVirtualMachine(newvm);
-
-        }
 
         newvm.setIps(ips);
 

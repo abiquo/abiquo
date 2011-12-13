@@ -724,12 +724,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
         links.add(builder.buildRelLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NIC, params,
-            VirtualMachineNetworkConfigurationResource.NIC));
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH));
         links.add(builder.buildRelLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH,
-            VirtualMachineStorageConfigurationResource.DISK, params,
-            VirtualMachineStorageConfigurationResource.DISK));
+            VirtualMachineStorageConfigurationResource.DISKS_PATH, params,
+            VirtualMachineStorageConfigurationResource.DISKS_PATH));
         links.add(builder.buildRelLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
