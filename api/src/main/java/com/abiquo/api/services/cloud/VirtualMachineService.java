@@ -1658,6 +1658,12 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
     {
         VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+
+        if (virtualMachine == null)
+        {
+            return null;
+        }
+
         if (virtualMachine.getHypervisor() != null)
         {
             Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
@@ -1674,6 +1680,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
         }
+
         return virtualMachine;
     }
 
