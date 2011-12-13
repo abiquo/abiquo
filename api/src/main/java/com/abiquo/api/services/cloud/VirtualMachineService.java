@@ -26,6 +26,7 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +34,6 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +96,10 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.management.RasdDAO;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -116,6 +120,12 @@ public class VirtualMachineService extends DefaultApiService
     protected VirtualMachineRep repo;
 
     @Autowired
+    protected RasdManagementDAO rasdDao;
+
+    @Autowired
+    protected RasdDAO rasdRawRao;
+
+    @Autowired
     protected VirtualApplianceRep vappRep;
 
     @Autowired
@@ -128,7 +138,7 @@ public class VirtualMachineService extends DefaultApiService
     private UserService userService;
 
     @Autowired
-    private EnterpriseRep enterpriseRep;
+    protected EnterpriseRep enterpriseRep;
 
     @Autowired
     private VirtualMachineAllocatorService vmAllocatorService;
@@ -143,7 +153,7 @@ public class VirtualMachineService extends DefaultApiService
     private InfrastructureRep infRep;
 
     @Autowired
-    private AppsLibraryRep appsLibRep;
+    protected AppsLibraryRep appsLibRep;
 
     @Autowired
     private TarantinoService tarantino;
@@ -167,6 +177,7 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachineService(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
+        this.rasdDao = new RasdManagementDAO(em);
         this.vappRep = new VirtualApplianceRep(em);
         this.vdcRep = new VirtualDatacenterRep(em);
         this.remoteServiceService = new RemoteServiceService(em);
@@ -344,8 +355,8 @@ public class VirtualMachineService extends DefaultApiService
                 vmRequirements.createVirtualMachineRequirements(vm, newValues);
             vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}", newValues
-                .getId());
+            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
+                newValues.getId());
 
             LOGGER
                 .debug("Creating the temporary register in Virtual Machine for rollback purposes");
@@ -503,8 +514,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // Does it has volumes? PREMIUM
         detachVolumesFromVirtualMachine(virtualMachine);
-        LOGGER.debug("Detached the virtual machine's volumes with UUID {}", virtualMachine
-            .getUuid());
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
 
         repo.deleteVirtualMachine(virtualMachine);
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
@@ -649,8 +660,10 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Create node virtual image with name virtual machine: {}"
             + virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
-            new NodeVirtualImage(virtualMachine.getName(), virtualAppliance, virtualMachine
-                .getVirtualMachineTemplate(), virtualMachine);
+            new NodeVirtualImage(virtualMachine.getName(),
+                virtualAppliance,
+                virtualMachine.getVirtualMachineTemplate(),
+                virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
         LOGGER.debug("Node virtual image created!");
     }
@@ -888,8 +901,8 @@ public class VirtualMachineService extends DefaultApiService
             default:
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY, APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY
-                        .getMessage());
+                    EventType.VM_UNDEPLOY,
+                    APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
@@ -976,8 +989,8 @@ public class VirtualMachineService extends DefaultApiService
 
             String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
-            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!", virtualMachine
-                .getId());
+            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
+                virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
                 "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
@@ -1080,8 +1093,8 @@ public class VirtualMachineService extends DefaultApiService
         for (RemoteService r : remoteServicesByDatacenter)
         {
             ErrorsDto checkRemoteServiceStatus =
-                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(), r
-                    .getUri());
+                remoteServiceService.checkRemoteServiceStatus(r.getDatacenter(), r.getType(),
+                    r.getUri());
             errors.addAll(checkRemoteServiceStatus);
         }
 
@@ -1493,12 +1506,164 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /*
+     */
+    public VirtualMachine getBackupVirtualMachine(final VirtualMachine vmachine)
+    {
+        final VirtualMachine vmbackup = repo.findBackup(vmachine);
+
+        if (vmbackup == null)
+        {
+            addNotFoundErrors(APIError.VIRTUAL_MACHINE_BACKUP_NOT_FOUND);
+            flushErrors();
+        }
+
+        return vmbackup;
+    }
+
+    public void deleteBackupResources(final VirtualMachine vm)
+    {
+        for (RasdManagement rasd : getBackupResources(vm))
+        {
+            deleteResource(rasd);
+        }
+    }
+
+    protected List<RasdManagement> getBackupResources(final VirtualMachine rollbackVm)
+    {
+        try
+        {
+            rasdDao.enableTemporalOnlyFilter();
+
+            return rollbackVm.getRasdManagements();
+            // List<VolumeManagement> rollbackVolumes = rollbackVm.getv
+            // List<DiskManagement> rollbackDisks = rollbackVm.getDisks();
+            // List<IpPoolManagement> rollbackIps = rollbackVm.geti
+        }
+        finally
+        {
+            rasdDao.disabledTemporalOnlyFilter();
+        }
+    }
+
+    /**
+    * 
+    * */
+    public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
+        final VirtualMachine rollbackVm)
+    {
+
+        // will use VsmServiceStub to force a refresh
+        // updatedVm.setState(VirtualMachineState.LOCKED);
+
+        // backup virtual machine properties
+        updatedVm.setCpu(rollbackVm.getCpu());
+        updatedVm.setDatastore(rollbackVm.getDatastore());
+        updatedVm.setDescription(rollbackVm.getDescription());
+        updatedVm.setEnterprise(rollbackVm.getEnterprise());
+        updatedVm.setHdInBytes(rollbackVm.getHdInBytes());
+        updatedVm.setHighDisponibility(rollbackVm.getHighDisponibility());
+        updatedVm.setHypervisor(rollbackVm.getHypervisor());
+        updatedVm.setIdType(rollbackVm.getIdType());
+        updatedVm.setName(rollbackVm.getName());
+        updatedVm.setPassword(rollbackVm.getPassword());
+        updatedVm.setRam(rollbackVm.getRam());
+        updatedVm.setSubState(rollbackVm.getSubState());
+        updatedVm.setUser(rollbackVm.getUser());
+        updatedVm.setUuid(rollbackVm.getUuid());
+        updatedVm.setVdrpIP(rollbackVm.getVdrpIP());
+        updatedVm.setVdrpPort(rollbackVm.getVdrpPort());
+        updatedVm.setVirtualImageConversion(rollbackVm.getVirtualImageConversion());
+        updatedVm.setVirtualMachineTemplate(rollbackVm.getVirtualMachineTemplate());
+
+        List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
+        List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
+
+        // for updated if not temp -> delete rasd (if network) + delte / else update form temp
+        // (settemp=null)
+        for (RasdManagement updatedRasd : updatedResources)
+        {
+            RasdManagement rollbackRasd = getBackupResource(rollbackResources, updatedRasd.getId());
+            deleteResource(updatedRasd);
+
+            if (rollbackRasd != null) // restore the original resource attachment
+            {
+                restoreRollbackResouce(rollbackRasd, updatedVm);
+            }
+            // else the original vm do not include this resource (updatedRasd already deleted)
+
+        }
+
+        // for rollback if temp == 0 --> temp == null + attach a new machine
+        for (RasdManagement rollbackRasd : rollbackResources)
+        {
+            // updated vm do not include this resouces (deatach), we need to restore it
+            if (rollbackRasd.getTemporal() == 0)
+            {
+                restoreRollbackResouce(rollbackRasd, updatedVm);
+            }
+        }
+
+        rasdDao.flush(); // update virtual machine resources
+
+        repo.update(updatedVm); // remove orphans !!!
+        repo.deleteVirtualMachine(rollbackVm);
+
+        // TODO check temporal not set in updatedVm
+
+        return updatedVm;
+    }
+
+    private void deleteResource(final RasdManagement rasd)
+    {
+        rasd.detach();
+        rasd.setVirtualMachine(null); // FIXME until detach is not implemented in all
+                                      // RasdManagements
+
+        if (rasd instanceof IpPoolManagement)
+        {
+            rasdRawRao.remove(rasd.getRasd());
+        }
+
+        rasdDao.remove(rasd);
+    }
+
+    private void restoreRollbackResouce(final RasdManagement rasd, final VirtualMachine vm)
+    {
+
+        // using the original sequence
+        final Integer originalSequence = rasd.getRasd().getGeneration().intValue();
+        rasd.attach(originalSequence, vm);
+
+        rasd.setTemporal(null);
+    }
+
+    /** Find */
+    private RasdManagement getBackupResource(final List<RasdManagement> rollbackResources,
+        final Integer tempRasdManId)
+    {
+        for (RasdManagement rasdman : rollbackResources)
+        {
+            if (tempRasdManId.equals(rasdman.getTemporal()))
+            {
+                return rasdman;
+            }
+        }
+        return null;
+    }
+
+    /*
      * @param vmId
      * @return VirtualMachine with DC.
      */
     public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
     {
         VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+
+        if (virtualMachine == null)
+        {
+            return null;
+        }
+
         if (virtualMachine.getHypervisor() != null)
         {
             Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
@@ -1515,6 +1680,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
         }
+
         return virtualMachine;
     }
 

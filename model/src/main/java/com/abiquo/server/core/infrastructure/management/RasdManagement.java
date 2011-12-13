@@ -227,7 +227,7 @@ public class RasdManagement extends DefaultEntityBase
     {
         this.temporal = temporal;
     }
-    
+
     // **************************** Rasd delegating methods ***************************
 
     public String getDescription()
@@ -256,4 +256,23 @@ public class RasdManagement extends DefaultEntityBase
 
         getRasd().setGeneration(order < 0 ? 0L : order);
     }
+
+    // *************************** Resource state transitions ***************************
+
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        // TODO make it abstract
+    }
+
+    public void detach()
+    {
+        // TODO make it abstract
+    }
+
+    public boolean isAttached()
+    {
+        // TODO make it abstract
+        return false;
+    }
+
 }
