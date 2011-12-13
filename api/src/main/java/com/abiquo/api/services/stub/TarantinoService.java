@@ -25,6 +25,7 @@ import java.io.IOException;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.tasks.util.DatacenterTaskBuilder;
+import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
@@ -90,6 +92,8 @@ public class TarantinoService extends DefaultApiService
 
     public TarantinoService(final EntityManager em)
     {
+        this.tracer = new TracerLogger(); // TODO super(em)
+        
         remoteServiceService = new RemoteServiceService(em);
         jobCreator = new TarantinoJobCreator(em);
         vsm = new VsmServiceStub();
@@ -128,7 +132,7 @@ public class TarantinoService extends DefaultApiService
     private void send(final Datacenter datacenter, final DatacenterTasks tasks,
         final EventType event)
     {
-        TarantinoRequestProducer producer = new TarantinoRequestProducer(datacenter.getUuid());
+        TarantinoRequestProducer producer = getTarantinoProducer(datacenter);
 
         try
         {
@@ -153,6 +157,22 @@ public class TarantinoService extends DefaultApiService
 
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, event,
             "tarantino.taskEnqueued");
+    }
+
+    private TarantinoRequestProducer getTarantinoProducer(final Datacenter datacenter)
+    {
+        final String datacenterQueueId = datacenter.getUuid();
+        if (StringUtils.isEmpty(datacenterQueueId))
+        {
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNKNOWN, null, "tarantino.sendError",
+                APIError.DATACENTER_QUEUE_NOT_CONFIGURED.getMessage());
+
+            addNotFoundErrors(APIError.DATACENTER_QUEUE_NOT_CONFIGURED);
+            flushErrors();
+        }
+
+        return new TarantinoRequestProducer(datacenterQueueId);
     }
 
     /**

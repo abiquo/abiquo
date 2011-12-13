@@ -68,7 +68,8 @@ public enum APIError
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
         "The current enterprise cannot use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
         "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
-        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"), DATACENTER_QUEUE_NOT_CONFIGURED(
+        "DC-7", "Datacenter queues are not configured (check BPM and Tarantino remote services)"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
