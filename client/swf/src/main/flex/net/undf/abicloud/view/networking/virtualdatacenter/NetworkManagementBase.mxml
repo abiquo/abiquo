@@ -46,7 +46,7 @@
             public function set virtualDatacenter(value:VirtualDataCenter):void
             {
                 _virtualDatacenter = value;
-                if (this.visible)
+                if (privateNetworkManagement.visible)
                     privateNetworkManagement.virtualDatacenter = _virtualDatacenter;
             }
             
