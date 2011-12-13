@@ -23,7 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.common.Assert.assertLinkExist;
 import static com.abiquo.api.common.UriTestResolver.resolveEnterpriseURI;
-import static com.abiquo.api.common.UriTestResolver.resolveVirtualImageURI;
+import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineTemplateURI;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachinesURI;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -39,9 +39,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -55,6 +55,11 @@ import com.abiquo.server.core.enterprise.Role;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.Type;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.util.network.IPAddress;
+import com.abiquo.server.core.util.network.IPNetworkRang;
 
 public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 {
@@ -68,7 +73,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
     protected VirtualAppliance vapp;
 
-    protected VirtualImage vImage;
+    protected VirtualMachineTemplate vmtemplate;
+
+    protected VLANNetwork vlan;
 
     @BeforeMethod
     public void setUp()
@@ -79,7 +86,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         vdc = vdcGenerator.createInstance(datacenter, ent);
         vapp = vappGenerator.createInstance(vdc);
-        vImage = virtualImageGenerator.createInstance(ent, datacenter);
+        vmtemplate = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
+        vlan = vlanGenerator.createInstance(vdc.getNetwork());
+        vdc.setDefaultVlan(vlan);
     }
 
     @BeforeMethod
@@ -127,9 +136,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         final NodeVirtualImage nvi = nodeVirtualImageGenerator.createInstance(vapp, vm);
         final NodeVirtualImage nvi2 = nodeVirtualImageGenerator.createInstance(vapp, vm2);
 
-        vm.getVirtualImage().getRepository()
+        vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
-        vm2.getVirtualImage().getRepository()
+        vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
 
         final List<Object> entitiesToSetup = new ArrayList<Object>();
@@ -137,6 +146,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
         entitiesToSetup.add(ent);
         entitiesToSetup.add(datacenter);
         entitiesToSetup.add(dcallowed);
+        entitiesToSetup.add(vdc.getNetwork());
+        entitiesToSetup.add(vdc.getDefaultVlan().getConfiguration());
+        entitiesToSetup.add(vdc.getDefaultVlan());
         entitiesToSetup.add(vdc);
         entitiesToSetup.add(vapp);
         entitiesToSetup.add(vapp2);
@@ -148,9 +160,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(vm.getUser().getRole());
         entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm.getVirtualImage());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(machine);
         entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm);
@@ -163,9 +175,9 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
 
         entitiesToSetup.add(vm2.getUser().getRole());
         entitiesToSetup.add(vm2.getUser());
-        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate());
         entitiesToSetup.add(machine2);
         entitiesToSetup.add(vm2.getHypervisor());
         entitiesToSetup.add(vm2);
@@ -198,7 +210,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualApplianceId()
     {
-        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
             get(resolveVirtualMachinesURI(vdc.getId(), new Random().nextInt()));
@@ -212,7 +225,8 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void getVirtualMachinesRaises404WhenInvalidVirtualDatacenterId()
     {
-        setup(ent, datacenter, dcallowed, vdc, vapp);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
 
         final ClientResponse response =
             get(resolveVirtualMachinesURI(new Random().nextInt(), vapp.getId()));
@@ -225,34 +239,59 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void createVirtualMachine()
     {
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        setup(vmtemplate.getRepository(), vmtemplate.getCategory(), vmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        IPAddress ip =
+            IPAddress.newIPAddress(vdc.getDefaultVlan().getConfiguration().getAddress())
+                .nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vdc.getDefaultVlan()
+                .getConfiguration().getAddress()), IPNetworkRang.masktoNumberOfNodes(vdc
+                .getDefaultVlan().getConfiguration().getMask()));
+
+        List<Object> arrayIps = new ArrayList<Object>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool =
+                ipGenerator.createInstance(vdc, vdc.getDefaultVlan(), ip.toString());
+            ippool.setType(Type.PRIVATE);
+            arrayIps.add(ippool.getRasd());
+            arrayIps.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(arrayIps.toArray());
+
+        final VirtualMachine vm = vmGenerator.createInstance(vmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.CREATED.getStatusCode(),
+            response.getEntity(String.class).toString());
 
-        String vimageUrl =
-            resolveVirtualImageURI(vImage.getEnterprise().getId(), vImage.getRepository()
-                .getDatacenter().getId(), vImage.getId());
-        assertLinkExist(dto, vimageUrl, VirtualImageResource.VIRTUAL_IMAGE);
+        String vmtemplateUrl =
+            resolveVirtualMachineTemplateURI(vmtemplate.getEnterprise().getId(), vmtemplate
+                .getRepository().getDatacenter().getId(), vmtemplate.getId());
+        assertLinkExist(dto, vmtemplateUrl, VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
     }
 
     /**
-     * Attempt to create a virtual machine with a virtual image not in the same repository
+     * Attempt to create a virtual machine with a vmtemplate not in the same repository
      */
     @Test
-    public void createVirtualMachineInvalidVirtualImageDifferentDatacenter()
+    public void createVirtualMachineInvalidVirtualMachineTemplateDifferentDatacenter()
     {
         Datacenter otherDc = datacenterGenerator.createUniqueInstance();
-        VirtualImage otherVimage = virtualImageGenerator.createInstance(ent, otherDc);
+        VirtualMachineTemplate otherVmtemplate =
+            virtualMachineTemplateGenerator.createInstance(ent, otherDc);
 
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(otherDc, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        setup(otherDc, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
+            otherVmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        final VirtualMachine vm = vmGenerator.createInstance(otherVmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
@@ -260,18 +299,21 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Attempt to create a virtual machine with a virtual image not in the same enterprise
+     * Attempt to create a virtual machine with a vmtemplate not in the same enterprise
      */
     @Test
-    public void createVirtualMachineInvalidVirtualImageDifferentEnterprise()
+    public void createVirtualMachineInvalidVirtualMachineTemplateDifferentEnterprise()
     {
         Enterprise otherEnt = enterpriseGenerator.createUniqueInstance();
-        VirtualImage otherVimage = virtualImageGenerator.createInstance(otherEnt, datacenter);
+        VirtualMachineTemplate otherVmtemplate =
+            virtualMachineTemplateGenerator.createInstance(otherEnt, datacenter);
 
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(otherEnt, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        setup(otherEnt, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
+            otherVmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        final VirtualMachine vm = vmGenerator.createInstance(otherVmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
@@ -279,19 +321,43 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Create a virtual machine with a virtual image not in the same enterprise but shared
+     * Create a virtual machine with a vmtemplate not in the same enterprise but shared
      */
     @Test
-    public void createVirtualMachineSharedVirtualImageDifferentEnterprise()
+    public void createVirtualMachineSharedVirtualMachineTemplateDifferentEnterprise()
     {
-        Enterprise otherEnt = enterpriseGenerator.createUniqueInstance();
-        VirtualImage otherVimage = virtualImageGenerator.createInstance(otherEnt, datacenter);
-        otherVimage.setShared(true);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        
+        DatacenterLimits otherDcLimits = datacenterLimitsGenerator.createInstance(datacenter);
+        Enterprise otherEnt = otherDcLimits.getEnterprise();
+        VirtualMachineTemplate otherVmtemplate =
+            virtualMachineTemplateGenerator.createInstance(otherEnt, datacenter);
+        otherVmtemplate.setShared(true);
+        setup(otherEnt, otherDcLimits, otherVmtemplate.getRepository(), otherVmtemplate.getCategory(),
+            otherVmtemplate);
 
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(otherEnt, otherVimage.getRepository(), otherVimage.getCategory(), otherVimage);
+        IPAddress ip =
+            IPAddress.newIPAddress(vdc.getDefaultVlan().getConfiguration().getAddress())
+                .nextIPAddress();
+        IPAddress lastIP =
+            IPNetworkRang.lastIPAddressWithNumNodes(IPAddress.newIPAddress(vdc.getDefaultVlan()
+                .getConfiguration().getAddress()), IPNetworkRang.masktoNumberOfNodes(vdc
+                .getDefaultVlan().getConfiguration().getMask()));
 
-        final VirtualMachine vm = vmGenerator.createInstance(otherVimage, ent, "Image");
+        List<Object> arrayIps = new ArrayList<Object>();
+        while (!ip.equals(lastIP))
+        {
+            IpPoolManagement ippool =
+                ipGenerator.createInstance(vdc, vdc.getDefaultVlan(), ip.toString());
+            ippool.setType(Type.PRIVATE);
+            arrayIps.add(ippool.getRasd());
+            arrayIps.add(ippool);
+            ip = ip.nextIPAddress();
+        }
+        setup(arrayIps.toArray());
+
+        final VirtualMachine vm = vmGenerator.createInstance(otherVmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
@@ -299,15 +365,16 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Attempts to create a virtual machine for a non existent virtual image
+     * Attempts to create a virtual machine for a non existent vmtemplate
      */
     @Test
-    public void createVirtualMachine404VirtualImageNotFound()
+    public void createVirtualMachine404VirtualMachineTemplateNotFound()
     {
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        setup(vmtemplate.getRepository(), vmtemplate.getCategory(), vmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachine vm = vmGenerator.createInstance(vmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
 
         tearDown("virtualimage");
@@ -318,39 +385,41 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Attempts to create a virtual machine using a malformed virtual image link
+     * Attempts to create a virtual machine using a malformed vmtemplate link
      */
     @Test
-    public void createVirtualMachine404VirtualImageMissingLink()
+    public void createVirtualMachine400VirtualMachineTemplateInvalidLink()
     {
-        setup(ent, datacenter, dcallowed, vdc, vapp);
-        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+        setup(ent, datacenter, dcallowed, vdc.getNetwork(),
+            vdc.getDefaultVlan().getConfiguration(), vdc.getDefaultVlan(), vdc, vapp);
+        setup(vmtemplate.getRepository(), vmtemplate.getCategory(), vmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachine vm = vmGenerator.createInstance(vmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
-        for (RESTLink vimagerLink : dto.getLinks())
+        for (RESTLink vmtemplateLink : dto.getLinks())
         {
-            if (vimagerLink.getRel().equalsIgnoreCase("virtualimage"))
+            if (vmtemplateLink.getRel().equalsIgnoreCase("virtualmachinetemplate"))
             {
-                vimagerLink.setHref("http://i/m/dummy/user");
+                vmtemplateLink.setHref("http://i/m/dummy/user");
             }
         }
 
         final ClientResponse response =
             post(resolveVirtualMachinesURI(vdc.getId(), vapp.getId()), dto, "sysadmin", "sysadmin");
-        assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
+        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
     }
 
     /**
-     * Attempts to create a virtual machine for a datacenter not allowed (in the vimage)
+     * Attempts to create a virtual machine for a datacenter not allowed (in the vmtemplate)
      */
     @Test
-    public void createVirtualMachine409VirtualImageInDatacenterNotAllowed()
+    public void createVirtualMachine409VirtualMachineTemplateInDatacenterNotAllowed()
     {
-        setup(ent, datacenter, vdc, vapp); // dcallowed
-        setup(vImage.getRepository(), vImage.getCategory(), vImage);
+        setup(ent, datacenter, vdc.getNetwork(), vdc.getDefaultVlan().getConfiguration(),
+            vdc.getDefaultVlan(), vdc, vapp); // dcallowed
+        setup(vmtemplate.getRepository(), vmtemplate.getCategory(), vmtemplate);
 
-        final VirtualMachine vm = vmGenerator.createInstance(vImage, ent, "Image");
+        final VirtualMachine vm = vmGenerator.createInstance(vmtemplate, ent, "Template");
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
 
         final ClientResponse response =
@@ -359,12 +428,13 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Creates a virtual machine.Disabled until the VirtualImage resource is done
+     * Creates a virtual machine.Disabled until the VirtualMachineTemplate resource is done
      */
     @Test(enabled = false)
     public void createVirtualMachine404InvalidDatacenterId()
     {
-        setup(ent, datacenter, vdc, vapp);
+        setup(ent, datacenter, vdc.getNetwork(), vdc.getDefaultVlan().getConfiguration(),
+            vdc.getDefaultVlan(), vdc, vapp);
 
         final VirtualMachine vm = vmGenerator.createInstance(ent);
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
@@ -375,12 +445,13 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
     }
 
     /**
-     * Creates a virtual machine.Disabled until the VirtualImage resource is done
+     * Creates a virtual machine.Disabled until the VirtualMachineTemplate resource is done
      */
     @Test(enabled = false)
     public void createVirtualMachine404InvalidVapp()
     {
-        setup(ent, datacenter, vdc, vapp);
+        setup(ent, datacenter, vdc.getNetwork(), vdc.getDefaultVlan().getConfiguration(),
+            vdc.getDefaultVlan(), vdc, vapp);
 
         final VirtualMachine vm = vmGenerator.createInstance(ent);
         final VirtualMachineDto dto = fromVirtualMachineToDto(vm);
@@ -416,11 +487,12 @@ public class VirtualMachinesResourceIT extends AbstractJpaGeneratorIT
             new RESTLink("enterprise", resolveEnterpriseURI(vm.getEnterprise().getId()));
         dto.addLink(enterpriseLink);
 
-        final RESTLink vImageLink =
-            new RESTLink("virtualimage", resolveVirtualImageURI(vm.getVirtualImage()
-                .getEnterprise().getId(), vm.getVirtualImage().getRepository().getDatacenter()
-                .getId(), vm.getVirtualImage().getId()));
-        dto.addLink(vImageLink);
+        final RESTLink vmtemplateLink =
+            new RESTLink("virtualmachinetemplate", resolveVirtualMachineTemplateURI(vm
+                .getVirtualMachineTemplate().getEnterprise().getId(), vm
+                .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm
+                .getVirtualMachineTemplate().getId()));
+        dto.addLink(vmtemplateLink);
 
         return dto;
     }

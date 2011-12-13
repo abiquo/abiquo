@@ -21,14 +21,21 @@
 
 package com.abiquo.api.services.cloud;
 
-import java.io.IOException;
+import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
+import static com.abiquo.api.util.URIResolver.buildPath;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,31 +45,44 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
+import com.abiquo.api.exceptions.BadRequestException;
+import com.abiquo.api.resources.EnterpriseResource;
+import com.abiquo.api.resources.EnterprisesResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
+import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
+import com.abiquo.api.resources.cloud.DiskResource;
+import com.abiquo.api.resources.cloud.DisksResource;
+import com.abiquo.api.resources.cloud.IpAddressesResource;
+import com.abiquo.api.resources.cloud.PrivateNetworkResource;
+import com.abiquo.api.resources.cloud.PrivateNetworksResource;
+import com.abiquo.api.resources.cloud.VirtualDatacenterResource;
+import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.services.EnterpriseService;
-import com.abiquo.api.services.MachineService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.StorageService;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
-import com.abiquo.api.services.appslibrary.VirtualImageService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
-import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
-import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
+import com.abiquo.api.util.URIResolver;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
-import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
-import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ApplyVirtualMachineStateOp;
 import com.abiquo.model.enumerator.HypervisorType;
-import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.SingleResourceTransportDto;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
+import com.abiquo.server.core.appslibrary.AppsLibraryRep;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
+import com.abiquo.server.core.cloud.VirtualApplianceRep;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -70,11 +90,22 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.enterprise.EnterpriseRep;
 import com.abiquo.server.core.enterprise.User;
+import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.server.core.infrastructure.storage.StorageRep;
+import com.abiquo.server.core.infrastructure.management.RasdDAO;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.VLANNetwork;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
+import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -83,61 +114,61 @@ import com.abiquo.tracer.SeverityType;
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class VirtualMachineService extends DefaultApiService
 {
+    /** The logger object **/
+    private final static Logger LOGGER = LoggerFactory.getLogger(VirtualMachineService.class);
+
     @Autowired
     protected VirtualMachineRep repo;
 
     @Autowired
-    protected VirtualDatacenterRep vdcRepo;
+    protected RasdManagementDAO rasdDao;
 
     @Autowired
-    protected VirtualApplianceService vappService;
+    protected RasdDAO rasdRawRao;
 
     @Autowired
-    protected RemoteServiceService remoteServiceService;
+    protected VirtualApplianceRep vappRep;
 
     @Autowired
-    UserService userService;
+    protected VirtualDatacenterRep vdcRep;
 
     @Autowired
-    protected EnterpriseService enterpriseService;
+    private RemoteServiceService remoteServiceService;
 
     @Autowired
-    protected VirtualMachineAllocatorService vmAllocatorService;
+    private UserService userService;
 
     @Autowired
-    protected VirtualDatacenterService vdcService;
+    protected EnterpriseRep enterpriseRep;
 
     @Autowired
-    protected MachineService machineService;
+    private VirtualMachineAllocatorService vmAllocatorService;
 
     @Autowired
-    protected NetworkService ipService;
+    private VirtualMachineRequirementsFactory vmRequirements;
 
     @Autowired
-    protected StorageRep storageRep;
+    private VirtualDatacenterService vdcService;
 
     @Autowired
-    protected InfrastructureRep infRep;
+    private InfrastructureRep infRep;
 
     @Autowired
-    protected VirtualImageService vimageService;
+    protected AppsLibraryRep appsLibRep;
 
     @Autowired
-    protected TarantinoService tarantino;
+    private TarantinoService tarantino;
 
-    @Deprecated
     // job creator should be used ONLY inside the TarantinoService
+    @Deprecated
     @Autowired
-    protected TarantinoJobCreator jobCreator;
+    private TarantinoJobCreator jobCreator;
 
     @Autowired
-    protected TaskService tasksService;
-
-    /** The logger object **/
-    private final static Logger logger = LoggerFactory.getLogger(VirtualMachineService.class);
+    private NetworkService ipService;
 
     @Autowired
-    protected StorageService storageService;
+    private TaskService tasksService;
 
     public VirtualMachineService()
     {
@@ -147,13 +178,19 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachineService(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
-        this.storageService = new StorageService(em);
-        this.vdcRepo = new VirtualDatacenterRep(em);
-        this.vappService = new VirtualApplianceService(em);
+        this.rasdDao = new RasdManagementDAO(em);
+        this.vappRep = new VirtualApplianceRep(em);
+        this.vdcRep = new VirtualDatacenterRep(em);
+        this.remoteServiceService = new RemoteServiceService(em);
         this.userService = new UserService(em);
+        this.enterpriseRep = new EnterpriseRep(em);
+        this.vmAllocatorService = new VirtualMachineAllocatorService(em);
+        this.vmRequirements = new VirtualMachineRequirementsFactory(); // XXX
+        this.vdcService = new VirtualDatacenterService(em);
         this.infRep = new InfrastructureRep(em);
-        this.storageRep = new StorageRep(em);
-        vdcService = new VirtualDatacenterService(em);
+        this.appsLibRep = new AppsLibraryRep(em);
+        this.tarantino = new TarantinoService(em);
+        this.jobCreator = new TarantinoJobCreator(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -195,16 +232,35 @@ public class VirtualMachineService extends DefaultApiService
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
-            logger.error("Error retrieving the virtual machine: {} does not exist", vmId);
+            LOGGER.error("Error retrieving the virtual machine: {} does not exist", vmId);
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
             flushErrors();
         }
-        logger.debug("virtual machine {} found", vmId);
+        LOGGER.debug("virtual machine {} found", vmId);
         return vm;
+    }
+
+    /**
+     * This method is semi-duplicated from VirtualApplianceService, but bean can not be used due
+     * cross references
+     */
+    private VirtualAppliance getVirtualApplianceAndCheckVirtualDatacenter(final Integer vdcId,
+        final Integer vappId)
+    {
+        // checks vdc exist
+        vdcService.getVirtualDatacenter(vdcId);
+
+        VirtualAppliance vapp = vappRep.findById(vappId);
+        if (vapp == null || !vapp.getVirtualDatacenter().getId().equals(vdcId))
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
+            flushErrors();
+        }
+        return vapp;
     }
 
     public VirtualMachine getVirtualMachine(final Integer vmId)
@@ -230,71 +286,127 @@ public class VirtualMachineService extends DefaultApiService
         repo.insert(virtualMachine);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public VirtualMachine updateVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final VirtualMachineDto dto)
-    {
-        VirtualMachine old = getVirtualMachine(vdcId, vappId, vmId);
-        return updateVirtualMachineFromDto(dto, old);
-    }
-
-    /**
-     * @return the tarantino task Id if required, null if no {@link DatacenterTasks} to tarantino is
-     *         required.
+/**
+     * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine} object
+     * and sends the object to the method {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine).
+     * 
+     * @param vdcId identifier of the {@link VirtualDatacenter}
+     * @param vappId identifier of the {@link VirtualAppliance}
+     * @param vmId identifier of the {@link VirtualMachine}
+     * @param dto input {@link VirtualMachineDto} object with all its links.
+     * @return the link to the asnyncronous task.
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final VirtualMachineDto newVirtualMachineDto)
+        final Integer vmId, final VirtualMachineDto dto)
     {
-        logger.debug("Starting the reconfigure of the virtual machine {}", vmId);
-
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        logger.debug("Check for permissions");
+        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine,
+            buildVirtualMachineFromDto(vdc, dto));
+    }
+
+    /**
+     * <pre>
+     * Prepare the machine to reconfigure. That means:
+     * - Check the new allocation requirements
+     * - Create the temporal register in database with the old values of the virtual machine for rollback purposes.
+     * - Prepares and send the tarantino job.
+     * - Returns the link to the asynchronous task to query in order to see the progress.
+     * </pre>
+     * 
+     * This method assumes: - Any of the input params is null. - The 'isAssigned' checks are already
+     * done: the virtual machine actually belongs to virtual appliance and the virtual appliance
+     * actually belongs to virtual datacenter.
+     * 
+     * @param vdc {@link VirtualDatacenter} object where the virtual machine to reconfigure belongs
+     *            to.
+     * @param vapp {@link VirtualAppliance} object where the virtual machine to reconfigure belongs
+     *            to.
+     * @param newValues {@link VirtualMachine} exactly as we want to be after the reconfigure.
+     * @return a String containing the URI where to check the progress.
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
+    {
+        LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
+
+        LOGGER.debug("Check for permissions");
         // The user must have the proper permission
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        logger.debug("Permission granted");
+        userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
+        newValues.setEnterprise(vm.getEnterprise());
+        LOGGER.debug("Permission granted");
 
-        logger.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED or OFF");
-        checkVirtualMachineStateAllowsReconfigure(virtualMachine);
-        logger.debug("The state is valid for reconfigure");
+        LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED or OFF");
+        checkVirtualMachineStateAllowsReconfigure(vm);
+        LOGGER.debug("The state is valid for reconfigure");
 
         // if NOT_ALLOCATED isn't necessary to check the resource limits
-        if (virtualMachine.getState() != VirtualMachineState.NOT_ALLOCATED)
+        if (vm.getState() == VirtualMachineState.OFF)
         {
             // There might be different hardware needs. This call also recalculate.
-            logger.debug("Updating the hardware needs in DB for virtual machine {}", vmId);
-            vmAllocatorService.checkAllocate(vappId, vmId, newVirtualMachineDto, false);
-            logger.debug("Updated the hardware needs in DB for virtual machine {}", vmId);
+            LOGGER.debug("Updating the hardware needs in DB for virtual machine {}", vm.getId());
+            VirtualMachineRequirements requirements =
+                vmRequirements.createVirtualMachineRequirements(vm, newValues);
+            vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
+
+            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
+                newValues.getId());
+
+            LOGGER
+                .debug("Creating the temporary register in Virtual Machine for rollback purposes");
+            VirtualMachine backUpVm = createBackUpObject(vm);
+            repo.insert(backUpVm);
+            LOGGER.debug("Rollback register has id {}" + vm.getId());
         }
 
-        // Current definition in tarantino representation
+        // Before to update the virtualmachine to new values, create the tarantino descriptor
         VirtualMachineDescriptionBuilder virtualMachineTarantino =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+            jobCreator.toTarantinoDto(vm, vapp);
 
-        logger.debug("Updating the virtual machine in the DB with id {}", vmId);
-        VirtualMachine newVirtualMachine = updateFromDto(newVirtualMachineDto, virtualMachine);
-        logger.debug("Updated virtual machine {}", vmId);
+        // update the old virtual machine with the new virtual machine values.
+        // and set the ID of the backupmachine (which has the old values) for recovery purposes.
+        LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
+        updateVirtualMachineToNewValues(vm, newValues);
+        repo.update(vm);
+        LOGGER.debug("Updated virtual machine {}", vm.getId());
+
+        // next step:
 
         // it is required a tarantino Task ?
-        if (!virtualMachine.getState().existsInHypervisor())
+        if (vm.getState() == VirtualMachineState.OFF)
         {
-            return null; // updated in BBDD and done
+            return null;
         }
 
-        // lock the virtual machine during the async task
-        lockVirtualMachine(virtualMachine);
-
         VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-            jobCreator.toTarantinoDto(newVirtualMachine, virtualAppliance);
+            jobCreator.toTarantinoDto(vm, vapp);
 
         // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        return tarantino.reconfigureVirtualMachine(virtualMachine, virtualMachineTarantino,
+        return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
             newVirtualMachineTarantino);
+    }
+
+    /**
+     * Just assign the new virtual machine values to the new ones.
+     * 
+     * @param old old virtual machine instance
+     * @param vmnew new virtual machine values
+     */
+    private void updateVirtualMachineToNewValues(final VirtualMachine old,
+        final VirtualMachine vmnew)
+    {
+        old.setCpu(vmnew.getCpu());
+        old.setDescription(vmnew.getDescription());
+        old.setRam(vmnew.getRam());
+        old.setState(VirtualMachineState.LOCKED); // Always locked, we are reconfiguring!!!
     }
 
     /** set the virtual machine state to LOCKED (when an async task is needed) */
@@ -302,47 +414,6 @@ public class VirtualMachineService extends DefaultApiService
     {
         virtualMachine.setState(VirtualMachineState.LOCKED);
         repo.update(virtualMachine);
-    }
-
-    protected VirtualMachine createFromDto(final VirtualMachineDto dto)
-    {
-        return null; // TODO
-    }
-
-    protected VirtualMachine updateFromDto(final VirtualMachineDto dto, final VirtualMachine old)
-    {
-        return null; // TODO
-    }
-
-    @Deprecated
-    private VirtualMachine updateVirtualMachineFromDto(final VirtualMachineDto dto,
-        final VirtualMachine old)
-    {
-        virtualMachineFromDto(dto, old);
-        updateVirtualMachine(old);
-        return old;
-    }
-
-    @Deprecated
-    private VirtualMachine virtualMachineFromDto(final VirtualMachineDto dto,
-        final VirtualMachine old)
-    {
-        old.setName(dto.getName());
-        old.setDescription(dto.getDescription());
-        old.setCpu(dto.getCpu());
-        old.setRam(dto.getRam());
-        old.setHdInBytes(dto.getHdInBytes());
-        old.setHighDisponibility(dto.getHighDisponibility());
-
-        if (StringUtils.isNotBlank(old.getPassword()))
-        {
-            old.setPassword(dto.getPassword());
-        }
-        else
-        {
-            old.setPassword(null);
-        }
-        return old;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -409,7 +480,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Delete a {@link VirtualMachine}.
+     * Delete a {@link VirtualMachine}. And the {@link Node}.
      * 
      * @param virtualMachine to delete. void
      */
@@ -426,31 +497,40 @@ public class VirtualMachineService extends DefaultApiService
         if (!virtualMachine.getState().equals(VirtualMachineState.NOT_ALLOCATED)
             && !virtualMachine.getState().equals(VirtualMachineState.UNKNOWN))
         {
-            logger
+            LOGGER
                 .error(
                     "Delete virtual machine error, the State must be NOT_ALLOCATED or UNKNOWN but was {}",
                     virtualMachine.getState().name());
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
-                "Delete of the virtual appliance with name " + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was "
-                    + virtualMachine.getState().name());
+                "virtualMachine.deleteFailed", virtualMachine.getName(), virtualMachine.getState()
+                    .name());
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
         }
-        logger.debug("Deleting the virtual machine with UUID {}", virtualMachine.getUuid());
+        LOGGER.debug("Deleting the virtual machine with UUID {}", virtualMachine.getUuid());
         NodeVirtualImage nodeVirtualImage = repo.findNodeVirtualImageByVm(virtualMachine);
-        logger.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
+        LOGGER.trace("Deleting the node virtual image with id {}", nodeVirtualImage.getId());
         repo.deleteNodeVirtualImage(nodeVirtualImage);
-        logger.trace("Deleted node virtual image!");
+        LOGGER.trace("Deleted node virtual image!");
+
+        // Does it has volumes? PREMIUM
+        detachVolumesFromVirtualMachine(virtualMachine);
+        LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
+            virtualMachine.getUuid());
+
         repo.deleteVirtualMachine(virtualMachine);
-        tracer
-            .log(
-                SeverityType.INFO,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DELETE,
-                "Delete of the virtual appliance with name "
-                    + virtualMachine.getName()
-                    + " failed with due to an invalid state. Should be NOT_DEPLOYED, but was successful!");
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
+            "virtualMachine.deleteFailedInvalidNotDeployed", virtualMachine.getName());
+    }
+
+    /**
+     * This method is properly documented in the premium edition.
+     * 
+     * @param virtualMachine void
+     */
+    protected void detachVolumesFromVirtualMachine(final VirtualMachine virtualMachine)
+    {
+        // PREMIUM
     }
 
     /**
@@ -459,101 +539,134 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine to create. void
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine createVirtualMachine(final VirtualMachine virtualMachine,
-        final Integer enterpriseId, final Integer vImageId, final Integer vdcId,
-        final Integer vappId)
+    public VirtualMachine createVirtualMachine(final Integer vdcId, final Integer vappId,
+        final VirtualMachineDto dto)
     {
-        // generates the random identifier
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // those VirtualAppliance and VirtualDatacenter
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+        // First we get from dto. All the values wi
+        VirtualMachine virtualMachine = buildVirtualMachineFromDto(vdc, dto);
         virtualMachine.setUuid(UUID.randomUUID().toString());
         virtualMachine.setName("ABQ_" + virtualMachine.getUuid());
 
-        // We need the Enterprise
-        Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        virtualMachine.setEnterprise(enterprise);
-
-        VirtualAppliance virtualAppliance = checkVdcVappAndPrivilege(virtualMachine, vdcId, vappId);
-
-        // We need the VirtualImage
-        VirtualImage virtualImage =
-            vimageService.getVirtualImage(enterpriseId, virtualAppliance.getVirtualDatacenter()
-                .getDatacenter().getId(), vImageId);
-        checkVirtualImageCanBeUsed(virtualImage, virtualAppliance);
-        virtualMachine.setVirtualImage(virtualImage);
+        // Set the user and enterprise
+        virtualMachine.setUser(userService.getCurrentUser());
+        virtualMachine.setEnterprise(userService.getCurrentUser().getEnterprise());
 
         // We check for a suitable conversion (PREMIUM)
-        attachVirtualImageConversion(virtualAppliance.getVirtualDatacenter(), virtualMachine);
+        attachVirtualMachineTemplateConversion(virtualAppliance.getVirtualDatacenter(),
+            virtualMachine);
 
         // At this stage the virtual machine is not associated with any hypervisor
         virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
 
         // A user can only create virtual machine
-        virtualMachine.setUser(userService.getCurrentUser());
+        validate(virtualMachine);
         repo.createVirtualMachine(virtualMachine);
 
         // The entity that defines the relation between a virtual machine, virtual applicance and
-        // virtual image is VirtualImageNode
+        // virtual machine template is VirtualImageNode
         createNodeVirtualImage(virtualMachine, virtualAppliance);
+
+        // We must add the default NIC. This is the very next free IP in the virtual datacenter's
+        // default VLAN
+        ipService.assignDefaultNICToVirtualMachine(virtualMachine.getId());
 
         return virtualMachine;
     }
 
-    /** Checks correct datacenter and enterprise. */
-    private void checkVirtualImageCanBeUsed(final VirtualImage vimage, final VirtualAppliance vapp)
+    /**
+     * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
+     * <p>
+     * It also set the required CPU and RAM if it wasn't specified in the requested
+     * {@link VirtualMachineDto}
+     */
+    private void setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(
+        final VirtualMachine vmachine, final VirtualMachineTemplate vmtemplate)
     {
-        if (vimage.getRepository().getDatacenter().getId() != vapp.getVirtualDatacenter()
-            .getDatacenter().getId())
+        if (vmachine.getCpu() == 0)
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_IN_DATACENTER);
+            vmachine.setCpu(vmtemplate.getCpuRequired());
+        }
+        if (vmachine.getRam() == 0)
+        {
+            vmachine.setRam(vmtemplate.getRamRequired());
         }
 
-        if (!vimage.isShared() && vimage.getEnterprise().getId() != vapp.getEnterprise().getId())
+        if (vmtemplate.isStateful())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_IMAGE_NOT_ALLOWED);
+            vmachine.setHdInBytes(0);
         }
-
-        flushErrors();
+        else
+        {
+            vmachine.setHdInBytes(vmtemplate.getHdRequiredInBytes());
+        }
     }
 
     /**
-     * Check if the current request is ok. Checks if the {@link VirtualAppliance} belongs to the
-     * {@link VirtualMachine} and if the user has the appropiate grant.<br>
-     * <br>
-     * Throws <b>all</b> the exceptions.
-     * 
-     * @param virtualMachine virtual machine.
-     * @param vdcId virtual datacenter.
-     * @param vappId virtuap appliance.
-     * @return VirtualAppliance
+     * This code is semiduplicated from VirtualMachineTemplateService but can't be used due cross
+     * refrerence dep
      */
-    private VirtualAppliance checkVdcVappAndPrivilege(final VirtualMachine virtualMachine,
-        final Integer vdcId, final Integer vappId)
+    private VirtualMachineTemplate getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(
+        final Integer enterpriseId, final Integer datacenterId,
+        final Integer virtualMachineTemplateId)
     {
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
 
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        return virtualAppliance;
+        Datacenter datacenter = infRep.findById(datacenterId);
+        Enterprise enterprise = enterpriseRep.findById(enterpriseId);
+
+        if (datacenter == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_DATACENTER);
+        }
+        if (enterprise == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ENTERPRISE);
+        }
+        flushErrors();
+
+        DatacenterLimits limits = infRep.findDatacenterLimits(enterprise, datacenter);
+        if (limits == null)
+        {
+            addConflictErrors(APIError.ENTERPRISE_NOT_ALLOWED_DATACENTER);
+            flushErrors();
+        }
+
+        VirtualMachineTemplate virtualMachineTemplate =
+            appsLibRep.findVirtualMachineTemplateById(virtualMachineTemplateId);
+        if (virtualMachineTemplate == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_MACHINE_TEMPLATE);
+            flushErrors();
+        }
+
+        return virtualMachineTemplate;
     }
 
     /**
      * Creates the {@link NodeVirtualImage} that is the relation of {@link VirtualMachine}
-     * {@link VirtualAppliance} and {@link VirtualImage}.
+     * {@link VirtualAppliance} and {@link VirtualMachineTemplate}.
      * 
      * @param virtualMachine virtual machine to be associated with the virtual appliance. It must
-     *            contain the virtual image.
+     *            contain the virtual machine template.
      * @param virtualAppliance void where the virtual machine exists.
      */
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance)
     {
-        logger.debug("Create node virtual image with name virtual machine: {}"
+        LOGGER.debug("Create node virtual image with name virtual machine: {}"
             + virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(virtualMachine.getName(),
                 virtualAppliance,
-                virtualMachine.getVirtualImage(),
+                virtualMachine.getVirtualMachineTemplate(),
                 virtualMachine);
         repo.insertNodeVirtualImage(nodeVirtualImage);
-        logger.debug("Node virtual image created!");
+        LOGGER.debug("Node virtual image created!");
     }
 
     /**
@@ -564,11 +677,11 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine virtual machine to persist.
      * @return VirtualImage in premium the conversion.
      */
-    public void attachVirtualImageConversion(final VirtualDatacenter virtualDatacenter,
+    public void attachVirtualMachineTemplateConversion(final VirtualDatacenter virtualDatacenter,
         final VirtualMachine virtualMachine)
     {
         // COMMUNITY does nothing.
-        logger.debug("attachVirtualImageConversion community edition");
+        LOGGER.debug("attachVirtualImageConversion community edition");
     }
 
     /**
@@ -600,31 +713,32 @@ public class VirtualMachineService extends DefaultApiService
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
-        logger.debug("Starting the deploy of the virtual machine {}", vmId);
+        LOGGER.debug("Starting the deploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
-        logger.debug("Check for permissions");
+        LOGGER.debug("Check for permissions");
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        logger.debug("Permission granted");
+        LOGGER.debug("Permission granted");
 
-        logger.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED");
+        LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED");
         // If the machine is already allocated we did compute its resources consume before, now
         // we've been doubling it
         checkVirtualMachineStateAllowsDeploy(virtualMachine);
-        logger.debug("The state is valid for deploy");
+        LOGGER.debug("The state is valid for deploy");
 
-        logger.debug("Check remote services");
+        LOGGER.debug("Check remote services");
         // The remote services must be up for this Datacenter if we are to deploy
         checkRemoteServicesByVirtualDatacenter(vdcId);
-        logger.debug("Remote services are ok!");
+        LOGGER.debug("Remote services are ok!");
 
         // Tasks needs the definition of the virtual machine
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        logger
+        LOGGER
             .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
         try
         {
@@ -634,20 +748,19 @@ public class VirtualMachineService extends DefaultApiService
              * one of the above fail we cannot allocate the VirtualMachine
              */
             vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
-            vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
-            logger.debug("Allocated!");
+            LOGGER.debug("Allocated!");
 
             lockVirtualMachine(virtualMachine);
 
-            logger.debug("Mapping the external volumes");
+            LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
             initiatorMappings(virtualMachine);
-            logger.debug("Mapping done!");
+            LOGGER.debug("Mapping done!");
 
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-            logger.info("Generating the link to the status! {}", virtualMachine.getId());
+            LOGGER.info("Generating the link to the status! {}", virtualMachine.getId());
             return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
         }
         catch (APIException e)
@@ -669,9 +782,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
-            logger
+                EventType.VM_DEPLOY, "virtualMachine.deploy", e.toString());
+            LOGGER
                 .error(
                     "Error deploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
                     virtualMachine.getUuid(), e.toString());
@@ -684,53 +796,6 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    private RemoteService findRemoteServiceWithTypeInDatacenter(
-        final VirtualDatacenter virtualDatacenter)
-    {
-        List<RemoteService> services =
-            infRep.findRemoteServiceWithTypeInDatacenter(virtualDatacenter.getDatacenter(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-        RemoteService vsmRS = null;
-        if (!services.isEmpty())
-        {
-            // Only one remote service of each type by datacenter.
-            vsmRS = services.get(0);
-        }
-        else
-        {
-            addNotFoundErrors(APIError.NON_EXISTENT_REMOTE_SERVICE_TYPE);
-            flushErrors();
-        }
-        return vsmRS;
-    }
-
-    public void closeProducerChannel(final TarantinoRequestProducer producer)
-    {
-        try
-        {
-            if (producer == null)
-            {
-                return;
-            }
-            producer.closeChannel();
-        }
-        catch (IOException e)
-        {
-            logger.error("Error closing the producer channel with error: " + e.getMessage());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer.systemLog(
-                SeverityType.CRITICAL,
-                ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY,
-                "Error closing the producer channel with error:. The error message was "
-                    + e.getMessage());
-
-        }
-    }
-
     /**
      * Checks the {@link RemoteService} of the {@link VirtualDatacenter} and logs if any error.
      * 
@@ -738,24 +803,24 @@ public class VirtualMachineService extends DefaultApiService
      */
     private void checkRemoteServicesByVirtualDatacenter(final Integer vdcId)
     {
-        logger.debug("Checking remote services for virtual datacenter {}", vdcId);
+        LOGGER.debug("Checking remote services for virtual datacenter {}", vdcId);
         VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
         ErrorsDto rsErrors =
             checkRemoteServiceStatusByDatacenter(virtualDatacenter.getDatacenter().getId());
         if (!rsErrors.isEmpty())
         {
-            logger.error("Some errors found while cheking remote services");
+            LOGGER.error("Some errors found while cheking remote services");
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
             // For the Admin to know all errors
             traceAdminErrors(rsErrors, SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Remote Service is down or not configured", true);
+                EventType.VM_DEPLOY, "remoteServices.down", true);
 
             // There is no point in continue
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
         }
-        logger.debug("Remote services Ok!");
+        LOGGER.debug("Remote services Ok!");
     }
 
     /**
@@ -773,11 +838,11 @@ public class VirtualMachineService extends DefaultApiService
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
                 APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY.getMessage());
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "The Virtual Machine is already deployed or Allocated.");
+                EventType.VM_DEPLOY, "virtualMachine.deployedOrAllocated");
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
             flushErrors();
         }
-        logger.debug("The virtual machine is in state {}" + virtualMachine.getState().name());
+        LOGGER.debug("The virtual machine is in state {}" + virtualMachine.getState().name());
     }
 
     /**
@@ -809,7 +874,7 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
-        logger.debug("The virtual machine is in state {}" + virtualMachine.getState().name());
+        LOGGER.debug("The virtual machine is in state {}" + virtualMachine.getState().name());
     }
 
     /**
@@ -830,7 +895,7 @@ public class VirtualMachineService extends DefaultApiService
             case OFF:
             case ON:
             {
-                logger.debug("The virtual machine is in state {}"
+                LOGGER.debug("The virtual machine is in state {}"
                     + virtualMachine.getState().name());
                 break;
             }
@@ -841,8 +906,7 @@ public class VirtualMachineService extends DefaultApiService
                     APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY.getMessage());
 
                 tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_UNDEPLOY,
-                    "The Virtual Machine is in a state in which cannot be undeployed.");
+                    EventType.VM_UNDEPLOY, "virtualMachine.cannotUndeployed");
                 addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY);
                 flushErrors();
 
@@ -858,7 +922,7 @@ public class VirtualMachineService extends DefaultApiService
     protected void initiatorMappings(final VirtualMachine virtualMachine)
     {
         // PREMIUM
-        logger.debug("initiatorMappings community edition");
+        LOGGER.debug("initiatorMappings community edition");
     }
 
     /**
@@ -887,31 +951,32 @@ public class VirtualMachineService extends DefaultApiService
     public String undeployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId)
     {
-        logger.debug("Starting the undeploy of the virtual machine {}", vmId);
+        LOGGER.debug("Starting the undeploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
-        logger.debug("Check for permissions");
+        LOGGER.debug("Check for permissions");
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        logger.debug("Permission granted");
+        LOGGER.debug("Permission granted");
 
-        logger
+        LOGGER
             .debug(
                 "Checking that the virtual machine id {} is in an appropriate state. Valid states are OFF, ON, PAUSED",
                 virtualMachine.getId());
         // Not every state is valid for a virtual machine to deploy
         checkVirtualMachineStateAllowsUndeploy(virtualMachine);
-        logger
+        LOGGER
             .debug("The virtual machine id {} is in an appropriate state", virtualMachine.getId());
 
-        logger.debug("Check remote services");
+        LOGGER.debug("Check remote services");
         // The remote services must be up for this Datacenter if we are to deploy
         checkRemoteServicesByVirtualDatacenter(vdcId);
-        logger.debug("Remote services are ok!");
+        LOGGER.debug("Remote services are ok!");
 
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         try
         {
@@ -923,18 +988,17 @@ public class VirtualMachineService extends DefaultApiService
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-            String location =
+            String idAsyncTask =
                 tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
-            logger.info("Undeploying of the virtual machine id {} in tarantino!",
+            LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
-                "Undeploy of the virtual machine with name " + virtualMachine.getName()
-                    + " enqueued successfully!");
+                "virtualMachine.enqueued", virtualMachine.getName());
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY, "The enqueuing in Tarantino was OK.");
+                EventType.VM_UNDEPLOY, "virtualMachine.enqueuedTarantino");
 
-            return location;
+            return idAsyncTask;
 
         }
         catch (APIException e)
@@ -950,9 +1014,8 @@ public class VirtualMachineService extends DefaultApiService
 
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_UNDEPLOY,
-                "The machine is should be now in state UNKNOWN. Unexpected Error: " + e.toString());
-            logger
+                EventType.VM_UNDEPLOY, "virtualMachine.undeployError", e.toString());
+            LOGGER
                 .error(
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
                     virtualMachine.getUuid(), e.toString());
@@ -963,172 +1026,6 @@ public class VirtualMachineService extends DefaultApiService
 
         }
         return null;
-    }
-
-    private void undeployInDb(final VirtualMachine virtualMachine)
-    {
-        logger.debug("The virtual machine state to NOT_DEPLOYED");
-        virtualMachine.setState(VirtualMachineState.ALLOCATED);
-        // Hypervisor == null in order to delete the relation between
-        // virtualMachine
-        // and physicalMachine
-        virtualMachine.setHypervisor(null);
-        // Datastore == null in order to delete the relation virtualmachine
-        // datastore
-        virtualMachine.setDatastore(null);
-
-        repo.update(virtualMachine);
-        logger.debug("The state is valid  undeploy");
-    }
-
-    /**
-     * Resumes a {@link VirtualMachine}. This involves some steps. <br>
-     * <ol>
-     * <li>Select a machine to allocate the virtual machine</li>
-     * <li>Check limits</li>
-     * <li>Check resources</li>
-     * <li>Check remote services</li>
-     * <li>In premium call initiator</li>
-     * <li>Subscribe to VSM</li>
-     * <li>Build the Task DTO</li>
-     * <li>Build the Configure DTO</li>
-     * <li>Build the Power On DTO</li>
-     * <li>Enqueue in tarantino</li>
-     * <li>Register in redis</li>
-     * <li>Add Task DTO to rabbitmq</li>
-     * <li>Enable the resource <code>Progress<code></li>
-     * </ol>
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param foreceEnterpriseSoftLimits Do we should take care of the soft limits?
-     * @param restBuilder injected restbuilder context parameter
-     * @throws Exception
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void resumeVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId,
-        final Boolean foreceEnterpriseSoftLimits)
-    {
-        logger.debug("Starting the deploy of the virtual machine {}", vmId);
-        // We need to operate with concrete and this also check that the VirtualMachine belongs to
-        // those VirtualAppliance and VirtualDatacenter
-        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
-
-        logger.debug("Check for permissions");
-        // The user must have the proper permission
-        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
-        logger.debug("Permission granted");
-
-        logger
-            .debug("Checking the virtual machine state. It must be in either NOT_ALLOCATED or NOT_DEPLOYED");
-        // If the machine is already allocated we did compute its resources consume before, now
-        // we've been doubling it
-        checkVirtualMachineStateAllowsDeploy(virtualMachine);
-        logger.debug("The state is valid for deploy");
-
-        logger
-            .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
-        /*
-         * Select a machine to allocate the virtual machine, Check limits, Check resources If one of
-         * the above fail we cannot allocate the VirtualMachine
-         */
-        vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
-        vmAllocatorService.updateVirtualMachineUse(vappId, virtualMachine);
-        logger.debug("Allocated!");
-
-        logger.debug("Check remote services");
-        // The remote services must be up for this Datacenter if we are to deploy
-        checkRemoteServicesByVirtualDatacenter(vdcId);
-        logger.debug("Remote services are ok!");
-
-        logger.debug("Registering the machine VSM");
-        // In order to be aware of the messages from the hypervisors we need to subscribe to VSM
-        VirtualDatacenter virtualDatacenter = vdcService.getVirtualDatacenter(vdcId);
-        RemoteService vsmRS = findRemoteServiceWithTypeInDatacenter(virtualDatacenter);
-        machineService.getVsm().unsubscribe(vsmRS, virtualMachine);
-        logger.debug("Machine registered!");
-
-        logger.debug("Creating the DatacenterTask");
-
-        // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
-        // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        DatacenterTasks deployTask = new DatacenterTasks();
-
-        // The id identifies this job and is neede to create the ids of the items. It is hyerarchic
-        // so Task 1 and its job would be 1.1, another 1.2
-        deployTask.setId(virtualMachine.getUuid());
-
-        // Tasks needs the definition of the virtual machine
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
-        VirtualMachineDescriptionBuilder vmDesc =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
-
-        logger.debug("Configure the hypervisor connection");
-        // Hypervisor connection related configuration
-        HypervisorConnection hypervisorConnection =
-            jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
-        logger.debug("Hypervisor connection configuration done");
-
-        logger.debug("Apply state job");
-        ApplyVirtualMachineStateOp stateJob =
-            jobCreator.applyStateVirtualMachineConfiguration(virtualMachine, deployTask, vmDesc,
-                hypervisorConnection, VirtualMachineStateTransition.RESUME);
-        logger.debug("Apply state job done with id {}", stateJob.getId());
-
-        // The jobs are to be rolled back
-        deployTask.setDependent(Boolean.TRUE);
-        deployTask.getJobs().add(stateJob);
-
-        TarantinoRequestProducer producer =
-            new TarantinoRequestProducer(virtualDatacenter.getDatacenter().getName());
-
-        try
-        {
-            logger.trace("Deploying of the virtual machine id {} to tarantino: open channel",
-                virtualMachine.getId());
-            producer.openChannel();
-            logger.trace("Deploying of the virtual machine id {} to tarantino: channel opened",
-                virtualMachine.getId());
-            logger.trace("Deploying of the virtual machine id {} to tarantino: published to amqp",
-                virtualMachine.getId());
-            producer.publish(deployTask);
-            logger.trace(
-                "Deploying of the virtual machine id {} to tarantino: published successfully",
-                virtualMachine.getId());
-        }
-        catch (Exception e)
-        {
-
-            logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
-                + e.getMessage());
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer
-                .systemLog(
-                    SeverityType.CRITICAL,
-                    ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY,
-                    "The enqueuing in Tarantino failed. Rabbitmq might be down or not configured. The error message was "
-                        + e.getMessage());
-
-            // There is no point in continue
-            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
-            flushErrors();
-        }
-        finally
-        {
-            closeProducerChannel(producer);
-        }
-        logger.info("Deploying of the virtual machine id {} in tarantino!", virtualMachine.getId());
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-            "Deploy of the virtual machine with name " + virtualMachine.getName()
-                + " enqueued successfully!");
-        // For the Admin to know all errors
-        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-            "The enqueuing in Tarantino was OK.");
     }
 
     /**
@@ -1159,21 +1056,21 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachineStateTransition validMachineStateChange =
             validMachineStateChange(virtualMachine, state);
 
-        VirtualAppliance virtualAppliance = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
         VirtualMachineDescriptionBuilder machineDescriptionBuilder =
             jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
         String location =
             tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder,
                 validMachineStateChange);
-        logger.info("Applying the new state of the virtual machine id {} in tarantino!",
+        LOGGER.info("Applying the new state of the virtual machine id {} in tarantino!",
             virtualMachine.getId());
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "Applying the state of the virtual machine with name " + virtualMachine.getName()
-                + " enqueued successfully!");
+            "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "The enqueuing in Tarantino was OK. The virtual machine is locked");
+            "virtualMachine.applyVirtualMachineTarantinoEnqueued");
 
         lockVirtualMachine(virtualMachine);
         // tasksService.
@@ -1211,20 +1108,20 @@ public class VirtualMachineService extends DefaultApiService
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
 
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vm == null || !isAssignedTo(vmId, vapp.getId()))
         {
-            logger.error("Error retrieving the virtual machine: {} does not exist", vmId);
+            LOGGER.error("Error retrieving the virtual machine: {} does not exist", vmId);
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
             flushErrors();
         }
-        logger.debug("virtual machine {} found", vmId);
+        LOGGER.debug("virtual machine {} found", vmId);
 
         NodeVirtualImage nodeVirtualImage = repo.findNodeVirtualImageByVm(vm);
         if (nodeVirtualImage == null)
         {
-            logger.error("Error retrieving the node virtual image of machine: {} does not exist",
+            LOGGER.error("Error retrieving the node virtual image of machine: {} does not exist",
                 vmId);
             addNotFoundErrors(APIError.NODE_VIRTUAL_MACHINE_IMAGE_NOT_EXISTS);
             flushErrors();
@@ -1235,15 +1132,15 @@ public class VirtualMachineService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public List<NodeVirtualImage> getNodeVirtualImages(final Integer vdcId, final Integer vappId)
     {
-        VirtualAppliance vapp = vappService.getVirtualAppliance(vdcId, vappId);
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         if (vapp == null)
         {
-            logger.error("Error retrieving the virtual appliance: {} does not exist", vappId);
+            LOGGER.error("Error retrieving the virtual appliance: {} does not exist", vappId);
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALAPPLIANCE);
             flushErrors();
         }
-        logger.debug("virtual appliance {} found", vappId);
+        LOGGER.debug("virtual appliance {} found", vappId);
 
         return vapp.getNodes();
     }
@@ -1253,5 +1150,542 @@ public class VirtualMachineService extends DefaultApiService
     {
         virtualMachine.setState(VirtualMachineState.UNKNOWN);
         repo.update(virtualMachine);
+    }
+
+    /**
+     * Builds a {@link VirtualMachine} object from {@link VirtualMachineDto} object.
+     * 
+     * @param dto transfer input object
+     * @return output pojo object.
+     */
+    protected VirtualMachine buildVirtualMachineFromDto(final VirtualDatacenter vdc,
+        final VirtualMachineDto dto)
+    {
+        VirtualMachine vm = null;
+        try
+        {
+            vm = ModelTransformer.persistenceFromTransport(VirtualMachine.class, dto);
+        }
+        catch (Exception e)
+        {
+            addUnexpectedErrors(APIError.STATUS_BAD_REQUEST);
+            flushErrors();
+        }
+
+        vm.setVirtualMachineTemplate(getVirtualMachineTemplateFromDto(dto));
+        setVirtualMachineTemplateRequirementsIfNotAlreadyDefined(vm, vm.getVirtualMachineTemplate());
+        vm.setDisks(getHardDisksFromDto(vdc, dto));
+        vm.setIps(getNICsFromDto(vdc, dto));
+
+        return vm;
+    }
+
+    /**
+     * Validates the given object with links to a hard disk and returns the referenced hard disk.
+     * 
+     * @param links The links to validate the hard disk.
+     * @param expectedVirtualDatacenter The expected virtual datacenter to be found in the link.
+     * @return The list of {@link DiskManagement} referenced by the link.
+     * @throws Exception If the link is not valid.
+     */
+    public List<DiskManagement> getHardDisksFromDto(final VirtualDatacenter vdc,
+        final SingleResourceTransportDto dto)
+    {
+        List<DiskManagement> disks = new LinkedList<DiskManagement>();
+
+        // Validate and load each volume from the link list
+        for (RESTLink link : dto.searchLinks(DiskResource.DISK))
+        {
+            String path =
+                buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH,
+                    DiskResource.DISK_PARAM);
+
+            MultivaluedMap<String, String> pathValues =
+                URIResolver.resolveFromURI(path, link.getHref());
+
+            // URI needs to have an identifier to a VDC, and another one to the volume
+            if (pathValues == null
+                || !pathValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+                || !pathValues.containsKey(DiskResource.DISK))
+            {
+                throw new BadRequestException(APIError.HD_ATTACH_INVALID_LINK);
+            }
+
+            // Volume provided in link must belong to the same virtual datacenter
+            Integer vdcId =
+                Integer.parseInt(pathValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+            if (!vdcId.equals(vdc.getId()))
+            {
+                throw new BadRequestException(APIError.HD_ATTACH_INVALID_VDC_LINK);
+            }
+
+            Integer diskId = Integer.parseInt(pathValues.getFirst(DiskResource.DISK));
+
+            DiskManagement disk = vdcRep.findHardDiskByVirtualDatacenter(vdc, diskId);
+            if (disk == null)
+            {
+                String errorCode = APIError.HD_NON_EXISTENT_HARD_DISK.getCode();
+                String message =
+                    APIError.HD_NON_EXISTENT_HARD_DISK.getMessage() + ": Hard Disk id " + diskId;
+                CommonError error = new CommonError(errorCode, message);
+                addNotFoundErrors(error);
+            }
+            else
+            {
+                disks.add(disk);
+            }
+        }
+
+        // Throw the exception with all the disks we have not found.
+        flushErrors();
+
+        return disks;
+    }
+
+    /**
+     * Validates the given object with links to a NIC and returns the referenced list of
+     * {@link IpPoolManagement}.
+     * 
+     * @param links The links to validate the hard disk.
+     * @param expectedVirtualDatacenter The expected virtual datacenter to be found in the link.
+     * @return The list of {@link IpPoolManagement} referenced by the link.
+     * @throws Exception If the link is not valid.
+     */
+    public List<IpPoolManagement> getNICsFromDto(final VirtualDatacenter vdc,
+        final SingleResourceTransportDto dto)
+    {
+        List<IpPoolManagement> ips = new LinkedList<IpPoolManagement>();
+
+        // Validate and load each volume from the link list
+        for (RESTLink link : dto.searchLinks(PrivateNetworkResource.PRIVATE_IP))
+        {
+            // Parse the URI with the expected parameters and extract the identifier values.
+            String buildPath =
+                buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                    VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                    PrivateNetworksResource.PRIVATE_NETWORKS_PATH,
+                    PrivateNetworkResource.PRIVATE_NETWORK_PARAM, IpAddressesResource.IP_ADDRESSES,
+                    IpAddressesResource.IP_ADDRESS_PARAM);
+            MultivaluedMap<String, String> ipsValues =
+                URIResolver.resolveFromURI(buildPath, link.getHref());
+
+            // URI needs to have an identifier to a VDC, another one to a Private Network
+            // and another one to Private IP
+            if (ipsValues == null
+                || !ipsValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+                || !ipsValues.containsKey(PrivateNetworkResource.PRIVATE_NETWORK)
+                || !ipsValues.containsKey(IpAddressesResource.IP_ADDRESS))
+            {
+                throw new BadRequestException(APIError.VLANS_PRIVATE_IP_INVALID_LINK);
+            }
+
+            // Private IP must belong to the same Virtual Datacenter where the Virtual Machine
+            // belongs to.
+            Integer idVdc =
+                Integer.parseInt(ipsValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+            if (!idVdc.equals(vdc.getId()))
+            {
+                throw new BadRequestException(APIError.VLANS_IP_LINK_INVALID_VDC);
+            }
+
+            // Extract the vlanId and ipId values to execute the association.
+            Integer vlanId =
+                Integer.parseInt(ipsValues.getFirst(PrivateNetworkResource.PRIVATE_NETWORK));
+            Integer ipId = Integer.parseInt(ipsValues.getFirst(IpAddressesResource.IP_ADDRESS));
+            VLANNetwork vlan = vdcRep.findVlanByVirtualDatacenterId(vdc, vlanId);
+            if (vlan == null)
+            {
+                String errorCode = APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK.getCode();
+                String message =
+                    APIError.VLANS_NON_EXISTENT_VIRTUAL_NETWORK.getMessage() + ": Vlan id "
+                        + vlanId;
+                CommonError error = new CommonError(errorCode, message);
+                addNotFoundErrors(error);
+                continue;
+            }
+            IpPoolManagement ip = vdcRep.findIp(vlan, ipId);
+            if (ip == null)
+            {
+                String errorCode = APIError.NON_EXISTENT_IP.getCode();
+                String message =
+                    APIError.NON_EXISTENT_IP.getMessage() + ": Vlan id " + vlan.getId();
+                CommonError error = new CommonError(errorCode, message);
+                addNotFoundErrors(error);
+                continue;
+            }
+
+            ips.add(ip);
+        }
+
+        // Throw the exception with all the disks we have not found.
+        flushErrors();
+
+        return ips;
+    }
+
+    /**
+     * Get the object {@link VirtualMachineTemplate} from the input dto.
+     * 
+     * @param dto the object that should have the link to a virtual machine template.
+     * @return the found {@link virtualMachineTemplateObject}
+     */
+    public VirtualMachineTemplate getVirtualMachineTemplateFromDto(
+        final SingleResourceTransportDto dto)
+    {
+        String vmTemplatePath =
+            buildPath(
+                EnterprisesResource.ENTERPRISES_PATH,
+                EnterpriseResource.ENTERPRISE_PARAM, //
+                DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
+                DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM,
+                VirtualMachineTemplatesResource.VIRTUAL_MACHINE_TEMPLATES_PATH,
+                VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE_PARAM);
+
+        RESTLink link = dto.searchLink(VIRTUAL_MACHINE_TEMPLATE);
+
+        if (link == null)
+        {
+            addValidationErrors(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_NOT_FOUND);
+            flushErrors();
+        }
+
+        Integer entId = null;
+        Integer dcId = null;
+        Integer templId = null;
+        try
+        {
+            MultivaluedMap<String, String> pathValues =
+                URIResolver.resolveFromURI(vmTemplatePath, link.getHref());
+
+            // URI needs to have an identifier to a ENTERPRISE, another to a DATACENTER_REPOSITORY
+            // and another one to the TEMPLATE
+            if (pathValues == null || !pathValues.containsKey(EnterpriseResource.ENTERPRISE)
+                || !pathValues.containsKey(DatacenterRepositoryResource.DATACENTER_REPOSITORY)
+                || !pathValues.containsKey(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE))
+            {
+                throw new BadRequestException(APIError.LINKS_VIRTUAL_MACHINE_TEMPLATE_INVALID_URI);
+            }
+
+            entId = Integer.valueOf(pathValues.getFirst(EnterpriseResource.ENTERPRISE));
+            dcId =
+                Integer.valueOf(pathValues
+                    .getFirst(DatacenterRepositoryResource.DATACENTER_REPOSITORY));
+            templId =
+                Integer.valueOf(pathValues
+                    .getFirst(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE));
+        }
+        catch (Exception e)
+        {
+            // unhandled exception parsing the uri
+            addValidationErrors(APIError.LINKS_INVALID_LINK);
+            flushErrors();
+        }
+
+        return getVirtualMachineTemplateAndValidateEnterpriseAndDatacenter(entId, dcId, templId);
+    }
+
+    /**
+     * Gets a VirtualDatacenter. Raises an exception if it does not exist.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @return the found {@link VirtualDatacenter} instance.
+     */
+    protected VirtualDatacenter getVirtualDatacenter(final Integer vdcId)
+    {
+        VirtualDatacenter vdc = vdcRep.findById(vdcId);
+        if (vdc == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_VIRTUAL_DATACENTER);
+            flushErrors();
+        }
+        return vdc;
+    }
+
+    /**
+     * Copy of the Virtual Machine object.
+     * 
+     * @param vm {@link VirtualMachine} object original
+     * @return the copy of the input param.
+     */
+    public VirtualMachine createBackUpObject(final VirtualMachine vm)
+    {
+        VirtualMachine tmp = new VirtualMachine();
+
+        // backup virtual machine properties
+        tmp.setCpu(vm.getCpu());
+        tmp.setDatastore(vm.getDatastore());
+        tmp.setDescription(vm.getDescription());
+        tmp.setEnterprise(vm.getEnterprise());
+        tmp.setHdInBytes(vm.getHdInBytes());
+        tmp.setHighDisponibility(vm.getHighDisponibility());
+        tmp.setHypervisor(vm.getHypervisor());
+        tmp.setIdType(vm.getIdType());
+        tmp.setName(vm.getName());
+        tmp.setPassword(vm.getPassword());
+        tmp.setRam(vm.getRam());
+        tmp.setState(VirtualMachineState.LOCKED);
+        tmp.setSubState(vm.getSubState());
+        tmp.setUser(vm.getUser());
+        tmp.setUuid(vm.getUuid());
+        tmp.setVdrpIP(vm.getVdrpIP());
+        tmp.setVdrpPort(vm.getVdrpPort());
+        tmp.setVirtualImageConversion(vm.getVirtualImageConversion());
+        tmp.setVirtualMachineTemplate(vm.getVirtualMachineTemplate());
+        tmp.setTemporal(vm.getId());
+
+        // Backup disks
+        List<DiskManagement> disksTemp = new ArrayList<DiskManagement>();
+        for (DiskManagement disk : vm.getDisks())
+        {
+            DiskManagement disktmp = new DiskManagement();
+            disktmp.setAttachmentOrder(disk.getAttachmentOrder());
+            disktmp.setDatastore(disk.getDatastore());
+            disktmp.setDescription(disk.getDescription());
+            disktmp.setTemporal(disk.getId());
+            disktmp.setIdResourceType(disk.getIdResourceType());
+            disktmp.setRasd(disk.getRasd());
+            disktmp.setReadOnly(disk.getReadOnly());
+            disktmp.setSizeInMb(disk.getSizeInMb());
+            disktmp.setVirtualAppliance(disk.getVirtualAppliance());
+            disktmp.setVirtualDatacenter(disk.getVirtualDatacenter());
+            disktmp.setVirtualMachine(disk.getVirtualMachine());
+
+            disksTemp.add(disktmp);
+        }
+        tmp.setDisks(disksTemp);
+
+        // Backup NICs
+        List<IpPoolManagement> ipsTemp = new ArrayList<IpPoolManagement>();
+        for (IpPoolManagement ip : vm.getIps())
+        {
+            IpPoolManagement ipTmp = new IpPoolManagement();
+            ipTmp.setAttachmentOrder(ip.getAttachmentOrder());
+            ipTmp.setDescription(ip.getDescription());
+            ipTmp.setTemporal(ip.getId());
+            ipTmp.setIdResourceType(ip.getIdResourceType());
+            ipTmp.setRasd(ip.getRasd());
+            ipTmp.setVirtualAppliance(ip.getVirtualAppliance());
+            ipTmp.setVirtualDatacenter(ip.getVirtualDatacenter());
+            ipTmp.setVirtualMachine(ip.getVirtualMachine());
+
+            ipTmp.setName(ip.getName());
+            ipTmp.setVlanNetwork(ip.getVlanNetwork());
+            ipTmp.setMac(ip.getMac());
+            ipTmp.setConfigureGateway(ip.getConfigureGateway());
+            ipTmp.setAvailable(ip.getAvailable());
+            ipTmp.setNetworkName(ip.getNetworkName());
+            ipTmp.setQuarantine(ip.getQuarantine());
+            ipTmp.setIp(ip.getIp());
+
+            ipsTemp.add(ipTmp);
+        }
+        tmp.setIps(ipsTemp);
+
+        // Backup Volumes
+        List<VolumeManagement> volsTemp = new ArrayList<VolumeManagement>();
+        for (VolumeManagement vol : vm.getVolumes())
+        {
+            VolumeManagement volTmp = new VolumeManagement();
+            volTmp.setAttachmentOrder(vol.getAttachmentOrder());
+            volTmp.setDescription(vol.getDescription());
+            volTmp.setTemporal(vol.getId());
+            volTmp.setIdResourceType(vol.getIdResourceType());
+            volTmp.setRasd(vol.getRasd());
+            volTmp.setVirtualAppliance(vol.getVirtualAppliance());
+            volTmp.setVirtualDatacenter(vol.getVirtualDatacenter());
+            volTmp.setVirtualMachine(vol.getVirtualMachine());
+
+            volTmp.setStoragePool(vol.getStoragePool());
+            volTmp.setVirtualMachineTemplate(vol.getVirtualMachineTemplate());
+            volTmp.setIdScsi(vol.getIdScsi());
+            volTmp.setState(vol.getState());
+            volTmp.setUsedSizeInMB(vol.getUsedSizeInMB());
+        }
+        tmp.setVolumes(volsTemp);
+        return tmp;
+    }
+
+    /*
+     */
+    public VirtualMachine getBackupVirtualMachine(final VirtualMachine vmachine)
+    {
+        final VirtualMachine vmbackup = repo.findBackup(vmachine);
+
+        if (vmbackup == null)
+        {
+            addNotFoundErrors(APIError.VIRTUAL_MACHINE_BACKUP_NOT_FOUND);
+            flushErrors();
+        }
+
+        return vmbackup;
+    }
+
+    public void deleteBackupResources(final VirtualMachine vm)
+    {
+        for (RasdManagement rasd : getBackupResources(vm))
+        {
+            deleteResource(rasd);
+        }
+    }
+
+    protected List<RasdManagement> getBackupResources(final VirtualMachine rollbackVm)
+    {
+        try
+        {
+            rasdDao.enableTemporalOnlyFilter();
+
+            return rollbackVm.getRasdManagements();
+            // List<VolumeManagement> rollbackVolumes = rollbackVm.getv
+            // List<DiskManagement> rollbackDisks = rollbackVm.getDisks();
+            // List<IpPoolManagement> rollbackIps = rollbackVm.geti
+        }
+        finally
+        {
+            rasdDao.disabledTemporalOnlyFilter();
+        }
+    }
+
+    /**
+    * 
+    * */
+    public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
+        final VirtualMachine rollbackVm)
+    {
+
+        // will use VsmServiceStub to force a refresh
+        // updatedVm.setState(VirtualMachineState.LOCKED);
+
+        // backup virtual machine properties
+        updatedVm.setCpu(rollbackVm.getCpu());
+        updatedVm.setDatastore(rollbackVm.getDatastore());
+        updatedVm.setDescription(rollbackVm.getDescription());
+        updatedVm.setEnterprise(rollbackVm.getEnterprise());
+        updatedVm.setHdInBytes(rollbackVm.getHdInBytes());
+        updatedVm.setHighDisponibility(rollbackVm.getHighDisponibility());
+        updatedVm.setHypervisor(rollbackVm.getHypervisor());
+        updatedVm.setIdType(rollbackVm.getIdType());
+        updatedVm.setName(rollbackVm.getName());
+        updatedVm.setPassword(rollbackVm.getPassword());
+        updatedVm.setRam(rollbackVm.getRam());
+        updatedVm.setSubState(rollbackVm.getSubState());
+        updatedVm.setUser(rollbackVm.getUser());
+        updatedVm.setUuid(rollbackVm.getUuid());
+        updatedVm.setVdrpIP(rollbackVm.getVdrpIP());
+        updatedVm.setVdrpPort(rollbackVm.getVdrpPort());
+        updatedVm.setVirtualImageConversion(rollbackVm.getVirtualImageConversion());
+        updatedVm.setVirtualMachineTemplate(rollbackVm.getVirtualMachineTemplate());
+
+        List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
+        List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
+
+        // for updated if not temp -> delete rasd (if network) + delte / else update form temp
+        // (settemp=null)
+        for (RasdManagement updatedRasd : updatedResources)
+        {
+            RasdManagement rollbackRasd = getBackupResource(rollbackResources, updatedRasd.getId());
+            deleteResource(updatedRasd);
+
+            if (rollbackRasd != null) // restore the original resource attachment
+            {
+                restoreRollbackResouce(rollbackRasd, updatedVm);
+            }
+            // else the original vm do not include this resource (updatedRasd already deleted)
+
+        }
+
+        // for rollback if temp == 0 --> temp == null + attach a new machine
+        for (RasdManagement rollbackRasd : rollbackResources)
+        {
+            // updated vm do not include this resouces (deatach), we need to restore it
+            if (rollbackRasd.getTemporal() == 0)
+            {
+                restoreRollbackResouce(rollbackRasd, updatedVm);
+            }
+        }
+
+        rasdDao.flush(); // update virtual machine resources
+
+        repo.update(updatedVm); // remove orphans !!!
+        repo.deleteVirtualMachine(rollbackVm);
+
+        // TODO check temporal not set in updatedVm
+
+        return updatedVm;
+    }
+
+    private void deleteResource(final RasdManagement rasd)
+    {
+        rasd.detach();
+        rasd.setVirtualMachine(null); // FIXME until detach is not implemented in all
+                                      // RasdManagements
+
+        if (rasd instanceof IpPoolManagement)
+        {
+            rasdRawRao.remove(rasd.getRasd());
+        }
+
+        rasdDao.remove(rasd);
+    }
+
+    private void restoreRollbackResouce(final RasdManagement rasd, final VirtualMachine vm)
+    {
+
+        // using the original sequence
+        final Integer originalSequence = rasd.getRasd().getGeneration().intValue();
+        rasd.attach(originalSequence, vm);
+
+        rasd.setTemporal(null);
+    }
+
+    /** Find */
+    private RasdManagement getBackupResource(final List<RasdManagement> rollbackResources,
+        final Integer tempRasdManId)
+    {
+        for (RasdManagement rasdman : rollbackResources)
+        {
+            if (tempRasdManId.equals(rasdman.getTemporal()))
+            {
+                return rasdman;
+            }
+        }
+        return null;
+    }
+
+    /*
+     * @param vmId
+     * @return VirtualMachine with DC.
+     */
+    public VirtualMachine getVirtualMachineInitialized(final Integer vmId)
+    {
+        VirtualMachine virtualMachine = repo.findVirtualMachineById(vmId);
+        if (virtualMachine.getHypervisor() != null)
+        {
+            Hibernate.initialize(virtualMachine.getHypervisor().getMachine().getDatacenter());
+        }
+        if (virtualMachine.getEnterprise() != null)
+        {
+            Hibernate.initialize(virtualMachine.getEnterprise());
+        }
+        if (virtualMachine.getDatastore() != null)
+        {
+            Hibernate.initialize(virtualMachine.getDatastore());
+        }
+        if (virtualMachine.getVirtualMachineTemplate() != null)
+        {
+            Hibernate.initialize(virtualMachine.getVirtualMachineTemplate());
+        }
+        return virtualMachine;
+    }
+
+    /**
+     * This method writes without care for permissions.
+     * 
+     * @param vm void
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateVirtualMachineBySystem(final VirtualMachine vm)
+    {
+        repo.update(vm);
     }
 }

@@ -50,8 +50,8 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.operations.ReconfigureVirtu
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
@@ -149,7 +149,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * Gets the configured DCHP in the datacenter to set its URL in the
      * {@link com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.NetworkConfiguration}
      */
-    private void addDhcpConfiguration(final Integer datacenterId,
+    public void addDhcpConfiguration(final Integer datacenterId,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         // TODO 2.0 will support manual DHCP configuration
@@ -194,9 +194,18 @@ public class TarantinoJobCreator extends DefaultApiService
 
         List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
 
-        String datastore =
-            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
-                .getDatastore().getDirectory());
+        String datastore;
+        if (virtualMachine.getDatastore().getDirectory() != null
+            && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+        {
+            datastore =
+                FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                    .getDatastore().getDirectory());
+        }
+        else
+        {
+            datastore = virtualMachine.getDatastore().getRootPath();
+        }
 
         DiskControllerType cntrlType =
             getDiskController(virtualMachine.getHypervisor().getType(), false, false);
@@ -272,8 +281,9 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     /**
-     * In community there are no statful image. If some {@link VirtualImageConversion} attached use
-     * his properties when defining the {@link PrimaryDisk}, else use the {@link VirtualImage}
+     * In community there are no statful template. If some {@link VirtualImageConversion} attached
+     * use his properties when defining the {@link PrimaryDisk}, else use the
+     * {@link VirtualMachineTemplate}
      * 
      * @param virtualMachine
      * @param vmDesc
@@ -283,9 +293,18 @@ public class TarantinoJobCreator extends DefaultApiService
     public void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
-        String datastore =
-            FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
-                .getDatastore().getDirectory());
+        String datastore;
+        if (virtualMachine.getDatastore().getDirectory() != null
+            && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+        {
+            datastore =
+                FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
+                    .getDatastore().getDirectory());
+        }
+        else
+        {
+            datastore = virtualMachine.getDatastore().getRootPath();
+        }
 
         // Repository Manager address
         List<RemoteService> services =
@@ -303,15 +322,15 @@ public class TarantinoJobCreator extends DefaultApiService
             flushErrors();
         }
 
-        final VirtualImage vimage = virtualMachine.getVirtualImage();
+        final VirtualMachineTemplate vmtemplate = virtualMachine.getVirtualMachineTemplate();
         final HypervisorType htype = virtualMachine.getHypervisor().getType();
 
         final VirtualImageConversion conversion = virtualMachine.getVirtualImageConversion();
 
         final DiskFormatType format =
-            conversion != null ? conversion.getTargetType() : vimage.getDiskFormatType();
-        final Long size = conversion != null ? conversion.getSize() : vimage.getDiskFileSize();
-        final String path = conversion != null ? conversion.getTargetPath() : vimage.getPath();
+            conversion != null ? conversion.getTargetType() : vmtemplate.getDiskFormatType();
+        final Long size = conversion != null ? conversion.getSize() : vmtemplate.getDiskFileSize();
+        final String path = conversion != null ? conversion.getTargetPath() : vmtemplate.getPath();
         final DiskControllerType cntrlType = getDiskController(htype, true, false);
 
         if (cntrlType != null && cntrlType == DiskControllerType.SCSI
@@ -322,7 +341,7 @@ public class TarantinoJobCreator extends DefaultApiService
         }
 
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
-            virtualMachine.getVirtualImage().getRepository().getUrl(), path, datastore,
+            virtualMachine.getVirtualMachineTemplate().getRepository().getUrl(), path, datastore,
             repositoryManager.getUri(), cntrlType);
     }
 
@@ -461,7 +480,9 @@ public class TarantinoJobCreator extends DefaultApiService
      * 
      * @param virtualMachine The virtual machine to reconfigure.
      * @param builder The original configuration for the virtual machine.
-     * @param currentState State of the {@link VirtualMachine} at the start of the undeploy.
+     * @param currentState State of the {@link VirtualMachine} at the start of the undeploy. The
+     *            state of this {@link VirtualMachine} at this point is
+     *            {@link VirtualMachineState#LOCKED}.
      * @return The reconfigure task.
      */
     public DatacenterTasks undeployTask(final VirtualMachine virtualMachine,
@@ -523,4 +544,26 @@ public class TarantinoJobCreator extends DefaultApiService
 
         return applyStateTask;
     }
+
+    // /**
+    // * Creates a undeploy task. The Job id identifies this job and is neede to create the ids of
+    // the
+    // * items. It is hyerarchic so Task 1 and its job would be 1.1, another 1.2 <br>
+    // * <br>
+    // * If it is ON we shutdown the virtual machine.
+    // *
+    // * @param virtualMachine The virtual machine to reconfigure.
+    // * @param builder The original configuration for the virtual machine.
+    // * @param currentState State of the {@link VirtualMachine} at the start of the undeploy. The
+    // * state of this {@link VirtualMachine} at this point is
+    // * {@link VirtualMachineState#LOCKED}.
+    // * @return The reconfigure task.
+    // */
+    // public UndeployTaskBuilder undeployAsyncTask(final VirtualMachine virtualMachine,
+    // final VirtualMachineDescriptionBuilder builder, final VirtualMachineState currentState)
+    // {
+    // UndeployTaskBuilder tasksBuilder = new UndeployTaskBuilder();
+    //
+    // return tasksBuilder.undeployTask(virtualMachine, builder, currentState);
+    // }
 }

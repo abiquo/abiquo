@@ -57,21 +57,21 @@ public class VirtualImageConversion extends DefaultEntityBase
         // Just for JPA support
     }
 
-    public VirtualImageConversion(final VirtualImage image, final DiskFormatType targetType,
-        final String targetPath)
+    public VirtualImageConversion(final VirtualMachineTemplate image,
+        final DiskFormatType targetType, final String targetPath)
     {
-        this.virtualImage = image;
+        this.virtualMachineTemplate = image;
         this.targetType = targetType;
         this.targetPath = targetPath;
         this.timestamp = new Date();
         this.state = ConversionState.ENQUEUED;
     }
 
-    public VirtualImageConversion(final VirtualImage image, final ConversionState state,
+    public VirtualImageConversion(final VirtualMachineTemplate image, final ConversionState state,
         final DiskFormatType sourceType, final DiskFormatType targetType, final String sourcePath,
         final String targetPath)
     {
-        this.virtualImage = image;
+        this.virtualMachineTemplate = image;
         this.targetType = targetType;
         this.targetPath = targetPath;
         this.timestamp = new Date();
@@ -93,26 +93,26 @@ public class VirtualImageConversion extends DefaultEntityBase
         return this.id;
     }
 
-    public final static String VIRTUAL_IMAGE_PROPERTY = "virtualImage";
+    public final static String VIRTUAL_MACHINE_TEMPLATE_PROPERTY = "virtualMachineTemplate";
 
-    private final static boolean VIRTUAL_IMAGE_REQUIRED = true;
+    private final static boolean VIRTUAL_MACHINE_TEMPLATE_REQUIRED = true;
 
-    private final static String VIRTUAL_IMAGE_ID_COLUMN = "idImage";
+    private final static String VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN = "idImage";
 
-    @JoinColumn(name = VIRTUAL_IMAGE_ID_COLUMN)
+    @JoinColumn(name = VIRTUAL_MACHINE_TEMPLATE_ID_COLUMN)
     @ManyToOne(fetch = FetchType.LAZY)
     @ForeignKey(name = "FK_virtualimage_conversions_virtualimage")
-    private VirtualImage virtualImage;
+    private VirtualMachineTemplate virtualMachineTemplate;
 
-    @Required(value = VIRTUAL_IMAGE_REQUIRED)
-    public VirtualImage getVirtualImage()
+    @Required(value = VIRTUAL_MACHINE_TEMPLATE_REQUIRED)
+    public VirtualMachineTemplate getVirtualMachineTemplate()
     {
-        return this.virtualImage;
+        return this.virtualMachineTemplate;
     }
 
-    public void setVirtualImage(final VirtualImage virtualImage)
+    public void setVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        this.virtualImage = virtualImage;
+        this.virtualMachineTemplate = virtualMachineTemplate;
     }
 
     public final static String SOURCE_TYPE_PROPERTY = "sourceType";

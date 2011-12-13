@@ -159,8 +159,8 @@ public class RemoteServiceService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_CREATE,
-            responseDto.getType().getName() + " created in " + responseDto.getUri()
-                + " for datacenter " + datacenter.getName());
+            "remoteServices.created", responseDto.getType().getName(), responseDto.getUri(),
+            datacenter.getName());
 
         return responseDto;
     }
@@ -201,7 +201,8 @@ public class RemoteServiceService extends DefaultApiService
                     remoteService.setStatus(STATUS_ERROR);
                     APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName() + ", " + amEx.getMessage()));
+                        .getName()
+                        + ", " + amEx.getMessage()));
 
                     return configurationErrors;
 
@@ -228,7 +229,8 @@ public class RemoteServiceService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -415,6 +417,7 @@ public class RemoteServiceService extends DefaultApiService
         return checkRemoteServiceStatus(datacenter, type, url, false);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ErrorsDto checkRemoteServiceStatus(final Datacenter datacenter,
         final RemoteServiceType type, final String url, final boolean flushErrors)
     {
@@ -452,33 +455,37 @@ public class RemoteServiceService extends DefaultApiService
                         }
                     }
                 }// remote service check fail
-
-                if (type.checkDatacenterId())
+                else
                 {
-                    final String rsDatacenterUuid = response.getEntity(String.class);
+                    if (type.checkDatacenterId())
+                    {
+                        final String rsDatacenterUuid = response.getEntity(String.class);
 
-                    if (!StringUtils.hasText(rsDatacenterUuid))
-                    {
-                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND;
-                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                            + error.getMessage()));
-                        if (flushErrors)
+                        if (!StringUtils.hasText(rsDatacenterUuid))
                         {
-                            addConflictErrors(error);
+                            final APIError error =
+                                APIError.REMOTE_SERVICE_DATACENTER_UUID_NOT_FOUND;
+                            configurationErrors.add(new ErrorDto(error.getCode(), type.getName()
+                                + ", " + error.getMessage()));
+                            if (flushErrors)
+                            {
+                                addConflictErrors(error);
+                            }
                         }
-                    }
-                    else if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
-                    {
-                        final APIError error = APIError.REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT;
-                        configurationErrors.add(new ErrorDto(error.getCode(), type.getName() + ", "
-                            + error.getMessage() + "\n Current datacenter UUID is "
-                            + datacenter.getUuid()));
-                        if (flushErrors)
+                        else if (!isValidDatacenterUuid(rsDatacenterUuid, datacenter))
                         {
-                            addConflictErrors(error);
+                            final APIError error =
+                                APIError.REMOTE_SERVICE_DATACENTER_UUID_INCONSISTENT;
+                            configurationErrors.add(new ErrorDto(error.getCode(), type.getName()
+                                + ", " + error.getMessage() + "\n Current datacenter UUID is "
+                                + datacenter.getUuid()));
+                            if (flushErrors)
+                            {
+                                addConflictErrors(error);
+                            }
                         }
-                    }
-                }// datacenter uuid
+                    }// datacenter uuid
+                }
             }
             catch (Exception e)
             {
@@ -491,6 +498,10 @@ public class RemoteServiceService extends DefaultApiService
                     addNotFoundErrors(APIError.REMOTE_SERVICE_CONNECTION_FAILED);
                 }
             }
+        }
+        else if (flushErrors)
+        {
+            addConflictErrors(APIError.REMOTE_SERVICE_CANNOT_BE_CHECKED);
         }
 
         if (flushErrors)
@@ -537,8 +548,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
-        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
-            remoteService.getType()))
+        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService
+            .getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
             configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
@@ -557,7 +568,8 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName() + " : " + error.getMessage()));
+                        .getName()
+                        + " : " + error.getMessage()));
                     if (flushErrors)
                     {
                         addConflictErrors(error);
@@ -568,7 +580,8 @@ public class RemoteServiceService extends DefaultApiService
             {
                 APIError error = APIError.REMOTE_SERVICE_MALFORMED_URL;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + " : " + error.getMessage()));
+                    .getName()
+                    + " : " + error.getMessage()));
                 if (flushErrors)
                 {
                     addValidationErrors(error);

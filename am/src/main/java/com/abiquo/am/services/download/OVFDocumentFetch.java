@@ -21,7 +21,7 @@
 
 package com.abiquo.am.services.download;
 
-import static com.abiquo.am.services.OVFPackageConventions.getFileUrl;
+import static com.abiquo.am.services.TemplateConventions.getFileUrl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,7 +130,7 @@ public class OVFDocumentFetch
                 throw (AMException) e;
             }
 
-            throw new AMException(AMError.OVF_INVALID, e);
+            throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
         finally
         {
@@ -140,7 +140,7 @@ public class OVFDocumentFetch
             }
             catch (IOException e)
             {
-                throw new AMException(AMError.OVF_INSTALL, //
+                throw new AMException(AMError.TEMPLATE_INSTALL, //
                     "Can't close the http connection to " + ovfId,
                     e);
             }
@@ -158,7 +158,7 @@ public class OVFDocumentFetch
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_INVALID, e);
+            throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
 
         return envelope;
@@ -278,7 +278,7 @@ public class OVFDocumentFetch
         }
         catch (Exception e)
         {
-            throw new AMException(AMError.OVF_INVALID, e);
+            throw new AMException(AMError.TEMPLATE_INVALID, e);
         }
 
         return envelope;

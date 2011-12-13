@@ -21,6 +21,8 @@
 
 package com.abiquo.scheduler;
 
+import static com.abiquo.testng.TestConfig.ALL_UNIT_TESTS;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,11 +34,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import com.abiquo.api.resources.AbstractJpaGeneratorIT;
+import com.abiquo.api.common.AbstractGeneratorTest;
 
-public class TestPopulate extends AbstractJpaGeneratorIT
+@Test(groups = ALL_UNIT_TESTS)
+public class TestPopulate extends AbstractGeneratorTest
 {
     public static final String DATA_PROVIDER = "populateModel";
 
@@ -47,8 +53,24 @@ public class TestPopulate extends AbstractJpaGeneratorIT
     @Autowired
     PopulateReader populateReader;
 
+    @BeforeMethod
+    @Override
+    public void setup()
+    {
+        // this is necessary to run as test group
+        super.setup();
+    }
+
+    @AfterMethod
+    @Override
+    public void tearDown()
+    {
+        // this is necessary to run as test group
+        super.tearDown();
+    }
+
     @DataProvider(name = DATA_PROVIDER)
-    public Iterator<Object[]> populateModel(Method meth) throws URISyntaxException
+    public Iterator<Object[]> populateModel(final Method meth) throws URISyntaxException
     {
         final String inputFolder = DATA_FOLDER + '/' + meth.getName();
 
@@ -92,7 +114,7 @@ public class TestPopulate extends AbstractJpaGeneratorIT
         return models.iterator();
     }
 
-    private List<String> getModel(File file) throws Exception
+    private List<String> getModel(final File file) throws Exception
     {
         List<String> model = new LinkedList<String>();
 
@@ -116,20 +138,17 @@ public class TestPopulate extends AbstractJpaGeneratorIT
         return model;
     }
 
-    // /
-    public PopulateTestCase setUpModel(List<String> model)
+    public PopulateTestCase setUpModel(final List<String> model)
     {
-        setup();
-
         return populateReader.readModel(model);
     }
 
-    protected void removeVirtualMachine(Integer virtualMachineId)
+    protected void removeVirtualMachine(final Integer virtualMachineId)
     {
         populateReader.removeVirtualMachine(virtualMachineId);
     }
 
-    protected void runningVirtualMachine(Integer virtualMachineId)
+    protected void runningVirtualMachine(final Integer virtualMachineId)
     {
         populateReader.runningVirtualMachine(virtualMachineId);
     }

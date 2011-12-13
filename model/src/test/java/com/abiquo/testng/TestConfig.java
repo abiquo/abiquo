@@ -74,6 +74,10 @@ public class TestConfig
     /** TestNG group for all premium unit tests. */
     public static final String PREMIUM_ALL_UNIT_TESTS = "test-premium-all";
 
+    /** TestNG group for all VirtualMachineAllocatorServicePremiumTest. */
+    public static final String PREMIUM_ALLOCATOR_TESTS = "test-premium-allocator";
+
+    
     /** TestNG group for all premium integration tests. */
     public static final String PREMIUM_ALL_INTEGRATION_TESTS = "it-premium-all";
 

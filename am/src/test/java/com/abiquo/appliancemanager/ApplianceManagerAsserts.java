@@ -35,13 +35,13 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.abiquo.am.services.EnterpriseRepositoryService;
 import com.abiquo.am.services.ErepoFactory;
-import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.transport.MemorySizeUnit;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstanceStateDto;
-import com.abiquo.appliancemanager.transport.OVFPackageInstancesStateDto;
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateDto;
+import com.abiquo.appliancemanager.transport.TemplateStateDto;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.testng.TestServerListener;
 
@@ -63,16 +63,16 @@ public class ApplianceManagerAsserts
         this.stub = stub;
     }
 
-    public void ovfStatus(final String ovfId, final OVFStatusEnumType expectedStatus)
+    public void ovfStatus(final String ovfId, final TemplateStatusEnumType expectedStatus)
     {
 
-        OVFPackageInstanceStateDto prevStatus =
-            stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        TemplateStateDto prevStatus =
+            stub.getTemplateStatus(idEnterprise, ovfId);
 
         Assert.assertEquals(expectedStatus, prevStatus.getStatus());
         Assert.assertEquals(ovfId, prevStatus.getOvfId());
 
-        if (expectedStatus == OVFStatusEnumType.ERROR)
+        if (expectedStatus == TemplateStatusEnumType.ERROR)
         {
             Assert.assertNotNull(prevStatus.getErrorCause());
         }
@@ -88,7 +88,7 @@ public class ApplianceManagerAsserts
      */
     public Integer ovfAvailable(final String ovfId, final Boolean isContained)
     {
-        OVFPackageInstancesStateDto prevList = stub.getOVFPackagInstanceStatusList(idEnterprise);
+        TemplatesStateDto prevList = stub.getTemplatesState(idEnterprise);
 
         Assert.assertEquals(isContained, isContained(prevList, ovfId));
 
@@ -98,7 +98,7 @@ public class ApplianceManagerAsserts
     public void installOvf(final String ovfId)
     {
         // TODO OVFPackageInstanceStatusDto statusInstall =
-        stub.createOVFPackageInstance(idEnterprise, ovfId);
+        stub.installTemplateDefinition(idEnterprise, ovfId);
 
         // Assert.assertNull(statusInstall.getErrorCause());
         // Assert.assertEquals(statusInstall.getOvfId(), ovfId);
@@ -111,7 +111,7 @@ public class ApplianceManagerAsserts
     {
         installOvf(ovfId);
 
-        waitUnitlExpected(ovfId, OVFStatusEnumType.DOWNLOAD);
+        waitUnitlExpected(ovfId, TemplateStatusEnumType.DOWNLOAD);
     }
 
     /**
@@ -119,11 +119,11 @@ public class ApplianceManagerAsserts
      */
     public void ovfInstanceExist(final String ovfId)
     {
-        ovfStatus(ovfId, OVFStatusEnumType.DOWNLOAD);
+        ovfStatus(ovfId, TemplateStatusEnumType.DOWNLOAD);
 
         ovfAvailable(ovfId, true);
 
-        OVFPackageInstanceDto pi = stub.getOVFPackageInstance(idEnterprise, ovfId);
+        TemplateDto pi = stub.getTemplate(idEnterprise, ovfId);
         File diskFile = new File(REPO_PATH + pi.getDiskFilePath());
         Assert.assertTrue(diskFile.exists());
     }
@@ -134,7 +134,7 @@ public class ApplianceManagerAsserts
     public void ovfInstanceNoExist(final String ovfId)
     {
         // The OVF is NOT_DOWNLOAD
-        ovfStatus(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
+        ovfStatus(ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
 
         // The OVF is not on the available list
         ovfAvailable(ovfId, false);
@@ -157,7 +157,7 @@ public class ApplianceManagerAsserts
     {
         EnterpriseRepositoryService er = ErepoFactory.getRepo(idEnterprise);
 
-        final String ovfpath = OVFPackageConventions.getRelativePackagePath(ovfId);
+        final String ovfpath = TemplateConventions.getRelativePackagePath(ovfId);
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         // final String diskFilePathRel = diskFilePath.substring(diskFilePath.lastIndexOf('/'));
 
@@ -193,7 +193,7 @@ public class ApplianceManagerAsserts
         return file;
     }
 
-    protected static OVFPackageInstanceDto createTestDiskInfoBundle(final String ovfId,
+    protected static TemplateDto createTestDiskInfoBundle(final String ovfId,
         final String snapshot)
     {
 
@@ -208,7 +208,7 @@ public class ApplianceManagerAsserts
         final String diskFilePathRel = er.getDiskFilePath(ovfId);
         final String diskPath = ("-snapshot-" + diskFilePathRel);
 
-        OVFPackageInstanceDto di = new OVFPackageInstanceDto();
+        TemplateDto di = new TemplateDto();
         di.setName("theBundleDiskName");
         di.setDescription("theBundleDiskDescription");
 
@@ -231,9 +231,9 @@ public class ApplianceManagerAsserts
         return di;
     }
 
-    protected static OVFPackageInstanceDto createTestDiskInfoUpload(final String ovfid)
+    protected static TemplateDto createTestDiskInfoUpload(final String ovfid)
     {
-        OVFPackageInstanceDto di = new OVFPackageInstanceDto();
+        TemplateDto di = new TemplateDto();
         di.setName("theDiskName");
         di.setDescription("theDiskDescription");
 
@@ -256,9 +256,9 @@ public class ApplianceManagerAsserts
         return di;
     }
 
-    protected static Boolean isContained(final OVFPackageInstancesStateDto list, final String ovfId)
+    protected static Boolean isContained(final TemplatesStateDto list, final String ovfId)
     {
-        for (OVFPackageInstanceStateDto status : list.getCollection())
+        for (TemplateStateDto status : list.getCollection())
         {
             if (ovfId.equalsIgnoreCase(status.getOvfId()))
             {
@@ -271,17 +271,17 @@ public class ApplianceManagerAsserts
     /**
      * TODO test timeout
      */
-    public void waitUnitlExpected(final String ovfId, final OVFStatusEnumType expected)
+    public void waitUnitlExpected(final String ovfId, final TemplateStatusEnumType expected)
         throws Exception
     {
         Thread.sleep(downloadProgressInterval); // FIXME
 
-        OVFPackageInstanceStateDto status = stub.getOVFPackageInstanceStatus(idEnterprise, ovfId);
+        TemplateStateDto status = stub.getTemplateStatus(idEnterprise, ovfId);
         if (status.getStatus() == expected)
         {
             return;
         }
-        else if (status.getStatus() == OVFStatusEnumType.DOWNLOADING)
+        else if (status.getStatus() == TemplateStatusEnumType.DOWNLOADING)
         {
             Thread.sleep(downloadProgressInterval);
             waitUnitlExpected(ovfId, expected);

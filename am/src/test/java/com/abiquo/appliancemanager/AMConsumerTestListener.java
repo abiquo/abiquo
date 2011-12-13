@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 
-import com.abiquo.appliancemanager.transport.OVFStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
 import com.abiquo.commons.amqp.impl.am.AMCallback;
 import com.abiquo.commons.amqp.impl.am.AMConsumer;
 import com.abiquo.commons.amqp.impl.am.domain.OVFPackageInstanceStatusEvent;
@@ -47,21 +47,21 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
 
     private AMConsumer consumer;
 
-    private static Queue<OVFStatusEnumType> EVENTS = new ConcurrentLinkedQueue<OVFStatusEnumType>();
+    private static Queue<TemplateStatusEnumType> EVENTS = new ConcurrentLinkedQueue<TemplateStatusEnumType>();
 
     private final static int TIMEOUT = 3;
 
-    public static void expectedEvents(final OVFStatusEnumType... events)
+    public static void expectedEvents(final TemplateStatusEnumType... events)
     {
-        for (OVFStatusEnumType event : events)
+        for (TemplateStatusEnumType event : events)
         {
             pollWithTimeoutAndCompare(event);
         }
     }
 
-    private static void pollWithTimeoutAndCompare(final OVFStatusEnumType expected)
+    private static void pollWithTimeoutAndCompare(final TemplateStatusEnumType expected)
     {
-        OVFStatusEnumType actual = null;
+        TemplateStatusEnumType actual = null;
 
         for (int t = 0; t < TIMEOUT && actual == null; t++)
         {
@@ -86,7 +86,7 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
 
     public static void assertEventsEmpty()
     {
-        OVFStatusEnumType noEvent = EVENTS.poll();
+        TemplateStatusEnumType noEvent = EVENTS.poll();
         Assert.assertNull(noEvent, "expected no event but there is a : " + noEvent);
     }
 
@@ -133,25 +133,25 @@ public class AMConsumerTestListener implements ISuiteListener, AMCallback
     @Override
     public void onDownload(OVFPackageInstanceStatusEvent event)
     {
-        EVENTS.add(OVFStatusEnumType.fromValue(event.getStatus()));
+        EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
     public void onNotDownload(OVFPackageInstanceStatusEvent event)
     {
-        EVENTS.add(OVFStatusEnumType.fromValue(event.getStatus()));
+        EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
     public void onError(OVFPackageInstanceStatusEvent event)
     {
-        EVENTS.add(OVFStatusEnumType.fromValue(event.getStatus()));
+        EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
     @Override
     public void onDownloading(OVFPackageInstanceStatusEvent event)
     {
-        EVENTS.add(OVFStatusEnumType.fromValue(event.getStatus()));
+        EVENTS.add(TemplateStatusEnumType.fromValue(event.getStatus()));
     }
 
 }

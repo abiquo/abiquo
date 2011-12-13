@@ -24,8 +24,8 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 import java.util.UUID;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
@@ -43,7 +43,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
 
     UserGenerator userGenerator;
 
-    VirtualImageGenerator vImageGenerator;
+    VirtualMachineTemplateGenerator vImageGenerator;
 
     public VirtualMachineGenerator(final SeedGenerator seed)
     {
@@ -52,7 +52,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         hypervisorGenerator = new HypervisorGenerator(seed);
         enterpriseGenerator = new EnterpriseGenerator(seed);
         userGenerator = new UserGenerator(seed);
-        vImageGenerator = new VirtualImageGenerator(seed);
+        vImageGenerator = new VirtualMachineTemplateGenerator(seed);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
             VirtualMachine.VDRP_PORT_PROPERTY, VirtualMachine.VDRP_IP_PROPERTY,
             VirtualMachine.HIGH_DISPONIBILITY_PROPERTY, VirtualMachine.ID_TYPE_PROPERTY);
 
-        vImageGenerator.assertAllPropertiesEqual(obj1.getVirtualImage(), obj2.getVirtualImage());
+        vImageGenerator.assertAllPropertiesEqual(obj1.getVirtualMachineTemplate(), obj2.getVirtualMachineTemplate());
     }
 
     @Override
@@ -77,14 +77,14 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
     public VirtualMachine createInstance(final Hypervisor hypervisor)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        VirtualImage vimage = vImageGenerator.createInstance(enterprise);
+        VirtualMachineTemplate vimage = vImageGenerator.createInstance(enterprise);
         String name =
             newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
 
         return createInstance(vimage, enterprise, hypervisor, name);
     }
 
-    public VirtualMachine createInstance(final VirtualImage vimage)
+    public VirtualMachine createInstance(final VirtualMachineTemplate vimage)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
@@ -102,7 +102,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
 
     public VirtualMachine createInstance(final Enterprise enterprise, final User user)
     {
-        VirtualImage vimage = vImageGenerator.createInstance(enterprise);
+        VirtualMachineTemplate vimage = vImageGenerator.createInstance(enterprise);
         Hypervisor hypervisor = hypervisorGenerator.createUniqueInstance();
         String name =
             newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
@@ -110,14 +110,14 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         return createInstance(vimage, enterprise, hypervisor, user, name);
     }
 
-    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+    public VirtualMachine createInstance(final VirtualMachineTemplate vimage, final Enterprise enterprise,
         final Hypervisor hypervisor, final String name)
     {
         User user = userGenerator.createInstance(enterprise);
         return createInstance(vimage, enterprise, hypervisor, user, name);
     }
 
-    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+    public VirtualMachine createInstance(final VirtualMachineTemplate vimage, final Enterprise enterprise,
         final Hypervisor hypervisor, final User user, final String name)
     {
         VirtualMachine virtualMachine =
@@ -133,7 +133,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         return virtualMachine;
     }
 
-    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+    public VirtualMachine createInstance(final VirtualMachineTemplate vimage, final Enterprise enterprise,
         final User user, final String name)
     {
         VirtualMachine virtualMachine =
@@ -151,7 +151,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         return virtualMachine;
     }
 
-    public VirtualMachine createInstance(final VirtualImage vimage, final Enterprise enterprise,
+    public VirtualMachine createInstance(final VirtualMachineTemplate vimage, final Enterprise enterprise,
         final String name)
     {
         User user = userGenerator.createInstance(enterprise);
@@ -189,7 +189,7 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         enterpriseGenerator.addAuxiliaryEntitiesToPersist(enterprise, entitiesToPersist);
         entitiesToPersist.add(enterprise);
 
-        VirtualImage vimage = entity.getVirtualImage();
+        VirtualMachineTemplate vimage = entity.getVirtualMachineTemplate();
         vImageGenerator.addAuxiliaryEntitiesToPersist(vimage, entitiesToPersist);
         entitiesToPersist.add(vimage);
 

@@ -78,7 +78,7 @@ public class VirtualApplianceConversionsDAOHibernate extends
     {
         Query query =
             getSession()
-                .createQuery(
+                .createSQLQuery(
                     "select distinct(dc.uuid) from vappstateful_conversions vasc left outer join virtualapp va on vasc.idVirtualApp = va.idVirtualApp left outer join virtualdatacenter vdc on va.idVirtualDataCenter = vdc.idVirtualdataCenter left outer join datacenter dc on vdc.idDatacenter = dc.idDataCenter where vasc.id = :id");
         query.setParameter("id", idVASC);
 

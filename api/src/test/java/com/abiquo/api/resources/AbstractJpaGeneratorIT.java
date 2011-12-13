@@ -36,7 +36,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
-import com.abiquo.testng.TestConfig;
 
 @Test(groups = ALL_INTEGRATION_TESTS)
 public class AbstractJpaGeneratorIT extends AbstractGeneratorTest

@@ -143,7 +143,7 @@ public class InfrastructureService extends DefaultApiService
         if (repo.existsAnyRackWithName(datacenter, rack.getName()))
         {
             tracer.log(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
-                "Rack with duplicated name " + rack.getName());
+                "rack.duplicatedname", rack.getName());
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
             flushErrors();
         }
@@ -177,8 +177,8 @@ public class InfrastructureService extends DefaultApiService
         validate(rack);
         repo.insertRack(rack);
 
-        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
-            "Rack '" + rack.getName() + "' has been created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, "Rack '"
+            + rack.getName() + "' has been created succesfully");
 
         return rack;
     }
@@ -204,8 +204,8 @@ public class InfrastructureService extends DefaultApiService
         validateCreateInfo(createInfo);
 
         return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
-            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
-            createInfo.getPort(), createInfo.getvSwitch());
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(), createInfo
+                .getPort(), createInfo.getvSwitch());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -234,7 +234,7 @@ public class InfrastructureService extends DefaultApiService
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
         // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-        // user, password, port);
+            // user, password, port);
             this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
                 port, vSwitch);
 
@@ -340,10 +340,9 @@ public class InfrastructureService extends DefaultApiService
             getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
         vsmServiceStub.monitor(vsmRS, machine.getHypervisor());
 
-        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine '"
-            + machine.getName() + "' [ ip: " + machine.getHypervisor().getIp() + " type: "
-            + machine.getHypervisor().getType() + " state: " + machine.getState()
-            + " ] has been created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+            "machine.created", machine.getName(), machine.getHypervisor().getIp(), machine
+                .getHypervisor().getType(), machine.getState());
 
         return machine;
     }
@@ -421,7 +420,7 @@ public class InfrastructureService extends DefaultApiService
         if (repo.existsAnyOtherRackWithName(old, rack.getName()))
         {
             tracer.log(SeverityType.MINOR, ComponentType.RACK, EventType.RACK_CREATE,
-                "Rack with duplicated name " + rack.getName());
+                "rack.duplicatedname", rack.getName());
             addConflictErrors(APIError.RACK_DUPLICATED_NAME);
             flushErrors();
         }
@@ -443,13 +442,9 @@ public class InfrastructureService extends DefaultApiService
         validate(old);
         repo.updateRack(old);
 
-        tracer.log(
-            SeverityType.INFO,
-            ComponentType.RACK,
-            EventType.RACK_MODIFY,
-            "Rack '" + old.getName() + "' has been modified [Name: " + rack.getName()
-                + ", Short description: " + rack.getShortDescription() + ", HA enabled: "
-                + (rack.isHaEnabled() ? "yes" : "no") + "]");
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_MODIFY, "rack.updated",
+            old.getName(), rack.getName(), rack.getShortDescription(), (rack.isHaEnabled() ? "yes"
+                : "no"));
 
         return old;
     }
@@ -477,8 +472,8 @@ public class InfrastructureService extends DefaultApiService
         }
 
         repo.deleteRack(rack);
-        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE,
-            "Rack " + rack.getName() + " deleted");
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_DELETE, "rack.deleted",
+            rack.getName());
     }
 
     public List<Machine> getMachines(final Rack rack)
@@ -551,8 +546,8 @@ public class InfrastructureService extends DefaultApiService
         RemoteService old = getRemoteService(id);
 
         ErrorsDto configurationErrors =
-            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(),
-                dto.getUri());
+            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto
+                .getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -575,7 +570,7 @@ public class InfrastructureService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_UPDATE,
-            dto.getType().getName() + " updated");
+            "remoteServices.updated", dto.getType().getName());
 
         return responseDto;
     }
@@ -590,7 +585,7 @@ public class InfrastructureService extends DefaultApiService
         repo.deleteRemoteService(remoteService);
 
         tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.REMOTE_SERVICES_DELETE,
-            remoteService.getType().getName() + " deleted");
+            "remoteServices.deleted", remoteService.getType().getName());
     }
 
     protected void checkRemoteServiceStatusBeforeRemoving(final RemoteService remoteService)
@@ -686,7 +681,8 @@ public class InfrastructureService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName() + ", " + error.getMessage()));
+                    .getName()
+                    + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -898,6 +894,20 @@ public class InfrastructureService extends DefaultApiService
         return m.getState();
     }
 
+    public void isStonithUp(final Integer datacenterId, final String ip, final String user,
+        final String password, final Integer port)
+    {
+
+        RemoteService nodecollector =
+            getRemoteService(datacenterId, RemoteServiceType.NODE_COLLECTOR);
+
+        if (!nodecollectorServiceStub.isStonithUp(nodecollector, ip, port, user, password))
+        {
+            addValidationErrors(APIError.MACHINE_INVALID_IPMI_CONF);
+            flushErrors();
+        }
+    }
+
     public void checkAvailableCores(final Machine machine)
     {
         // PREMIUM
@@ -1016,8 +1026,9 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (pd.getReadMethod().invoke(dto) == null)
                 {
-                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
-                        pd.getName() + " can't be null"));
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(), pd
+                        .getName()
+                        + " can't be null"));
                     flushErrors();
                 }
             }
@@ -1144,9 +1155,8 @@ public class InfrastructureService extends DefaultApiService
         if (tracer != null)
         {
             tracer.log(SeverityType.INFO, ComponentType.MACHINE,
-                EventType.MACHINE_DELETE_VMS_NOTMANAGED,
-                "Virtual Machines not managed by host from '" + hypervisor.getIp()
-                    + "' have been deleted");
+                EventType.MACHINE_DELETE_VMS_NOTMANAGED, "virtualMachine.notManagedVMDeleted",
+                hypervisor.getIp());
         }
     }
 

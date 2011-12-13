@@ -47,7 +47,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
     {
         Disk disk = new Disk();
         disk.setDiskSizeInMb(dto.getSizeInMb());
-        disk.setReadOnly(dto.getReadOnly());
+        disk.setReadOnly(Boolean.FALSE);
         return disk;
     }
 

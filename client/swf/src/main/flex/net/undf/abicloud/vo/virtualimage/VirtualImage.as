@@ -27,9 +27,9 @@ package net.undf.abicloud.vo.virtualimage
     [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualimage.VirtualImage")]
     public class VirtualImage
     {
-        public static const TYPE_STATELESS:int = 0;
+        public static const TYPE_STATELESS:Boolean = false;
 
-        public static const TYPE_STATEFUL:int = 1;
+        public static const TYPE_STATEFUL:Boolean = true;
 
         /* ------------- Public atributes ------------- */
         public var id:int;
@@ -62,11 +62,11 @@ package net.undf.abicloud.vo.virtualimage
 
         public var ovfId:String;
 
-        public var stateful:int;
+        public var stateful:Boolean;
 
         public var diskFileSize:Number;
         
-        public var shared:int;
+        public var shared:Boolean;
         
         public var chefEnabled:Boolean;
 
@@ -92,7 +92,7 @@ package net.undf.abicloud.vo.virtualimage
             ovfId = "";
             stateful = TYPE_STATELESS;
             diskFileSize = 0;
-            shared = 0;
+            shared = false;
             chefEnabled = false;
             costCode = 0;
         }

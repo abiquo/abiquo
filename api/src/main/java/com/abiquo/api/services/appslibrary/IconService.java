@@ -101,7 +101,7 @@ public class IconService extends DefaultApiService
     {
         Icon icon = findById(iconId);
 
-        if (appslibraryRep.isIconInUseByVirtualImages(icon))
+        if (appslibraryRep.isIconInUseByVirtualMachineTemplates(icon))
         {
             addConflictErrors(APIError.ICON_IN_USE_BY_VIRTUAL_IMAGES);
             flushErrors();

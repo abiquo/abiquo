@@ -21,7 +21,7 @@
 
 package com.abiquo.am.services.filesystem.filters;
 
-import static com.abiquo.am.services.OVFPackageConventions.OVF_BUNDLE_PATH_IDENTIFIER;
+import static com.abiquo.am.services.TemplateConventions.OVF_BUNDLE_PATH_IDENTIFIER;
 
 import java.io.File;
 import java.io.FilenameFilter;

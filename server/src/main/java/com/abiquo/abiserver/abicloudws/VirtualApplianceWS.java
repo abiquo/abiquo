@@ -44,7 +44,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
 import com.abiquo.abiserver.eventing.EventingException;
-import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
@@ -92,8 +91,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     private static final ResourceManager resourceManager =
         new ResourceManager(VirtualApplianceWS.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     IInfrastructureWS infrastructureWS;
 
@@ -129,9 +128,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
-                    .newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -151,7 +149,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         Resource resource;
 
         BasicResult result = new BasicResult(); // TODO throw Exception on
-                                                // reportError
+        // reportError
 
         try
         {
@@ -186,7 +184,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             {
                 // Subscribing to the virtual appliance states
                 // Decomment this to test subscribing to all the events
-                EventingSupport.subscribeToAllVA(virtualAppliance, virtualSystemMonitor);
+                // EventingSupport.subscribeToAllVA(virtualAppliance, virtualSystemMonitor);
 
                 // Starting the virtual Appliance Changing the virtualSystems to
                 // running
@@ -259,7 +257,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             {
                 // Subscribing to the virtual appliance states
                 // Decomment this to test subscribing to all the events
-                EventingSupport.subscribeToAllVA(virtualAppliance, virtualSystemMonitorAddress);
+                // EventingSupport.subscribeToAllVA(virtualAppliance, virtualSystemMonitorAddress);
                 // Starting the virtual Appliance Changing the virtualSystems to
                 // running
                 if (mustChangeState)
@@ -380,7 +378,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 OVFModelFactory.createOVFModelFromVirtualAppliance().createVirtualApplication(
                     virtualAppliance);
 
-            logger.info("Checking the Virtual Appliance");
+            logger.info("Checking the Virtual Appliance: [" + virtualAppliance.getId() + " - "
+                + virtualAppliance.getName());
 
             Boolean resultCheck = checkVirtualAppliance(virtualAppliance);
             result.setSuccess(resultCheck);
@@ -395,7 +394,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                     // VM
                     // //Decomment this to test unsubscribing to all the events
                     result = changeState(resource, envelope, AbiCloudConstants.POWERDOWN_ACTION);
-                    EventingSupport.unsubscribeToAllVA(virtualAppliance);
+                    // EventingSupport.unsubscribeToAllVA(virtualAppliance);
                 }
                 else
                 {
@@ -405,7 +404,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage("The health check for this virtual appliance was not succesful");
+                result.setMessage("The health check for this virtual appliance was not successful");
                 return result;
             }
 
@@ -649,7 +648,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 // The nodes crashed will not be rechecked
                 if (nodeVi.getModified() == Node.NODE_ERASED)
                 {
-                    logger.info("Checking Virtual machine before the VM operation");
+                    logger.info("Checking Virtual Machine before the VM operation");
                     Boolean checkResult =
                         infrastructureWS.checkVirtualSystem(nodeVi.getVirtualMachine());
                     if (!checkResult)
@@ -661,7 +660,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         }
         if (!checkTotalResult)
         {
-            throw new VirtualFactoryHealthException("The nodes removed don't pass the health check");
+            throw new VirtualFactoryHealthException("The nodes removed did not pass the health check");
         }
 
         return true;
@@ -676,6 +675,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     @Override
     public BasicResult forceRefreshVirtualApplianceState(final VirtualAppliance virtualAppliance)
     {
+        /*
         logger.info("Refreshing the virtual appliance state: {}", virtualAppliance.getId());
         BasicResult result = new BasicResult();
         try
@@ -684,14 +684,13 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         }
         catch (EventingException e)
         {
-            logger
-                .warn(
-                    "An error was occurred when invokin a pulling subscribing to recover the VA events: {}",
-                    e);
+            logger.warn("An error occurred when subscribing to retrieve the VA events: {}", e);
         }
 
         result.setSuccess(true);
         return result;
+        */
+        return null;
     }
 
     /**
@@ -702,7 +701,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     @Override
     public void rollbackEventSubscription(final VirtualAppliance virtualAppliance)
     {
-        EventingSupport.unsubscribeToAllVA(virtualAppliance);
+        // EventingSupport.unsubscribeToAllVA(virtualAppliance);
     }
 
     /*
@@ -748,7 +747,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
+                result.setMessage(virtualAppliance.getId() + " - " + virtualAppliance.getName()
+                    + ": Operation cannot be performed.");
                 return result;
             }
         }

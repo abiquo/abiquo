@@ -29,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 @Component
-// @Transactional
 public class PopulateReader extends PopulateConstants
 {
 
@@ -48,7 +47,7 @@ public class PopulateReader extends PopulateConstants
     @Autowired
     PopulateAction populateAction;
 
-    public PopulateTestCase readModel(List<String> decs)
+    public PopulateTestCase readModel(final List<String> decs)
     {
         PopulateTestCase tcase = new PopulateTestCase();
         tcase.actions = new LinkedList<AllocatorAction>();
@@ -104,7 +103,7 @@ public class PopulateReader extends PopulateConstants
     /**
      * clear comments from input (#)
      */
-    private String cleanLine(String line)
+    private String cleanLine(final String line)
     {
         if (line.startsWith(COMMNET))
         {
@@ -121,12 +120,12 @@ public class PopulateReader extends PopulateConstants
 
     }
 
-    public void removeVirtualMachine(Integer virtualMachineId)
+    public void removeVirtualMachine(final Integer virtualMachineId)
     {
         populateVirtualInfrastructure.removeVirtualMachine(virtualMachineId);
     }
 
-    public void runningVirtualMachine(Integer virtualMachineId)
+    public void runningVirtualMachine(final Integer virtualMachineId)
     {
         populateVirtualInfrastructure.runningVirtualMachine(virtualMachineId);
     }

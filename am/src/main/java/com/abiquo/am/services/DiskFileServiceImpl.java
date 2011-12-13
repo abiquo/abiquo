@@ -20,7 +20,7 @@
  */
 package com.abiquo.am.services;
 
-import static com.abiquo.am.services.OVFPackageConventions.customEncode;
+import static com.abiquo.am.services.TemplateConventions.customEncode;
 
 import java.io.File;
 import java.io.IOException;

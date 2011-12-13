@@ -241,7 +241,7 @@
                     iconsList.selectedIndex = AbicloudUtils.getValuePositionInArray(virtualImageManager.icons.toArray(),
                                                                                     "id",
                                                                                     _virtualImage.icon);
-                    publicImageInput.selected = this._virtualImage.shared == 1;
+                    publicImageInput.selected = this._virtualImage.shared;
                     chefEnabledCombobox.selected = this._virtualImage.chefEnabled;
                     this._costCodeId = this._virtualImage.costCode;
                 }
@@ -296,10 +296,7 @@
                     if (iconsList.selectedIndex > -1)
                         updatedValues.icon = iconsList.selectedItem as Icon;
 
-                    if (publicImageInput.selected)
-                        updatedValues.shared = 1;
-                    else
-                        updatedValues.shared = 0; 
+                    updatedValues.shared = publicImageInput.selected;
                         
                     //Chef integration
                     updatedValues.chefEnabled = chefEnabledCombobox.selected;

@@ -37,8 +37,8 @@ import org.testng.annotations.BeforeMethod;
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
-import com.abiquo.server.core.appslibrary.OVFPackageGenerator;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.HypervisorGenerator;
 import com.abiquo.server.core.cloud.NodeVirtualImageGenerator;
 import com.abiquo.server.core.cloud.VirtualApplianceGenerator;
@@ -67,6 +67,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
 import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
@@ -108,7 +109,8 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected VolumeManagementGenerator volumeManagementGenerator =
         new VolumeManagementGenerator(seed);
 
-    protected VirtualImageGenerator virtualImageGenerator = new VirtualImageGenerator(seed);
+    protected VirtualMachineTemplateGenerator virtualMachineTemplateGenerator =
+        new VirtualMachineTemplateGenerator(seed);
 
     protected VirtualImageConversionGenerator conversionGenerator =
         new VirtualImageConversionGenerator(seed);
@@ -136,13 +138,16 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
     protected CategoryGenerator categoryGenerator = new CategoryGenerator(seed);
 
-    protected OVFPackageGenerator ovfPackageGenerator = new OVFPackageGenerator(seed);
+    protected TemplateDefinitionGenerator templateDefGenerator =
+        new TemplateDefinitionGenerator(seed);
 
     protected AppsLibraryGenerator appsLibraryGenerator = new AppsLibraryGenerator(seed);
 
     protected IconGenerator iconGenerator = new IconGenerator(seed);
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
+    
+    protected DiskManagementGenerator diskGenerator = new DiskManagementGenerator(seed);
 
     protected InitiatorMappingGenerator initiatorMappingGenerator =
         new InitiatorMappingGenerator(seed);
@@ -233,6 +238,9 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
         em.getTransaction().commit();
         em.close();
+        
+        // Avoid having closed EntityManagers bound to the thread
+        TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
     }
 
     private EntityManagerFactory getEntityManagerFactory()

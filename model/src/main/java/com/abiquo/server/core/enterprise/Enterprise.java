@@ -44,7 +44,7 @@ import org.hibernate.validator.constraints.URL;
 
 import com.abiquo.model.validation.LimitRange;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.common.DefaultEntityWithLimits;
 import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.pricing.PricingTemplate;
@@ -381,7 +381,7 @@ public class Enterprise extends DefaultEntityWithLimits
     private final List<DatacenterLimits> datacenterLimits = new ArrayList<DatacenterLimits>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
-    private final List<VirtualImage> virtualImages = new ArrayList<VirtualImage>();
+    private final List<VirtualMachineTemplate> virtualImages = new ArrayList<VirtualMachineTemplate>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "enterprise")
     private final List<AppsLibrary> appsLibraries = new ArrayList<AppsLibrary>();

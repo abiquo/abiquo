@@ -25,11 +25,11 @@ import java.util.List;
 
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.server.core.common.DefaultEntityWithLimitsGenerator;
-import com.abiquo.server.core.common.Limit;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.DatacenterGenerator;
+import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.abiquo.server.core.infrastructure.network.Network;
 import com.abiquo.server.core.infrastructure.network.NetworkGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -37,23 +37,26 @@ import com.softwarementors.commons.testng.AssertEx;
 
 public class VirtualDatacenterGenerator extends DefaultEntityWithLimitsGenerator<VirtualDatacenter>
 {
+    RemoteServiceGenerator rsGenerator;
+
     DatacenterGenerator datacenterGenerator;
 
     EnterpriseGenerator enterpriseGenerator;
 
     NetworkGenerator networkGenerator;
 
-    public VirtualDatacenterGenerator(SeedGenerator seed)
+    public VirtualDatacenterGenerator(final SeedGenerator seed)
     {
         super(seed);
 
         datacenterGenerator = new DatacenterGenerator(seed);
         enterpriseGenerator = new EnterpriseGenerator(seed);
         networkGenerator = new NetworkGenerator(seed);
+        rsGenerator = new RemoteServiceGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(VirtualDatacenter obj1, VirtualDatacenter obj2)
+    public void assertAllPropertiesEqual(final VirtualDatacenter obj1, final VirtualDatacenter obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, VirtualDatacenter.NAME_PROPERTY);
     }
@@ -65,23 +68,22 @@ public class VirtualDatacenterGenerator extends DefaultEntityWithLimitsGenerator
         return createInstance(enterprise);
     }
 
-    public VirtualDatacenter createInstance(Enterprise enterprise)
+    public VirtualDatacenter createInstance(final Enterprise enterprise)
     {
         Datacenter datacenter = datacenterGenerator.createUniqueInstance();
         return createInstance(datacenter, enterprise);
     }
 
-    public VirtualDatacenter createInstance(Datacenter datacenter)
+    public VirtualDatacenter createInstance(final Datacenter datacenter)
     {
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         return createInstance(datacenter, enterprise);
     }
 
-    public VirtualDatacenter createInstance(Datacenter datacenter, Enterprise enterprise,
-        HypervisorType htype, String name)
+    public VirtualDatacenter createInstance(final Datacenter datacenter,
+        final Enterprise enterprise, final HypervisorType htype, final String name)
     {
         Network network = networkGenerator.createUniqueInstance();
-
         VirtualDatacenter virtualDatacenter =
             new VirtualDatacenter(enterprise, datacenter, network, htype, name);
 
@@ -90,8 +92,8 @@ public class VirtualDatacenterGenerator extends DefaultEntityWithLimitsGenerator
         return virtualDatacenter;
     }
 
-    public VirtualDatacenter createInstance(Datacenter datacenter, Enterprise enterprise,
-        HypervisorType htype)
+    public VirtualDatacenter createInstance(final Datacenter datacenter,
+        final Enterprise enterprise, final HypervisorType htype)
     {
         final String name =
             newString(nextSeed(), VirtualDatacenter.NAME_LENGTH_MIN,
@@ -100,14 +102,14 @@ public class VirtualDatacenterGenerator extends DefaultEntityWithLimitsGenerator
         return createInstance(datacenter, enterprise, htype, name);
     }
 
-    public VirtualDatacenter createInstance(Datacenter datacenter, Enterprise enterprise)
+    public VirtualDatacenter createInstance(final Datacenter datacenter, final Enterprise enterprise)
     {
         return createInstance(datacenter, enterprise, HypervisorType.VMX_04);
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(VirtualDatacenter entity,
-        List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final VirtualDatacenter entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
 

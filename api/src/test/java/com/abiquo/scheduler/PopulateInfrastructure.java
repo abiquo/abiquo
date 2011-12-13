@@ -22,6 +22,9 @@
 package com.abiquo.scheduler;
 
 import static junit.framework.Assert.assertTrue;
+
+import java.util.UUID;
+
 import junit.framework.Assert;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,19 +70,19 @@ public class PopulateInfrastructure extends PopulateConstants
     private RepositoryDAO repoDao; // TODO on dcRep
 
     // Generators
-    private SeedGenerator sgen = new SeedGenerator();
+    private final SeedGenerator sgen = new SeedGenerator();
 
-    private DatacenterGenerator dcGen = new DatacenterGenerator(sgen);
+    private final DatacenterGenerator dcGen = new DatacenterGenerator(sgen);
 
-    private RackGenerator rackGen = new RackGenerator(sgen);
+    private final RackGenerator rackGen = new RackGenerator(sgen);
 
-    private MachineGenerator machineGen = new MachineGenerator(sgen);
+    private final MachineGenerator machineGen = new MachineGenerator(sgen);
 
-    private HypervisorGenerator hyperGen = new HypervisorGenerator(sgen);
+    private final HypervisorGenerator hyperGen = new HypervisorGenerator(sgen);
 
-    private RepositoryGenerator repoGen = new RepositoryGenerator(sgen);
+    private final RepositoryGenerator repoGen = new RepositoryGenerator(sgen);
 
-    private DatastoreGenerator datastoreGen = new DatastoreGenerator(sgen);
+    private final DatastoreGenerator datastoreGen = new DatastoreGenerator(sgen);
 
     public PopulateInfrastructure()
     {
@@ -253,14 +256,15 @@ public class PopulateInfrastructure extends PopulateConstants
             org.testng.Assert.assertNotNull(rack, "Rack not found " + rackStr);
 
             machine = machineGen.createMachine(rack.getDatacenter(), rack);
-            machine.setState(MachineState.MANAGED);
-            dcRep.insertMachine(machine);
-
             Hypervisor hyper = hyperGen.createInstance(machine, htype);
-            dcRep.insertHypervisor(hyper);
+            // machine.createHypervisor(type, ip, ipService, port, user, password);
 
             machine.setName(mName);
-            // machine.setHypervisor(hyper);
+            machine.setState(MachineState.MANAGED);
+            machine.setHypervisor(hyper);
+
+            dcRep.insertMachine(machine);
+            // dcRep.insertHypervisor(hyper);
 
             long cpu = DEF_MACHINE_CPU, ram = DEF_MACHINE_RAM, hd = DEF_MACHINE_HD;
 
@@ -275,6 +279,7 @@ public class PopulateInfrastructure extends PopulateConstants
             ds.setEnabled(true);
             ds.setUsedSize(0);
             ds.setSize(hd * GB_TO_MB * 1014 * 1024); // TODO Datastore size is bytes
+            ds.setDatastoreUUID(UUID.randomUUID().toString());
 
             dcRep.insertDatastore(ds);
 

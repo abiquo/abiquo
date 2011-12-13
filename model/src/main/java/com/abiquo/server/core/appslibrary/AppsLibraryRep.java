@@ -37,7 +37,7 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 public class AppsLibraryRep extends DefaultRepBase
 {
     @Autowired
-    private VirtualImageDAO virtualImageDAO;
+    private VirtualMachineTemplateDAO virtualMachineTemplateDAO;
 
     @Autowired
     private VirtualImageConversionDAO conversionDAO;
@@ -56,7 +56,7 @@ public class AppsLibraryRep extends DefaultRepBase
     public AppsLibraryRep(final EntityManager em)
     {
         this.entityManager = em;
-        this.virtualImageDAO = new VirtualImageDAO(em);
+        this.virtualMachineTemplateDAO = new VirtualMachineTemplateDAO(em);
         this.categoryDAO = new CategoryDAO(em);
         this.iconDAO = new IconDAO(em);
         this.conversionDAO = new VirtualImageConversionDAO(em);
@@ -178,126 +178,126 @@ public class AppsLibraryRep extends DefaultRepBase
         return icon;
     }
 
-    public boolean isIconInUseByVirtualImages(final Icon icon)
+    public boolean isIconInUseByVirtualMachineTemplates(final Icon icon)
     {
-        return iconDAO.iconInUseByVirtualImages(icon);
+        return iconDAO.iconInUseByVirtualMachineTemplates(icon);
     }
 
-    // Virtual Image
+    // Virtual Machine Template
 
-    public void insertVirtualImage(final VirtualImage virtualImage)
+    public void insertVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        virtualImageDAO.persist(virtualImage);
+        virtualMachineTemplateDAO.persist(virtualMachineTemplate);
     }
 
-    public void updateVirtualImage(final VirtualImage virtualImage)
+    public void updateVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        virtualImageDAO.flush();
+        virtualMachineTemplateDAO.flush();
     }
 
-    public void deleteVirtualImage(final VirtualImage virtualImage)
+    public void deleteVirtualMachineTemplate(final VirtualMachineTemplate virtualMachineTemplate)
     {
-        virtualImageDAO.remove(virtualImage);
+        virtualMachineTemplateDAO.remove(virtualMachineTemplate);
     }
 
-    public List<VirtualImage> findAllVirtualImages()
+    public List<VirtualMachineTemplate> findAllVirtualMachineTemplates()
     {
-        return virtualImageDAO.findAll();
+        return virtualMachineTemplateDAO.findAll();
     }
 
-    public VirtualImage findVirtualImageById(final Integer virtualImage)
+    public VirtualMachineTemplate findVirtualMachineTemplateById(final Integer virtualMachineTemplate)
     {
-        return virtualImageDAO.findById(virtualImage);
+        return virtualMachineTemplateDAO.findById(virtualMachineTemplate);
     }
 
-    public VirtualImage findVirtualImageByName(final String name)
+    public VirtualMachineTemplate findVirtualMachineTemplateByName(final String name)
     {
-        return virtualImageDAO.findByName(name);
+        return virtualMachineTemplateDAO.findByName(name);
     }
 
-    public List<VirtualImage> findVirtualImagesByEnterprise(final Enterprise enterprise)
+    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByEnterprise(final Enterprise enterprise)
     {
-        return virtualImageDAO.findByEnterprise(enterprise);
+        return virtualMachineTemplateDAO.findByEnterprise(enterprise);
     }
 
-    public List<VirtualImage> findVirtualImagesByEnterpriseAndRepository(
+    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByEnterpriseAndRepository(
         final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository)
     {
-        return virtualImageDAO.findByEnterpriseAndRepository(enterprise, repository);
+        return virtualMachineTemplateDAO.findByEnterpriseAndRepository(enterprise, repository);
     }
 
     /**
-     * Gets the list of compatible(*) virtual images available in the provided enterprise and
+     * Gets the list of compatible(*) virtual machine templates available in the provided enterprise and
      * repository.
      * 
      * @param category null indicate all categories (no filter)
-     * @param hypervisor (*) null indicate no filter compatibles, else return images compatibles or
+     * @param hypervisor (*) null indicate no filter compatibles, else return templates compatibles or
      *            with compatible conversions. @see {@link VirtualImageConversionDAO}
      */
-    public List<VirtualImage> findVirtualImages(final Enterprise enterprise,
+    public List<VirtualMachineTemplate> findVirtualMachineTemplates(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
         final HypervisorType hypervisor)
     {
         if (category == null && hypervisor == null)
         {
-            return findVirtualImagesByEnterpriseAndRepository(enterprise, repository);
+            return findVirtualMachineTemplatesByEnterpriseAndRepository(enterprise, repository);
         }
 
-        return virtualImageDAO.findBy(enterprise, repository, category, hypervisor);
+        return virtualMachineTemplateDAO.findBy(enterprise, repository, category, hypervisor);
     }
 
-    public boolean existImageWithSamePath(final Enterprise enterprise,
+    public boolean existVirtualMachineTemplateWithSamePath(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
-        return virtualImageDAO.existWithSamePath(enterprise, repository, path);
+        return virtualMachineTemplateDAO.existWithSamePath(enterprise, repository, path);
     }
 
-    public VirtualImage findVirtualImageByPath(final Enterprise enterprise,
+    public VirtualMachineTemplate findVirtualMachineTemplateByPath(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final String path)
     {
-        return virtualImageDAO.findByPath(enterprise, repository, path);
+        return virtualMachineTemplateDAO.findByPath(enterprise, repository, path);
     }
 
-    public List<VirtualImage> findAllStatefulVirtualImages()
+    public List<VirtualMachineTemplate> findAllStatefulVirtualMachineTemplates()
     {
-        return virtualImageDAO.findStatefuls();
+        return virtualMachineTemplateDAO.findStatefuls();
     }
 
-    public List<VirtualImage> findStatefulVirtualImagesByDatacenter(final Datacenter datacenter)
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByDatacenter(final Datacenter datacenter)
     {
-        return virtualImageDAO.findStatefulsByDatacenter(datacenter);
+        return virtualMachineTemplateDAO.findStatefulsByDatacenter(datacenter);
     }
 
-    public List<VirtualImage> findStatefulVirtualImagesByCategoryAndDatacenter(
+    public List<VirtualMachineTemplate> findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(
         final Category category, final Datacenter datacenter)
     {
-        return virtualImageDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
+        return virtualMachineTemplateDAO.findStatefulsByCategoryAndDatacenter(category, datacenter);
     }
 
-    public boolean isMaster(final VirtualImage vImage)
+    public boolean isMaster(final VirtualMachineTemplate vmtemplae)
     {
-        return virtualImageDAO.isMaster(vImage);
+        return virtualMachineTemplateDAO.isMaster(vmtemplae);
     }
 
-    public List<VirtualImage> findVirtualImagesByMaster(final VirtualImage master)
+    public List<VirtualMachineTemplate> findVirtualMachineTemplatesByMaster(final VirtualMachineTemplate master)
     {
-        return virtualImageDAO.findByMaster(master);
+        return virtualMachineTemplateDAO.findByMaster(master);
     }
 
     /**
-     * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualImage,
+     * @see com.abiquo.server.core.appslibrary.VirtualImageConversionDAO#compatilbeConversions(com.abiquo.server.core.cloud.VirtualMachineTemplate,
      *      com.abiquo.model.enumerator.HypervisorType)
      */
-    public List<VirtualImageConversion> compatilbeConversions(final VirtualImage virtualImage,
+    public List<VirtualImageConversion> compatilbeConversions(final VirtualMachineTemplate vmtemplate,
         final HypervisorType hypervisorType)
     {
-        return conversionDAO.compatilbeConversions(virtualImage, hypervisorType);
+        return conversionDAO.compatilbeConversions(vmtemplate, hypervisorType);
     }
 
-    public boolean isVirtualImageConverted(final VirtualImage image, final DiskFormatType targetType)
+    public boolean isVirtualMachineTemplateConverted(final VirtualMachineTemplate vmtemplate, final DiskFormatType targetType)
     {
-        return conversionDAO.isConverted(image, targetType);
+        return conversionDAO.isConverted(vmtemplate, targetType);
     }
 
     public void addConversion(final VirtualImageConversion conversion)

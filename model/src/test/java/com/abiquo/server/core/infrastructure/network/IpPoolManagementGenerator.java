@@ -28,6 +28,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
@@ -107,7 +108,10 @@ public class IpPoolManagementGenerator extends DefaultEntityGenerator<IpPoolMana
         IpPoolManagement ipPoolManagement =
             new IpPoolManagement(vlan, mac, name, ip, networkName, IpPoolManagement.Type.PRIVATE);
 
+        RasdManagement rasdManagement = rasdmGenerator.createUniqueInstance();
+        rasdManagement.setVirtualDatacenter(vdc);
         ipPoolManagement.setVirtualDatacenter(vdc);
+        ipPoolManagement.setRasd(rasdManagement.getRasd());
 
         return ipPoolManagement;
     }

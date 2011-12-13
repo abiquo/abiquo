@@ -79,6 +79,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
+    @Deprecated
     public void assignDefaultNICResource(final UserHB user, final Integer vmId)
         throws NetworkCommandException
     {
@@ -151,6 +152,7 @@ public class NetworkCommandImpl extends BasicCommand implements NetworkCommand
     }
 
     @Override
+    @Deprecated
     public void assignDefaultNICResource(final UserSession userSession, final Integer vmId)
         throws NetworkCommandException
     {

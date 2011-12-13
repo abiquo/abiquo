@@ -46,7 +46,7 @@ import com.abiquo.nodecollector.exception.ConnectionException;
 import com.abiquo.nodecollector.exception.LoginException;
 import com.abiquo.nodecollector.exception.ServiceUnavailableException;
 import com.abiquo.nodecollector.exception.UnprovisionedException;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -631,7 +631,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                     vm.setDatastore(ds);
                 }
 
-                VirtualImage vi = new VirtualImage(); // XXX this is not stored in the DDBB
+                VirtualMachineTemplate vi = new VirtualMachineTemplate(); // XXX this is not stored in the DDBB
                 VirtualDiskEnumType diskFormatType =
                     VirtualDiskEnumType.fromValue(rt.getResourceSubType().toString());
                 vi.setDiskFormatType(DiskFormatType.fromURI(diskFormatType.value()));
@@ -641,7 +641,7 @@ public class NodecollectorServiceStub extends DefaultApiService
                     vi.setStateful(Boolean.TRUE);
                 }
                 vi.setDiskFileSize(rt.getUnits());
-                vm.setVirtualImage(vi);
+                vm.setVirtualMachineTemplate(vi);
                 vm.setHdInBytes(rt.getUnits());
             }
             else

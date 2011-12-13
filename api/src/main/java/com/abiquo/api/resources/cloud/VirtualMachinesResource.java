@@ -22,7 +22,7 @@
 package com.abiquo.api.resources.cloud;
 
 import static com.abiquo.api.resources.EnterpriseResource.ENTERPRISE;
-import static com.abiquo.api.resources.appslibrary.VirtualImageResource.VIRTUAL_IMAGE;
+import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE;
 import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.Collection;
@@ -46,13 +46,13 @@ import com.abiquo.api.resources.EnterpriseResource;
 import com.abiquo.api.resources.EnterprisesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoriesResource;
 import com.abiquo.api.resources.appslibrary.DatacenterRepositoryResource;
-import com.abiquo.api.resources.appslibrary.VirtualImageResource;
-import com.abiquo.api.resources.appslibrary.VirtualImagesResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResource;
+import com.abiquo.api.resources.appslibrary.VirtualMachineTemplatesResource;
 import com.abiquo.api.services.cloud.VirtualApplianceService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualAppliance;
@@ -134,9 +134,9 @@ public class VirtualMachinesResource extends AbstractResource
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId()));
 
-        final VirtualImage vimage = vm.getVirtualImage();
-        vmDto.addLink(restBuilder.buildVirtualImageLink(vimage.getEnterprise().getId(), vimage
-            .getRepository().getDatacenter().getId(), vimage.getId()));
+        final VirtualMachineTemplate vmtemplate = vm.getVirtualMachineTemplate();
+        vmDto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
+            .getRepository().getDatacenter().getId(), vmtemplate.getId()));
         return vmDto;
     }
 
@@ -158,48 +158,13 @@ public class VirtualMachinesResource extends AbstractResource
         throws Exception
     {
 
-        final VirtualMachine vm = createVirtualMachineFromDto(virtualMachineDto);
-
-        final Integer enterpriseId =
-            getLinkId(virtualMachineDto.searchLink(ENTERPRISE),
-                EnterprisesResource.ENTERPRISES_PATH, EnterpriseResource.ENTERPRISE_PARAM,
-                ENTERPRISE, APIError.NON_EXISTENT_ENTERPRISE);
-        final Integer vImageId =
-            getLinkId(virtualMachineDto.searchLink(VIRTUAL_IMAGE), virtualImageTemplatePath(),
-                VirtualImageResource.VIRTUAL_IMAGE_PARAM, VIRTUAL_IMAGE,
-                APIError.NON_EXISTENT_VIRTUAL_IMAGE);
-
         final VirtualMachine virtualMachine =
-            service.createVirtualMachine(vm, enterpriseId, vImageId, vdcId, vappId);
+            service.createVirtualMachine(vdcId, vappId, virtualMachineDto);
 
         final VirtualMachineDto vappsDto =
             VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder);
 
         return vappsDto;
-    }
-
-    /** Do not include the virtual image param, will be added later. **/
-    private String virtualImageTemplatePath()
-    {
-        return buildPath(EnterprisesResource.ENTERPRISES_PATH,
-            EnterpriseResource.ENTERPRISE_PARAM, //
-            DatacenterRepositoriesResource.DATACENTER_REPOSITORIES_PATH,
-            DatacenterRepositoryResource.DATACENTER_REPOSITORY_PARAM, //
-            VirtualImagesResource.VIRTUAL_IMAGES_PATH);
-    }
-
-    /**
-     * Creates a {@link VirtualMachine} out of the {@link VirtualMachineDto}.
-     * 
-     * @param virtualMachineDto
-     * @return
-     * @throws Exception VirtualMachine
-     */
-    private VirtualMachine createVirtualMachineFromDto(final VirtualMachineDto virtualMachineDto)
-        throws Exception
-    {
-        return ModelTransformer.persistenceFromTransport(VirtualMachine.class, virtualMachineDto);
-
     }
 
     @GET

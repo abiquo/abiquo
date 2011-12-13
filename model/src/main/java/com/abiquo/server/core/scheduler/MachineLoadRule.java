@@ -33,7 +33,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Range;
 
-import com.abiquo.server.core.appslibrary.VirtualImage;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.Machine;
@@ -44,7 +43,7 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = MachineLoadRule.TABLE_NAME)
 @org.hibernate.annotations.Table(appliesTo = MachineLoadRule.TABLE_NAME)
 public class MachineLoadRule extends DefaultEntityBase implements
-    Rule<VirtualImage, Machine, Integer>, PersistentRule
+    Rule<VirtualMachineRequirements, Machine, Integer>, PersistentRule
 
 {
     public static final MachineLoadRule DEFAULT_RULE = new MachineLoadRuleWithNoLocation();
@@ -56,7 +55,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
      */
 
     // TODO deprectate this // used on generators
-    public MachineLoadRule(int cpuLoadPercentage, int ramLoadPercentage)
+    public MachineLoadRule(final int cpuLoadPercentage, final int ramLoadPercentage)
     {
         super();
 
@@ -64,7 +63,8 @@ public class MachineLoadRule extends DefaultEntityBase implements
         setRamLoadPercentage(ramLoadPercentage);
     }
 
-    public MachineLoadRule(Machine machine, int cpuLoadPercentage, int ramLoadPercentage)
+    public MachineLoadRule(final Machine machine, final int cpuLoadPercentage,
+        final int ramLoadPercentage)
     {
         super();
         setMachine(machine);
@@ -72,7 +72,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         setRamLoadPercentage(ramLoadPercentage);
     }
 
-    public MachineLoadRule(Rack rack, int cpuLoadPercentage, int ramLoadPercentage)
+    public MachineLoadRule(final Rack rack, final int cpuLoadPercentage, final int ramLoadPercentage)
     {
         super();
         setRack(rack);
@@ -80,7 +80,8 @@ public class MachineLoadRule extends DefaultEntityBase implements
         setRamLoadPercentage(ramLoadPercentage);
     }
 
-    public MachineLoadRule(Datacenter datacenter, int cpuLoadPercentage, int ramLoadPercentage)
+    public MachineLoadRule(final Datacenter datacenter, final int cpuLoadPercentage,
+        final int ramLoadPercentage)
     {
         super();
         setDatacenter(datacenter);
@@ -122,7 +123,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.machine;
     }
 
-    public void setMachine(Machine machine)
+    public void setMachine(final Machine machine)
     {
         this.machine = machine;
     }
@@ -144,7 +145,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.datacenter;
     }
 
-    public void setDatacenter(Datacenter datacenter)
+    public void setDatacenter(final Datacenter datacenter)
     {
         this.datacenter = datacenter;
     }
@@ -166,7 +167,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.rack;
     }
 
-    public void setRack(Rack rack)
+    public void setRack(final Rack rack)
     {
         this.rack = rack;
     }
@@ -188,7 +189,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.cpuLoadPercentage;
     }
 
-    public void setCpuLoadPercentage(int cpuLoadPercentage)
+    public void setCpuLoadPercentage(final int cpuLoadPercentage)
     {
         this.cpuLoadPercentage = cpuLoadPercentage;
     }
@@ -210,7 +211,7 @@ public class MachineLoadRule extends DefaultEntityBase implements
         return this.ramLoadPercentage;
     }
 
-    public void setRamLoadPercentage(int ramLoadPercentage)
+    public void setRamLoadPercentage(final int ramLoadPercentage)
     {
         this.ramLoadPercentage = ramLoadPercentage;
     }
@@ -231,11 +232,12 @@ public class MachineLoadRule extends DefaultEntityBase implements
     }
 
     @Override
-    public boolean pass(final VirtualImage image, final Machine machine, final Integer contextData)
+    public boolean pass(final VirtualMachineRequirements requirements, final Machine machine,
+        final Integer contextData)
     {
 
         final boolean passCPU =
-            pass(Long.valueOf(machine.getVirtualCpusUsed()), Long.valueOf(image.getCpuRequired()),
+            pass(Long.valueOf(machine.getVirtualCpusUsed()), requirements.getCpu(),
                 Long.valueOf(machine.getVirtualCpuCores() * machine.getVirtualCpusPerCore()),
                 cpuLoadPercentage);
 
@@ -245,9 +247,8 @@ public class MachineLoadRule extends DefaultEntityBase implements
         // }
 
         final boolean passRAM =
-            pass(Long.valueOf(machine.getVirtualRamUsedInMb()),
-                Long.valueOf(image.getRamRequired()), Long.valueOf(machine.getVirtualRamInMb()),
-                ramLoadPercentage);
+            pass(Long.valueOf(machine.getVirtualRamUsedInMb()), requirements.getRam(),
+                Long.valueOf(machine.getVirtualRamInMb()), ramLoadPercentage);
 
         return passCPU && passRAM;
     }

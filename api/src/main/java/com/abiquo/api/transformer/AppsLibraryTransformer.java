@@ -21,11 +21,8 @@
 
 package com.abiquo.api.transformer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,18 +33,17 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.appslibrary.CategoryResource;
 import com.abiquo.api.resources.appslibrary.IconResource;
 import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.api.util.AbiquoLinkBuilder;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
-import com.abiquo.server.core.appslibrary.OVFPackage;
-import com.abiquo.server.core.appslibrary.OVFPackageDto;
-import com.abiquo.server.core.appslibrary.OVFPackageList;
-import com.abiquo.server.core.appslibrary.OVFPackageListDto;
-import com.abiquo.server.core.appslibrary.OVFPackagesDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinition;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionList;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionListDto;
+import com.abiquo.server.core.appslibrary.TemplateDefinitionsDto;
 
 @Service
 public class AppsLibraryTransformer extends DefaultApiService
@@ -55,69 +51,64 @@ public class AppsLibraryTransformer extends DefaultApiService
     @Autowired
     private AppsLibraryRep appslibraryRep;
 
-    /**
-     * ModelTransformer.transportFromPersistence(OVFPackageDto.class, ovfPackage);
-     */
-    public OVFPackageDto createTransferObject(final OVFPackage ovfPackage,
+    public TemplateDefinitionDto createTransferObject(final TemplateDefinition templateDef,
         final IRESTBuilder builder) throws Exception
     {
 
-        OVFPackageDto dto = new OVFPackageDto();
+        TemplateDefinitionDto dto = new TemplateDefinitionDto();
 
-        dto.setDescription(ovfPackage.getDescription());
-        dto.setId(ovfPackage.getId());
-        dto.setProductName(ovfPackage.getProductName());
-        dto.setProductUrl(ovfPackage.getProductUrl());
-        dto.setProductVendor(ovfPackage.getProductVendor());
-        dto.setProductVersion(ovfPackage.getProductVersion());
-        dto.setUrl(ovfPackage.getUrl());
-        dto.setDiskFileSize(ovfPackage.getDiskFileSize());
+        dto.setDescription(templateDef.getDescription());
+        dto.setId(templateDef.getId());
+        dto.setProductName(templateDef.getProductName());
+        dto.setProductUrl(templateDef.getProductUrl());
+        dto.setProductVendor(templateDef.getProductVendor());
+        dto.setProductVersion(templateDef.getProductVersion());
+        dto.setUrl(templateDef.getUrl());
+        dto.setDiskFileSize(templateDef.getDiskFileSize());
 
-        dto.setDiskFormatTypeUri(ovfPackage.getType().uri);
+        dto.setDiskFormatType(String.valueOf(templateDef.getType().name()));
 
-        final Integer idEnterprise = ovfPackage.getAppsLibrary().getEnterprise().getId();
-        dto.addLinks(builder.buildOVFPackageLinks(idEnterprise, dto, ovfPackage.getCategory(),
-            ovfPackage.getIcon()));
+        final Integer idEnterprise = templateDef.getAppsLibrary().getEnterprise().getId();
+        dto.addLinks(builder.buildTemplateDefinitionLinks(idEnterprise, dto, templateDef
+            .getCategory(), templateDef.getIcon()));
 
         return dto;
     }
 
-    public OVFPackageListDto createTransferObject(final OVFPackageList ovfPackageList,
-        final IRESTBuilder builder) throws Exception
+    public TemplateDefinitionListDto createTransferObject(
+        final TemplateDefinitionList templateDefList, final IRESTBuilder builder) throws Exception
     {
 
-        OVFPackagesDto ovfpackDtoList = new OVFPackagesDto();
-        for (OVFPackage ovfPack : ovfPackageList.getOvfPackages())
+        TemplateDefinitionsDto listDto = new TemplateDefinitionsDto();
+        for (TemplateDefinition templateDef : templateDefList.getTemplateDefinitions())
         {
-            ovfPack.setAppsLibrary(ovfPackageList.getAppsLibrary());
-            ovfpackDtoList.add(createTransferObject(ovfPack, builder));
+            templateDef.setAppsLibrary(templateDefList.getAppsLibrary());
+            listDto.add(createTransferObject(templateDef, builder));
         }
-        OVFPackageListDto dto = new OVFPackageListDto();
-        dto.setName(ovfPackageList.getName());
-        dto.setId(ovfPackageList.getId());
-        dto.setOvfPackages(ovfpackDtoList);
-        dto.setUrl(ovfPackageList.getUrl());
+        TemplateDefinitionListDto dto = new TemplateDefinitionListDto();
+        dto.setName(templateDefList.getName());
+        dto.setId(templateDefList.getId());
+        dto.setTemplateDefinitions(listDto);
+        dto.setUrl(templateDefList.getUrl());
 
-        final Integer idEnterprise = ovfPackageList.getAppsLibrary().getEnterprise().getId();
-        dto.setLinks(builder.buildOVFPackageListLinks(idEnterprise, dto));
+        final Integer idEnterprise = templateDefList.getAppsLibrary().getEnterprise().getId();
+        dto.setLinks(builder.buildTemplateDefinitionListLinks(idEnterprise, dto));
 
         return dto;
     }
 
-    /**
-     * ModelTransformer.persistenceFromTransport(OVFPackage.class, ovfPackage);
-     */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackage createPersistenceObject(final OVFPackageDto ovfDto) throws Exception
+    public TemplateDefinition createPersistenceObject(final TemplateDefinitionDto templateDef)
+        throws Exception
     {
-        DiskFormatType diskFormatType = DiskFormatType.fromURI(ovfDto.getDiskFormatTypeUri());
+        DiskFormatType diskFormatType = DiskFormatType.fromValue(templateDef.getDiskFormatType());
         if (diskFormatType == null)
         {
             addValidationErrors(APIError.INVALID_DISK_FORMAT_TYPE);
             flushErrors();
         }
 
-        RESTLink categoryLink = ovfDto.searchLink(CategoryResource.CATEGORY);
+        RESTLink categoryLink = templateDef.searchLink(CategoryResource.CATEGORY);
         Category category = appslibraryRep.findCategoryByName(categoryLink.getTitle());
         if (category == null)
         {
@@ -132,7 +123,7 @@ public class AppsLibraryTransformer extends DefaultApiService
             }
         }
 
-        RESTLink iconLink = ovfDto.searchLink(IconResource.ICON);
+        RESTLink iconLink = templateDef.searchLink(IconResource.ICON);
         Icon icon = appslibraryRep.findIconByPath(iconLink.getTitle());
         if (icon == null)
         {
@@ -144,44 +135,46 @@ public class AppsLibraryTransformer extends DefaultApiService
             // icon is optional
         }
 
-        OVFPackage pack = new OVFPackage();
+        TemplateDefinition pack = new TemplateDefinition();
         // pack.setAppsLibrary(appsLibrary) //XXX outside
         pack.setCategory(category);
         pack.setType(diskFormatType);
         pack.setIcon(icon);
 
-        pack.setId(ovfDto.getId());
-        pack.setName(ovfDto.getProductName()); // XXX TODO
-        pack.setDescription(ovfDto.getDescription());
-        pack.setUrl(ovfDto.getUrl());
-        pack.setProductName(ovfDto.getProductName());
-        pack.setProductUrl(ovfDto.getProductUrl());
-        pack.setProductVendor(ovfDto.getProductVendor());
-        pack.setProductVersion(ovfDto.getProductVersion());
-        pack.setDiskFileSize(ovfDto.getDiskFileSize());
+        pack.setId(templateDef.getId());
+        pack.setName(templateDef.getProductName()); // XXX TODO
+        pack.setDescription(templateDef.getDescription());
+        pack.setUrl(templateDef.getUrl());
+        pack.setProductName(templateDef.getProductName());
+        pack.setProductUrl(templateDef.getProductUrl());
+        pack.setProductVendor(templateDef.getProductVendor());
+        pack.setProductVersion(templateDef.getProductVersion());
+        pack.setDiskFileSize(templateDef.getDiskFileSize());
 
         return pack;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OVFPackageList createPersistenceObject(final OVFPackageListDto ovfDto) throws Exception
+    public TemplateDefinitionList createPersistenceObject(
+        final TemplateDefinitionListDto templateDefListDto) throws Exception
     {
 
-        List<OVFPackage> ovfPackList = new LinkedList<OVFPackage>();
-        if (ovfDto.getOvfPackages() != null)
+        List<TemplateDefinition> templateDefinitions = new LinkedList<TemplateDefinition>();
+        if (templateDefListDto.getTemplateDefinitions() != null)
         {
-            for (OVFPackageDto ovfPackDto : ovfDto.getOvfPackages().getCollection())
+            for (TemplateDefinitionDto templateDefDto : templateDefListDto.getTemplateDefinitions()
+                .getCollection())
             {
-                ovfPackList.add(createPersistenceObject(ovfPackDto));
+                templateDefinitions.add(createPersistenceObject(templateDefDto));
             }
         }
 
-        OVFPackageList pack = new OVFPackageList();
+        TemplateDefinitionList pack = new TemplateDefinitionList();
 
         // pack.setAppsLibrary(appsLibrary) // XXX outside
-        pack.setId(ovfDto.getId());
-        pack.setName(ovfDto.getName());
-        pack.setOvfPackages(ovfPackList);
+        pack.setId(templateDefListDto.getId());
+        pack.setName(templateDefListDto.getName());
+        pack.setTemplateDefinitions(templateDefinitions);
 
         return pack;
     }

@@ -31,7 +31,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.DiskFormatType;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.appslibrary.VirtualImageConversion;
 import com.abiquo.server.core.appslibrary.VirtualImageConversionDAO;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -57,7 +57,7 @@ import com.softwarementors.bzngine.entities.test.PersistentInstanceTester;
 public class VirtualImageConversionDAOTest extends
     DefaultDAOTestBase<VirtualImageConversionDAO, VirtualImageConversion>
 {
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
     private EnterpriseGenerator enterpriseGenerator;
 
@@ -79,7 +79,7 @@ public class VirtualImageConversionDAOTest extends
     {
         super.methodSetUp();
         userGenerator = new UserGenerator(getSeed());
-        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        virtualImageGenerator = new VirtualMachineTemplateGenerator(getSeed());
         enterpriseGenerator = new EnterpriseGenerator(getSeed());
         virtualMachineGenerator = new VirtualMachineGenerator(getSeed());
         hypervisorGenerator = new HypervisorGenerator(getSeed());
@@ -120,7 +120,7 @@ public class VirtualImageConversionDAOTest extends
         Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(enterprise, role);
-        VirtualImage image = virtualImageGenerator.createImageWithConversions(enterprise);
+        VirtualMachineTemplate image = virtualImageGenerator.createVirtualMachineTemplateWithConversions(enterprise);
         Hypervisor hypervisor = hypervisorGenerator.createInstance(machine);
         VirtualMachine virtualMachine =
             virtualMachineGenerator.createInstance(image, enterprise, hypervisor, user, "name");
@@ -142,7 +142,7 @@ public class VirtualImageConversionDAOTest extends
         ds().persistAll(entitiesToSetup.toArray());
         VirtualImageConversionDAO dao = createDaoForReadWriteTransaction();
         dao.getUnbundledConversion(image, virtualMachine.getHypervisor().getType().baseFormat);
-        Assert.assertEquals(DiskFormatType.VDI_SPARSE, virtualMachine.getVirtualImage()
+        Assert.assertEquals(DiskFormatType.VDI_SPARSE, virtualMachine.getVirtualMachineTemplate()
             .getDiskFormatType());
     }
 
@@ -156,7 +156,7 @@ public class VirtualImageConversionDAOTest extends
 
         VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
 
-        assertTrue(dao.isConverted(imageConversion.getVirtualImage(), imageConversion
+        assertTrue(dao.isConverted(imageConversion.getVirtualMachineTemplate(), imageConversion
             .getTargetType()));
     }
 
@@ -171,7 +171,7 @@ public class VirtualImageConversionDAOTest extends
 
         VirtualImageConversionDAO dao = createDaoForRollbackTransaction();
 
-        assertFalse(dao.isConverted(imageConversion.getVirtualImage(), imageConversion
+        assertFalse(dao.isConverted(imageConversion.getVirtualMachineTemplate(), imageConversion
             .getTargetType()));
     }
 }

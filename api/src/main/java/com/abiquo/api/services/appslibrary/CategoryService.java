@@ -72,6 +72,18 @@ public class CategoryService extends DefaultApiService
         return category;
     }
 
+    @Transactional(readOnly = true)
+    public Category getCategoryByName(final String categoryName)
+    {
+        Category category = appslibraryRep.findCategoryByName(categoryName);
+        if (category == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_CATEGORY);
+            flushErrors();
+        }
+        return category;
+    }
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Category addCategory(final Category category)
     {
@@ -85,6 +97,9 @@ public class CategoryService extends DefaultApiService
         }
 
         appslibraryRep.insertCategory(category);
+
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_CREATED,
+            "category.created", category.getName());
 
         return category;
     }
@@ -113,7 +128,7 @@ public class CategoryService extends DefaultApiService
         appslibraryRep.updateCategory(old);
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_MODIFIED,
-            "Category " + category.getName() + " updated ");
+            "category.updated", category.getName());
 
         return old;
     }
@@ -135,7 +150,7 @@ public class CategoryService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_DELETED,
-            "Removing category " + category.getName());
+            "category.removed", category.getName());
 
         appslibraryRep.deleteCategory(category);
     }

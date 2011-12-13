@@ -29,6 +29,9 @@ import javax.persistence.TypedQuery;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Filters;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -212,4 +215,26 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
     {
         return Restrictions.eq(VirtualMachine.ID_TYPE_PROPERTY, VirtualMachine.NOT_MANAGED);
     }
+
+    private Criteria temporalVirtualMachine(final Integer vmachineId)
+    {
+        return createCriteria(Restrictions.eq(VirtualMachine.TEMPORAL_PROPERTY, vmachineId));
+    }
+
+    public VirtualMachine findBackup(final VirtualMachine vmachine)
+    {
+        try
+        {
+            getSession().disableFilter(VirtualMachine.NOT_TEMP);
+            getSession().enableFilter(VirtualMachine.ONLY_TEMP);
+
+            return getSingleResult(temporalVirtualMachine(vmachine.getId()));
+        }
+        finally
+        {
+            getSession().enableFilter(VirtualMachine.NOT_TEMP);
+            getSession().disableFilter(VirtualMachine.ONLY_TEMP);
+        }
+    }
+
 }

@@ -27,8 +27,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.abiquo.model.enumerator.VolumeState;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
@@ -46,7 +46,7 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
         vmGenerator = new VirtualMachineGenerator(getSeed());
     }
 
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
     @Override
     protected InstanceTester<VolumeManagement> createEntityInstanceGenerator()
@@ -156,12 +156,12 @@ public class VolumeManagementTest extends DefaultEntityTestBase<VolumeManagement
     public void testIsStateful()
     {
         VolumeManagement volume = createUniqueEntity();
-        volume.setVirtualImage(null);
+        volume.setVirtualMachineTemplate(null);
         assertFalse(volume.isStateful());
 
-        virtualImageGenerator = new VirtualImageGenerator(getSeed());
-        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
-        volume.setVirtualImage(virtualImage);
+        virtualImageGenerator = new VirtualMachineTemplateGenerator(getSeed());
+        VirtualMachineTemplate virtualImage = virtualImageGenerator.createUniqueInstance();
+        volume.setVirtualMachineTemplate(virtualImage);
         assertTrue(volume.isStateful());
     }
 }

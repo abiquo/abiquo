@@ -29,11 +29,11 @@ public interface ApplianceManagerPaths
 
     public static final String ENTERPRISE_REPOSITORY = "erepo";
 
-    public static final String OVFPI = "ovf";
+    public static final String TEMPLATE = "template";
 
-    public static final String OVFPI_PATH = "ovfs";
+    public static final String TEMPLATE_PATH = "templates";
 
-    public static final String OVFLIST_PATH = "list";
+    public static final String TEMPLATE_LIST_PATH = "list";
 
     public static final String DISK_FILE_PATH = "diskfile";
 

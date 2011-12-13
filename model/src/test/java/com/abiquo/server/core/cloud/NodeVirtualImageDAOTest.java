@@ -33,8 +33,8 @@ import org.testng.annotations.Test;
 
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
-import com.abiquo.server.core.appslibrary.VirtualImage;
-import com.abiquo.server.core.appslibrary.VirtualImageGenerator;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplateGenerator;
 import com.abiquo.server.core.common.persistence.DefaultDAOTestBase;
 import com.abiquo.server.core.common.persistence.TestDataAccessManager;
 import com.abiquo.server.core.enterprise.Enterprise;
@@ -54,9 +54,9 @@ public class NodeVirtualImageDAOTest extends
 
     private VirtualMachine vmachine;
 
-    private VirtualImageGenerator virtualImageGenerator;
+    private VirtualMachineTemplateGenerator virtualImageGenerator;
 
-    private VirtualImage vimage;
+    private VirtualMachineTemplate vimage;
 
     private CategoryGenerator categoryGenerator;
 
@@ -68,7 +68,7 @@ public class NodeVirtualImageDAOTest extends
 
         virtualMachineGenerator = new VirtualMachineGenerator(getSeed());
         virtualApplianceGenerator = new VirtualApplianceGenerator(getSeed());
-        virtualImageGenerator = new VirtualImageGenerator(getSeed());
+        virtualImageGenerator = new VirtualMachineTemplateGenerator(getSeed());
         categoryGenerator = new CategoryGenerator(getSeed());
 
         vimage = virtualImageGenerator.createUniqueInstance();
@@ -135,11 +135,11 @@ public class NodeVirtualImageDAOTest extends
         NodeVirtualImage nvi2 = nodeVImageGenerator.createInstance(vAppliance, vm2);
         NodeVirtualImage nvi3 = nodeVImageGenerator.createInstance(vAppliance2, vm3);
 
-        vm1.getVirtualImage().getRepository()
+        vm1.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm1.getHypervisor().getMachine().getRack().getDatacenter());
-        vm2.getVirtualImage().getRepository()
+        vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getRack().getDatacenter());
-        vm3.getVirtualImage().getRepository()
+        vm3.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm3.getHypervisor().getMachine().getRack().getDatacenter());
 
         // ds().persistAll(enterprise, enterprise2, vm1.getUser().getRole(), vm1.getUser(),
@@ -182,9 +182,9 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm1.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm1.getHypervisor().getMachine());
         entitiesToSetup.add(vm1.getHypervisor());
-        entitiesToSetup.add(vm1.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm1.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm1.getVirtualImage());
+        entitiesToSetup.add(vm1.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm1.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm1.getVirtualMachineTemplate());
         entitiesToSetup.add(vm1);
         entitiesToSetup.add(nvi);
 
@@ -199,9 +199,9 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm2.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm2.getHypervisor().getMachine());
         entitiesToSetup.add(vm2.getHypervisor());
-        entitiesToSetup.add(vm2.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm2.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm2.getVirtualImage());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm2.getVirtualMachineTemplate());
         entitiesToSetup.add(vm2);
         entitiesToSetup.add(nvi2);
 
@@ -216,9 +216,9 @@ public class NodeVirtualImageDAOTest extends
         entitiesToSetup.add(vm3.getHypervisor().getMachine().getRack());
         entitiesToSetup.add(vm3.getHypervisor().getMachine());
         entitiesToSetup.add(vm3.getHypervisor());
-        entitiesToSetup.add(vm3.getVirtualImage().getRepository());
-        entitiesToSetup.add(vm3.getVirtualImage().getCategory());
-        entitiesToSetup.add(vm3.getVirtualImage());
+        entitiesToSetup.add(vm3.getVirtualMachineTemplate().getRepository());
+        entitiesToSetup.add(vm3.getVirtualMachineTemplate().getCategory());
+        entitiesToSetup.add(vm3.getVirtualMachineTemplate());
         entitiesToSetup.add(vm3);
         entitiesToSetup.add(nvi3);
 
@@ -296,7 +296,7 @@ public class NodeVirtualImageDAOTest extends
         NodeVirtualImageDAO nodeVirtualImageDAO = createDaoForRollbackTransaction();
 
         List<NodeVirtualImage> result =
-            nodeVirtualImageDAO.findByVirtualImage(vmachine.getVirtualImage());
+            nodeVirtualImageDAO.findByVirtualImage(vmachine.getVirtualMachineTemplate());
 
         assertNotNull(result);
         assertEquals(result.size(), 3);

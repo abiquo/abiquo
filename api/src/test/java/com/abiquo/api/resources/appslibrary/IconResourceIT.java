@@ -37,7 +37,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.appslibrary.Icon;
 import com.abiquo.server.core.appslibrary.IconDto;
-import com.abiquo.server.core.appslibrary.VirtualImage;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 
 public class IconResourceIT extends AbstractJpaGeneratorIT
 {
@@ -130,11 +130,11 @@ public class IconResourceIT extends AbstractJpaGeneratorIT
     public void deleteIconRaises409WhenInUseInVirtualImages()
     {
         Icon icon = iconGenerator.createUniqueInstance();
-        VirtualImage virtualImage = virtualImageGenerator.createUniqueInstance();
+        VirtualMachineTemplate virtualImage = virtualMachineTemplateGenerator.createUniqueInstance();
         virtualImage.setIcon(icon);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
-        virtualImageGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
+        virtualMachineTemplateGenerator.addAuxiliaryEntitiesToPersist(virtualImage, entitiesToPersist);
         entitiesToPersist.add(virtualImage);
 
         setup(entitiesToPersist.toArray());

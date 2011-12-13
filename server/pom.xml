@@ -24,6 +24,7 @@
             <groupId>org.jclouds.provider</groupId>
             <artifactId>jclouds-abiquo</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <classifier>api-deploy</classifier>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

@@ -21,7 +21,13 @@
             </bean>
         </property>
     </bean>
-    
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>messages/tracer</value>
+            </list>
+        </property>
+    </bean>
     <!-- load the configuration file -->
     <import resource="persistencebeans.xml" />
     <import resource="security-beans.xml" />

@@ -94,7 +94,7 @@ public class BusinessDelegateProxy<D> implements InvocationHandler
         // Check database connectivity
         if (!HibernateDAOFactory.instance().pingDB())
         {
-            throw new PersistenceException("Could not connect to database. "
+            throw new PersistenceException("Could not connect to the database. "
                 + "Please contact the cloud administrator.");
         }
 

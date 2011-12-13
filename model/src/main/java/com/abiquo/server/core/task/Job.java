@@ -30,8 +30,7 @@ public class Job extends RedisEntityBase
 {
     public enum JobState
     {
-        PENDING, STARTED, DONE, FAILED, ROLLBACK_PENDING, ROLLBACK_STARTED, ROLLBACK_DONE
-
+        PENDING, STARTED, DONE, FAILED, ROLLBACK_STARTED, ROLLBACK_DONE, UNKNOWN
     };
 
     public enum JobType
@@ -61,6 +60,7 @@ public class Job extends RedisEntityBase
 
         this.state = JobState.PENDING;
         this.rollbackState = JobState.PENDING;
+        description = "";
     }
 
     @Override
@@ -74,7 +74,7 @@ public class Job extends RedisEntityBase
         return id;
     }
 
-    public void setId(String id)
+    public void setId(final String id)
     {
         this.id = id;
     }
@@ -84,7 +84,7 @@ public class Job extends RedisEntityBase
         return type;
     }
 
-    public void setType(JobType type)
+    public void setType(final JobType type)
     {
         this.type = type;
     }
@@ -94,7 +94,7 @@ public class Job extends RedisEntityBase
         return state;
     }
 
-    public void setState(JobState state)
+    public void setState(final JobState state)
     {
         this.state = state;
     }
@@ -104,7 +104,7 @@ public class Job extends RedisEntityBase
         return rollbackState;
     }
 
-    public void setRollbackState(JobState rollbackState)
+    public void setRollbackState(final JobState rollbackState)
     {
         this.rollbackState = rollbackState;
     }
@@ -114,7 +114,7 @@ public class Job extends RedisEntityBase
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -129,7 +129,7 @@ public class Job extends RedisEntityBase
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp)
+    public void setTimestamp(final long timestamp)
     {
         this.timestamp = timestamp;
     }
@@ -139,8 +139,16 @@ public class Job extends RedisEntityBase
         return parentTaskId;
     }
 
-    public void setParentTaskId(String parentTaskId)
+    public void setParentTaskId(final String parentTaskId)
     {
         this.parentTaskId = parentTaskId;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+            "Job id: '%s' Job type: '%s' Task id: '%s' State: '%s' Rollback state: '%s'", getId(),
+            getType().name(), getParentTaskId(), getState().name(), getRollbackState().name());
     }
 }

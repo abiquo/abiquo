@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.abiquo.am.services.OVFPackageConventions;
+import com.abiquo.am.services.TemplateConventions;
 import com.abiquo.appliancemanager.config.AMConfigurationManager;
 
 // TODO add authentication support
@@ -194,7 +194,7 @@ extends HttpServlet
     {
         String path = getPath(req);
 
-        path = OVFPackageConventions.customEncode(path);
+        path = TemplateConventions.customEncode(path);
         path = path.replace("files/", "");
 
         // XXX if(isForbidden(path))

@@ -126,8 +126,9 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
     {
         DiskManagement disk1 = diskGenerator.createUniqueInstance();
         DiskManagement disk2 = diskGenerator.createInstance(disk1.getVirtualDatacenter());
-        
-        VirtualMachine vm = vmGenerator.createInstance(disk1.getVirtualDatacenter().getEnterprise());
+
+        VirtualMachine vm =
+            vmGenerator.createInstance(disk1.getVirtualDatacenter().getEnterprise());
 
         // Set reverse order to test DAO ordering
         disk1.setVirtualMachine(vm);
@@ -189,7 +190,7 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         vol2.setVirtualMachine(vm);
         disk1.setVirtualMachine(vm);
         disk2.setVirtualMachine(vm);
-        
+
         // Set order to test DAO ordering
         disk1.setAttachmentOrder(4);
         disk2.setAttachmentOrder(1);
