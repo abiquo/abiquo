@@ -450,6 +450,11 @@ public class VirtualMachine extends DefaultEntityBase
         return getIdType() == MANAGED;
     }
 
+    public boolean isDeployed()
+    {
+        return !this.state.equals(State.NOT_ALLOCATED) && !this.state.equals(State.UNKNOWN);
+    }
+
     public void setIdType(final int idType)
     {
         this.idType = idType;
