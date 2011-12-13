@@ -274,21 +274,17 @@
             
             private function checkSingleSignOn():void{ 
        	
-				//var urlString:String = ExternalInterface.call('window.location.href.toString');
 				var urlString:String = ExternalInterface.call('window.location.href.toString');
-				var parameters:Array = urlString.split("?");
 				
 				var token:String = ExternalInterface.call("checkAuthentication");
-				Alert.show("token : "+token);
 				
 				//we save the current URL, for the logout process
-				AbiCloudModel.getInstance().configurationManager.config.currentUrl = parameters[0];
-				
+				AbiCloudModel.getInstance().configurationManager.config.currentUrl = urlString;
 				
 				//the separator exists
-				if(parameters.length != 1){
-					var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
-		            var token:String = parameterList.auth;
+				if(token != ""){
+					var parameterList:Object = URLUtil.stringToObject(token, "&"); 
+					token = parameterList.auth;        
 		            var language:String = parameterList.lang;         
 				}
             	//we check if the selected language is passed in the URL
@@ -296,7 +292,7 @@
             		AbiCloudModel.getInstance().configurationManager.config.selectedLanguage = loginView.returnLanguage(language);
             	}
             	//if the token exists, we try an automatic loggin
-            	if(token){
+            	if(token != ""){
             		singleSignOnlogin(token);
             	}else{
             		showLoginform();

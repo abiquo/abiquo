@@ -142,16 +142,8 @@ if ( hasProductInstall && !hasRequestedVersion ) {
             deleteCookie("token");
             return token;
         }
-        else 
-        {
-          token=prompt("Please enter a token:","");
-          if (token!=null && token!="")
-          {
-            setCookie("token",token,365);
-          }
-
-        }
-        return "no token";
+        
+        return "";
     }
 
 	function onBodyLoad()
