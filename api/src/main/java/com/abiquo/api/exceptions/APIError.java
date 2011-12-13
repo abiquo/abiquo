@@ -297,7 +297,7 @@ public enum APIError
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
-        "Wrong remote service"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
+        "Wrong remote service type"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
         "The remote service's URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
         "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",

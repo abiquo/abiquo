@@ -192,9 +192,6 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
-        links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
             params));
         links.add(builder.buildRestLink(DatacenterResource.class,
