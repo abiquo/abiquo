@@ -47,7 +47,7 @@
 	</filter>
 	<filter>
 		<filter-name>OpenSessionInView</filter-name>
-		<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+		<filter-class>com.abiquo.api.spring.jpa.OpenEntityManagerInViewWithFilters</filter-class>
 	</filter>
 	<filter-mapping>
 		<filter-name>securedURLRewrite</filter-name>

@@ -30,8 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Filters;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -223,17 +221,18 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
 
     public VirtualMachine findBackup(final VirtualMachine vmachine)
     {
+        Session session = getSession();
         try
         {
-            getSession().disableFilter(VirtualMachine.NOT_TEMP);
-            getSession().enableFilter(VirtualMachine.ONLY_TEMP);
+            session.disableFilter(VirtualMachine.NOT_TEMP);
+            session.enableFilter(VirtualMachine.ONLY_TEMP);
 
             return getSingleResult(temporalVirtualMachine(vmachine.getId()));
         }
         finally
         {
-            getSession().enableFilter(VirtualMachine.NOT_TEMP);
-            getSession().disableFilter(VirtualMachine.ONLY_TEMP);
+            session.enableFilter(VirtualMachine.NOT_TEMP);
+            session.disableFilter(VirtualMachine.ONLY_TEMP);
         }
     }
 

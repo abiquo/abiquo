@@ -34,6 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import com.abiquo.api.spring.jpa.JPAConfiguration;
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
@@ -65,9 +66,9 @@ import com.abiquo.server.core.infrastructure.management.RasdGenerator;
 import com.abiquo.server.core.infrastructure.management.RasdManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
 import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagementGenerator;
-import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
 import com.abiquo.server.core.pricing.PricingTemplateGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 
@@ -146,7 +147,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     protected IconGenerator iconGenerator = new IconGenerator(seed);
 
     protected RepositoryGenerator repositoryGenerator = new RepositoryGenerator(seed);
-    
+
     protected DiskManagementGenerator diskGenerator = new DiskManagementGenerator(seed);
 
     protected InitiatorMappingGenerator initiatorMappingGenerator =
@@ -238,7 +239,7 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
         em.getTransaction().commit();
         em.close();
-        
+
         // Avoid having closed EntityManagers bound to the thread
         TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
     }
@@ -267,12 +268,12 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
 
             if (!em.isOpen())
             {
-                em = emf.createEntityManager();
+                em = createEntityManager(emf);
             }
         }
         else
         {
-            em = emf.createEntityManager();
+            em = createEntityManager(emf);
             TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
         }
 
@@ -298,6 +299,11 @@ public abstract class AbstractGeneratorTest extends AbstractTestNGSpringContextT
     private EntityManagerHolder getResource(final EntityManagerFactory emf)
     {
         return (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
+    }
+
+    private EntityManager createEntityManager(final EntityManagerFactory emf)
+    {
+        return JPAConfiguration.enableDefaultFilters(emf.createEntityManager());
     }
 
 }

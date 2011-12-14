@@ -54,7 +54,7 @@ public class CheckRepositoryHandler extends AbstractHandler
 
         super.handleRequest(context);
     }
-
+    
     public Void canUseRepository()
     {
         // XXX consider global limiting of threads

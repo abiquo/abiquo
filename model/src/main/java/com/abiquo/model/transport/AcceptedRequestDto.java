@@ -43,7 +43,7 @@ import com.abiquo.model.util.CompositeComparator;
  * @author ssedano
  */
 @XmlRootElement(name = "acceptedrequest")
-public class AcceptedRequestDto<T> implements Serializable
+public class AcceptedRequestDto<T> implements Serializable//extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -7743440222172054557L;
 

@@ -74,40 +74,40 @@ public class EnvironmentGenerator
 {
     public static final String SYSADMIN = "sysadmin";
 
-    private EnterpriseGenerator enterpriseGenerator;
+    private final EnterpriseGenerator enterpriseGenerator;
 
-    private RoleGenerator roleGenerator;
+    private final RoleGenerator roleGenerator;
 
-    private UserGenerator userGenerator;
+    private final UserGenerator userGenerator;
 
-    private DatacenterGenerator datacenterGenerator;
+    private final DatacenterGenerator datacenterGenerator;
 
-    private DatacenterLimitsGenerator datacenterLimitsGenerator;
+    private final DatacenterLimitsGenerator datacenterLimitsGenerator;
 
-    private RemoteServiceGenerator remoteServiceGenerator;
+    private final RemoteServiceGenerator remoteServiceGenerator;
 
-    private StorageDeviceGenerator deviceGenerator;
+    private final StorageDeviceGenerator deviceGenerator;
 
-    private StoragePoolGenerator poolGenerator;
+    private final StoragePoolGenerator poolGenerator;
 
-    private VirtualDatacenterGenerator vdcGenerator;
+    private final VirtualDatacenterGenerator vdcGenerator;
 
-    private VirtualApplianceGenerator vappGenerator;
+    private final VirtualApplianceGenerator vappGenerator;
 
-    private NodeVirtualImageGenerator nodeVirtualImageGenerator;
+    private final NodeVirtualImageGenerator nodeVirtualImageGenerator;
 
-    private VolumeManagementGenerator volumeGenerator;
+    private final VolumeManagementGenerator volumeGenerator;
 
-    private VLANNetworkGenerator vlanGenerator;
+    private final VLANNetworkGenerator vlanGenerator;
 
-    private HypervisorGenerator hypervisorGenerator;
+    private final HypervisorGenerator hypervisorGenerator;
 
-    private DatastoreGenerator datastoreGenerator;
+    private final DatastoreGenerator datastoreGenerator;
 
-    private InitiatorMappingGenerator initiatorMappingGenerator;
+    private final InitiatorMappingGenerator initiatorMappingGenerator;
 
     /** The entities of the generated environment. */
-    private List<Object> entities;
+    private final List<Object> entities;
 
     public EnvironmentGenerator(final SeedGenerator seed)
     {
@@ -144,7 +144,7 @@ public class EnvironmentGenerator
      */
     public List<Object> generateEnterprise()
     {
-        Enterprise ent = enterpriseGenerator.createUniqueInstance();
+        Enterprise ent = enterpriseGenerator.createInstanceNoLimits();
         Role role = roleGenerator.createInstanceSysAdmin();
         User user = userGenerator.createInstance(ent, role, SYSADMIN, SYSADMIN);
 

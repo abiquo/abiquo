@@ -68,7 +68,8 @@ public enum APIError
         "DC-3", "There is already a datacenter with that name"), DATACENTER_NOT_ALLOWED("DC-4",
         "The current enterprise cannot use this datacenter"), DATACENTER_DELETE_STORAGE("DC-5",
         "Cannot delete datacenter with storage devices associated"), DATACENTER_DELETE_VIRTUAL_DATACENTERS(
-        "DC-6", "Cannot delete datacenter with virtual datacenters associated"),
+        "DC-6", "Cannot delete datacenter with virtual datacenters associated"), DATACENTER_QUEUE_NOT_CONFIGURED(
+        "DC-7", "Datacenter queues are not configured (check BPM and Tarantino remote services)"),
 
     // ENTERPRISE
     NON_EXISTENT_ENTERPRISE("EN-0", "The requested enterprise does not exist"), ENTERPRISE_DUPLICATED_NAME(
@@ -260,6 +261,8 @@ public enum APIError
         "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"), VIRTUAL_MACHINE_BACKUP_NOT_FOUND(
         "VM-23",
         "Can't restore the original virtual machine (after a failed reconfigure), the original virutual machine info was not found."),
+        RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
+            "VM-24", "The resource is already used by another virtual machine"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -294,7 +297,7 @@ public enum APIError
     // REMOTE SERVICE
     NOT_ASSIGNED_REMOTE_SERVICE_DATACENTER("RS-0",
         "The remote service is not assigned to the datacenter"), WRONG_REMOTE_SERVICE_TYPE("RS-1",
-        "Wrong remote service"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
+        "Wrong remote service type"), NON_EXISTENT_REMOTE_SERVICE_TYPE("RS-2",
         "The remote service does not exist"), REMOTE_SERVICE_URL_ALREADY_EXISTS("RS-3",
         "The remote service's URL already exists and cannot be duplicated"), REMOTE_SERVICE_MALFORMED_URL(
         "RS-4", "The remote service's URL is not well formed"), REMOTE_SERVICE_POOL_ASIGNED("RS-5",

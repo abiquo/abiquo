@@ -49,7 +49,6 @@ import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -142,7 +141,7 @@ public class VirtualMachineResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
-    public AcceptedRequestDto<VirtualMachineDto> updateVirtualMachine(
+    public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
@@ -152,11 +151,12 @@ public class VirtualMachineResource
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
         if(link != null)
         {
-            AcceptedRequestDto<VirtualMachineDto> request = new AcceptedRequestDto<VirtualMachineDto>();
+//            AcceptedRequestDto<VirtualMachineDto> request = new AcceptedRequestDto<VirtualMachineDto>();
+            AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
 
             String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
             request.setStatusUrlLink(taskLink);
-            request.setEntity(dto);
+            request.setEntity("");//dto);
 
             return request;
         }

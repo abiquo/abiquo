@@ -18,35 +18,26 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.spring.jpa;
 
-package com.abiquo.api.services.appslibrary;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.springframework.stereotype.Service;
-
-import com.abiquo.api.services.DefaultApiService;
-import com.abiquo.model.enumerator.DiskFormatType;
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
 /**
- * @author dlopez - DiskFormatType resource cannot be modified due to its immutability
+ * OpenEntityManagerInViewFilter with the default hibernate filters enabled.
+ * 
+ * @author Ignasi Barrera
+ * @see OpenEntityManagerInViewFilter
  */
-@Service
-public class DiskFormatTypeService extends DefaultApiService
+public class OpenEntityManagerInViewWithFilters extends OpenEntityManagerInViewFilter
 {
-    public DiskFormatTypeService()
-    {
 
+    @Override
+    protected EntityManager createEntityManager(final EntityManagerFactory emf)
+    {
+        return JPAConfiguration.enableDefaultFilters(super.createEntityManager(emf));
     }
 
-    public Collection<DiskFormatType> getDiskFormatTypes()
-    {
-        return Arrays.asList(DiskFormatType.values());
-    }
-
-    public DiskFormatType getDiskFormatType(final Integer DiskFormatTypeId)
-    {
-        return DiskFormatType.fromId(DiskFormatTypeId);
-    }
 }

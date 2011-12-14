@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -107,10 +106,6 @@ public class DatacenterResource extends AbstractResource
     public static final String ACTION_DISCOVER_MULTIPLE = "action/discovermultiple";
 
     public static final String ACTION_DISCOVER_MULTIPLE_REL = "discovermultiple";
-
-    public static final String ACTION_CHECK_REMOTE_SERVICE = "action/checkremoteservice";
-
-    public static final String ACTION_CHECK_REMOTE_SERVICE_REL = "checkremoteservice";
 
     public static final String ACTION_MACHINES_CHECK = "action/checkmachinestate";
 
@@ -331,30 +326,6 @@ public class DatacenterResource extends AbstractResource
                 IPAddress.newIPAddress(ipTo), HypervisorType.fromValue(hypervisorType), user,
                 password, port, vswitch);
         return MachinesResource.transformMachinesDto(restBuilder, machines);
-    }
-
-    /**
-     * Check state from future remote service will be created in a url.
-     * <p>
-     * This method doesn't create the remote service.
-     * 
-     * @param datacenterId identifier of the datacenter
-     * @param type type of the future remote service
-     * @param url where remote service will be created
-     * @param restBuilder injected context REST link builder
-     * @throws Exception
-     */
-    @GET
-    @Path(ACTION_CHECK_REMOTE_SERVICE)
-    public void pingRemoteService(
-        @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
-        @QueryParam(RemoteServiceResource.REMOTE_SERVICE) @NotNull @com.abiquo.model.validation.RemoteService final String type,
-        @QueryParam(URL) @NotNull final URL url, @Context final IRESTBuilder restBuilder)
-        throws Exception
-    {
-        Datacenter dc = service.getDatacenter(datacenterId);
-        infraService.checkRemoteServiceStatus(dc, RemoteServiceType.valueFromName(type),
-            url.toString(), true);
     }
 
     /**
