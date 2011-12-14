@@ -614,5 +614,4 @@ public class VirtualDatacenterRep extends DefaultRepBase
     {
         ipManagementDAO.remove(ip);
     }
-
 }

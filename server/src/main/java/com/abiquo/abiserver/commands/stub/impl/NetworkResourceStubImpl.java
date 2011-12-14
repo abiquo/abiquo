@@ -581,13 +581,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         }
 
         result.setSuccess(Boolean.FALSE);
-        result.setMessage("Unknow exception. External networks not found.");
+        result.setMessage("Unknown exception. External networks not found.");
         return result;
     }
 
     @Override
     public BasicResult getExternalVlansByVirtualDatacenter(final VirtualDataCenter vdc)
     {
+
         return this.getExternalVlansByDatacenterInEnterprise(vdc.getIdDataCenter(), vdc
             .getEnterprise().getId());
     }
@@ -1673,50 +1674,52 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         flexIp.setAvailable(ip.getAvailable());
         flexIp.setConfigureGateway(ip.getConfigureGateway());
         flexIp.setVlanNetworkName(ip.getNetworkName());
-
-        for (RESTLink currentLink : ip.getLinks())
+        if (ip.getLinks() != null)
         {
-            if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+            for (RESTLink currentLink : ip.getLinks())
             {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
-            {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
-            {
-                flexIp.setVlanNetworkName(currentLink.getTitle());
-                flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
-            {
-                flexIp.setVirtualDatacenterName(currentLink.getTitle());
-                flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
-            {
-                flexIp.setVirtualApplianceName(currentLink.getTitle());
-                flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
-            {
-                flexIp.setVirtualMachineName(currentLink.getTitle());
-                flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
-            }
-            else if (currentLink.getRel().equalsIgnoreCase("enterprise"))
-            {
-                flexIp.setEnterpriseName(currentLink.getTitle());
-                flexIp.setEnterpriseId(Integer.valueOf(currentLink.getHref().substring(
-                    currentLink.getHref().lastIndexOf("/") + 1)));
+                if (currentLink.getRel().equalsIgnoreCase("privatenetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                if (currentLink.getRel().equalsIgnoreCase("publicnetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                if (currentLink.getRel().equalsIgnoreCase("externalnetwork"))
+                {
+                    flexIp.setVlanNetworkName(currentLink.getTitle());
+                    flexIp.setVlanNetworkId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualdatacenter"))
+                {
+                    flexIp.setVirtualDatacenterName(currentLink.getTitle());
+                    flexIp.setVirtualDatacenterId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualappliance"))
+                {
+                    flexIp.setVirtualApplianceName(currentLink.getTitle());
+                    flexIp.setVirtualApplianceId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("virtualmachine"))
+                {
+                    flexIp.setVirtualMachineName(currentLink.getTitle());
+                    flexIp.setVirtualMachineId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
+                else if (currentLink.getRel().equalsIgnoreCase("enterprise"))
+                {
+                    flexIp.setEnterpriseName(currentLink.getTitle());
+                    flexIp.setEnterpriseId(Integer.valueOf(currentLink.getHref().substring(
+                        currentLink.getHref().lastIndexOf("/") + 1)));
+                }
             }
         }
 
