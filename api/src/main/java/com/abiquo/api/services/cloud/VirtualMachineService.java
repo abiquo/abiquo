@@ -162,8 +162,6 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private TarantinoService tarantino;
 
-    // job creator should be used ONLY inside the TarantinoService
-    @Deprecated
     @Autowired
     private TarantinoJobCreator jobCreator;
 
@@ -394,9 +392,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        // return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
-        // newVirtualMachineTarantino);
-        return null;
+        return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
+            newVirtualMachineTarantino);
     }
 
     /**
@@ -432,8 +429,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param old old virtual machine instance
      * @param vmnew new virtual machine values
      */
-    private void updateVirtualMachineToNewValues(final VirtualAppliance vapp, final VirtualMachine old,
-        final VirtualMachine vmnew)
+    private void updateVirtualMachineToNewValues(final VirtualAppliance vapp,
+        final VirtualMachine old, final VirtualMachine vmnew)
     {
         // update the new values of the virtual machine
         old.setCpu(vmnew.getCpu());
@@ -486,7 +483,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param volumes list of new Volumes of the machine
      * @return true if the volume is into the new list.
      */
-    private boolean volumeIntoNewList(final VolumeManagement volume, final List<VolumeManagement> volumes)
+    private boolean volumeIntoNewList(final VolumeManagement volume,
+        final List<VolumeManagement> volumes)
     {
         for (VolumeManagement newVolumes : volumes)
         {
@@ -1743,7 +1741,7 @@ public class VirtualMachineService extends DefaultApiService
         tmp.setHighDisponibility(vm.getHighDisponibility());
         tmp.setHypervisor(vm.getHypervisor());
         tmp.setIdType(vm.getIdType());
-        tmp.setName("tmp_"+vm.getName());
+        tmp.setName("tmp_" + vm.getName());
         tmp.setPassword(vm.getPassword());
         tmp.setRam(vm.getRam());
         tmp.setState(VirtualMachineState.LOCKED);
@@ -1906,7 +1904,7 @@ public class VirtualMachineService extends DefaultApiService
 
             if (rollbackRasd == null)
             {
-                LOGGER.trace("restore: detach resource "+ updatedRasd.getId());
+                LOGGER.trace("restore: detach resource " + updatedRasd.getId());
                 removeResource(updatedRasd, false);
             }
         }
@@ -1916,10 +1914,12 @@ public class VirtualMachineService extends DefaultApiService
             RasdManagement originalRasd =
                 getOriginalResource(updatedResources, rollbackRasd.getTemporal());
 
-            if (!originalRasd.isAttached() || originalRasd.getVirtualMachine() == null) // XXX
+            if (!originalRasd.isAttached())
             {
-                LOGGER.trace("restore: attach resource "+ originalRasd.getId());
-                restoreResource(originalRasd, updatedVm, rollbackRasd.getRasd().getGeneration().intValue());
+                LOGGER.trace("restore: attach resource " + originalRasd.getId());
+                // Re attach the resource to the virtual machine */
+                originalRasd.attach(rollbackRasd.getRasd().getGeneration().intValue(), updatedVm);
+
             }
 
             removeResource(rollbackRasd, true);
@@ -1936,27 +1936,18 @@ public class VirtualMachineService extends DefaultApiService
         return updatedVm;
     }
 
-    /** Re attach the resource to the virtual machine */
-    private void restoreResource(final RasdManagement rasd, final VirtualMachine updatedVm, final Integer originalSequence)
-    {
-        rasd.attach(originalSequence, updatedVm);
-        rasd.setVirtualMachine(updatedVm); // XXX
-    }
-    
     /** Removes the resource attachment */
     private void removeResource(final RasdManagement rasd, final boolean remove)
     {
         rasd.detach();
-        rasd.setVirtualMachine(null); // FIXME until detach is not implemented in all
-                                      // RasdManagements
 
         if (rasd instanceof IpPoolManagement)
         {
             rasdRawRao.remove(rasd.getRasd());
         }
 
-        if(remove)
-        {            
+        if (remove)
+        {
             rasdDao.remove(rasd);
         }
     }
