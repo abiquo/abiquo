@@ -445,11 +445,19 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             result.setResultCode(BasicResult.NOT_AUTHORIZED);
             throw new UserSessionException(result);
         }
-        ErrorsDto error = response.getEntity(ErrorsDto.class);
-        errors.append("\n").append(error.toString());
-        if (error.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+        Object entity = response.getEntity(Object.class);
+        if (entity instanceof ErrorsDto)
         {
-            result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            ErrorsDto error = (ErrorsDto) entity;
+            errors.append("\n").append(error.toString());
+            if (error.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            }
+        }
+        else
+        {
+            errors.append("\n").append("Unexpected Error");
         }
     }
 
