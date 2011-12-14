@@ -26,7 +26,6 @@ import static com.abiquo.api.util.URIResolver.buildPath;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +60,6 @@ import com.abiquo.api.resources.cloud.VirtualDatacentersResource;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
@@ -97,11 +95,10 @@ import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
-import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -165,16 +162,11 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private TarantinoService tarantino;
 
-    // job creator should be used ONLY inside the TarantinoService
-    @Deprecated
     @Autowired
     private TarantinoJobCreator jobCreator;
 
     @Autowired
     private NetworkService ipService;
-
-    @Autowired
-    private TaskService tasksService;
 
     public VirtualMachineService()
     {
@@ -198,6 +190,7 @@ public class VirtualMachineService extends DefaultApiService
         this.tarantino = new TarantinoService(em);
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
+        this.ipService = new NetworkService(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -399,9 +392,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        // return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
-        // newVirtualMachineTarantino);
-        return null;
+        return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
+            newVirtualMachineTarantino);
     }
 
     /**
@@ -409,7 +401,7 @@ public class VirtualMachineService extends DefaultApiService
      * 
      * @param backUpVm
      */
-    private void insertBackUpResources(VirtualMachine backUpVm)
+    private void insertBackUpResources(final VirtualMachine backUpVm)
     {
         for (IpPoolManagement ip : backUpVm.getIps())
         {
@@ -437,8 +429,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param old old virtual machine instance
      * @param vmnew new virtual machine values
      */
-    private void updateVirtualMachineToNewValues(final VirtualAppliance vapp, VirtualMachine old,
-        final VirtualMachine vmnew)
+    private void updateVirtualMachineToNewValues(final VirtualAppliance vapp,
+        final VirtualMachine old, final VirtualMachine vmnew)
     {
         // update the new values of the virtual machine
         old.setCpu(vmnew.getCpu());
@@ -469,8 +461,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param resources list of new Resources of the machine
      * @return true if the resource is into the new list.
      */
-    private boolean resourceIntoNewList(RasdManagement resource,
-        List< ? extends RasdManagement> newResources)
+    private boolean resourceIntoNewList(final RasdManagement resource,
+        final List< ? extends RasdManagement> newResources)
     {
         for (RasdManagement newResource : newResources)
         {
@@ -491,7 +483,8 @@ public class VirtualMachineService extends DefaultApiService
      * @param volumes list of new Volumes of the machine
      * @return true if the volume is into the new list.
      */
-    private boolean volumeIntoNewList(VolumeManagement volume, List<VolumeManagement> volumes)
+    private boolean volumeIntoNewList(final VolumeManagement volume,
+        final List<VolumeManagement> volumes)
     {
         for (VolumeManagement newVolumes : volumes)
         {
@@ -1293,7 +1286,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param resources the list of resources that will be allocated.
      */
     protected void allocateNewStorages(final VirtualAppliance vapp, final VirtualMachine vm,
-        List< ? extends RasdManagement> resources, final List<Integer> blackList)
+        final List< ? extends RasdManagement> resources, final List<Integer> blackList)
     {
         // When we allocate a resource, we need to set a unique attachment order for each one.
         // The function #getStorageFreeAttachmentSlot do the work. However, it only takes
@@ -1341,7 +1334,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param resources the list of resources that will be allocated.
      */
     protected void allocateNewNICs(final VirtualAppliance vapp, final VirtualMachine vm,
-        List<IpPoolManagement> resources, final List<Integer> blackList)
+        final List<IpPoolManagement> resources, final List<Integer> blackList)
     {
         // When we allocate a resource, we need to set a unique attachment order for each one.
         // The function #getStorageFreeAttachmentSlot do the work. However, it only takes
@@ -1748,7 +1741,7 @@ public class VirtualMachineService extends DefaultApiService
         tmp.setHighDisponibility(vm.getHighDisponibility());
         tmp.setHypervisor(vm.getHypervisor());
         tmp.setIdType(vm.getIdType());
-        tmp.setName(vm.getName());
+        tmp.setName("tmp_" + vm.getName());
         tmp.setPassword(vm.getPassword());
         tmp.setRam(vm.getRam());
         tmp.setState(VirtualMachineState.LOCKED);
@@ -1770,7 +1763,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vm original virtualmachine
      * @param tmp backup virtualmachine where the resources will be copied.
      */
-    protected void createBackUpResources(final VirtualMachine vm, VirtualMachine tmp)
+    protected void createBackUpResources(final VirtualMachine vm, final VirtualMachine tmp)
     {
         // Backup disks
         List<DiskManagement> disksTemp = new ArrayList<DiskManagement>();
@@ -1838,7 +1831,10 @@ public class VirtualMachineService extends DefaultApiService
         tmp.setVolumes(volsTemp);
     }
 
-    /*
+    /**
+     * Gets the {@link VirtualMachine} backup created to store reconfigure previous state.
+     * 
+     * @return the virtualmachine with ''temp'' == provided vm identifier
      */
     public VirtualMachine getBackupVirtualMachine(final VirtualMachine vmachine)
     {
@@ -1853,34 +1849,25 @@ public class VirtualMachineService extends DefaultApiService
         return vmbackup;
     }
 
+    /**
+     * Cleanup backup resources
+     */
     public void deleteBackupResources(final VirtualMachine vm)
     {
         for (RasdManagement rasd : getBackupResources(vm))
         {
-            deleteResource(rasd);
-        }
-    }
-
-    protected List<RasdManagement> getBackupResources(final VirtualMachine rollbackVm)
-    {
-        try
-        {
-            rasdDao.enableTemporalOnlyFilter();
-
-            return rollbackVm.getRasdManagements();
-            // List<VolumeManagement> rollbackVolumes = rollbackVm.getv
-            // List<DiskManagement> rollbackDisks = rollbackVm.getDisks();
-            // List<IpPoolManagement> rollbackIps = rollbackVm.geti
-        }
-        finally
-        {
-            rasdDao.disabledTemporalOnlyFilter();
+            removeResource(rasd, true);
         }
     }
 
     /**
-    * 
-    * */
+     * Updates all the attributes and resource attachments of ''updatedVm'' from the backup
+     * ''rollbackVm''.
+     * 
+     * @param updatedVm, current state of the virtual machine (not applied in the hypervisor)
+     * @param rollbackVm, state of updaedVm previous to the reconfigure.
+     * @return updatedVm with the attributes and resource attachments of rollbackVm.
+     */
     public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
         final VirtualMachine rollbackVm)
     {
@@ -1911,72 +1898,105 @@ public class VirtualMachineService extends DefaultApiService
         List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
 
-        // for updated if not temp -> delete rasd (if network) + delte / else update form temp
-        // (settemp=null)
         for (RasdManagement updatedRasd : updatedResources)
         {
             RasdManagement rollbackRasd = getBackupResource(rollbackResources, updatedRasd.getId());
-            deleteResource(updatedRasd);
 
-            if (rollbackRasd != null) // restore the original resource attachment
+            if (rollbackRasd == null)
             {
-                restoreRollbackResouce(rollbackRasd, updatedVm);
+                LOGGER.trace("restore: detach resource " + updatedRasd.getId());
+                removeResource(updatedRasd, false);
             }
-            // else the original vm do not include this resource (updatedRasd already deleted)
-
         }
 
-        // for rollback if temp == 0 --> temp == null + attach a new machine
         for (RasdManagement rollbackRasd : rollbackResources)
         {
-            // updated vm do not include this resouces (deatach), we need to restore it
-            if (rollbackRasd.getTemporal() == 0)
+            RasdManagement originalRasd =
+                getOriginalResource(updatedResources, rollbackRasd.getTemporal());
+
+            if (!originalRasd.isAttached())
             {
-                restoreRollbackResouce(rollbackRasd, updatedVm);
+                LOGGER.trace("restore: attach resource " + originalRasd.getId());
+                // Re attach the resource to the virtual machine */
+                originalRasd.attach(rollbackRasd.getRasd().getGeneration().intValue(), updatedVm);
+
             }
+
+            removeResource(rollbackRasd, true);
         }
 
         rasdDao.flush(); // update virtual machine resources
-
-        repo.update(updatedVm); // remove orphans !!!
+        repo.update(updatedVm);
         repo.deleteVirtualMachine(rollbackVm);
 
         // TODO check temporal not set in updatedVm
 
+        LOGGER.info("restored virtual machine {} from backup", updatedVm.getUuid());
+
         return updatedVm;
     }
 
-    private void deleteResource(final RasdManagement rasd)
+    /** Removes the resource attachment */
+    private void removeResource(final RasdManagement rasd, final boolean remove)
     {
         rasd.detach();
-        rasd.setVirtualMachine(null); // FIXME until detach is not implemented in all
-                                      // RasdManagements
 
         if (rasd instanceof IpPoolManagement)
         {
             rasdRawRao.remove(rasd.getRasd());
         }
 
-        rasdDao.remove(rasd);
+        if (remove)
+        {
+            rasdDao.remove(rasd);
+        }
     }
 
-    private void restoreRollbackResouce(final RasdManagement rasd, final VirtualMachine vm)
+    /**
+     * Get the resources attached to the provided backup virtualmachine.
+     */
+    private List<RasdManagement> getBackupResources(final VirtualMachine rollbackVm)
     {
-
-        // using the original sequence
-        final Integer originalSequence = rasd.getRasd().getGeneration().intValue();
-        rasd.attach(originalSequence, vm);
-
-        rasd.setTemporal(null);
+        try
+        {
+            rasdDao.enableTemporalOnlyFilter();
+            return rollbackVm.getRasdManagements();
+        }
+        finally
+        {
+            rasdDao.disabledTemporalOnlyFilter();
+        }
     }
 
-    /** Find */
+    /**
+     * Find the backup resources with temporal pointing to the provided resource identifier.
+     * 
+     * @return resource with temporal == provided resource id, null if not found
+     */
     private RasdManagement getBackupResource(final List<RasdManagement> rollbackResources,
         final Integer tempRasdManId)
     {
         for (RasdManagement rasdman : rollbackResources)
         {
             if (tempRasdManId.equals(rasdman.getTemporal()))
+            {
+                return rasdman;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find the original resource with identifier equals to the provided backup resource temporal.
+     * 
+     * @return resource with id == backup.temporal, null if not found
+     */
+    private RasdManagement getOriginalResource(final List<RasdManagement> updatedResources,
+        final Integer temporalId)
+    {
+        for (RasdManagement rasdman : updatedResources)
+        {
+            if (temporalId.equals(rasdman.getId()))
             {
                 return rasdman;
             }
@@ -2027,7 +2047,7 @@ public class VirtualMachineService extends DefaultApiService
      * @return true if the resource has been allocated, false if it was previously allocated.
      */
     protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
-        RasdManagement resource, final Integer attachOrder)
+        final RasdManagement resource, final Integer attachOrder)
     {
         if (resource.getVirtualMachine() != null)
         {

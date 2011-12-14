@@ -28,7 +28,8 @@ package com.abiquo.appliancemanager.config;
  */
 public class AMConfiguration
 {
-    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = 10;
+    public final static Integer REPOSITORY_FILE_MARK_CHECK_TIMEOUT_SECONDS = Integer.valueOf(System
+        .getProperty("abiquo.repository.timeoutSeconds", "10"));
 
     public final static int HTTP_CONNECTION_TIMEOUT = 60 * 1000; // a minute
 

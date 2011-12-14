@@ -22,6 +22,7 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -605,7 +606,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public List<DiskManagement> getDisks()
     {
-        return disks;
+        return disks != null ? disks : new LinkedList<DiskManagement>();
     }
 
     public void setDisks(final List<DiskManagement> disks)
@@ -620,7 +621,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public List<VolumeManagement> getVolumes()
     {
-        return volumes;
+        return volumes != null ? volumes : new LinkedList<VolumeManagement>();
     }
 
     public void setVolumes(final List<VolumeManagement> volumes)
@@ -635,7 +636,7 @@ public class VirtualMachine extends DefaultEntityBase
 
     public List<IpPoolManagement> getIps()
     {
-        return ips;
+        return ips != null ? ips : new LinkedList<IpPoolManagement>();
     }
 
     public void setIps(final List<IpPoolManagement> ips)
