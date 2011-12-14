@@ -100,6 +100,7 @@ import com.abiquo.server.core.infrastructure.management.RasdDAO;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.Type;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
@@ -536,7 +537,8 @@ public class VirtualMachineService extends DefaultApiService
         final VirtualMachine virtualMachine, final VirtualMachineState newState)
     {
         VirtualMachineStateTransition validTransition =
-            VirtualMachineStateTransition.getValidTransition(virtualMachine.getState(), newState);
+            VirtualMachineStateTransition.getValidVmStateChangeTransition(
+                virtualMachine.getState(), newState);
         if (validTransition == null)
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_STATE_CHANGE_ERROR);
@@ -569,6 +571,40 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * Check that {@link VirtualMachine} is in appropriate state. *
+     * <ul>
+     * <li>{@link VirtualMachineState#ON}</li>
+     * </ul>
+     * 
+     * @param vm {@link VirtualMachine}. void
+     */
+    public void checkResetAllowed(final VirtualMachine vm)
+    {
+        if (vm.getState() != VirtualMachineState.ON)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_RESET);
+            flushErrors();
+        }
+    }
+
+    /**
+     * The {@link VirtualMachine} is in appropriate state.
+     * <ul>
+     * <li>{@link VirtualMachineState#OFF}</li>
+     * </ul>
+     * 
+     * @param vm
+     */
+    public void checkSnapshotAllowed(final VirtualMachine vm)
+    {
+        if (vm.getState() != VirtualMachineState.OFF)
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT);
+            flushErrors();
+        }
+    }
+
+    /**
      * Delete a {@link VirtualMachine}. And the {@link Node}.
      * 
      * @param virtualMachine to delete. void
@@ -576,7 +612,8 @@ public class VirtualMachineService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deleteVirtualMachine(final Integer vmId, final Integer vappId, final Integer vdcId)
     {
-        // We need to operate with concrete and this also check that the VirtualMachine belongs to
+        // We need to operate with concrete and this also check that the VirtualMachine belongs
+        // to
         // those VirtualAppliance and VirtualDatacenter
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
@@ -607,9 +644,31 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Detached the virtual machine's volumes with UUID {}",
             virtualMachine.getUuid());
 
+        detachIps(virtualMachine);
+
         repo.deleteVirtualMachine(virtualMachine);
         tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
-            "virtualMachine.deleteFailedInvalidNotDeployed", virtualMachine.getName());
+            "virtualMachine.delete");
+    }
+
+    /**
+     * Deletes the {@link Rasd} of an {@link IpPoolManagement}.
+     * 
+     * @param virtualMachine void
+     */
+    private void detachIps(final VirtualMachine virtualMachine)
+    {
+        for (IpPoolManagement ip : virtualMachine.getIps())
+        {
+            vdcRep.deleteRasd(ip.getRasd());
+            ip.detach();
+            if (Type.EXTERNAL == ip.getType())
+            {
+                ip.setVirtualDatacenter(null);
+                ip.setMac(null);
+                ip.setName(null);
+            }
+        }
     }
 
     /**
@@ -747,8 +806,8 @@ public class VirtualMachineService extends DefaultApiService
     private void createNodeVirtualImage(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance)
     {
-        LOGGER.debug("Create node virtual image with name virtual machine: {}"
-            + virtualMachine.getName());
+        LOGGER.debug("Create node virtual image with name virtual machine: {}",
+            virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
             new NodeVirtualImage(virtualMachine.getName(),
                 virtualAppliance,
@@ -1160,6 +1219,95 @@ public class VirtualMachineService extends DefaultApiService
         // For the Admin to know all errors
         tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
             "virtualMachine.applyVirtualMachineTarantinoEnqueued");
+
+        lockVirtualMachine(virtualMachine);
+        // tasksService.
+        // Here we add the url which contains the status
+        return location;
+    }
+
+    /**
+     * Reset the VirtualMachine to the state passed
+     * 
+     * @param vappId Virtual Appliance Id
+     * @param vdcId VirtualDatacenter Id
+     * @param state The state to which change
+     * @throws Exception
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public String resetVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final VirtualMachineStateTransition state)
+    {
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
+        // the if(!hypervisor)
+        if (!virtualMachine.getState().existsInHypervisor())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
+            flushErrors();
+        }
+
+        checkResetAllowed(virtualMachine);
+
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachineDescriptionBuilder machineDescriptionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+        String location =
+            tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
+        LOGGER.info("Applying the reset of the virtual machine id {} in tarantino!",
+            virtualMachine.getId());
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+            "virtualMachine.resetVirtualMachineEnqueued", virtualMachine.getName());
+        // For the Admin to know all errors
+        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+            "virtualMachine.resetVirtualMachineTarantinoEnqueued");
+
+        lockVirtualMachine(virtualMachine);
+        // tasksService.
+        // Here we add the url which contains the status
+        return location;
+    }
+
+    /**
+     * Changes the state of the VirtualMachine to the state passed
+     * 
+     * @param vappId Virtual Appliance Id
+     * @param vdcId VirtualDatacenter Id
+     * @param state The state to which change
+     * @throws Exception
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public String virtualMachineSnapshot(final Integer vmId, final Integer vappId,
+        final Integer vdcId, final VirtualMachineStateTransition state)
+    {
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        // The change state applies on the hypervisor. Now there is a NOT_ALLOCATED to get rid of
+        // the if(!hypervisor)
+        if (!virtualMachine.getState().existsInHypervisor())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_UNALLOCATED_STATE);
+            flushErrors();
+        }
+
+        checkSnapshotAllowed(virtualMachine);
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachineDescriptionBuilder machineDescriptionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+        String location =
+            tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
+        LOGGER.info("Applying the snapshot of the virtual machine id {} in tarantino!",
+            virtualMachine.getId());
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+            "virtualMachine.virtualMachineSnapshotEnqueued", virtualMachine.getName());
+        // For the Admin to know all errors
+        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+            "virtualMachine.virtualMachineSnapshotTarantinoEnqueued");
 
         lockVirtualMachine(virtualMachine);
         // tasksService.
