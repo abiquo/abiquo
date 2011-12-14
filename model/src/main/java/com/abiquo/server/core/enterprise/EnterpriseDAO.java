@@ -48,6 +48,7 @@ import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.pricing.PricingTemplate;
 import com.abiquo.server.core.util.PagedList;
+import com.softwarementors.bzngine.entities.PersistentEntity;
 
 @Repository("jpaEnterpriseDAO")
 class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
@@ -111,13 +112,13 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
 
     public List<Enterprise> findByPricingTemplate(final PricingTemplate pt, final boolean included,
         final String filterName, final Integer offset, final Integer numResults,
-        final String orderBy, final boolean desc)
+        final String orderBy, final boolean desc, final Integer idEnterprise)
     {
-        Criteria criteria = createCriteria(pt, included, filterName, orderBy, desc);
+        Criteria criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
 
         Long total = count(criteria);
 
-        criteria = createCriteria(pt, included, filterName, orderBy, desc);
+        criteria = createCriteria(pt, included, filterName, orderBy, desc, idEnterprise);
 
         criteria.setFirstResult(offset * numResults);
         criteria.setMaxResults(numResults);
@@ -363,7 +364,7 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
     }
 
     private Criteria createCriteria(final PricingTemplate pricingTemplate, final boolean included,
-        final String filter, final String orderBy, final boolean desc)
+        final String filter, final String orderBy, final boolean desc, final Integer enterpriseId)
     {
         Criteria criteria = createCriteria();
 
@@ -386,6 +387,11 @@ class EnterpriseDAO extends DefaultDAOBase<Integer, Enterprise>
         else if (!included && pricingTemplate == null)
         {
             criteria.add(withoutPricingTemplate());
+        }
+
+        if (enterpriseId != null)
+        {
+            criteria.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, enterpriseId));
         }
 
         if (!StringUtils.isEmpty(filter))
