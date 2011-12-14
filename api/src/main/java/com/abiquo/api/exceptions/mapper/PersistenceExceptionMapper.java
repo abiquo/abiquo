@@ -22,10 +22,48 @@
 package com.abiquo.api.exceptions.mapper;
 
 import javax.persistence.PersistenceException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.wink.common.internal.ResponseImpl.ResponseBuilderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.model.transport.error.ErrorDto;
+import com.abiquo.model.transport.error.ErrorsDto;
+
+/**
+ * Handles unexpected {@link PersistenceException}.
+ * 
+ * @author Ignasi Barrera
+ */
 @Provider
-public class PersistenceExceptionMapper extends ServerExceptionMapper<PersistenceException>
+public class PersistenceExceptionMapper implements ExceptionMapper<PersistenceException>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceExceptionMapper.class);
+
+    @Override
+    public Response toResponse(final PersistenceException exception)
+    {
+        ErrorsDto errors = new ErrorsDto();
+        ErrorDto error = new ErrorDto();
+        ResponseBuilder builder = new ResponseBuilderImpl();
+
+        error.setCode(APIError.STATUS_INTERNAL_SERVER_ERROR.getCode());
+        error.setMessage(APIError.STATUS_INTERNAL_SERVER_ERROR.getMessage());
+        builder.status(Status.INTERNAL_SERVER_ERROR);
+
+        errors.getCollection().add(error);
+        builder.entity(errors).type(MediaType.APPLICATION_XML_TYPE);
+
+        LOGGER.error("Unexpexted persistence exception", exception);
+
+        return builder.build();
+    }
 
 }

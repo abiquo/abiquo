@@ -46,11 +46,9 @@ import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
-import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
-import com.abiquo.model.util.ModelTransformer;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -110,9 +108,6 @@ public class VirtualMachineResource
     private VirtualMachineService vmService;
 
     @Autowired
-    private VirtualMachineAllocatorService service;
-
-    @Autowired
     private TaskService taskService;
 
     /**
@@ -146,19 +141,22 @@ public class VirtualMachineResource
      * @throws Exception AcceptedRequestDto
      */
     @PUT
-    public AcceptedRequestDto updateVirtualMachine(
+    public AcceptedRequestDto<String> updateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder) throws Exception
+        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        
-        if (link != null)
+        if(link != null)
         {
-            AcceptedRequestDto request = new AcceptedRequestDto();
-            request.setStatusUrlLink(link);
-            request.setEntity(dto);
+//            AcceptedRequestDto<VirtualMachineDto> request = new AcceptedRequestDto<VirtualMachineDto>();
+            AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
+
+            String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
+            request.setStatusUrlLink(taskLink);
+            request.setEntity("");//dto);
 
             return request;
         }
@@ -184,12 +182,12 @@ public class VirtualMachineResource
      */
     @PUT
     @Path(VIRTUAL_MACHINE_STATE)
-    public AcceptedRequestDto powerStateVirtualMachine(
+    public AcceptedRequestDto<VirtualMachineStateDto> powerStateVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        final VirtualMachineStateDto state, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         VirtualMachineState newState = validateState(state);
         String link = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
@@ -199,9 +197,12 @@ public class VirtualMachineResource
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto request = new AcceptedRequestDto();
+        AcceptedRequestDto<VirtualMachineStateDto> request =
+            new AcceptedRequestDto<VirtualMachineStateDto>();
+        String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
         request.setStatusUrlLink(link);
-        request.setEntity(null);
+        request.setStatusUrlLink(taskLink);
+        request.setEntity(state);
         return request;
     }
 
@@ -316,8 +317,8 @@ public class VirtualMachineResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         String link =
             vmService.deployVirtualMachine(vmId, vappId, vdcId,
@@ -329,7 +330,9 @@ public class VirtualMachineResource
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-        a202.setStatusUrlLink(link);
+
+        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
+        a202.setStatusUrlLink(taskLink);
         a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
@@ -364,7 +367,7 @@ public class VirtualMachineResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
 
         String link = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
@@ -374,7 +377,9 @@ public class VirtualMachineResource
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-        a202.setStatusUrlLink(link);
+
+        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
+        a202.setStatusUrlLink(taskLink);
         a202.setEntity("");
 
         return a202;
@@ -406,7 +411,7 @@ public class VirtualMachineResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
         String link = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
         // If the link is null no Task was performed
@@ -415,7 +420,9 @@ public class VirtualMachineResource
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-        a202.setStatusUrlLink(link);
+
+        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
+        a202.setStatusUrlLink(taskLink);
         a202.setEntity("");
 
         return a202;
@@ -464,10 +471,11 @@ public class VirtualMachineResource
                 .getEnterprise();
         final User user =
             v.getVirtualMachine().getUser() == null ? null : v.getVirtualMachine().getUser();
-        final VirtualMachineTemplate virtualImage = v.getVirtualImage() == null ? null : v.getVirtualImage();
+        final VirtualMachineTemplate virtualImage =
+            v.getVirtualImage() == null ? null : v.getVirtualImage();
 
-        dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise().getId(),
-            virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
+        dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
+            .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
@@ -524,8 +532,8 @@ public class VirtualMachineResource
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
-                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
@@ -578,8 +586,8 @@ public class VirtualMachineResource
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
         {
-            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise().getId(), vmtemplate
-                .getRepository().getDatacenter().getId(), vmtemplate.getId()));
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
 
         return dto;

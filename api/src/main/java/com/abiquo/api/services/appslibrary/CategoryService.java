@@ -98,6 +98,9 @@ public class CategoryService extends DefaultApiService
 
         appslibraryRep.insertCategory(category);
 
+        tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_CREATED,
+            "category.created", category.getName());
+
         return category;
     }
 
@@ -125,7 +128,7 @@ public class CategoryService extends DefaultApiService
         appslibraryRep.updateCategory(old);
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_MODIFIED,
-            "Category " + category.getName() + " updated ");
+            "category.updated", category.getName());
 
         return old;
     }
@@ -147,7 +150,7 @@ public class CategoryService extends DefaultApiService
         }
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD, EventType.CATEGORY_DELETED,
-            "Removing category " + category.getName());
+            "category.removed", category.getName());
 
         appslibraryRep.deleteCategory(category);
     }

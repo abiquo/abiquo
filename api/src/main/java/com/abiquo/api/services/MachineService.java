@@ -186,11 +186,9 @@ public class MachineService extends DefaultApiService
 
         repo.updateMachine(old);
 
-        tracer
-            .log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE, "Machine "
-                + old.getName() + "[ ip: " + old.getHypervisor().getIp() + " type: "
-                + old.getHypervisor().getType() + " state: " + old.getState()
-                + "] created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_CREATE,
+            "machine.created", old.getName(), old.getHypervisor().getIp(), old.getHypervisor()
+                .getType(), old.getState());
 
         return old;
     }
@@ -282,10 +280,9 @@ public class MachineService extends DefaultApiService
 
         repo.deleteMachine(machine);
 
-        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE, "Machine "
-            + machine.getName() + "[ ip: " + machine.getHypervisor().getIp() + " type: "
-            + machine.getHypervisor().getType() + " state: " + machine.getState()
-            + "] deleted succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.MACHINE, EventType.MACHINE_DELETE,
+            "machine.deleted", machine.getName(), machine.getHypervisor().getIp(), machine
+                .getHypervisor().getType(), machine.getState());
     }
 
     protected void deleteMachineLoadRulesFromMachine(final Machine machine)

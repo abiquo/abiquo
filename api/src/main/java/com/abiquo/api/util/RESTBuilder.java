@@ -192,9 +192,6 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
-        links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
             params));
         links.add(builder.buildRestLink(DatacenterResource.class,
@@ -727,12 +724,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
         links.add(builder.buildRelLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NIC, params,
-            VirtualMachineNetworkConfigurationResource.NIC));
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH));
         links.add(builder.buildRelLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH,
-            VirtualMachineStorageConfigurationResource.DISK, params,
-            VirtualMachineStorageConfigurationResource.DISK));
+            VirtualMachineStorageConfigurationResource.DISKS_PATH, params,
+            VirtualMachineStorageConfigurationResource.DISKS_PATH));
         links.add(builder.buildRelLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
@@ -1325,6 +1322,19 @@ public class RESTBuilder implements IRESTBuilder
         final Integer id)
     {
         return null;
+    }
+
+    @Override
+    public RESTLink buildVirtualMachineLink(final Integer vdc, final Integer vapp, final Integer vm)
+    {
+
+        AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
+        Map params = new HashMap();
+        params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdc);
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vapp);
+        params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm);
+
+        return builder.buildRestLink(VirtualMachineResource.class, "", params);
     }
 
 }

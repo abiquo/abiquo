@@ -22,6 +22,7 @@
 package com.abiquo.server.core.cloud;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +47,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.FilterDefs;
 import org.hibernate.annotations.Filters;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -58,6 +58,7 @@ import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Datastore;
+import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
@@ -449,6 +450,11 @@ public class VirtualMachine extends DefaultEntityBase
         return getIdType() == MANAGED;
     }
 
+    public boolean isDeployed()
+    {
+        return !this.state.equals(State.NOT_ALLOCATED) && !this.state.equals(State.UNKNOWN);
+    }
+
     public void setIdType(final int idType)
     {
         this.idType = idType;
@@ -594,13 +600,13 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of disks */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = DiskManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = DiskManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<DiskManagement> disks;
 
     public List<DiskManagement> getDisks()
     {
-        return disks;
+        return disks != null ? disks : new LinkedList<DiskManagement>();
     }
 
     public void setDisks(final List<DiskManagement> disks)
@@ -609,13 +615,13 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of volumes */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = VolumeManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = VolumeManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<VolumeManagement> volumes;
 
     public List<VolumeManagement> getVolumes()
     {
-        return volumes;
+        return volumes != null ? volumes : new LinkedList<VolumeManagement>();
     }
 
     public void setVolumes(final List<VolumeManagement> volumes)
@@ -624,18 +630,36 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of ips */
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = IpPoolManagement.class)
+    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = IpPoolManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<IpPoolManagement> ips;
 
     public List<IpPoolManagement> getIps()
     {
-        return ips;
+        return ips != null ? ips : new LinkedList<IpPoolManagement>();
     }
 
     public void setIps(final List<IpPoolManagement> ips)
     {
         this.ips = ips;
+    }
+
+    /**
+     * List all {@link RasdManagement} (including {@link DiskManagement}, {@link IpPoolManagement}
+     * and {@link VolumeManagement} )
+     */
+    // do not orphanRemoval = true,
+    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
+    private List<RasdManagement> rasdManagements;
+
+    public List<RasdManagement> getRasdManagements()
+    {
+        return rasdManagements;
+    }
+
+    public void setRasdManagements(final List<RasdManagement> rasdManagements)
+    {
+        this.rasdManagements = rasdManagements;
     }
 
     public static final String CHEF_RUNLIST_TABLE = "chef_runlist";

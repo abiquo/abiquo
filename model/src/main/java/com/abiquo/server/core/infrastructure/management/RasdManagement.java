@@ -50,22 +50,16 @@ import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
-@FilterDefs({@FilterDef(name = RasdManagement.NOT_TEMP),
-    @FilterDef(name = RasdManagement.ONLY_TEMP)})
-@Filters({@Filter(name = RasdManagement.NOT_TEMP, condition = "temporal is null"),
-    @Filter(name = RasdManagement.ONLY_TEMP, condition = "temporal is not null")})
 @Table(name = RasdManagement.TABLE_NAME)
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "idResourceType", discriminatorType = DiscriminatorType.STRING)
 public class RasdManagement extends DefaultEntityBase
 {
     /** The first attachment sequence number to be used. */
-    public static final int FIRST_ATTACHMENT_SEQUENCE = 1;
+    public static final int FIRST_ATTACHMENT_SEQUENCE = 0;
 
     public static final String TABLE_NAME = "rasd_management";
 
-    public static final String NOT_TEMP = "rasdmanagement_not_temp";
-    public static final String ONLY_TEMP = "rasdmanagement_only_temp";
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     protected RasdManagement()
@@ -233,7 +227,7 @@ public class RasdManagement extends DefaultEntityBase
     {
         this.temporal = temporal;
     }
-    
+
     // **************************** Rasd delegating methods ***************************
 
     public String getDescription()
@@ -262,4 +256,28 @@ public class RasdManagement extends DefaultEntityBase
 
         getRasd().setGeneration(order < 0 ? 0L : order);
     }
+
+    // *************************** Resource state transitions ***************************
+
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        throw new UnsupportedOperationException("Must call concrete subclass attach method");
+    }
+    
+    public void attach(final int sequence, final VirtualMachine vm, final VirtualAppliance vapp)
+    {
+        attach(sequence, vm);
+        setVirtualAppliance(vapp);
+    }
+
+    public void detach()
+    {
+        throw new UnsupportedOperationException("Must call concrete subclass dettach method");
+    }
+
+    public boolean isAttached()
+    {
+        throw new UnsupportedOperationException("Must call concrete subclass 'isAttached' method");
+    }
+
 }

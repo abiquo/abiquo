@@ -87,6 +87,10 @@ public class PhysicalMachineCreation
         {
             h = this.getHypervisors().get(0);
         }
+        else if (pm.getHypervisor() != null)
+        {
+            h = pm.getHypervisor();
+        }
 
         dto.setId(pm.getId());
         dto.setDescription(pm.getDescription());

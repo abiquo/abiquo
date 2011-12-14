@@ -99,10 +99,20 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = true)
-    public Repository getDatacenterRepository(final Integer dcId)
+    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
+
         Datacenter datacenter = infrastructureService.getDatacenter(dcId);
-        return repositoryDao.findByDatacenter(datacenter);
+        Repository repo = repositoryDao.findByDatacenter(datacenter);
+
+        if (repo == null)
+        {
+            addNotFoundErrors(APIError.VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND);
+            flushErrors();
+        }
+
+        return repo;
     }
 
     /**
@@ -115,7 +125,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         for (DatacenterLimits dclimit : enterpriseService.findLimitsByEnterprise(enterpriseId))
         {
-            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId()));
+            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
         }
 
         return repos;
@@ -152,11 +162,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     public List<VirtualMachineTemplate> getVirtualMachineTemplates(final Integer enterpriseId,
         final Integer datacenterId, final String categoryName, final String hypervisorName)
     {
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
-
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        Repository repository = infrastructureService.getRepository(datacenter);
+        Repository repository = getDatacenterRepository(datacenterId, enterpriseId);
 
         Category category = null;
         HypervisorType hypervisor = null;
@@ -316,11 +323,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             {
                 if (tracer != null)
                 {
-                    String messageTrace =
-                        "Virtual Machine Template '" + old.getName()
-                            + "' has been converted to a master template '";
                     tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_UPDATE,
-                        messageTrace);
+                        "virtualMachineTemplate.convertedToMaster", old.getName());
                 }
             }
             old.setMaster(null);
@@ -419,11 +423,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         if (tracer != null)
         {
-            String messageTrace =
-                "Virtual Machine Template '" + vmtemplateToDelete.getName()
-                    + "' has been deleted '";
             tracer.log(SeverityType.INFO, ComponentType.DATACENTER, EventType.VI_DELETE,
-                messageTrace);
+                "virtualMachineTemplate.deleted", vmtemplateToDelete.getName());
         }
 
     }
@@ -452,8 +453,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
         Category category = categoryService.getCategoryByName(categoryName);
 
-        return appsLibraryRep
-            .findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category, datacenter);
+        return appsLibraryRep.findStatefulVirtualMachineTemplatesByCategoryAndDatacenter(category,
+            datacenter);
     }
 
     /**

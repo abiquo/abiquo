@@ -32,18 +32,28 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.enumerator.VolumeState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.softwarementors.validation.constraints.Required;
 
 @Entity
 @Table(name = DiskManagement.TABLE_NAME)
 @DiscriminatorValue(DiskManagement.DISCRIMINATOR)
+@FilterDefs({@FilterDef(name = DiskManagement.NOT_TEMP),
+    @FilterDef(name = DiskManagement.ONLY_TEMP)})
+@Filters({@Filter(name = DiskManagement.NOT_TEMP, condition = "temporal is null"),
+    @Filter(name = DiskManagement.ONLY_TEMP, condition = "temporal is not null")})
 public class DiskManagement extends RasdManagement
 {
     public static final String DISCRIMINATOR = "17"; // CIMResourceTypeEnum.Disk_Drive
@@ -54,6 +64,9 @@ public class DiskManagement extends RasdManagement
 
     public static final String DISK_DEVICE_NAME = "Disk Device";
 
+    public static final String NOT_TEMP = "diskmanagement_not_temp";
+    public static final String ONLY_TEMP = "diskmanagement_only_temp";
+    
     // DO NOT ACCESS: present due to needs of infrastructure support. *NEVER* call from business
     // code
     public DiskManagement()
@@ -143,4 +156,28 @@ public class DiskManagement extends RasdManagement
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 
+    @Override
+    public void attach(final int sequence, final VirtualMachine vm)
+    {
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
+
+        setAttachmentOrder(sequence);
+        setVirtualMachine(vm);
+    }
+
+    @Override
+    public void detach()
+    {
+        setVirtualMachine(null);
+        setVirtualAppliance(null);
+    }
+
+    @Override
+    public boolean isAttached()
+    {
+        return getVirtualMachine() != null;
+    }
 }

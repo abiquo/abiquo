@@ -18,26 +18,26 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.spring.jpa;
 
-package com.abiquo.abiserver.commands.stub;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
-import java.util.List;
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
-import com.abiquo.abiserver.pojo.authentication.UserSession;
-import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.service.RemoteService;
-
-public interface RemoteServicesResourceStub
+/**
+ * OpenEntityManagerInViewFilter with the default hibernate filters enabled.
+ * 
+ * @author Ignasi Barrera
+ * @see OpenEntityManagerInViewFilter
+ */
+public class OpenEntityManagerInViewWithFilters extends OpenEntityManagerInViewFilter
 {
-    public DataResult<RemoteService> addRemoteService(RemoteService remoteService);
 
-    public DataResult<RemoteService> modifyRemoteService(RemoteService remoteService);
+    @Override
+    protected EntityManager createEntityManager(final EntityManagerFactory emf)
+    {
+        return JPAConfiguration.enableDefaultFilters(super.createEntityManager(emf));
+    }
 
-    public DataResult<Boolean> deleteRemoteService(RemoteService remoteService);
-
-    public DataResult<List<RemoteService>> getRemoteServices(Integer idDatacenter, String type);
-
-    public DataResult<Boolean> checkRemoteService(Integer idDatacenter, String type);
-
-    public DataResult<Boolean> checkRemoteService(UserSession userSession, String type, String uri);
 }

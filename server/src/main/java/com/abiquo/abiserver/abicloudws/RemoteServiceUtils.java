@@ -77,7 +77,7 @@ public class RemoteServiceUtils
         Set<RemoteServiceHB> remoteServices = myDatacenter.getRemoteServicesHB();
         for (RemoteServiceHB remoteServiceHB : remoteServices)
         {
-            if (remoteServiceHB.getRemoteServiceType() == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.VIRTUAL_FACTORY)
+            if (remoteServiceHB.getRemoteServiceType() == com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServiceType.TARANTINO)
             {
                 destination = remoteServiceHB.getUri();
                 break;

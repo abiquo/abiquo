@@ -21,7 +21,16 @@
 
 package com.abiquo.server.core.task.enums;
 
+
 public enum TaskState
 {
-    FINISHED_SUCCESFULLY, FINISHED_UNSUCCESFULLY, PENDING, STARTED
+    FINISHED_SUCCESSFULLY,
+
+    FINISHED_UNSUCCESSFULLY,
+
+    PENDING,
+
+    STARTED,
+
+    ABORTED
 }

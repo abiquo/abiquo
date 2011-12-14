@@ -26,8 +26,6 @@ import static com.abiquo.abiserver.business.hibernate.pojohb.service.RemoteServi
 import java.util.ArrayList;
 import java.util.List;
 
-import com.abiquo.abiserver.commands.RemoteServicesCommand;
-import com.abiquo.abiserver.commands.impl.RemoteServicesCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.RemoteServicesResourceStub;
 import com.abiquo.abiserver.commands.stub.impl.RemoteServicesResourceStubImpl;
@@ -45,13 +43,6 @@ import com.abiquo.abiserver.pojo.service.RemoteServiceType;
 
 public class RemoteServicesService
 {
-    protected RemoteServicesCommand remoteCommand;
-
-    public RemoteServicesService()
-    {
-        remoteCommand = new RemoteServicesCommandImpl();
-    }
-
     protected RemoteServicesResourceStub proxyStub(final UserSession userSession)
     {
         return APIStubFactory.getInstance(userSession, new RemoteServicesResourceStubImpl(),
@@ -121,11 +112,11 @@ public class RemoteServicesService
      * @return
      */
     public DataResult<Boolean> checkRemoteService(final UserSession userSession,
-        final Integer datacenterId, final String protocol, final String domainName,
-        final Integer port, final String serviceMapping, final String remoteServiceType)
+        final String protocol, final String domainName, final Integer port,
+        final String serviceMapping, final String remoteServiceType)
     {
 
-        return proxyStub(userSession).checkRemoteService(datacenterId, remoteServiceType,
+        return proxyStub(userSession).checkRemoteService(userSession, remoteServiceType,
             RemoteService.getFullUri(protocol, domainName, port, serviceMapping));
     }
 

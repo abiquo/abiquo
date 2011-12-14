@@ -42,8 +42,8 @@ import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.repositoryspace.OVFDescription;
 import com.abiquo.appliancemanager.repositoryspace.RepositorySpace;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
-import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.appliancemanager.transport.TemplatesStateDto;
 import com.abiquo.ovfmanager.ovf.exceptions.XMLException;
 import com.abiquo.server.core.appslibrary.AppsLibrary;
 import com.abiquo.server.core.appslibrary.AppsLibraryDAO;
@@ -237,8 +237,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         repo.updateTemplateDefinitionList(old);
 
         tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
-            EventType.TEMPLATE_DEFINITION_LIST_MODIFIED, "TemplateDefinitionList "
-                + templateDefList.getName() + " updated");
+            EventType.TEMPLATE_DEFINITION_LIST_MODIFIED, "templateDefinitionList.updated",
+            templateDefList.getName());
         return old;
     }
 
@@ -256,8 +256,8 @@ public class TemplateDefinitionListService extends DefaultApiServiceWithApplianc
         if (!refresh)
         {
             tracer.log(SeverityType.INFO, ComponentType.WORKLOAD,
-                EventType.TEMPLATE_DEFINITION_LIST_DELETED, "Removing ovf package list "
-                    + templateDefList.getName());
+                EventType.TEMPLATE_DEFINITION_LIST_DELETED, "templateDefinitionList.deleted",
+                templateDefList.getName());
         }
         repo.removeTemplateDefinitionList(templateDefList);
 

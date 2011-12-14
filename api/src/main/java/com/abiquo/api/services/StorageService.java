@@ -134,21 +134,8 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(oldvm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        for (DiskManagement disk : disks)
-        {
-            // if the hard disk is already attached to another virtual machine
-            // , raise a conflict error.
-            if (disk.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
-                flushErrors();
-            }
-            disk.setVirtualAppliance(vapp);
-            disk.setVirtualMachine(newvm);
-            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
-
-            newvm.getDisks().add(disk);
-        }
+        
+        newvm.getDisks().addAll(disks);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
@@ -202,19 +189,7 @@ public class StorageService extends DefaultApiService
 
         VirtualMachine newvm = vmService.createBackUpObject(vm);
         List<DiskManagement> disks = vmService.getHardDisksFromDto(vdc, hdRefs);
-        for (DiskManagement disk : disks)
-        {
-            // if the hard disk is already attached to another virtual machine
-            // , raise a conflict error.
-            if (disk.getVirtualMachine() != null)
-            {
-                addConflictErrors(APIError.HD_CURRENTLY_ALLOCATED);
-                flushErrors();
-            }
-            disk.setVirtualAppliance(vapp);
-            disk.setVirtualMachine(newvm);
-            disk.setAttachmentOrder(getFreeAttachmentSlot(newvm));
-        }
+        
         newvm.setDisks(disks);
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
@@ -266,12 +241,8 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "A new hard disk VLAN of " + sizeInMb
-                    + " MB has been created as a resource in VirtualDatacenter '" + vdc.getName()
-                    + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.HARD_DISK_CREATE, messageTrace);
+                EventType.HARD_DISK_CREATE, "hardDisk.created", sizeInMb, vdc.getName());
         }
 
         return disk;
@@ -308,11 +279,9 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
-                    + "MB has been deleted from VirtualDatacenter '" + vdc.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_DATACENTER,
-                EventType.HARD_DISK_DELETE, messageTrace);
+                EventType.HARD_DISK_DELETE, "hardDisk.deleted", disk.getId(), disk.getSizeInMb(),
+                vdc.getName());
         }
     }
 
@@ -459,19 +428,16 @@ public class StorageService extends DefaultApiService
         }
         createdDisk.setVirtualAppliance(vapp);
         createdDisk.setVirtualMachine(vm);
-        createdDisk.setAttachmentOrder(getFreeAttachmentSlot(vm));
+        createdDisk.setAttachmentOrder(repo.findDisksAndVolumesByVirtualMachine(vm).size());
 
         vdcRepo.updateDisk(createdDisk);
 
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + createdDisk.getId() + "' and size of "
-                    + createdDisk.getSizeInMb() + "MB has been assigned to virtual machine '"
-                    + vm.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_ASSIGN, messageTrace);
+                EventType.HARD_DISK_ASSIGN, "hardDisk.assigned", createdDisk.getId(), createdDisk
+                    .getSizeInMb(), vm.getName());
         }
 
         return createdDisk;
@@ -521,11 +487,9 @@ public class StorageService extends DefaultApiService
         // Trace
         if (tracer != null)
         {
-            String messageTrace =
-                "The hard disk resource '" + disk.getId() + "' and size of " + disk.getSizeInMb()
-                    + "MB has been released from virtual machine '" + vm.getName() + "'.";
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                EventType.HARD_DISK_UNASSIGN, messageTrace);
+                EventType.HARD_DISK_UNASSIGN, "hardDisk.released", disk.getId(),
+                disk.getSizeInMb(), vm.getName());
         }
     }
 
@@ -541,8 +505,8 @@ public class StorageService extends DefaultApiService
         // creating volumes in other enterprises VDC
         Enterprise enterprise = vdc.getEnterprise();
 
-        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB",
-            enterprise.getName(), sizeInMB);
+        LOGGER.debug("Checking limits for enterprise {} to a locate a volume of {}MB", enterprise
+            .getName(), sizeInMB);
 
         DatacenterLimits dcLimits =
             datacenterRepo.findDatacenterLimits(enterprise, vdc.getDatacenter());
@@ -565,40 +529,6 @@ public class StorageService extends DefaultApiService
             addConflictErrors(new CommonError(APIError.LIMIT_EXCEEDED.getCode(), ex.toString()));
             flushErrors();
         }
-    }
-
-    /**
-     * Get the next free attachment slot to be used to attach a disk or volume to the virtual
-     * machine.
-     * 
-     * @param vm The virtual machine where the disk will be attached.
-     * @return The free slot to use.
-     */
-    protected int getFreeAttachmentSlot(final VirtualMachine vm)
-    {
-        // The list is already ordered by attachment ascendent order
-        List< ? extends RasdManagement> attachments = repo.findDisksAndVolumesByVirtualMachine(vm);
-
-        // In Hyper-v only 2 attached volumes are allowed
-        if (vm.getHypervisor() != null && vm.getHypervisor().getType() == HypervisorType.HYPERV_301
-            && attachments.size() >= 2)
-        {
-            addConflictErrors(APIError.VOLUME_TOO_MUCH_ATTACHMENTS);
-            flushErrors();
-        }
-
-        // Find the first free slot
-        for (int i = 0; i < attachments.size(); i++)
-        {
-            long sequence = attachments.get(i).getAttachmentOrder();
-            if (sequence != i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE)
-            {
-                return i + RasdManagement.FIRST_ATTACHMENT_SEQUENCE; // Found gap
-            }
-        }
-
-        // If no gap was found, use the next sequence
-        return attachments.size() + RasdManagement.FIRST_ATTACHMENT_SEQUENCE;
     }
 
     /**
