@@ -54,9 +54,9 @@ import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.Rasd;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.server.core.util.network.NetworkResolver;
@@ -85,8 +85,9 @@ public class NetworkService extends DefaultApiService
     {
         // create the Rasd object.
         Rasd rasd =
-            new Rasd(UUID.randomUUID().toString(), IpPoolManagement.DEFAULT_RESOURCE_NAME, Integer
-                .valueOf(IpPoolManagement.DISCRIMINATOR));
+            new Rasd(UUID.randomUUID().toString(),
+                IpPoolManagement.DEFAULT_RESOURCE_NAME,
+                Integer.valueOf(IpPoolManagement.DISCRIMINATOR));
 
         rasd.setDescription(IpPoolManagement.DEFAULT_RESOURCE_DESCRIPTION);
         rasd.setConnection("");
@@ -172,8 +173,8 @@ public class NetworkService extends DefaultApiService
             case EXTERNAL:
             case UNMANAGED:
                 DatacenterLimits dcLimits =
-                    entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(), vdc
-                        .getDatacenter());
+                    entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
+                        vdc.getDatacenter());
                 ip =
                     repo.findExternalIpsByVlan(vdc.getEnterprise().getId(), dcLimits.getId(),
                         vlan.getId(), 0, 1, new String(), OrderByEnum.IP, Boolean.TRUE,
@@ -188,6 +189,11 @@ public class NetworkService extends DefaultApiService
         ip.setRasd(rasd);
         
         ip.attach(0, vm, vapp);
+        
+        ip.setVirtualAppliance(vapp);
+        ip.setVirtualMachine(vm);
+        ip.setConfigureGateway(Boolean.TRUE);
+        
         repo.updateIpManagement(ip);
 
         return;
@@ -545,8 +551,8 @@ public class NetworkService extends DefaultApiService
             {
                 // needed for REST links.
                 DatacenterLimits dl =
-                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(), vdc
-                        .getDatacenter());
+                    datacenterRepo.findDatacenterLimits(ip.getVlanNetwork().getEnterprise(),
+                        vdc.getDatacenter());
                 ip.getVlanNetwork().setLimitId(dl.getId());
             }
         }
@@ -835,20 +841,20 @@ public class NetworkService extends DefaultApiService
                         if (privateIp)
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.NIC_RELEASED_VIRTUAL_MACHINE, "nic.released", vm
-                                    .getName(), ip.getIp(), ip.getNetworkName());
+                                EventType.NIC_RELEASED_VIRTUAL_MACHINE, "nic.released",
+                                vm.getName(), ip.getIp(), ip.getNetworkName());
                         }
                         else if (publicIp)
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.PUBLIC_IP_UNASSIGN, "nic.released", vm.getName(), ip
-                                    .getIp(), ip.getNetworkName());
+                                EventType.PUBLIC_IP_UNASSIGN, "nic.released", vm.getName(),
+                                ip.getIp(), ip.getNetworkName());
                         }
                         else
                         {
                             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
-                                EventType.EXTERNAL_IP_UNASSIGN, "nic.released", vm.getName(), ip
-                                    .getIp(), ip.getNetworkName());
+                                EventType.EXTERNAL_IP_UNASSIGN, "nic.released", vm.getName(),
+                                ip.getIp(), ip.getNetworkName());
                         }
                     }
                 }
@@ -1031,10 +1037,10 @@ public class NetworkService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(vdc.getEnterprise());
 
         // Values 'address', 'mask', and 'tag' can not be changed by the edit process
-        if (!oldNetwork.getConfiguration().getAddress().equalsIgnoreCase(
-            newNetwork.getConfiguration().getAddress())
-            || !oldNetwork.getConfiguration().getMask().equals(
-                newNetwork.getConfiguration().getMask())
+        if (!oldNetwork.getConfiguration().getAddress()
+            .equalsIgnoreCase(newNetwork.getConfiguration().getAddress())
+            || !oldNetwork.getConfiguration().getMask()
+                .equals(newNetwork.getConfiguration().getMask())
             || oldNetwork.getTag() == null
             && newNetwork.getTag() != null
             || oldNetwork.getTag() != null
@@ -1047,8 +1053,8 @@ public class NetworkService extends DefaultApiService
         }
 
         // Check the new gateway is inside the range of IPs.
-        if (!newNetwork.getConfiguration().getGateway().equalsIgnoreCase(
-            oldNetwork.getConfiguration().getGateway()))
+        if (!newNetwork.getConfiguration().getGateway()
+            .equalsIgnoreCase(oldNetwork.getConfiguration().getGateway()))
         {
             IPAddress networkIP =
                 IPAddress.newIPAddress(newNetwork.getConfiguration().getAddress());
