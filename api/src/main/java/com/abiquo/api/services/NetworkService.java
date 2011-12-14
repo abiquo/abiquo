@@ -47,6 +47,7 @@ import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
+import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.management.Rasd;
@@ -86,6 +87,9 @@ public class NetworkService extends DefaultApiService
     /** User service for user-specific privileges */
     @Autowired
     protected UserService userService;
+
+    @Autowired
+    private EnterpriseService entService;
 
     /**
      * Default constructor. Needed by @Autowired injections
@@ -414,7 +418,7 @@ public class NetworkService extends DefaultApiService
             flushErrors();
         }
 
-        NetworkType netType = null;
+        NetworkType netType = NetworkType.INTERNAL;
         if (type != null && !type.equals("false") && !type.equals("INTERNAL"))
         {
             netType = NetworkType.fromValue(type);
@@ -428,11 +432,26 @@ public class NetworkService extends DefaultApiService
         }
 
         // Query the list to database.
-        List<IpPoolManagement> ips =
-            repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc, netType);
-        LOGGER
-            .debug("Returning the list of IPs used by VirtualDatacenter '" + vdc.getName() + "'.");
-        return ips;
+        if (netType.equals(NetworkType.EXTERNAL_UNMANAGED))
+        {
+            // get the enterprise and datacenter and get the external and unmanaged ips
+            List<IpPoolManagement> ips =
+                repo.findPublicIpsByDatacenter(vdc.getDatacenter().getId(), firstElem, numElem,
+                    has, orderByEnum, asc, netType);
+            LOGGER
+                .debug("Returning the list of external and unmanaged IPs used by VirtualDatacenter '"
+                    + vdc.getName() + "'.");
+            return ips;
+        }
+        else
+        {
+            List<IpPoolManagement> ips =
+                repo.findIpsByVdc(vdcId, firstElem, numElem, has, orderByEnum, asc, netType);
+            LOGGER.debug("Returning the list of private IPs used by VirtualDatacenter '"
+                + vdc.getName() + "'.");
+            return ips;
+        }
+
     }
 
     /**
