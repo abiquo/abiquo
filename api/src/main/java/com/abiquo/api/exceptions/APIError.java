@@ -262,8 +262,10 @@ public enum APIError
         "VM-23",
         "Can't restore the original virtual machine (after a failed reconfigure), the original virutual machine info was not found."),
         RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
-            "VM-24", "The resource is already used by another virtual machine"),
-
+            "VM-24", "The resource is already used by another virtual machine"), VIRTUAL_MACHINE_INVALID_STATE_RESET(
+        "VM-26", "The allowed power states for Reset Virtual Machines is ON"), VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT(
+        "VM-27", "The allowed power states for Snapshot Virtual Machines is OFF"),
+    
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
         "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",

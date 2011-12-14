@@ -865,13 +865,13 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         VirtualMachineStateDto dto = new VirtualMachineStateDto();
-        dto.setPower(VirtualMachineState.OFF.name());
+        dto.setPower(VirtualMachineState.OFF);
         // Check for vm state
         ClientResponse response =
             put(resolveVirtualMachineStateURI(vdc.getId(), vapp.getId(), vm.getId()), dto,
                 "sysadmin", "sysadmin");
         VirtualMachineStateDto vmDto = response.getEntity(VirtualMachineStateDto.class);
-        assertEquals(VirtualMachineState.OFF.name(), vmDto.getPower());
+        assertEquals(VirtualMachineState.OFF, vmDto.getPower());
 
     }
 

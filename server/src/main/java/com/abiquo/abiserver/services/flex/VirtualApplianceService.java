@@ -254,9 +254,10 @@ public class VirtualApplianceService
     public BasicResult getVirtualAppliancesByEnterprise(final UserSession userSession,
         final Enterprise enterprise)
     {
-        VirtualApplianceCommand command = proxyCommand(userSession);
-
-        return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
+        // VirtualApplianceCommand command = proxyCommand(userSession);
+        return proxyVirtualApplianceResourceStub(userSession).getVirtualAppliancesByEnterprise(
+            userSession, enterprise);
+        // return command.getVirtualAppliancesByEnterprise(userSession, enterprise);
     }
 
     /**
