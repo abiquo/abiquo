@@ -365,7 +365,9 @@
         width="100%" height="100%"
         verticalAlign="middle"
         verticalGap="-1"
-        title="@Resource(bundle='Networking', key='LABEL_PRIVATE_IPS')">
+        title="{this._vlanType == VlanNetwork.INTERNAL ? 
+                                  resourceManager.getString('Networking','LABEL_PRIVATE_IPS'):
+                                  resourceManager.getString('Networking','LABEL_EXTERNAL_IPS')}">
 
         <privateip:PrivateIPList id="privateIPList" 
         	vlanType="{this._vlanType}"/>
