@@ -129,7 +129,7 @@ public class VirtualMachineResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        return createTransferObject(vm, vdcId, vappId, restBuilder);
+        return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm));
     }
 
     /***
@@ -149,18 +149,19 @@ public class VirtualMachineResource
         @Context final UriInfo uriInfo) throws Exception
     {
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        if(link != null)
+        if (link != null)
         {
-//            AcceptedRequestDto<VirtualMachineDto> request = new AcceptedRequestDto<VirtualMachineDto>();
+            // AcceptedRequestDto<VirtualMachineDto> request = new
+            // AcceptedRequestDto<VirtualMachineDto>();
             AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
 
             String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
             request.setStatusUrlLink(taskLink);
-            request.setEntity("");//dto);
+            request.setEntity("You can keep track of the progress in the link");
 
             return request;
         }
-        
+
         return null;
     }
 
@@ -488,15 +489,8 @@ public class VirtualMachineResource
         return dto;
     }
 
-    /** ########## DEPRECATED ZONE ########## */
-
-    public static VirtualMachineDto createCloudTransferObject(final VirtualMachine v,
-        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
-    {
-        VirtualMachineDto vmDto = createTransferObject(v, vdcId, vappId, restBuilder);
-        return vmDto;
-    }
-
+    @Deprecated
+    // use the integer based version
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final IRESTBuilder restBuilder)
     {
@@ -542,7 +536,8 @@ public class VirtualMachineResource
     }
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
-        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder)
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
+        final Integer... volumeIds)
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
@@ -581,7 +576,7 @@ public class VirtualMachineResource
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled()));
+            v.isChefEnabled(), volumeIds));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
@@ -644,5 +639,10 @@ public class VirtualMachineResource
         Task task = taskService.findTask(vmId.toString(), taskId);
 
         return TaskResourceUtils.transform(task, uriInfo);
+    }
+
+    protected Integer[] getVolumeIds(final VirtualMachine vm)
+    {
+        return null; // Community impl
     }
 }
