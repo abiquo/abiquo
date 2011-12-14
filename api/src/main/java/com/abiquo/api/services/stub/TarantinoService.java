@@ -293,6 +293,87 @@ public class TarantinoService extends DefaultApiService
         return null;
     }
 
+
+    /**
+     * Sends a Deploy operation originated by HA move
+     * 
+     * @param virtualMachine
+     * @param virtualMachineDesciptionBuilder
+     * @param originalVMState
+     * @return
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String deployVirtualMachineHA(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final boolean originalVMStateON)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+        try
+        {
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
+
+            DatacenterTasks deployTask = null;
+
+            if (originalVMStateON)
+            {
+                deployTask =
+                    builder.add(VirtualMachineStateTransition.CONFIGURE)
+                    .add(
+                    VirtualMachineStateTransition.POWERON).buildTarantinoTask();
+            }
+            else
+            {
+                deployTask =
+                    builder.add(VirtualMachineStateTransition.CONFIGURE).buildTarantinoTask();
+            }
+                    
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                TaskType.HIGH_AVAILABILITY));
+            send(datacenter, deployTask, EventType.VM_MOVING_BY_HA);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            // No need to unsuscribe the machine
+            // logger.debug("Error enqueuing the HA deploy task dto to Tarantino with error: "
+            // + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
+            // vsm.unsubscribe(remoteService, virtualMachine);
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the HA deploy task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_MOVING_BY_HA,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_MOVING_BY_HA, "tarantino.deployVMError", e.getMessage());
+
+            // No need to unsuscribe the machine
+            // logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
+            // + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
+            // vsm.unsubscribe(remoteService, virtualMachine);
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
     /**
      * Adds a task to redis. This task become available for all the resources implementing
      * {@link AbstractResourceWithTasks}.
