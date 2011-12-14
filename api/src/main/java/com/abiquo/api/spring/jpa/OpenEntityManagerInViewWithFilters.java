@@ -25,6 +25,8 @@ import javax.persistence.EntityManagerFactory;
 
 import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
+
 /**
  * OpenEntityManagerInViewFilter with the default hibernate filters enabled.
  * 

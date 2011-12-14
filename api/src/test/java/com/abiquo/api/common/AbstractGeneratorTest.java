@@ -34,7 +34,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import com.abiquo.api.spring.jpa.JPAConfiguration;
 import com.abiquo.server.core.appslibrary.AppsLibraryGenerator;
 import com.abiquo.server.core.appslibrary.CategoryGenerator;
 import com.abiquo.server.core.appslibrary.IconGenerator;
@@ -48,6 +47,7 @@ import com.abiquo.server.core.cloud.VirtualImageConversionGenerator;
 import com.abiquo.server.core.cloud.VirtualMachineGenerator;
 import com.abiquo.server.core.cloud.stateful.NodeVirtualImageStatefulConversionGenerator;
 import com.abiquo.server.core.cloud.stateful.VirtualApplianceStatefulConversionGenerator;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.config.SystemPropertyGenerator;
 import com.abiquo.server.core.enterprise.EnterpriseGenerator;
 import com.abiquo.server.core.enterprise.PrivilegeGenerator;

@@ -371,8 +371,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
         assertLinkExist(vmDto,
             resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()),
-            VirtualMachineNetworkConfigurationResource.NIC,
-            VirtualMachineNetworkConfigurationResource.NIC);
+            VirtualMachineNetworkConfigurationResource.NICS_PATH,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");
         assertLinkExist(
