@@ -219,4 +219,10 @@ public class DhcpOption extends DefaultEntityBase
         this.netmask = netmask;
     }
 
+    // I don't want to access the networks directly but I want to remove them in cascade
+    public final static String ASSOCIATION_TABLE = "vlans_dhcpOption";
+
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = VLANNetwork.class, cascade = CascadeType.DETACH)
+    @JoinTable(name = ASSOCIATION_TABLE, joinColumns = @JoinColumn(name = "idDhcpOption"), inverseJoinColumns = @JoinColumn(name = "idVlan"))
+    private List<VLANNetwork> networks;
 }
