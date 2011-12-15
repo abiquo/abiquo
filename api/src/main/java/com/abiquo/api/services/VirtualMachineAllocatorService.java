@@ -154,7 +154,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
             if (!check)
             {
-                final String cause =
+                final String cause = 
                     String.format("Current workload rules (RAM and CPU oversubscription) "
                         + "on the target machine: %s disallow the required resources increment.",
                         machine.getName());

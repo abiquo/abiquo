@@ -48,6 +48,7 @@ import com.abiquo.server.core.infrastructure.DatacenterGenerator;
 import com.abiquo.server.core.infrastructure.DatacenterLimitsGenerator;
 import com.abiquo.server.core.infrastructure.Datastore;
 import com.abiquo.server.core.infrastructure.DatastoreGenerator;
+import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
@@ -199,7 +200,13 @@ public class EnvironmentGenerator
         StorageDevice device = deviceGenerator.createInstance(dc);
         device.setStorageTechnology(StorageTechnologyType.OPENSOLARIS);
         StoragePool pool = poolGenerator.createInstance(device);
-
+        
+        Machine machine = hypervisor.getMachine();
+        machine.setVirtualCpuCores(Integer.MAX_VALUE);
+        machine.setVirtualRamInMb(Integer.MAX_VALUE);
+        machine.setVirtualCpusUsed(0);
+        machine.setVirtualRamUsedInMb(0);
+        
         add(dc);
         add(dcLimits);
         add(am);

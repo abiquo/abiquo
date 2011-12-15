@@ -348,10 +348,11 @@ public class VirtualMachineService extends DefaultApiService
         checkVirtualMachineStateAllowsReconfigure(vm);
         LOGGER.debug("The state is valid for reconfigure");
 
-        // if NOT_ALLOCATED isn't necessary to check the resource limits
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
 
+        // if NOT_ALLOCATED isn't necessary to check the resource limits and 
+        // insert the 'backup' resources
         if (vm.getState() == VirtualMachineState.OFF)
         {
             // There might be different hardware needs. This call also recalculate.
@@ -383,7 +384,7 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Updated virtual machine {}", vm.getId());
 
         // it is required a tarantino Task ?
-        if (vm.getState() != VirtualMachineState.OFF)
+        if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
         {
             return null;
         }
@@ -444,16 +445,20 @@ public class VirtualMachineService extends DefaultApiService
             old.setState(VirtualMachineState.LOCKED);
         }
 
-        List<Integer> attachmentIds = dellocateOldNICs(old, vmnew);
-        allocateNewNICs(vapp, old, vmnew.getIps(), attachmentIds);
+        // dellocate older values, and save the used slots 
+        List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
+        List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
+        usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
 
-        attachmentIds = dellocateOldDisks(old, vmnew);
-        attachmentIds.addAll(dellocateOldVolumes(old, vmnew));
-
+        // allocate the new values.
+        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
+        
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
         storageResources.addAll(vmnew.getDisks());
         storageResources.addAll(vmnew.getVolumes());
-        allocateNewStorages(vapp, old, storageResources, attachmentIds);
+        allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
+        
+        // save the new configuration
         repo.update(old);
     }
 
@@ -471,28 +476,6 @@ public class VirtualMachineService extends DefaultApiService
         {
             // Since the values point to the same rasd, the id should be the same
             if (resource.getRasd().getId().equals(newResource.getRasd().getId()))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if the volume is into the list of new volumes.
-     * 
-     * @param volume {@link VolumeManagement} disk to check
-     * @param volumes list of new Volumes of the machine
-     * @return true if the volume is into the new list.
-     */
-    private boolean volumeIntoNewList(final VolumeManagement volume,
-        final List<VolumeManagement> volumes)
-    {
-        for (VolumeManagement newVolumes : volumes)
-        {
-            // Since the values point to the same rasd, the id should be the same
-            if (volume.getRasd().getId().equals(newVolumes.getRasd().getId()))
             {
                 return true;
             }
@@ -1602,6 +1585,11 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!resourceIntoNewList(vol, newVm.getVolumes()))
             {
+                if (!vol.isAttached())
+                {
+                    addConflictErrors(APIError.VOLUME_NOT_ATTACHED);
+                    flushErrors();
+                }
                 vol.detach();
                 storageRep.updateVolume(vol);
             }
