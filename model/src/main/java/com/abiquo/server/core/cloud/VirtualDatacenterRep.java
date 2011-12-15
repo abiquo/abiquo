@@ -556,6 +556,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
         ipManagementDAO.persist(ipManagement);
     }
 
+    /** Temporal backup rasd_management uses the same rasd */
+    public void insertTemporalIpManagement(final IpPoolManagement ipManagement)
+    {
+        ipManagementDAO.persist(ipManagement);
+    }
+
     public void insertNetwork(final Network network)
     {
         networkDAO.persist(network);

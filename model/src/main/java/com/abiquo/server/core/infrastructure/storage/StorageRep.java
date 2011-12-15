@@ -117,8 +117,7 @@ public class StorageRep extends DefaultRepBase
         return deviceDAO.findDeviceByManagementIP(datacenterId, managementIp);
     }
 
-    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm,
-        final Integer diskId)
+    public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm, final Integer diskId)
     {
         return diskManagementDAO.findHardDiskByVirtualMachine(vm, diskId);
     }
@@ -128,7 +127,8 @@ public class StorageRep extends DefaultRepBase
         return diskManagementDAO.findHardDisksByVirtualMachine(vm);
     }
 
-    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(final VirtualMachineTemplate virtualImage)
+    public List<NodeVirtualImage> findNodeVirtualImageByVirtualImage(
+        final VirtualMachineTemplate virtualImage)
     {
         return nodeVirtualImageDAO.findByVirtualImage(virtualImage);
     }
@@ -293,6 +293,12 @@ public class StorageRep extends DefaultRepBase
         return sd;
     }
 
+    /** Temporal backup rasd_management uses the same rasd */
+    public void insertTemporalHardDisk(final DiskManagement createdDisk)
+    {
+        diskManagementDAO.persist(createdDisk);
+    }
+
     public void insertHardDisk(final DiskManagement createdDisk)
     {
         if (createdDisk.getRasd() != null)
@@ -321,6 +327,14 @@ public class StorageRep extends DefaultRepBase
         tierDAO.flush();
 
         return tier;
+    }
+
+    /** Temporal backup rasd_management uses the same rasd */
+    public VolumeManagement insertTemporalVolume(final VolumeManagement volume)
+    {
+        volumeDAO.persist(volume);
+
+        return volume;
     }
 
     public VolumeManagement insertVolume(final VolumeManagement volume)

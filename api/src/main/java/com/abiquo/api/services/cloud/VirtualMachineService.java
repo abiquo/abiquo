@@ -404,19 +404,21 @@ public class VirtualMachineService extends DefaultApiService
      */
     private void insertBackUpResources(final VirtualMachine backUpVm)
     {
+
         for (IpPoolManagement ip : backUpVm.getIps())
         {
-            vdcRep.insertIpManagement(ip);
+            vdcRep.insertTemporalIpManagement(ip);
         }
         for (VolumeManagement vol : backUpVm.getVolumes())
         {
-            storageRep.insertVolume(vol);
+            storageRep.insertTemporalVolume(vol);
         }
         for (DiskManagement disk : backUpVm.getDisks())
         {
-            storageRep.insertHardDisk(disk);
+            storageRep.insertTemporalHardDisk(disk);
         }
 
+        // XXX this a kind of magic !!!
         backUpVm.setIps(null);
         backUpVm.setVolumes(null);
         backUpVm.setDisks(null);
@@ -1975,6 +1977,8 @@ public class VirtualMachineService extends DefaultApiService
             volTmp.setIdScsi(vol.getIdScsi());
             volTmp.setState(vol.getState());
             volTmp.setUsedSizeInMB(vol.getUsedSizeInMB());
+
+            volsTemp.add(volTmp);
         }
         tmp.setVolumes(volsTemp);
     }
@@ -2087,16 +2091,19 @@ public class VirtualMachineService extends DefaultApiService
     /** Removes the resource attachment */
     private void removeResource(final RasdManagement rasd, final boolean remove)
     {
-        rasd.detach();
 
-        if (rasd instanceof IpPoolManagement)
-        {
-            rasdRawRao.remove(rasd.getRasd());
-        }
+        // if (rasd instanceof IpPoolManagement)
+        // {
+        // rasdRawRao.remove(rasd.getRasd());
+        // }
 
         if (remove)
         {
             rasdDao.remove(rasd);
+        }
+        else
+        {
+            rasd.detach();
         }
     }
 
