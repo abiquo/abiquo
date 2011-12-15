@@ -383,7 +383,7 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Updated virtual machine {}", vm.getId());
 
         // it is required a tarantino Task ?
-        if (vm.getState() != VirtualMachineState.OFF)
+        if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
         {
             return null;
         }
@@ -2058,6 +2058,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param rollbackVm, state of updaedVm previous to the reconfigure.
      * @return updatedVm with the attributes and resource attachments of rollbackVm.
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine restoreBackupVirtualMachine(final VirtualMachine updatedVm,
         final VirtualMachine rollbackVm)
     {
@@ -2074,7 +2075,7 @@ public class VirtualMachineService extends DefaultApiService
         updatedVm.setHighDisponibility(rollbackVm.getHighDisponibility());
         updatedVm.setHypervisor(rollbackVm.getHypervisor());
         updatedVm.setIdType(rollbackVm.getIdType());
-        updatedVm.setName(rollbackVm.getName());
+        updatedVm.setName(rollbackVm.getName().substring("tmp_".length()));
         updatedVm.setPassword(rollbackVm.getPassword());
         updatedVm.setRam(rollbackVm.getRam());
         updatedVm.setSubState(rollbackVm.getSubState());
@@ -2088,6 +2089,9 @@ public class VirtualMachineService extends DefaultApiService
         List<RasdManagement> updatedResources = updatedVm.getRasdManagements();
         List<RasdManagement> rollbackResources = getBackupResources(rollbackVm);
 
+        repo.deleteVirtualMachine(rollbackVm);
+        LOGGER.debug("removed backup virtual machine");
+
         for (RasdManagement updatedRasd : updatedResources)
         {
             RasdManagement rollbackRasd = getBackupResource(rollbackResources, updatedRasd.getId());
@@ -2095,53 +2099,33 @@ public class VirtualMachineService extends DefaultApiService
             if (rollbackRasd == null)
             {
                 LOGGER.trace("restore: detach resource " + updatedRasd.getId());
-                removeResource(updatedRasd, false);
+                updatedRasd.detach();
             }
         }
 
         for (RasdManagement rollbackRasd : rollbackResources)
         {
-            RasdManagement originalRasd =
-                getOriginalResource(updatedResources, rollbackRasd.getTemporal());
+            RasdManagement originalRasd = rasdDao.findById(rollbackRasd.getTemporal());
 
             if (!originalRasd.isAttached())
             {
                 LOGGER.trace("restore: attach resource " + originalRasd.getId());
-                // Re attach the resource to the virtual machine */
-                originalRasd.attach(rollbackRasd.getRasd().getGeneration().intValue(), updatedVm);
+                // Re attach the resource to the virtual machine
+                // FIXME rollbackRasd.getRasd().getGeneration().intValue()
+                originalRasd.attach(0, updatedVm);
 
             }
 
-            removeResource(rollbackRasd, true);
+            rasdDao.remove(rasdDao.findById(rollbackRasd.getId())); // refresh as the vm was deleted
         }
 
         repo.update(updatedVm);
-        repo.deleteVirtualMachine(rollbackVm);
-        rasdDao.flush(); // update virtual machine resources
-
-        // TODO check temporal not set in updatedVm
+        rasdDao.flush();
+        // update virtual machine resources
 
         LOGGER.info("restored virtual machine {} from backup", updatedVm.getUuid());
 
         return updatedVm;
-    }
-
-    /** Removes the resource attachment */
-    private void removeResource(final RasdManagement rasd, final boolean remove)
-    {
-        // if (rasd instanceof IpPoolManagement)
-        // {
-        // rasdRawRao.remove(rasd.getRasd());
-        // }
-
-        if (remove)
-        {
-            rasdDao.remove(rasd);
-        }
-        else
-        {
-            rasd.detach();
-        }
     }
 
     /**
@@ -2171,24 +2155,6 @@ public class VirtualMachineService extends DefaultApiService
         for (RasdManagement rasdman : rollbackResources)
         {
             if (tempRasdManId.equals(rasdman.getTemporal()))
-            {
-                return rasdman;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Find the original resource with identifier equals to the provided backup resource temporal.
-     * 
-     * @return resource with id == backup.temporal, null if not found
-     */
-    private RasdManagement getOriginalResource(final List<RasdManagement> updatedResources,
-        final Integer temporalId)
-    {
-        for (RasdManagement rasdman : updatedResources)
-        {
-            if (temporalId.equals(rasdman.getId()))
             {
                 return rasdman;
             }
