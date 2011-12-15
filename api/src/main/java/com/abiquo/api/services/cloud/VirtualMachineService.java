@@ -351,7 +351,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
 
-        // if NOT_ALLOCATED isn't necessary to check the resource limits and 
+        // if NOT_ALLOCATED isn't necessary to check the resource limits and
         // insert the 'backup' resources
         if (vm.getState() == VirtualMachineState.OFF)
         {
@@ -445,21 +445,39 @@ public class VirtualMachineService extends DefaultApiService
             old.setState(VirtualMachineState.LOCKED);
         }
 
-        // dellocate older values, and save the used slots 
+        // dellocate older values, and save the used slots
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
         usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
 
         // allocate the new values.
-        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
+        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots); // FIXME getOnlyNew Ipd
         
+
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
-        storageResources.addAll(vmnew.getDisks());
-        storageResources.addAll(vmnew.getVolumes());
+        storageResources.addAll(vmnew.getDisks()); // FIXME getOnlyNew Disks
+        storageResources.addAll(getOnlyDeatachedRasd(old.getVolumes(), vmnew.getVolumes()));
+
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
-        
+
         // save the new configuration
         repo.update(old);
+    }
+
+    private List<VolumeManagement> getOnlyDeatachedRasd(final List<VolumeManagement> currentRasds,
+        final List<VolumeManagement> newRasds)
+    {
+        List<VolumeManagement> reallyNewRasd = new LinkedList<VolumeManagement>();
+
+        for (VolumeManagement newRasd : newRasds)
+        {
+            if (!newRasd.isAttached()) // TODO attached in the same VM
+            {
+                reallyNewRasd.add(newRasd); 
+            }
+        }
+
+        return reallyNewRasd;
     }
 
     /**
