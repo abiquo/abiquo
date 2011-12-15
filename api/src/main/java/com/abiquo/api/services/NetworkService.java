@@ -187,13 +187,13 @@ public class NetworkService extends DefaultApiService
         Rasd rasd = createRasdEntity(vm, ip);
         repo.insertRasd(rasd);
         ip.setRasd(rasd);
-        
+
         ip.attach(0, vm, vapp);
-        
+
         ip.setVirtualAppliance(vapp);
         ip.setVirtualMachine(vm);
         ip.setConfigureGateway(Boolean.TRUE);
-        
+
         repo.updateIpManagement(ip);
 
         return;
@@ -225,7 +225,7 @@ public class NetworkService extends DefaultApiService
         List<IpPoolManagement> ips = vmService.getNICsFromDto(vdc, nicRefs);
 
         newvm.getIps().addAll(ips);
-        
+
         return vmService.reconfigureVirtualMachine(vdc, vapp, oldvm, newvm);
     }
 
