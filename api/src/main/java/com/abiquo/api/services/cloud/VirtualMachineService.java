@@ -383,7 +383,7 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Updated virtual machine {}", vm.getId());
 
         // it is required a tarantino Task ?
-        if (vm.getState() != VirtualMachineState.OFF)
+        if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
         {
             return null;
         }
@@ -2206,7 +2206,7 @@ public class VirtualMachineService extends DefaultApiService
     {
         if (resource.getVirtualMachine() != null)
         {
-            if (!resource.getVirtualMachine().getId().equals(vm.getId()))
+            if (!resource.getVirtualMachine().getTemporal().equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();
