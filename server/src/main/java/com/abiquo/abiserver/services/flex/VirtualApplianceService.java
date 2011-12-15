@@ -102,11 +102,6 @@ public class VirtualApplianceService
             VirtualApplianceCommand.class);
     }
 
-    private UserCommand proxyCommand2(final UserSession userSession)
-    {
-        return BusinessDelegateProxy.getInstance(userSession, userCommand, UserCommand.class);
-    }
-
     /**
      * Proxies the stub to authenticate to the API.
      * 

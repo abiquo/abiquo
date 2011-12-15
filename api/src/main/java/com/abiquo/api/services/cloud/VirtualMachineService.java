@@ -350,6 +350,8 @@ public class VirtualMachineService extends DefaultApiService
 
         // if NOT_ALLOCATED isn't necessary to check the resource limits
         VirtualMachine backUpVm = null;
+        VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
+
         if (vm.getState() == VirtualMachineState.OFF)
         {
             // There might be different hardware needs. This call also recalculate.
@@ -368,11 +370,11 @@ public class VirtualMachineService extends DefaultApiService
             createBackUpResources(vm, backUpVm);
             insertBackUpResources(backUpVm);
             LOGGER.debug("Rollback register has id {}" + vm.getId());
-        }
 
-        // Before to update the virtualmachine to new values, create the tarantino descriptor
-        VirtualMachineDescriptionBuilder virtualMachineTarantino =
-            jobCreator.toTarantinoDto(vm, vapp);
+            // Before to update the virtualmachine to new values, create the tarantino descriptor
+            // (only if the VM is deployed and OFF, othwerwise it won't have a datastore)
+            virtualMachineTarantino = jobCreator.toTarantinoDto(vm, vapp);
+        }
 
         // update the old virtual machine with the new virtual machine values.
         // and set the ID of the backupmachine (which has the old values) for recovery purposes.
@@ -380,10 +382,8 @@ public class VirtualMachineService extends DefaultApiService
         updateVirtualMachineToNewValues(vapp, vm, newValues);
         LOGGER.debug("Updated virtual machine {}", vm.getId());
 
-        // next step:
-
         // it is required a tarantino Task ?
-        if (vm.getState() == VirtualMachineState.OFF)
+        if (vm.getState() != VirtualMachineState.OFF)
         {
             return null;
         }
