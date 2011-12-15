@@ -65,6 +65,8 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
@@ -1115,6 +1117,65 @@ public class VirtualMachineService extends DefaultApiService
 
         }
         return null;
+    }
+
+    /**
+     * Snapshot a {@link VirtualMachine}.
+     * 
+     * @param vmId Virtual Machine Id
+     * @param vappId Virtual Appliance Id
+     * @param vdcId Virtual Datacenter Id
+     * @return
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId)
+    {
+        // Retrieve entities
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+        VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+        // Check if the operation is allowed
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        checkSnapshotAllowed(virtualMachine);
+
+        // TODO lockVirtualMachine(virtualMachine);
+        // TODO unsubscribe(virtualMachine);
+
+        // Do the snapshot
+        VirtualMachineDescriptionBuilder definitionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualApp);
+
+        VirtualMachineDefinition definition = null;
+        DiskSnapshot destinationDisk = null;
+
+        if (!virtualMachine.isStateful() && virtualMachine.isManaged())
+        {
+            VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
+            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+            definition = definitionBuilder.build(virtualMachine.getUuid());
+
+            destinationDisk = new DiskSnapshot();
+            destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
+            destinationDisk.setPath(template.getPath() + "/snapshots/sadsadsad"); // XXX
+            destinationDisk.setSnapshotName("lñasdñslakd"); // XXX
+            destinationDisk.setRepositoryManagerAddress(""); // XXX
+        }
+        // else if (!virtualMachine.isManaged())
+        // else if (virtualMachine.isStateful())
+
+        return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk);
+    }
+
+    public void checkSnapshotAllowed(final VirtualMachine virtualMachine)
+    {
+        if (virtualMachine.getState().isDeployed())
+        {
+            // TODO Add some APIError more specific?
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
+            flushErrors();
+        }
     }
 
     /**

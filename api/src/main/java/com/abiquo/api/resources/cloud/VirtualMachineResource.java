@@ -104,6 +104,8 @@ public class VirtualMachineResource
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/snapshot";
+
     @Autowired
     private VirtualMachineService vmService;
 
@@ -149,18 +151,19 @@ public class VirtualMachineResource
         @Context final UriInfo uriInfo) throws Exception
     {
         String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        if(link != null)
+        if (link != null)
         {
-//            AcceptedRequestDto<VirtualMachineDto> request = new AcceptedRequestDto<VirtualMachineDto>();
+            // AcceptedRequestDto<VirtualMachineDto> request = new
+            // AcceptedRequestDto<VirtualMachineDto>();
             AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
 
             String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
             request.setStatusUrlLink(taskLink);
-            request.setEntity("");//dto);
+            request.setEntity("");// dto);
 
             return request;
         }
-        
+
         return null;
     }
 
@@ -424,6 +427,42 @@ public class VirtualMachineResource
         String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
         a202.setStatusUrlLink(taskLink);
         a202.setEntity("");
+
+        return a202;
+    }
+
+    /**
+     * Snapshot a {@link VirtualMachine}.>
+     * 
+     * @param vdcId VirtualDatacenter id
+     * @param vappId VirtualAppliance id
+     * @param vmId VirtualMachine id
+     * @param restBuilder injected restbuilder context parameter
+     * @return a link where you can keep track of the progress and a message.
+     * @throws Exception
+     */
+    @POST
+    @Path(VIRTUAL_MACHINE_ACTION_SNAPSHOT)
+    public AcceptedRequestDto<String> snapshotVirtualMachine(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
+    {
+        String taskId = vmService.snapshotVirtualMachine(vmId, vappId, vdcId);
+
+        if (taskId == null)
+        {
+            // If the link is null no Task was performed
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+
+        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + taskId;
+
+        a202.setStatusUrlLink(taskLink);
+        a202.setEntity(null);
 
         return a202;
     }
