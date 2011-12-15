@@ -42,7 +42,6 @@ import org.hibernate.validator.constraints.Length;
 
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
 
@@ -50,9 +49,9 @@ import com.softwarementors.validation.constraints.Required;
 @Table(name = IpPoolManagement.TABLE_NAME)
 @DiscriminatorValue("10")
 @FilterDefs({@FilterDef(name = IpPoolManagement.NOT_TEMP),
-    @FilterDef(name = IpPoolManagement.ONLY_TEMP)})
+@FilterDef(name = IpPoolManagement.ONLY_TEMP)})
 @Filters({@Filter(name = IpPoolManagement.NOT_TEMP, condition = "temporal is null"),
-    @Filter(name = IpPoolManagement.ONLY_TEMP, condition = "temporal is not null")})
+@Filter(name = IpPoolManagement.ONLY_TEMP, condition = "temporal is not null")})
 @NamedQueries({@NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VLAN", query = IpPoolManagement.BY_VLAN),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_VDC", query = IpPoolManagement.BY_VDC),
 @NamedQuery(name = "IP_POOL_MANAGEMENT.BY_ENT", query = IpPoolManagement.BY_ENT)})
@@ -72,8 +71,9 @@ public class IpPoolManagement extends RasdManagement
         "MAC Address asociated to external Network";
 
     public static final String NOT_TEMP = "ipmanagement_not_temp";
+
     public static final String ONLY_TEMP = "ipmanagement_only_temp";
-    
+
     public static enum Type
     {
         PRIVATE, PUBLIC, EXTERNAL, UNMANAGED; // 0 = private, 1 = public, 2 = external, 3 =
@@ -388,22 +388,26 @@ public class IpPoolManagement extends RasdManagement
     @Override
     public void attach(final int sequence, final VirtualMachine vm)
     {
-        // TODO Auto-generated method stub
+        if (vm == null)
+        {
+            throw new IllegalStateException("Virtual machine can not be null");
+        }
 
+        setAttachmentOrder(sequence);
+        setVirtualMachine(vm);
     }
 
     @Override
     public void detach()
     {
-        // TODO Auto-generated method stub
-
+        setVirtualMachine(null);
+        setVirtualAppliance(null);
     }
 
     @Override
     public boolean isAttached()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return getVirtualMachine() != null;
     }
 
 }

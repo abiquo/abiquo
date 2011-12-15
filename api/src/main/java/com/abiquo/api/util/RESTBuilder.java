@@ -192,9 +192,6 @@ public class RESTBuilder implements IRESTBuilder
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE,
             DatacenterResource.ACTION_DISCOVER_HYPERVISOR_TYPE_REL, params));
         links.add(builder.buildRestLink(DatacenterResource.class,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE,
-            DatacenterResource.ACTION_CHECK_REMOTE_SERVICE_REL, params));
-        links.add(builder.buildRestLink(DatacenterResource.class,
             DatacenterResource.ACTION_MACHINES_CHECK, DatacenterResource.ACTION_MACHINES_CHECK_REL,
             params));
         links.add(builder.buildRestLink(DatacenterResource.class,
@@ -713,7 +710,7 @@ public class RESTBuilder implements IRESTBuilder
 
     @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final boolean chefEnabled)
+        final Integer vmId, final boolean chefEnabled, final Integer... volumeIds)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
@@ -727,12 +724,12 @@ public class RESTBuilder implements IRESTBuilder
             VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
         links.add(builder.buildRelLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NIC, params,
-            VirtualMachineNetworkConfigurationResource.NIC));
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH));
         links.add(builder.buildRelLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH,
-            VirtualMachineStorageConfigurationResource.DISK, params,
-            VirtualMachineStorageConfigurationResource.DISK));
+            VirtualMachineStorageConfigurationResource.DISKS_PATH, params,
+            VirtualMachineStorageConfigurationResource.DISKS_PATH));
         links.add(builder.buildRelLink(VirtualMachineResource.class,
             VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
             IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
@@ -756,7 +753,7 @@ public class RESTBuilder implements IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
-        final boolean chefEnabled)
+        final boolean chefEnabled, final Integer... volumeIds)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -767,7 +764,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         links.add(builder.buildRestLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
-        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled));
+        links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled, volumeIds));
 
         return links;
     }

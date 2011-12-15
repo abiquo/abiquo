@@ -149,7 +149,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * Gets the configured DCHP in the datacenter to set its URL in the
      * {@link com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition.NetworkConfiguration}
      */
-    public void addDhcpConfiguration(final Integer datacenterId,
+    private void addDhcpConfiguration(final Integer datacenterId,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         // TODO 2.0 will support manual DHCP configuration
@@ -174,7 +174,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * @param virtualMachine
      * @param vmDesc void
      */
-    public void secondaryScsiDefinition(final VirtualMachine virtualMachine,
+    protected void secondaryScsiDefinition(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
         // PREMIUM
@@ -188,11 +188,11 @@ public class TarantinoJobCreator extends DefaultApiService
      * @param vmDesc definition to send.
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void secondaryHardDisksDefinition(final VirtualMachine virtualMachine,
+    private void secondaryHardDisksDefinition(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
 
-        List<DiskManagement> hardDisks = storageRep.findHardDisksByVirtualMachine(virtualMachine);
+        List<DiskManagement> hardDisks = virtualMachine.getDisks();
 
         String datastore;
         if (virtualMachine.getDatastore().getDirectory() != null
@@ -221,7 +221,7 @@ public class TarantinoJobCreator extends DefaultApiService
         }
     }
 
-    public ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
+    private ApplyVirtualMachineStateOp applyStateVirtualMachineConfiguration(
         final VirtualMachine virtualMachine, final DatacenterTasks deployTask,
         final VirtualMachineDescriptionBuilder vmDesc,
         final HypervisorConnection hypervisorConnection,
@@ -290,7 +290,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * @param idDatacenter void
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
+    protected void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore;
@@ -395,14 +395,10 @@ public class TarantinoJobCreator extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
+    private void vnicDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc)
     {
-
-        List<IpPoolManagement> ipPoolManagementByMachine =
-            vdcRep.findIpsByVirtualMachine(virtualMachine);
-
-        for (IpPoolManagement i : ipPoolManagementByMachine)
+        for (IpPoolManagement i : virtualMachine.getIps())
         {
             if (i.getConfigureGateway())
             {
@@ -430,7 +426,7 @@ public class TarantinoJobCreator extends DefaultApiService
         }
     }
 
-    public void bootstrapConfiguration(final VirtualMachine virtualMachine,
+    protected void bootstrapConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc, final VirtualDatacenter virtualDatacenter,
         final VirtualAppliance virtualAppliance)
     {

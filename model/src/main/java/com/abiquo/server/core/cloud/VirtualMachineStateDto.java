@@ -50,7 +50,7 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      * <li><b>PAUSED</b></li>
      * </ul>
      */
-    private String power;
+    private VirtualMachineState power;
 
     /**
      * Machine power state.
@@ -62,7 +62,7 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      *         <li><b>PAUSED</b></li>
      *         </ul>
      */
-    public String getPower()
+    public VirtualMachineState getPower()
     {
         return power;
     }
@@ -84,7 +84,7 @@ public class VirtualMachineStateDto extends SingleResourceTransportDto implement
      *            </ul>
      *            void
      */
-    public void setPower(final String power)
+    public void setPower(final VirtualMachineState power)
     {
         this.power = power;
     }

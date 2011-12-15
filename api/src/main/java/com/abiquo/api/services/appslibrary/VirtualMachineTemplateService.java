@@ -99,10 +99,20 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     }
 
     @Transactional(readOnly = true)
-    public Repository getDatacenterRepository(final Integer dcId)
+    public Repository getDatacenterRepository(final Integer dcId, final Integer enterpriseId)
     {
+        checkEnterpriseCanUseDatacenter(enterpriseId, dcId);
+
         Datacenter datacenter = infrastructureService.getDatacenter(dcId);
-        return repositoryDao.findByDatacenter(datacenter);
+        Repository repo = repositoryDao.findByDatacenter(datacenter);
+
+        if (repo == null)
+        {
+            addNotFoundErrors(APIError.VIMAGE_DATACENTER_REPOSITORY_NOT_FOUND);
+            flushErrors();
+        }
+
+        return repo;
     }
 
     /**
@@ -115,7 +125,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
 
         for (DatacenterLimits dclimit : enterpriseService.findLimitsByEnterprise(enterpriseId))
         {
-            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId()));
+            repos.add(getDatacenterRepository(dclimit.getDatacenter().getId(), enterpriseId));
         }
 
         return repos;
@@ -152,11 +162,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
     public List<VirtualMachineTemplate> getVirtualMachineTemplates(final Integer enterpriseId,
         final Integer datacenterId, final String categoryName, final String hypervisorName)
     {
-        checkEnterpriseCanUseDatacenter(enterpriseId, datacenterId);
-
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
-        Datacenter datacenter = infrastructureService.getDatacenter(datacenterId);
-        Repository repository = infrastructureService.getRepository(datacenter);
+        Repository repository = getDatacenterRepository(datacenterId, enterpriseId);
 
         Category category = null;
         HypervisorType hypervisor = null;

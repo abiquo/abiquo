@@ -43,7 +43,7 @@ import com.abiquo.model.util.CompositeComparator;
  * @author ssedano
  */
 @XmlRootElement(name = "acceptedrequest")
-public class AcceptedRequestDto<T> implements Serializable
+public class AcceptedRequestDto<T> implements Serializable//extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -7743440222172054557L;
 
@@ -53,7 +53,7 @@ public class AcceptedRequestDto<T> implements Serializable
 
     protected List<RESTLink> links;
 
-    @XmlElement(name = "message", namespace = "", nillable = true)
+    @XmlElement(name = "message", namespace = "", nillable = true, required = false)
     public T getEntity()
     {
         return entity;
@@ -64,6 +64,7 @@ public class AcceptedRequestDto<T> implements Serializable
         this.entity = entity;
     }
 
+    @SuppressWarnings("unchecked")
     @XmlElement(name = "link")
     public List<RESTLink> getLinks()
     {

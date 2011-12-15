@@ -142,7 +142,7 @@ public interface IRESTBuilder
         Integer machineId, Integer enterpriseId, Integer userId);
 
     public List<RESTLink> buildVirtualMachineCloudLinks(Integer vdcId, Integer vappId,
-        Integer vmId, boolean chefEnabled);
+        Integer vmId, boolean chefEnabled, final Integer... volumeIds);
 
     public List<RESTLink> buildSystemPropertyLinks(SystemPropertyDto systemProperty);
 
@@ -170,7 +170,7 @@ public interface IRESTBuilder
     public List<RESTLink> buildVirtualMachineCloudAdminLinks(final Integer vdcId,
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
-        boolean chefEnabled);
+        boolean chefEnabled, Integer... volumeIds);
 
     public List<RESTLink> buildEnterpriseExclusionRuleLinks(
         final EnterpriseExclusionRuleDto enterpriseExclusionDto,

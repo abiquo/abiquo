@@ -121,6 +121,11 @@ public class Task extends RedisEntityBase
         this.state = state;
     }
 
+    public boolean isAborted()
+    {
+        return this.getState() == TaskState.ABORTED;
+    }
+
     @Override
     public String toString()
     {

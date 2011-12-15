@@ -75,7 +75,8 @@ public enum VirtualMachineStateTransition
 
     private VirtualMachineState end;
 
-    private VirtualMachineStateTransition(final Set<VirtualMachineState> origins, final VirtualMachineState end)
+    private VirtualMachineStateTransition(final Set<VirtualMachineState> origins,
+        final VirtualMachineState end)
     {
         this.origins = origins;
         this.end = end;
@@ -122,7 +123,8 @@ public enum VirtualMachineStateTransition
         }
     }
 
-    public static boolean isValidTransition(final VirtualMachineState origin, final VirtualMachineState end)
+    public static boolean isValidTransition(final VirtualMachineState origin,
+        final VirtualMachineState end)
     {
         for (VirtualMachineStateTransition l : VirtualMachineStateTransition.values())
         {
@@ -134,13 +136,32 @@ public enum VirtualMachineStateTransition
         return false;
     }
 
-    public static VirtualMachineStateTransition getValidTransition(final VirtualMachineState origin, final VirtualMachineState end)
+    public static VirtualMachineStateTransition getValidTransition(
+        final VirtualMachineState origin, final VirtualMachineState end)
     {
         for (VirtualMachineStateTransition l : VirtualMachineStateTransition.values())
         {
             if (l.isValidOrigin(origin) && l.getEndState().equals(end))
             {
                 return l;
+            }
+        }
+        return null;
+    }
+
+    public static VirtualMachineStateTransition getValidVmStateChangeTransition(
+        final VirtualMachineState origin, final VirtualMachineState end)
+    {
+        VirtualMachineStateTransition validTransition = getValidTransition(origin, end);
+        if (validTransition != null)
+        {
+            switch (validTransition)
+            {
+                case POWEROFF:
+                case PAUSE:
+                case POWERON:
+                case RESUME:
+                    return validTransition;
             }
         }
         return null;

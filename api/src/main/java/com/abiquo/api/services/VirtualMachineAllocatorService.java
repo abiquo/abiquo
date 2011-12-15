@@ -110,7 +110,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     public VirtualMachineAllocatorService(final EntityManager em)
     {
         this.virtualAppDao = new VirtualApplianceDAO(em);
-        this.allocationService = new VirtualimageAllocationService();
+        this.allocationService = new VirtualimageAllocationService(em);
         this.vmFactory = new VirtualMachineFactory(em);
         this.machineChecker = new MachineCheck();
         this.virtualMachineDao = new VirtualMachineDAO(em);

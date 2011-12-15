@@ -93,22 +93,22 @@ public class RESTHandler extends CheckLocationHeaderHandler
             && context.getResponseEntity() instanceof AcceptedRequestDto)
         {
             context.setResponseStatusCode(HttpServletResponse.SC_ACCEPTED);
-            Object entity = ((AcceptedRequestDto) context.getResponseEntity()).getEntity();
+            // Object entity = ((AcceptedRequestDto) context.getResponseEntity()).getEntity();
 
-            if (entity instanceof SingleResourceTransportDto)
-            {
-                SingleResourceTransportDto resource = (SingleResourceTransportDto) entity;
-
-                ResponseBuilder builder = new ResponseBuilderImpl();
-                if (!(entity instanceof WrapperDto))
-                {
-                    builder.location(new URI(resource.getEditLink().getHref()));
-                }
-                builder.entity(resource);
-                builder.status(HttpServletResponse.SC_ACCEPTED);
-
-                context.setResponseEntity(builder.build());
-            }
+            // if (entity instanceof SingleResourceTransportDto)
+            // {
+            // SingleResourceTransportDto resource = (SingleResourceTransportDto) entity;
+            //
+            // ResponseBuilder builder = new ResponseBuilderImpl();
+            // if (!(entity instanceof WrapperDto))
+            // {
+            // builder.location(new URI(resource.getEditLink().getHref()));
+            // }
+            // builder.entity(resource);
+            // builder.status(HttpServletResponse.SC_ACCEPTED);
+            //
+            // context.setResponseEntity(builder.build());
+            // }
         }
         else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
             && context.getResponseEntity() != null

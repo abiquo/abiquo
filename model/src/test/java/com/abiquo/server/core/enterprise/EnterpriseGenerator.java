@@ -22,11 +22,11 @@ package com.abiquo.server.core.enterprise;
 
 import java.util.List;
 
-import com.abiquo.server.core.common.DefaultEntityGenerator;
+import com.abiquo.server.core.common.DefaultEntityWithLimitsGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
 import com.softwarementors.commons.testng.AssertEx;
 
-public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
+public class EnterpriseGenerator extends DefaultEntityWithLimitsGenerator<Enterprise>
 {
 
     public EnterpriseGenerator(final SeedGenerator seed)
@@ -53,6 +53,13 @@ public class EnterpriseGenerator extends DefaultEntityGenerator<Enterprise>
         final String name =
             newString(nextSeed(), Enterprise.NAME_LENGTH_MIN, Enterprise.NAME_LENGTH_MAX);
         return createInstance(name);
+    }
+
+    public Enterprise createInstanceNoLimits()
+    {
+        final String name =
+            newString(nextSeed(), Enterprise.NAME_LENGTH_MIN, Enterprise.NAME_LENGTH_MAX);
+        return createInstanceNoLimits(name);
     }
 
     public Enterprise createInstance(final String name)

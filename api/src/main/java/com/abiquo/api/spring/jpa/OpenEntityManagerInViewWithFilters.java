@@ -18,19 +18,26 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.spring.jpa;
 
-package com.abiquo.api.eventing;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
+import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 
 /**
- * Virtual System Monitor subscriber interface to allow proxying the implementation.
+ * OpenEntityManagerInViewFilter with the default hibernate filters enabled.
  * 
- * @author daniel.estevez
+ * @author Ignasi Barrera
+ * @see OpenEntityManagerInViewFilter
  */
-public interface VSMSubscriber
+public class OpenEntityManagerInViewWithFilters extends OpenEntityManagerInViewFilter
 {
-    /**
-     * Attempts an VSM subscription for each VA. If subscription succeeds the task is unsheduled.
-     * Gets all VM Deployed and subscribes to VSM
-     */
-    public abstract void subscribe();
+
+    @Override
+    protected EntityManager createEntityManager(final EntityManagerFactory emf)
+    {
+        return JPAConfiguration.enableDefaultFilters(super.createEntityManager(emf));
+    }
+
 }
