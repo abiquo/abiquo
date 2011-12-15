@@ -1926,6 +1926,7 @@ public class VirtualMachineService extends DefaultApiService
         for (DiskManagement disk : vm.getDisks())
         {
             DiskManagement disktmp = new DiskManagement();
+            disktmp.setSequence(disk.getSequence());
             disktmp.setDatastore(disk.getDatastore());
             disktmp.setTemporal(disk.getId());
             disktmp.setIdResourceType(disk.getIdResourceType());
@@ -1945,6 +1946,7 @@ public class VirtualMachineService extends DefaultApiService
         for (IpPoolManagement ip : vm.getIps())
         {
             IpPoolManagement ipTmp = new IpPoolManagement();
+            ipTmp.setSequence(ip.getSequence());
             ipTmp.setTemporal(ip.getId());
             ipTmp.setIdResourceType(ip.getIdResourceType());
             Hibernate.initialize(ip.getRasd());
@@ -1971,6 +1973,7 @@ public class VirtualMachineService extends DefaultApiService
         for (VolumeManagement vol : vm.getVolumes())
         {
             VolumeManagement volTmp = new VolumeManagement();
+            volTmp.setSequence(vol.getSequence());
             volTmp.setTemporal(vol.getId());
             volTmp.setIdResourceType(vol.getIdResourceType());
             volTmp.setRasd(vol.getRasd());
@@ -2115,10 +2118,9 @@ public class VirtualMachineService extends DefaultApiService
 
             if (!originalRasd.isAttached())
             {
-                LOGGER.trace("restore: attach resource " + originalRasd.getId());
                 // Re attach the resource to the virtual machine
-                // FIXME rollbackRasd.getRasd().getGeneration().intValue()
-                originalRasd.attach(0, updatedVm);
+                LOGGER.trace("restore: attach resource " + originalRasd.getId());
+                originalRasd.attach(originalRasd.getSequence(), updatedVm);
 
             }
 

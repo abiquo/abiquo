@@ -34,10 +34,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.FilterDefs;
-import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -228,6 +224,28 @@ public class RasdManagement extends DefaultEntityBase
         this.temporal = temporal;
     }
 
+    public final static String SEQUENCE_PROPERTY = "sequence";
+
+    private final static String SEQUENCE_COLUMN = "sequence";
+
+    private final static int SEQUENCE_MIN = 0;
+
+    private final static int SEQUENCE_MAX = Integer.MAX_VALUE;
+
+    @Column(name = SEQUENCE_COLUMN, nullable = true)
+    @Range(min = SEQUENCE_MIN, max = SEQUENCE_MAX)
+    private Integer sequence;
+
+    public Integer getSequence()
+    {
+        return this.sequence;
+    }
+
+    public void setSequence(final Integer sequence)
+    {
+        this.sequence = sequence;
+    }
+
     // **************************** Rasd delegating methods ***************************
 
     public String getDescription()
@@ -240,12 +258,17 @@ public class RasdManagement extends DefaultEntityBase
         getRasd().setDescription(description);
     }
 
+    @Deprecated
+    /** use sequence*/
     public long getAttachmentOrder()
     {
         Long generation = getRasd().getGeneration();
-        return generation == null ? 0L : generation;
+        // XXX priorize sequence attribute
+        return generation == null ? (sequence == null ? 0L : sequence) : generation;
     }
 
+    @Deprecated
+    /** use sequence*/
     public void setAttachmentOrder(final long order)
     {
         if (order < FIRST_ATTACHMENT_SEQUENCE)
@@ -254,6 +277,7 @@ public class RasdManagement extends DefaultEntityBase
                 + FIRST_ATTACHMENT_SEQUENCE);
         }
 
+        setSequence((int) order);
         getRasd().setGeneration(order < 0 ? 0L : order);
     }
 
@@ -263,7 +287,7 @@ public class RasdManagement extends DefaultEntityBase
     {
         throw new UnsupportedOperationException("Must call concrete subclass attach method");
     }
-    
+
     public void attach(final int sequence, final VirtualMachine vm, final VirtualAppliance vapp)
     {
         attach(sequence, vm);
