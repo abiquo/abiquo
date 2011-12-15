@@ -71,7 +71,7 @@ public class NonBlockingService
     public NonBlockingService()
     {
         virtualApplianceResourceStub = new VirtualApplianceResourceStubImpl();
-
+        // to_delete
         vmResourceStub = new VirtualMachineResourceStubImpl();
         try
         {
@@ -276,12 +276,14 @@ public class NonBlockingService
     public BasicResult deleteVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
+        //
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
 
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.deleteVirtualAppliance(session, virtualAppliance);
+        return proxyVirtualApplianceResourceStub(session).deleteVirtualAppliance(virtualAppliance,
+            false);
+        // return command.deleteVirtualAppliance(session, virtualAppliance);
     }
 
     /**

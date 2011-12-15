@@ -53,7 +53,7 @@ public class AcceptedRequestDto<T> implements Serializable//extends SingleResour
 
     protected List<RESTLink> links;
 
-    @XmlElement(name = "message", namespace = "", nillable = true)
+    @XmlElement(name = "message", namespace = "", nillable = true, required = false)
     public T getEntity()
     {
         return entity;
@@ -64,6 +64,7 @@ public class AcceptedRequestDto<T> implements Serializable//extends SingleResour
         this.entity = entity;
     }
 
+    @SuppressWarnings("unchecked")
     @XmlElement(name = "link")
     public List<RESTLink> getLinks()
     {

@@ -593,6 +593,67 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
+     * Creates and sends a deploy operation.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String virtualMachineSnapshot(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final DiskSnapshot diskSnapshot)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        // ignoreVSMEventsIfNecessary(datacenter, virtualMachine);
+
+        try
+        {
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
+
+            DatacenterTasks deployTask = builder.addSnapshot(diskSnapshot).buildTarantinoTask();
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                getTaskTypeFromTransition(VirtualMachineStateTransition.SNAPSHOT)));
+
+            send(datacenter, deployTask, EventType.VM_STATE);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            // We need to unsuscribe the machine
+            logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
+                + e.getMessage() + " machine: " + virtualMachine.getName());
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the state change task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
+    /**
      * Return the {@link TaskType} that is related to this {@link VirtualMachineStateTransition}. <br>
      * <br>
      * Null if empty.

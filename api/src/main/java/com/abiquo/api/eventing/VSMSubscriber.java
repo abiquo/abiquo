@@ -18,125 +18,19 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+
 package com.abiquo.api.eventing;
 
-import java.util.Collection;
-import java.util.List;
-
-import org.hibernate.HibernateException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.stub.VsmServiceStub;
-import com.abiquo.api.tracer.TracerLogger;
-import com.abiquo.model.enumerator.RemoteServiceType;
-import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDAO;
-import com.abiquo.server.core.cloud.VirtualMachineRep;
-import com.abiquo.server.core.infrastructure.Datacenter;
-import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.RemoteService;
-import com.abiquo.tracer.ComponentType;
-import com.abiquo.tracer.EventType;
-import com.abiquo.tracer.SeverityType;
-
 /**
- * Implements Virtual System Monitor subscription initialization and checks.
+ * Virtual System Monitor subscriber interface to allow proxying the implementation.
  * 
  * @author daniel.estevez
  */
-@Service("vsmSubscriber")
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-public class VSMSubscriber
+public interface VSMSubscriber
 {
-
-    /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(VSMSubscriber.class);
-
-    // Uncomment this to enable only-at-the-beginning execution
-    /**
-     * private static boolean executed = false;
-     */
-
-    @Autowired
-    protected TracerLogger tracer;
-
-    @Autowired
-    protected VirtualMachineDAO vMachineDAO;
-
-    @Autowired
-    protected VirtualMachineRep vMachineRep;
-
-    @Autowired
-    protected InfrastructureRep infraRep;
-
-    @Autowired
-    protected VsmServiceStub vsmStub;
-
-    @Autowired
-    private RemoteServiceService remoteServiceService;
-
     /**
      * Attempts an VSM subscription for each VA. If subscription succeeds the task is unsheduled.
      * Gets all VM Deployed and subscribes to VSM
      */
-    public void subscribe()
-    {
-        try
-        {
-            LOGGER.info("Refreshing Virtual System Monitor subscriptions");
-
-            // Uncomment this to enable only-at-the-beginning execution
-            /**
-             * LOGGER.debug("VSMSubscriber.executed is now : " + VSMSubscriber.executed); if
-             * (VSMSubscriber.executed) return;
-             */
-
-
-            // Get the Virtual appliance list
-            // OPTIMIZED -> we recover all VMs by Datacenter? or PMachine?
-            Collection<Datacenter> allDCs = infraRep.findAll();
-            for (Datacenter datacenter : allDCs)
-            {
-                RemoteService remoteService =
-                    remoteServiceService.getRemoteService(datacenter.getId(),
-                        RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-                List<VirtualMachine> vMachines =
-                    vMachineDAO.findVirtualMachinesByDatacenter(datacenter.getId());
-                for (VirtualMachine vMachine : vMachines)
-                {
-                    if (vMachine.isDeployed())
-                    {
-                        vsmStub.subscribe(remoteService, vMachine);
-                    }
-                }
-            }
-
-            // Uncomment this to enable only-at-the-beginning execution
-            /**
-             * // Task finished ok. It should be unscheduled LOGGER .info(
-             * "VSMSubscriber.executed set to TRUERefreshing Virtual System Monitor subscriptions");
-             * VSMSubscriber.executed = true;
-             */
-
-        }
-        catch (HibernateException e)
-        {
-            LOGGER.error("An error was occurred when refreshing the VSM subscriptions caused by:",
-                e);
-            tracer.log(SeverityType.MAJOR, ComponentType.API, EventType.REMOTE_SERVICES_CHECK,
-                "vsm.subscriber.error", e.getCause());
-
-            // Uncomment this to enable only-at-the-beginning execution
-            /**
-             * VSMSubscriber.executed = false;
-             */
-
-        }
-    }
+    public abstract void subscribe();
 }
