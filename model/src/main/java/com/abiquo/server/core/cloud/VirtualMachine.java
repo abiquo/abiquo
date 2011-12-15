@@ -588,6 +588,12 @@ public class VirtualMachine extends DefaultEntityBase
     @Range(min = TEMPORAL_MIN, max = TEMPORAL_MAX)
     private Integer temporal = null;
 
+    /**
+     * This field is used to mark temporal objects used in reconfigure operations. It holds a
+     * reference to the id of the original virtual machine.
+     * 
+     * @return The reference to the id of the original virtual machine.
+     */
     public Integer getTemporal()
     {
         return this.temporal;
