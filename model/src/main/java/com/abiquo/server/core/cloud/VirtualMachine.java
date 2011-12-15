@@ -701,6 +701,11 @@ public class VirtualMachine extends DefaultEntityBase
         return getVirtualMachineTemplate().isChefEnabled() && getEnterprise().isChefEnabled();
     }
 
+    public boolean isStateful()
+    {
+        return virtualMachineTemplate.isStateful();
+    }
+
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
         final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate,
         final UUID uuid, final Integer typeId)
