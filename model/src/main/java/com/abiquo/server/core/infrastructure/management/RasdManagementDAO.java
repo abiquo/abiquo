@@ -34,7 +34,7 @@ import org.springframework.stereotype.Repository;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
-import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
@@ -100,24 +100,13 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
 
     public void enableTemporalOnlyFilter()
     {
-        getSession().disableFilter(VolumeManagement.NOT_TEMP);
-        getSession().disableFilter(DiskManagement.NOT_TEMP);
-        getSession().disableFilter(IpPoolManagement.NOT_TEMP);
-
-        getSession().enableFilter(VolumeManagement.ONLY_TEMP);
-        getSession().enableFilter(DiskManagement.ONLY_TEMP);
-        getSession().enableFilter(IpPoolManagement.ONLY_TEMP);
+        JPAConfiguration.enableOnlyTemporalFilters(getEntityManager());
     }
 
-    public void disabledTemporalOnlyFilter()
+    public void restoreDefaultFilters()
     {
-        getSession().enableFilter(VolumeManagement.NOT_TEMP);
-        getSession().enableFilter(DiskManagement.NOT_TEMP);
-        getSession().enableFilter(IpPoolManagement.NOT_TEMP);
+        JPAConfiguration.enableDefaultFilters(getEntityManager());
 
-        getSession().disableFilter(VolumeManagement.ONLY_TEMP);
-        getSession().disableFilter(DiskManagement.ONLY_TEMP);
-        getSession().disableFilter(IpPoolManagement.ONLY_TEMP);
     }
 
 }
