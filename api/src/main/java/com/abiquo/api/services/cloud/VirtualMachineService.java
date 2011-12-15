@@ -2004,12 +2004,50 @@ public class VirtualMachineService extends DefaultApiService
     /**
      * Cleanup backup resources
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deleteBackupResources(final VirtualMachine vm)
     {
-        for (RasdManagement rasd : getBackupResources(vm))
+
+        try
         {
-            removeResource(rasd, true);
+            rasdDao.enableTemporalOnlyFilter();
+
+            List<RasdManagement> rasds = vm.getRasdManagements();
+
+            // we need to first delete the vm (as it updates the rasd_man)
+            repo.deleteVirtualMachine(vm);
+
+            for (RasdManagement rasd : rasds)
+            {
+                // refresh as the vm delete was updated the rasd
+                rasdDao.remove(rasdDao.findById(rasd.getId()));
+            }
+
+            rasdDao.flush();
         }
+        finally
+        {
+            rasdDao.restoreDefaultFilters();
+        }
+
+        // This is what we like
+        // try
+        // {
+        // rasdDao.enableTemporalOnlyFilter();
+        //
+        // for (RasdManagement rasd : vm.getRasdManagements())
+        // {
+        // rasdDao.remove(rasd);
+        // }
+        //
+        // repo.deleteVirtualMachine(repo.findVirtualMachineById(vm.getId()));
+        //
+        // rasdDao.flush();
+        // }
+        // finally
+        // {
+        // rasdDao.restoreDefaultFilters();
+        // }
     }
 
     /**
@@ -2077,9 +2115,9 @@ public class VirtualMachineService extends DefaultApiService
             removeResource(rollbackRasd, true);
         }
 
-        rasdDao.flush(); // update virtual machine resources
         repo.update(updatedVm);
         repo.deleteVirtualMachine(rollbackVm);
+        rasdDao.flush(); // update virtual machine resources
 
         // TODO check temporal not set in updatedVm
 
@@ -2091,7 +2129,6 @@ public class VirtualMachineService extends DefaultApiService
     /** Removes the resource attachment */
     private void removeResource(final RasdManagement rasd, final boolean remove)
     {
-
         // if (rasd instanceof IpPoolManagement)
         // {
         // rasdRawRao.remove(rasd.getRasd());
@@ -2119,7 +2156,7 @@ public class VirtualMachineService extends DefaultApiService
         }
         finally
         {
-            rasdDao.disabledTemporalOnlyFilter();
+            rasdDao.restoreDefaultFilters();
         }
     }
 

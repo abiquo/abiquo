@@ -26,7 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -600,7 +599,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of disks */
-    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = DiskManagement.class)
+    @OneToMany(targetEntity = DiskManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<DiskManagement> disks;
 
@@ -615,7 +614,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of volumes */
-    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = VolumeManagement.class)
+    @OneToMany(targetEntity = VolumeManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<VolumeManagement> volumes;
 
@@ -630,7 +629,7 @@ public class VirtualMachine extends DefaultEntityBase
     }
 
     /** List of ips */
-    @OneToMany(cascade = CascadeType.PERSIST, targetEntity = IpPoolManagement.class)
+    @OneToMany(targetEntity = IpPoolManagement.class)
     @JoinTable(name = "rasd_management", joinColumns = {@JoinColumn(name = "idVM")}, inverseJoinColumns = {@JoinColumn(name = "idManagement")})
     private List<IpPoolManagement> ips;
 
@@ -649,7 +648,7 @@ public class VirtualMachine extends DefaultEntityBase
      * and {@link VolumeManagement} )
      */
     // do not orphanRemoval = true,
-    @OneToMany(cascade = CascadeType.REMOVE, targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
+    @OneToMany(targetEntity = RasdManagement.class, mappedBy = RasdManagement.VIRTUAL_MACHINE_PROPERTY)
     private List<RasdManagement> rasdManagements;
 
     public List<RasdManagement> getRasdManagements()
