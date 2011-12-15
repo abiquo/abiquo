@@ -64,7 +64,7 @@
             [Bindable]
             private var _isFormValid:Boolean;
             
-            //Static Rules for DHCP options
+            //Static Routes for DHCP options
             [Bindable]
             private var _staticRules:StaticRulesForm;
             
