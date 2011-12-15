@@ -124,7 +124,7 @@ public class TestDataAccessManager
         if (factory == null)
         {
             factory =
-                new JpaEntityManagerFactoryForTesting("abiquoPersistence",
+                new JpaEntityManagerFactoryWithFilters("abiquoPersistence",
                     persistentClassesInEntityDeletionOrder,
                     associationTablesInAssociationDeletionOrder);
         }
