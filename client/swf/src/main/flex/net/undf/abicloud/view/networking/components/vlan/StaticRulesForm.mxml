@@ -57,7 +57,14 @@
             private var _networkIpIsValid:Boolean;
             
             [Bindable]
+            private var _netmaskIpIsValid:Boolean;
+            
+            [Bindable]
             private var _gatewayIpIsValid:Boolean;
+            
+            [Bindable]
+            private var _maskIsValid:Boolean;
+            
             
            	public function init(staticRules:ArrayCollection = null):void
            	{
@@ -66,12 +73,15 @@
            	    }else{
            	    	this._staticRules = new ArrayCollection();
            	    }
+           	    this._netmaskIpIsValid = false;
            	    this._networkIpIsValid = false;
            	    this._gatewayIpIsValid = false;
+           	    this._maskIsValid = false;
            	}		
             
             private function onCreationComplete():void{
-                 netmaskInput.selectedIndex = 0;
+                 netmaskInput.text = '';
+                 maskInput.text = '';
                  addressInput.text = '';
                  gatewayInput.text = '';
                  validateForm();
@@ -112,8 +122,8 @@
             	var dhcpOption:DhcpOption = new DhcpOption();
             	dhcpOption.gateway = gatewayInput.text;
             	dhcpOption.networkAddress = addressInput.text;
-            	dhcpOption.netmask = netmaskInput.selectedItem as String;
-            	dhcpOption.mask = netmasksCIDR[netmaskInput.selectedItem.toString()];
+            	dhcpOption.netmask = netmaskInput.text;
+            	dhcpOption.mask = int(maskInput.text);
                 this._staticRules.addItem(dhcpOption);            	
             }
 
@@ -168,11 +178,14 @@
             
             private function validateForm():void
             {
-                addButton.enabled = netmaskInput.selectedIndex > -1 
+                addButton.enabled = netmaskInput.text.length > 0
+                               && maskInput.text.length > 0 
                                && addressInput.text.length > 0 
                                && gatewayInput.text.length > 0
                                && this._gatewayIpIsValid
-                               && this._networkIpIsValid;
+                               && this._maskIsValid
+                               && this._networkIpIsValid
+                               && this._netmaskIpIsValid;
             }
             
             private function netmaskComboBoxLabelFunction(item:Object):String
@@ -207,6 +220,27 @@
         tweenStart="onResizeEffectStart()"
         tweenUpdate="onResizeEffectUpdate()"
         tweenEnd="onResizeEffectEnd()"/>
+        
+    <mx:NumberValidator
+        id="maskValidator"
+        source="{maskInput}"
+        minValue="0"
+        maxValue="32"
+        property="text" required="false"
+        trigger="{maskInput}"
+        triggerEvent="change"
+        invalid="_maskIsValid = false ; changeTextColor(true , maskInput)"
+        valid="_maskIsValid = true ; changeTextColor(false , maskInput) "/>
+    
+    <utils:IPValidator
+        id="netmaskValidator"
+        source="{netmaskInput}"
+        property="text" required="false"
+        trigger="{netmaskInput}"
+        triggerEvent="change"
+        allowLocalHost="false"
+        invalid="_netmaskIpIsValid = false ; changeTextColor(true , netmaskInput)"
+        valid="_netmaskIpIsValid = true ; changeTextColor(false , netmaskInput) "/>
     
     <utils:IPValidator
         id="networkIpValidator"
@@ -227,7 +261,7 @@
         allowLocalHost="false"
         invalid="_gatewayIpIsValid = false ; changeTextColor(true , gatewayInput)"
         valid="_gatewayIpIsValid = true ; changeTextColor(false , gatewayInput) "/>
-   
+    
     <mx:VBox verticalGap="0" paddingTop="0" width="100%" horizontalAlign="right">    	
     
 	    <mx:Form width="100%" paddingTop="0">
@@ -235,7 +269,7 @@
                 fontWeight="bold"
                 text="@Resource(bundle='Infrastructure', key='LABEL_ADD_STATIC_RULE')"/>
 	       
-	       <mx:FormItem 
+	       <!--<mx:FormItem 
                 label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
                 direction="vertical"
                 required="true">
@@ -244,6 +278,33 @@
                     dataProvider="{this._netmaskDP}"
                     labelFunction="netmaskComboBoxLabelFunction"
                     change="validateForm()"/>
+            </mx:FormItem>-->
+            
+            <mx:FormItem 
+                horizontalGap="0"
+                label="@Resource(bundle='Networking', key='LABEL_MASK')"
+                direction="horizontal"
+                required="true">
+
+                <mx:TextInput id="maskInput"
+                    height="20"
+                    maxChars="2"
+                    width="50"
+                    change="validateForm()"
+                    restrict="0-9"/>
+            </mx:FormItem>
+            
+            <mx:FormItem 
+                horizontalGap="0"
+                label="@Resource(bundle='Networking', key='LABEL_NETMASK')"
+                direction="horizontal"
+                required="true">
+
+                <mx:TextInput id="netmaskInput"
+                    height="20"
+                    maxChars="39"
+                    change="validateForm()"
+                    restrict="0-9.:A-F"/>
             </mx:FormItem>
 
             <mx:FormItem 
