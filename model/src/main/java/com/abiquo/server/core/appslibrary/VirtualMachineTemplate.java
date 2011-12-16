@@ -607,7 +607,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     public boolean isMaster()
     {
-        return getMaster() != null;
+        return getMaster() == null;
     }
 
     public String getFileRef()

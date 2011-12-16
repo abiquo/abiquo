@@ -523,13 +523,14 @@ public class TarantinoService extends DefaultApiService
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final VirtualMachine virtualMachine,
-        final VirtualMachineDefinition definition, final DiskSnapshot destinationDisk)
+        final VirtualMachineDefinition definition, final DiskSnapshot destinationDisk,
+        final boolean mustPowerOffToSnapshot)
     {
         try
         {
             Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
             String virtualMachineId = String.valueOf(virtualMachine.getId());
-            RemoteService service = remoteServiceService.getVSMService(datacenter);
+            RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
 
             // Unsubscribe the virtual machine to prevent unlock
             vsm.unsubscribe(service, virtualMachine);
@@ -542,7 +543,7 @@ public class TarantinoService extends DefaultApiService
                 new DatacenterTaskBuilder(definition, connection, userService.getCurrentUser()
                     .getNick());
 
-            if (mustPowerOffToSnapshot(virtualMachine))
+            if (mustPowerOffToSnapshot)
             {
                 builder.add(VirtualMachineStateTransition.POWEROFF);
                 builder.addSnapshot(destinationDisk);
@@ -590,12 +591,6 @@ public class TarantinoService extends DefaultApiService
         }
 
         return null;
-    }
-
-    protected boolean mustPowerOffToSnapshot(final VirtualMachine virtualMachine)
-    {
-        VirtualMachineState state = virtualMachine.getState();
-        return (state == VirtualMachineState.ON || state == VirtualMachineState.PAUSED);
     }
 
     /**

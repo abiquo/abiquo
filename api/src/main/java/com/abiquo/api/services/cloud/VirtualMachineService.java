@@ -455,7 +455,6 @@ public class VirtualMachineService extends DefaultApiService
 
         // allocate the new values.
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots); // FIXME getOnlyNew Ipd
-        
 
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
         storageResources.addAll(vmnew.getDisks()); // FIXME getOnlyNew Disks
@@ -476,7 +475,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!newRasd.isAttached()) // TODO attached in the same VM
             {
-                reallyNewRasd.add(newRasd); 
+                reallyNewRasd.add(newRasd);
             }
         }
 
@@ -595,7 +594,7 @@ public class VirtualMachineService extends DefaultApiService
 
     public void checkSnapshotAllowed(final VirtualMachine virtualMachine)
     {
-        if (virtualMachine.getState().isDeployed())
+        if (!virtualMachine.getState().isDeployed())
         {
             // TODO Add some APIError more specific?
             addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
@@ -1212,9 +1211,11 @@ public class VirtualMachineService extends DefaultApiService
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
             destinationDisk.setPath(formatSnapshotPath(template));
             destinationDisk.setSnapshotName(formatSnapshotName(template));
-            destinationDisk.setRepositoryManagerAddress(""); // TODO for XenServer
+            destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
+                datacenter).getUri());
 
-            return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk);
+            return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
+                false);
         }
         // else if (!virtualMachine.isManaged())
         // else if (virtualMachine.isStateful())
@@ -1222,6 +1223,13 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
+    /**
+     * Returns the destination path where a snapshot of a certain {@link VirtualMachineTemplate}
+     * must be stored.
+     * 
+     * @param template The {@link VirtualMachineTemplate} to consider
+     * @return The destination path
+     */
     protected String formatSnapshotPath(VirtualMachineTemplate template)
     {
         String filename = template.getPath();
@@ -1234,9 +1242,22 @@ public class VirtualMachineService extends DefaultApiService
         return FilenameUtils.getFullPath(filename);
     }
 
+    /**
+     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
+     * 
+     * @param template The {@link VirtualMachineTemplate} to consider
+     * @return The snapshot filename
+     */
     protected String formatSnapshotName(VirtualMachineTemplate template)
     {
-        return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), template.getName());
+        String name = FilenameUtils.getName(template.getPath());
+
+        if (!template.isMaster())
+        {
+            name = FilenameUtils.getName(template.getMaster().getPath());
+        }
+
+        return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
     }
 
     /**

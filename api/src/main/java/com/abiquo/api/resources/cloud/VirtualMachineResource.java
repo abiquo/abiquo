@@ -97,7 +97,9 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/snapsshot";
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "snapshot";
+
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/snapshot";
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 

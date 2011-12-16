@@ -242,9 +242,14 @@ public class RemoteServiceService extends DefaultApiService
         return infrastructureRepo.findRemoteServiceById(id);
     }
 
-    public RemoteService getVSMService(final Datacenter datacenter)
+    public RemoteService getVSMRemoteService(final Datacenter datacenter)
     {
         return getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+    }
+
+    public RemoteService getAMRemoteService(final Datacenter datacenter)
+    {
+        return getRemoteService(datacenter.getId(), RemoteServiceType.APPLIANCE_MANAGER);
     }
 
     public RemoteService getRemoteService(final Integer datacenterId, final RemoteServiceType type)
