@@ -672,7 +672,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
             pack.setCategory("Others");
         }
         pack.setDescription(packDto.getDescription());
-        pack.setDiskFormat(DiskFormat.fromValue(packDto.getDiskFormatType()).name());
+        pack.setDiskFormat(String.valueOf(packDto.getDiskFormatType()));
         pack.setDiskSizeMb(packDto.getDiskFileSize());
         RESTLink iconLink = packDto.searchLink("icon");
         if (iconLink != null)
