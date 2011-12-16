@@ -408,7 +408,7 @@ public class IpPoolManagement extends RasdManagement
     public long getAttachmentOrder()
     {
         String attachment = getRasd().getConfigurationName();
-        return attachment == null ? 0L : Long.valueOf(attachment);
+        return attachment == null ? getSequence() : Long.valueOf(attachment);
     }
 
     @Override
