@@ -398,6 +398,20 @@ public class IpPoolManagement extends RasdManagement
     }
 
     @Override
+    public void setAttachmentOrder(final long order)
+    {
+        super.setAttachmentOrder(order);
+        getRasd().setConfigurationName(String.valueOf(order));
+    }
+
+    @Override
+    public long getAttachmentOrder()
+    {
+        String attachment = getRasd().getConfigurationName();
+        return attachment == null ? 0L : Long.valueOf(attachment);
+    }
+
+    @Override
     public void detach()
     {
         setVirtualMachine(null);

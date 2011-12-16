@@ -678,6 +678,7 @@ CREATE TABLE  `kinton`.`rasd_management` (
   `idVirtualApp` int(10) unsigned default NULL,
   `version_c` integer NOT NULL DEFAULT 1,
   `temporal` int(10) unsigned DEFAULT NULL,
+  `sequence` int(10) unsigned default NULL,
   PRIMARY KEY  (`idManagement`),
   KEY `idVirtualApp_FK` (`idVirtualApp`),
   KEY `idVM_FK` (`idVM`),
