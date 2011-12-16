@@ -169,6 +169,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private NetworkService ipService;
 
+    @Autowired
+    private VirtualMachineLock vmLock;
+
     public VirtualMachineService()
     {
 
@@ -192,6 +195,7 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.vmLock = new VirtualMachineLock(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -452,7 +456,6 @@ public class VirtualMachineService extends DefaultApiService
 
         // allocate the new values.
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots); // FIXME getOnlyNew Ipd
-        
 
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
         storageResources.addAll(vmnew.getDisks()); // FIXME getOnlyNew Disks
@@ -473,7 +476,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!newRasd.isAttached()) // TODO attached in the same VM
             {
-                reallyNewRasd.add(newRasd); 
+                reallyNewRasd.add(newRasd);
             }
         }
 
@@ -502,11 +505,24 @@ public class VirtualMachineService extends DefaultApiService
         return false;
     }
 
-    /** set the virtual machine state to LOCKED (when an async task is needed) */
-    private void lockVirtualMachine(final VirtualMachine virtualMachine)
+    /**
+     * Set the virtual machine state to LOCKED (when an async task is needed).
+     * <p>
+     * This method returns the locked virtual machine that <b>MUST</b> be used to perform the
+     * upcoming operations.
+     * 
+     * @param vm The virtual machine to lock.
+     * @return The virtual machine that must be used to perform the upcoming operations.
+     */
+    private VirtualMachine lockVirtualMachine(final VirtualMachine vm)
     {
-        virtualMachine.setState(VirtualMachineState.LOCKED);
-        repo.update(virtualMachine);
+        // Lock the virtual machine in a different transaction using the VM locker. This way the
+        // operation will be atomic and the VM will effectively be locked after method
+        // execution
+        vmLock.lock(vm.getId());
+
+        // Refresh the locked virtual machine from database, to avoid StaleObject issues
+        return repo.findVirtualMachineById(vm.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -901,18 +917,18 @@ public class VirtualMachineService extends DefaultApiService
             vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
 
-            lockVirtualMachine(virtualMachine);
+            VirtualMachine locked = lockVirtualMachine(virtualMachine);
 
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
-            initiatorMappings(virtualMachine);
+            initiatorMappings(locked);
             LOGGER.debug("Mapping done!");
 
             VirtualMachineDescriptionBuilder vmDesc =
-                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+                jobCreator.toTarantinoDto(locked, virtualAppliance);
 
-            LOGGER.info("Generating the link to the status! {}", virtualMachine.getId());
-            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+            LOGGER.info("Generating the link to the status! {}", locked.getId());
+            return tarantino.deployVirtualMachine(locked, vmDesc);
         }
         catch (APIException e)
         {
