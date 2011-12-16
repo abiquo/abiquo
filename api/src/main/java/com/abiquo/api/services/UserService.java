@@ -224,8 +224,7 @@ public class UserService extends DefaultApiService
                 .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
-        user.isValid();
-
+        validate(user);
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, user))
         {
             user.setAvailableVirtualDatacenters(null);
@@ -481,7 +480,13 @@ public class UserService extends DefaultApiService
 
     private Role findRole(final UserDto dto)
     {
-        return repo.findRoleById(getRoleId(dto));
+        Role role = repo.findRoleById(getRoleId(dto));
+        if (role == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_ROLE);
+            flushErrors();
+        }
+        return role;
     }
 
     private Integer getRoleId(final UserDto user)
