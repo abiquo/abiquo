@@ -1330,6 +1330,12 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public RESTLink buildMovedVolumeLinks(final VolumeManagement movedVolume)
+    {
+        return null;
+    }
+
+    @Override
     public RESTLink buildVirtualMachineLink(final Integer vdc, final Integer vapp, final Integer vm)
     {
 
@@ -1340,6 +1346,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm);
 
         return builder.buildRestLink(VirtualMachineResource.class, "", params);
+
     }
 
 }

@@ -238,7 +238,7 @@ public class RasdManagement extends DefaultEntityBase
 
     public Integer getSequence()
     {
-        return this.sequence;
+        return this.sequence == null ? 0 : this.sequence;
     }
 
     public void setSequence(final Integer sequence)
@@ -264,7 +264,7 @@ public class RasdManagement extends DefaultEntityBase
     {
         Long generation = getRasd().getGeneration();
         // XXX priorize sequence attribute
-        return generation == null ? (sequence == null ? 0L : sequence) : generation;
+        return generation == null ? getSequence() : generation;
     }
 
     @Deprecated
