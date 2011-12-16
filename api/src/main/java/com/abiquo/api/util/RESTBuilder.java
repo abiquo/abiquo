@@ -136,7 +136,7 @@ public class RESTBuilder implements IRESTBuilder
 
     public static final String LAST = "last";
 
-    private static final String REL_SELF = "self";
+    public static final String REL_SELF = "self";
 
     protected LinkBuilders linkProcessor;
 

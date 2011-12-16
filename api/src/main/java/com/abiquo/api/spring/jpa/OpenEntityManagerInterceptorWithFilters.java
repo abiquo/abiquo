@@ -35,6 +35,8 @@ import org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.request.WebRequestInterceptor;
 
+import com.abiquo.server.core.common.persistence.JPAConfiguration;
+
 /**
  * OpenEntityManagerInView interceptor that is not coupled to the {@link WebRequestInterceptor}
  * interface.

@@ -210,14 +210,10 @@ public class TarantinoJobCreator extends DefaultApiService
         DiskControllerType cntrlType =
             getDiskController(virtualMachine.getHypervisor().getType(), false, false);
 
-        Integer sequence = 1;
-
         for (DiskManagement imHard : hardDisks)
         {
-            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, sequence, datastore,
-                cntrlType);
-
-            sequence++;
+            vmDesc.addSecondaryHardDisk(imHard.getSizeInMb() * 1048576, imHard.getSequence(),
+                datastore, cntrlType);
         }
     }
 

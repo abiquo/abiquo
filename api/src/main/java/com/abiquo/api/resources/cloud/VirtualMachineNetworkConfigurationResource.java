@@ -21,8 +21,6 @@
 
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.util.URIResolver.buildPath;
-
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -34,19 +32,15 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.api.util.URIResolver;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
@@ -236,8 +230,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.
-     * @param nicRefs {@link LinksDto} object with information that identifier the Private
-     *            IP.
+     * @param nicRefs {@link LinksDto} object with information that identifier the Private IP.
      * @param restBuilder restBuilder a Context-injected object to create the links of the Dto
      * @return a {@link NicDto} object that represents the new created NIC.
      * @throws Exception any thrown exception. Moved to HTTP status code in the
@@ -249,8 +242,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
         Object result = service.attachNICs(vdcId, vappId, vmId, nicRefs);
 
@@ -266,7 +258,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
         return null;
     }
-    
+
     /**
      * <pre>
      * Associate IPs to a Virtual Machine NIC. The function parameters need all the target Virtual
@@ -277,8 +269,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * @param vdcId Identifier of the Virtual Datacenter.
      * @param vappId Identifier of the Virtual Appliance.
      * @param vmId Identifier of the Virtual Machine.
-     * @param nicRefs {@link LinksDto} object with information that identifier the Private
-     *            IP.
+     * @param nicRefs {@link LinksDto} object with information that identifier the Private IP.
      * @param restBuilder restBuilder a Context-injected object to create the links of the Dto
      * @return a {@link NicDto} object that represents the new created NIC.
      * @throws Exception any thrown exception. Moved to HTTP status code in the
@@ -290,8 +281,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @NotNull final LinksDto nicRefs, @Context final IRESTBuilder restBuilder) throws Exception
     {
         Object result = service.changeNICs(vdcId, vappId, vmId, nicRefs);
 
@@ -368,61 +358,62 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
      * @throws Exception any thrown exception. Moved to HTTP status code in the
      *             {@link APIExceptionMapper} exception mapper.
      */
-//    @PUT
-//    @Path(NICS_PATH + "/" + NIC_PARAM)
-//    public void reorderVirtualMachineNic(
-//        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
-//        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
-//        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-//        @PathParam(NIC) @Min(0) final Integer nicOrder, final LinksDto nicAssociations,
-//        @Context final IRESTBuilder restBuilder) throws Exception
-//    {
-        // Get the link that identifies the current NIC order.
-//        RESTLink previousLink = nicAssociations.searchLink("nic");
+    // @PUT
+    // @Path(NICS_PATH + "/" + NIC_PARAM)
+    // public void reorderVirtualMachineNic(
+    // @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer
+    // vdcId,
+    // @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+    // @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+    // @PathParam(NIC) @Min(0) final Integer nicOrder, final LinksDto nicAssociations,
+    // @Context final IRESTBuilder restBuilder) throws Exception
+    // {
+    // Get the link that identifies the current NIC order.
+    // RESTLink previousLink = nicAssociations.searchLink("nic");
 
-        // Parse the URI with the expected parameters and extract the identifier values.
-//        String buildPath =
-//            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
-//                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
-//                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
-//                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
-//                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
-//                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
-//                VirtualMachineNetworkConfigurationResource.NETWORK,
-//                VirtualMachineNetworkConfigurationResource.NICS_PATH,
-//                VirtualMachineNetworkConfigurationResource.NIC_PARAM);
-//        MultivaluedMap<String, String> ipsValues =
-//            URIResolver.resolveFromURI(buildPath, previousLink.getHref());
+    // Parse the URI with the expected parameters and extract the identifier values.
+    // String buildPath =
+    // buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+    // VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+    // VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+    // VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+    // VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+    // VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+    // VirtualMachineNetworkConfigurationResource.NETWORK,
+    // VirtualMachineNetworkConfigurationResource.NICS_PATH,
+    // VirtualMachineNetworkConfigurationResource.NIC_PARAM);
+    // MultivaluedMap<String, String> ipsValues =
+    // URIResolver.resolveFromURI(buildPath, previousLink.getHref());
 
-        // Check if the link to the nic link is valid. Must contain the identifiers of
-        // Virtual Datacenter, Virtual Appliance, Virtual Machine, and old Nic order
-//        if (ipsValues == null
-//            || !ipsValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
-//            || !ipsValues.containsKey(VirtualApplianceResource.VIRTUAL_APPLIANCE)
-//            || !ipsValues.containsKey(VirtualMachineResource.VIRTUAL_MACHINE)
-//            || !ipsValues.containsKey(VirtualMachineNetworkConfigurationResource.NIC))
-//        {
-//            throw new BadRequestException(APIError.VLANS_REORDER_NIC_INVALID_LINK);
-//        }
+    // Check if the link to the nic link is valid. Must contain the identifiers of
+    // Virtual Datacenter, Virtual Appliance, Virtual Machine, and old Nic order
+    // if (ipsValues == null
+    // || !ipsValues.containsKey(VirtualDatacenterResource.VIRTUAL_DATACENTER)
+    // || !ipsValues.containsKey(VirtualApplianceResource.VIRTUAL_APPLIANCE)
+    // || !ipsValues.containsKey(VirtualMachineResource.VIRTUAL_MACHINE)
+    // || !ipsValues.containsKey(VirtualMachineNetworkConfigurationResource.NIC))
+    // {
+    // throw new BadRequestException(APIError.VLANS_REORDER_NIC_INVALID_LINK);
+    // }
 
-        // Since we move NICs between the same Virtual Machine, the extracted values
-        // must match with the input parameters 'vdcId', 'vappId' and 'vmId'
-//        Integer linkIdVdc =
-//            Integer.valueOf(ipsValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
-//        Integer linkIdVapp =
-//            Integer.valueOf(ipsValues.getFirst(VirtualApplianceResource.VIRTUAL_APPLIANCE));
-//        Integer linkIdVm =
-//            Integer.valueOf(ipsValues.getFirst(VirtualMachineResource.VIRTUAL_MACHINE));
-//        Integer linkOldOrder =
-//            Integer.valueOf(ipsValues.getFirst(VirtualMachineNetworkConfigurationResource.NIC));
-//        if (!linkIdVdc.equals(vdcId) || !linkIdVapp.equals(vappId) || !linkIdVm.equals(vmId))
-//        {
-//            throw new BadRequestException(APIError.VLANS_REORDER_NIC_INVALID_LINK_VALUES);
-//        }
+    // Since we move NICs between the same Virtual Machine, the extracted values
+    // must match with the input parameters 'vdcId', 'vappId' and 'vmId'
+    // Integer linkIdVdc =
+    // Integer.valueOf(ipsValues.getFirst(VirtualDatacenterResource.VIRTUAL_DATACENTER));
+    // Integer linkIdVapp =
+    // Integer.valueOf(ipsValues.getFirst(VirtualApplianceResource.VIRTUAL_APPLIANCE));
+    // Integer linkIdVm =
+    // Integer.valueOf(ipsValues.getFirst(VirtualMachineResource.VIRTUAL_MACHINE));
+    // Integer linkOldOrder =
+    // Integer.valueOf(ipsValues.getFirst(VirtualMachineNetworkConfigurationResource.NIC));
+    // if (!linkIdVdc.equals(vdcId) || !linkIdVapp.equals(vappId) || !linkIdVm.equals(vmId))
+    // {
+    // throw new BadRequestException(APIError.VLANS_REORDER_NIC_INVALID_LINK_VALUES);
+    // }
 
-        // Call the business logic with the correct values.
-//        service.reorderVirtualMachineNic(vdcId, vappId, vmId, linkOldOrder, nicOrder);
-//    }
+    // Call the business logic with the correct values.
+    // service.reorderVirtualMachineNic(vdcId, vappId, vmId, linkOldOrder, nicOrder);
+    // }
 
     /**
      * Static method that converts transfer object {@link VMNetworkConfigurationDto} object to
@@ -473,7 +464,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
         NicDto dto = ModelTransformer.transportFromPersistence(NicDto.class, ip);
-        dto.setSequence(Integer.valueOf(ip.getRasd().getConfigurationName()));
+        dto.setSequence(Long.valueOf(ip.getAttachmentOrder()).intValue());
         dto.setLinks(restBuilder.buildNICLinks(ip));
         return dto;
     }

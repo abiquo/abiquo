@@ -357,7 +357,7 @@ public class VolumeManagement extends RasdManagement
     {
         return state == VolumeState.ATTACHED && getVirtualMachine() != null;
     }
-
+    
     // ********************************** Others ********************************
     @Override
     public String toString()

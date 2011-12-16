@@ -21,6 +21,9 @@
 
 package com.abiquo.server.core.cloud;
 
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * The {@link VirtualMachine} State model. The transitions between states are in
  * {@link VirtualMachineStateTransition}.
@@ -28,6 +31,8 @@ package com.abiquo.server.core.cloud;
  * @author ssedano
  * @see com.abiquo.server.core.cloud.VirtualMachineStateTransition
  */
+@XmlType(name = "VirtualMachineState")
+@XmlEnum
 public enum VirtualMachineState
 {
 
