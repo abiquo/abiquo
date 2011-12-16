@@ -67,7 +67,7 @@ package net.undf.abicloud.controller.systemProperties
         {
             if (result.success)
             {
-				//TODO: show indication saying content saved
+				AbiCloudModel.getInstance().configurationManager.config.updateProperties(DataResult(result).data as ArrayCollection);
             }
             else
             {

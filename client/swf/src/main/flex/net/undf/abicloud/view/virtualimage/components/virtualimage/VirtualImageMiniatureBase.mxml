@@ -94,14 +94,13 @@
             private function onCreationComplete():void
             {
                 //Checking privilege
-                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"removeChild",buttonsContainer,imageCanvas);
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_ALLOW_MODIFY,"removeChild",editButton,buttonsContainer);
                 SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.APPLIB_DOWNLOAD_IMAGE,"removeChild",downloadButton,buttonsContainer);
 
                 //Check if the user can delete a shared image
-                if(this._virtualImage.shared){
-                    if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.ENTERPRISE_ADMINISTER_ALL)){
-                        buttonsContainer.removeChild(eraseButton);
-                    }
+                if(!SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.APPLIB_ALLOW_MODIFY)
+                || (this._virtualImage.shared && !SecuredPrivilegeAccess.userHasPrivilege(PrivilegeType.ENTERPRISE_ADMINISTER_ALL)) ){
+                	buttonsContainer.removeChild(eraseButton);
                 }
 
                 //Changing the style of this component, depending on the multiplier

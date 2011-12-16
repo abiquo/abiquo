@@ -34,6 +34,20 @@ DROP TABLE IF EXISTS `kinton`.`dhcp_service`;
 --                 TABLE CREATION                 --
 -- ---------------------------------------------- --
 
+CREATE TABLE  `kinton`.`enterprise_properties` (
+  `idProperties` int(11) unsigned NOT NULL auto_increment,
+  `enterprise` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`idProperties`),
+  CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+CREATE TABLE  `kinton`.`enterprise_properties_map` (
+ `enterprise_properties` int(11) unsigned NOT NULL,
+  `map_key` varchar(30) NOT NULL,
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- PRICING --
 -- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
@@ -132,6 +146,7 @@ ALTER TABLE `kinton`.`virtualimage` MODIFY COLUMN `cost_code` int(4) DEFAULT 0;
 -- VFILER --
 ALTER TABLE `kinton`.`storage_device` ADD COLUMN `username` varchar(256) DEFAULT NULL;
 ALTER TABLE `kinton`.`storage_device` ADD COLUMN `password` varchar(256) DEFAULT NULL;
+
 -- ---------------------------------------------- --
 --   DATA CHANGES (insert, update, delete, etc)   --
 -- ---------------------------------------------- --
@@ -181,6 +196,11 @@ UNLOCK TABLES;
 -- First I need to update some rows before to delete the `default_network` field
 -- UPDATE `kinton`.`virtualdatacenter` vdc, `kinton`.`vlan_network` v set vdc.default_vlan_network_id = v.vlan_network_id WHERE vdc.networktypeID = v.network_id and v.default_network = 1;
 -- ALTER TABLE `kinton`.`vlan_network` DROP COLUMN `default_network`;
+
+LOCK TABLES `kinton`.`enterprise_properties` WRITE;
+INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
+INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
+UNLOCK TABLES;
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --

@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+     Abiquo community edition
+     cloud management application for hybrid clouds
+     Copyright (C) 2008-2010 - Abiquo Holdings S.L.
+
+     This application is free software; you can redistribute it and/or
+     modify it under the terms of the GNU LESSER GENERAL PUBLIC
+     LICENSE as published by the Free Software Foundation under
+     version 3 of the License
+
+     This software is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+     LESSER GENERAL PUBLIC LICENSE v.3 for more details.
+
+     You should have received a copy of the GNU Lesser General Public
+     License along with this library; if not, write to the
+     Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+     Boston, MA 02111-1307, USA.
+
+-->
+
+<mx:VBox 
+    width="100%" height="100%"
+    horizontalAlign="left"
+    verticalGap="2"
+    paddingTop="10"
+    verticalAlign="middle"
+    creationComplete="onCreationComplete()"
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:utils="net.undf.abicloud.utils.*"
+    xmlns:general="net.undf.abicloud.view.general.*">
+
+    <mx:Script>
+        <![CDATA[
+        	import net.undf.abicloud.vo.user.PrivilegeType;
+        	import net.undf.abicloud.utils.SecuredPrivilegeAccess;
+        	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
+        	import net.undf.abicloud.events.VirtualApplianceEvent;
+        	import net.undf.abicloud.vo.infrastructure.HyperVisor;
+        	import net.undf.abicloud.vo.infrastructure.State;
+        	import net.undf.abicloud.vo.infrastructure.HyperVisorType;
+        	import net.undf.abicloud.events.InfrastructureEvent;
+        	import mx.utils.ObjectUtil;
+        	import net.undf.abicloud.utils.AbicloudUtils;
+        	import mx.core.UIComponent;
+        	import mx.managers.DragManager;
+        	import mx.controls.Image;
+        	import mx.core.DragSource;
+        	import mx.events.DragEvent;
+            import mx.collections.ArrayCollection;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            import mx.resources.ResourceManager;
+
+            import net.undf.abicloud.events.NetworkingEvent;
+            import net.undf.abicloud.model.AbiCloudModel;
+            import net.undf.abicloud.view.general.AbiCloudAlert;
+            import net.undf.abicloud.vo.infrastructure.VirtualMachine;
+            import net.undf.abicloud.vo.networking.IPAddress;
+            import net.undf.abicloud.vo.networking.IPPoolManagement;
+            import net.undf.abicloud.vo.virtualappliance.NodeVirtualImage;
+            import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
+
+            //The VirtualMachine to manage its Network
+            [Bindable]
+            protected var _virtualMachine:VirtualMachine;
+
+            //The VirtualDatacenter where the VirtualMachine is
+            [Bindable]
+            protected var _virtualDatacenter:VirtualDataCenter;
+            
+            //The Virtual Appliance where the node is
+            [Bindable]
+            private var _virtualAppliance:VirtualAppliance;
+
+            //Flag indicating if changes can be made to the VirtualMachine network configuration
+            [Bindable]
+            private var _isEditionAllowed:Boolean;  
+            
+            [Bindable]
+            private var _name:String;  
+            
+            private var _originalNode:NodeVirtualImage;       
+
+            override protected function createChildren():void
+            {
+                super.createChildren();
+            }
+
+            private function onCreationComplete():void
+            {
+                SecuredPrivilegeAccess.checkElementAccess(PrivilegeType.VAPP_CUSTOMISE_SETTINGS,"removeChild",saveButton,saveBox);
+                
+            }
+
+            /**
+             * Initializes this component to manage the Network of a Virtual Machine
+             */
+            public function init(node:NodeVirtualImage, isEditionAllowed:Boolean,
+                                 virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance):void
+            {
+                _originalNode = node;
+                _virtualAppliance = virtualAppliance;
+                _virtualMachine = node.virtualMachine;
+                _virtualDatacenter = virtualDatacenter;
+                _isEditionAllowed = isEditionAllowed;
+                _name = node.name;
+                
+                if(virtualDatacenter.hyperType.id == HyperVisorType.HYPERV){
+                    remoteServicePsw.enabled = false;
+                }else{
+                    remoteServicePsw.enabled = true;
+                }
+
+            }
+            
+            private function editVirtualMachine():void{
+            
+                //Need to check which function need to be call
+                if(nameInput.text != _originalNode.name)
+                {
+                	var updatedNode:NodeVirtualImage = returnVirtualApplianceNode(_originalNode);
+                	if(updatedNode)
+                	{
+	                	updatedNode.name = nameInput.text;
+	                	var virtualApplianceEvent:VirtualApplianceEvent = new VirtualApplianceEvent(VirtualApplianceEvent.EDIT_VIRTUALAPPLIANCE);
+	                    virtualApplianceEvent.virtualAppliance = _virtualAppliance;
+	                    dispatchEvent(virtualApplianceEvent);
+                	}
+                } 
+                
+                if(cpuInput.value != _originalNode.virtualMachine.cpu
+                || ramInput.value != _originalNode.virtualMachine.ram
+                || (passwordInput.text != '' && passwordInput.text != _originalNode.virtualMachine.password)
+                || descriptionInput.text != _originalNode.virtualMachine.description)
+                {
+	                //Making a copy of the virtual machine, to not modify the original one before changes are saved in server
+	                var virtualMachineEdited:VirtualMachine = ObjectUtil.copy(this._virtualMachine) as VirtualMachine;
+	
+	                //Saving changes made by the user
+	                virtualMachineEdited.cpu = cpuInput.value;
+	                virtualMachineEdited.ram = ramInput.value * ramUnitsSelector.selectedItem.conversion;
+	                virtualMachineEdited.password = passwordInput.text;
+	                virtualMachineEdited.description = descriptionInput.text;
+	
+	                //Announcing that a virtual machine has been edited
+	                var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
+	                infrastructureEvent.infrastructureElement = virtualMachineEdited;
+	                dispatchEvent(infrastructureEvent);
+                }
+            }
+
+            private function returnVirtualApplianceNode(node:NodeVirtualImage):NodeVirtualImage
+            {
+                var _currentNode:NodeVirtualImage;
+                for(var i:int = 0 ; i < _virtualAppliance.nodes.length ; i++)
+                {
+                    _currentNode = _virtualAppliance.nodes.getItemAt(i) as NodeVirtualImage;
+                    if(_currentNode.id == node.id)
+                    {
+                    	return _currentNode;
+                    }
+                }	
+                
+                return null;
+            }
+           
+           
+        ]]>
+    </mx:Script>
+
+    <mx:Form paddingTop="3" width="100%">
+
+        <mx:FormItem 
+            height="17"
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_UUID')">
+            <mx:Label 
+                text="{_virtualMachine.UUID}" selectable="true"
+                truncateToFit="true"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Common', key='TEXTINPUT_LABEL_NAME')">
+            <mx:TextInput id="nameInput" 
+            	text="{_name}"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            height="17"
+            label="@Resource(bundle='Infrastructure', key='LABEL_OWNER')">
+            <mx:Label text="{this._virtualMachine.enterprise.name}"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_CPU')"
+            direction="horizontal">
+
+            <mx:NumericStepper id="cpuInput"
+            	enabled="{this._isEditionAllowed}"
+                width="75"
+                fontSize="10"
+                minimum="1" maximum="32" stepSize="1"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_RAM')"
+            direction="horizontal">
+     
+            <mx:NumericStepper id="ramInput"
+            	enabled="{this._isEditionAllowed}"
+                width="75" 
+                fontSize="10"
+                minimum="0"
+                maximum="{ramUnitsSelector.selectedItem.maximum}"
+                stepSize="{ramUnitsSelector.selectedItem.stepSize}"
+                value="{this._virtualMachine.ram / ramUnitsSelector.selectedItem.conversion}"/>
+
+            <mx:ComboBox id="ramUnitsSelector"
+            	enabled="{this._isEditionAllowed}"
+                width="80" height="18"
+                labelField="label"
+                dataProvider="{AbiCloudModel.ramUnitsSelectorDP}"
+                selectedIndex="0"/>
+        </mx:FormItem>
+
+        <mx:FormItem 
+            height="17"
+            label="@Resource(bundle='Infrastructure', key='TEXTINPUT_LABEL_HD')"
+            direction="horizontal">
+
+            <mx:Label id="hdLabel"
+                text="{Number(_virtualMachine.hd / AbiCloudModel.GB_TO_BYTES).toFixed(2).toString() + ' GB'}"/>
+
+        </mx:FormItem>
+
+        <mx:FormItem 
+            height="17"
+            label="@Resource(bundle='Infrastructure', key='LABEL_REMOTE_ACCESS')"
+            visible="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
+            includeInLayout="{AbiCloudModel.getInstance().configurationManager.config.client_virtual_allowVMRemoteAccess.value == 1}"
+            direction="horizontal">
+            <mx:Label id="remoteAccessLabel"
+                text="{(this._virtualMachine.vdrpIP == null || 
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.HYPERV || 
+                        HyperVisor(this._virtualMachine.assignedTo).type.id == HyperVisorType.XENSERVER) ? ResourceManager.getInstance().getString('Infrastructure', 'LABEL_NOT_AVAILABLE') :
+                                                                                                                           _virtualMachine.vdrpIP + ':' + _virtualMachine.vdrpPort.toString()}"
+                selectable="true"/>
+
+            <mx:Button id="copyRemoteAccessAddressButton"
+                height="16"
+                label="@Resource(bundle='Common', key='BUTTON_COPY_CLIPBOARD')"
+                includeInLayout="false"
+                visible="false"/>
+        </mx:FormItem>
+        
+        <mx:FormItem id="remoteServicePsw" 
+        	label="@Resource(bundle='Infrastructure',key='LABEL_REMOTE_ACCESS_PASSWORD')" direction="horizontal">
+	        <mx:TextInput 
+	        	editable="{this._isEditionAllowed}"
+	            displayAsPassword="{!hidePassword.selected}" 
+	            id="passwordInput" 
+	            maxChars="32"
+	            text="{this._virtualMachine.password}"/>
+	        <mx:CheckBox 
+	        	enabled="{this._isEditionAllowed}"
+	            id="hidePassword" 
+	            labelPlacement="right" 
+	            label="@Resource(bundle='Infrastructure',key='LABEL_SHOW_PASSWORD')"/>
+	    </mx:FormItem>
+                   
+		<mx:FormItem 
+            label="@Resource(bundle='Infrastructure', key='LABEL_DESCRIPTION')"
+            direction="horizontal" width="100%">
+
+            <mx:TextArea id="descriptionInput"
+            	editable="{this._isEditionAllowed}"
+                width="100%"
+                maxChars="255"
+                minHeight="100"
+                text="{_virtualMachine.description}"/>
+
+        </mx:FormItem>
+                   
+    </mx:Form>
+
+    <mx:HBox width="100%" horizontalAlign="center" id="saveBox">
+        <mx:Button height="18" id="saveButton"
+            label="@Resource(bundle='Common',key='BUTTON_SAVE')"
+            click="editVirtualMachine()"/>
+   </mx:HBox>
+</mx:VBox>

@@ -147,10 +147,6 @@
                     <targetPlayer>10.0.0</targetPlayer>
                     <compiledLocales>
                         <locale>en_US</locale>
-                        <locale>es_ES</locale>
-                        <locale>ja_JP</locale>
-                        <locale>zh_ZH</locale>
-                        <locale>pt_PT</locale>
                     </compiledLocales>
                     <skipTests>true</skipTests>
                     <generateHtmlWrapper>true</generateHtmlWrapper>
@@ -193,8 +189,8 @@
                 <configuration>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
-            </plugin>
-            <plugin>
+            </plugin>	
+			<plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptors>
