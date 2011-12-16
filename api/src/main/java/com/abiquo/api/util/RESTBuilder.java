@@ -743,6 +743,11 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY_REL, params));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL, params));
+
         links
             .add(builder.buildRestLink(VirtualMachineResource.class, RESTBuilder.REL_EDIT, params));
 

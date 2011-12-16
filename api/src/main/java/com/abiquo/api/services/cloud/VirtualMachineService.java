@@ -33,6 +33,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,8 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
+import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
@@ -467,7 +470,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (!newRasd.isAttached()) // TODO attached in the same VM
             {
-                reallyNewRasd.add(newRasd); 
+                reallyNewRasd.add(newRasd);
             }
         }
 
@@ -584,19 +587,12 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    /**
-     * The {@link VirtualMachine} is in appropriate state.
-     * <ul>
-     * <li>{@link VirtualMachineState#OFF}</li>
-     * </ul>
-     * 
-     * @param vm
-     */
-    public void checkSnapshotAllowed(final VirtualMachine vm)
+    public void checkSnapshotAllowed(final VirtualMachine virtualMachine)
     {
-        if (vm.getState() != VirtualMachineState.OFF)
+        if (!virtualMachine.getState().isDeployed())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT);
+            // TODO Add some APIError more specific?
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
     }
@@ -1171,6 +1167,92 @@ public class VirtualMachineService extends DefaultApiService
 
         }
         return null;
+    }
+
+    /**
+     * Snapshot a {@link VirtualMachine}.
+     * 
+     * @param vmId Virtual Machine Id
+     * @param vappId Virtual Appliance Id
+     * @param vdcId Virtual Datacenter Id
+     * @return
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
+        final Integer vdcId)
+    {
+        // Retrieve entities
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+        VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+        // Check if the operation is allowed and lock the virtual machine
+        userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        checkSnapshotAllowed(virtualMachine);
+
+        lockVirtualMachine(virtualMachine);
+
+        // Do the snapshot
+        VirtualMachineDescriptionBuilder definitionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualApp);
+
+        if (!virtualMachine.isStateful() && virtualMachine.isManaged())
+        {
+            VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
+            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+            VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+
+            DiskSnapshot destinationDisk = new DiskSnapshot();
+            destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
+            destinationDisk.setPath(formatSnapshotPath(template));
+            destinationDisk.setSnapshotName(formatSnapshotName(template));
+            destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
+                datacenter).getUri());
+
+            return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
+                false);
+        }
+        // else if (!virtualMachine.isManaged())
+        // else if (virtualMachine.isStateful())
+
+        return null;
+    }
+
+    /**
+     * Returns the destination path where a snapshot of a certain {@link VirtualMachineTemplate}
+     * must be stored.
+     * 
+     * @param template The {@link VirtualMachineTemplate} to consider
+     * @return The destination path
+     */
+    protected String formatSnapshotPath(VirtualMachineTemplate template)
+    {
+        String filename = template.getPath();
+
+        if (!template.isMaster())
+        {
+            filename = template.getMaster().getPath();
+        }
+
+        return FilenameUtils.getFullPath(filename);
+    }
+
+    /**
+     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
+     * 
+     * @param template The {@link VirtualMachineTemplate} to consider
+     * @return The snapshot filename
+     */
+    protected String formatSnapshotName(VirtualMachineTemplate template)
+    {
+        String name = FilenameUtils.getName(template.getPath());
+
+        if (!template.isMaster())
+        {
+            name = FilenameUtils.getName(template.getMaster().getPath());
+        }
+
+        return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
     }
 
     /**

@@ -253,7 +253,7 @@ public class DatacenterTaskBuilder
                 return StateTransition.SNAPSHOT;
 
             default:
-                throw new InvalidParameterException();
+                throw new InvalidParameterException("Error unknown transition: " + transition);
         }
     }
 
@@ -314,4 +314,3 @@ public class DatacenterTaskBuilder
         }
     }
 }
-

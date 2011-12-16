@@ -28,6 +28,7 @@ import static com.abiquo.testng.TestConfig.getParameter;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
@@ -50,7 +51,15 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         return Integer.valueOf(getParameter(WEBAPP_PORT, DEFAULT_SERVER_PORT));
     }
 
-    protected RestClient client = new RestClient();
+    protected RestClient client;
+
+    public AbstractJpaGeneratorIT()
+    {
+        super();
+        ClientConfig restConfig = new ClientConfig();
+        restConfig.followRedirects(false);
+        client = new RestClient(restConfig);
+    }
 
     @BeforeMethod
     @Override
