@@ -23,6 +23,7 @@ package com.abiquo.api.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,6 +58,7 @@ import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.util.network.IPAddress;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.server.core.util.network.NetworkResolver;
@@ -96,9 +98,24 @@ public class NetworkService extends DefaultApiService
         rasd.setAutomaticDeallocation(0);
         rasd.setAddress(ip.getMac());
         rasd.setParent(ip.getNetworkName());
-        rasd.setResourceSubType(String.valueOf(ip.getVlanNetwork().getType().ordinal()));
+        rasd.setResourceSubType(String.valueOf(defineIpType(ip.getVlanNetwork()).ordinal()));
 
         return rasd;
+    }
+
+    private static IpPoolManagement.Type defineIpType(final VLANNetwork vlan)
+    {
+        switch (vlan.getType())
+        {
+            case INTERNAL:
+                return IpPoolManagement.Type.PRIVATE;
+            case PUBLIC:
+                return IpPoolManagement.Type.PUBLIC;
+            case EXTERNAL:
+                return IpPoolManagement.Type.EXTERNAL;
+            default:
+                return IpPoolManagement.Type.UNMANAGED;
+        }
     }
 
     /** Autowired infrastructure DAO repository. */
@@ -170,8 +187,7 @@ public class NetworkService extends DefaultApiService
                         new String(), OrderByEnum.IP, Boolean.TRUE).get(0);
                 break;
 
-            case EXTERNAL:
-            case UNMANAGED:
+            default:
                 DatacenterLimits dcLimits =
                     entRep.findLimitsByEnterpriseAndDatacenter(vdc.getEnterprise(),
                         vdc.getDatacenter());
@@ -314,8 +330,7 @@ public class NetworkService extends DefaultApiService
         }
 
         // store the dhcp and all the ips.
-        storeIPs(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range,
-            IpPoolManagement.Type.PRIVATE);
+        storeIPs(virtualDatacenter.getDatacenter(), virtualDatacenter, newVlan, range);
         // Trace
         if (tracer != null)
         {
@@ -398,20 +413,35 @@ public class NetworkService extends DefaultApiService
         VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
         VirtualMachine vm = getVirtualMachine(vapp, vmId);
 
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
         if (ips.size() == 1)
         {
-            addConflictErrors(APIError.VLANS_CAN_NOT_DELETE_LAST_NIC);
+            addConflictErrors(APIError.VLANS_CAN_NOT_DETACH_LAST_NIC);
             flushErrors();
         }
-        for (IpPoolManagement ip : ips)
+
+        IpPoolManagement ipToDetach = repo.findIpByVirtualMachine(vm, nicId);
+        if (ipToDetach == null)
         {
-            if (ip.getId().equals(nicId))
-            {
-                newVm.getIps().remove(nicId);
-            }
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
         }
+
+        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        Iterator<IpPoolManagement> ipIterator = newVm.getIps().iterator();
+        while (ipIterator.hasNext())
+        {
+            IpPoolManagement currentIp = ipIterator.next();
+            if (currentIp.getRasd().equals(ipToDetach.getRasd()))
+            {
+                ipIterator.remove();
+            }
+
+            return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+        }
+
+        addUnexpectedErrors(APIError.NON_EXISTENT_IP);
+        flushErrors();
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
     }
@@ -436,6 +466,34 @@ public class NetworkService extends DefaultApiService
         LOGGER.debug("Returning the default network used by Virtual Datacenter '" + vdc.getName()
             + "'.");
         return vdc.getDefaultVlan();
+    }
+
+    /**
+     * Asks for an IP managed by a Virtual Virtual Machine.
+     * 
+     * @param vdcId identifier of the Virtual Datacenter.
+     * @param vappId identifier of the Virtual Appliance.
+     * @param vmId identifier of the Virtual Machine.
+     * @param nicId identifier of the IP to return
+     * @return the list of matching elements.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public IpPoolManagement getIpPoolManagementByVirtualMachine(final Integer vdcId,
+        final Integer vappId, final Integer vmId, final Integer nicId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        IpPoolManagement ip = repo.findIpByVirtualMachine(vm, nicId);
+        if (ip == null)
+        {
+            addNotFoundErrors(APIError.NON_EXISTENT_IP);
+            flushErrors();
+        }
+
+        LOGGER.debug("Returning the list of IPs used by Virtual Machine '" + vm.getName() + "'.");
+        return ip;
     }
 
     /**
@@ -775,7 +833,7 @@ public class NetworkService extends DefaultApiService
         List<IpPoolManagement> ips = repo.findIpsByVirtualMachine(vm);
         if (ips.size() == 1)
         {
-            addConflictErrors(APIError.VLANS_CAN_NOT_DELETE_LAST_NIC);
+            addConflictErrors(APIError.VLANS_CAN_NOT_DETACH_LAST_NIC);
             flushErrors();
         }
         Boolean found = Boolean.FALSE;
@@ -1430,7 +1488,7 @@ public class NetworkService extends DefaultApiService
      * @return
      */
     protected void storeIPs(final Datacenter datacenter, final VirtualDatacenter vdc,
-        final VLANNetwork vlan, final Collection<IPAddress> range, final IpPoolManagement.Type type)
+        final VLANNetwork vlan, final Collection<IPAddress> range)
     {
 
         Collection<String> allMacAddresses = repo.getAllMacs();
@@ -1455,12 +1513,7 @@ public class NetworkService extends DefaultApiService
             }
 
             IpPoolManagement ipManagement =
-                new IpPoolManagement(vlan,
-                    macAddress,
-                    name,
-                    address.toString(),
-                    vlan.getName(),
-                    type);
+                new IpPoolManagement(vlan, macAddress, name, address.toString(), vlan.getName());
 
             if (vdc != null)
             {

@@ -19,12 +19,10 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
 package com.abiquo.api.services;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.cloud.VirtualMachineService;
-import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.limit.EnterpriseLimitChecker;
@@ -51,7 +48,6 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
-import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
@@ -141,32 +137,6 @@ public class StorageService extends DefaultApiService
     }
 
     /**
-     * Detach all the list of disks from a Virtual Machine.
-     * <p>
-     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
-     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
-     * will return the identifier of the task object associated to the reconfigure operation.
-     * 
-     * @param vdcId identifier of the virtual datacenter.
-     * @param vappId identifier of the virtual appliance
-     * @param vmId identifier of the virtual machine
-     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
-     *         otherwise.
-     */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId)
-    {
-        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
-        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
-        VirtualMachine vm = getVirtualMachine(vapp, vmId);
-
-        VirtualMachine newVm = vmService.createBackUpObject(vm);
-        newVm.getDisks().clear();
-
-        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
-    }
-
-    /**
      * Set the list of disks from a Virtual Machine.
      * <p>
      * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
@@ -194,19 +164,6 @@ public class StorageService extends DefaultApiService
 
         return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newvm);
     }
-
-    /**
-     * Attach a list of disks to a virtual machine.
-     * <p>
-     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
-     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
-     * will return the identifier of the task object associated to the reconfigure operation.
-     * 
-     * @param volume The volume to attach.
-     * @param vm The virtual machine.
-     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
-     *         otherwise.
-     */
 
     /**
      * Creates a new resource {@link DiskManagement} associated to a virtual machine.
@@ -249,6 +206,19 @@ public class StorageService extends DefaultApiService
     }
 
     /**
+     * Attach a list of disks to a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the attachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param volume The volume to attach.
+     * @param vm The virtual machine.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+
+    /**
      * Delete the disk from the virtual datacenter.\
      * 
      * @param vdcId identifier of the {@link VirtualDatacenter}
@@ -283,6 +253,79 @@ public class StorageService extends DefaultApiService
                 EventType.HARD_DISK_DELETE, "hardDisk.deleted", disk.getId(), disk.getSizeInMb(),
                 vdc.getName());
         }
+    }
+
+    /**
+     * Detach a hard disk from a virtual machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param diskId identifier of the disk to detach.
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object detachHardDisk(Integer vdcId, Integer vappId, Integer vmId, Integer diskId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+        DiskManagement disk = vdcRepo.findHardDiskByVirtualMachine(vm, diskId);
+        
+        if (disk == null)
+        {
+            addNotFoundErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+            flushErrors();
+        }
+
+        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        Iterator<DiskManagement> diskIterator = newVm.getDisks().iterator();
+        while (diskIterator.hasNext())
+        {
+            DiskManagement currentDisk = diskIterator.next();
+            if (currentDisk.getRasd().equals(disk.getRasd()))
+            {
+                diskIterator.remove();
+            }
+            
+            return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
+        }
+        
+        addUnexpectedErrors(APIError.HD_NON_EXISTENT_HARD_DISK);
+        flushErrors();
+        
+        return null;
+    }
+
+    /**
+     * Detach all the list of disks from a Virtual Machine.
+     * <p>
+     * If the virtual machine is not deployed, the method simply returns <code>null</code>. If the
+     * virtual machine is deployed, the detachment will run a reconfigure operation and this method
+     * will return the identifier of the task object associated to the reconfigure operation.
+     * 
+     * @param vdcId identifier of the virtual datacenter.
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return The id of the Tarantino task if the virtual machine is deployed, <code>null</code>
+     *         otherwise.
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Object detachHardDisks(final Integer vdcId, final Integer vappId, final Integer vmId)
+    {
+        VirtualDatacenter vdc = getVirtualDatacenter(vdcId);
+        VirtualAppliance vapp = getVirtualAppliance(vdc, vappId);
+        VirtualMachine vm = getVirtualMachine(vapp, vmId);
+
+        VirtualMachine newVm = vmService.createBackUpObject(vm);
+        newVm.getDisks().clear();
+
+        return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
     }
 
     /**

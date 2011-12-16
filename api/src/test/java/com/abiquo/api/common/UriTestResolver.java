@@ -547,7 +547,25 @@ public class UriTestResolver
         values.put(PrivateNetworkResource.PRIVATE_NETWORK, vlanId.toString());
 
         return resolveURI(template, values);
+    }
+    
+    public static String resolvePrivateNetworkIPURI(final Integer virtualDatacenterId,
+        final Integer vlanId, final Integer ipId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                PrivateNetworksResource.PRIVATE_NETWORKS_PATH,
+                PrivateNetworkResource.PRIVATE_NETWORK_PARAM, 
+                IpAddressesResource.IP_ADDRESSES,
+                IpAddressesResource.IP_ADDRESS_PARAM);
 
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, virtualDatacenterId.toString());
+        values.put(PrivateNetworkResource.PRIVATE_NETWORK, vlanId.toString());
+        values.put(IpAddressesResource.IP_ADDRESS, ipId.toString());
+
+        return resolveURI(template, values);
     }
 
     /**
@@ -730,11 +748,11 @@ public class UriTestResolver
      * @param vdcId identifier of the virtual datacenter
      * @param vappId identifier of the virtual apliance
      * @param vmId identifier of the virtual machine
-     * @param diskOrder identifier of the disk inside the virtual machine.
+     * @param diskId identifier of the disk inside the virtual machine.
      * @return URI of the virtual appliance resource into string object
      */
     public static String resolveVirtualMachineDiskUri(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskOrder)
+        final Integer vmId, final Integer diskId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
@@ -751,11 +769,76 @@ public class UriTestResolver
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
-        values.put(VirtualMachineStorageConfigurationResource.DISK, diskOrder.toString());
+        values.put(VirtualMachineStorageConfigurationResource.DISK, diskId.toString());
 
         return resolveURI(template, values);
     }
 
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/network/ips
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineIpsUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineNetworkConfigurationResource.NETWORK,
+                VirtualMachineNetworkConfigurationResource.NICS_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/network/ips/{ipId}
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual apliance
+     * @param vmId identifier of the virtual machine
+     * @param ipId identifier of the ip inside the virtual machine.
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineIpUri(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final Integer diskOrder)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineNetworkConfigurationResource.NETWORK,
+                VirtualMachineNetworkConfigurationResource.NICS_PATH,
+                VirtualMachineNetworkConfigurationResource.NIC_PARAM);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        values.put(VirtualMachineNetworkConfigurationResource.NIC, diskOrder.toString());
+
+        return resolveURI(template, values);
+    }
+    
     /**
      * Creates something like
      * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
