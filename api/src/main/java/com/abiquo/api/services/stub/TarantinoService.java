@@ -529,7 +529,12 @@ public class TarantinoService extends DefaultApiService
         {
             Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
             String virtualMachineId = String.valueOf(virtualMachine.getId());
+            RemoteService service = remoteServiceService.getVSMService(datacenter);
 
+            // Unsubscribe the virtual machine to prevent unlock
+            vsm.unsubscribe(service, virtualMachine);
+
+            // Build the job sequence
             HypervisorConnection connection =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
 
@@ -554,10 +559,11 @@ public class TarantinoService extends DefaultApiService
 
             // Send Tarantino task
             DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
-            send(datacenter, tarantinoTask, EventType.VM_STATE); // TODO eventType
+            send(datacenter, tarantinoTask, EventType.VAPP_BUNDLE); // TODO eventType
 
             return tarantinoTask.getId();
         }
+        // TODO
         catch (NotFoundException e)
         {
             // We need to unsuscribe the machine
@@ -589,7 +595,7 @@ public class TarantinoService extends DefaultApiService
     protected boolean mustPowerOffToSnapshot(final VirtualMachine virtualMachine)
     {
         VirtualMachineState state = virtualMachine.getState();
-        return (state == VirtualMachineState.ON || state == VirtualMachineState.OFF);
+        return (state == VirtualMachineState.ON || state == VirtualMachineState.PAUSED);
     }
 
     /**

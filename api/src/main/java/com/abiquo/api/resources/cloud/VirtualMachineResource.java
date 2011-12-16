@@ -103,8 +103,6 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
 
-    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/snapshot";
-
     @Autowired
     private VirtualMachineService vmService;
 
@@ -464,9 +462,8 @@ public class VirtualMachineResource extends AbstractResource
         AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
 
         String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + taskId;
-
         a202.setStatusUrlLink(taskLink);
-        a202.setEntity(null);
+        a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
     }
@@ -709,42 +706,6 @@ public class VirtualMachineResource extends AbstractResource
 
         String link =
             vmService.resetVirtualMachine(vmId, vappId, vdcId, VirtualMachineStateTransition.RESET);
-        // If the link is null no Task was performed
-        if (link == null)
-        {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
-        }
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity(null);
-
-        return a202;
-    }
-
-    /**
-     * Snapshot a {@link VirtualMachine}.>
-     * 
-     * @param vdcId VirtualDatacenter id
-     * @param vappId VirtualAppliance id
-     * @param vmId VirtualMachine id
-     * @param restBuilder injected restbuilder context parameter
-     * @return a link where you can keep track of the progress and a message.
-     * @throws Exception
-     */
-    @POST
-    @Path(VIRTUAL_MACHINE_ACTION_SNAPSHOT)
-    public AcceptedRequestDto<String> virtualMachineSnapshot(
-        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
-        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
-    {
-
-        String link =
-            vmService.virtualMachineSnapshot(vmId, vappId, vdcId,
-                VirtualMachineStateTransition.SNAPSHOT);
         // If the link is null no Task was performed
         if (link == null)
         {

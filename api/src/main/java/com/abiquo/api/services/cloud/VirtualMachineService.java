@@ -33,6 +33,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -591,19 +592,12 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    /**
-     * The {@link VirtualMachine} is in appropriate state.
-     * <ul>
-     * <li>{@link VirtualMachineState#OFF}</li>
-     * </ul>
-     * 
-     * @param vm
-     */
-    public void checkSnapshotAllowed(final VirtualMachine vm)
+    public void checkSnapshotAllowed(final VirtualMachine virtualMachine)
     {
-        if (vm.getState() != VirtualMachineState.OFF)
+        if (virtualMachine.getState().isDeployed())
         {
-            addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT);
+            // TODO Add some APIError more specific?
+            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
             flushErrors();
         }
     }
@@ -1196,47 +1190,52 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        // Check if the operation is allowed
+        // Check if the operation is allowed and lock the virtual machine
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         checkSnapshotAllowed(virtualMachine);
 
-        // TODO lockVirtualMachine(virtualMachine);
-        // TODO unsubscribe(virtualMachine);
+        lockVirtualMachine(virtualMachine);
 
         // Do the snapshot
         VirtualMachineDescriptionBuilder definitionBuilder =
             jobCreator.toTarantinoDto(virtualMachine, virtualApp);
-
-        VirtualMachineDefinition definition = null;
-        DiskSnapshot destinationDisk = null;
 
         if (!virtualMachine.isStateful() && virtualMachine.isManaged())
         {
             VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
             Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
-            definition = definitionBuilder.build(virtualMachine.getUuid());
+            VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
 
-            destinationDisk = new DiskSnapshot();
+            DiskSnapshot destinationDisk = new DiskSnapshot();
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
-            destinationDisk.setPath(template.getPath() + "/snapshots/sadsadsad"); // XXX
-            destinationDisk.setSnapshotName("lñasdñslakd"); // XXX
-            destinationDisk.setRepositoryManagerAddress(""); // XXX
+            destinationDisk.setPath(formatSnapshotPath(template));
+            destinationDisk.setSnapshotName(formatSnapshotName(template));
+            destinationDisk.setRepositoryManagerAddress(""); // TODO for XenServer
+
+            return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk);
         }
         // else if (!virtualMachine.isManaged())
         // else if (virtualMachine.isStateful())
 
-        return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk);
+        return null;
     }
 
-    public void checkSnapshotAllowed(final VirtualMachine virtualMachine)
+    protected String formatSnapshotPath(VirtualMachineTemplate template)
     {
-        if (virtualMachine.getState().isDeployed())
+        String filename = template.getPath();
+
+        if (!template.isMaster())
         {
-            // TODO Add some APIError more specific?
-            addConflictErrors(APIError.VIRTUAL_MACHINE_NOT_DEPLOYED);
-            flushErrors();
+            filename = template.getMaster().getPath();
         }
+
+        return FilenameUtils.getFullPath(filename);
+    }
+
+    protected String formatSnapshotName(VirtualMachineTemplate template)
+    {
+        return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), template.getName());
     }
 
     /**

@@ -201,8 +201,7 @@ public class RemoteServiceService extends DefaultApiService
                     remoteService.setStatus(STATUS_ERROR);
                     APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName()
-                        + ", " + amEx.getMessage()));
+                        .getName() + ", " + amEx.getMessage()));
 
                     return configurationErrors;
 
@@ -229,8 +228,7 @@ public class RemoteServiceService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + ", " + error.getMessage()));
+                    .getName() + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -242,6 +240,11 @@ public class RemoteServiceService extends DefaultApiService
     public RemoteService getRemoteService(final Integer id)
     {
         return infrastructureRepo.findRemoteServiceById(id);
+    }
+
+    public RemoteService getVSMService(final Datacenter datacenter)
+    {
+        return getRemoteService(datacenter.getId(), RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
     }
 
     public RemoteService getRemoteService(final Integer datacenterId, final RemoteServiceType type)
@@ -548,8 +551,8 @@ public class RemoteServiceService extends DefaultApiService
     {
         ErrorsDto configurationErrors = new ErrorsDto();
 
-        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter, remoteService
-            .getType()))
+        if (infrastructureRepo.existAnyRemoteServiceWithTypeInDatacenter(datacenter,
+            remoteService.getType()))
         {
             APIError error = APIError.REMOTE_SERVICE_TYPE_EXISTS;
             configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType().getName()
@@ -568,8 +571,7 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     APIError error = APIError.REMOTE_SERVICE_URL_ALREADY_EXISTS;
                     configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                        .getName()
-                        + " : " + error.getMessage()));
+                        .getName() + " : " + error.getMessage()));
                     if (flushErrors)
                     {
                         addConflictErrors(error);
@@ -580,8 +582,7 @@ public class RemoteServiceService extends DefaultApiService
             {
                 APIError error = APIError.REMOTE_SERVICE_MALFORMED_URL;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + " : " + error.getMessage()));
+                    .getName() + " : " + error.getMessage()));
                 if (flushErrors)
                 {
                     addValidationErrors(error);
