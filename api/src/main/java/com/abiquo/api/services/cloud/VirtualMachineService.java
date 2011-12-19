@@ -354,6 +354,26 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
 
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
+        {
+            LOGGER.debug("Will reconfigure the vm template");
+
+            if (vm.getState().existsInHypervisor())
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
+                flushErrors();
+            }
+
+            // already checked is not attached
+            if (newValues.getVirtualMachineTemplate().isStateful())
+            {
+                LOGGER.debug("Attaching virtual machine template volume");
+                newValues.getVirtualMachineTemplate().getVolume().attach(0, vm);
+                // primary disk sequence == 0
+            }
+        }
+
         // if NOT_ALLOCATED isn't necessary to check the resource limits and
         // insert the 'backup' resources
         if (vm.getState() == VirtualMachineState.OFF)
@@ -399,6 +419,62 @@ public class VirtualMachineService extends DefaultApiService
         // VirtualMachine is the definition of the VirtualMachine and the job, power on
         return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
             newVirtualMachineTarantino);
+    }
+
+    /**
+     * Checks if the {@link VirtualMachineTemplate} is being changed, if so checks the new template
+     * is an instance or a persistent of the original template (if not reports a conflict
+     * {@link APIError}).
+     * 
+     * @return true if the {@link VirtualMachineTemplate} is being reconfigured.
+     */
+    protected boolean checkReconfigureTemplate(final VirtualMachineTemplate original,
+        final VirtualMachineTemplate requested)
+    {
+        if (original.getId() == requested.getId())
+        {
+            return false;
+        }
+        else if (!original.isManaged())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED);
+            flushErrors();
+        }
+        else if (!requested.isManaged())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_MANAGED);
+            flushErrors();
+        }
+        else if (requested.isStateful() && requested.getVolume().isAttached())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT);
+            flushErrors();
+        }
+        else if (original.isMaster() && !requested.isMaster()
+            && requested.getMaster().getId() != original.getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (!original.isMaster() && !requested.isMaster()
+            && requested.getMaster().getId() != original.getMaster().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (requested.isMaster() && !original.isMaster()
+            && requested.getId() != original.getMaster().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (original.isMaster() && requested.isMaster())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+
+        return true;
     }
 
     /**
@@ -1230,7 +1306,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param template The {@link VirtualMachineTemplate} to consider
      * @return The destination path
      */
-    protected String formatSnapshotPath(VirtualMachineTemplate template)
+    protected String formatSnapshotPath(final VirtualMachineTemplate template)
     {
         String filename = template.getPath();
 
@@ -1248,7 +1324,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param template The {@link VirtualMachineTemplate} to consider
      * @return The snapshot filename
      */
-    protected String formatSnapshotName(VirtualMachineTemplate template)
+    protected String formatSnapshotName(final VirtualMachineTemplate template)
     {
         String name = FilenameUtils.getName(template.getPath());
 

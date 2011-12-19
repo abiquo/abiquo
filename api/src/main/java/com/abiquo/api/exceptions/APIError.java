@@ -260,12 +260,18 @@ public enum APIError
         "VM-21", "The node virtual image does not exist"), VIRTUAL_MACHINE_ESXI_INCOMPATIBLE_DISK_CONTROLLER(
         "VM-22", "ESXi hosts can't deploy an VMDK sparse using SCSI disk controller"), VIRTUAL_MACHINE_BACKUP_NOT_FOUND(
         "VM-23",
-        "Can't restore the original virtual machine (after a failed reconfigure), the original virutual machine info was not found."),
-        RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
-            "VM-24", "The resource is already used by another virtual machine"), VIRTUAL_MACHINE_INVALID_STATE_RESET(
+        "Can't restore the original virtual machine (after a failed reconfigure), the original virutual machine info was not found."), RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE(
+        "VM-24", "The resource is already used by another virtual machine"), VIRTUAL_MACHINE_INVALID_STATE_RESET(
         "VM-26", "The allowed power states for Reset Virtual Machines is ON"), VIRTUAL_MACHINE_INVALID_STATE_SNAPSHOT(
-        "VM-27", "The allowed power states for Snapshot Virtual Machines is OFF"),
-    
+        "VM-27", "The allowed power states for Snapshot Virtual Machines is OFF"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_MANAGED(
+        "VM-28", "Cannot reconfigure to a not managed virtual machine template"), VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED(
+        "VM-29", "Cannot reconfigure the template of a not managed virtual machine"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER(
+        "VM-30",
+        "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
+        "VM-31", "Provided virtual machine template for reconfigure is an already attached volume"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
+        "VM-32",
+        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"),
+
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
         "ROLE-1", "The requested role cannot be modified"), PRIVILEGE_PARAM_NOT_FOUND("ROLE-2",

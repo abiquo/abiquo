@@ -58,14 +58,17 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
     }
 
     @Override
-    public void assertAllPropertiesEqual(final VirtualMachineTemplate img1, final VirtualMachineTemplate img2)
+    public void assertAllPropertiesEqual(final VirtualMachineTemplate img1,
+        final VirtualMachineTemplate img2)
     {
         // Properties
-        AssertEx.assertPropertiesEqualSilent(img1, img2, VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY,
-            VirtualMachineTemplate.NAME_PROPERTY, VirtualMachineTemplate.STATEFUL_PROPERTY,
-            VirtualMachineTemplate.CPU_REQUIRED_PROPERTY, VirtualMachineTemplate.PATH_PROPERTY,
-            VirtualMachineTemplate.OVFID_PROPERTY, VirtualMachineTemplate.RAM_REQUIRED_PROPERTY,
-            VirtualMachineTemplate.HD_REQUIRED_PROPERTY, VirtualMachineTemplate.DISK_FILE_SIZE_PROPERTY,
+        AssertEx.assertPropertiesEqualSilent(img1, img2,
+            VirtualMachineTemplate.DISKFORMAT_TYPE_PROPERTY, VirtualMachineTemplate.NAME_PROPERTY,
+            VirtualMachineTemplate.STATEFUL_PROPERTY, VirtualMachineTemplate.CPU_REQUIRED_PROPERTY,
+            VirtualMachineTemplate.PATH_PROPERTY, VirtualMachineTemplate.OVFID_PROPERTY,
+            VirtualMachineTemplate.RAM_REQUIRED_PROPERTY,
+            VirtualMachineTemplate.HD_REQUIRED_PROPERTY,
+            VirtualMachineTemplate.DISK_FILE_SIZE_PROPERTY,
             VirtualMachineTemplate.DESCRIPTION_PROPERTY, VirtualMachineTemplate.SHARED_PROPERTY,
             VirtualMachineTemplate.COST_CODE_PROPERTY);
 
@@ -108,57 +111,70 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         return createInstance(enterprise, datacenter);
     }
 
-    public VirtualMachineTemplate createInstance(final Enterprise enterprise, final Datacenter datacenter)
+    public VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Datacenter datacenter)
     {
         Repository repository = repositoryGenerator.createInstance(datacenter);
         return createInstance(enterprise, repository);
     }
 
-    public VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository)
+    public VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Repository repository)
     {
         Category category = categoryGenerator.createUniqueInstance();
         return createInstance(enterprise, repository, category);
     }
 
-    public VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository,
-        final DiskFormatType baseType, final String name)
+    public VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Repository repository, final DiskFormatType baseType, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
 
         return createInstance(enterprise, repository, 0, 0, 0, name, category, baseType);
     }
 
-    public VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository,
-        final Category category)
+    public VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Repository repository, final Category category)
     {
         final String name =
-            newString(nextSeed(), VirtualMachineTemplate.NAME_LENGTH_MIN, VirtualMachineTemplate.NAME_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.NAME_LENGTH_MIN,
+                VirtualMachineTemplate.NAME_LENGTH_MAX);
 
         return createInstance(enterprise, repository, 0, 0, 0, name, category, DiskFormatType.RAW);
     }
 
-    public VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository,
-        final int cpuRequired, final int ramRequired, final long hdRequired, final String name)
+    public VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Repository repository, final int cpuRequired, final int ramRequired,
+        final long hdRequired, final String name)
     {
         Category category = categoryGenerator.createUniqueInstance();
-        return createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired, name, category, DiskFormatType.RAW);
+        return createInstance(enterprise, repository, cpuRequired, ramRequired, hdRequired, name,
+            category, DiskFormatType.RAW);
     }
 
-    protected VirtualMachineTemplate createInstance(final Enterprise enterprise, final Repository repository,
-        final int cpuRequired, final int ramRequired, final long hdRequired, final String name,
-        final Category category, final DiskFormatType diskFormat)
+    protected VirtualMachineTemplate createInstance(final Enterprise enterprise,
+        final Repository repository, final int cpuRequired, final int ramRequired,
+        final long hdRequired, final String name, final Category category,
+        final DiskFormatType diskFormat)
     {
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName =
-            newString(nextSeed(), VirtualMachineTemplate.PATH_LENGTH_MIN, VirtualMachineTemplate.PATH_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.PATH_LENGTH_MIN,
+                VirtualMachineTemplate.PATH_LENGTH_MAX);
         String ovfid =
-            newString(nextSeed(), VirtualMachineTemplate.OVFID_LENGTH_MIN, VirtualMachineTemplate.OVFID_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.OVFID_LENGTH_MIN,
+                VirtualMachineTemplate.OVFID_LENGTH_MAX);
         String creationUser =
             newString(nextSeed(), VirtualMachineTemplate.CREATION_USER_LENGTH_MIN,
                 VirtualMachineTemplate.CREATION_USER_LENGTH_MAX);
 
         VirtualMachineTemplate vtemplate =
-            new VirtualMachineTemplate(enterprise, name, diskFormat, pathName, diskFileSize, category);
+            new VirtualMachineTemplate(enterprise,
+                name,
+                diskFormat,
+                pathName,
+                diskFileSize,
+                category);
 
         vtemplate.setRepository(repository);
         vtemplate.setCpuRequired(cpuRequired);
@@ -177,12 +193,15 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         Category category = categoryGenerator.createUniqueInstance();
 
         final String name =
-            newString(nextSeed(), VirtualMachineTemplate.NAME_LENGTH_MIN, VirtualMachineTemplate.NAME_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.NAME_LENGTH_MIN,
+                VirtualMachineTemplate.NAME_LENGTH_MAX);
         Long diskFileSize = newBigDecimal(nextSeed()).longValue();
         final String pathName =
-            newString(nextSeed(), VirtualMachineTemplate.PATH_LENGTH_MIN, VirtualMachineTemplate.PATH_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.PATH_LENGTH_MIN,
+                VirtualMachineTemplate.PATH_LENGTH_MAX);
         String ovfid =
-            newString(nextSeed(), VirtualMachineTemplate.OVFID_LENGTH_MIN, VirtualMachineTemplate.OVFID_LENGTH_MAX);
+            newString(nextSeed(), VirtualMachineTemplate.OVFID_LENGTH_MIN,
+                VirtualMachineTemplate.OVFID_LENGTH_MAX);
         String creationUser =
             newString(nextSeed(), VirtualMachineTemplate.CREATION_USER_LENGTH_MIN,
                 VirtualMachineTemplate.CREATION_USER_LENGTH_MAX);
@@ -206,7 +225,8 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         return vi;
     }
 
-    public VirtualMachineTemplate createSlaveVirtualMachineTemplate(final VirtualMachineTemplate master)
+    public VirtualMachineTemplate createSlaveVirtualMachineTemplate(
+        final VirtualMachineTemplate master)
     {
         VirtualMachineTemplate slave =
             createInstance(master.getEnterprise(), master.getRepository(), master.getCategory());
@@ -214,7 +234,20 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         return slave;
     }
 
-    public VirtualMachineTemplate createVirtualMachineTemplateWithConversions(final Enterprise enterprise)
+    public VirtualMachineTemplate createSlavePersistent(final VirtualMachineTemplate master,
+        final VolumeManagement volman)
+    {
+        VirtualMachineTemplate slave =
+            createInstanceGenericISCSI(master.getEnterprise(), master.getRepository()
+                .getDatacenter(), volman);
+        slave.setMaster(master);
+        slave.setCategory(master.getCategory());
+        slave.setRepository(master.getRepository());
+        return slave;
+    }
+
+    public VirtualMachineTemplate createVirtualMachineTemplateWithConversions(
+        final Enterprise enterprise)
     {
         VirtualMachineTemplate template = createInstance(enterprise);
         VirtualImageConversion conversion =
