@@ -311,8 +311,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine,
-            buildVirtualMachineFromDto(vdc, virtualAppliance, dto));
+        VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
+        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
+        
+        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
     /**
@@ -459,22 +461,6 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
         repo.update(old);
-    }
-
-    private List<VolumeManagement> getOnlyDeatachedRasd(final List<VolumeManagement> currentRasds,
-        final List<VolumeManagement> newRasds)
-    {
-        List<VolumeManagement> reallyNewRasd = new LinkedList<VolumeManagement>();
-
-        for (VolumeManagement newRasd : newRasds)
-        {
-            if (!newRasd.isAttached()) // TODO attached in the same VM
-            {
-                reallyNewRasd.add(newRasd);
-            }
-        }
-
-        return reallyNewRasd;
     }
 
     /**
@@ -2291,9 +2277,9 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
         final RasdManagement resource, final Integer attachOrder)
     {
-        if (resource.getVirtualMachine() != null)
+        if (resource.getVirtualMachine() != null && resource.getVirtualMachine().getId() != null)
         {
-            if (!resource.getVirtualMachine().getTemporal().equals(vm.getId()))
+            if (!resource.getVirtualMachine().getId().equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();
