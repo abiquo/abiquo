@@ -24,6 +24,8 @@ package com.abiquo.model.enumerator;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
+import org.apache.commons.lang.StringUtils;
+
 @XmlType(name = "diskFormatType")
 @XmlEnum
 public enum DiskFormatType
@@ -54,11 +56,11 @@ public enum DiskFormatType
 
     /* 6 */
     VHD_FLAT("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_flat",
-        "VHD Fixed Disk", DiskFormatTypeAlias.VHD),
+        "VHD Fixed Disk", DiskFormatTypeAlias.VHD, "vhd"),
 
     /* 7 */
     VHD_SPARSE("http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx#monolithic_sparse",
-        "VHD Sparse Disk", DiskFormatTypeAlias.VHD),
+        "VHD Sparse Disk", DiskFormatTypeAlias.VHD, "vhd"),
 
     /* 8 */
     VDI_FLAT("http://forums.virtualbox.org/viewtopic.php?t=8046#monolithic_flat", "VDI Fixed disk",
@@ -79,6 +81,8 @@ public enum DiskFormatType
     public final String uri, description;
 
     public final DiskFormatTypeAlias alias;
+
+    public final String extension;
 
     public static final DiskFormatType[] VBOX_COMPATIBLES = new DiskFormatType[] {VMDK_SPARSE,
     VHD_FLAT, VHD_SPARSE, VDI_FLAT, VDI_SPARSE};
@@ -106,6 +110,16 @@ public enum DiskFormatType
         this.uri = uri;
         this.description = description;
         this.alias = alias;
+        this.extension = StringUtils.EMPTY;
+    }
+
+    private DiskFormatType(final String uri, final String description,
+        final DiskFormatTypeAlias alias, final String extension)
+    {
+        this.uri = uri;
+        this.description = description;
+        this.alias = alias;
+        this.extension = extension;
     }
 
     public DiskFormatTypeAlias getAlias()
@@ -153,5 +167,10 @@ public enum DiskFormatType
     public static int getIdMax()
     {
         return ID_MAX;
+    }
+
+    public boolean requiresExtension()
+    {
+        return !StringUtils.isBlank(extension);
     }
 }

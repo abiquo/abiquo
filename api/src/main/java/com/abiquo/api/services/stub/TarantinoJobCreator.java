@@ -415,8 +415,9 @@ public class TarantinoJobCreator extends DefaultApiService
             logger.debug("Network configuration without gateway");
             // Only the data not related to the network since this data is configured based on the
             // configureNetwork parameter
+            Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
-                .getVirtualSwitch(), i.getNetworkName(), i.getVlanNetwork().getTag(), i.getName(),
+                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(),
                 null, null, null, null, null, null, null,
                 Integer.valueOf(i.getRasd().getConfigurationName()));
         }

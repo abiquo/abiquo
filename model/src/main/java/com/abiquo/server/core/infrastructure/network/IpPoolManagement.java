@@ -106,7 +106,7 @@ public class IpPoolManagement extends RasdManagement
     }
 
     public IpPoolManagement(final VLANNetwork vlan, final String mac, final String name,
-        final String ip, final String networkName, final Type type)
+        final String ip, final String networkName)
     {
         super(DISCRIMINATOR);
 

@@ -45,9 +45,6 @@
  */
 package com.abiquo.api.resources.cloud;
 
-import static com.abiquo.api.util.URIResolver.buildPath;
-
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -59,28 +56,21 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.mapper.APIExceptionMapper;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.StorageService;
 import com.abiquo.api.util.IRESTBuilder;
-import com.abiquo.api.util.URIResolver;
-import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.LinksDto;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 
 /**
  * <pre>
@@ -270,10 +260,10 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
-        @PathParam(DISK) @NotNull @Min(0) final Integer diskOrder,
+        @PathParam(DISK) @NotNull @Min(0) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        DiskManagement disk = service.getHardDiskByVM(vdcId, vappId, vmId, diskOrder);
+        DiskManagement disk = service.getHardDiskByVM(vdcId, vappId, vmId, diskId);
 
         return createDiskTransferObject(disk, vdcId, vappId, restBuilder);
     }
@@ -300,7 +290,18 @@ public class VirtualMachineStorageConfigurationResource extends AbstractResource
         @PathParam(DISK) @NotNull @Min(0) final Integer diskId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // TODO : apply Albert configuration changes.
+        Object result = service.detachHardDisk(vdcId, vappId, vmId, diskId);
+
+        // The attach method may return a Tarantino task identifier if the operation requires a
+        // reconfigure. Otherwise it will return null.
+        if (result != null)
+        {
+            AcceptedRequestDto<Object> response = new AcceptedRequestDto<Object>();
+            response.setStatusUrlLink("http://status");
+            response.setEntity(result);
+            return response;
+        }
+
         return null;
     }
 

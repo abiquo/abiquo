@@ -12,7 +12,8 @@
 				<include name="it-network" />
 				<include name="it-appslibrary" />
 				<include name="it-all" />				
-				<exclude name="it-am"/>				
+				<exclude name="it-am"/>	
+				<include name="it-editvm" />			
 			</run>
 		</groups>
 		<packages>

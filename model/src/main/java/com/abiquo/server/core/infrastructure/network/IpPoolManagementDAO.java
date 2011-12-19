@@ -41,6 +41,7 @@ import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.common.persistence.DefaultDAOBase;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement.OrderByEnum;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.util.PagedList;
 import com.softwarementors.bzngine.entities.PersistentEntity;
 
@@ -85,6 +86,22 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
         + " AND vn.network.id = vdc.network.id" + " AND vdc.enterprise.id = ent.id"
         + " AND ent.id = :ent_id " + " AND " + "( ip.ip like :filterLike "
+        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
+        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
+
+    public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
+        + " left join ip.virtualMachine vm "
+        + " left join ip.virtualAppliance vapp "
+        + " left join ip.virtualDatacenter vdc, "
+        + " NetworkConfiguration nc, "
+        + " VLANNetwork vn "
+        + " join vn.enterprise ent, "
+        + " DatacenterLimits dcl"
+        // + " WHERE ip.dhcp.id = nc.dhcp.id "
+        + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
+        + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
+        + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
+        + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
@@ -201,22 +218,6 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
         + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
 
-    public static final String BY_EXTERNAL_VLAN = "SELECT ip FROM IpPoolManagement ip "
-        + " left join ip.virtualMachine vm "
-        + " left join ip.virtualAppliance vapp "
-        + " left join ip.virtualDatacenter vdc, "
-        + " NetworkConfiguration nc, "
-        + " VLANNetwork vn "
-        + " join vn.enterprise ent, "
-        + " DatacenterLimits dcl"
-        // + " WHERE ip.dhcp.id = nc.dhcp.id "
-        + " WHERE ip.vlanNetwork.id = vn.id " + " AND nc.id = vn.configuration.id "
-        + " AND vn.id = :vlan_id " + " AND ent.id = :ent_id AND "
-        + " dcl.enterprise.id = ent.id AND " + " ip.available = 1 AND "
-        + " dcl.id = :dc_limit_id AND " + "( ip.ip like :filterLike "
-        + " OR ip.mac like :filterLike " + " OR ip.vlanNetwork.name like :filterLike "
-        + " OR vapp.name like :filterLike " + " OR vm.name like :filterLike " + ")";
-
     public static final String BY_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM ip_pool_management ip  , rasd_management rasd, virtualdatacenter vdc "
             + "  WHERE ip.idManagement= rasd.idManagement and rasd.idVirtualDatacenter "
@@ -273,6 +274,10 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         + "and ip.virtualDatacenter.id = vdc.id "
         + "and vlan.type = 'PUBLIC'";
 
+    public static final String GET_IP_INTO_VIRTUALMACHINE =
+        " SELECT ip FROM IpPoolManagement ip" + " WHERE ip.virtualMachine.id = :idVm "
+            + " AND ip.id = :idIp ";
+    
     private static Criterion equalMac(final String mac)
     {
         assert !StringUtils.isEmpty(mac);
@@ -624,6 +629,15 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         List<IpPoolManagement> ips = query.list();
         return ips;
 
+    }
+
+    public IpPoolManagement findIpByVirtualMachine(VirtualMachine vm, Integer nicId)
+    {
+        Query finalQuery = getSession().createQuery(GET_IP_INTO_VIRTUALMACHINE);
+        finalQuery.setParameter("idVm", vm.getId());
+        finalQuery.setParameter("idIp", nicId);
+
+        return (IpPoolManagement) finalQuery.uniqueResult();
     }
 
     public List<IpPoolManagement> findIpsByVirtualMachineWithConfigurationId(

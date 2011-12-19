@@ -743,6 +743,11 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY_REL, params));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT,
+            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL, params));
+
         links
             .add(builder.buildRestLink(VirtualMachineResource.class, RESTBuilder.REL_EDIT, params));
 
@@ -1325,6 +1330,12 @@ public class RESTBuilder implements IRESTBuilder
     }
 
     @Override
+    public RESTLink buildMovedVolumeLinks(final VolumeManagement movedVolume)
+    {
+        return null;
+    }
+
+    @Override
     public RESTLink buildVirtualMachineLink(final Integer vdc, final Integer vapp, final Integer vm)
     {
 
@@ -1335,6 +1346,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, vm);
 
         return builder.buildRestLink(VirtualMachineResource.class, "", params);
+
     }
 
 }
