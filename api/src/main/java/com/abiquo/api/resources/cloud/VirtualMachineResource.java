@@ -461,13 +461,7 @@ public class VirtualMachineResource extends AbstractResource
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + taskId;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity("You can keep track of the progress in the link");
-
-        return a202;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -718,6 +712,24 @@ public class VirtualMachineResource extends AbstractResource
         String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
         a202.setStatusUrlLink(taskLink);
         a202.setEntity(null);
+
+        return a202;
+    }
+
+    protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLink(final String taskId,
+        final UriInfo uriInfo)
+    {
+        // Build task link
+        String link = uriInfo.getRequestUri().toString();
+
+        link = link.replaceAll("action.*", "");
+        link = link.replaceAll("(/)*$", "");
+        link = link.concat(TaskResourceUtils.TASKS_PATH).concat("/").concat(taskId);
+
+        // Build AcceptedRequestDto
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink(link);
+        a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
     }

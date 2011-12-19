@@ -1194,6 +1194,7 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         checkSnapshotAllowed(virtualMachine);
 
+        VirtualMachineState state = virtualMachine.getState();
         lockVirtualMachine(virtualMachine);
 
         // Do the snapshot
@@ -1210,15 +1211,16 @@ public class VirtualMachineService extends DefaultApiService
             DiskSnapshot destinationDisk = new DiskSnapshot();
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
             destinationDisk.setPath(formatSnapshotPath(template));
-            destinationDisk.setSnapshotName(formatSnapshotName(template));
+            destinationDisk.setSnapshotFilename(formatSnapshotName(template));
+            destinationDisk.setName(UUID.randomUUID().toString()); // TODO Use a DTO
             destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
                 datacenter).getUri());
 
             return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
-                false);
+                mustPowerOffToSnapshot(state));
         }
-        // else if (!virtualMachine.isManaged())
-        // else if (virtualMachine.isStateful())
+        // else if (!virtualMachine.isManaged()) // TODO
+        // else if (virtualMachine.isStateful()) // TODO
 
         return null;
     }
@@ -1258,6 +1260,12 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
+    }
+
+    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    {
+        return virtualMachineState == VirtualMachineState.ON
+            || virtualMachineState == VirtualMachineState.PAUSED;
     }
 
     /**

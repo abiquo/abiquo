@@ -23,6 +23,7 @@ package com.abiquo.api.tasks.util;
 
 import java.security.InvalidParameterException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
@@ -186,7 +187,13 @@ public class DatacenterTaskBuilder
         job.setDiskSnapshot(destinationDisk);
 
         this.tarantinoTask.addDatacenterJob(job);
-        this.asyncTask.getJobs().add(createRedisJob(job.getId(), JobType.SNAPSHOT));
+
+        Job redisJob = createRedisJob(job.getId(), JobType.SNAPSHOT);
+        redisJob.getData().put("name", destinationDisk.getName());
+        redisJob.getData().put("path",
+            FilenameUtils.concat(destinationDisk.getPath(), destinationDisk.getSnapshotFilename()));
+
+        this.asyncTask.getJobs().add(redisJob);
 
         return this;
     }
