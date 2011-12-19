@@ -316,8 +316,9 @@ public class VirtualMachineService extends DefaultApiService
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
-        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
-        
+        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
+                                                   // to update the virtualMachine.
+
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
@@ -1053,7 +1054,7 @@ public class VirtualMachineService extends DefaultApiService
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
-                String.format("VirtualMachine % in %", virtualMachine.getUuid(), virtualMachine
+                String.format("VirtualMachine %s in %s", virtualMachine.getUuid(), virtualMachine
                     .getState().name());
 
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
@@ -1308,7 +1309,7 @@ public class VirtualMachineService extends DefaultApiService
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
     }
 
-    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    protected boolean mustPowerOffToSnapshot(final VirtualMachineState virtualMachineState)
     {
         return virtualMachineState == VirtualMachineState.ON
             || virtualMachineState == VirtualMachineState.PAUSED;
@@ -1710,7 +1711,7 @@ public class VirtualMachineService extends DefaultApiService
                     ip.setName(name);
                     ip.setVirtualDatacenter(vapp.getVirtualDatacenter());
                 }
-                   
+
                 Rasd rasd = NetworkService.createRasdEntity(vm, ip);
                 vdcRep.insertRasd(rasd);
 

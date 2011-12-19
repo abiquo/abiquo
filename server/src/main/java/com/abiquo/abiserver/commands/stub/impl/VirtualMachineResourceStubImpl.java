@@ -256,7 +256,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
     }
 
-    private String resolveVirtualMachineUrl(final Integer virtualDatacenterId,
+    protected String resolveVirtualMachineUrl(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final Integer virtualMachineId)
     {
         Map<String, String> params = new HashMap<String, String>();
@@ -271,7 +271,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 params);
     }
 
-    private VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
+    protected VirtualMachineDto createTransferObject(final VirtualMachine virtualMachine)
     {
         VirtualMachineDto dto = new VirtualMachineDto();
 
