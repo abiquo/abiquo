@@ -452,21 +452,16 @@ public class VirtualMachineService extends DefaultApiService
             old.setState(VirtualMachineState.LOCKED);
         }
 
-        // dellocate older values, and save the used slots
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
+        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
+
         List<Integer> usedStorageSlots = dellocateOldDisks(old, vmnew);
         usedStorageSlots.addAll(dellocateOldVolumes(old, vmnew));
 
-        // allocate the new values.
-        allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots); // FIXME getOnlyNew Ipd
-
         List<RasdManagement> storageResources = new ArrayList<RasdManagement>();
-        storageResources.addAll(vmnew.getDisks()); // FIXME getOnlyNew Disks
-        storageResources.addAll(getOnlyDeatachedRasd(old.getVolumes(), vmnew.getVolumes()));
-
+        storageResources.addAll(vmnew.getDisks());
+        storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
-
-        // save the new configuration
         repo.update(old);
     }
 
@@ -1605,7 +1600,7 @@ public class VirtualMachineService extends DefaultApiService
                     ip.setName(name);
                     ip.setVirtualDatacenter(vapp.getVirtualDatacenter());
                 }
-
+                   
                 Rasd rasd = NetworkService.createRasdEntity(vm, ip);
                 vdcRep.insertRasd(rasd);
 
