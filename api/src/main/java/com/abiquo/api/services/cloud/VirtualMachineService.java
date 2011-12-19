@@ -172,6 +172,9 @@ public class VirtualMachineService extends DefaultApiService
     @Autowired
     private NetworkService ipService;
 
+    @Autowired
+    private VirtualMachineLock vmLock;
+
     public VirtualMachineService()
     {
 
@@ -195,6 +198,7 @@ public class VirtualMachineService extends DefaultApiService
         this.storageRep = new StorageRep(em);
         this.jobCreator = new TarantinoJobCreator(em);
         this.ipService = new NetworkService(em);
+        this.vmLock = new VirtualMachineLock(em);
     }
 
     public Collection<VirtualMachine> findByHypervisor(final Hypervisor hypervisor)
@@ -339,7 +343,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -355,52 +359,79 @@ public class VirtualMachineService extends DefaultApiService
 
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
+        VirtualMachineState originalState = vm.getState();
 
         // if NOT_ALLOCATED isn't necessary to check the resource limits and
         // insert the 'backup' resources
-        if (vm.getState() == VirtualMachineState.OFF)
+        try
         {
-            // There might be different hardware needs. This call also recalculate.
-            LOGGER.debug("Updating the hardware needs in DB for virtual machine {}", vm.getId());
-            VirtualMachineRequirements requirements =
-                vmRequirements.createVirtualMachineRequirements(vm, newValues);
-            vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
+            if (vm.getState() == VirtualMachineState.OFF)
+            {
+                vm = lockVirtualMachine(vm);
 
-            LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
-                newValues.getId());
+                // There might be different hardware needs. This call also recalculate.
+                LOGGER
+                    .debug("Updating the hardware needs in DB for virtual machine {}", vm.getId());
+                VirtualMachineRequirements requirements =
+                    vmRequirements.createVirtualMachineRequirements(vm, newValues);
+                vmAllocatorService.checkAllocate(vapp.getId(), vm.getId(), requirements, false);
 
-            LOGGER
-                .debug("Creating the temporary register in Virtual Machine for rollback purposes");
-            backUpVm = createBackUpMachine(vm);
-            repo.insert(backUpVm);
-            createBackUpResources(vm, backUpVm);
-            insertBackUpResources(backUpVm);
-            LOGGER.debug("Rollback register has id {}" + vm.getId());
+                LOGGER.debug("Updated the hardware needs in DB for virtual machine {}",
+                    newValues.getId());
 
-            // Before to update the virtualmachine to new values, create the tarantino descriptor
-            // (only if the VM is deployed and OFF, othwerwise it won't have a datastore)
-            virtualMachineTarantino = jobCreator.toTarantinoDto(vm, vapp);
+                LOGGER
+                    .debug("Creating the temporary register in Virtual Machine for rollback purposes");
+                backUpVm = createBackUpMachine(vm);
+                repo.insert(backUpVm);
+                createBackUpResources(vm, backUpVm);
+                insertBackUpResources(backUpVm);
+                LOGGER.debug("Rollback register has id {}" + vm.getId());
+
+                // Before to update the virtualmachine to new values, create the tarantino
+                // descriptor
+                // (only if the VM is deployed and OFF, othwerwise it won't have a datastore)
+                virtualMachineTarantino = jobCreator.toTarantinoDto(vm, vapp);
+            }
+
+            // update the old virtual machine with the new virtual machine values.
+            // and set the ID of the backupmachine (which has the old values) for recovery purposes.
+            LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
+            updateVirtualMachineToNewValues(vapp, vm, newValues);
+            LOGGER.debug("Updated virtual machine {}", vm.getId());
+
+            // it is required a tarantino Task ?
+            if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
+            {
+                return null;
+            }
+
+            VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
+                jobCreator.toTarantinoDto(vm, vapp);
+
+            // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
+            // VirtualMachine is the definition of the VirtualMachine and the job, power on
+            return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
+                newVirtualMachineTarantino);
         }
-
-        // update the old virtual machine with the new virtual machine values.
-        // and set the ID of the backupmachine (which has the old values) for recovery purposes.
-        LOGGER.debug("Updating the virtual machine in the DB with id {}", vm.getId());
-        updateVirtualMachineToNewValues(vapp, vm, newValues);
-        LOGGER.debug("Updated virtual machine {}", vm.getId());
-
-        // it is required a tarantino Task ?
-        if (vm.getState() == VirtualMachineState.NOT_ALLOCATED)
+        catch (Exception ex)
         {
+            if (vm.getState() == VirtualMachineState.LOCKED)
+            {
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, "virtualMachine.reconfigureError", vm.getName());
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, ex, "virtualMachine.reconfigureError", vm.getName());
+
+                // Must unlock the virtual machine
+                unlockVirtualMachineState(vm, originalState);
+
+                addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+                flushErrors();
+            }
+
             return null;
         }
-
-        VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-            jobCreator.toTarantinoDto(vm, vapp);
-
-        // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
-        // VirtualMachine is the definition of the VirtualMachine and the job, power on
-        return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
-            newVirtualMachineTarantino);
     }
 
     /**
@@ -445,10 +476,12 @@ public class VirtualMachineService extends DefaultApiService
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
-        if (old.getState() == VirtualMachineState.OFF)
-        {
-            old.setState(VirtualMachineState.LOCKED);
-        }
+
+        // At this point the VM should already be locked
+        // if (old.getState() == VirtualMachineState.OFF)
+        // {
+        // old.setState(VirtualMachineState.LOCKED);
+        // }
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
@@ -485,11 +518,46 @@ public class VirtualMachineService extends DefaultApiService
         return false;
     }
 
-    /** set the virtual machine state to LOCKED (when an async task is needed) */
-    private void lockVirtualMachine(final VirtualMachine virtualMachine)
+    /**
+     * Set the virtual machine state to LOCKED (when an async task is needed).
+     * <p>
+     * This method returns the locked virtual machine that <b>MUST</b> be used to perform the
+     * upcoming operations.
+     * 
+     * @param vm The virtual machine to lock.
+     * @return The virtual machine that must be used to perform the upcoming operations.
+     */
+    private VirtualMachine lockVirtualMachine(final VirtualMachine vm)
     {
-        virtualMachine.setState(VirtualMachineState.LOCKED);
-        repo.update(virtualMachine);
+        // Lock the virtual machine in a different transaction using the VM locker. This way the
+        // operation will be atomic and the VM will effectively be locked after method
+        // execution
+        vmLock.lock(vm.getId());
+
+        // Refresh the locked virtual machine from database, to avoid StaleObject issues
+        return repo.findVirtualMachineById(vm.getId());
+    }
+
+    /**
+     * Restore the virtual machine state.
+     * <p>
+     * This method returns the unlocked virtual machine that <b>MUST</b> be used to perform the
+     * upcoming operations.
+     * 
+     * @param vm The virtual machine to unlock
+     * @param originalState The original state of the virtual machine.
+     * @return The virtual machine that must be used to perform the upcoming operations.
+     */
+    private VirtualMachine unlockVirtualMachineState(final VirtualMachine vm,
+        final VirtualMachineState originalState)
+    {
+        // Unlock the virtual machine in a different transaction using the VM locker. This way the
+        // operation will be atomic and the VM will effectively be unlocked after method
+        // execution
+        vmLock.unlock(vm.getId(), originalState);
+
+        // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
+        return repo.findVirtualMachineById(vm.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -850,12 +918,6 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         LOGGER.debug("Permission granted");
 
-        LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED");
-        // If the machine is already allocated we did compute its resources consume before, now
-        // we've been doubling it
-        checkVirtualMachineStateAllowsDeploy(virtualMachine);
-        LOGGER.debug("The state is valid for deploy");
-
         LOGGER.debug("Check remote services");
         // The remote services must be up for this Datacenter if we are to deploy
         checkRemoteServicesByVirtualDatacenter(vdcId);
@@ -865,10 +927,20 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        LOGGER
-            .debug("Allocating with force enterpise  soft limits : " + foreceEnterpriseSoftLimits);
+        LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED");
+        // If the machine is already allocated we did compute its resources consume before, now
+        // we've been doubling it
+        checkVirtualMachineStateAllowsDeploy(virtualMachine);
+        LOGGER.debug("The state is valid for deploy");
+
+        VirtualMachineState originalState = virtualMachine.getState();
+
         try
         {
+            virtualMachine = lockVirtualMachine(virtualMachine);
+
+            LOGGER.debug("Allocating with force enterpise  soft limits : "
+                + foreceEnterpriseSoftLimits);
 
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
@@ -876,8 +948,6 @@ public class VirtualMachineService extends DefaultApiService
              */
             vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
-
-            lockVirtualMachine(virtualMachine);
 
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
@@ -892,8 +962,7 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
-
-            setVirtualMachineUnknown(virtualMachine);
+            unlockVirtualMachineState(virtualMachine, originalState);
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
              * one of the above fail we cannot allocate the VirtualMachine It also perform the
@@ -902,25 +971,22 @@ public class VirtualMachineService extends DefaultApiService
             vmAllocatorService.deallocateVirtualMachine(vmId);
             throw e;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
+                "virtualMachine.deploy", virtualMachine.getName());
 
-            // For the Admin to know all errors
-            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "virtualMachine.deploy", e.toString());
-            LOGGER
-                .error(
-                    "Error deploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
-                    virtualMachine.getUuid(), e.toString());
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
 
-            setVirtualMachineUnknown(virtualMachine);
+            unlockVirtualMachineState(virtualMachine, originalState);
             vmAllocatorService.deallocateVirtualMachine(vmId);
+
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
+
+            return null;
         }
-        return null;
     }
 
     /**
@@ -1088,6 +1154,14 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         LOGGER.debug("Permission granted");
 
+        LOGGER.debug("Check remote services");
+        // The remote services must be up for this Datacenter if we are to deploy
+        checkRemoteServicesByVirtualDatacenter(vdcId);
+        LOGGER.debug("Remote services are ok!");
+
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
         LOGGER
             .debug(
                 "Checking that the virtual machine id {} is in an appropriate state. Valid states are OFF, ON, PAUSED",
@@ -1097,26 +1171,18 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER
             .debug("The virtual machine id {} is in an appropriate state", virtualMachine.getId());
 
-        LOGGER.debug("Check remote services");
-        // The remote services must be up for this Datacenter if we are to deploy
-        checkRemoteServicesByVirtualDatacenter(vdcId);
-        LOGGER.debug("Remote services are ok!");
-
-        VirtualAppliance virtualAppliance =
-            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachineState originalState = virtualMachine.getState();
 
         try
         {
-            VirtualMachineState currentState =
-                VirtualMachineState.valueOf(virtualMachine.getState().name());
-            lockVirtualMachine(virtualMachine);
+            virtualMachine = lockVirtualMachine(virtualMachine);
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
             String idAsyncTask =
-                tarantino.undeployVirtualMachine(virtualMachine, vmDesc, currentState);
+                tarantino.undeployVirtualMachine(virtualMachine, vmDesc, originalState);
             LOGGER.info("Undeploying of the virtual machine id {} in tarantino!",
                 virtualMachine.getId());
             tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
@@ -1130,8 +1196,7 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
-
-            setVirtualMachineUnknown(virtualMachine);
+            unlockVirtualMachineState(virtualMachine, originalState);
             throw e;
         }
         catch (Exception e)
@@ -1147,7 +1212,7 @@ public class VirtualMachineService extends DefaultApiService
                     "Error undeploying setting the virtual machine to UNKNOWN virtual machine name {}: {}",
                     virtualMachine.getUuid(), e.toString());
 
-            setVirtualMachineUnknown(virtualMachine);
+            unlockVirtualMachineState(virtualMachine, originalState);
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
 
@@ -1211,7 +1276,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param template The {@link VirtualMachineTemplate} to consider
      * @return The destination path
      */
-    protected String formatSnapshotPath(VirtualMachineTemplate template)
+    protected String formatSnapshotPath(final VirtualMachineTemplate template)
     {
         String filename = template.getPath();
 
@@ -1229,7 +1294,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param template The {@link VirtualMachineTemplate} to consider
      * @return The snapshot filename
      */
-    protected String formatSnapshotName(VirtualMachineTemplate template)
+    protected String formatSnapshotName(final VirtualMachineTemplate template)
     {
         String name = FilenameUtils.getName(template.getPath());
 
@@ -1269,26 +1334,50 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachineStateTransition validMachineStateChange =
             validMachineStateChange(virtualMachine, state);
 
-        VirtualAppliance virtualAppliance =
-            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        VirtualMachineDescriptionBuilder machineDescriptionBuilder =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+        VirtualMachineState originalState = virtualMachine.getState();
 
-        String location =
-            tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder,
-                validMachineStateChange);
-        LOGGER.info("Applying the new state of the virtual machine id {} in tarantino!",
-            virtualMachine.getId());
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
-        // For the Admin to know all errors
-        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.applyVirtualMachineTarantinoEnqueued");
+        try
+        {
+            virtualMachine = lockVirtualMachine(virtualMachine);
 
-        lockVirtualMachine(virtualMachine);
-        // tasksService.
-        // Here we add the url which contains the status
-        return location;
+            VirtualAppliance virtualAppliance =
+                getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+            VirtualMachineDescriptionBuilder machineDescriptionBuilder =
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+            String location =
+                tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder,
+                    validMachineStateChange);
+            LOGGER.info("Applying the new state of the virtual machine id {} in tarantino!",
+                virtualMachine.getId());
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.applyVirtualMachineEnqueued", virtualMachine.getName());
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.applyVirtualMachineTarantinoEnqueued");
+
+            // tasksService.
+            // Here we add the url which contains the status
+            return location;
+        }
+        catch (Exception ex)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                "virtualMachine.applyStateError", state.name(), virtualMachine.getName());
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, ex, "virtualMachine.applyStateError", state.name(),
+                virtualMachine.getName());
+
+            // Must unlock the virtual machine
+            unlockVirtualMachineState(virtualMachine, originalState);
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+
+            return null;
+        }
     }
 
     /**
@@ -1313,27 +1402,52 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
-        checkResetAllowed(virtualMachine);
-
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        VirtualMachineDescriptionBuilder machineDescriptionBuilder =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-        String location =
-            tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
-        LOGGER.info("Applying the reset of the virtual machine id {} in tarantino!",
-            virtualMachine.getId());
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.resetVirtualMachineEnqueued", virtualMachine.getName());
-        // For the Admin to know all errors
-        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.resetVirtualMachineTarantinoEnqueued");
+        checkResetAllowed(virtualMachine);
 
-        lockVirtualMachine(virtualMachine);
-        // tasksService.
-        // Here we add the url which contains the status
-        return location;
+        VirtualMachineState originalState = virtualMachine.getState();
+
+        try
+        {
+            virtualMachine = lockVirtualMachine(virtualMachine);
+
+            VirtualMachineDescriptionBuilder machineDescriptionBuilder =
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+            String location =
+                tarantino
+                    .applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
+            LOGGER.info("Applying the reset of the virtual machine id {} in tarantino!",
+                virtualMachine.getId());
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.resetVirtualMachineEnqueued", virtualMachine.getName());
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.resetVirtualMachineTarantinoEnqueued");
+
+            // tasksService.
+            // Here we add the url which contains the status
+            return location;
+        }
+        catch (Exception ex)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                "virtualMachine.resetVirtualMachineError", virtualMachine.getName());
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, ex, "virtualMachine.resetVirtualMachineError",
+                virtualMachine.getName());
+
+            // Must unlock the virtual machine
+            unlockVirtualMachineState(virtualMachine, originalState);
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+
+            return null;
+        }
     }
 
     /**
@@ -1358,30 +1472,56 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
 
-        checkSnapshotAllowed(virtualMachine);
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-        VirtualMachineDescriptionBuilder machineDescriptionBuilder =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-        String location =
-            tarantino.applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
-        LOGGER.info("Applying the snapshot of the virtual machine id {} in tarantino!",
-            virtualMachine.getId());
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.virtualMachineSnapshotEnqueued", virtualMachine.getName());
-        // For the Admin to know all errors
-        tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-            "virtualMachine.virtualMachineSnapshotTarantinoEnqueued");
+        checkSnapshotAllowed(virtualMachine);
 
-        lockVirtualMachine(virtualMachine);
-        // tasksService.
-        // Here we add the url which contains the status
-        return location;
+        VirtualMachineState originalState = virtualMachine.getState();
+
+        try
+        {
+            virtualMachine = lockVirtualMachine(virtualMachine);
+
+            VirtualMachineDescriptionBuilder machineDescriptionBuilder =
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+            String location =
+                tarantino
+                    .applyVirtualMachineState(virtualMachine, machineDescriptionBuilder, state);
+            LOGGER.info("Applying the snapshot of the virtual machine id {} in tarantino!",
+                virtualMachine.getId());
+            tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.virtualMachineSnapshotEnqueued", virtualMachine.getName());
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+                "virtualMachine.virtualMachineSnapshotTarantinoEnqueued");
+
+            // tasksService.
+            // Here we add the url which contains the status
+            return location;
+        }
+        catch (Exception ex)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                "virtualMachine.virtualMachinesnapshotError", virtualMachine.getName());
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, ex, "virtualMachine.virtualMachinesnapshotError",
+                virtualMachine.getName());
+
+            // Must unlock the virtual machine
+            unlockVirtualMachineState(virtualMachine, originalState);
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+
+            return null;
+        }
     }
 
     /**
-     * Checks one by one all {@link RemoteService} a ssociated with the @{link Datacenter}.
+     * Checks one by one all {@link RemoteService} associated with the @{link Datacenter}.
      * 
      * @param datacenterId
      * @return ErrorsDto
@@ -1445,13 +1585,6 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("virtual appliance {} found", vappId);
 
         return vapp.getNodes();
-    }
-
-    /** set the virtual machine state to UNKNOWN (when an async task is needed) */
-    private void setVirtualMachineUnknown(final VirtualMachine virtualMachine)
-    {
-        virtualMachine.setState(VirtualMachineState.UNKNOWN);
-        repo.update(virtualMachine);
     }
 
     /**
