@@ -128,11 +128,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return nvi;
     }
 
-    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
-    {
-        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
-    }
-
     public boolean containsResources(final VirtualDatacenter virtualDatacenter,
         final String idResource)
     {
@@ -156,6 +151,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
 
         networkDAO.remove(vdc.getNetwork());
         virtualDatacenterDAO.remove(vdc);
+    }
+
+    public void deleteIpPoolManagement(final IpPoolManagement ip)
+    {
+        ipManagementDAO.remove(ip);
     }
 
     public void deleteNodeVirtualImage(final NodeVirtualImage nvi)
@@ -197,6 +197,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public Collection<VLANNetwork> findAllVlans()
     {
         return this.vlanDAO.findAll();
+    }
+
+    public Collection<VirtualDatacenter> findByDatacenter(final Datacenter datacenter)
+    {
+        return this.virtualDatacenterDAO.findByDatacenter(datacenter);
     }
 
     public Collection<VirtualDatacenter> findByEnterprise(final Enterprise enterprise)
@@ -265,14 +270,15 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.findFreeIpsByVlan(vlan);
     }
 
+    public DiskManagement findHardDiskByVirtualDatacenter(final VirtualDatacenter vdc,
+        final Integer idDisk)
+    {
+        return diskManagementDAO.findHardDiskByVirtualDatacenter(vdc, idDisk);
+    }
+
     public DiskManagement findHardDiskByVirtualMachine(final VirtualMachine vm, final Integer diskId)
     {
         return diskManagementDAO.findHardDiskByVirtualMachine(vm, diskId);
-    }
-
-    public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
-    {
-        return diskManagementDAO.findHardDisksByVirtualMachine(vm);
     }
 
     public List<DiskManagement> findHardDisksByVirtualDatacenter(final VirtualDatacenter vdc)
@@ -280,15 +286,19 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return diskManagementDAO.findHardDisksByVirtualDatacenter(vdc);
     }
 
-    public DiskManagement findHardDiskByVirtualDatacenter(final VirtualDatacenter vdc,
-        final Integer idDisk)
+    public List<DiskManagement> findHardDisksByVirtualMachine(final VirtualMachine vm)
     {
-        return diskManagementDAO.findHardDiskByVirtualDatacenter(vdc, idDisk);
+        return diskManagementDAO.findHardDisksByVirtualMachine(vm);
     }
 
     public IpPoolManagement findIp(final VLANNetwork vlan, final Integer ipId)
     {
         return ipManagementDAO.findIp(vlan, ipId);
+    }
+
+    public IpPoolManagement findIpByVirtualMachine(VirtualMachine vm, Integer nicId)
+    {
+        return ipManagementDAO.findIpByVirtualMachine(vm, nicId);
     }
 
     /**
@@ -542,6 +552,11 @@ public class VirtualDatacenterRep extends DefaultRepBase
         return ipManagementDAO.getAllMacs();
     }
 
+    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
+    {
+        return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
+    }
+
     public void insert(final VirtualDatacenter vdc)
     {
         virtualDatacenterDAO.persist(vdc);
@@ -553,12 +568,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
         {
             rasdDAO.persist(ipManagement.getRasd());
         }
-        ipManagementDAO.persist(ipManagement);
-    }
-
-    /** Temporal backup rasd_management uses the same rasd */
-    public void insertTemporalIpManagement(final IpPoolManagement ipManagement)
-    {
         ipManagementDAO.persist(ipManagement);
     }
 
@@ -580,6 +589,12 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void insertRasd(final Rasd rasd)
     {
         rasdDAO.persist(rasd);
+    }
+
+    /** Temporal backup rasd_management uses the same rasd */
+    public void insertTemporalIpManagement(final IpPoolManagement ipManagement)
+    {
+        ipManagementDAO.persist(ipManagement);
     }
 
     public void insertVirtualAppliance(final VirtualAppliance vapp)
@@ -649,16 +664,6 @@ public class VirtualDatacenterRep extends DefaultRepBase
     public void updateVlan(final VLANNetwork vlan)
     {
         vlanDAO.flush();
-    }
-
-    public List<VirtualDatacenter> getVirualDatacenterFromDefaultVlan(final Integer defaultVlanId)
-    {
-        return virtualDatacenterDAO.getVirualDatacenterFromDefaultVlan(defaultVlanId);
-    }
-
-    public void deleteIpPoolManagement(final IpPoolManagement ip)
-    {
-        ipManagementDAO.remove(ip);
     }
 
 }

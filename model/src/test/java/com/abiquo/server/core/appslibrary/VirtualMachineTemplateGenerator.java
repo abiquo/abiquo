@@ -174,7 +174,8 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
                 diskFormat,
                 pathName,
                 diskFileSize,
-                category);
+                category,
+                "dummyuser");
 
         vtemplate.setRepository(repository);
         vtemplate.setCpuRequired(cpuRequired);
@@ -213,6 +214,7 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
                 pathName,
                 diskFileSize,
                 category,
+                "dummyuser",
                 volman);
 
         vi.setRepository(repository);

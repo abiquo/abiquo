@@ -106,7 +106,7 @@ public class IpPoolManagement extends RasdManagement
     }
 
     public IpPoolManagement(final VLANNetwork vlan, final String mac, final String name,
-        final String ip, final String networkName, final Type type)
+        final String ip, final String networkName)
     {
         super(DISCRIMINATOR);
 
@@ -408,7 +408,7 @@ public class IpPoolManagement extends RasdManagement
     public long getAttachmentOrder()
     {
         String attachment = getRasd().getConfigurationName();
-        return attachment == null ? getSequence() : Long.valueOf(attachment);
+        return attachment == null ? 0L : Long.valueOf(attachment);
     }
 
     @Override

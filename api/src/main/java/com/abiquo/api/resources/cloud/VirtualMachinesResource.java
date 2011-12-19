@@ -96,7 +96,8 @@ public class VirtualMachinesResource extends AbstractResource
             for (final VirtualMachine v : all)
             {
                 vappsDto.add(VirtualMachineResource.createTransferObject(v, vapp
-                    .getVirtualDatacenter().getId(), vapp.getId(), restBuilder));
+                    .getVirtualDatacenter().getId(), vapp.getId(), restBuilder,
+ null, null));
             }
         }
 
@@ -162,7 +163,8 @@ public class VirtualMachinesResource extends AbstractResource
             service.createVirtualMachine(vdcId, vappId, virtualMachineDto);
 
         final VirtualMachineDto vappsDto =
-            VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder);
+            VirtualMachineResource.createTransferObject(virtualMachine, vdcId, vappId, restBuilder,
+                null, null);
 
         return vappsDto;
     }
@@ -182,7 +184,7 @@ public class VirtualMachinesResource extends AbstractResource
         for (final NodeVirtualImage n : all)
         {
             vappsDto.add(VirtualMachineResource.createNodeTransferObject(n, vdcId, vappId,
-                restBuilder));
+                restBuilder, null, null));
         }
 
         return vappsDto;
