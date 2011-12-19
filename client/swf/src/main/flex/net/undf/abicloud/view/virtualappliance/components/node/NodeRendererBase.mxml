@@ -40,6 +40,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.events.InfrastructureEvent;
         	import net.undf.abicloud.events.VirtualApplianceEvent;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.vo.infrastructure.VirtualMachine;
@@ -114,6 +115,7 @@
                 
                 //Listener for virtualMachine state changes
                 AbiCloudModel.getInstance().virtualApplianceManager.addEventListener(VirtualApplianceEvent.VIRTUAL_MACHINE_CHANGE_STATE,updateState);
+                
             }
             
             /**
@@ -401,6 +403,8 @@
             	if(event && event.virtualMachine){
                     if(NodeVirtualImage(this._node) && NodeVirtualImage(this._node).virtualMachine){
                     	if(NodeVirtualImage(this._node).virtualMachine.id == event.virtualMachine.id){
+                    		//Update virtual machine state
+                    		NodeVirtualImage(this._node).virtualMachine.state = event.virtualMachine.state;
                     		if(event.virtualMachine.state.id == net.undf.abicloud.vo.infrastructure.State.IN_PROGRESS){
                     			this._canBeModified = false;
                     		}
