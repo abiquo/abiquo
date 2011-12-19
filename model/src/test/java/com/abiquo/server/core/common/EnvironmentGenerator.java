@@ -51,8 +51,12 @@ import com.abiquo.server.core.infrastructure.DatastoreGenerator;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.RemoteServiceGenerator;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagementGenerator;
 import com.abiquo.server.core.infrastructure.network.VLANNetwork;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkGenerator;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementGenerator;
 import com.abiquo.server.core.infrastructure.storage.InitiatorMapping;
 import com.abiquo.server.core.infrastructure.storage.InitiatorMappingGenerator;
 import com.abiquo.server.core.infrastructure.storage.StorageDevice;
@@ -75,40 +79,44 @@ public class EnvironmentGenerator
 {
     public static final String SYSADMIN = "sysadmin";
 
+    private final DatacenterGenerator datacenterGenerator;
+
+    private final DatacenterLimitsGenerator datacenterLimitsGenerator;
+
+    private final DatastoreGenerator datastoreGenerator;
+
+    private final StorageDeviceGenerator deviceGenerator;
+
+    private final DiskManagementGenerator diskGenerator;
+
     private final EnterpriseGenerator enterpriseGenerator;
+
+    /** The entities of the generated environment. */
+    private final List<Object> entities;
+
+    private final HypervisorGenerator hypervisorGenerator;
+
+    private final InitiatorMappingGenerator initiatorMappingGenerator;
+
+    private final IpPoolManagementGenerator ipGenerator;
+
+    private final NodeVirtualImageGenerator nodeVirtualImageGenerator;
+
+    private final StoragePoolGenerator poolGenerator;
+
+    private final RemoteServiceGenerator remoteServiceGenerator;
 
     private final RoleGenerator roleGenerator;
 
     private final UserGenerator userGenerator;
 
-    private final DatacenterGenerator datacenterGenerator;
-
-    private final DatacenterLimitsGenerator datacenterLimitsGenerator;
-
-    private final RemoteServiceGenerator remoteServiceGenerator;
-
-    private final StorageDeviceGenerator deviceGenerator;
-
-    private final StoragePoolGenerator poolGenerator;
-
-    private final VirtualDatacenterGenerator vdcGenerator;
-
     private final VirtualApplianceGenerator vappGenerator;
-
-    private final NodeVirtualImageGenerator nodeVirtualImageGenerator;
-
-    private final VolumeManagementGenerator volumeGenerator;
-
+    
+    private final VirtualDatacenterGenerator vdcGenerator;
+    
     private final VLANNetworkGenerator vlanGenerator;
 
-    private final HypervisorGenerator hypervisorGenerator;
-
-    private final DatastoreGenerator datastoreGenerator;
-
-    private final InitiatorMappingGenerator initiatorMappingGenerator;
-
-    /** The entities of the generated environment. */
-    private final List<Object> entities;
+    private final VolumeManagementGenerator volumeGenerator;
 
     public EnvironmentGenerator(final SeedGenerator seed)
     {
@@ -129,7 +137,71 @@ public class EnvironmentGenerator
         hypervisorGenerator = new HypervisorGenerator(seed);
         datastoreGenerator = new DatastoreGenerator(seed);
         initiatorMappingGenerator = new InitiatorMappingGenerator(seed);
+        diskGenerator = new DiskManagementGenerator(seed);
+        ipGenerator = new IpPoolManagementGenerator(seed);
         entities = new ArrayList<Object>();
+    }
+
+    /**
+     * Add the given entity to the environment.
+     * 
+     * @param entity The entity to add.
+     */
+    public void add(final Object entity)
+    {
+        entities.add(entity);
+    }
+
+    /**
+     * Generates and adds the following entities to the environment.
+     * <ol>
+     * <li>A virtual appliance in the generated virtual datacenter</li>
+     * <li>An image repository in the given datacenter and enterprise</li>
+     * <li>An image category</li>
+     * <li>A virtual image in the generated repository and category</li>
+     * <li>A NodeVirtualImage linking the generated image with the generated appliance</li>
+     * <li>A virtual machine linked to the generated NodeVirtualImage, belonging to the user in the
+     * environment, and allocated to the generated hypervisor and datastore</li>
+     * </ol>
+     * 
+     * @return The environment entities.
+     */
+    public List<Object> generateAllocatedVirtualMachine()
+    {
+        // Generated the not allocated virtual machine first
+        generateNotAllocatedVirtualMachine();
+
+        // Entities that should be already added to the environment
+        VirtualMachine vm = get(VirtualMachine.class);
+        Hypervisor hypervisor = get(Hypervisor.class);
+        Datastore datastore = get(Datastore.class);
+
+        // Allocate the virtual machine
+        vm.setHypervisor(hypervisor);
+        vm.setDatastore(datastore);
+        vm.setState(VirtualMachineState.OFF); // Allocated and powered off
+
+        return getEnvironment();
+    }
+
+    /**
+     * Generates and adds the following entitities to the environment.
+     * <ol>
+     * <li>A disk in the generated virtual datacenter and storage pool</li>
+     * <li>Its Rasd</li>
+     * </ol>
+     * @return
+     */
+    public List<Object> generateDisk()
+    {
+        VirtualDatacenter vdc = get(VirtualDatacenter.class);
+        
+        DiskManagement disk = diskGenerator.createInstance(vdc);
+        
+        add(disk.getRasd());
+        add(disk);
+        
+        return getEnvironment();
     }
 
     /**
@@ -228,40 +300,6 @@ public class EnvironmentGenerator
     /**
      * Generates and adds the following entities to the environment.
      * <ol>
-     * <li>A network for the virtual datacenter</li>
-     * <li>A DHCP remote service</li>
-     * <li>A DHCP entity</li>
-     * <li>A network configuration for the dhcp service</li>
-     * <li>A private VLAN with the generated network configuration</li>
-     * <li>A virtual datacenter in the generated datacenter and enterprise</li>
-     * </ol>
-     * 
-     * @return The environment entities.
-     */
-    public List<Object> generateVirtualDatacenter()
-    {
-        // Entities that should be already added to the environment
-        Datacenter datacenter = get(Datacenter.class);
-        Enterprise enterprise = get(Enterprise.class);
-
-        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
-        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork());
-        // vlan.getConfiguration().getDhcp().getRemoteService().setDatacenter(datacenter);
-        vdc.setDefaultVlan(vlan);
-
-        add(vdc.getNetwork());
-        // add(vlan.getConfiguration().getDhcp().getRemoteService());
-        // add(vlan.getConfiguration().getDhcp());
-        add(vlan.getConfiguration());
-        add(vlan);
-        add(vdc);
-
-        return getEnvironment();
-    }
-
-    /**
-     * Generates and adds the following entities to the environment.
-     * <ol>
      * <li>A virtual appliance in the generated virtual datacenter</li>
      * <li>An image repository in the given datacenter and enterprise</li>
      * <li>An image category</li>
@@ -292,35 +330,59 @@ public class EnvironmentGenerator
 
         return getEnvironment();
     }
-
+    
+    /**
+     * Generates and adds the following entities to the environment.
+     * 
+     * <ol>
+     * <li>A ip in the generated virtual datacenter and its default vlan.</li>
+     * <li>Its Rasd</li>
+     * </ol>
+     * @return
+     */
+    public List<Object> generatePrivateIp()
+    {
+        VirtualDatacenter vdc = get(VirtualDatacenter.class);
+        VLANNetwork vlan = vdc.getDefaultVlan();
+        IpPoolManagement ip = ipGenerator.createInstance(vdc, vlan, "10.60.1.24");
+        
+        add(ip.getRasd());
+        add(ip);
+        
+        return getEnvironment();
+    }
+    
     /**
      * Generates and adds the following entities to the environment.
      * <ol>
-     * <li>A virtual appliance in the generated virtual datacenter</li>
-     * <li>An image repository in the given datacenter and enterprise</li>
-     * <li>An image category</li>
-     * <li>A virtual image in the generated repository and category</li>
-     * <li>A NodeVirtualImage linking the generated image with the generated appliance</li>
-     * <li>A virtual machine linked to the generated NodeVirtualImage, belonging to the user in the
-     * environment, and allocated to the generated hypervisor and datastore</li>
+     * <li>A network for the virtual datacenter</li>
+     * <li>A DHCP remote service</li>
+     * <li>A DHCP entity</li>
+     * <li>A network configuration for the dhcp service</li>
+     * <li>A private VLAN with the generated network configuration</li>
+     * <li>A virtual datacenter in the generated datacenter and enterprise</li>
      * </ol>
      * 
      * @return The environment entities.
      */
-    public List<Object> generateAllocatedVirtualMachine()
+    public List<Object> generateVirtualDatacenter()
     {
-        // Generated the not allocated virtual machine first
-        generateNotAllocatedVirtualMachine();
-
         // Entities that should be already added to the environment
-        VirtualMachine vm = get(VirtualMachine.class);
-        Hypervisor hypervisor = get(Hypervisor.class);
-        Datastore datastore = get(Datastore.class);
+        Datacenter datacenter = get(Datacenter.class);
+        Enterprise enterprise = get(Enterprise.class);
 
-        // Allocate the virtual machine
-        vm.setHypervisor(hypervisor);
-        vm.setDatastore(datastore);
-        vm.setState(VirtualMachineState.OFF); // Allocated and powered off
+        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
+        VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork());
+        vlan.setTag(3);
+        // vlan.getConfiguration().getDhcp().getRemoteService().setDatacenter(datacenter);
+        vdc.setDefaultVlan(vlan);
+
+        add(vdc.getNetwork());
+        // add(vlan.getConfiguration().getDhcp().getRemoteService());
+        // add(vlan.getConfiguration().getDhcp());
+        add(vlan.getConfiguration());
+        add(vlan);
+        add(vdc);
 
         return getEnvironment();
     }
@@ -351,26 +413,6 @@ public class EnvironmentGenerator
     }
 
     /**
-     * Get the entities of the current environment.
-     * 
-     * @return The entities of the current environment.
-     */
-    public List<Object> getEnvironment()
-    {
-        return entities;
-    }
-
-    /**
-     * Add the given entity to the environment.
-     * 
-     * @param entity The entity to add.
-     */
-    public void add(final Object entity)
-    {
-        entities.add(entity);
-    }
-
-    /**
      * Get the entity of the given class in the current environment.
      * 
      * @param clazz The class of the entity to get.
@@ -391,5 +433,15 @@ public class EnvironmentGenerator
     public <T> List<T> getAll(final Class<T> clazz)
     {
         return Lists.newLinkedList(Iterables.filter(entities, clazz));
+    }
+
+    /**
+     * Get the entities of the current environment.
+     * 
+     * @return The entities of the current environment.
+     */
+    public List<Object> getEnvironment()
+    {
+        return entities;
     }
 }

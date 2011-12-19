@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -130,7 +131,8 @@ public class VirtualMachineResource extends AbstractResource
     {
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
-        return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm));
+        return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm),
+            getDiskIds(vm));
     }
 
     /***
@@ -476,7 +478,8 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     public static VirtualMachineWithNodeDto createNodeTransferObject(final NodeVirtualImage v,
-        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder) throws Exception
+        final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
+        Integer[] volumeIds, Integer[] diskIds) throws Exception
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
         dto.setUuid(v.getVirtualMachine().getUuid());
@@ -517,7 +520,8 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled()));
+                .getVirtualMachine().isChefEnabled(), volumeIds,
+ diskIds));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -572,7 +576,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        final Integer... volumeIds)
+        Integer[] volumeIds, Integer diskIds[])
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
@@ -611,7 +615,7 @@ public class VirtualMachineResource extends AbstractResource
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds));
+            v.isChefEnabled(), volumeIds, diskIds));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
@@ -642,7 +646,8 @@ public class VirtualMachineResource extends AbstractResource
     {
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
-        return createNodeTransferObject(node, vdcId, vappId, restBuilder);
+        return createNodeTransferObject(node, vdcId, vappId, restBuilder,
+            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()));
     }
 
     @GET
@@ -677,6 +682,11 @@ public class VirtualMachineResource extends AbstractResource
     }
 
     protected Integer[] getVolumeIds(final VirtualMachine vm)
+    {
+        return null; // Community impl
+    }
+
+    protected Integer[] getDiskIds(final VirtualMachine vm)
     {
         return null; // Community impl
     }

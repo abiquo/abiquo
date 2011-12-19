@@ -230,7 +230,7 @@ public class EnterpriseResource extends AbstractResource
             VirtualMachine vm = nvimg.getVirtualMachine();
 
             vmDto.add(VirtualMachineResource.createTransferObject(vm, vapp.getVirtualDatacenter()
-                .getId(), vapp.getId(), restBuilder));
+                .getId(), vapp.getId(), restBuilder, null, null));
         }
         return vmDto;
 

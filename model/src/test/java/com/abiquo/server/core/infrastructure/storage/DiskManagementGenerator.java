@@ -22,6 +22,7 @@
 package com.abiquo.server.core.infrastructure.storage;
 
 import java.util.List;
+import java.util.Random;
 
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterGenerator;
@@ -71,7 +72,7 @@ public class DiskManagementGenerator extends DefaultEntityGenerator<DiskManageme
 
     public DiskManagement createInstance(final VirtualDatacenter vdc)
     {
-        return new DiskManagement(vdc, (long) nextSeed());
+        return new DiskManagement(vdc, (long) new Random().nextInt(10000));
     }
 
     @Override

@@ -51,6 +51,8 @@ import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfiguration;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationDto;
 import com.abiquo.server.core.infrastructure.network.VMNetworkConfigurationsDto;
+import com.abiquo.server.core.infrastructure.storage.DiskManagement;
+import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 
 /**
  * <pre>
@@ -93,6 +95,15 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
 
     /** Parameter to map the input values related to NICs. */
     public static final String NIC_PARAM = "{" + NIC + "}";
+
+    /** edit relation to private ips. */
+    public static final String PRIVATE_IP = "privateip";
+    
+    /** edit relation to private ips. */
+    public static final String PUBLIC_IP = "publicip";
+    
+    /** edit relation to private ips. */
+    public static final String EXTERNAL_IP = "externalip";
 
     /** Autowired business logic service. */
     @Autowired
@@ -298,6 +309,32 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         return null;
     }
 
+    /**
+     * Returns a single ip according on its id in Virtual Machine
+     * 
+     * @param vdcId identifier of the Virtual Datacenter.
+     * @param vappId identifier of the Virtual Appliance.
+     * @param vmId identifier of the Virtual Machine.
+     * @param nicId identifier of the ip inside the virtual machine
+     * @param restBuilder a Context-injected object to create the links of the Dto
+     * @return the {@link DiskManagementDto} object that contains all the {@link DiskManagementDto}
+     * @throws Exception any thrown exception. Moved to HTTP status code in the
+     *             {@link APIExceptionMapper} exception mapper.
+     */
+    @GET
+    @Path(NICS_PATH + "/" + NIC_PARAM)
+    public NicDto getIp(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        @PathParam(NIC) @NotNull @Min(0) final Integer nicId,
+        @Context final IRESTBuilder restBuilder) throws Exception
+    {
+        IpPoolManagement ip = service.getIpPoolManagementByVirtualMachine(vdcId, vappId, vmId, nicId);
+
+        return createNICTransferObject(ip, restBuilder);
+    }
+    
     /**
      * Remove a Virtual Machine NIC. Release the association between Private IP and NIC.
      * 
