@@ -2070,7 +2070,7 @@ CREATE TRIGGER `kinton`.`datacenter_deleted` AFTER DELETE ON `kinton`.`datacente
 |
 CREATE TRIGGER `kinton`.`virtualapp_created` AFTER INSERT ON `kinton`.`virtualapp`
   FOR EACH ROW BEGIN
-    DECLARE vdcNameObj VARCHAR(50);
+    DECLARE vdcNameObj VARCHAR(50) CHARACTER SET utf8;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       SELECT vdc.name INTO vdcNameObj
       FROM virtualdatacenter vdc
@@ -2558,7 +2558,7 @@ CREATE TRIGGER `kinton`.`create_nodevirtualimage_update_stats` AFTER INSERT ON `
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
     DECLARE idVirtualDataCenterObj INTEGER;
-    DECLARE state VARCHAR(50);
+    DECLARE state VARCHAR(50) CHARACTER SET utf8;
     DECLARE type INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
       SELECT vapp.idVirtualApp, vapp.idVirtualDataCenter, vdc.idDataCenter INTO idVirtualAppObj, idVirtualDataCenterObj, idDataCenterObj
@@ -2605,7 +2605,7 @@ CREATE TRIGGER `kinton`.`delete_nodevirtualimage_update_stats` AFTER DELETE ON `
     DECLARE idDataCenterObj INTEGER;
     DECLARE idVirtualAppObj INTEGER;
     DECLARE idVirtualDataCenterObj INTEGER;
-    DECLARE oldState VARCHAR(50);
+    DECLARE oldState VARCHAR(50) CHARACTER SET utf8;
     DECLARE type INTEGER;
     DECLARE isUsingIP INTEGER;
     IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN
@@ -2653,7 +2653,7 @@ CREATE TRIGGER `kinton`.`create_rasd_management_update_stats` AFTER INSERT ON `k
         DECLARE idDataCenterObj INTEGER;
         DECLARE idThisEnterprise INTEGER;
         DECLARE limitResourceObj BIGINT;
-        DECLARE resourceName VARCHAR(255);
+        DECLARE resourceName VARCHAR(255) CHARACTER SET utf8;
         SELECT vdc.idDataCenter, vdc.idEnterprise INTO idDataCenterObj, idThisEnterprise
         FROM virtualdatacenter vdc
         WHERE vdc.idVirtualDataCenter = NEW.idVirtualDataCenter;
@@ -2685,7 +2685,7 @@ CREATE TRIGGER `kinton`.`delete_rasd_management_update_stats` AFTER DELETE ON `k
         DECLARE idDataCenterObj INTEGER;
         DECLARE idThisEnterprise INTEGER;
         DECLARE limitResourceObj BIGINT;    
-        DECLARE resourceName VARCHAR(255);  
+        DECLARE resourceName VARCHAR(255) CHARACTER SET utf8;  
         SELECT vdc.idDataCenter, vdc.idEnterprise INTO idDataCenterObj, idThisEnterprise
         FROM virtualdatacenter vdc
         WHERE vdc.idVirtualDataCenter = OLD.idVirtualDataCenter;
@@ -2740,7 +2740,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_created` AFTER INSERT ON `kinton`.`vi
 CREATE TRIGGER `kinton`.`virtualdatacenter_updated` AFTER UPDATE ON `kinton`.`virtualdatacenter`
     FOR EACH ROW BEGIN
     DECLARE vlanNetworkIdObj INTEGER;    
-        	  DECLARE networkNameObj VARCHAR(40);
+        	  DECLARE networkNameObj VARCHAR(40) CHARACTER SET utf8;
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN   
             -- INSERT INTO debug_msg (msg) VALUES (CONCAT('OLD.networktypeID ', IFNULL(OLD.networktypeID,'NULL'),'NEW.networktypeID ', IFNULL(NEW.networktypeID,'NULL')));
             -- Checks for changes
@@ -2807,7 +2807,7 @@ CREATE TRIGGER `kinton`.`virtualdatacenter_deleted` BEFORE DELETE ON `kinton`.`v
     FOR EACH ROW BEGIN
     DECLARE currentIdManagement INTEGER DEFAULT -1;
     DECLARE currentDataCenter INTEGER DEFAULT -1;
-    DECLARE currentIpAddress VARCHAR(20) DEFAULT '';
+    DECLARE currentIpAddress VARCHAR(20) CHARACTER SET utf8 DEFAULT '';
     DECLARE no_more_ipsfreed INT;
     DECLARE curIpFreed CURSOR FOR SELECT dc.idDataCenter, ipm.ip, ra.idManagement   
            FROM ip_pool_management ipm, network_configuration nc, vlan_network vn, datacenter dc, rasd_management ra
@@ -2961,13 +2961,13 @@ CREATE TRIGGER `kinton`.`update_volume_management_update_stats` AFTER UPDATE ON 
 |
 CREATE TRIGGER `kinton`.`update_rasd_management_update_stats` AFTER UPDATE ON `kinton`.`rasd_management`
     FOR EACH ROW BEGIN
-        DECLARE state VARCHAR(50);
+        DECLARE state VARCHAR(50) CHARACTER SET utf8;
         DECLARE idState INTEGER;
         DECLARE idImage INTEGER;
         DECLARE idDataCenterObj INTEGER;
         DECLARE idEnterpriseObj INTEGER;
         DECLARE reservedSize BIGINT;
-        DECLARE ipAddress VARCHAR(20);
+        DECLARE ipAddress VARCHAR(20) CHARACTER SET utf8;
         IF (@DISABLE_STATS_TRIGGERS IS NULL) THEN                                   
             --     
             IF OLD.idResourceType = 8 THEN
@@ -3904,7 +3904,7 @@ CREATE PROCEDURE `kinton`.CalculateVdcEnterpriseStats()
    BEGIN
   DECLARE idVirtualDataCenterObj INTEGER;
   DECLARE idEnterprise INTEGER;
-  DECLARE vdcName VARCHAR(45);
+  DECLARE vdcName VARCHAR(45) CHARACTER SET utf8;
   DECLARE vmCreated MEDIUMINT UNSIGNED;
   DECLARE vmActive MEDIUMINT UNSIGNED;
   DECLARE volCreated MEDIUMINT UNSIGNED;
@@ -4046,8 +4046,8 @@ CREATE PROCEDURE `kinton`.CalculateVappEnterpriseStats()
   DECLARE idVirtualAppObj INTEGER;
   DECLARE idEnterprise INTEGER;
   DECLARE idVirtualDataCenter INTEGER;
-  DECLARE vappName VARCHAR(45);
-  DECLARE vdcName VARCHAR(45);
+  DECLARE vappName VARCHAR(45) CHARACTER SET utf8;
+  DECLARE vdcName VARCHAR(45) CHARACTER SET utf8;
   DECLARE vmCreated MEDIUMINT UNSIGNED;
   DECLARE vmActive MEDIUMINT UNSIGNED;
   DECLARE volAssociated MEDIUMINT UNSIGNED;
@@ -4169,7 +4169,7 @@ DROP PROCEDURE IF EXISTS `kinton`.`add_version_column_to_all`;
 DELIMITER |
 CREATE PROCEDURE `kinton`.`add_version_column_to_all`()
 BEGIN
-    DECLARE currentTableName VARCHAR(64);
+    DECLARE currentTableName VARCHAR(64) CHARACTER SET utf8;
     DECLARE no_more_tables INTEGER;
     DECLARE curAllTables CURSOR FOR SELECT TABLE_NAME from `information_schema`.TABLES where TABLE_SCHEMA = "kinton" AND TABLE_TYPE="BASE TABLE";
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET no_more_tables=1;
