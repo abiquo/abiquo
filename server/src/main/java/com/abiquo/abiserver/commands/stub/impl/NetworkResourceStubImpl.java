@@ -234,8 +234,14 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         ClientResponse response = post(uri, dto);
         if (response.getStatusCode() == 201)
         {
-            result.setData(createFlexObject(response.getEntity(VLANNetworkDto.class)));
+            VlanNetwork network = createFlexObject(response.getEntity(VLANNetworkDto.class));
+            result.setData(network);
             result.setSuccess(Boolean.TRUE);
+            if (network.getDhcpOptions().size() != dhcpOptions.size())
+            {
+                result
+                    .setMessage("Public Vlan created successfully but some static routes were not created.");
+            }
         }
         else
         {
@@ -392,6 +398,12 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
         if (response.getStatusCode() == 200)
         {
             result.setSuccess(Boolean.TRUE);
+            VlanNetwork network = createFlexObject(response.getEntity(VLANNetworkDto.class));
+            if (network.getDhcpOptions().size() != dhcpOptions.size())
+            {
+                result
+                    .setMessage("Public Vlan edited successfully but some static routes were not created.");
+            }
         }
         else
         {
