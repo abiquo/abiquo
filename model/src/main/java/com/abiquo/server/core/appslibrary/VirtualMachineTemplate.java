@@ -66,7 +66,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     public VirtualMachineTemplate(final Enterprise enterprise, final String name,
         final DiskFormatType diskFormatType, final String path, final long diskFileSize,
-        final Category category)
+        final Category category, final String creationUser)
     {
         super();
         this.enterprise = enterprise;
@@ -75,11 +75,12 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.path = path;
         this.diskFileSize = diskFileSize;
         this.category = category;
+        this.creationUser = creationUser;
     }
 
     public VirtualMachineTemplate(final Enterprise enterprise, final String name,
         final DiskFormatType diskFormatType, final String path, final long diskFileSize,
-        final Category category, final VolumeManagement volume)
+        final Category category, final String creationUser, final VolumeManagement volume)
     {
         super();
         this.enterprise = enterprise;
@@ -90,6 +91,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
         this.category = category;
         this.volume = volume;
         this.stateful = volume != null;
+        this.creationUser = creationUser;
     }
 
     private final static String ID_COLUMN = "idImage";

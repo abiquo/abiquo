@@ -61,7 +61,6 @@ import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
  * 
  * @author jdevesa@abiquo.com
  */
-@Test(groups = {STORAGE_INTEGRATION_TESTS})
 public class VirtualMachineStorageConfigurationResourceIT extends AbstractJpaGeneratorIT
 {
     private EnvironmentGenerator environment;

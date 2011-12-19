@@ -315,8 +315,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine,
-            buildVirtualMachineFromDto(vdc, virtualAppliance, dto));
+        VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
+        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
+        
+        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
     /**
@@ -492,22 +494,6 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
         repo.update(old);
-    }
-
-    private List<VolumeManagement> getOnlyDeatachedRasd(final List<VolumeManagement> currentRasds,
-        final List<VolumeManagement> newRasds)
-    {
-        List<VolumeManagement> reallyNewRasd = new LinkedList<VolumeManagement>();
-
-        for (VolumeManagement newRasd : newRasds)
-        {
-            if (!newRasd.isAttached()) // TODO attached in the same VM
-            {
-                reallyNewRasd.add(newRasd);
-            }
-        }
-
-        return reallyNewRasd;
     }
 
     /**
@@ -1254,6 +1240,7 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         checkSnapshotAllowed(virtualMachine);
 
+        VirtualMachineState state = virtualMachine.getState();
         lockVirtualMachine(virtualMachine);
 
         // Do the snapshot
@@ -1270,15 +1257,16 @@ public class VirtualMachineService extends DefaultApiService
             DiskSnapshot destinationDisk = new DiskSnapshot();
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
             destinationDisk.setPath(formatSnapshotPath(template));
-            destinationDisk.setSnapshotName(formatSnapshotName(template));
+            destinationDisk.setSnapshotFilename(formatSnapshotName(template));
+            destinationDisk.setName(UUID.randomUUID().toString()); // TODO Use a DTO
             destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
                 datacenter).getUri());
 
             return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
-                false);
+                mustPowerOffToSnapshot(state));
         }
-        // else if (!virtualMachine.isManaged())
-        // else if (virtualMachine.isStateful())
+        // else if (!virtualMachine.isManaged()) // TODO
+        // else if (virtualMachine.isStateful()) // TODO
 
         return null;
     }
@@ -1318,6 +1306,12 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
+    }
+
+    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    {
+        return virtualMachineState == VirtualMachineState.ON
+            || virtualMachineState == VirtualMachineState.PAUSED;
     }
 
     /**
@@ -2424,9 +2418,9 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
         final RasdManagement resource, final Integer attachOrder)
     {
-        if (resource.getVirtualMachine() != null)
+        if (resource.getVirtualMachine() != null && resource.getVirtualMachine().getId() != null)
         {
-            if (!resource.getVirtualMachine().getTemporal().equals(vm.getId()))
+            if (!resource.getVirtualMachine().getId().equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();

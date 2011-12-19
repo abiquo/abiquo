@@ -47,14 +47,13 @@ import com.abiquo.server.core.infrastructure.Repository;
 import com.abiquo.tracer.User;
 
 /**
- * Transforms an {@link TemplateDto} from ApplianceManager into a
- * {@link VirtualMachineTemplate} in API
+ * Transforms an {@link TemplateDto} from ApplianceManager into a {@link VirtualMachineTemplate} in
+ * API
  */
 @Service
 public class TemplateFactory
 {
-    private final static Logger logger = LoggerFactory
-        .getLogger(TemplateFactory.class);
+    private final static Logger logger = LoggerFactory.getLogger(TemplateFactory.class);
 
     @Autowired
     private AppsLibraryRep appslibraryRep;
@@ -117,8 +116,8 @@ public class TemplateFactory
     }
 
     /**
-     * Filer already present virtual machne template paths. Ignore virtual vmtemplates from not present enterprise
-     * repository.
+     * Filer already present virtual machne template paths. Ignore virtual vmtemplates from not
+     * present enterprise repository.
      */
     private List<TemplateDto> filterAlreadyInsertedVirtualMachineTemplatePathsOrEnterpriseDoNotExist(
         final List<TemplateDto> disks, final Repository repository)
@@ -144,8 +143,8 @@ public class TemplateFactory
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    protected VirtualMachineTemplate virtualMachineTemplateFromTemplate(
-        final TemplateDto disk, final Repository repository)
+    protected VirtualMachineTemplate virtualMachineTemplateFromTemplate(final TemplateDto disk,
+        final Repository repository)
     {
         Enterprise enterprise = entRepo.findById(disk.getEnterpriseRepositoryId());
 
@@ -173,7 +172,8 @@ public class TemplateFactory
                 diskFormat,
                 disk.getDiskFilePath(),
                 disk.getDiskFileSize(),
-                category);
+                category,
+                User.SYSTEM_USER.getName()); // TODO
 
         vmtemplate.setIcon(getIcon(disk));
         vmtemplate.setDescription(getDescription(disk));
@@ -182,7 +182,7 @@ public class TemplateFactory
         vmtemplate.setHdRequiredInBytes(getHdInBytes(disk));
         vmtemplate.setOvfid(disk.getUrl());
         vmtemplate.setRepository(repository);
-        vmtemplate.setCreationUser(User.SYSTEM_USER.getName());// TODO
+
         if (master != null)
         {
             vmtemplate.setMaster(master);
@@ -202,7 +202,8 @@ public class TemplateFactory
 
         // try to find in the TemplateDefinition
         TemplateDefinition templateDef = templateDefDao.findByUrl(disk.getUrl());
-        return templateDef != null ? templateDef.getCategory() : appslibraryRep.getDefaultCategory();
+        return templateDef != null ? templateDef.getCategory() : appslibraryRep
+            .getDefaultCategory();
     }
 
     private Icon getIcon(final TemplateDto disk)
