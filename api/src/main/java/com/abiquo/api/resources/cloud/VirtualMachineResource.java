@@ -650,6 +650,11 @@ public class VirtualMachineResource extends AbstractResource
         return null; // Community impl
     }
 
+    protected Integer[] getDiskIds(final VirtualMachine vm)
+    {
+        return null; // Community impl
+    }
+
     /**
      * Reset a {@link VirtualMachine}.
      * 
