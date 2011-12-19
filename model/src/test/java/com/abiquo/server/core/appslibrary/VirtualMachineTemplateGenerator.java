@@ -236,6 +236,18 @@ public class VirtualMachineTemplateGenerator extends DefaultEntityGenerator<Virt
         return slave;
     }
 
+    public VirtualMachineTemplate createSlavePersistent(final VirtualMachineTemplate master,
+        final VolumeManagement volman)
+    {
+        VirtualMachineTemplate slave =
+            createInstanceGenericISCSI(master.getEnterprise(), master.getRepository()
+                .getDatacenter(), volman);
+        slave.setMaster(master);
+        slave.setCategory(master.getCategory());
+        slave.setRepository(master.getRepository());
+        return slave;
+    }
+
     public VirtualMachineTemplate createVirtualMachineTemplateWithConversions(
         final Enterprise enterprise)
     {
