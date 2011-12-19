@@ -383,13 +383,13 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         // Assert the properties of the 'inputDisk1'
         DiskManagement outputDisk1 = disks.get(1);
-        assertEquals(outputDisk1.getAttachmentOrder(), inputDisk1.getAttachmentOrder());
+        assertEquals(outputDisk1.getSequence(), inputDisk1.getSequence());
         assertEquals(outputDisk1.getSizeInMb(), inputDisk1.getSizeInMb());
         assertEquals(outputDisk1.getReadOnly(), Boolean.FALSE);
 
         // Assert the properties of the 'inputDisk2'
         DiskManagement outputDisk2 = disks.get(2);
-        assertEquals(outputDisk2.getAttachmentOrder(), inputDisk2.getAttachmentOrder());
+        assertEquals(outputDisk2.getSequence(), inputDisk2.getSequence());
         assertEquals(outputDisk2.getSizeInMb(), inputDisk2.getSizeInMb());
         assertEquals(outputDisk2.getReadOnly(), Boolean.FALSE);
 
@@ -409,7 +409,7 @@ public class DiskManagementServiceTest extends AbstractUnitTest
         DiskManagement disk = service.getHardDiskByVM(vdc.getId(), vapp.getId(), vm.getId(), 0);
 
         // Assert this disk has always the 'attachmentOrder' 0
-        assertEquals(disk.getAttachmentOrder(), 0L);
+        assertEquals((int) disk.getSequence(), 0L);
 
         // Assert is 'readOnly'
         assertEquals(disk.getReadOnly(), Boolean.TRUE);
@@ -510,13 +510,13 @@ public class DiskManagementServiceTest extends AbstractUnitTest
 
         // Assert the properties of the 'inputDisk1'
         DiskManagement outputDisk1 = disks.get(1);
-        assertEquals(outputDisk1.getAttachmentOrder(), inputDisk1.getAttachmentOrder());
+        assertEquals(outputDisk1.getSequence(), inputDisk1.getSequence());
         assertEquals(outputDisk1.getSizeInMb(), inputDisk1.getSizeInMb());
         assertEquals(outputDisk1.getReadOnly(), Boolean.FALSE);
 
         // Assert the properties of the 'inputDisk2'
         DiskManagement outputDisk2 = disks.get(2);
-        assertEquals(outputDisk2.getAttachmentOrder(), inputDisk2.getAttachmentOrder());
+        assertEquals(outputDisk2.getSequence(), inputDisk2.getSequence());
         assertEquals(outputDisk2.getSizeInMb(), inputDisk2.getSizeInMb());
         assertEquals(outputDisk2.getReadOnly(), Boolean.FALSE);
 

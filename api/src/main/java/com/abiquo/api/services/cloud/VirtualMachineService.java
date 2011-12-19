@@ -1655,8 +1655,7 @@ public class VirtualMachineService extends DefaultApiService
                 }
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(resource.getAttachmentOrder()).toString());
+                Integer blacklisted = resource.getSequence();
                 blackList.add(blacklisted);
 
                 if (resource instanceof DiskManagement)
@@ -1710,9 +1709,7 @@ public class VirtualMachineService extends DefaultApiService
                 vdcRep.updateIpManagement(ip);
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                blackList.add(blacklisted);
+                blackList.add(ip.getSequence());
             }
         }
     }
@@ -1740,9 +1737,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                oldNicsAttachments.add(blacklisted);
+                oldNicsAttachments.add(ip.getSequence());
             }
         }
         return oldNicsAttachments;
@@ -1771,9 +1766,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(disk.getAttachmentOrder()).toString());
-                oldDisksAttachments.add(blacklisted);
+                oldDisksAttachments.add(disk.getSequence());
             }
         }
         return oldDisksAttachments;
@@ -1808,9 +1801,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(vol.getAttachmentOrder()).toString());
-                oldVolumesAttachments.add(blacklisted);
+                oldVolumesAttachments.add(vol.getSequence());
             }
         }
         return oldVolumesAttachments;

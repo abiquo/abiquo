@@ -471,7 +471,7 @@ public class StorageService extends DefaultApiService
         }
         createdDisk.setVirtualAppliance(vapp);
         createdDisk.setVirtualMachine(vm);
-        createdDisk.setAttachmentOrder(repo.findDisksAndVolumesByVirtualMachine(vm).size());
+        createdDisk.setSequence(repo.findDisksAndVolumesByVirtualMachine(vm).size());
 
         vdcRepo.updateDisk(createdDisk);
 
