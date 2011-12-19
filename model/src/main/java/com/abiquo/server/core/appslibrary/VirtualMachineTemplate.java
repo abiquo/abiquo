@@ -173,7 +173,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
     @Required(value = STATEFUL_REQUIRED)
     public boolean isStateful()
     {
-        return this.stateful;
+        return this.stateful; // && getVolume() != null;
     }
 
     /**
@@ -607,7 +607,7 @@ public class VirtualMachineTemplate extends DefaultEntityBase
 
     public boolean isMaster()
     {
-        return getMaster() != null;
+        return getMaster() == null;
     }
 
     public String getFileRef()

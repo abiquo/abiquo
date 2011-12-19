@@ -41,6 +41,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.abiquo.api.util.AbiquoLinkBuildersFactory;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.model.transport.MovedPermanentlyDto;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.WrapperDto;
 import com.google.common.collect.Iterables;
@@ -110,6 +111,18 @@ public class RESTHandler extends CheckLocationHeaderHandler
             // }
         }
         else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
+            && context.getResponseEntity() != null
+            && context.getResponseEntity() instanceof MovedPermanentlyDto)
+        {
+            context.setResponseStatusCode(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            MovedPermanentlyDto resource = (MovedPermanentlyDto) context.getResponseEntity();
+            ResponseBuilder builder = new ResponseBuilderImpl();
+            builder.location(new URI(resource.getLocationLink().getHref()));
+            builder.entity(resource);
+            builder.status(HttpServletResponse.SC_MOVED_PERMANENTLY);
+            context.setResponseEntity(builder.build());
+        }
+        else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
             && RequestMethod.valueOf(context.getRequest().getMethod()) == RequestMethod.POST)
         {
             context.setResponseStatusCode(HttpServletResponse.SC_CREATED);
@@ -130,6 +143,7 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 context.setResponseEntity(builder.build());
             }
         }
+
         super.handleRequest(context);
     }
 

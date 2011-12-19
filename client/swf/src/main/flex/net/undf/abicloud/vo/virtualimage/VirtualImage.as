@@ -71,6 +71,10 @@ package net.undf.abicloud.vo.virtualimage
         public var chefEnabled:Boolean;
 
         public var costCode:int;
+        
+        public var creationUser:String;
+
+        public var creationDate:Date;
 
         /* ------------- Constructor ------------- */
         public function VirtualImage()
@@ -95,6 +99,8 @@ package net.undf.abicloud.vo.virtualimage
             shared = false;
             chefEnabled = false;
             costCode = 0;
+            creationUser = "";
+            creationDate = new Date();
         }
 
     }

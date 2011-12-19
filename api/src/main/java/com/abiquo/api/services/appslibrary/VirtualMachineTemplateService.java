@@ -457,6 +457,11 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             datacenter);
     }
 
+    public void insertVirtualMachineTemplate(final VirtualMachineTemplate template)
+    {
+        appsLibraryRep.insertVirtualMachineTemplate(template);
+    }
+
     /**
      * Checks the enterprise and datacenter exists and have a limits relation (datacenter allowed by
      * enterprise).

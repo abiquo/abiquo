@@ -76,7 +76,7 @@ public class AbstractAPIStub
 
     public static final String LINK_MEDIA_TYPE = "application/link+xml";
 
-    protected RestClient client = new RestClient();
+    protected RestClient client;
 
     protected final String apiUri;
 
@@ -87,6 +87,11 @@ public class AbstractAPIStub
     public AbstractAPIStub()
     {
         this.apiUri = AbiConfigManager.getInstance().getAbiConfig().getApiLocation();
+
+        // Do not follow redirects. We want to get 301 response codes
+        ClientConfig restConfig = new ClientConfig();
+        restConfig.followRedirects(false);
+        client = new RestClient(restConfig);
     }
 
     public UserSession getCurrentSession()
@@ -281,6 +286,7 @@ public class AbstractAPIStub
 
     private Resource resource(final String uri, final String user, final String password)
     {
+
         Resource resource = client.resource(uri).accept(MediaType.APPLICATION_XML);
         String cookieValue = generateToken(user, password);
         return resource.cookie(new Cookie("auth", cookieValue));
