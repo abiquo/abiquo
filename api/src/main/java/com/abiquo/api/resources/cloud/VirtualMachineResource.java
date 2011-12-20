@@ -664,10 +664,6 @@ public class VirtualMachineResource extends AbstractResource
         return null; // Community impl
     }
 
-    protected Integer[] getPrivateIpsIds(final VirtualMachine vm)
-    {
-        return null; // Community impl
-    }
 
     /**
      * Reset a {@link VirtualMachine}.
