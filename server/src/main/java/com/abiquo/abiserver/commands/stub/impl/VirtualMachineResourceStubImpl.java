@@ -106,10 +106,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         }
         catch (Exception e)
         {
-            // if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
-            // {
-            // basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
-            // }
             populateErrors(e, result, "updateVirtualMachine");
         }
         finally
