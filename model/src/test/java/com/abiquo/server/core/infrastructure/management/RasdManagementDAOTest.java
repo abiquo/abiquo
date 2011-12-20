@@ -133,8 +133,8 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         // Set reverse order to test DAO ordering
         disk1.setVirtualMachine(vm);
         disk2.setVirtualMachine(vm);
-        disk1.setAttachmentOrder(2);
-        disk2.setAttachmentOrder(1);
+        disk1.setSequence(2);
+        disk2.setSequence(1);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         diskGenerator.addAuxiliaryEntitiesToPersist(disk1, entitiesToPersist);
@@ -145,8 +145,8 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
 
         assertNotNull(disks);
         assertEquals(disks.size(), 2);
-        assertEquals(disks.get(0).getAttachmentOrder(), 1);
-        assertEquals(disks.get(1).getAttachmentOrder(), 2);
+        assertEquals((int) disks.get(0).getSequence(), 1);
+        assertEquals((int) disks.get(1).getSequence(), 2);
     }
 
     @Test
@@ -160,8 +160,8 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         vol1.setVirtualMachine(vm);
         vol2.setVirtualMachine(vm);
         // Set reverse order to test DAO ordering
-        vol1.setAttachmentOrder(2);
-        vol2.setAttachmentOrder(1);
+        vol1.setSequence(2);
+        vol2.setSequence(1);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         volumeGenerator.addAuxiliaryEntitiesToPersist(vol1, entitiesToPersist);
@@ -172,8 +172,8 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
 
         assertNotNull(volumes);
         assertEquals(volumes.size(), 2);
-        assertEquals(volumes.get(0).getAttachmentOrder(), 1);
-        assertEquals(volumes.get(1).getAttachmentOrder(), 2);
+        assertEquals((int) volumes.get(0).getSequence(), 1);
+        assertEquals((int) volumes.get(1).getSequence(), 2);
     }
 
     @Test
@@ -192,10 +192,10 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         disk2.setVirtualMachine(vm);
 
         // Set order to test DAO ordering
-        disk1.setAttachmentOrder(4);
-        disk2.setAttachmentOrder(1);
-        vol1.setAttachmentOrder(2);
-        vol2.setAttachmentOrder(3);
+        disk1.setSequence(4);
+        disk2.setSequence(1);
+        vol1.setSequence(2);
+        vol2.setSequence(3);
 
         List<Object> entitiesToPersist = new ArrayList<Object>();
         volumeGenerator.addAuxiliaryEntitiesToPersist(vol1, entitiesToPersist);
@@ -208,10 +208,10 @@ public class RasdManagementDAOTest extends DefaultDAOTestBase<RasdManagementDAO,
         assertNotNull(disks);
         assertEquals(disks.size(), 4);
 
-        assertEquals(disks.get(0).getAttachmentOrder(), 1);
-        assertEquals(disks.get(1).getAttachmentOrder(), 2);
-        assertEquals(disks.get(2).getAttachmentOrder(), 3);
-        assertEquals(disks.get(3).getAttachmentOrder(), 4);
+        assertEquals((int) disks.get(0).getSequence(), 1);
+        assertEquals((int) disks.get(1).getSequence(), 2);
+        assertEquals((int) disks.get(2).getSequence(), 3);
+        assertEquals((int) disks.get(3).getSequence(), 4);
 
         assertTrue(disks.get(0) instanceof DiskManagement);
         assertTrue(disks.get(1) instanceof VolumeManagement);

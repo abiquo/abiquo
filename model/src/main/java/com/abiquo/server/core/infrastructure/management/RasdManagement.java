@@ -243,6 +243,11 @@ public class RasdManagement extends DefaultEntityBase
 
     public void setSequence(final Integer sequence)
     {
+        if (sequence < FIRST_ATTACHMENT_SEQUENCE)
+        {
+            throw new IllegalArgumentException("Attachment order should be greater or equal to "
+                + FIRST_ATTACHMENT_SEQUENCE);
+        }
         this.sequence = sequence;
     }
 
@@ -256,29 +261,6 @@ public class RasdManagement extends DefaultEntityBase
     public void setDescription(final String description)
     {
         getRasd().setDescription(description);
-    }
-
-    @Deprecated
-    /** use sequence*/
-    public long getAttachmentOrder()
-    {
-        Long generation = getRasd().getGeneration();
-        // XXX priorize sequence attribute
-        return generation == null ? getSequence() : generation;
-    }
-
-    @Deprecated
-    /** use sequence*/
-    public void setAttachmentOrder(final long order)
-    {
-        if (order < FIRST_ATTACHMENT_SEQUENCE)
-        {
-            throw new IllegalArgumentException("Attachment order should be greater or equal to "
-                + FIRST_ATTACHMENT_SEQUENCE);
-        }
-
-        setSequence((int) order);
-        getRasd().setGeneration(order < 0 ? 0L : order);
     }
 
     // *************************** Resource state transitions ***************************

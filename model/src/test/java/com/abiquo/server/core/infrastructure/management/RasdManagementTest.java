@@ -42,18 +42,18 @@ public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
     {
         RasdManagement rasdm = createUniqueEntity();
 
-        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE);
-        assertEquals(rasdm.getAttachmentOrder(), FIRST_ATTACHMENT_SEQUENCE);
+        rasdm.setSequence(FIRST_ATTACHMENT_SEQUENCE);
+        assertEquals((int) rasdm.getSequence(), FIRST_ATTACHMENT_SEQUENCE);
 
-        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE + 1);
-        assertEquals(rasdm.getAttachmentOrder(), FIRST_ATTACHMENT_SEQUENCE + 1);
+        rasdm.setSequence(FIRST_ATTACHMENT_SEQUENCE + 1);
+        assertEquals((int) rasdm.getSequence(), FIRST_ATTACHMENT_SEQUENCE + 1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInvalidGenerationValues()
     {
         RasdManagement rasdm = createUniqueEntity();
-        rasdm.setAttachmentOrder(FIRST_ATTACHMENT_SEQUENCE - 1);
+        rasdm.setSequence(FIRST_ATTACHMENT_SEQUENCE - 1);
     }
 
     @Test
@@ -62,6 +62,6 @@ public class RasdManagementTest extends DefaultEntityTestBase<RasdManagement>
         RasdManagement rasdm = createUniqueEntity();
 
         assertNull(rasdm.getRasd().getGeneration());
-        assertEquals(rasdm.getAttachmentOrder(), 0L);
+        assertEquals((int) rasdm.getSequence(), 0);
     }
 }
