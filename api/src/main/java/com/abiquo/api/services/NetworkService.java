@@ -435,9 +435,8 @@ public class NetworkService extends DefaultApiService
             if (currentIp.getRasd().equals(ipToDetach.getRasd()))
             {
                 ipIterator.remove();
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
             }
-
-            return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
         }
 
         addUnexpectedErrors(APIError.NON_EXISTENT_IP);

@@ -316,6 +316,7 @@ public class VirtualMachineService extends DefaultApiService
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
+        
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
         
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
@@ -552,12 +553,6 @@ public class VirtualMachineService extends DefaultApiService
         old.setCpu(vmnew.getCpu());
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
-
-        // At this point the VM should already be locked
-        // if (old.getState() == VirtualMachineState.OFF)
-        // {
-        // old.setState(VirtualMachineState.LOCKED);
-        // }
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
