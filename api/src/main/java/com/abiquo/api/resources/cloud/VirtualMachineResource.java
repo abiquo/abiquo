@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.beans.ConstructorProperties;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -160,6 +161,38 @@ public class VirtualMachineResource extends AbstractResource
         }
 
         return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+    }
+
+    /**
+     * Updates this virtual Machine Node information (e.g. name)
+     * 
+     * @param vdcId
+     * @param vappId
+     * @param vmId
+     * @param dto
+     * @param restBuilder
+     * @param uriInfo
+     * @return
+     * @throws Exception
+     */
+    @PUT
+    @Consumes(VM_NODE_MEDIA_TYPE)
+    public VirtualMachineDto updateVirtualMachineNode(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
+    {
+        // TODO: validatePathParameters(vdcId, vappId, vmId);
+
+        VirtualMachine modifiedVMachine = vmService.modifyVirtualMachine(vdcId, vappId, vmId);
+
+        final VirtualMachineDto modifiedVMachineDto =
+            VirtualMachineResource.createTransferObject(modifiedVMachine, vdcId, vappId,
+                restBuilder, null, null, null);
+
+        return modifiedVMachineDto;
     }
 
     /**
