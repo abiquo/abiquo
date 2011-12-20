@@ -434,15 +434,31 @@ public class VirtualMachineService extends DefaultApiService
             return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
                 newVirtualMachineTarantino);
         }
+        catch (APIException e)
+        {
+            if (vm.getState() == VirtualMachineState.LOCKED)
+            {
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RECONFIGURE, "virtualMachine.reconfigureError", vm.getName());
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RECONFIGURE, e, "virtualMachine.reconfigureError", vm.getName());
+
+                // Must unlock the virtual machine
+                unlockVirtualMachineState(vm, originalState);
+            }
+
+            throw e;
+        }
         catch (Exception ex)
         {
             if (vm.getState() == VirtualMachineState.LOCKED)
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY, "virtualMachine.reconfigureError", vm.getName());
+                    EventType.VM_RECONFIGURE, "virtualMachine.reconfigureError", vm.getName());
 
                 tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY, ex, "virtualMachine.reconfigureError", vm.getName());
+                    EventType.VM_RECONFIGURE, ex, "virtualMachine.reconfigureError", vm.getName());
 
                 // Must unlock the virtual machine
                 unlockVirtualMachineState(vm, originalState);
@@ -844,6 +860,22 @@ public class VirtualMachineService extends DefaultApiService
         ipService.assignDefaultNICToVirtualMachine(virtualMachine.getId());
 
         return virtualMachine;
+    }
+
+    /**
+     * 
+     * @param vdcId
+     * @param vappId
+     * @param dto
+     * @return
+     */
+    public VirtualMachine modifyVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        
+        // XXX
+        // TODO: Implement this modifier!
+        return getVirtualMachine(vmId);
     }
 
     /**

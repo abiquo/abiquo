@@ -42,6 +42,7 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceMa
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
+import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
@@ -89,6 +90,12 @@ import com.abiquo.util.resources.ResourceManager;
 public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
     VirtualApplianceResourceStub
 {
+
+    public static String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml"; // TODO:
+
+    // move to
+    // VirtualMachineResrouceStub?
+
     public VirtualApplianceResourceStubImpl()
     {
     }
@@ -196,6 +203,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                     }
                     case Node.NODE_MODIFIED:
                     {
+                        // We should only update DB without sending a reconfigure operation
                         VirtualMachineDto virtualMachineDto =
                             virtualMachineToDto(virtualAppliance, n.getVirtualMachine(), n,
                                 virtualDatacenterId, virtualAppliance.getVirtualDataCenter()
@@ -205,8 +213,9 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
                                 n.getVirtualMachine().getId());
 
-                        ClientResponse put = post(linkVirtualMachine, virtualMachineDto);
-                        if (put.getStatusCode() != Status.ACCEPTED.getStatusCode())
+                        ClientResponse put  =
+                            put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
+                        if (put.getStatusCode() != Status.OK.getStatusCode())
                         {
                             addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);

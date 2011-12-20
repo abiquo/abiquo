@@ -113,6 +113,7 @@ public class AbstractAPIStub
 
             Properties props = new Properties();
             props.put("abiquo.endpoint", apiUri);
+            props.put("jclouds.max-retries", "0");
 
             context =
                 new AbiquoContextFactory().createContext(token,
@@ -983,22 +984,16 @@ public class AbstractAPIStub
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
 
-        return resolveURI(
-            apiUri,
-            "cloud/virtualdatacenters/{vdcid}/disks",
-            params);
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks", params);
     }
-    
+
     protected String createVirtualDatacenterDiskLink(final Integer vdcId, final Integer diskId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
         params.put("diskId", diskId.toString());
 
-        return resolveURI(
-            apiUri,
-            "cloud/virtualdatacenters/{vdcid}/disks/{diskId}",
-            params);
+        return resolveURI(apiUri, "cloud/virtualdatacenters/{vdcid}/disks/{diskId}", params);
     }
 
     protected String createVirtualMachineDisksLink(final Integer vdcId, final Integer vappId,
@@ -1014,7 +1009,7 @@ public class AbstractAPIStub
             "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/",
             params);
     }
-    
+
     protected String createVirtualMachineDiskLink(final Integer vdcId, final Integer vappId,
         final Integer vmId, final Integer diskId)
     {
