@@ -161,7 +161,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         ClientResponse delete = delete(linkVirtualMachine);
                         if (delete.getStatusCode() != 204)
                         {
-                            addErrors(result, errors, delete, "updateVirrtualApplianceNodes");
+                            addErrors(result, errors, delete, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
 
                             result.setMessage(errors.toString());
@@ -187,7 +187,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         if (post.getStatusCode() != Status.CREATED.getStatusCode())
                         {
                             errors.append(n.getVirtualImage().getName());
-                            addErrors(result, errors, post, "updateVirrtualApplianceNodes");
+                            addErrors(result, errors, post, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
 
                             result.setMessage(errors.toString());
@@ -208,7 +208,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                         ClientResponse put = post(linkVirtualMachine, virtualMachineDto);
                         if (put.getStatusCode() != Status.ACCEPTED.getStatusCode())
                         {
-                            addErrors(result, errors, put, "updateVirrtualApplianceNodes");
+                            addErrors(result, errors, put, "updateVirtualApplianceNodes");
                             result.setSuccess(Boolean.FALSE);
 
                             result.setMessage(errors.toString());
@@ -229,7 +229,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         ClientResponse put = put(linkApp, appDto);
         if (put.getStatusCode() != Status.OK.getStatusCode())
         {
-            addErrors(result, errors, put, "updateVirrtualApplianceNodes");
+            addErrors(result, errors, put, "updateVirtualApplianceNodes");
         }
 
         ClientResponse response = get(linkApp);
@@ -249,7 +249,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            populateErrors(response, result, "updateVirrtualApplianceNodes");
+            populateErrors(response, result, "updateVirtualApplianceNodes");
         }
 
         return result;
