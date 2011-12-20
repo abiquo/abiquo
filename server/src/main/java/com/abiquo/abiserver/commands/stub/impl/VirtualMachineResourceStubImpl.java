@@ -32,8 +32,10 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
+import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 
 import com.abiquo.abiserver.commands.BasicCommand;
+import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.exception.HardLimitExceededException;
@@ -44,6 +46,7 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
@@ -76,20 +79,42 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
+
         BasicResult result = new BasicResult();
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId,
-                virtualMachine.getId());
 
-        ClientResponse response = put(vmachineUrl, createTransferObject(virtualMachine));
-
-        if (response.getStatusCode() == 200)
+        try
         {
-            result.setSuccess(true);
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance vapp =
+                getApiClient().getCloudService().getVirtualDatacenter(virtualDatacenterId)
+                    .getVirtualAppliance(virtualApplianceId);
+
+            org.jclouds.abiquo.domain.cloud.VirtualMachine vm =
+                vapp.getVirtualMachine(virtualMachine.getId());
+
+            if (vm.getCpu() != virtualMachine.getCpu() || vm.getRam() != virtualMachine.getRam())
+            {
+                vm.setCpu(virtualMachine.getCpu());
+                vm.setRam(virtualMachine.getRam());
+
+                // Here we actually perform the request to create the virtual machine
+                vm.update();
+            }
+            // else all updated
+
+            result.setSuccess(Boolean.TRUE);
         }
-        else
+        catch (Exception e)
         {
-            populateErrors(response, result, "updateVirtualMachine");
+            // if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
+            // {
+            // basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            // }
+            populateErrors(e, result, "updateVirtualMachine");
+        }
+        finally
+        {
+            releaseApiClient();
         }
 
         return result;
@@ -111,37 +136,6 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         ClientResponse response =
             vmachineResource.contentType(MediaType.APPLICATION_XML)
                 .accept(MediaType.APPLICATION_XML).post(null);
-
-        // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
-
-        if (response.getStatusCode() / 200 != 1)
-        {
-            onError(userSession, response);
-        }
-    }
-
-    @Override
-    @Deprecated
-    public void checkEdit(final UserSession userSession, final Integer virtualDatacenterId,
-        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
-        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
-        SchedulerException, NotEnoughResourcesException
-    {
-
-        VirtualMachineDto newRequirements = new VirtualMachineDto();
-        newRequirements.setCpu(newcpu);
-        newRequirements.setRam(newram);
-
-        String vmachineUrl =
-            resolveVirtualMachineUrl(virtualDatacenterId, virtualApplianceId, virtualMachineId);
-
-        vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/checkedit");
-
-        Resource vmachineResource = resource(vmachineUrl);
-
-        ClientResponse response =
-            vmachineResource.contentType(MediaType.APPLICATION_XML)
-                .accept(MediaType.APPLICATION_XML).put(newRequirements);
 
         // ClientResponse response = put(vappUrl, String.valueOf(forceEnterpirseLimits));
 

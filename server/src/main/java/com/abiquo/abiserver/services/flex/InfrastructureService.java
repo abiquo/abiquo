@@ -476,11 +476,16 @@ public class InfrastructureService
      * @return
      */
     public BasicResult editVirtualMachine(final UserSession session,
-        final VirtualMachine virtualMachine)
+        final VirtualMachine virtualMachine, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId)
     {
 
-        InfrastructureCommand command = proxyCommand(session);
-        return command.editVirtualMachine(session, virtualMachine);
+        VirtualMachineResourceStub vmachineResource =
+            APIStubFactory.getInstance(session, new VirtualMachineResourceStubImpl(),
+                VirtualMachineResourceStub.class);
+
+        return vmachineResource.updateVirtualMachine(virtualDatacenterId, virtualApplianceId,
+            virtualMachine);
     }
 
     /**

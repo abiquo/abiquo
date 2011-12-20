@@ -113,6 +113,7 @@ public class AbstractAPIStub
 
             Properties props = new Properties();
             props.put("abiquo.endpoint", apiUri);
+            // XXX props.put("jclouds.max-retries", "0");
 
             context =
                 new AbiquoContextFactory().createContext(token,
