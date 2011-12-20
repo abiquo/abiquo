@@ -103,28 +103,6 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
-     * Creates and sends a reconfigure operation.
-     * 
-     * @param vm The virtual machine to reconfigure.
-     * @param originalConfig The original configuration for the virtual machine.
-     * @param newConfig The new configuration for the virtual machine.
-     * @return The identifier of the reconfigure task.
-     */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public String reconfigureVirtualMachine(final VirtualMachine vm,
-        final VirtualMachineDescriptionBuilder originalConfig,
-        final VirtualMachineDescriptionBuilder newConfig)
-    {
-        Datacenter datacenter = vm.getHypervisor().getMachine().getDatacenter();
-        ignoreVSMEventsIfNecessary(datacenter, vm);
-
-        DatacenterTasks reconfigureTask = jobCreator.reconfigureTask(vm, originalConfig, newConfig);
-        send(datacenter, reconfigureTask, EventType.VM_RECONFIGURE);
-
-        return reconfigureTask.getId();
-    }
-
-    /**
      * Send the given datacenter tasks.
      * 
      * @param datacenter The datacenter where the tasks will be sent to.
@@ -287,6 +265,73 @@ public class TarantinoService extends DefaultApiService
             logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
                 + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
             vsm.unsubscribe(remoteService, virtualMachine);
+
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
+    /**
+     * Creates and sends a reconfigure operation.
+     * 
+     * @param vm The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String reconfigureVirtualMachine(final VirtualMachine vm,
+        final VirtualMachineDescriptionBuilder originalConfig,
+        final VirtualMachineDescriptionBuilder newConfig)
+    {
+        Datacenter datacenter = vm.getHypervisor().getMachine().getDatacenter();
+        ignoreVSMEventsIfNecessary(datacenter, vm);
+
+        try
+        {
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(vm.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(originalConfig.build(vm.getUuid()), conn, userService
+                    .getCurrentUser().getNick());
+
+            DatacenterTasks reconfigTask =
+                builder.addReconfigure(newConfig.build(vm.getUuid())).buildTarantinoTask();
+
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(vm.getId()), TaskType.RECONFIGURE));
+
+            send(datacenter, builder.buildTarantinoTask(), EventType.VM_RECONFIGURE);
+
+            return reconfigTask.getId();
+
+        }
+        catch (NotFoundException e)
+        {
+            logger.debug("Error enqueuing the reconfiguretask dto to Tarantino with error: "
+                + e.getMessage() + " unmonitoring the machine: " + vm.getName());
+
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the reconfigure task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE, APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE, "tarantino.reconfigureVMError", e.getMessage());
+
+            // We need to unsuscribe the machine
+            // logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
+            // + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
+            // vsm.unsubscribe(remoteService, virtualMachine);
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);

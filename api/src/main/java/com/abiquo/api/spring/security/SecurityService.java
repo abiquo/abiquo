@@ -21,10 +21,15 @@
 
 package com.abiquo.api.spring.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.AccessDeniedException;
 import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.providers.UsernamePasswordAuthenticationToken;
+import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.util.AuthorityUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.Privileges;
 import com.abiquo.server.core.enterprise.Privilege;
@@ -39,6 +44,9 @@ import com.abiquo.server.core.enterprise.User;
 @Service
 public class SecurityService
 {
+    @Autowired
+    private UserLoginService userDetailsService;
+
     public boolean hasPrivilege(final Privileges privilege)
     {
         return AuthorityUtils.userHasAuthority(AbiquoUserDetailsService.DEFAULT_ROLE_PREFIX
@@ -117,6 +125,28 @@ public class SecurityService
         }
 
         return false;
+    }
+
+    /**
+     * Publishes login info for the given user.
+     * <p>
+     * this method <b>MUST</b> be called within a transaction, since it will access database to load
+     * the list of privileges for the given user.
+     * 
+     * @param user The user to log in.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
+    public void loginAsUser(final User user)
+    {
+        UserDetails userDetails = userDetailsService.getUserDetails(user);
+
+        UsernamePasswordAuthenticationToken auth =
+            new UsernamePasswordAuthenticationToken(userDetails.getUsername(),
+                userDetails.getPassword(),
+                userDetails.getAuthorities());
+        auth.setDetails(userDetails);
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     public static Privileges[] getAllPrivileges()

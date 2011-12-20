@@ -157,7 +157,7 @@ public class VirtualMachineResource extends AbstractResource
         if (taskId == null)
         {
             // If the link is null no Task was performed
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            return null;
         }
 
         return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
@@ -696,7 +696,6 @@ public class VirtualMachineResource extends AbstractResource
     {
         return null; // Community impl
     }
-
 
     /**
      * Reset a {@link VirtualMachine}.

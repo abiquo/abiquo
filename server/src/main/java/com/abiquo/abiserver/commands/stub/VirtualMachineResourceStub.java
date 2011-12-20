@@ -45,12 +45,6 @@ public interface VirtualMachineResourceStub
         Integer virtualApplianceId, Integer virtualMachineId) throws HardLimitExceededException,
         SoftLimitExceededException, SchedulerException, NotEnoughResourcesException;
 
-    @Deprecated
-    void checkEdit(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException;
-
     public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
         Integer virtualApplianceId, VirtualMachine virtualMachine);
 
