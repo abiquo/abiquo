@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dmtf.schemas.ovf.envelope._1.DiskSectionType;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.ovf.envelope._1.FileType;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.abiquo.ovfmanager.ovf.OVFEnvelopeUtils;
+import com.abiquo.ovfmanager.ovf.exceptions.InvalidSectionException;
+import com.abiquo.ovfmanager.ovf.exceptions.SectionNotPresentException;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.ProxyServer;
@@ -80,8 +84,8 @@ public class TemplateDownloader
 
     /**
      * Make the provided template available on the enterprise repository. Creates a new directory
-     * for the provided template definition into the repository (using the OVF file name), inspect the
-     * OVF-Envelope to download all its File References into its package folder. Also change the
+     * for the provided template definition into the repository (using the OVF file name), inspect
+     * the OVF-Envelope to download all its File References into its package folder. Also change the
      * envelope to ensure use relative paths on the File ''href''. Sets the OVFState to DOWNLOADING
      * on the OVFIndex.
      * 
@@ -105,7 +109,7 @@ public class TemplateDownloader
             inprogress.put(ovfId, DownloadingFile);
             purgeInprogress();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             throw new AMException(AMError.TEMPLATE_INSTALL, e);
         }
@@ -125,27 +129,41 @@ public class TemplateDownloader
     /**
      * @param envelope, the OVF envelope document.
      * @param enterprise, the current enterprise being deploying.
+     * @throws InvalidSectionException
+     * @throws SectionNotPresentException
      */
     private DownloadingFile createFileTransfers(final String ovfId, final EnvelopeType envelope,
-        final String enterpriseId)
+        final String enterpriseId) throws SectionNotPresentException, InvalidSectionException
     {
         // TODO prior validation
-        if (envelope.getReferences().getFile().size() != 1)
-        {
-            throw new AMException(AMError.TEMPLATE_INVALID_MULTIPLE_FILES);
-        }
+        /*
+         * if (envelope.getReferences().getFile().size() != 1) { throw new
+         * AMException(AMError.TEMPLATE_INVALID_MULTIPLE_FILES); }
+         */
 
         final EnterpriseRepositoryService enterpirseRepository = ErepoFactory.getRepo(enterpriseId);
 
-        final FileType fileType = envelope.getReferences().getFile().get(0);
+        DiskSectionType diskSectionType =
+            OVFEnvelopeUtils.getSection(envelope, DiskSectionType.class);
+        int index = 0;
+        int references = 0;
+        for (FileType fileType : envelope.getReferences().getFile())
+        {
+            if (diskSectionType.getDisk().get(0).getFileRef().equals(fileType.getId()))
+            {
+                index = references;
+            }
+            references++;
+        }
+        final FileType fileType = envelope.getReferences().getFile().get(index); // XXX
 
         final Long expectedBytes = fileType.getSize().longValue();
         if (!enterpirseRepository.isEnoughtSpaceOn(expectedBytes))
         {
             // note the expected bytes are from the OVF document, but for progress we use the
             // content-length header
-            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB",
-                String.valueOf((expectedBytes / 1048576))));
+            throw new AMException(AMError.REPO_NO_SPACE, String.format("Requested %s MB", String
+                .valueOf((expectedBytes / 1048576))));
         }
 
         final String destinationPath =
@@ -162,8 +180,8 @@ public class TemplateDownloader
      * @return the OVFid of the just uploaded package
      * @throws IOException
      */
-    public synchronized String uploadTemplate(final TemplateDto diskInfo,
-        final File diskFile) throws IOException
+    public synchronized String uploadTemplate(final TemplateDto diskInfo, final File diskFile)
+        throws IOException
     {
 
         final long idEnterprise = diskInfo.getEnterpriseRepositoryId();
@@ -173,8 +191,7 @@ public class TemplateDownloader
             ErepoFactory.getRepo(String.valueOf(idEnterprise));
 
         // create and write the OVF Envelope
-        EnvelopeType envelope =
-            TemplateToOVFEnvelope.createOVFEnvelopeFromTemplate(diskInfo);
+        EnvelopeType envelope = TemplateToOVFEnvelope.createOVFEnvelopeFromTemplate(diskInfo);
 
         enterpriseRepository.createTemplateFolder(ovfId);
         enterpriseRepository.createTemplateFolder(ovfId, envelope);
