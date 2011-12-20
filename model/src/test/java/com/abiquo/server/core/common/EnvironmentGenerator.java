@@ -23,6 +23,7 @@ package com.abiquo.server.core.common;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.abiquo.model.enumerator.MachineState;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.enumerator.StorageTechnologyType;
 import com.abiquo.server.core.cloud.Hypervisor;
@@ -111,9 +112,9 @@ public class EnvironmentGenerator
     private final UserGenerator userGenerator;
 
     private final VirtualApplianceGenerator vappGenerator;
-    
+
     private final VirtualDatacenterGenerator vdcGenerator;
-    
+
     private final VLANNetworkGenerator vlanGenerator;
 
     private final VolumeManagementGenerator volumeGenerator;
@@ -190,17 +191,18 @@ public class EnvironmentGenerator
      * <li>A disk in the generated virtual datacenter and storage pool</li>
      * <li>Its Rasd</li>
      * </ol>
+     * 
      * @return
      */
     public List<Object> generateDisk()
     {
         VirtualDatacenter vdc = get(VirtualDatacenter.class);
-        
+
         DiskManagement disk = diskGenerator.createInstance(vdc);
-        
+
         add(disk.getRasd());
         add(disk);
-        
+
         return getEnvironment();
     }
 
@@ -272,13 +274,14 @@ public class EnvironmentGenerator
         StorageDevice device = deviceGenerator.createInstance(dc);
         device.setStorageTechnology(StorageTechnologyType.OPENSOLARIS);
         StoragePool pool = poolGenerator.createInstance(device);
-        
+
         Machine machine = hypervisor.getMachine();
+        machine.setState(MachineState.MANAGED);
         machine.setVirtualCpuCores(Integer.MAX_VALUE);
         machine.setVirtualRamInMb(Integer.MAX_VALUE);
         machine.setVirtualCpusUsed(0);
         machine.setVirtualRamUsedInMb(0);
-        
+
         add(dc);
         add(dcLimits);
         add(am);
@@ -320,6 +323,7 @@ public class EnvironmentGenerator
         VirtualAppliance vapp = vappGenerator.createInstance(vdc);
         NodeVirtualImage node = nodeVirtualImageGenerator.createInstance(vapp, user);
         VirtualMachine vm = node.getVirtualMachine();
+        vm.setState(VirtualMachineState.NOT_ALLOCATED);
 
         add(vapp);
         add(node.getVirtualImage().getRepository());
@@ -330,14 +334,14 @@ public class EnvironmentGenerator
 
         return getEnvironment();
     }
-    
+
     /**
      * Generates and adds the following entities to the environment.
-     * 
      * <ol>
      * <li>A ip in the generated virtual datacenter and its default vlan.</li>
      * <li>Its Rasd</li>
      * </ol>
+     * 
      * @return
      */
     public List<Object> generatePrivateIp()
@@ -345,13 +349,13 @@ public class EnvironmentGenerator
         VirtualDatacenter vdc = get(VirtualDatacenter.class);
         VLANNetwork vlan = vdc.getDefaultVlan();
         IpPoolManagement ip = ipGenerator.createInstance(vdc, vlan, "10.60.1.24");
-        
+
         add(ip.getRasd());
         add(ip);
-        
+
         return getEnvironment();
     }
-    
+
     /**
      * Generates and adds the following entities to the environment.
      * <ol>
@@ -370,8 +374,10 @@ public class EnvironmentGenerator
         // Entities that should be already added to the environment
         Datacenter datacenter = get(Datacenter.class);
         Enterprise enterprise = get(Enterprise.class);
+        Hypervisor hypervisor = get(Hypervisor.class);
 
-        VirtualDatacenter vdc = vdcGenerator.createInstance(datacenter, enterprise);
+        VirtualDatacenter vdc =
+            vdcGenerator.createInstance(datacenter, enterprise, hypervisor.getType());
         VLANNetwork vlan = vlanGenerator.createInstance(vdc.getNetwork());
         vlan.setTag(3);
         // vlan.getConfiguration().getDhcp().getRemoteService().setDatacenter(datacenter);

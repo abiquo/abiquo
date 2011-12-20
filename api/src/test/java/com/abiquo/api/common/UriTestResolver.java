@@ -548,7 +548,7 @@ public class UriTestResolver
 
         return resolveURI(template, values);
     }
-    
+
     public static String resolvePrivateNetworkIPURI(final Integer virtualDatacenterId,
         final Integer vlanId, final Integer ipId)
     {
@@ -556,8 +556,7 @@ public class UriTestResolver
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
                 VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
                 PrivateNetworksResource.PRIVATE_NETWORKS_PATH,
-                PrivateNetworkResource.PRIVATE_NETWORK_PARAM, 
-                IpAddressesResource.IP_ADDRESSES,
+                PrivateNetworkResource.PRIVATE_NETWORK_PARAM, IpAddressesResource.IP_ADDRESSES,
                 IpAddressesResource.IP_ADDRESS_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
@@ -712,6 +711,96 @@ public class UriTestResolver
     /**
      * Creates something like
      * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineDeployURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineUndeployURI(final Integer vdcId,
+        final Integer vappId, final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/action/deploy
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineResetURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
+                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_RESET);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
      * vappId}/virtualmachines/{vmId}/storage/disks
      * 
      * @param vdcId identifier of the virtual datacenter
@@ -838,7 +927,7 @@ public class UriTestResolver
 
         return resolveURI(template, values);
     }
-    
+
     /**
      * Creates something like
      * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
@@ -1101,7 +1190,7 @@ public class UriTestResolver
     {
         return resolveURI(IconsResource.ICONS_PATH, new HashMap<String, String>());
     }
-    
+
     public static String resolveDisksUri(final Integer vdcId)
     {
         String template =
@@ -1113,12 +1202,13 @@ public class UriTestResolver
 
         return resolveURI(template, values);
     }
-    
+
     public static String resolveDiskUri(final Integer vdcId, final Integer diskId)
     {
         String template =
             buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
-                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH, DiskResource.DISK_PARAM);
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM, DisksResource.DISKS_PATH,
+                DiskResource.DISK_PARAM);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());

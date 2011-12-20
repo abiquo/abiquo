@@ -134,6 +134,11 @@ public class VirtualMachineRep extends DefaultRepBase
         dao.flush();
     }
 
+    public void refresh(final VirtualMachine vm)
+    {
+        dao.refresh(vm);
+    }
+
     public Collection<RasdManagement> findRasdManagementByVirtualMachine(
         final VirtualMachine virtualMachine)
     {

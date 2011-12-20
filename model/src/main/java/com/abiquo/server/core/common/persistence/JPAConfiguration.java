@@ -55,7 +55,7 @@ public class JPAConfiguration
         }
 
         Session session = (Session) em.getDelegate();
-        
+
         for (String filter : ONLY_TEMPORAL_FILTERS)
         {
             session.disableFilter(filter);
@@ -67,7 +67,7 @@ public class JPAConfiguration
 
         return em;
     }
-    
+
     public static EntityManager enableNotTemporalFilters(final EntityManager em)
     {
         if (!em.isOpen())
@@ -76,7 +76,7 @@ public class JPAConfiguration
         }
 
         Session session = (Session) em.getDelegate();
-        
+
         for (String filter : ONLY_TEMPORAL_FILTERS)
         {
             session.disableFilter(filter);
@@ -88,7 +88,7 @@ public class JPAConfiguration
 
         return em;
     }
-    
+
     public static EntityManager enableOnlyTemporalFilters(final EntityManager em)
     {
         if (!em.isOpen())
@@ -97,7 +97,7 @@ public class JPAConfiguration
         }
 
         Session session = (Session) em.getDelegate();
-        
+
         for (String filter : NOT_TEMPORAL_FILTERS)
         {
             session.disableFilter(filter);

@@ -164,7 +164,7 @@ public class VirtualMachineService extends DefaultApiService
     protected AppsLibraryRep appsLibRep;
 
     @Autowired
-    private TarantinoService tarantino;
+    protected TarantinoService tarantino;
 
     @Autowired
     private TarantinoJobCreator jobCreator;
@@ -316,8 +316,9 @@ public class VirtualMachineService extends DefaultApiService
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
-        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
-        
+        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
+                                                   // to update the virtualMachine.
+
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
@@ -343,7 +344,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -387,7 +388,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (vm.getState() == VirtualMachineState.OFF)
             {
-                vm = lockVirtualMachine(vm);
+                lockVirtualMachine(vm);
 
                 // There might be different hardware needs. This call also recalculate.
                 LOGGER
@@ -597,13 +598,12 @@ public class VirtualMachineService extends DefaultApiService
     /**
      * Set the virtual machine state to LOCKED (when an async task is needed).
      * <p>
-     * This method returns the locked virtual machine that <b>MUST</b> be used to perform the
+     * This method updates the given virtual machine, which <b>MUST</b> be used to perform the
      * upcoming operations.
      * 
      * @param vm The virtual machine to lock.
-     * @return The virtual machine that must be used to perform the upcoming operations.
      */
-    private VirtualMachine lockVirtualMachine(final VirtualMachine vm)
+    private void lockVirtualMachine(final VirtualMachine vm)
     {
         // Lock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be locked after method
@@ -611,7 +611,7 @@ public class VirtualMachineService extends DefaultApiService
         vmLock.lock(vm.getId());
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
-        return repo.findVirtualMachineById(vm.getId());
+        repo.refresh(vm);
     }
 
     /**
@@ -1013,7 +1013,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             LOGGER.debug("Allocating with force enterpise  soft limits : "
                 + foreceEnterpriseSoftLimits);
@@ -1044,7 +1044,11 @@ public class VirtualMachineService extends DefaultApiService
              * one of the above fail we cannot allocate the VirtualMachine It also perform the
              * resource recompute
              */
-            vmAllocatorService.deallocateVirtualMachine(vmId);
+            if (virtualMachine.getHypervisor() != null)
+            {
+                vmAllocatorService.deallocateVirtualMachine(vmId);
+            }
+
             throw e;
         }
         catch (Exception ex)
@@ -1251,7 +1255,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
@@ -1384,7 +1388,7 @@ public class VirtualMachineService extends DefaultApiService
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
     }
 
-    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    protected boolean mustPowerOffToSnapshot(final VirtualMachineState virtualMachineState)
     {
         return virtualMachineState == VirtualMachineState.ON
             || virtualMachineState == VirtualMachineState.PAUSED;
@@ -1422,7 +1426,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualAppliance virtualAppliance =
                 getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
@@ -1495,7 +1499,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualMachineDescriptionBuilder machineDescriptionBuilder =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1565,7 +1569,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualMachineDescriptionBuilder machineDescriptionBuilder =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1785,7 +1789,7 @@ public class VirtualMachineService extends DefaultApiService
                     ip.setName(name);
                     ip.setVirtualDatacenter(vapp.getVirtualDatacenter());
                 }
-                   
+
                 Rasd rasd = NetworkService.createRasdEntity(vm, ip);
                 vdcRep.insertRasd(rasd);
 

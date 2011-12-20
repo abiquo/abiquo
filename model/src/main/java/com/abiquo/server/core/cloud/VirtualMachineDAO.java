@@ -24,6 +24,7 @@ package com.abiquo.server.core.cloud;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang.StringUtils;
@@ -234,6 +235,11 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
             session.enableFilter(VirtualMachine.NOT_TEMP);
             session.disableFilter(VirtualMachine.ONLY_TEMP);
         }
+    }
+
+    public void refresh(final VirtualMachine vm)
+    {
+        getEntityManager().refresh(vm, LockModeType.PESSIMISTIC_READ);
     }
 
 }

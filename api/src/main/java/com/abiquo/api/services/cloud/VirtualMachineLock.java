@@ -42,22 +42,22 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
  * @author Ignasi Barrera
  */
 
-// This class is visible only at package level. It should only be accessed from the
+// This class is only visible at package level. It should only be accessed from the
 // VirtualMachineService#lockVirtualMachine and VirtualMachineService#unlockVirtualMachine
 // methods
 
 @Service
-class VirtualMachineLock
+public class VirtualMachineLock
 {
     @Autowired
     private VirtualMachineRep repo;
 
-    VirtualMachineLock()
+    public VirtualMachineLock()
     {
 
     }
 
-    VirtualMachineLock(final EntityManager em)
+    public VirtualMachineLock(final EntityManager em)
     {
         this.repo = new VirtualMachineRep(em);
     }
@@ -72,7 +72,7 @@ class VirtualMachineLock
      * @param vmId The ID of the virtual machine to lock.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    void lock(final Integer vmId)
+    public void lock(final Integer vmId)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
         vm.setState(VirtualMachineState.LOCKED);
@@ -90,7 +90,7 @@ class VirtualMachineLock
      * @param state The original state for the virtual machine.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    void unlock(final Integer vmId, final VirtualMachineState state)
+    public void unlock(final Integer vmId, final VirtualMachineState state)
     {
         VirtualMachine vm = repo.findVirtualMachineById(vmId);
         vm.setState(state);
