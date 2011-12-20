@@ -34,8 +34,12 @@ public enum AMError
         "Cannot update Template status because cannot publish download status message in RabbitMQ"), //
     TEMPLATE_INVALID("TEMPLATE-INVALID", "Invalid OVF Document"), //
     TEMPLATE_INVALID_LOCATION("TEMPLATE-INVALID-LOC", "Invalid OVF URL"), //
-    TEMPLATE_INVALID_MULTIPLE_FILES("TEMPLATE-INVALID-MULTIPLE-FILE",
-        "OVF document contains more than one Referenced File or none."), TEMPLATE_NOT_FOUND(
+    TEMPLATE_INVALID_MULTIPLE_DISKS("TEMPLATE-INVALID-MULTIPLE-DISK",
+        "OVF document contains more than one Referenced Disks or none."), TEMPLATE_INVALID_MULTIPLE_FILES(
+        "TEMPLATE-INVALID-MULTIPLE-FILE",
+        "OVF document contains more than one Referenced Files or none."), TEMPLATE_INVALID_DISK_REFERENCE(
+        "TEMPLATE-INVALID-DISK-REFRENCE",
+        "In Virtual Hardware Section no reference to image disk is found."), TEMPLATE_NOT_FOUND(
         "TEMPLATE-NOT-FOUND", "OVF Document not found in the Template Repository"), //
     TEMPLATE_MALFORMED("TEMPLATE-MALFORMED", "OVF Document cannot be read"), //
     TEMPLATE_INSTALL("TEMPLATE-INSTALL",
@@ -122,8 +126,8 @@ public enum AMError
         // Outputs all errors in wiki table format
         for (AMError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
     }
 

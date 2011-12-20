@@ -42,12 +42,12 @@ public class AMNotifier extends AMProducer
 {
     public AMNotifier()
     {
-        
+
     }
-    
+
     // used on AMSink to discrimitate the Datacenter it belongs to .
-    private final static String REPO_LOCATION = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryLocation();
+    private final static String REPO_LOCATION =
+        AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryLocation();
 
     /**
      * Change the status for the provided OVF package Id.
@@ -58,14 +58,14 @@ public class AMNotifier extends AMProducer
      * @throws RepositoryException
      * @throws EventException
      */
-    public void setTemplateStatus(final String erId, final String ovfId, final TemplateStatusEnumType status)
+    public void setTemplateStatus(final String erId, final String ovfId,
+        final TemplateStatusEnumType status)
     {
         assert status != TemplateStatusEnumType.ERROR;
 
         final String enterpriseRepositoryPath = ErepoFactory.getRepo(erId).path();
 
-        TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId, status,
-            null);
+        TemplateFileSystem.createTemplateStatusMarks(enterpriseRepositoryPath, ovfId, status, null);
 
         notifyOVFStatusEvent(erId, ovfId, status, null);
     }
@@ -79,7 +79,8 @@ public class AMNotifier extends AMProducer
      * @throws EventException
      * @throws RepositoryException
      */
-    public void setTemplateStatusError(final String erId, final String ovfId, final String errorMessage)
+    public void setTemplateStatusError(final String erId, final String ovfId,
+        final String errorMessage)
     {
         assert errorMessage != null;
 
@@ -97,9 +98,16 @@ public class AMNotifier extends AMProducer
         assert status != TemplateStatusEnumType.ERROR || errorMsg != null;
 
         AMRedisDao dao = AMRedisDao.getDao();
-        dao.setState(erId, ovfId, status);
+        if (status == TemplateStatusEnumType.ERROR)
+        {
+            dao.setError(erId, ovfId, errorMsg);
+        }
+        else
+        {
+            dao.setState(erId, ovfId, status);
+        }
         AMRedisDao.returnDao(dao);
-        
+
         OVFPackageInstanceStatusEvent event = new OVFPackageInstanceStatusEvent();
         event.setOvfId(ovfId);
         event.setStatus(status.name());

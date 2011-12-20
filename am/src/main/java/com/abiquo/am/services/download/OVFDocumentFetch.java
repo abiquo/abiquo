@@ -68,8 +68,8 @@ import com.abiquo.ovfmanager.ovf.xml.OVFSerializer;
 public class OVFDocumentFetch
 {
     /** Timeout for all the HTTP connections. */
-    private final static Integer httpTimeout = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getTimeout();
+    private final static Integer httpTimeout =
+        AMConfigurationManager.getInstance().getAMConfiguration().getTimeout();
 
     private InputStream openHTTPConnection(final String ovfid) throws DownloadException
     {
@@ -175,9 +175,28 @@ public class OVFDocumentFetch
             DiskSectionType diskSectionType =
                 OVFEnvelopeUtils.getSection(envelope, DiskSectionType.class);
 
-            for (FileType fileType : envelope.getReferences().getFile())
+            if (diskSectionType.getDisk().size() != 1)
             {
-                fileIdToFileType.put(fileType.getId(), fileType);
+                // more than one disk in disk section
+                throw new AMException(AMError.TEMPLATE_INVALID_MULTIPLE_DISKS);
+            }
+            else
+            {
+                int references = 0;
+                for (FileType fileType : envelope.getReferences().getFile())
+                {
+                    fileIdToFileType.put(fileType.getId(), fileType);
+                    if (diskSectionType.getDisk().get(0).getFileRef().equals(fileType.getId()))
+                    {
+                        references++;
+                    }
+                }
+                if (references != 1)
+                {
+                    // file referenced in diskSection isn't found in file references or found more
+                    // than one
+                    throw new AMException(AMError.TEMPLATE_INVALID_MULTIPLE_FILES);
+                }
             }
             // Create a hash
             for (VirtualDiskDescType virtualDiskDescType : diskSectionType.getDisk())
@@ -276,6 +295,11 @@ public class OVFDocumentFetch
             }
 
         }
+
+        catch (AMException amException)
+        {
+            throw amException;
+        }
         catch (Exception e)
         {
             throw new AMException(AMError.TEMPLATE_INVALID, e);
@@ -351,8 +375,8 @@ public class OVFDocumentFetch
         catch (Exception e)
         {
             throw new InvalidSectionException(String.format("Invalid File References section "
-                + "(check all the files on the OVF document contains the ''size'' attribute):\n",
-                e.toString()));
+                + "(check all the files on the OVF document contains the ''size'' attribute):\n", e
+                .toString()));
         }
 
         return envelope;

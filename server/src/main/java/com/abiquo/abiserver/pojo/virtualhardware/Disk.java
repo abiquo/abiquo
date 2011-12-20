@@ -32,6 +32,8 @@ public class Disk
     private Long diskSizeInMb;
 
     private Boolean readOnly;
+    
+    private Integer diskId;
 
     public Long getDiskSizeInMb()
     {
@@ -51,6 +53,16 @@ public class Disk
     public void setReadOnly(final Boolean readOnly)
     {
         this.readOnly = readOnly;
+    }
+
+    public void setDiskId(Integer diskId)
+    {
+        this.diskId = diskId;
+    }
+
+    public Integer getDiskId()
+    {
+        return diskId;
     }
 
 }

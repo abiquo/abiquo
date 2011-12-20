@@ -465,7 +465,7 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean checkReconfigureTemplate(final VirtualMachineTemplate original,
         final VirtualMachineTemplate requested)
     {
-        if (original.getId() == requested.getId())
+        if (original.getId().equals(requested.getId()))
         {
             return false;
         }
@@ -485,19 +485,19 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         else if (original.isMaster() && !requested.isMaster()
-            && requested.getMaster().getId() != original.getId())
+            && !requested.getMaster().getId().equals(original.getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
         }
         else if (!original.isMaster() && !requested.isMaster()
-            && requested.getMaster().getId() != original.getMaster().getId())
+            && !requested.getMaster().getId().equals(original.getMaster().getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
         }
         else if (requested.isMaster() && !original.isMaster()
-            && requested.getId() != original.getMaster().getId())
+            && !requested.getId().equals(original.getMaster().getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
@@ -554,11 +554,7 @@ public class VirtualMachineService extends DefaultApiService
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
 
-        // At this point the VM should already be locked
-        // if (old.getState() == VirtualMachineState.OFF)
-        // {
-        // old.setState(VirtualMachineState.LOCKED);
-        // }
+        old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
@@ -1133,7 +1129,7 @@ public class VirtualMachineService extends DefaultApiService
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
-                String.format("VirtualMachine % in %", virtualMachine.getUuid(), virtualMachine
+                String.format("VirtualMachine %s in %s", virtualMachine.getUuid(), virtualMachine
                     .getState().name());
 
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
