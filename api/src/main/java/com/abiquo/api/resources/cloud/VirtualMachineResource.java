@@ -452,7 +452,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     public static VirtualMachineWithNodeDto createNodeTransferObject(final NodeVirtualImage v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        final Integer[] volumeIds, final Integer[] diskIds) throws Exception
+        final Integer[] volumeIds, final Integer[] diskIds, final List<IpPoolManagement> ips)
+        throws Exception
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
         dto.setUuid(v.getVirtualMachine().getUuid());
