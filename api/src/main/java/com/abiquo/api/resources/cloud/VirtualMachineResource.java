@@ -155,7 +155,8 @@ public class VirtualMachineResource extends AbstractResource
         if (taskId == null)
         {
             // If the link is null no Task was performed
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            // throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            return null; // 204
         }
 
         return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
@@ -450,7 +451,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     public static VirtualMachineWithNodeDto createNodeTransferObject(final NodeVirtualImage v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer[] diskIds) throws Exception
+        final Integer[] volumeIds, final Integer[] diskIds) throws Exception
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
         dto.setUuid(v.getVirtualMachine().getUuid());
@@ -546,7 +547,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer diskIds[])
+        final Integer[] volumeIds, final Integer diskIds[])
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
