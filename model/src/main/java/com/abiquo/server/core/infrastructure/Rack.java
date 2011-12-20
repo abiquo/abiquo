@@ -37,6 +37,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
+import com.abiquo.model.validation.VlanIdRange;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.softwarementors.validation.constraints.LeadingOrTrailingWhitespace;
 import com.softwarementors.validation.constraints.Required;
@@ -292,6 +293,18 @@ public class Rack extends DefaultEntityBase
         this.vlanIdMax = vlanIdMax;
     }
 
+    @VlanIdRange
+    public VlanRange getVlanIdRange()
+    {
+        return new VlanRange(vlanIdMin, vlanIdMax);
+    }
+
+    public void setVlanIdRange(final Integer vlanIdMin, final Integer vlanIdMax)
+    {
+        setVlanIdMin(vlanIdMin);
+        setVlanIdMax(vlanIdMax);
+    }
+
     public final static String VLANS_ID_AVOIDED_PROPERTY = "vlansIdAvoided";
 
     public final static String VLANS_ID_AVOIDED_DEFAULT_VALUE = "";
@@ -348,6 +361,20 @@ public class Rack extends DefaultEntityBase
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public static class VlanRange
+    {
+        public Integer vlanIdMin;
+
+        public Integer vlanIdMax;
+
+        public VlanRange(final Integer vlanIdMin, final Integer vlanIdMax)
+        {
+            super();
+            this.vlanIdMin = vlanIdMin;
+            this.vlanIdMax = vlanIdMax;
+        }
     }
 
 }

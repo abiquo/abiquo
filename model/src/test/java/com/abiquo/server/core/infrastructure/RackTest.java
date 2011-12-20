@@ -21,6 +21,11 @@
 
 package com.abiquo.server.core.infrastructure;
 
+import java.util.Set;
+
+import org.testng.annotations.Test;
+
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.common.DefaultEntityTestBase;
 import com.softwarementors.bzngine.entities.test.InstanceTester;
 
@@ -31,5 +36,19 @@ public class RackTest extends DefaultEntityTestBase<Rack>
     protected InstanceTester<Rack> createEntityInstanceGenerator()
     {
         return new RackGenerator(getSeed());
+    }
+
+    @Test
+    public void testVlanIdRange()
+    {
+        Rack rack = createUniqueEntity();
+        rack.setVlanIdRange(Rack.VLAN_ID_MIN_DEFAULT_VALUE, Rack.VLAN_ID_MAX_DEFAULT_VALUE);
+        assertTrue(rack.isValid());
+
+        rack.setVlanIdRange(5, 3);
+
+        Set<CommonError> errors = rack.getValidationErrors();
+        assertFalse(errors.isEmpty());
+        assertEquals(errors.iterator().next().getCode(), "CONSTR-VLANIDRANGE");
     }
 }
