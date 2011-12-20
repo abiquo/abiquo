@@ -865,6 +865,22 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * 
+     * @param vdcId
+     * @param vappId
+     * @param dto
+     * @return
+     */
+    public VirtualMachine modifyVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+        
+        // XXX
+        // TODO: Implement this modifier!
+        return getVirtualMachine(vmId);
+    }
+
+    /**
      * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
      * <p>
      * It also set the required CPU and RAM if it wasn't specified in the requested
