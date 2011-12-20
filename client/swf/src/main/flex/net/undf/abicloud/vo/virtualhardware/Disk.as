@@ -25,12 +25,15 @@ package net.undf.abicloud.vo.virtualhardware
 	public class Disk
 	{
 		
+		public var diskId:int;
+		
 		public var diskSizeInMb:Number;
 		
 		public var readOnly:Boolean; 
 		
 		public function Disk()
 		{
+			diskId = 0;
 			diskSizeInMb = 0;
             readOnly = false; 
 		}

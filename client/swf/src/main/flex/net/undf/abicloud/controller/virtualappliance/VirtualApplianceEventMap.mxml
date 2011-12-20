@@ -896,7 +896,7 @@
             event.virtualDataCenter.id, 
             event.virtualAppliance.id,
             event.virtualMachine.id,
-            event.diskOrder]}">
+            event.diskId]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
@@ -933,7 +933,7 @@
             event.virtualDataCenter.id, 
             event.virtualAppliance.id,
             event.virtualMachine.id,
-            event.diskOrder]}">
+            event.size]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{VirtualApplianceResultHandler}"
