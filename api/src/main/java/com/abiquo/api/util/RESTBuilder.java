@@ -711,7 +711,7 @@ public class RESTBuilder implements IRESTBuilder
     @Override
     public List<RESTLink> buildVirtualMachineCloudLinks(final Integer vdcId, final Integer vappId,
         final Integer vmId, final boolean chefEnabled, final Integer[] volumeIds,
-        final Integer[] diskIds, final Integer[] ipsIds)
+        final Integer[] diskIds, final List<IpPoolManagement> ips)
     {
         List<RESTLink> links = new ArrayList<RESTLink>();
         Map<String, String> params = new HashMap<String, String>();
@@ -760,7 +760,7 @@ public class RESTBuilder implements IRESTBuilder
         final Integer vappId, final Integer vmId, final Integer datacenterId, final Integer rackId,
         final Integer machineId, final Integer enterpriseId, final Integer userId,
         final boolean chefEnabled, final Integer[] volumeIds, final Integer[] diskIds,
-        final Integer[] ipsIds)
+        final List<IpPoolManagement> ips)
     {
 
         List<RESTLink> links = new ArrayList<RESTLink>();
@@ -772,7 +772,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
         links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled, volumeIds,
-            diskIds, ipsIds));
+            diskIds, ips));
 
         return links;
     }
