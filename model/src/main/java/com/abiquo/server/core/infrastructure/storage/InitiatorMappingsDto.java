@@ -21,6 +21,7 @@
 
 package com.abiquo.server.core.infrastructure.storage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -37,6 +38,10 @@ public class InitiatorMappingsDto extends WrapperDto<InitiatorMappingDto>
     @XmlElement(name = "initiatorMapping")
     public List<InitiatorMappingDto> getCollection()
     {
+        if (collection == null)
+        {
+            collection = new ArrayList<InitiatorMappingDto>();
+        }
         return collection;
     }
 

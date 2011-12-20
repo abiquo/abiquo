@@ -21,7 +21,6 @@
 
 package com.abiquo.api.resources.cloud;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -151,19 +150,15 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String link = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
-        if (link != null)
+        String taskId = vmService.reconfigureVirtualMachine(vdcId, vappId, vmId, dto);
+
+        if (taskId == null)
         {
-            AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
-
-            String taskLink = uriInfo.getPath() + TaskResourceUtils.TASKS_PATH + "/" + link;
-            request.setStatusUrlLink(taskLink);
-            request.setEntity("You can keep track of the progress in the link");
-
-            return request;
+            // If the link is null no Task was performed
+            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        return null;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -192,26 +187,15 @@ public class VirtualMachineResource extends AbstractResource
         @Context final UriInfo uriInfo) throws Exception
     {
         VirtualMachineState newState = validateState(state);
-        String link = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
+        String taskId = vmService.applyVirtualMachineState(vmId, vappId, vdcId, newState);
 
         // If the link is null no Task was performed
-        if (link == null)
+        if (taskId == null)
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto<String> request =
-            createAcceptedRequestDto("", uriInfo.getAbsolutePath().toString(), link);
-        return request;
-    }
 
-    private AcceptedRequestDto<String> createAcceptedRequestDto(final String state,
-        final String uri, final String taskId)
-    {
-        AcceptedRequestDto<String> request = new AcceptedRequestDto<String>();
-        String taskLink = uri + TaskResourceUtils.TASKS_PATH + "/" + taskId;
-        request.setStatusUrlLink(taskLink);
-
-        return request;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -329,22 +313,17 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String link =
+        String taskId =
             vmService.deployVirtualMachine(vmId, vappId, vdcId,
                 forceSoftLimits.isForceEnterpriseSoftLimits());
 
         // If the link is null no Task was performed
-        if (link == null)
+        if (taskId == null)
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
 
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity("You can keep track of the progress in the link");
-
-        return a202;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -379,19 +358,15 @@ public class VirtualMachineResource extends AbstractResource
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
 
-        String link = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+        String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+
         // If the link is null no Task was performed
-        if (link == null)
+        if (taskId == null)
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
 
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity(null);
-
-        return a202;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -422,19 +397,15 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-        String link = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+        String taskId = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+
         // If the link is null no Task was performed
-        if (link == null)
+        if (taskId == null)
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
 
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity(null);
-
-        return a202;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -463,13 +434,7 @@ public class VirtualMachineResource extends AbstractResource
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
-
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + taskId;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity("You can keep track of the progress in the link");
-
-        return a202;
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -526,8 +491,7 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds,
- diskIds));
+                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -715,19 +679,32 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-
-        String link =
+        String taskId =
             vmService.resetVirtualMachine(vmId, vappId, vdcId, VirtualMachineStateTransition.RESET);
+
         // If the link is null no Task was performed
-        if (link == null)
+        if (taskId == null)
         {
             throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
         }
-        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
 
-        String taskLink = uriInfo.getRequestUri() + TaskResourceUtils.TASKS_PATH + "/" + link;
-        a202.setStatusUrlLink(taskLink);
-        a202.setEntity(null);
+        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+    }
+
+    protected AcceptedRequestDto<String> buildAcceptedRequestDtoWithTaskLink(final String taskId,
+        final UriInfo uriInfo)
+    {
+        // Build task link
+        String link = uriInfo.getRequestUri().toString();
+
+        link = link.replaceAll("action.*", "");
+        link = link.replaceAll("(/)*$", "");
+        link = link.concat(TaskResourceUtils.TASKS_PATH).concat("/").concat(taskId);
+
+        // Build AcceptedRequestDto
+        AcceptedRequestDto<String> a202 = new AcceptedRequestDto<String>();
+        a202.setStatusUrlLink(link);
+        a202.setEntity("You can keep track of the progress in the link");
 
         return a202;
     }
