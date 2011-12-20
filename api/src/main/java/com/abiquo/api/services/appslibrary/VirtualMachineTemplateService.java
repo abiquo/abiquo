@@ -457,6 +457,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             datacenter);
     }
 
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void insertVirtualMachineTemplate(final VirtualMachineTemplate template)
     {
         appsLibraryRep.insertVirtualMachineTemplate(template);

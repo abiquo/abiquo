@@ -332,7 +332,7 @@ public class VolumeManagement extends RasdManagement
             throw new IllegalStateException("Virtual machine can not be null");
         }
 
-        setAttachmentOrder(sequence);
+        setSequence(sequence);
         setVirtualMachine(vm);
         setState(VolumeState.ATTACHED);
     }

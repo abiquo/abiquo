@@ -315,8 +315,10 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
-        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine,
-            buildVirtualMachineFromDto(vdc, virtualAppliance, dto));
+        VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
+        newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying to update the virtualMachine.
+        
+        return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
     /**
@@ -358,6 +360,26 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
         VirtualMachineState originalState = vm.getState();
+
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
+        {
+            LOGGER.debug("Will reconfigure the vm template");
+
+            if (vm.getState().existsInHypervisor())
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
+                flushErrors();
+            }
+
+            // already checked is not attached
+            if (newValues.getVirtualMachineTemplate().isStateful())
+            {
+                LOGGER.debug("Attaching virtual machine template volume");
+                newValues.getVirtualMachineTemplate().getVolume().attach(0, vm);
+                // primary disk sequence == 0
+            }
+        }
 
         // if NOT_ALLOCATED isn't necessary to check the resource limits and
         // insert the 'backup' resources
@@ -433,6 +455,62 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * Checks if the {@link VirtualMachineTemplate} is being changed, if so checks the new template
+     * is an instance or a persistent of the original template (if not reports a conflict
+     * {@link APIError}).
+     * 
+     * @return true if the {@link VirtualMachineTemplate} is being reconfigured.
+     */
+    protected boolean checkReconfigureTemplate(final VirtualMachineTemplate original,
+        final VirtualMachineTemplate requested)
+    {
+        if (original.getId() == requested.getId())
+        {
+            return false;
+        }
+        else if (!original.isManaged())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_NOT_MANAGED);
+            flushErrors();
+        }
+        else if (!requested.isManaged())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_MANAGED);
+            flushErrors();
+        }
+        else if (requested.isStateful() && requested.getVolume().isAttached())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT);
+            flushErrors();
+        }
+        else if (original.isMaster() && !requested.isMaster()
+            && requested.getMaster().getId() != original.getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (!original.isMaster() && !requested.isMaster()
+            && requested.getMaster().getId() != original.getMaster().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (requested.isMaster() && !original.isMaster()
+            && requested.getId() != original.getMaster().getId())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+        else if (original.isMaster() && requested.isMaster())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
+            flushErrors();
+        }
+
+        return true;
+    }
+
+    /**
      * Insert the backup resources in database.
      * 
      * @param backUpVm
@@ -492,22 +570,6 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
         repo.update(old);
-    }
-
-    private List<VolumeManagement> getOnlyDeatachedRasd(final List<VolumeManagement> currentRasds,
-        final List<VolumeManagement> newRasds)
-    {
-        List<VolumeManagement> reallyNewRasd = new LinkedList<VolumeManagement>();
-
-        for (VolumeManagement newRasd : newRasds)
-        {
-            if (!newRasd.isAttached()) // TODO attached in the same VM
-            {
-                reallyNewRasd.add(newRasd);
-            }
-        }
-
-        return reallyNewRasd;
     }
 
     /**
@@ -1254,6 +1316,7 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         checkSnapshotAllowed(virtualMachine);
 
+        VirtualMachineState state = virtualMachine.getState();
         lockVirtualMachine(virtualMachine);
 
         // Do the snapshot
@@ -1270,15 +1333,16 @@ public class VirtualMachineService extends DefaultApiService
             DiskSnapshot destinationDisk = new DiskSnapshot();
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
             destinationDisk.setPath(formatSnapshotPath(template));
-            destinationDisk.setSnapshotName(formatSnapshotName(template));
+            destinationDisk.setSnapshotFilename(formatSnapshotName(template));
+            destinationDisk.setName(UUID.randomUUID().toString()); // TODO Use a DTO
             destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
                 datacenter).getUri());
 
             return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
-                false);
+                mustPowerOffToSnapshot(state));
         }
-        // else if (!virtualMachine.isManaged())
-        // else if (virtualMachine.isStateful())
+        // else if (!virtualMachine.isManaged()) // TODO
+        // else if (virtualMachine.isStateful()) // TODO
 
         return null;
     }
@@ -1318,6 +1382,12 @@ public class VirtualMachineService extends DefaultApiService
         }
 
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
+    }
+
+    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    {
+        return virtualMachineState == VirtualMachineState.ON
+            || virtualMachineState == VirtualMachineState.PAUSED;
     }
 
     /**
@@ -1669,8 +1739,7 @@ public class VirtualMachineService extends DefaultApiService
                 }
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(resource.getAttachmentOrder()).toString());
+                Integer blacklisted = resource.getSequence();
                 blackList.add(blacklisted);
 
                 if (resource instanceof DiskManagement)
@@ -1724,9 +1793,7 @@ public class VirtualMachineService extends DefaultApiService
                 vdcRep.updateIpManagement(ip);
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                blackList.add(blacklisted);
+                blackList.add(ip.getSequence());
             }
         }
     }
@@ -1754,9 +1821,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                oldNicsAttachments.add(blacklisted);
+                oldNicsAttachments.add(ip.getSequence());
             }
         }
         return oldNicsAttachments;
@@ -1785,9 +1850,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(disk.getAttachmentOrder()).toString());
-                oldDisksAttachments.add(blacklisted);
+                oldDisksAttachments.add(disk.getSequence());
             }
         }
         return oldDisksAttachments;
@@ -1822,9 +1885,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(vol.getAttachmentOrder()).toString());
-                oldVolumesAttachments.add(blacklisted);
+                oldVolumesAttachments.add(vol.getSequence());
             }
         }
         return oldVolumesAttachments;
@@ -2424,9 +2485,9 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean allocateResource(final VirtualMachine vm, final VirtualAppliance vapp,
         final RasdManagement resource, final Integer attachOrder)
     {
-        if (resource.getVirtualMachine() != null)
+        if (resource.getVirtualMachine() != null && resource.getVirtualMachine().getId() != null)
         {
-            if (!resource.getVirtualMachine().getTemporal().equals(vm.getId()))
+            if (!resource.getVirtualMachine().getId().equals(vm.getId()))
             {
                 addConflictErrors(APIError.RESOURCE_ALREADY_ASSIGNED_TO_A_VIRTUAL_MACHINE);
                 flushErrors();

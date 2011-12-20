@@ -121,7 +121,7 @@ public class DiskManagement extends RasdManagement
      */
     public Boolean getReadOnly()
     {
-        if (this.getAttachmentOrder() == 0L)
+        if (this.getSequence() == 0L)
         {
             return true;
         }
@@ -164,7 +164,7 @@ public class DiskManagement extends RasdManagement
             throw new IllegalStateException("Virtual machine can not be null");
         }
 
-        setAttachmentOrder(sequence);
+        setSequence(sequence);
         setVirtualMachine(vm);
     }
 

@@ -944,7 +944,10 @@
 
         <RemoteObjectInvoker instance="{services.infrastructureService}"
             method="editVirtualMachine"
-            arguments="{[AbiCloudModel.getInstance().loginManager.session, event.infrastructureElement]}">
+            arguments="{[AbiCloudModel.getInstance().loginManager.session, 
+            event.infrastructureElement,
+            event.virtualDatacenter.id,
+            event.virtualAppliance.id]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{InfrastructureResultHandler}"
