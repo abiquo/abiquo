@@ -979,6 +979,29 @@ public class AbstractAPIStub
             params);
     }
 
+    protected String createVirtualDatacenterDisksLink(final Integer vdcId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/disks",
+            params);
+    }
+    
+    protected String createVirtualDatacenterDiskLink(final Integer vdcId, final Integer diskId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("vdcid", vdcId.toString());
+        params.put("diskId", diskId.toString());
+
+        return resolveURI(
+            apiUri,
+            "cloud/virtualdatacenters/{vdcid}/disks/{diskId}",
+            params);
+    }
+
     protected String createVirtualMachineDisksLink(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
@@ -989,22 +1012,22 @@ public class AbstractAPIStub
 
         return resolveURI(
             apiUri,
-            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks",
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/",
             params);
     }
-
+    
     protected String createVirtualMachineDiskLink(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskOrder)
+        final Integer vmId, final Integer diskId)
     {
         Map<String, String> params = new HashMap<String, String>();
         params.put("vdcid", vdcId.toString());
         params.put("vappid", vappId.toString());
         params.put("vmid", vmId.toString());
-        params.put("diskOrder", diskOrder.toString());
+        params.put("diskId", diskId.toString());
 
         return resolveURI(
             apiUri,
-            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/{diskOrder}",
+            "cloud/virtualdatacenters/{vdcid}/virtualappliances/{vappid}/virtualmachines/{vmid}/storage/disks/{diskId}",
             params);
     }
 

@@ -291,9 +291,8 @@ public class StorageService extends DefaultApiService
             if (currentDisk.getRasd().equals(disk.getRasd()))
             {
                 diskIterator.remove();
+                return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
             }
-            
-            return vmService.reconfigureVirtualMachine(vdc, vapp, vm, newVm);
         }
         
         addUnexpectedErrors(APIError.HD_NON_EXISTENT_HARD_DISK);

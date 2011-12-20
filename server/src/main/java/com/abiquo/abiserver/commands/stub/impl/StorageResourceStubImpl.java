@@ -31,6 +31,8 @@ import com.abiquo.abiserver.commands.stub.StorageResourceStub;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
 import com.abiquo.abiserver.pojo.virtualhardware.Disk;
+import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.LinksDto;
 import com.abiquo.server.core.infrastructure.storage.DiskManagementDto;
 import com.abiquo.server.core.infrastructure.storage.DisksManagementDto;
 
@@ -48,6 +50,7 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
         Disk disk = new Disk();
         disk.setDiskSizeInMb(dto.getSizeInMb());
         disk.setReadOnly(Boolean.FALSE);
+        disk.setDiskId(dto.getIdFromLink("edit"));
         return disk;
     }
 
@@ -110,16 +113,34 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
     {
         DataResult<Disk> result = new DataResult<Disk>();
 
-        String uri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
+        String uri = createVirtualDatacenterDisksLink(vdcId);
         DiskManagementDto inputDto = new DiskManagementDto();
         inputDto.setSizeInMb(diskSizeInMb);
         ClientResponse response = post(uri, inputDto);
 
         if (response.getStatusCode() == 201)
         {
-            DiskManagementDto dto = response.getEntity(DiskManagementDto.class);
-            result.setData(createFlexObject(dto));
-            result.setSuccess(Boolean.TRUE);
+            DiskManagementDto diskDto = response.getEntity(DiskManagementDto.class);
+            
+            // If it has been created, assign the disk to the virtualmachine
+            LinksDto links = new LinksDto();
+            RESTLink link = new RESTLink();
+            link.setRel("disk");
+            link.setHref(diskDto.getEditLink().getHref());
+            links.addLink(link);
+            
+            String vmUri = createVirtualMachineDisksLink(vdcId, vappId, vmId);
+            response = post(vmUri, links);
+            
+            if (response.getStatusCode() == 202 || response.getStatusCode() == 204)
+            {
+                result.setData(createFlexObject(diskDto));
+                result.setSuccess(Boolean.TRUE);
+            }
+            else
+            {
+                populateErrors(response, result, "createDiskIntoVirtualMachine");
+            }
         }
         else
         {
@@ -131,14 +152,28 @@ public class StorageResourceStubImpl extends AbstractAPIStub implements StorageR
 
     @Override
     public BasicResult deleteDiskFromVirtualMachine(final Integer vdcId, final Integer vappId,
-        final Integer vmId, final Integer diskOrder)
+        final Integer vmId, final Integer diskId)
     {
         BasicResult result = new BasicResult();
 
-        String uri = createVirtualMachineDiskLink(vdcId, vappId, vmId, diskOrder);
+        String uri = createVirtualMachineDiskLink(vdcId, vappId, vmId, diskId);
         ClientResponse response = delete(uri);
 
         if (response.getStatusCode() == 204)
+        {
+            uri = createVirtualDatacenterDiskLink(vdcId, diskId);
+            response = delete(uri);
+            
+            if (response.getStatusCode() == 204)
+            {
+                result.setSuccess(Boolean.TRUE);
+            }
+            else
+            {
+                populateErrors(response, result, "deleteDiskFromVirtualMachine");
+            }
+        }
+        else if (response.getStatusCode() == 202)
         {
             result.setSuccess(Boolean.TRUE);
         }

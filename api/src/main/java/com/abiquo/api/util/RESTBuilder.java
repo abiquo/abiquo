@@ -1268,7 +1268,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
         params.put(VirtualMachineStorageConfigurationResource.DISK,
-            String.valueOf(disk.getSequence()));
+            String.valueOf(disk.getId()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,

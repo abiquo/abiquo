@@ -249,7 +249,7 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         return result;
     }
 
-    private void installTemplateDefinitionInDatacenter(final String templateDefinitionUrl,
+    private BasicResult installTemplateDefinitionInDatacenter(final String templateDefinitionUrl,
         final Integer idEnterprise, final Integer datacenterId)
     {
         final Integer templateDefinitionId =
@@ -263,13 +263,17 @@ public class AppsLibraryStubImpl extends AbstractAPIStub implements AppsLibraryS
         ClientResponse response = resource.post(String.valueOf(datacenterId));
         // TODO post use the the provided mediatype both for mediatype and accepttype
         // ClientResponse response = post(uri, String.valueOf(ovfPackageId), MediaType.TEXT_PLAIN);
-
+        BasicResult result = new BasicResult();
+        result.setSuccess(true);
         if (response.getStatusCode() != 200)
         {
             logger.error("Can't install TemplateDefinition {} in dc {}", templateDefinitionUrl,
                 datacenterId);
+            result.setSuccess(false);
+            result.setMessage(response.getMessage());
             // error cause will be shown with getOVFPackageState
         }
+        return result;
     }
 
     @Override

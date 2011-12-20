@@ -49,7 +49,7 @@ import com.abiquo.server.core.enterprise.User.AuthType;
  */
 @Service("userDetailsService")
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-public class AbiquoUserDetailsService implements UserDetailsService
+public class AbiquoUserDetailsService implements UserDetailsService, UserLoginService
 {
     /** The default role prefix to use. */
     public static final String DEFAULT_ROLE_PREFIX = "ROLE_";
@@ -85,6 +85,7 @@ public class AbiquoUserDetailsService implements UserDetailsService
         authType = null;
     }
 
+    // @Override
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException,
         DataAccessException
@@ -112,7 +113,12 @@ public class AbiquoUserDetailsService implements UserDetailsService
             throw new UsernameNotFoundException("Invalid credentials");
         }
 
-        // Set user information
+        return getUserDetails(user);
+    }
+
+    @Override
+    public UserDetails getUserDetails(final User user)
+    {
         AbiquoUserDetails userDetails = new AbiquoUserDetails();
         userDetails.setUserId(user.getId());
         userDetails.setUsername(user.getNick());
