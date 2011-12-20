@@ -552,6 +552,8 @@
                 //Announcing that a virtual machine has been edited
                 var infrastructureEvent:InfrastructureEvent = new InfrastructureEvent(InfrastructureEvent.EDIT_VIRTUALMACHINE);
                 infrastructureEvent.infrastructureElement = virtualMachineEdited;
+                infrastructureEvent.virtualDatacenter = this._virtualDatacenter;
+                infrastructureEvent.virtualAppliance = this._virtualAppliance;
                 if (this._virtualMachine.state.description != State.LOCKED.description)
                     dispatchEvent(infrastructureEvent);
 

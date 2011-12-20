@@ -501,7 +501,7 @@ public class VirtualMachineNetworkConfigurationResource extends AbstractResource
         final IRESTBuilder restBuilder) throws Exception
     {
         NicDto dto = ModelTransformer.transportFromPersistence(NicDto.class, ip);
-        dto.setSequence(Long.valueOf(ip.getAttachmentOrder()).intValue());
+        dto.setSequence(ip.getSequence());
         dto.setLinks(restBuilder.buildNICLinks(ip));
         return dto;
     }

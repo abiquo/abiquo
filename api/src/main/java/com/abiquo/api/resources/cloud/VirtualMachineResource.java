@@ -66,6 +66,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
@@ -131,7 +132,7 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
         return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm),
-            getDiskIds(vm));
+            getDiskIds(vm), vm.getIps());
     }
 
     /***
@@ -450,7 +451,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     public static VirtualMachineWithNodeDto createNodeTransferObject(final NodeVirtualImage v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer[] diskIds) throws Exception
+        final Integer[] volumeIds, final Integer[] diskIds, final List<IpPoolManagement> ips)
+        throws Exception
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
         dto.setUuid(v.getVirtualMachine().getUuid());
@@ -491,7 +493,7 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds));
+                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -546,7 +548,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer diskIds[])
+        final Integer[] volumeIds, final Integer diskIds[], final List<IpPoolManagement> ips)
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
@@ -585,7 +587,7 @@ public class VirtualMachineResource extends AbstractResource
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds, diskIds));
+            v.isChefEnabled(), volumeIds, diskIds, ips));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
@@ -617,7 +619,8 @@ public class VirtualMachineResource extends AbstractResource
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
         return createNodeTransferObject(node, vdcId, vappId, restBuilder,
-            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()));
+            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node
+                .getVirtualMachine().getIps());
     }
 
     @GET
@@ -660,6 +663,7 @@ public class VirtualMachineResource extends AbstractResource
     {
         return null; // Community impl
     }
+
 
     /**
      * Reset a {@link VirtualMachine}.
