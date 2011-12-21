@@ -401,6 +401,11 @@ public class AbstractAPIStub
             if (abiquoException.hasError("LIMIT_EXCEEDED"))
             {
                 result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                // limit exceeded does not include the detail
+                if (result.getMessage().length() < 254)
+                {
+                    result.setResultCode(0);
+                }
             }
         }
         else
