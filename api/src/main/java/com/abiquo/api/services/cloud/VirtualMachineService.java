@@ -344,7 +344,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -426,8 +426,10 @@ public class VirtualMachineService extends DefaultApiService
                 return null;
             }
 
+            // refresh the virtualmachine object with the new values to get the 
+            // correct resources.
             VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-                jobCreator.toTarantinoDto(vm, vapp);
+                jobCreator.toTarantinoDto(newValues, vapp);
 
             // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
             // VirtualMachine is the definition of the VirtualMachine and the job, power on
@@ -582,7 +584,9 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getDisks());
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
+        
         repo.update(old);
+    
     }
 
     /**
