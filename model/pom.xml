@@ -325,11 +325,12 @@
                                 <include>**/enumerator/*.class</include>
                                 <include>**/transport/**/*.class</include>
                                 <include>**/rest/*.class</include>
-                                <incluide>**/*Dto.class</incluide>
-                                <incluide>com/abiquo/model/util/*.class</incluide>
-                                <incluide>**/cloud/VirtualApplianceState.class</incluide>
-                                <incluide>**/cloud/VirtualMachineState.class</incluide>
-                                <incluide>**/cloud/VirtualMachineStateTransition.class</incluide>
+                                <include>**/*Dto.class</include>
+                                <include>com/abiquo/model/util/*.class</include>
+                                <include>**/cloud/VirtualApplianceState.class</include>
+                                <include>**/cloud/VirtualMachineState.class</include>
+                                <include>**/cloud/VirtualMachineStateTransition.class</include>
+                                <include>**/Job*.class</include>
                             </includes>
                         </configuration>
                     </execution>
