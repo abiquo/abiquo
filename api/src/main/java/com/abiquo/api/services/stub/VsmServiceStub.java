@@ -168,7 +168,7 @@ public class VsmServiceStub extends DefaultApiService
      * @param username The username used to connect to the hypervisor.
      * @param password The password used to connect to the hypervisor.
      */
-    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine)
+    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine, final boolean logError)
     {
         VSMClient client = getClientFromPool(service);
 
@@ -181,14 +181,32 @@ public class VsmServiceStub extends DefaultApiService
         }
         catch (VSMClientException e)
         {
-            LOGGER.error(APIError.SUBSCRIPTION_PROBLEM.getMessage(), e);
-            addUnexpectedErrors(APIError.SUBSCRIPTION_PROBLEM);
-            flushErrors();
+            if (logError)
+            {
+                LOGGER.error(APIError.SUBSCRIPTION_PROBLEM.getMessage(), e);
+                addUnexpectedErrors(APIError.SUBSCRIPTION_PROBLEM);
+                flushErrors();
+            }
         }
         finally
         {
             returnClientToPool(client);
         }
+    }
+    
+    /**
+     * Monitors the physical machine
+     * 
+     * @param serviceUri the vsm uri
+     * @param physicalMachineIP The physical machine to monitor.
+     * @param physicalMachinePort the physical machine port
+     * @param type The hypervisor type of the physical machine.
+     * @param username The username used to connect to the hypervisor.
+     * @param password The password used to connect to the hypervisor.
+     */
+    public void subscribe(final RemoteService service, final VirtualMachine virtualMachine)
+    {
+        subscribe(service, virtualMachine, Boolean.TRUE);
     }
 
     /**
