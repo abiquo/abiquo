@@ -27,6 +27,10 @@
                     <name>Português</name>
                     <value>pt_PT</value>
                 </language>
+                <language>
+                    <name>Deutsch</name>
+                    <value>de_DE</value>
+                </language>
             </languages>
         </value>
     </param>
