@@ -639,10 +639,12 @@ public class VirtualMachineService extends DefaultApiService
         // Lock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be locked after method
         // execution
+        LOGGER.debug("Locking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.lock(vm.getId());
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
         repo.refresh(vm);
+        LOGGER.debug("Virtual machine {} in state {} after lock", vm.getName(), vm.getState());
     }
 
     /**
@@ -655,16 +657,19 @@ public class VirtualMachineService extends DefaultApiService
      * @param originalState The original state of the virtual machine.
      * @return The virtual machine that must be used to perform the upcoming operations.
      */
-    private VirtualMachine unlockVirtualMachineState(final VirtualMachine vm,
+    private void unlockVirtualMachineState(final VirtualMachine vm,
         final VirtualMachineState originalState)
     {
         // Unlock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be unlocked after method
         // execution
+        LOGGER
+            .debug("Unlocking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.unlock(vm.getId(), originalState);
 
         // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
-        return repo.findVirtualMachineById(vm.getId());
+        repo.refresh(vm);
+        LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
