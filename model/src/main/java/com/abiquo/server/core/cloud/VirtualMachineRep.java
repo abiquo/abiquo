@@ -227,6 +227,11 @@ public class VirtualMachineRep extends DefaultRepBase
 
     }
 
+    public void updateNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.flush();
+    }
+
     public void deleteNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
     {
         nodeVirtualImageDAO.remove(nodeVirtualImage);

@@ -583,6 +583,25 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
         repo.update(old);
+
+        // FIXME: improvement related ABICLOUDPREMIUM-2925
+        updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
+    }
+
+    /**
+     * updates the virtual machine template from node virtual image with the template given by the
+     * {@link VirtualMachineTemplate} param.
+     * 
+     * @param vm {@link VirtualMachine} Virtual machine where obtains the related
+     *            {@link NodeVirtualImage}
+     * @parem template {@link VirtualMachineTemplate} Virtual Machine Template to set
+     */
+    private void updateNodeVirtualImage(final VirtualMachine vm,
+        final VirtualMachineTemplate template)
+    {
+        NodeVirtualImage nvi = repo.findNodeVirtualImageByVm(vm);
+        nvi.setVirtualImage(template);
+        repo.updateNodeVirtualImage(nvi);
     }
 
     /**
@@ -863,7 +882,6 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * 
      * @param vdcId
      * @param vappId
      * @param dto
@@ -872,7 +890,7 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine modifyVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
-        
+
         // XXX
         // TODO: Implement this modifier!
         return getVirtualMachine(vmId);
