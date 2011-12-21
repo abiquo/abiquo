@@ -93,7 +93,7 @@ public class RasdManagementDAO extends DefaultDAOBase<Integer, RasdManagement>
         crit.add(sameVirtualMachine(virtualMachine));
 
         // Order by generation (attachment order)
-        crit.addOrder(Order.asc("rasd." + Rasd.GENERATION_PROPERTY));
+        crit.addOrder(Order.asc("sequence"));
 
         return getResultList(crit);
     }

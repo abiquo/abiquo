@@ -18,51 +18,40 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+package com.abiquo.api.services.cloud;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.stereotype.Service;
+
+import com.abiquo.api.services.stub.TarantinoServiceMock;
+import com.abiquo.model.transport.error.ErrorsDto;
 
 /**
+ * Mock class for the {@link VirtualMachineService} tests.
  * 
+ * @author Ignasi Barrera
  */
-package com.abiquo.abiserver.pojo.virtualhardware;
-
-/**
- * @author jdevesa
- */
-public class Disk
+@Service
+public class VirtualMachineServiceMock extends VirtualMachineService
 {
-    private Long diskSizeInMb;
 
-    private Boolean readOnly;
-    
-    private Integer diskId;
-
-    public Long getDiskSizeInMb()
+    public VirtualMachineServiceMock()
     {
-        return diskSizeInMb;
+        super();
+        tarantino = new TarantinoServiceMock();
     }
 
-    public void setDiskSizeInMb(final Long diskSizeInMb)
+    public VirtualMachineServiceMock(final EntityManager em)
     {
-        this.diskSizeInMb = diskSizeInMb;
+        super(em);
+        tarantino = new TarantinoServiceMock();
     }
 
-    public Boolean getReadOnly()
+    @Override
+    public ErrorsDto checkRemoteServiceStatusByDatacenter(final Integer datacenterId)
     {
-        return readOnly;
-    }
-
-    public void setReadOnly(final Boolean readOnly)
-    {
-        this.readOnly = readOnly;
-    }
-
-    public void setDiskId(Integer diskId)
-    {
-        this.diskId = diskId;
-    }
-
-    public Integer getDiskId()
-    {
-        return diskId;
+        return new ErrorsDto(); // Return a DTO without errors
     }
 
 }

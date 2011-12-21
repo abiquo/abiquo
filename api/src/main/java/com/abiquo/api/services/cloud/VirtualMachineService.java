@@ -164,7 +164,7 @@ public class VirtualMachineService extends DefaultApiService
     protected AppsLibraryRep appsLibRep;
 
     @Autowired
-    private TarantinoService tarantino;
+    protected TarantinoService tarantino;
 
     @Autowired
     private TarantinoJobCreator jobCreator;
@@ -344,7 +344,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -388,7 +388,7 @@ public class VirtualMachineService extends DefaultApiService
         {
             if (vm.getState() == VirtualMachineState.OFF)
             {
-                vm = lockVirtualMachine(vm);
+                lockVirtualMachine(vm);
 
                 // There might be different hardware needs. This call also recalculate.
                 LOGGER
@@ -426,23 +426,41 @@ public class VirtualMachineService extends DefaultApiService
                 return null;
             }
 
+            // refresh the virtualmachine object with the new values to get the
+            // correct resources.
             VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-                jobCreator.toTarantinoDto(vm, vapp);
+                jobCreator.toTarantinoDto(newValues, vapp);
 
             // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
             // VirtualMachine is the definition of the VirtualMachine and the job, power on
             return tarantino.reconfigureVirtualMachine(vm, virtualMachineTarantino,
                 newVirtualMachineTarantino);
         }
+        catch (APIException e)
+        {
+            if (vm.getState() == VirtualMachineState.LOCKED)
+            {
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RECONFIGURE, "virtualMachine.reconfigureError", vm.getName());
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_RECONFIGURE, e, "virtualMachine.reconfigureError", vm.getName());
+
+                // Must unlock the virtual machine
+                unlockVirtualMachineState(vm, originalState);
+            }
+
+            throw e;
+        }
         catch (Exception ex)
         {
             if (vm.getState() == VirtualMachineState.LOCKED)
             {
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY, "virtualMachine.reconfigureError", vm.getName());
+                    EventType.VM_RECONFIGURE, "virtualMachine.reconfigureError", vm.getName());
 
                 tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY, ex, "virtualMachine.reconfigureError", vm.getName());
+                    EventType.VM_RECONFIGURE, ex, "virtualMachine.reconfigureError", vm.getName());
 
                 // Must unlock the virtual machine
                 unlockVirtualMachineState(vm, originalState);
@@ -465,7 +483,7 @@ public class VirtualMachineService extends DefaultApiService
     protected boolean checkReconfigureTemplate(final VirtualMachineTemplate original,
         final VirtualMachineTemplate requested)
     {
-        if (original.getId() == requested.getId())
+        if (original.getId().equals(requested.getId()))
         {
             return false;
         }
@@ -485,19 +503,19 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
         }
         else if (original.isMaster() && !requested.isMaster()
-            && requested.getMaster().getId() != original.getId())
+            && !requested.getMaster().getId().equals(original.getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
         }
         else if (!original.isMaster() && !requested.isMaster()
-            && requested.getMaster().getId() != original.getMaster().getId())
+            && !requested.getMaster().getId().equals(original.getMaster().getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
         }
         else if (requested.isMaster() && !original.isMaster()
-            && requested.getId() != original.getMaster().getId())
+            && !requested.getId().equals(original.getMaster().getId()))
         {
             addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_NOT_SAME_MASTER);
             flushErrors();
@@ -554,11 +572,7 @@ public class VirtualMachineService extends DefaultApiService
         old.setDescription(vmnew.getDescription());
         old.setRam(vmnew.getRam());
 
-        // At this point the VM should already be locked
-        // if (old.getState() == VirtualMachineState.OFF)
-        // {
-        // old.setState(VirtualMachineState.LOCKED);
-        // }
+        old.setVirtualMachineTemplate(vmnew.getVirtualMachineTemplate());
 
         List<Integer> usedNICslots = dellocateOldNICs(old, vmnew);
         allocateNewNICs(vapp, old, vmnew.getIps(), usedNICslots);
@@ -570,7 +584,27 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getDisks());
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
+
         repo.update(old);
+
+        // FIXME: improvement related ABICLOUDPREMIUM-2925
+        updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
+    }
+
+    /**
+     * updates the virtual machine template from node virtual image with the template given by the
+     * {@link VirtualMachineTemplate} param.
+     * 
+     * @param vm {@link VirtualMachine} Virtual machine where obtains the related
+     *            {@link NodeVirtualImage}
+     * @parem template {@link VirtualMachineTemplate} Virtual Machine Template to set
+     */
+    private void updateNodeVirtualImage(final VirtualMachine vm,
+        final VirtualMachineTemplate template)
+    {
+        NodeVirtualImage nvi = repo.findNodeVirtualImageByVm(vm);
+        nvi.setVirtualImage(template);
+        repo.updateNodeVirtualImage(nvi);
     }
 
     /**
@@ -598,21 +632,22 @@ public class VirtualMachineService extends DefaultApiService
     /**
      * Set the virtual machine state to LOCKED (when an async task is needed).
      * <p>
-     * This method returns the locked virtual machine that <b>MUST</b> be used to perform the
+     * This method updates the given virtual machine, which <b>MUST</b> be used to perform the
      * upcoming operations.
      * 
      * @param vm The virtual machine to lock.
-     * @return The virtual machine that must be used to perform the upcoming operations.
      */
-    private VirtualMachine lockVirtualMachine(final VirtualMachine vm)
+    private void lockVirtualMachine(final VirtualMachine vm)
     {
         // Lock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be locked after method
         // execution
+        LOGGER.debug("Locking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.lock(vm.getId());
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
-        return repo.findVirtualMachineById(vm.getId());
+        repo.refreshLock(vm);
+        LOGGER.debug("Virtual machine {} in state {} after lock", vm.getName(), vm.getState());
     }
 
     /**
@@ -625,16 +660,19 @@ public class VirtualMachineService extends DefaultApiService
      * @param originalState The original state of the virtual machine.
      * @return The virtual machine that must be used to perform the upcoming operations.
      */
-    private VirtualMachine unlockVirtualMachineState(final VirtualMachine vm,
+    private void unlockVirtualMachineState(final VirtualMachine vm,
         final VirtualMachineState originalState)
     {
         // Unlock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be unlocked after method
         // execution
+        LOGGER
+            .debug("Unlocking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.unlock(vm.getId(), originalState);
 
         // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
-        return repo.findVirtualMachineById(vm.getId());
+        repo.refreshLock(vm);
+        LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -852,6 +890,21 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
+     * @param vdcId
+     * @param vappId
+     * @param dto
+     * @return
+     */
+    public VirtualMachine modifyVirtualMachine(final Integer vdcId, final Integer vappId,
+        final Integer vmId)
+    {
+
+        // XXX
+        // TODO: Implement this modifier!
+        return getVirtualMachine(vmId);
+    }
+
+    /**
      * Sets the virtual machine HD requirements based on the {@link VirtualMachineTemplate}
      * <p>
      * It also set the required CPU and RAM if it wasn't specified in the requested
@@ -1014,7 +1067,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             LOGGER.debug("Allocating with force enterpise  soft limits : "
                 + foreceEnterpriseSoftLimits);
@@ -1045,7 +1098,11 @@ public class VirtualMachineService extends DefaultApiService
              * one of the above fail we cannot allocate the VirtualMachine It also perform the
              * resource recompute
              */
-            vmAllocatorService.deallocateVirtualMachine(vmId);
+            if (virtualMachine.getHypervisor() != null)
+            {
+                vmAllocatorService.deallocateVirtualMachine(vmId);
+            }
+
             throw e;
         }
         catch (Exception ex)
@@ -1130,7 +1187,7 @@ public class VirtualMachineService extends DefaultApiService
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
-                String.format("VirtualMachine % in %", virtualMachine.getUuid(), virtualMachine
+                String.format("VirtualMachine %s in %s", virtualMachine.getUuid(), virtualMachine
                     .getState().name());
 
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
@@ -1252,7 +1309,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             // Tasks needs the definition of the virtual machine
             VirtualMachineDescriptionBuilder vmDesc =
@@ -1348,7 +1405,7 @@ public class VirtualMachineService extends DefaultApiService
         return null;
     }
 
-    protected boolean mustPowerOffToSnapshot(VirtualMachineState virtualMachineState)
+    protected boolean mustPowerOffToSnapshot(final VirtualMachineState virtualMachineState)
     {
         return virtualMachineState == VirtualMachineState.ON
             || virtualMachineState == VirtualMachineState.PAUSED;
@@ -1386,7 +1443,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualAppliance virtualAppliance =
                 getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
@@ -1459,7 +1516,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualMachineDescriptionBuilder machineDescriptionBuilder =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1529,7 +1586,7 @@ public class VirtualMachineService extends DefaultApiService
 
         try
         {
-            virtualMachine = lockVirtualMachine(virtualMachine);
+            lockVirtualMachine(virtualMachine);
 
             VirtualMachineDescriptionBuilder machineDescriptionBuilder =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1703,8 +1760,7 @@ public class VirtualMachineService extends DefaultApiService
                 }
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(resource.getAttachmentOrder()).toString());
+                Integer blacklisted = resource.getSequence();
                 blackList.add(blacklisted);
 
                 if (resource instanceof DiskManagement)
@@ -1758,9 +1814,7 @@ public class VirtualMachineService extends DefaultApiService
                 vdcRep.updateIpManagement(ip);
 
                 // if it is new allocated, we set the integer into the 'blacklisted' list.
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                blackList.add(blacklisted);
+                blackList.add(ip.getSequence());
             }
         }
     }
@@ -1788,9 +1842,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(ip.getAttachmentOrder()).toString());
-                oldNicsAttachments.add(blacklisted);
+                oldNicsAttachments.add(ip.getSequence());
             }
         }
         return oldNicsAttachments;
@@ -1819,9 +1871,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(disk.getAttachmentOrder()).toString());
-                oldDisksAttachments.add(blacklisted);
+                oldDisksAttachments.add(disk.getSequence());
             }
         }
         return oldDisksAttachments;
@@ -1856,9 +1906,7 @@ public class VirtualMachineService extends DefaultApiService
             }
             else
             {
-                Integer blacklisted =
-                    Integer.valueOf(Long.valueOf(vol.getAttachmentOrder()).toString());
-                oldVolumesAttachments.add(blacklisted);
+                oldVolumesAttachments.add(vol.getSequence());
             }
         }
         return oldVolumesAttachments;

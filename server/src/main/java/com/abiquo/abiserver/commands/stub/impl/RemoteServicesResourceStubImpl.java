@@ -78,25 +78,6 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
             releaseApiClient();
         }
 
-        RemoteServiceDto dto = getApiResource(remoteService);
-
-        String uri = createRemoteServicesLink(remoteService.getIdDataCenter());
-
-        ClientResponse response = post(uri, dto);
-        if (response.getStatusCode() == 201)
-        {
-            result.setSuccess(true);
-
-            RemoteService responseService =
-                getReponseService(remoteService, result, response, EventType.REMOTE_SERVICES_CREATE);
-
-            result.setData(responseService);
-        }
-        else
-        {
-            populateErrors(response, result, "addRemoteService");
-        }
-
         return result;
     }
 
@@ -286,14 +267,4 @@ public class RemoteServicesResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    private RemoteServiceDto getApiResource(final RemoteService remoteService)
-    {
-        RemoteServiceDto dto = new RemoteServiceDto();
-        dto.setUri(remoteService.getUri());
-        dto.setType(RemoteServiceType.valueOf(remoteService.getRemoteServiceType().toEnum()
-            .toString()));
-        dto.setId(remoteService.getIdRemoteService());
-
-        return dto;
-    }
 }

@@ -72,7 +72,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceMa
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualImageConversionsHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.virtualimage.VirtualimageHB;
 import com.abiquo.abiserver.commands.BasicCommand;
-import com.abiquo.abiserver.commands.NetworkCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
@@ -3376,7 +3375,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
 
             factory.beginConnection();
-            NetworkCommand netcommand = new NetworkCommandImpl();
 
             for (Node currentNode : updatedNodes)
             {
@@ -3394,8 +3392,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         if (listPools.size() == 0)
                         {
                             VirtualDataCenterDAO vdcDAO = factory.getVirtualDataCenterDAO();
-                            netcommand.assignDefaultNICResource(user, nodevi.getVirtualMachine()
-                                .getId());
+/*       ALREADY DELETED!   netcommand.assignDefaultNICResource(user, nodevi.getVirtualMachine()
+                                .getId());*/
                         }
 
                     }

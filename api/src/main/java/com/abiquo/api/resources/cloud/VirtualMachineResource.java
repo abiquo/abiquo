@@ -21,6 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.beans.ConstructorProperties;
 import java.util.List;
 
 import javax.validation.constraints.Min;
@@ -67,6 +68,7 @@ import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.Rack;
+import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TasksDto;
@@ -132,7 +134,7 @@ public class VirtualMachineResource extends AbstractResource
         VirtualMachine vm = vmService.getVirtualMachine(vdcId, vappId, vmId);
 
         return createTransferObject(vm, vdcId, vappId, restBuilder, getVolumeIds(vm),
-            getDiskIds(vm));
+            getDiskIds(vm), vm.getIps());
     }
 
     /***
@@ -156,10 +158,42 @@ public class VirtualMachineResource extends AbstractResource
         if (taskId == null)
         {
             // If the link is null no Task was performed
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            return null;
         }
 
         return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+    }
+
+    /**
+     * Updates this virtual Machine Node information (e.g. name)
+     * 
+     * @param vdcId
+     * @param vappId
+     * @param vmId
+     * @param dto
+     * @param restBuilder
+     * @param uriInfo
+     * @return
+     * @throws Exception
+     */
+    @PUT
+    @Consumes(VM_NODE_MEDIA_TYPE)
+    public VirtualMachineDto updateVirtualMachineNode(
+        @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer vdcId,
+        @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer vappId,
+        @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer vmId,
+        final VirtualMachineDto dto, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
+    {
+        // TODO: validatePathParameters(vdcId, vappId, vmId);
+
+        VirtualMachine modifiedVMachine = vmService.modifyVirtualMachine(vdcId, vappId, vmId);
+
+        final VirtualMachineDto modifiedVMachineDto =
+            VirtualMachineResource.createTransferObject(modifiedVMachine, vdcId, vappId,
+                restBuilder, null, null, null);
+
+        return modifiedVMachineDto;
     }
 
     /**
@@ -453,7 +487,8 @@ public class VirtualMachineResource extends AbstractResource
      */
     public static VirtualMachineWithNodeDto createNodeTransferObject(final NodeVirtualImage v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer[] diskIds) throws Exception
+        final Integer[] volumeIds, final Integer[] diskIds, final List<IpPoolManagement> ips)
+        throws Exception
     {
         VirtualMachineWithNodeDto dto = new VirtualMachineWithNodeDto();
         dto.setUuid(v.getVirtualMachine().getUuid());
@@ -494,7 +529,7 @@ public class VirtualMachineResource extends AbstractResource
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(), v
-                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds));
+                .getVirtualMachine().isChefEnabled(), volumeIds, diskIds, ips));
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
@@ -549,7 +584,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static VirtualMachineDto createTransferObject(final VirtualMachine v,
         final Integer vdcId, final Integer vappId, final IRESTBuilder restBuilder,
-        Integer[] volumeIds, Integer diskIds[])
+        final Integer[] volumeIds, final Integer diskIds[], final List<IpPoolManagement> ips)
     {
 
         VirtualMachineDto dto = new VirtualMachineDto();
@@ -588,7 +623,7 @@ public class VirtualMachineResource extends AbstractResource
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
             machine == null ? null : machine.getId(),
             enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
-            v.isChefEnabled(), volumeIds, diskIds));
+            v.isChefEnabled(), volumeIds, diskIds, ips));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate != null)
@@ -620,7 +655,8 @@ public class VirtualMachineResource extends AbstractResource
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
         return createNodeTransferObject(node, vdcId, vappId, restBuilder,
-            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()));
+            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node
+                .getVirtualMachine().getIps());
     }
 
     @GET

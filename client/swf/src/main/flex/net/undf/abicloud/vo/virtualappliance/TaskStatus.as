@@ -18,51 +18,27 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
-/**
- * 
- */
-package com.abiquo.abiserver.pojo.virtualhardware;
-
-/**
- * @author jdevesa
- */
-public class Disk
+ 
+package net.undf.abicloud.vo.virtualappliance
 {
-    private Long diskSizeInMb;
+	/**
+     * This class represents the status of a specifi task
+     */
 
-    private Boolean readOnly;
-    
-    private Integer diskId;
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
+	[Bindable]
+	public class TaskStatus
+	{
+        public var uuid:String;
+        public var statusname:String;
+        public var message:String;
 
-    public Long getDiskSizeInMb()
-    {
-        return diskSizeInMb;
-    }
+		public function TaskStatus()
+		{
+			uuid = "";
+			statusname = "";
+			message = "";
+		}
 
-    public void setDiskSizeInMb(final Long diskSizeInMb)
-    {
-        this.diskSizeInMb = diskSizeInMb;
-    }
-
-    public Boolean getReadOnly()
-    {
-        return readOnly;
-    }
-
-    public void setReadOnly(final Boolean readOnly)
-    {
-        this.readOnly = readOnly;
-    }
-
-    public void setDiskId(Integer diskId)
-    {
-        this.diskId = diskId;
-    }
-
-    public Integer getDiskId()
-    {
-        return diskId;
-    }
-
+	}
 }

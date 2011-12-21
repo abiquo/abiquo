@@ -44,6 +44,7 @@ package com.abiquo.server.core.infrastructure;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import com.abiquo.server.core.common.DefaultEntityGenerator;
 import com.softwarementors.commons.test.SeedGenerator;
@@ -54,14 +55,14 @@ public class DatastoreGenerator extends DefaultEntityGenerator<Datastore>
 
     private MachineGenerator machineGenerator;
 
-    public DatastoreGenerator(SeedGenerator seed)
+    public DatastoreGenerator(final SeedGenerator seed)
     {
         super(seed);
         this.machineGenerator = new MachineGenerator(seed);
     }
 
     @Override
-    public void assertAllPropertiesEqual(Datastore obj1, Datastore obj2)
+    public void assertAllPropertiesEqual(final Datastore obj1, final Datastore obj2)
     {
         AssertEx.assertPropertiesEqualSilent(obj1, obj2, Datastore.NAME_PROPERTY,
             Datastore.DIRECTORY_PROPERTY, Datastore.ROOT_PATH_PROPERTY);
@@ -74,19 +75,22 @@ public class DatastoreGenerator extends DefaultEntityGenerator<Datastore>
         return createInstance(machine);
     }
 
-    public Datastore createInstance(Machine machine)
+    public Datastore createInstance(final Machine machine)
     {
         String rootPath = newString(nextSeed(), 1, Integer.MAX_VALUE);
         String name = newString(nextSeed(), 1, Integer.MAX_VALUE);
         String directory = newString(nextSeed(), 1, Integer.MAX_VALUE);
 
         Datastore datastore = new Datastore(machine, name, rootPath, directory);
+        datastore.setSize(241013719040L); // Ensure it will be able to hold VMs
+        datastore.setDatastoreUUID(UUID.randomUUID().toString());
 
         return datastore;
     }
 
     @Override
-    public void addAuxiliaryEntitiesToPersist(Datastore entity, List<Object> entitiesToPersist)
+    public void addAuxiliaryEntitiesToPersist(final Datastore entity,
+        final List<Object> entitiesToPersist)
     {
         super.addAuxiliaryEntitiesToPersist(entity, entitiesToPersist);
         Collection<Machine> machines = entity.getMachines();

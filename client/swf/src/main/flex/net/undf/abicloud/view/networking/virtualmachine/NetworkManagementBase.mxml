@@ -203,7 +203,7 @@
                     var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.REMOVE_NIC_FROM_VIRTUAL_MACHINE);
                     event.virtualDatacenter = _virtualDatacenter;
                     event.virtualAppliance = _virtualAppliance;
-                    event.orderInList = virtualMachineNICsDataGrid.selectedIndex;
+                    event.ipPoolManagement = virtualMachineNICsDataGrid.selectedItem as IPPoolManagement;
                     event.virtualMachine = _virtualMachine;
                     dispatchEvent(event);
                 }

@@ -37,12 +37,15 @@ package net.undf.abicloud.vo.virtualappliance
         //The Virtual Machine where this Node has been deployed.
         //It may be null
         public var virtualMachine:VirtualMachine;
+        
+        public var taskStatus:TaskStatus;
 
         public function NodeVirtualImage()
         {
             super();
             virtualImage = new VirtualImage();
             virtualMachine = null;
+            taskStatus = new TaskStatus();
         }
 
     }

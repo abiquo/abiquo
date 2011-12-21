@@ -142,7 +142,9 @@ package net.undf.abicloud.events
         
         public var callback:Function;
         
-        public var diskOrder:Number;
+        public var diskId:Number;
+        
+        public var size:Number;
 
 
         /* ------------- Constructor ------------- */

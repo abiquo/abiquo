@@ -134,6 +134,11 @@ public class VirtualMachineRep extends DefaultRepBase
         dao.flush();
     }
 
+    public void refreshLock(final VirtualMachine vm)
+    {
+        dao.refreshLock(vm);
+    }
+
     public Collection<RasdManagement> findRasdManagementByVirtualMachine(
         final VirtualMachine virtualMachine)
     {
@@ -220,6 +225,11 @@ public class VirtualMachineRep extends DefaultRepBase
 
         return nodeVirtualImageDAO.findByVirtualAppliance(virtualAppliance);
 
+    }
+
+    public void updateNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
+    {
+        nodeVirtualImageDAO.flush();
     }
 
     public void deleteNodeVirtualImage(final NodeVirtualImage nodeVirtualImage)
