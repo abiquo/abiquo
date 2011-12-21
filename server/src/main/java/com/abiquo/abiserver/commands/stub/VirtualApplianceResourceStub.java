@@ -73,4 +73,7 @@ public interface VirtualApplianceResourceStub
         UserSession userSession, Enterprise enterprise);
 
     BasicResult deleteVirtualAppliance(VirtualAppliance virtualAppliance, boolean forceDelete);
+
+    BasicResult applyChangesVirtualAppliance(VirtualAppliance virtualAppliance,
+        UserSession userSession);
 }

@@ -931,6 +931,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
     /**
      * Delete a virtual machines fail its state.
      */
+    @Test(enabled = false)
     public void deleteVirtualMachineInvalidTest()
     {
         // Create a virtual machine

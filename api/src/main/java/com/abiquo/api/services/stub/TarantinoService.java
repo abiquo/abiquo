@@ -22,6 +22,8 @@
 package com.abiquo.api.services.stub;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -215,11 +217,6 @@ public class TarantinoService extends DefaultApiService
         final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-        RemoteService remoteService =
-            remoteServiceService.getRemoteService(datacenter.getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-        vsm.subscribe(remoteService, virtualMachine);
-
         try
         {
 
@@ -240,15 +237,6 @@ public class TarantinoService extends DefaultApiService
 
             return deployTask.getId();
         }
-        catch (NotFoundException e)
-        {
-            // We need to unsuscribe the machine
-            logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
-                + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
-            vsm.unsubscribe(remoteService, virtualMachine);
-
-            throw e;
-        }
         catch (RuntimeException e)
         {
             logger.error("Error enqueuing the deploy task dto to Tarantino with error: "
@@ -260,11 +248,6 @@ public class TarantinoService extends DefaultApiService
             // For the Admin to know all errors
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_DEPLOY, "tarantino.deployVMError", e.getMessage());
-
-            // We need to unsuscribe the machine
-            logger.debug("Error enqueuing the deploy task dto to Tarantino with error: "
-                + e.getMessage() + " unmonitoring the machine: " + virtualMachine.getName());
-            vsm.unsubscribe(remoteService, virtualMachine);
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -444,10 +427,6 @@ public class TarantinoService extends DefaultApiService
         final VirtualMachineState currentState)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-        RemoteService remoteService =
-            remoteServiceService.getRemoteService(datacenter.getId(),
-                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
-        vsm.unsubscribe(remoteService, virtualMachine);
 
         try
         {
@@ -474,11 +453,6 @@ public class TarantinoService extends DefaultApiService
         }
         catch (NotFoundException e)
         {
-            // We need to suscribe the machine
-            logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
-                + e.getMessage() + " monitoring the machine: " + virtualMachine.getName());
-            vsm.subscribe(remoteService, virtualMachine);
-
             throw e;
         }
         catch (RuntimeException e)
@@ -493,10 +467,72 @@ public class TarantinoService extends DefaultApiService
             tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                 EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
 
-            // We need to unsuscribe the machine
-            logger.debug("Error enqueuing the undeploy task dto to Tarantino with error: "
-                + e.getMessage() + " monitoring the machine: " + virtualMachine.getName());
-            vsm.subscribe(remoteService, virtualMachine);
+            // There is no point in continue
+            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+        return null;
+    }
+
+    /**
+     * Creates and sends a deploy operation. <br>
+     * Also adds the flag for deletion of the {@link VirtualMachine}.
+     * 
+     * @param virtualMachine The virtual machine to reconfigure.
+     * @param originalConfig The original configuration for the virtual machine.
+     * @param newConfig The new configuration for the virtual machine.
+     * @return The identifier of the reconfigure task.
+     */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String undeployVirtualMachineAndDelete(final VirtualMachine virtualMachine,
+        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
+        final VirtualMachineState currentState)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+        try
+        {
+            HypervisorConnection conn =
+                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+            DatacenterTaskBuilder builder =
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
+                    .getUuid()), conn, userService.getCurrentUser().getNick());
+
+            if (VirtualMachineState.ON.equals(currentState))
+            {
+                builder.add(VirtualMachineStateTransition.POWEROFF);
+            }
+            // This method must delete the virtual machine in the handler
+
+            Map<String, String> extraData = new HashMap<String, String>();
+            extraData.put("delete", Boolean.TRUE.toString());
+            DatacenterTasks deployTask =
+                builder.add(VirtualMachineStateTransition.DECONFIGURE, extraData)
+                    .buildTarantinoTask();
+            // We retrieve the progress from task service. We add it before just in case the task is
+            // performed before we actually add it to redis
+            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                TaskType.UNDEPLOY));
+
+            send(datacenter, deployTask, EventType.VM_UNDEPLOY);
+
+            return deployTask.getId();
+        }
+        catch (NotFoundException e)
+        {
+            throw e;
+        }
+        catch (RuntimeException e)
+        {
+            logger.error("Error enqueuing the undeploy task dto to Tarantino with error: "
+                + e.getMessage());
+
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_UNDEPLOY,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            // For the Admin to know all errors
+            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_UNDEPLOY, "tarantino.undeployVMError", e.getMessage());
 
             // There is no point in continue
             addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
@@ -755,4 +791,5 @@ public class TarantinoService extends DefaultApiService
                 return null;
         }
     }
+
 }
