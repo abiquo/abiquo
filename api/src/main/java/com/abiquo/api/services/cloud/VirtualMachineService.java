@@ -643,10 +643,13 @@ public class VirtualMachineService extends DefaultApiService
         // operation will be atomic and the VM will effectively be locked after method
         // execution
         LOGGER.debug("Locking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
-        vmLock.lock(vm.getId());
+        // vmLock.lock(vm.getId());
+        // Temporal fix to avoid stale objects
+        vm.setState(VirtualMachineState.LOCKED);
+        repo.update(vm);
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
-        repo.refreshLock(vm);
+        // repo.refreshLock(vm);
         LOGGER.debug("Virtual machine {} in state {} after lock", vm.getName(), vm.getState());
     }
 
@@ -668,10 +671,13 @@ public class VirtualMachineService extends DefaultApiService
         // execution
         LOGGER
             .debug("Unlocking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
-        vmLock.unlock(vm.getId(), originalState);
+        // vmLock.unlock(vm.getId(), originalState);
+        // Temporal fix to avoid stale objects
+        vm.setState(originalState);
+        repo.update(vm);
 
         // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
-        repo.refreshLock(vm);
+        // repo.refreshLock(vm);
         LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
     }
 
