@@ -33,7 +33,6 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +65,7 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
+import com.abiquo.api.util.snapshot.SnapshotUtils;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
@@ -1370,7 +1370,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId)
+        final Integer vdcId, final String snapshotName)
     {
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
@@ -1396,9 +1396,9 @@ public class VirtualMachineService extends DefaultApiService
 
             DiskSnapshot destinationDisk = new DiskSnapshot();
             destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
-            destinationDisk.setPath(formatSnapshotPath(template));
-            destinationDisk.setSnapshotFilename(formatSnapshotName(template));
-            destinationDisk.setName(UUID.randomUUID().toString()); // TODO Use a DTO
+            destinationDisk.setPath(SnapshotUtils.formatSnapshotPath(template));
+            destinationDisk.setSnapshotFilename(SnapshotUtils.formatSnapshotName(template));
+            destinationDisk.setName(snapshotName);
             destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
                 datacenter).getUri());
 
@@ -1409,43 +1409,6 @@ public class VirtualMachineService extends DefaultApiService
         // else if (virtualMachine.isStateful()) // TODO
 
         return null;
-    }
-
-    /**
-     * Returns the destination path where a snapshot of a certain {@link VirtualMachineTemplate}
-     * must be stored.
-     * 
-     * @param template The {@link VirtualMachineTemplate} to consider
-     * @return The destination path
-     */
-    protected String formatSnapshotPath(final VirtualMachineTemplate template)
-    {
-        String filename = template.getPath();
-
-        if (!template.isMaster())
-        {
-            filename = template.getMaster().getPath();
-        }
-
-        return FilenameUtils.getFullPath(filename);
-    }
-
-    /**
-     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
-     * 
-     * @param template The {@link VirtualMachineTemplate} to consider
-     * @return The snapshot filename
-     */
-    protected String formatSnapshotName(final VirtualMachineTemplate template)
-    {
-        String name = FilenameUtils.getName(template.getPath());
-
-        if (!template.isMaster())
-        {
-            name = FilenameUtils.getName(template.getMaster().getPath());
-        }
-
-        return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
     }
 
     protected boolean mustPowerOffToSnapshot(final VirtualMachineState virtualMachineState)
