@@ -490,8 +490,8 @@ public class RESTBuilder implements IRESTBuilder
         if (icon != null)
         {
             params.put(IconResource.ICON, String.valueOf(icon.getId()));
-            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON,
-                icon.getPath(), params));
+            links.add(builder.buildRestLink(IconResource.class, null, IconResource.ICON, icon
+                .getPath(), params));
 
         }
 
@@ -551,21 +551,24 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
         links.add(builder.buildRestLink(VirtualAppliancesResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE, params));
-        links.add(builder.buildRestLink(PrivateNetworkResource.class, "defaultnetwork", params));
-        links.add(builder.buildRelLink(VirtualDatacenterResource.class,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
-        links.add(builder.buildRelLink(VirtualDatacenterResource.class,
-            VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO, "dhcpinfo", params,
-            "dhcpinfo"));
+            VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH, params));
+        links.add(builder.buildRestLink(PrivateNetworkResource.class,
+            VirtualDatacenterResource.DEFAULT_NETWORK_REL, params));
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_REL, params));
+        links.add(builder.buildRestLink(VirtualDatacenterResource.class,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH,
+            VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_REL, params));
         RESTLink getVlanLink =
-            builder.buildActionLink(VirtualDatacenterResource.class,
-                VirtualDatacenterResource.ACTION_DEFAULT_VLAN, "defaultvlan", params);
+            builder.buildRestLink(VirtualDatacenterResource.class,
+                VirtualDatacenterResource.DEFAULT_VLAN_PATH,
+                VirtualDatacenterResource.DEFAULT_VLAN_REL, params);
         getVlanLink.setType("GET");
         RESTLink setVlanLink =
-            builder.buildActionLink(VirtualDatacenterResource.class,
-                VirtualDatacenterResource.ACTION_DEFAULT_VLAN, "defaultvlan", params);
+            builder.buildRestLink(VirtualDatacenterResource.class,
+                VirtualDatacenterResource.DEFAULT_VLAN_PATH,
+                VirtualDatacenterResource.DEFAULT_VLAN_REL, params);
         setVlanLink.setType("PUT");
         links.add(getVlanLink);
         links.add(setVlanLink);
@@ -1267,8 +1270,7 @@ public class RESTBuilder implements IRESTBuilder
         params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         params.put(VirtualMachineResource.VIRTUAL_MACHINE, disk.getVirtualMachine().getId()
             .toString());
-        params.put(VirtualMachineStorageConfigurationResource.DISK,
-            String.valueOf(disk.getId()));
+        params.put(VirtualMachineStorageConfigurationResource.DISK, String.valueOf(disk.getId()));
 
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
@@ -1352,4 +1354,28 @@ public class RESTBuilder implements IRESTBuilder
 
     }
 
+    public static RESTLink searchLinkInList(final String rel, final List<RESTLink> list)
+    {
+        for (RESTLink link : list)
+        {
+            if (link.getRel() != null)
+            {
+                if (link.getRel().equals(rel))
+                {
+                    return link;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void deleteLinkFromList(final String rel, final List<RESTLink> list)
+    {
+        RESTLink link = searchLinkInList(rel, list);
+
+        if (link != null)
+        {
+            list.remove(link);
+        }
+    }
 }

@@ -960,14 +960,14 @@ public class UriTestResolver
     public static String resolveVirtualDatacenterActionGetIPsURI(final Integer virtualDatacenterId)
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
-            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS;
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH;
     }
 
     public static String resolveVirtualDatacenterActionGetDHCPInfoURI(
         final Integer virtualDatacenterId)
     {
         return resolveVirtualDatacenterURI(virtualDatacenterId)
-            + VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO;
+            + VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH;
     }
 
     public static String resolveVirtualDatacentersURI()

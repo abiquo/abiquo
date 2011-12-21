@@ -23,12 +23,15 @@ package com.abiquo.server.core.task;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.server.core.task.Job.JobState;
 import com.abiquo.server.core.task.Job.JobType;
 
 @XmlRootElement(name = "job")
-public class JobDto
+public class JobDto extends SingleResourceTransportDto
 {
+    private static final long serialVersionUID = 3441968794948596375L;
+
     protected String id;
 
     protected String parentTaskId;
@@ -48,7 +51,7 @@ public class JobDto
         return id;
     }
 
-    public void setId(String id)
+    public void setId(final String id)
     {
         this.id = id;
     }
@@ -58,7 +61,7 @@ public class JobDto
         return parentTaskId;
     }
 
-    public void setParentTaskId(String parentTaskId)
+    public void setParentTaskId(final String parentTaskId)
     {
         this.parentTaskId = parentTaskId;
     }
@@ -68,7 +71,7 @@ public class JobDto
         return type;
     }
 
-    public void setType(JobType type)
+    public void setType(final JobType type)
     {
         this.type = type;
     }
@@ -78,7 +81,7 @@ public class JobDto
         return state;
     }
 
-    public void setState(JobState state)
+    public void setState(final JobState state)
     {
         this.state = state;
     }
@@ -88,7 +91,7 @@ public class JobDto
         return rollbackState;
     }
 
-    public void setRollbackState(JobState rollbackState)
+    public void setRollbackState(final JobState rollbackState)
     {
         this.rollbackState = rollbackState;
     }
@@ -98,7 +101,7 @@ public class JobDto
         return description;
     }
 
-    public void setDescription(String description)
+    public void setDescription(final String description)
     {
         this.description = description;
     }
@@ -108,7 +111,7 @@ public class JobDto
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp)
+    public void setTimestamp(final long timestamp)
     {
         this.timestamp = timestamp;
     }

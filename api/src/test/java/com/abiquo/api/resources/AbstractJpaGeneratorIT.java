@@ -125,8 +125,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 
     protected ClientResponse post(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).post(dto);
+        Resource resource = client.resource(uri);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.accept(MediaType.APPLICATION_XML);
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String mediaType)
@@ -138,10 +144,14 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
         final String password)
     {
         String basicAuth = basicAuth(username, password);
-
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .post(dto);
+        Resource resource = client.resource(uri).header("Authorization", "Basic " + basicAuth);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.accept(MediaType.APPLICATION_XML);
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.post(dto);
     }
 
     protected ClientResponse post(final String uri, final Object dto, final String username,
@@ -155,18 +165,28 @@ public class AbstractJpaGeneratorIT extends AbstractGeneratorTest
 
     protected ClientResponse put(final String uri, final Object dto)
     {
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).put(dto);
+        Resource resource = client.resource(uri);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.accept(MediaType.APPLICATION_XML);
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String username,
         final String password)
     {
         String basicAuth = basicAuth(username, password);
-
-        return client.resource(uri).accept(MediaType.APPLICATION_XML)
-            .contentType(MediaType.APPLICATION_XML).header("Authorization", "Basic " + basicAuth)
-            .put(dto);
+        Resource resource = client.resource(uri).header("Authorization", "Basic " + basicAuth);
+        if (dto != null)
+        {
+            // Only add the headers if the request has a body
+            resource.accept(MediaType.APPLICATION_XML);
+            resource.contentType(MediaType.APPLICATION_XML);
+        }
+        return resource.put(dto);
     }
 
     protected ClientResponse put(final String uri, final Object dto, final String username,

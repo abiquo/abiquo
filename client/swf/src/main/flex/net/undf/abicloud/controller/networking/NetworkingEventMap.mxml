@@ -607,7 +607,7 @@
             event.virtualDatacenter.id,
             event.virtualAppliance.id,
             event.virtualMachine.id,
-            event.orderInList]}">
+            event.ipPoolManagement.idManagement]}">
 
             <resultHandlers>
                 <MethodInvoker generator="{NetworkingResultHandler}"
