@@ -344,7 +344,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -426,8 +426,10 @@ public class VirtualMachineService extends DefaultApiService
                 return null;
             }
 
+            // refresh the virtualmachine object with the new values to get the 
+            // correct resources.
             VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
-                jobCreator.toTarantinoDto(vm, vapp);
+                jobCreator.toTarantinoDto(newValues, vapp);
 
             // A datacenter task is a set of jobs and datacenter task. This is, the deploy of a
             // VirtualMachine is the definition of the VirtualMachine and the job, power on
@@ -582,7 +584,27 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getDisks());
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
+        
         repo.update(old);
+
+        // FIXME: improvement related ABICLOUDPREMIUM-2925
+        updateNodeVirtualImage(old, vmnew.getVirtualMachineTemplate());
+    }
+
+    /**
+     * updates the virtual machine template from node virtual image with the template given by the
+     * {@link VirtualMachineTemplate} param.
+     * 
+     * @param vm {@link VirtualMachine} Virtual machine where obtains the related
+     *            {@link NodeVirtualImage}
+     * @parem template {@link VirtualMachineTemplate} Virtual Machine Template to set
+     */
+    private void updateNodeVirtualImage(final VirtualMachine vm,
+        final VirtualMachineTemplate template)
+    {
+        NodeVirtualImage nvi = repo.findNodeVirtualImageByVm(vm);
+        nvi.setVirtualImage(template);
+        repo.updateNodeVirtualImage(nvi);
     }
 
     /**
@@ -620,10 +642,12 @@ public class VirtualMachineService extends DefaultApiService
         // Lock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be locked after method
         // execution
+        LOGGER.debug("Locking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.lock(vm.getId());
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
         repo.refresh(vm);
+        LOGGER.debug("Virtual machine {} in state {} after lock", vm.getName(), vm.getState());
     }
 
     /**
@@ -636,16 +660,19 @@ public class VirtualMachineService extends DefaultApiService
      * @param originalState The original state of the virtual machine.
      * @return The virtual machine that must be used to perform the upcoming operations.
      */
-    private VirtualMachine unlockVirtualMachineState(final VirtualMachine vm,
+    private void unlockVirtualMachineState(final VirtualMachine vm,
         final VirtualMachineState originalState)
     {
         // Unlock the virtual machine in a different transaction using the VM locker. This way the
         // operation will be atomic and the VM will effectively be unlocked after method
         // execution
+        LOGGER
+            .debug("Unlocking virtual machine {}. Current state: {}", vm.getName(), vm.getState());
         vmLock.unlock(vm.getId(), originalState);
 
         // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
-        return repo.findVirtualMachineById(vm.getId());
+        repo.refresh(vm);
+        LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -863,7 +890,6 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * 
      * @param vdcId
      * @param vappId
      * @param dto
@@ -872,7 +898,7 @@ public class VirtualMachineService extends DefaultApiService
     public VirtualMachine modifyVirtualMachine(final Integer vdcId, final Integer vappId,
         final Integer vmId)
     {
-        
+
         // XXX
         // TODO: Implement this modifier!
         return getVirtualMachine(vmId);

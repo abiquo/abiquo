@@ -29,10 +29,11 @@
     paddingTop="15"
     styleName="VirtualApplianceDeployingSkin"
     show="checkVirtualApplianceState()"
-    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*">
+    xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:info="net.undf.abicloud.view.general.components.info.*" xmlns:general="net.undf.abicloud.view.general.*">
 
     <mx:Script>
         <![CDATA[
+        	import mx.controls.dataGridClasses.DataGridColumn;
         	import net.undf.abicloud.model.AbiCloudModel;
         	import net.undf.abicloud.controller.ThemeHandler;
         	import net.undf.abicloud.view.main.CommonAssets;
@@ -124,6 +125,16 @@
                 virtualApplianceEvent.virtualAppliance = this._virtualAppliance;
                 dispatchEvent(virtualApplianceEvent);
             }        
+            
+            private function returnName(object:NodeVirtualImage, column:DataGridColumn):String
+            {
+                return object.name;
+            }
+            
+            private function returnStatus(object:NodeVirtualImage, column:DataGridColumn):String
+            {
+                return object.taskStatus.message;
+            }
         ]]>
     </mx:Script>
     <mx:HBox width="100%" 
@@ -155,16 +166,6 @@
                 styleName="AlternativeButton"
                 click="onClickForceRefreshStateButton()"/>
             <mx:Spacer height="40%"/>
-
-           <!--This button in not used anymore -> 	ABICLOUDPREMIUM-547-->
-           
-           <!-- <mx:Button id="cancelButton"
-                height="18"
-                label="@Resource(bundle='Common', key='BUTTON_CANCEL')"
-                styleName="AlternativeButton"
-                includeInLayout="{setCancelButtonAvailability(_virtualAppliance.subState)}"
-                visible="{setCancelButtonAvailability(_virtualAppliance.subState)}"
-                click="onClickCancelButton()"/>-->
                 
         </mx:VBox>
         <!-- Animated icon, force refresh button and title -->
@@ -172,7 +173,8 @@
 
         <mx:VBox 
             width="100%" height="100%"
-            verticalGap="3">
+            verticalGap="3"
+            verticalAlign="middle">
 
             <!-- VirtualAppliance title -->
             <mx:HBox horizontalGap="0">
@@ -186,7 +188,7 @@
             </mx:HBox>
 
             <!-- Node info -->
-            <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NUMBER_OF_NODES') + ' ' + this._virtualAppliance.nodes.length}"/>
+            <!--<mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance', 'LABEL_NUMBER_OF_NODES') + ' ' + this._virtualAppliance.nodes.length}"/>
 
             <mx:HRule width="100%"/>
 
@@ -228,7 +230,7 @@
                 <mx:Label 
                     fontSize="12"
                     text="{this._nodesRunning.toString()}"/>
-            </mx:HBox>
+            </mx:HBox>-->
 
             <mx:HBox 
                 width="100%"
@@ -240,8 +242,28 @@
             <mx:HRule width="100%"/>
         </mx:VBox>
     </mx:HBox>
+    
+    <general:GeneralSubPanel 
+        width="100%" height="100%"
+        verticalAlign="middle"
+        title="Nodes Statuses">
 
-    <mx:Spacer height="15"/>
+        <mx:DataGrid id="nodesList"
+            width="100%" height="190"
+            dataProvider="{this._virtualAppliance.nodes}">
+            <mx:columns>
+                <mx:DataGridColumn 
+                	headerText="Node"
+                    labelFunction="returnName"/>
+                 
+                 <mx:DataGridColumn 
+                    headerText="Status"
+                    width="100"
+                    labelFunction="returnStatus"/>
+
+            </mx:columns>
+        </mx:DataGrid>
+    </general:GeneralSubPanel>
 
     <!-- Custom Progress Bar -->
     <mx:Canvas 
