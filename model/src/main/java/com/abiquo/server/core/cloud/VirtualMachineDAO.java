@@ -237,9 +237,11 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         }
     }
 
-    public void refresh(final VirtualMachine vm)
+    public void refreshLock(final VirtualMachine vm)
     {
-        getEntityManager().refresh(vm, LockModeType.PESSIMISTIC_READ);
+        // We force the refresh from database (PESSIMISTIC) and increment the version of the object
+        // (INCREMENT) to ensure that no other code will be using the "unlocked" object.
+        getEntityManager().refresh(vm, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
     }
 
 }

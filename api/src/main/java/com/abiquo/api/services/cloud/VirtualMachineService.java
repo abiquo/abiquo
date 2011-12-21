@@ -344,7 +344,7 @@ public class VirtualMachineService extends DefaultApiService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
-        final VirtualAppliance vapp, VirtualMachine vm, final VirtualMachine newValues)
+        final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
@@ -426,7 +426,7 @@ public class VirtualMachineService extends DefaultApiService
                 return null;
             }
 
-            // refresh the virtualmachine object with the new values to get the 
+            // refresh the virtualmachine object with the new values to get the
             // correct resources.
             VirtualMachineDescriptionBuilder newVirtualMachineTarantino =
                 jobCreator.toTarantinoDto(newValues, vapp);
@@ -584,7 +584,7 @@ public class VirtualMachineService extends DefaultApiService
         storageResources.addAll(vmnew.getDisks());
         storageResources.addAll(vmnew.getVolumes());
         allocateNewStorages(vapp, old, storageResources, usedStorageSlots);
-        
+
         repo.update(old);
 
         // FIXME: improvement related ABICLOUDPREMIUM-2925
@@ -646,7 +646,7 @@ public class VirtualMachineService extends DefaultApiService
         vmLock.lock(vm.getId());
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
-        repo.refresh(vm);
+        repo.refreshLock(vm);
         LOGGER.debug("Virtual machine {} in state {} after lock", vm.getName(), vm.getState());
     }
 
@@ -671,7 +671,7 @@ public class VirtualMachineService extends DefaultApiService
         vmLock.unlock(vm.getId(), originalState);
 
         // Refresh the unlocked virtual machine from database, to avoid StaleObject issues
-        repo.refresh(vm);
+        repo.refreshLock(vm);
         LOGGER.debug("Virtual machine {} in state {} after unlock", vm.getName(), vm.getState());
     }
 
