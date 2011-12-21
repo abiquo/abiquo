@@ -18,35 +18,27 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
+ 
 package net.undf.abicloud.vo.virtualappliance
 {
-    import net.undf.abicloud.vo.infrastructure.VirtualMachine;
-    import net.undf.abicloud.vo.virtualimage.VirtualImage;
-
-    /**
-     * This class represents a VirtualAppliance Node, that contains a Virtual Image
+	/**
+     * This class represents the status of a specifi task
      */
 
-    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage")]
-    [Bindable]
-    public class NodeVirtualImage extends Node
-    {
-        public var virtualImage:VirtualImage;
+    [RemoteClass(alias="com.abiquo.abiserver.pojo.virtualappliance.TaskStatus")]
+	[Bindable]
+	public class TaskStatus
+	{
+        public var uuid:String;
+        public var statusname:String;
+        public var message:String;
 
-        //The Virtual Machine where this Node has been deployed.
-        //It may be null
-        public var virtualMachine:VirtualMachine;
-        
-        public var taskStatus:TaskStatus;
+		public function TaskStatus()
+		{
+			uuid = "";
+			statusname = "";
+			message = "";
+		}
 
-        public function NodeVirtualImage()
-        {
-            super();
-            virtualImage = new VirtualImage();
-            virtualMachine = null;
-            taskStatus = new TaskStatus();
-        }
-
-    }
+	}
 }

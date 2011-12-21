@@ -19,8 +19,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo.api.services.cloud;
+package com.abiquo.api.resources.cloud;
 
+import static com.abiquo.api.common.Assert.assertErrors;
 import static com.abiquo.api.common.UriTestResolver.resolveVirtualMachineDeployURI;
 import static org.testng.Assert.assertEquals;
 
@@ -28,11 +29,12 @@ import org.apache.wink.client.ClientResponse;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.resources.AbstractJpaGeneratorIT;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.common.EnvironmentGenerator;
 
 /**
@@ -40,7 +42,7 @@ import com.abiquo.server.core.common.EnvironmentGenerator;
  * 
  * @author Ignasi Barrera
  */
-public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
+public class VirtualMachineAsyncActionsIT extends AbstractJpaGeneratorIT
 {
     private EnvironmentGenerator env;
 
@@ -70,16 +72,28 @@ public class VirtualMachineLockIT extends AbstractJpaGeneratorIT
     }
 
     @Test
-    public void testDeploy()
+    public void testDeployReturns409IfInvalidState()
     {
-        VirtualMachineDeployDto dto = new VirtualMachineDeployDto();
-        dto.setForceEnterpriseSoftLimits(false);
+        vm.setState(VirtualMachineState.OFF);
+        update(vm);
 
         String uri = resolveVirtualMachineDeployURI(vdc.getId(), vapp.getId(), vm.getId());
 
         ClientResponse response =
-            post(uri, dto, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
+
+        assertErrors(response, 409, APIError.VIRTUAL_MACHINE_INVALID_STATE_DEPLOY);
+    }
+
+    @Test
+    public void testDeploy()
+    {
+        String uri = resolveVirtualMachineDeployURI(vdc.getId(), vapp.getId(), vm.getId());
+
+        ClientResponse response =
+            post(uri, null, EnvironmentGenerator.SYSADMIN, EnvironmentGenerator.SYSADMIN);
 
         assertEquals(response.getStatusCode(), 202);
     }
+
 }

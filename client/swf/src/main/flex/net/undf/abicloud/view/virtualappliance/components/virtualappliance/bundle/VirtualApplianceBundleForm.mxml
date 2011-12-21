@@ -323,7 +323,7 @@
         <mx:Image
             id="alertIcon"
             creationComplete="AbicloudUtils.getImageFromStyle('CommonAssetsAlert', alertIcon)"/>
-        <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance','LABEL_HARD_DISKS_WARNING')"
+        <mx:Label text="{ResourceManager.getInstance().getString('VirtualAppliance','LABEL_HARD_DISKS_WARNING')}"
             styleName="DataCenterCreationWarning"/>
     </mx:HBox>
 

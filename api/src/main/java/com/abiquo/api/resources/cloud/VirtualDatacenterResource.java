@@ -73,11 +73,19 @@ public class VirtualDatacenterResource extends AbstractResource
 
     public static final String VIRTUAL_DATACENTER_PARAM = "{" + VIRTUAL_DATACENTER + "}";
 
-    public static final String VIRTUAL_DATACENTER_ACTION_GET_IPS = "/action/ips";
+    public static final String VIRTUAL_DATACENTER_GET_IPS_PATH = "/action/ips";
 
-    public static final String VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO = "/action/dhcpinfo";
+    public static final String VIRTUAL_DATACENTER_GET_IPS_REL = "ips";
 
-    public static final String ACTION_DEFAULT_VLAN = "/action/defaultvlan";
+    public static final String VIRTUAL_DATACENTER_DHCP_INFO_PATH = "/action/dhcpinfo";
+
+    public static final String VIRTUAL_DATACENTER_DHCP_INFO_REL = "dhcpinfo";
+
+    public static final String DEFAULT_VLAN_PATH = "/action/defaultvlan";
+
+    public static final String DEFAULT_VLAN_REL = "defaultvlan";
+
+    public static final String DEFAULT_NETWORK_REL = "defaultnetwork";
 
     // @Autowired
     @Resource(name = "virtualDatacenterService")
@@ -119,7 +127,7 @@ public class VirtualDatacenterResource extends AbstractResource
 
     @SuppressWarnings("unchecked")
     @GET
-    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_IPS)
+    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByVirtualDatacenter(
         @PathParam(VIRTUAL_DATACENTER) final Integer id,
         @QueryParam(START_WITH) @Min(0) final Integer startwith,
@@ -153,7 +161,7 @@ public class VirtualDatacenterResource extends AbstractResource
     }
 
     @GET
-    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_ACTION_GET_DHCP_INFO)
+    @Path(VirtualDatacenterResource.VIRTUAL_DATACENTER_DHCP_INFO_PATH)
     public String getDHCPInfoByVirtualDatacenter(@PathParam(VIRTUAL_DATACENTER) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
@@ -196,7 +204,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
     @GET
-    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     public VLANNetworkDto getDefaultVlan(
         @PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @Context final IRESTBuilder restBuilder) throws Exception
@@ -208,7 +216,7 @@ public class VirtualDatacenterResource extends AbstractResource
     // ALERT! this method is @override in enterprise version, any change here
     // should be also changed in enterprise version.
     @PUT
-    @Path(VirtualDatacenterResource.ACTION_DEFAULT_VLAN)
+    @Path(VirtualDatacenterResource.DEFAULT_VLAN_PATH)
     public void setDefaultVlan(@PathParam(VIRTUAL_DATACENTER) @NotNull @Min(1) final Integer id,
         @NotNull final LinksDto links, @Context final IRESTBuilder restBuilder) throws Exception
     {
