@@ -21,6 +21,9 @@
 
 package com.abiquo.api.resources.cloud;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DELETE;
@@ -32,9 +35,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.services.NetworkService;
 import com.abiquo.api.services.UserService;
@@ -52,6 +59,11 @@ import com.abiquo.server.core.cloud.VirtualMachineDto;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
+
+    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineResource.class);
+
+    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
+        "abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
 
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
@@ -110,53 +122,122 @@ public class VirtualMachineResource extends AbstractResource
         return VirtualMachinesResource.createCloudTransferObject(vm, vdcId, vappId, restBuilder);
     }
 
+    private final static ReentrantLock lock = new ReentrantLock();
+
     @PUT
     @Path("action/allocate")
-    public synchronized VirtualMachineDto allocate(
+    public VirtualMachineDto allocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) @NotNull @Min(1) final Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) @NotNull @Min(1) final Integer virtualMachineId,
         final String forceEnterpriseLimitsStr, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
+        try
+        {
+            if (!lock.tryLock(TIMEOUT, TimeUnit.MILLISECONDS))
+            {
+                logger
+                    .error(
+                        "We cannot aquire the lock in the current time: {} ms. to perform this operation: allocate",
+                        TIMEOUT);
+                throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+            }
 
-        Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
+            Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
+            // get user form the authentication layer
+            // User user = userService.getCurrentUser();
 
-        VirtualMachine vmachine =
-            service.allocateVirtualMachine(virtualMachineId, virtualApplianceId,
-                forceEnterpriseLimits);
+            VirtualMachine vmachine =
+                service.allocateVirtualMachine(virtualMachineId, virtualApplianceId,
+                    forceEnterpriseLimits);
 
-        service.updateVirtualMachineUse(virtualApplianceId, vmachine);
+            service.updateVirtualMachineUse(virtualApplianceId, vmachine);
 
-        return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
+            return ModelTransformer.transportFromPersistence(VirtualMachineDto.class, vmachine);
+        }
+        catch (InterruptedException e)
+        {
+            logger.error("We cannot aquire the lock to perform this operation: allocate");
+            throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+        }
+        finally
+        {
+            if (lock.isHeldByCurrentThread())
+            {
+                lock.unlock();
+            }
+        }
     }
 
     // TODO forceEnterpriseLimits = true
 
     @PUT
     @Path("action/checkedit")
-    public synchronized void checkEditAllocate(
+    public void checkEditAllocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
         final VirtualMachineDto vmachine, @Context final IRESTBuilder restBuilder) throws Exception
     {
-        // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
-        // get user form the authentication layer
-        // User user = userService.getCurrentUser();
-
-        service.checkAllocate(virtualApplianceId, virtualMachineId, vmachine, true);
+        try
+        {
+            if (!lock.tryLock(TIMEOUT, TimeUnit.MILLISECONDS))
+            {
+                logger
+                    .error(
+                        "We cannot aquire the lock in the current time: {} ms. to perform this operation: checkedit",
+                        TIMEOUT);
+                throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+            }
+            // Boolean forceEnterpriseLimits = Boolean.parseBoolean(forceEnterpriseLimitsStr);
+            // get user form the authentication layer
+            // User user = userService.getCurrentUser();
+            service.checkAllocate(virtualApplianceId, virtualMachineId, vmachine, true);
+        }
+        catch (InterruptedException e)
+        {
+            logger.error("We cannot aquire the lock to perform this operation: checkedit");
+            throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+        }
+        finally
+        {
+            if (lock.isHeldByCurrentThread())
+            {
+                lock.unlock();
+            }
+        }
     }
 
     @DELETE
     @Path("action/deallocate")
-    public synchronized void deallocate(
+    public void deallocate(
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer virtualApplianceId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer virtualMachineId,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
-
-        service.deallocateVirtualMachine(virtualMachineId);
+        try
+        {
+            if (!lock.tryLock(TIMEOUT, TimeUnit.MILLISECONDS))
+            {
+                logger
+                    .error(
+                        "We cannot aquire the lock in the current time: {} ms. to perform this operation: deallocate",
+                        TIMEOUT);
+                throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+            }
+            service.deallocateVirtualMachine(virtualMachineId);
+        }
+        catch (InterruptedException e)
+        {
+            logger.error("We cannot aquire the lock to perform this operation: checkedit");
+            throw new ServiceUnavailableException(APIError.SERVICE_UNAVAILABLE_ERROR);
+        }
+        finally
+        {
+            if (lock.isHeldByCurrentThread())
+            {
+                lock.unlock();
+            }
+        }
     }
 
     /**

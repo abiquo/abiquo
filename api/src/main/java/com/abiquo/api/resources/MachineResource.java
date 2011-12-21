@@ -33,6 +33,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+
 import javax.ws.rs.core.Context;
 
 import org.apache.wink.common.annotations.Parent;
@@ -92,6 +93,8 @@ public class MachineResource extends AbstractResource
 
     public static final String MACHINE_CHECK = "checkState";
 
+    public static final String SHOW_CREDENTIALS_QUERY_PARAM = "credentials";
+
     @Autowired
     MachineService service;
 
@@ -111,13 +114,24 @@ public class MachineResource extends AbstractResource
     public MachineDto getMachine(
         @PathParam(DatacenterResource.DATACENTER) final Integer datacenterId,
         @PathParam(RackResource.RACK) final Integer rackId,
-        @PathParam(MACHINE) final Integer machineId, @Context final IRESTBuilder restBuilder)
-        throws Exception
+        @PathParam(MACHINE) final Integer machineId,
+        @QueryParam(SHOW_CREDENTIALS_QUERY_PARAM) final Boolean showCredentials,
+        @Context final IRESTBuilder restBuilder) throws Exception
     {
         validatePathParameters(datacenterId, rackId, machineId);
 
         Machine machine = service.getMachine(machineId);
-        return createTransferObject(machine, restBuilder);
+        MachineDto dto = createTransferObject(machine, restBuilder);
+
+        // Credentials are only returned if they are requested
+        if (showCredentials != null && showCredentials.equals(Boolean.TRUE)
+            && machine.getHypervisor() != null)
+        {
+            dto.setUser(machine.getHypervisor().getUser());
+            dto.setPassword(machine.getHypervisor().getPassword());
+        }
+
+        return dto;
     }
 
     @PUT
@@ -236,8 +250,8 @@ public class MachineResource extends AbstractResource
             Hypervisor h = m.getHypervisor();
 
             MachineState state =
-                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(),
-                    h.getPassword(), h.getPort());
+                infraService.checkMachineState(datacenterId, h.getIp(), h.getType(), h.getUser(), h
+                    .getPassword(), h.getPort());
 
             if (sync)
             {
@@ -309,9 +323,10 @@ public class MachineResource extends AbstractResource
             dto.setIp(machine.getHypervisor().getIp());
             dto.setIpService(machine.getHypervisor().getIpService());
             dto.setType(machine.getHypervisor().getType());
-            dto.setUser(machine.getHypervisor().getUser());
-            dto.setPassword(machine.getHypervisor().getPassword());
             dto.setPort(machine.getHypervisor().getPort());
+            // Credentials are not returned by default
+            // dto.setUser(machine.getHypervisor().getUser());
+            // dto.setPassword(machine.getHypervisor().getPassword());
         }
 
         if (machine.getDatastores() != null)

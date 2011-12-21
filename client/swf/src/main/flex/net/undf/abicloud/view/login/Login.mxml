@@ -73,7 +73,15 @@
             private var rb2:ResourceBundle;
 
             [Bindable]
-            private var languageDP:ArrayCollection = AbiCloudModel.getInstance().configurationManager.languageSet;
+            
+            private var languageDP:Array = [ { label: "English", data: "en_US" },
+                                             { label: "Español", data: "es_ES" },
+                                             { label: "日本語", data: "ja_JP" },
+                                             { label: "中文", data: "zh_ZH" },
+                                             { label: "Português", data: "pt_PT" },
+                                             { label: "Deutsch", data: "de_DE"}
+                                              ];
+
 
             [Bindable]
             private var _loginLogo:String;

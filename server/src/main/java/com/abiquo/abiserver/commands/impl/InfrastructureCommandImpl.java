@@ -61,9 +61,12 @@ import com.abiquo.abiserver.commands.stub.impl.EnterprisesResourceStubImpl;
 import com.abiquo.abiserver.commands.stub.impl.VirtualMachineResourceStubImpl;
 import com.abiquo.abiserver.eventing.EventingException;
 import com.abiquo.abiserver.eventing.EventingSupport;
+import com.abiquo.abiserver.exception.HardLimitExceededException;
 import com.abiquo.abiserver.exception.InfrastructureCommandException;
 import com.abiquo.abiserver.exception.InvalidIPAddressException;
+import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.PersistenceException;
+import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.infrastructure.DataCenterDAO;
@@ -237,8 +240,7 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                 transaction.rollback();
             }
 
-            errorManager.reportError(InfrastructureCommandImpl.resourceManager, dataResult,
-                "getInfrastructureByDataCenter", e);
+            logger.trace("Unexpected database error when refreshing infrastructure data", e);
         }
 
         return dataResult;
@@ -546,9 +548,6 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
 
             PhysicalMachineDAO machineDao = factory.getPhysicalMachineDAO();
             PhysicalmachineHB machine = machineDao.findById(physicalMachine.getId());
-            List<VirtualmachineHB> vms =
-                machineDao.getDeployedVirtualMachines(machine.getIdPhysicalMachine());
-
             HypervisorHB hypervisor = machine.getHypervisor();
 
             try
@@ -582,17 +581,8 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
             String virtualSystemMonitorAddress =
                 RemoteServiceUtils.getVirtualSystemMonitorFromPhysicalMachine(physicalMachine);
 
-            for (VirtualmachineHB vm : vms)
-            {
-                try
-                {
-                    EventingSupport.unsubscribe(vm.getName(), virtualSystemMonitorAddress);
-                }
-                catch (EventingException e)
-                {
-                    logger.debug(e.getMessage());
-                }
-            }
+            EventingSupport.unsubscribeVirtualMachinesByPhysicalMachine(virtualSystemAddress,
+                virtualSystemMonitorAddress);
 
             EventingSupport.unMonitorPhysicalMachine(virtualSystemAddress, hypervisor.getType(),
                 virtualSystemMonitorAddress, user, password);
@@ -1138,17 +1128,32 @@ public class InfrastructureCommandImpl extends BasicCommand implements Infrastru
                             vmachineResource.checkEdit(userSession, virtualDatacenterId,
                                 virtualApplianceId, virtualMachineHB.getIdVm(), newcpu, newram);
                         }
+                        catch (NotEnoughResourcesException noDetailException)
+                        {
+                            basicResult.setSuccess(false);
+                            basicResult.setMessage(noDetailException.getMessage());
+                            basicResult.setResultCode(0);
+                            return basicResult;
+                        }
+                        catch (SoftLimitExceededException e)
+                        {
+                            basicResult.setSuccess(false);
+                            basicResult.setMessage(e.toString());
+                            basicResult.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
+                            return basicResult;
+                        }
+                        catch (HardLimitExceededException e)
+                        {
+                            basicResult.setSuccess(false);
+                            basicResult.setMessage(e.toString());
+                            basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+                            return basicResult;
+                        }
                         catch (Exception e)
                         {
                             basicResult.setSuccess(false);
                             basicResult.setMessage(e.toString());
-                            if (e.getMessage().startsWith("LIMIT_EXCEEDED"))
-                            {
-                                basicResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
-                            }
-                            // errorManager.reportError(resourceManager, basicResult,
-                            // "editVirtualMachine", e.toString());
-
+                            basicResult.setResultCode(0);
                             return basicResult;
                         }
                     }

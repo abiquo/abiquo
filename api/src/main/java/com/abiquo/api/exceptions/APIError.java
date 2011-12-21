@@ -43,7 +43,8 @@ public enum APIError
         "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
         "Abiquo API currently only supports application/xml Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
-        "412 - Unprovisioned", "Unprovisioned exception"),
+        "412 - Unprovisioned", "Unprovisioned exception"), SERVICE_UNAVAILABLE_ERROR(
+        "503- Service Unavailable", "Service Unavailable: try again in a few moments"),
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier can't be 0"), CONSTRAINT_VIOLATION(

@@ -93,8 +93,7 @@ public class ApplianceManagerStubIT
      * 
      * @throws IOException
      */
-    // @BeforeTest
-    @BeforeClass // XXX BeforeMethod
+    //@BeforeClass
     public void initializeRepositoryFileSystem() throws IOException
     {
 
@@ -303,7 +302,7 @@ public class ApplianceManagerStubIT
 
     //
 
-    @BeforeClass
+    // @BeforeClass
     protected void configureFileServerTestResources() throws Exception
     {
         rsServer = new Server();
@@ -328,7 +327,7 @@ public class ApplianceManagerStubIT
         createDiskFile();
     }
 
-    @AfterClass
+    // @AfterClass
     public static void tearDownFileServer() throws Exception
     {
         if (rsServer != null)

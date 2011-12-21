@@ -182,7 +182,7 @@ public class ESXiCollector extends AbstractCollector
     }
 
     // TODO DELME
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
         ESXiCollector coll = new ESXiCollector();
         coll.setIpAddress("10.60.1.120");
@@ -286,6 +286,7 @@ public class ESXiCollector extends AbstractCollector
     @Override
     public HostDto getHostInfo() throws CollectorException
     {
+        LOGGER.debug("Getting information for host at: {}", getIpAddress());
 
         final HostHardwareInfo hardwareInfo;
         final HostDto physicalInfo = new HostDto();
@@ -306,7 +307,9 @@ public class ESXiCollector extends AbstractCollector
         ObjectContent hostSystem;
         try
         {
+            LOGGER.debug("Getting Managed Object information for the host from inventory...");
             hostSystem = getManagedObjectReferencesFromInventory(hostSystemSpec)[0];
+            LOGGER.debug("Got the information of the Managed Object");
         }
         catch (RemoteException e)
         {
@@ -329,9 +332,13 @@ public class ESXiCollector extends AbstractCollector
 
         try
         {
+            LOGGER.debug("Getting the storage system information for the host...");
             ManagedObjectReference storageSystemMor = getStorageSystem(hostSystem);
+            LOGGER.debug("Storage information retrieved...");
 
+            LOGGER.debug("Getting the iSCSI initiator...");
             final String initiatorIQN = getInternetSCSIInitiatorIQN(hostSystem, storageSystemMor);
+            LOGGER.debug("iSCSI initiator retrieved");
 
             physicalInfo.setInitiatorIQN(initiatorIQN);
         }
@@ -342,6 +349,8 @@ public class ESXiCollector extends AbstractCollector
         }
 
         physicalInfo.setStatus(HostStatusEnumType.MANAGED);
+
+        LOGGER.debug("Information retreived for host at: {}", getIpAddress());
 
         return physicalInfo;
     }
@@ -498,7 +507,8 @@ public class ESXiCollector extends AbstractCollector
      * @param parameterTypes Array of Class objects for the parameter types
      * @return true if the method exists, false otherwise
      */
-    boolean methodExists(final Object obj, final String methodName, final Class<?>[] parameterTypes)
+    boolean methodExists(final Object obj, final String methodName,
+        final Class< ? >[] parameterTypes)
     {
         boolean exists = false;
         try
@@ -568,15 +578,15 @@ public class ESXiCollector extends AbstractCollector
         rpToVm};
     }
 
-    private static SelectionSpec createSelectionSpec(String name)
+    private static SelectionSpec createSelectionSpec(final String name)
     {
         SelectionSpec s = new SelectionSpec();
         s.setName(name);
         return s;
     }
 
-    private static TraversalSpec createTraversalSpec(String name, String type, String path,
-        SelectionSpec... selectSet)
+    private static TraversalSpec createTraversalSpec(final String name, final String type,
+        final String path, final SelectionSpec... selectSet)
     {
         TraversalSpec traversalSpec = new TraversalSpec();
         traversalSpec.setName(name);
@@ -731,13 +741,13 @@ public class ESXiCollector extends AbstractCollector
                     String address = "";
                     if (pnics.length > 0)
                     {
-                    	for (PhysicalNic nic : network.getPnic())
-                    	{
-                    		if (nic.getKey().equalsIgnoreCase(pnics[0]))
-                    		{
-                    			address = nic.getMac();
-                    		}
-                    	}
+                        for (PhysicalNic nic : network.getPnic())
+                        {
+                            if (nic.getKey().equalsIgnoreCase(pnics[0]))
+                            {
+                                address = nic.getMac();
+                            }
+                        }
                     }
                     resource.setAddress(address);
                     resource.setElementName(dvswitch.getDvsName());
@@ -745,7 +755,7 @@ public class ESXiCollector extends AbstractCollector
                 }
             }
         }
-        
+
         // Datastores resources
         HostConnectInfo hostInfo;
         HostDatastoreBrowser dsBrowser;
@@ -896,8 +906,8 @@ public class ESXiCollector extends AbstractCollector
      * @return a Datastore UUID
      * @throws CollectorException
      */
-    private String getDatastoreUuidMark(String dsName, HostDatastoreBrowser dsBrowser, Datacenter dc)
-        throws CollectorException
+    private String getDatastoreUuidMark(final String dsName, final HostDatastoreBrowser dsBrowser,
+        final Datacenter dc) throws CollectorException
     {
         String uuid = null;
         Task searchtask;
@@ -906,7 +916,7 @@ public class ESXiCollector extends AbstractCollector
         {
             // search on the top of the filesystem (do not navegate subfolders)
             searchtask = dsBrowser.searchDatastore_Task(dsName, createQueryDatastoreFolderMark()); // TODO
-                                                                                                   // static
+            // static
 
             searchtask.waitForTask();
 
@@ -975,7 +985,7 @@ public class ESXiCollector extends AbstractCollector
      * 
      * @return the just created UUID for the folder mark
      */
-    private String createDatastoreFolderMark(Datacenter dc, String dsName)
+    private String createDatastoreFolderMark(final Datacenter dc, final String dsName)
         throws CollectorException
     {
         String folderUuidMark = UUID.randomUUID().toString();
@@ -1012,7 +1022,7 @@ public class ESXiCollector extends AbstractCollector
      * @return list of ObjectContent with the result of the search.
      * @throws RemoteException if there is any problem working with the remote objects
      */
-    private ObjectContent[] getManagedObjectReferencesFromInventory(PropertySpec[] propSpec)
+    private ObjectContent[] getManagedObjectReferencesFromInventory(final PropertySpec[] propSpec)
         throws RemoteException
     {
         // Set the PropertyFilter Spec previous to put toghether the property Spec
@@ -1156,6 +1166,8 @@ public class ESXiCollector extends AbstractCollector
      */
     private synchronized void hasValidLicense() throws NoManagedException
     {
+        LOGGER.debug("Checking if host {} has a valid license...", getIpAddress());
+
         ManagedObjectReference licenseManager = getServiceContent().getLicenseManager();
 
         LicenseManagerLicenseInfo[] licenseInfo;
@@ -1168,6 +1180,7 @@ public class ESXiCollector extends AbstractCollector
             {
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
+                    LOGGER.debug("Invalid license found!");
                     throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                 }
 
@@ -1195,8 +1208,10 @@ public class ESXiCollector extends AbstractCollector
 
                 if (!neverExpires)
                 {
-                    if ((expirationHours.intValue() == 0) || (expirationMinutes.intValue() == 0))
+                    if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
+
                     {
+                        LOGGER.debug("Expired license found!");
                         throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                     }
                 }
@@ -1209,6 +1224,7 @@ public class ESXiCollector extends AbstractCollector
             throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
         }
 
+        LOGGER.debug("Valid license found");
     }
 
     /**
@@ -1281,8 +1297,8 @@ public class ESXiCollector extends AbstractCollector
      * Gets the internet SCSI controller (Host Bus Adapter -- config.storageDevice.scsiLun)
      * initiator IQN.
      */
-    protected String getInternetSCSIInitiatorIQN(ObjectContent hostSystemOc,
-        ManagedObjectReference storageSystemMor) throws CollectorException
+    protected String getInternetSCSIInitiatorIQN(final ObjectContent hostSystemOc,
+        final ManagedObjectReference storageSystemMor) throws CollectorException
     {
         String[] hbasPropDesc = new String[] {"config.storageDevice.hostBusAdapter"};
         ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
@@ -1327,7 +1343,7 @@ public class ESXiCollector extends AbstractCollector
             throw new CollectorException(cause, e);
         }
 
-        for (int i = 0; i < hbas.length; i++) //&& iscsi == null
+        for (int i = 0; i < hbas.length; i++) // && iscsi == null
         {
             HostHostBusAdapter hba = hbas[i];
 
@@ -1338,12 +1354,13 @@ public class ESXiCollector extends AbstractCollector
 
                 LOGGER.info(String.format(
                     "[iscsi] Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
-                    iscsicurrent.getDevice(), iscsicurrent.getDriver(), iscsicurrent.getModel(), iscsicurrent.getIScsiAlias(),
-                    iscsicurrent.getIScsiName(), String.valueOf(iscsicurrent.isIsSoftwareBased())));
+                    iscsicurrent.getDevice(), iscsicurrent.getDriver(), iscsicurrent.getModel(),
+                    iscsicurrent.getIScsiAlias(), iscsicurrent.getIScsiName(), String
+                        .valueOf(iscsicurrent.isIsSoftwareBased())));
 
-        
-                if (iscsicurrent.isIsSoftwareBased() && iscsicurrent.getModel().equalsIgnoreCase("iSCSI Software Adapter"))
-                {                    
+                if (iscsicurrent.isIsSoftwareBased()
+                    && iscsicurrent.getModel().equalsIgnoreCase("iSCSI Software Adapter"))
+                {
                     iscsi = iscsicurrent;
                 }
             }
@@ -1359,9 +1376,8 @@ public class ESXiCollector extends AbstractCollector
 
         LOGGER.info(String.format(
             "[iscsi] SELECTED :\n Device:%s Driver:%s Model:%s\n\tAlias:%s Name:%s Software:%s",
-            iscsi.getDevice(), iscsi.getDriver(), iscsi.getModel(), iscsi.getIScsiAlias(),
-            iscsi.getIScsiName(), String.valueOf(iscsi.isIsSoftwareBased())));
-
+            iscsi.getDevice(), iscsi.getDriver(), iscsi.getModel(), iscsi.getIScsiAlias(), iscsi
+                .getIScsiName(), String.valueOf(iscsi.isIsSoftwareBased())));
 
         return iscsi.getIScsiName();
     }
@@ -1369,7 +1385,7 @@ public class ESXiCollector extends AbstractCollector
     /**
      * Gets the storage system reference from the host system's configuration manager.
      */
-    private ManagedObjectReference getStorageSystem(ObjectContent hostSystemOc)
+    private ManagedObjectReference getStorageSystem(final ObjectContent hostSystemOc)
         throws CollectorException
     {
         String[] storageSystemPropDesc = new String[] {"configManager.storageSystem"};
@@ -1402,8 +1418,8 @@ public class ESXiCollector extends AbstractCollector
      * Check if host system has the internetSCSI software controller enable, if not try to enabling
      * it. TODO only look for software controller, add hardware support
      */
-    private Boolean isInternetSCSIEnable(ObjectContent hostSystemOc,
-        ManagedObjectReference storageSystemMor) throws CollectorException
+    private Boolean isInternetSCSIEnable(final ObjectContent hostSystemOc,
+        final ManagedObjectReference storageSystemMor) throws CollectorException
     {
         Object objIscsiEnable;
         Boolean isIscsiEnable;

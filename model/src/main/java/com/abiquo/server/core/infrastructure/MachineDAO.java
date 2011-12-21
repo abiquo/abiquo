@@ -110,19 +110,14 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
         return result;
     }
 
-    /**
-     * @return the list of physical machines of the infrastructure without virtual machines in the
-     *         allocator.
-     */
-    public Machine isMachineInAllocator(final Integer machineId)
+    public boolean isMachineInAllocator(final Integer machineId)
     {
         // The way to define the virtual machines in the allocator is:
         // All the virtual machines with an hypervisor associated and with state=NOT_DEPLOYED
         Query query = getSession().createQuery(QUERY_IS_MACHINE_IN_ALLOCATOR);
         query.setParameter("machineId", machineId);
 
-        return (Machine) query.uniqueResult();
-
+        return !query.list().isEmpty();
     }
 
     public List<Machine> findRackMachines(final Rack rack)
@@ -419,17 +414,19 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (machines == null || machines.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                        + "Pleas check the machine reservation policies.", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                            + "Pleas check the machine reservation policies.", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
             else
             {
-                throw new PersistenceException(String.format(
-                    "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
-                        + "is the target of the high availability (so can't be used) ", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "The only MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]"
+                            + "is the target of the high availability (so can't be used) ", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
         }
 
@@ -508,10 +505,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                        + "Please check the racks and hypervisor technology on the infrastructure.",
-                    reservedMachinesB.toString(), idRack, idVirtualDatacenter));
+                throw new PersistenceException(String
+                    .format(
+                        "%s\nThere isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                            + "Please check the racks and hypervisor technology on the infrastructure.",
+                        reservedMachinesB.toString(), idRack, idVirtualDatacenter));
             }
 
             /**
@@ -553,10 +551,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query1res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
-                        + "Please check the racks and hypervisor technology on the infrastructure.",
-                    idRack, idVirtualDatacenter));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any machine on the required rack [%d] and virtual datacenter [%d]. "
+                            + "Please check the racks and hypervisor technology on the infrastructure.",
+                        idRack, idVirtualDatacenter));
             }
 
             /**
@@ -591,10 +590,11 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
 
             if (query3res.size() == 0)
             {
-                throw new PersistenceException(String.format(
-                    "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
-                        + "Pleas check the machine reservation policies.", idRack,
-                    idVirtualDatacenter, enterprise.getName()));
+                throw new PersistenceException(String
+                    .format(
+                        "There isn't any MANAGED machine on the required rack [%d] and virtual datacenter [%d] available for the current enterpirse [%s]. "
+                            + "Pleas check the machine reservation policies.", idRack,
+                        idVirtualDatacenter, enterprise.getName()));
             }
 
             /**
@@ -758,23 +758,22 @@ public class MachineDAO extends DefaultDAOBase<Integer, Machine>
             "    AND datastore.datastoreUUID = :datastoreUuid";
 
     private static final String QUERY_IS_MACHINE_IN_ALLOCATOR =
-        "SELECT m FROM com.abiquo.server.core.infrastructure.Machine m " + "WHERE m.id not in ( "
-            + "SELECT mac.id FROM " + "com.abiquo.server.core.cloud.VirtualMachine vm "
-            + "join vm.hypervisor h " + "join h.machine mac "
-            + "WHERE vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
-            + ") AND m.id = :machineId";
+        "SELECT vm FROM com.abiquo.server.core.cloud.VirtualMachine vm "
+            + "join vm.hypervisor h join h.machine m WHERE m.id = :machineId "
+            + "AND vm.state != 'RUNNING' AND vm.state != 'POWERED_OFF' "
+            + "AND vm.state != 'PAUSED' AND vm.state != 'REBOOTED'";
 
     public Machine findByIds(final Integer datacenterId, final Integer rackId,
         final Integer machineId)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq("rack.id", rackId), Restrictions.eq("id", machineId));
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId), Restrictions
+            .eq("rack.id", rackId), Restrictions.eq("id", machineId));
     }
 
     public Machine findByIp(final Integer datacenterId, final String ip)
     {
-        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId),
-            Restrictions.eq("hypervisor.ip", ip));
+        return findUniqueByCriterions(Restrictions.eq("datacenter.id", datacenterId), Restrictions
+            .eq("hypervisor.ip", ip));
     }
 
 }

@@ -33,13 +33,13 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorSetType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
@@ -48,6 +48,7 @@ import com.abiquo.abiserver.eventing.EventingSupport;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
+import com.abiquo.abiserver.exception.VirtualApplianceTimeoutException;
 import com.abiquo.abiserver.exception.VirtualFactoryHealthException;
 import com.abiquo.abiserver.model.ovf.OVFModelFactory;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
@@ -92,8 +93,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     private static final ResourceManager resourceManager =
         new ResourceManager(VirtualApplianceWS.class);
 
-    private final ErrorManager errorManager = ErrorManager
-        .getInstance(AbiCloudConstants.ERROR_PREFIX);
+    private final ErrorManager errorManager =
+        ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX);
 
     IInfrastructureWS infrastructureWS;
 
@@ -129,9 +130,8 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         try
         {
             infrastructureWS =
-                (IInfrastructureWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.InfrastructureWSPremium")
-                    .newInstance();
+                (IInfrastructureWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.InfrastructureWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -151,7 +151,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         Resource resource;
 
         BasicResult result = new BasicResult(); // TODO throw Exception on
-                                                // reportError
+        // reportError
 
         try
         {
@@ -225,7 +225,6 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @deprecated
      * @throws Exception
      */
-
     @Deprecated
     BasicResult forceCreateVirtualAppliance(final VirtualAppliance virtualAppliance,
         final boolean mustChangeState) throws Exception
@@ -405,7 +404,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
+                result.setMessage("The health check for this virtual appliance was not succesful");
                 return result;
             }
 
@@ -578,6 +577,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         result.setSuccess(true);
         Collection<Node> nodesOld = virtualAppliance.getNodes();
         Collection<Node> nodesNew = new ArrayList<Node>();
+        Collection<Node> deployedNodes = new ArrayList<Node>();
         try
         {
             if (virtualAppliance.getState().toEnum() == StateEnum.APPLY_CHANGES_NEEDED)
@@ -589,10 +589,15 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                     if (node.isNodeTypeVirtualImage())
                     {
                         NodeVirtualImage nvi = (NodeVirtualImage) node;
-                        if (nvi.getVirtualMachine().getState().toEnum()
-                            .compareTo(StateEnum.IN_PROGRESS) == 0)
+                        if (nvi.getVirtualMachine().getState().toEnum().compareTo(
+                            StateEnum.IN_PROGRESS) == 0)
                         {
                             nodesNew.add(node);
+                        }
+
+                        else
+                        {
+                            deployedNodes.add(node);
                         }
                     }
                 }
@@ -605,6 +610,16 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                 {
                     virtualAppliance.setState(new State(StateEnum.NOT_DEPLOYED));
                     startVirtualAppliance(virtualAppliance);
+                }
+
+                String vsmAddress =
+                    RemoteServiceUtils.getVirtualSystemMonitorFromVA(virtualAppliance);
+
+                for (Node< ? > node : deployedNodes)
+                {
+                    NodeVirtualImage nvi = (NodeVirtualImage) node;
+
+                    EventingSupport.subscribeEvent(nvi.getVirtualMachine(), vsmAddress);
                 }
                 virtualAppliance.setNodes(nodesOld);
                 result.setSuccess(true);
@@ -749,7 +764,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
             }
             else
             {
-                result.setMessage(virtualAppliance.getName() + ": Operation cannot be performed.");
+                result.setMessage("The health check for this virtual appliance was not succesful");
                 return result;
             }
         }
@@ -776,7 +791,14 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     private void encapsulateAndRethrowFault(final VirtualAppliance va, final FaultException ex,
         final EventType event, final String message) throws VirtualApplianceFaultException
     {
+        if (isTimeoutException(ex))
+        {
+            // WSMAN Timeouts are handled in a different way
+            throw new VirtualApplianceTimeoutException(ex.getMessage(), ex);
+        }
+
         String exceptionMessage = null;
+
         try
         {
             // Try to find the original exception details
@@ -879,5 +901,10 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         // Log to tracer the original message
         TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
             event, message, platform);
+    }
+
+    private boolean isTimeoutException(final FaultException ex)
+    {
+        return ex.getMessage().indexOf("wsman:TimedOut") != -1;
     }
 }

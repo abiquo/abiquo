@@ -34,6 +34,10 @@ import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
 import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.vsm.client.VSMClient;
+import com.abiquo.vsm.client.VSMClientException;
+import com.abiquo.vsm.model.transport.PhysicalMachineDto;
+import com.abiquo.vsm.model.transport.VirtualMachineDto;
+import com.abiquo.vsm.model.transport.VirtualMachinesDto;
 
 /**
  * Eventing support utility class for sending subscribe messages to be monitored by the abicloud
@@ -378,6 +382,31 @@ public final class EventingSupport
             }
         }
         catch (Exception e)
+        {
+            throw new EventingException(e);
+        }
+    }
+
+    public static void unsubscribeVirtualMachinesByPhysicalMachine(
+        final String virtualSystemAddress, final String virtualSystemMonitorAddress)
+        throws EventingException
+    {
+        try
+        {
+            VSMClient client = new VSMClient(virtualSystemMonitorAddress);
+            VirtualMachinesDto dto = client.getSubscriptions();
+
+            for (VirtualMachineDto vm : dto.getCollection())
+            {
+                PhysicalMachineDto pm = vm.getPhysicalMachine();
+
+                if (pm != null && pm.getAddress().equalsIgnoreCase(virtualSystemAddress))
+                {
+                    unsubscribe(vm.getName(), virtualSystemMonitorAddress);
+                }
+            }
+        }
+        catch (VSMClientException e)
         {
             throw new EventingException(e);
         }

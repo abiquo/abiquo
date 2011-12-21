@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
@@ -54,8 +55,10 @@ import com.abiquo.util.URIResolver;
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     VirtualMachineResourceStub
 {
-
-    private final static Integer TIMEOUT = 3 * 60 * 1000; // 3 minutes
+    /* Set the timeout to the double fo time of the set in the system properties */
+    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
+        "abiquo.nodecollector.timeout", "0")) * 2 * 2; // 3 minutes the second * 2 is due to the
+                                                       // synchronization on allocate
 
     public VirtualMachineResourceStubImpl()
     {
@@ -68,8 +71,8 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     }
 
     @Override
-    public BasicResult updateVirtualMachine(Integer virtualDatacenterId,
-        Integer virtualApplianceId, final VirtualMachine virtualMachine)
+    public BasicResult updateVirtualMachine(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final VirtualMachine virtualMachine)
     {
         BasicResult result = new BasicResult();
         String vmachineUrl =
@@ -90,10 +93,10 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
         return result;
     }
 
-    public void pause(UserSession userSession, Integer virtualDatacenterId,
-        Integer virtualApplianceId, Integer virtualMachineId, final int newcpu, final int newram)
-        throws HardLimitExceededException, SoftLimitExceededException, SchedulerException,
-        NotEnoughResourcesException
+    public void pause(final UserSession userSession, final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId, final int newcpu,
+        final int newram) throws HardLimitExceededException, SoftLimitExceededException,
+        SchedulerException, NotEnoughResourcesException
     {
 
         String vmachineUrl =
@@ -189,11 +192,22 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
 
         vmachineUrl = UriHelper.appendPathToBaseUri(vmachineUrl, "action/deallocate");
 
-        ClientResponse response = resource(vmachineUrl).delete();
-
-        if (response.getStatusCode() / 200 != 1)
+        int i = 3;
+        while (i-- > 0)
         {
-            onError(userSession, response);
+            ClientResponse response = resource(vmachineUrl).delete();
+            int statusCode = response.getStatusCode();
+            if (statusCode == Status.NO_CONTENT.getStatusCode())
+            {
+                return;
+            }
+            if (statusCode == Status.SERVICE_UNAVAILABLE.getStatusCode())
+            {
+                BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DESTROY, userSession, null, "VDC id " + virtualDatacenterId,
+                    "The API returned a 503 - Service Unavailable. We will try up to " + i
+                        + " times again", null, null, null, null, null);
+            }
         }
     }
 
