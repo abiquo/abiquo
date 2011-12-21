@@ -42,7 +42,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceMa
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
-import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
@@ -213,7 +212,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
                                 n.getVirtualMachine().getId());
 
-                        ClientResponse put  =
+                        ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
                         if (put.getStatusCode() != Status.OK.getStatusCode())
                         {
@@ -782,7 +781,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             for (VirtualDatacenterDto dto : dtos.getCollection())
             {
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
-                RESTLink app = dto.searchLink("virtualappliance");
+                RESTLink app = dto.searchLink("virtualappliances");
                 ClientResponse response = get(app.getHref());
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
