@@ -40,7 +40,6 @@ public class CheckLinksPermissionsHandler extends AbstractHandler
 
     private URLAuthenticator urlAuthenticator;
 
-    @SuppressWarnings("unchecked")
     @Override
     public void handleResponse(final MessageContext msgContext) throws Throwable
     {
@@ -57,7 +56,7 @@ public class CheckLinksPermissionsHandler extends AbstractHandler
                     {
                         if (obj instanceof SingleResourceTransportDto)
                         {
-                            SingleResourceTransportDto srt = ((SingleResourceTransportDto) obj);
+                            SingleResourceTransportDto srt = (SingleResourceTransportDto) obj;
                             srt.setLinks(checkLinks(srt.getLinks()));
                         }
                     }
