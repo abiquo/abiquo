@@ -36,11 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
+import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.services.RemoteServiceService;
 import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.tasks.util.DatacenterTaskBuilder;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.api.util.snapshot.SnapshotUtils;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -49,6 +51,8 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.commons.amqp.impl.tarantino.domain.dto.DatacenterTasks;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.RemoteServiceType;
+import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
@@ -86,6 +90,9 @@ public class TarantinoService extends DefaultApiService
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private InfrastructureService infrastructureService;
 
     public TarantinoService()
     {
@@ -567,75 +574,85 @@ public class TarantinoService extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public String snapshotVirtualMachine(final VirtualMachine virtualMachine,
-        final VirtualMachineDefinition definition, final DiskSnapshot destinationDisk,
-        final boolean mustPowerOffToSnapshot)
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final String snapshotName,
+        final VirtualMachineState originalState)
     {
-        try
+        // Build destination DiskSnapshot
+        VirtualMachineDescriptionBuilder definitionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+        VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+
+        VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+
+        DiskSnapshot destinationDisk = new DiskSnapshot();
+        destinationDisk.setRepository(infrastructureService.getRepository(datacenter).getUrl());
+        destinationDisk.setPath(SnapshotUtils.formatSnapshotPath(template));
+        destinationDisk.setSnapshotFilename(SnapshotUtils.formatSnapshotName(template));
+        destinationDisk.setName(snapshotName);
+        destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
+            datacenter).getUri());
+
+        // Build the job sequence
+        HypervisorConnection connection =
+            jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
+
+        DatacenterTaskBuilder builder =
+            new DatacenterTaskBuilder(definition, connection, userService.getCurrentUser()
+                .getNick());
+
+        if (SnapshotUtils.mustPowerOffToSnapshot(originalState))
         {
-            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-            String virtualMachineId = String.valueOf(virtualMachine.getId());
-            RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
-
-            // Unsubscribe the virtual machine to prevent unlock
-            vsm.unsubscribe(service, virtualMachine);
-
-            // Build the job sequence
-            HypervisorConnection connection =
-                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
-
-            DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(definition, connection, userService.getCurrentUser()
-                    .getNick());
-
-            if (mustPowerOffToSnapshot)
-            {
-                builder.add(VirtualMachineStateTransition.POWEROFF);
-                builder.addSnapshot(destinationDisk);
-                builder.add(VirtualMachineStateTransition.POWERON);
-            }
-            else
-            {
-                builder.addSnapshot(destinationDisk);
-            }
-
-            // Add Redis task for progress tracking
-            Task redisTask = builder.buildAsyncTask(virtualMachineId, TaskType.SNAPSHOT);
-            addAsyncTask(redisTask);
-
-            // Send Tarantino task
-            DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
-            send(datacenter, tarantinoTask, EventType.VAPP_BUNDLE); // TODO eventType
-
-            return tarantinoTask.getId();
+            builder.add(VirtualMachineStateTransition.POWEROFF);
+            builder.addSnapshot(destinationDisk);
+            builder.add(VirtualMachineStateTransition.POWERON);
         }
+        else
+        {
+            builder.addSnapshot(destinationDisk);
+        }
+
+        // Unsubscribe the virtual machine to prevent unlock
+        RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
+        vsm.unsubscribe(service, virtualMachine);
+
+        // Add Redis task for progress tracking
+        Task redisTask =
+            builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.SNAPSHOT);
+        addAsyncTask(redisTask);
+
+        // Send Tarantino task
+        DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
+        send(datacenter, tarantinoTask, EventType.VAPP_BUNDLE); // TODO eventType
+
+        return tarantinoTask.getId();
         // TODO
-        catch (NotFoundException e)
-        {
-            // We need to unsuscribe the machine
-            logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
-                + e.getMessage() + " machine: " + virtualMachine.getName());
-
-            throw e;
-        }
-        catch (RuntimeException e)
-        {
-            logger.error("Error enqueuing the state change task dto to Tarantino with error: "
-                + e.getMessage());
-
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
-
-            // There is no point in continue
-            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
-            flushErrors();
-        }
-
-        return null;
+        // catch (NotFoundException e)
+        // {
+        // // We need to unsuscribe the machine
+        // logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
+        // + e.getMessage() + " machine: " + virtualMachine.getName());
+        //
+        // throw e;
+        // }
+        // catch (RuntimeException e)
+        // {
+        // logger.error("Error enqueuing the state change task dto to Tarantino with error: "
+        // + e.getMessage());
+        //
+        // tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
+        // APIError.GENERIC_OPERATION_ERROR.getMessage());
+        //
+        // // For the Admin to know all errors
+        // tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+        // EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
+        //
+        // // There is no point in continue
+        // addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
+        // flushErrors();
+        // }
     }
 
     /**
