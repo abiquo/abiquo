@@ -45,7 +45,7 @@ public class EnterprisePropertiesDAO extends DefaultDAOBase<Integer, EnterpriseP
 
     public EnterpriseProperties findByEnterprise(final Enterprise enterprise)
     {
-        return findUniqueExistingByCriterions(sameEnterprise(enterprise));
+        return findUniqueByCriterions(sameEnterprise(enterprise));
     }
 
     private Criterion sameEnterprise(final Enterprise enterprise)
