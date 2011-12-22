@@ -158,6 +158,13 @@ public abstract class AbsVmwareMachine extends AbsVirtualMachine
             // if (!apputil.getServiceConnection3().isConnected())
             utils.reconnect();
 
+            // If the vCenterBridge is defined, check if there is another machine 
+            // with the same name. If it exists, stop and delete to deploy again
+            if (vCenterBridge != null)
+            {
+                vCenterBridge.seachAndCleanExistingMachine(config.getMachineName());
+            }
+            
             if (!isVMAlreadyCreated())
             {
 

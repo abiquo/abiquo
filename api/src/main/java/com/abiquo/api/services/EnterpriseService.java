@@ -247,6 +247,7 @@ public class EnterpriseService extends DefaultApiService
         }
 
         old.setName(dto.getName());
+        old.setIsReservationRestricted(dto.getIsReservationRestricted());
         old.setRamLimitsInMb(new Limit((long) dto.getRamSoftLimitInMb(), (long) dto
             .getRamHardLimitInMb()));
         old.setCpuCountLimits(new Limit((long) dto.getCpuCountSoftLimit(), (long) dto
@@ -342,6 +343,7 @@ public class EnterpriseService extends DefaultApiService
             }
         }
 
+        removeEnterpriseProperties(enterprise);
         repo.delete(enterprise);
     }
 
@@ -468,20 +470,11 @@ public class EnterpriseService extends DefaultApiService
         }
 
         DatacenterLimits limit =
-            new DatacenterLimits(enterprise,
-                datacenter,
-                dto.getRamSoftLimitInMb(),
-                dto.getCpuCountSoftLimit(),
-                dto.getHdSoftLimitInMb(),
-                dto.getRamHardLimitInMb(),
-                dto.getCpuCountHardLimit(),
-                dto.getHdHardLimitInMb(),
-                dto.getStorageSoft(),
-                dto.getStorageHard(),
-                dto.getPublicIpsSoft(),
-                dto.getPublicIpsHard(),
-                dto.getVlansSoft(),
-                dto.getVlansHard());
+            new DatacenterLimits(enterprise, datacenter, dto.getRamSoftLimitInMb(), dto
+                .getCpuCountSoftLimit(), dto.getHdSoftLimitInMb(), dto.getRamHardLimitInMb(), dto
+                .getCpuCountHardLimit(), dto.getHdHardLimitInMb(), dto.getStorageSoft(), dto
+                .getStorageHard(), dto.getPublicIpsSoft(), dto.getPublicIpsHard(), dto
+                .getVlansSoft(), dto.getVlansHard());
 
         if (!limit.isValid())
         {
@@ -660,6 +653,11 @@ public class EnterpriseService extends DefaultApiService
     {
         // community dummy impl (no limit check)
 
+    }
+
+    protected void removeEnterpriseProperties(final Enterprise enterprise)
+    {
+        // PREMIUM
     }
 
     private PricingTemplate findPricingTemplate(final Integer id)

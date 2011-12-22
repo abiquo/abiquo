@@ -715,7 +715,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
     /**
      * Create a virtual machines and retrieve its state.
      */
-    // @Test
+    @Test(enabled = false)
     public void getVirtualMachineStateTest()
     {
         VirtualMachineTemplate vi = virtualMachineTemplateGenerator.createInstance(ent, datacenter);
@@ -931,6 +931,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
     /**
      * Delete a virtual machines fail its state.
      */
+    @Test(enabled = false)
     public void deleteVirtualMachineInvalidTest()
     {
         // Create a virtual machine

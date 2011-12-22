@@ -192,7 +192,7 @@ extends HttpServlet
     {
         new CheckRepositoryHandler().canUseRepository();
 
-        LookupResult r = (LookupResult) req.getAttribute("lookupResult");
+            LookupResult r = (LookupResult) req.getAttribute("lookupResult");
         if (r == null)
         {
             r = lookupNoCache(req);

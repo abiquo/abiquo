@@ -47,6 +47,7 @@
             public function init(icon:Icon = null):void
             {
                 this._icon = icon;
+                iconImage.loadSuccess = true;
 
                 if (this._icon == null)
                 {

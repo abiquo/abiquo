@@ -67,7 +67,7 @@ public class VSMEventProcessorTest extends VSMEventProcessorTestBase
         assertStage(createVirtualMachineStage().in(LOCKED).expecting(OFF).onEvent(POWER_OFF));
     }
 
-    @Test
+    @Test(enabled = false)
     public void test_lockedToNotAllocated()
     {
         assertStageAndDestroyed(createVirtualMachineStage().in(LOCKED).expecting(NOT_ALLOCATED)

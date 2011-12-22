@@ -22,6 +22,7 @@
 package com.abiquo.api.tasks.util;
 
 import java.security.InvalidParameterException;
+import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -61,6 +62,11 @@ public class DatacenterTaskBuilder
         final HypervisorConnection hypervisor, final String userId)
     {
         init(definition, hypervisor, userId);
+    }
+
+    public DatacenterTaskBuilder(final String userId)
+    {
+        init(null, null, userId);
     }
 
     /**
@@ -124,6 +130,52 @@ public class DatacenterTaskBuilder
      */
     public DatacenterTaskBuilder add(final VirtualMachineStateTransition transition)
     {
+        return add(this.definition, this.hypervisor, transition, null);
+    }
+
+    /**
+     * Add new {@link VirtualMachineStateTransition}. This method must be used to add transitions
+     * that only needs {@link VirtualMachineDefinition} and {@link HypervisorConnection} to be
+     * created.
+     * 
+     * @param transition The transition type to create
+     * @param extraData map with extra data to add to the job.
+     * @return The {@link DatacenterTaskBuilder} self
+     */
+    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
+        final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition)
+    {
+        return add(definition, hypervisor, transition, null);
+    }
+
+    /**
+     * Add new {@link VirtualMachineStateTransition}. This method must be used to add transitions
+     * that only needs {@link VirtualMachineDefinition} and {@link HypervisorConnection} to be
+     * created.
+     * 
+     * @param transition The transition type to create
+     * @param extraData map with extra data to add to the job.
+     * @return The {@link DatacenterTaskBuilder} self
+     */
+    public DatacenterTaskBuilder add(final VirtualMachineStateTransition transition,
+        final Map<String, String> extraData)
+    {
+        return add(this.definition, this.hypervisor, transition, extraData);
+    }
+
+    /**
+     * Add new {@link VirtualMachineStateTransition}. This method must be used to add transitions
+     * that only needs {@link VirtualMachineDefinition} and {@link HypervisorConnection} to be
+     * created.
+     * 
+     * @param transition The transition type to create
+     * @param extraData map to add to the job.
+     * @return The {@link DatacenterTaskBuilder} self
+     */
+    public DatacenterTaskBuilder add(final VirtualMachineDefinition definition,
+        final HypervisorConnection hypervisor, final VirtualMachineStateTransition transition,
+        final Map<String, String> extraData)
+    {
         switch (transition)
         {
             case PAUSE:
@@ -139,8 +191,13 @@ public class DatacenterTaskBuilder
                 job.setTransaction(toCommonsTransition(transition));
 
                 this.tarantinoTask.addDatacenterJob(job);
-                this.asyncTask.getJobs().add(
-                    createRedisJob(job.getId(), this.getTaskTypeFromTransition(transition)));
+                Job redisJob =
+                    createRedisJob(job.getId(), this.getTaskTypeFromTransition(transition));
+                if (extraData != null)
+                {
+                    redisJob.getData().putAll(extraData);
+                }
+                this.asyncTask.getJobs().add(redisJob);
 
                 break;
 

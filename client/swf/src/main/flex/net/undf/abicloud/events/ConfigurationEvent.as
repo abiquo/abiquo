@@ -22,7 +22,7 @@
 package net.undf.abicloud.events
 {
     import flash.events.Event;
-
+    
     import net.undf.abicloud.vo.configuration.Registration;
 
     public class ConfigurationEvent extends Event
@@ -67,6 +67,8 @@ package net.undf.abicloud.events
         public static const GET_LAST_HEARTBEAT_INFO:String = "getLastHeartbeatInfoConfigurationEvent";
 
         public static const GET_LAST_HEARTBEAT_ENTRIES:String = "getLastHeartbeatEntriesConfigurationEvent";
+        
+        public static const LOAD_LANGUAGE_LABEL:String = "loadLanguageLabelsConfigurationPremiumEvent";
 
         /* ------------- Constructor ------------- */
         public function ConfigurationEvent(type:String, bubbles:Boolean = true, cancelable:Boolean = false)

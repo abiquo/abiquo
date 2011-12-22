@@ -172,7 +172,8 @@ public class UserService extends DefaultApiService
         }
 
         Collection<User> users =
-            repo.findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
+            repo
+                .findUsersByEnterprise(enterprise, filter, order, desc, connected, page, numResults);
 
         // Refresh all entities to avioid lazys
         for (User u : users)
@@ -203,8 +204,8 @@ public class UserService extends DefaultApiService
         checkEnterpriseAdminCredentials(enterprise);
 
         User user =
-            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(),
-                dto.getNick(), encrypt(dto.getPassword()), dto.getLocale());
+            enterprise.createUser(role, dto.getName(), dto.getSurname(), dto.getEmail(), dto
+                .getNick(), encrypt(dto.getPassword()), dto.getLocale());
         user.setActive(dto.isActive() ? 1 : 0);
         user.setDescription(dto.getDescription());
 
@@ -299,7 +300,11 @@ public class UserService extends DefaultApiService
             old.setPassword(encrypt(user.getPassword()));
         }
         old.setSurname(user.getSurname());
-        old.setNick(user.getNick());
+        if (!old.getNick().equalsIgnoreCase(user.getNick()))
+        {
+            addConflictErrors(APIError.USER_NICK_CANNOT_BE_CHANGED);
+            flushErrors();
+        }
         old.setDescription(user.getDescription());
 
         if (securityService.hasPrivilege(Privileges.USERS_PROHIBIT_VDC_RESTRICTION, old))

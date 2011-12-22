@@ -34,4 +34,19 @@ public enum StateEnum
     {
         return StateEnum.values()[id - 1];
     }
+
+    public boolean existsInHypervisor()
+    {
+        switch (this)
+        {
+            case CONFIGURED:
+            case OFF:
+            case PAUSED:
+            case ON:
+            case DEPLOYED:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

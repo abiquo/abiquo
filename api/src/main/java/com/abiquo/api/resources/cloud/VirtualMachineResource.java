@@ -23,6 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import java.beans.ConstructorProperties;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -39,6 +40,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -46,6 +49,7 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
@@ -79,6 +83,12 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
+
+    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineResource.class);
+
+    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
+        "abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
+
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
