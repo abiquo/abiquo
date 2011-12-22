@@ -319,6 +319,30 @@ public class VirtualMachineService extends DefaultApiService
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
                                                    // to update the virtualMachine.
 
+        // allocated resources not present in the requested reconfiguration
+        newvm.setDatastore(virtualMachine.getDatastore());
+        newvm.setHypervisor(virtualMachine.getHypervisor());
+
+        if (checkReconfigureTemplate(virtualMachine.getVirtualMachineTemplate(),
+            newvm.getVirtualMachineTemplate()))
+        {
+            LOGGER.debug("Will reconfigure the vm template");
+
+            if (virtualMachine.getState().existsInHypervisor())
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
+                flushErrors();
+            }
+
+            // already checked is not attached
+            if (newvm.getVirtualMachineTemplate().isStateful())
+            {
+                LOGGER.debug("Attaching virtual machine template volume");
+                newvm.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine);
+                // primary disk sequence == 0
+            }
+        }
+
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
@@ -352,6 +376,7 @@ public class VirtualMachineService extends DefaultApiService
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(vm.getEnterprise());
         newValues.setEnterprise(vm.getEnterprise());
+
         LOGGER.debug("Permission granted");
 
         LOGGER.debug("Checking the virtual machine state. It must be in NOT_ALLOCATED or OFF");
@@ -361,26 +386,6 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachine backUpVm = null;
         VirtualMachineDescriptionBuilder virtualMachineTarantino = null;
         VirtualMachineState originalState = vm.getState();
-
-        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
-            newValues.getVirtualMachineTemplate()))
-        {
-            LOGGER.debug("Will reconfigure the vm template");
-
-            if (vm.getState().existsInHypervisor())
-            {
-                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
-                flushErrors();
-            }
-
-            // already checked is not attached
-            if (newValues.getVirtualMachineTemplate().isStateful())
-            {
-                LOGGER.debug("Attaching virtual machine template volume");
-                newValues.getVirtualMachineTemplate().getVolume().attach(0, vm);
-                // primary disk sequence == 0
-            }
-        }
 
         // if NOT_ALLOCATED isn't necessary to check the resource limits and
         // insert the 'backup' resources
@@ -1846,6 +1851,8 @@ public class VirtualMachineService extends DefaultApiService
 
     /**
      * Builds a {@link VirtualMachine} object from {@link VirtualMachineDto} object.
+     * <p>
+     * Allocated attributes (hypervisor/datastore) not set
      * 
      * @param dto transfer input object
      * @return output pojo object.

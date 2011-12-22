@@ -21,8 +21,6 @@
 
 package net.undf.abicloud.model
 {
-    import mx.collections.ArrayCollection;
-
     import net.undf.abicloud.business.managers.*;
     import net.undf.abicloud.business.managers.notification.NotificationManager;
     import net.undf.abicloud.business.managers.virtualimage.VirtualImageManager;
@@ -118,6 +116,8 @@ package net.undf.abicloud.model
         public static const KB_TO_BYTES:Number = 1024;
 
         public static const GB_TO_MBYTES:Number = 1024;
+        
+        public static const MAX_NUMBER_OF_CPU:Number = 999;
 
         //When conversion = 1, means that unit is the default one, and is the unit to store the value in server
         //For example, HardDisk values are always stored in Bytes, so when we receive or send HD values from / to server,

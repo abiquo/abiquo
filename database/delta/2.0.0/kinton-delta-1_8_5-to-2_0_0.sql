@@ -70,6 +70,20 @@ CREATE TABLE  `kinton`.`virtualmachinetrackedstate` (
  ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- TARANTINO --
 
+CREATE TABLE  `kinton`.`enterprise_properties` (
+  `idProperties` int(11) unsigned NOT NULL auto_increment,
+  `enterprise` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY  (`idProperties`),
+  CONSTRAINT `FK_enterprise` FOREIGN KEY (`enterprise`) REFERENCES `enterprise` (`idEnterprise`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+CREATE TABLE  `kinton`.`enterprise_properties_map` (
+ `enterprise_properties` int(11) unsigned NOT NULL,
+  `map_key` varchar(30) NOT NULL,
+  `value` varchar(50) default NULL, 
+  CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- PRICING --
 -- Definition of table `kinton`.`currency`
 CREATE TABLE `kinton`.`currency` (
@@ -265,6 +279,11 @@ ALTER TABLE `kinton`.`metering` MODIFY COLUMN `physicalmachine` VARCHAR(256)  CH
 UPDATE ip_pool_management im, rasd_management rm, rasd r SET rm.sequence = r.configurationname WHERE rm.idresource=r.instanceid AND Im.idmanagement = rm.idmanagement AND Rm.idvm IS NOT NULL;
 
 UPDATE Volume_management vm, rasd_management rm, rasd r SET Rm.sequence=IF(r.generation IS NULL, 0, r.generation +1) WHERE Rm.idResource=r.instanceID AND Vm.idManagement = rm.idManagement AND Rm.idVM IS NOT NULL;
+
+LOCK TABLES `kinton`.`enterprise_properties` WRITE;
+INSERT INTO `kinton`.`enterprise_properties` VALUES  (1,1);
+INSERT INTO `kinton`.`enterprise_properties_map` VALUES  (1,'Support e-mail','support@abiquo.com');
+UNLOCK TABLES;
 
 -- ---------------------------------------------- --
 --                  PROCEDURES                    --

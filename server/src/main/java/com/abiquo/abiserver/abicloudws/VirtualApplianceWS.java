@@ -33,13 +33,13 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 
-import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorSetType;
 import org.dmtf.schemas.wbem.wsman._1.wsman.SelectorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import com.abiquo.abiserver.business.hibernate.pojohb.infrastructure.StateEnum;
 import com.abiquo.abiserver.config.AbiConfig;
 import com.abiquo.abiserver.config.AbiConfigManager;
@@ -47,6 +47,7 @@ import com.abiquo.abiserver.eventing.EventingException;
 import com.abiquo.abiserver.exception.PersistenceException;
 import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.VirtualApplianceFaultException;
+import com.abiquo.abiserver.exception.VirtualApplianceTimeoutException;
 import com.abiquo.abiserver.exception.VirtualFactoryHealthException;
 import com.abiquo.abiserver.model.ovf.OVFModelFactory;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisor;
@@ -223,7 +224,6 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
      * @deprecated
      * @throws Exception
      */
-
     @Deprecated
     BasicResult forceCreateVirtualAppliance(final VirtualAppliance virtualAppliance,
         final boolean mustChangeState) throws Exception
@@ -604,6 +604,7 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
                     virtualAppliance.setState(new State(StateEnum.NOT_DEPLOYED));
                     startVirtualAppliance(virtualAppliance);
                 }
+                
                 virtualAppliance.setNodes(nodesOld);
                 result.setSuccess(true);
             }
@@ -775,7 +776,14 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
     private void encapsulateAndRethrowFault(final VirtualAppliance va, final FaultException ex,
         final EventType event, final String message) throws VirtualApplianceFaultException
     {
+        if (isTimeoutException(ex))
+        {
+            // WSMAN Timeouts are handled in a different way
+            throw new VirtualApplianceTimeoutException(ex.getMessage(), ex);
+        }
+
         String exceptionMessage = null;
+
         try
         {
             // Try to find the original exception details
@@ -878,5 +886,10 @@ public class VirtualApplianceWS implements IVirtualApplianceWS
         // Log to tracer the original message
         TracerFactory.getTracer().log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
             event, message, platform);
+    }
+
+    private boolean isTimeoutException(final FaultException ex)
+    {
+        return ex.getMessage().indexOf("wsman:TimedOut") != -1;
     }
 }

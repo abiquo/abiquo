@@ -27,6 +27,8 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
@@ -36,6 +38,8 @@ import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -43,12 +47,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.services.appslibrary.DatacenterRepositoryService;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.model.transport.SingleResourceTransportDto;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
+import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
@@ -63,10 +69,18 @@ import com.abiquo.tracer.SeverityType;
 public class RemoteServiceService extends DefaultApiService
 {
 
+    private final static Logger LOG = LoggerFactory.getLogger(RemoteServiceService.class);
+
     public static final String CHECK_RESOURCE = "check";
 
     @Autowired
     InfrastructureRep infrastructureRepo;
+
+    @Autowired
+    private DatacenterRepositoryService dcRepositoryService;
+
+    @Autowired
+    private UserService userService;
 
     public RemoteServiceService()
     {
@@ -222,6 +236,26 @@ public class RemoteServiceService extends DefaultApiService
                 {
                     infrastructureRepo.createRepository(datacenter, repositoryLocation);
                 }
+
+                // refresh for the current enterprise repository in background
+                final Enterprise currentEnterprise = userService.getCurrentUser().getEnterprise();
+                Executors.newSingleThreadExecutor().submit(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        try
+                        {
+                            dcRepositoryService.synchronizeDatacenterRepository(datacenter,
+                                currentEnterprise);
+                        }
+                        catch (Exception e)
+                        {
+                            LOG.warn("Can't initialize the appliance library in datacenter {}",
+                                datacenter.getName(), e);
+                        }
+                    }
+                });
             }
             catch (WebApplicationException e)
             {
