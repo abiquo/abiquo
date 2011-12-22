@@ -153,11 +153,14 @@ public class UserDAO extends DefaultDAOBase<Integer, User>
         {
             criteria.add(sameRole(role));
         }
-        for (String filter : filters)
+        if (!StringUtils.isEmpty(filters))
         {
-            if (!StringUtils.isEmpty(filter))
+            for (String filter : filters)
             {
-                criteria.add(filterBy(filter));
+                if (!StringUtils.isEmpty(filter))
+                {
+                    criteria.add(filterBy(filter));
+                }
             }
         }
 
