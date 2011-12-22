@@ -44,6 +44,9 @@
     
     <mx:Script>
         <![CDATA[
+        	import net.undf.abicloud.vo.configuration.Language;
+        	import net.undf.abicloud.vo.configuration.LanguageLabelLoader;
+        	import net.undf.abicloud.events.ConfigurationEvent;
         	import mx.containers.Panel;
         	import net.undf.abicloud.view.login.TokenLoader;
         	import net.undf.abicloud.utils.ScreenBlocker;
@@ -200,10 +203,30 @@
                 
                 AbiCloudModel.getInstance().loginManager.addEventListener('tokenFailed',showRelatedFormAfterAuthenticationFail);
                 
+                //To load language labels
+                AbiCloudModel.getInstance().configurationManager.addEventListener(ConfigurationEvent.LOAD_LANGUAGE_LABEL, loadLanguageLabel);
+                
                 //Creating the Main component
                 mainView = new Main();
                 loginView = new net.undf.abicloud.view.login.Login();
             }
+            
+            /**
+             * Handler to load language labels
+             **/
+             protected function loadLanguageLabel(configurationEvent:ConfigurationEvent):void
+             {
+             	var common:LanguageLabelLoader = new LanguageLabelLoader("Common.properties");
+             	var configuration:LanguageLabelLoader = new LanguageLabelLoader("Configuration.properties");
+             	var infrastructure:LanguageLabelLoader = new LanguageLabelLoader("Infrastructure.properties");
+             	var login:LanguageLabelLoader = new LanguageLabelLoader("Login.properties");
+             	var main:LanguageLabelLoader = new LanguageLabelLoader("Main.properties");
+             	var metering:LanguageLabelLoader = new LanguageLabelLoader("Metering.properties");
+             	var networking:LanguageLabelLoader = new LanguageLabelLoader("Networking.properties");
+             	var user:LanguageLabelLoader = new LanguageLabelLoader("User.properties");
+             	var virtualAppliance:LanguageLabelLoader = new LanguageLabelLoader("VirtualAppliance.properties");
+             	var virtualImage:LanguageLabelLoader = new LanguageLabelLoader("VirtualImage.properties");
+             }
 
             /**
              * Handler to define standard application behaivor when user uses the keyboard
@@ -271,11 +294,12 @@
 				if(parameters.length != 1){
 					var parameterList:Object = URLUtil.stringToObject(parameters[1], "&");         
 		            var token:String = parameterList.auth;
-		            var language:String = parameterList.lang;         
+		            var language:Language = new Language('',parameterList.lang);         
 				}
             	//we check if the selected language is passed in the URL
             	if(language){          		
             		this._tokenLanguage = loginView.returnLanguage(language);
+            		
             	}
             	//if the token exists, we try an automatic loggin
             	if(token){
@@ -328,7 +352,7 @@
             
             private function showTokenLoader(event:Event = null):void{
             	
-            	ResourceManager.getInstance().localeChain = [ this._tokenLanguage, "en_US" ];
+            	//ResourceManager.getInstance().localeChain = [ this._tokenLanguage, "en_US" ];
 
                 //Display the loading component
                 tokenView = new TokenLoader();

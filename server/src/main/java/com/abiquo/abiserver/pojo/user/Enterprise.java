@@ -303,6 +303,7 @@ public class Enterprise implements IPojo<EnterpriseHB>
         enterprise.setId(dto.getId());
         enterprise.setName(dto.getName());
         enterprise.setIdPricingTemplate(dto.getIdPricingTemplate());
+        enterprise.setIsReservationRestricted(dto.getIsReservationRestricted());
 
         ResourceAllocationLimit ral = new ResourceAllocationLimit();
 

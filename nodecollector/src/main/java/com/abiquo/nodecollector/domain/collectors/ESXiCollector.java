@@ -359,6 +359,7 @@ public class ESXiCollector extends AbstractCollector
     @Override
     public HostDto getHostInfo() throws CollectorException
     {
+        LOGGER.debug("Getting information for host at: {}", getIpAddress());
 
         final HostHardwareInfo hardwareInfo;
         final HostDto physicalInfo = new HostDto();
@@ -379,7 +380,9 @@ public class ESXiCollector extends AbstractCollector
         ObjectContent hostSystem;
         try
         {
+            LOGGER.debug("Getting Managed Object information for the host from inventory...");
             hostSystem = getManagedObjectReferencesFromInventory(hostSystemSpec)[0];
+            LOGGER.debug("Got the information of the Managed Object");
         }
         catch (RemoteException e)
         {
@@ -402,9 +405,13 @@ public class ESXiCollector extends AbstractCollector
 
         try
         {
+            LOGGER.debug("Getting the storage system information for the host...");
             ManagedObjectReference storageSystemMor = getStorageSystem(hostSystem);
+            LOGGER.debug("Storage information retrieved...");
 
+            LOGGER.debug("Getting the iSCSI initiator...");
             final String initiatorIQN = getInternetSCSIInitiatorIQN(hostSystem, storageSystemMor);
+            LOGGER.debug("iSCSI initiator retrieved");
 
             physicalInfo.setInitiatorIQN(initiatorIQN);
         }
@@ -415,6 +422,8 @@ public class ESXiCollector extends AbstractCollector
         }
 
         physicalInfo.setStatus(HostStatusEnumType.MANAGED);
+
+        LOGGER.debug("Information retreived for host at: {}", getIpAddress());
 
         return physicalInfo;
     }
@@ -706,22 +715,6 @@ public class ESXiCollector extends AbstractCollector
         String directoryOnDatastore =
             String.format("%s %s%s", dsName, DATASTORE_UUID_MARK, folderUuidMark);
 
-        try
-        {
-            // do not create parent folders (is on the root)
-            serviceInstance.getFileManager().makeDirectory(directoryOnDatastore, dc, false);
-        }
-        catch (FileFault e)
-        {
-            LOGGER.error("Can not create the folder mark at [{}], caused by file fault {}", dsName,
-                e);
-            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("Can not create the folder mark at [{}]\n{}", dsName, e);
-            throw new CollectorException(MessageValues.DATASTRORE_MARK, e);
-        }
 
         return folderUuidMark;
     }
@@ -1353,6 +1346,8 @@ public class ESXiCollector extends AbstractCollector
      */
     private synchronized void hasValidLicense() throws NoManagedException
     {
+        LOGGER.debug("Checking if host {} has a valid license...", getIpAddress());
+
         ManagedObjectReference licenseManager = getServiceContent().getLicenseManager();
 
         LicenseManagerLicenseInfo[] licenseInfo;
@@ -1365,6 +1360,7 @@ public class ESXiCollector extends AbstractCollector
             {
                 if (licenseManagerLicenseInfo.getEditionKey().equals("esxBasic"))
                 {
+                    LOGGER.debug("Invalid license found!");
                     throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                 }
 
@@ -1390,8 +1386,9 @@ public class ESXiCollector extends AbstractCollector
 
                 if (!neverExpires)
                 {
-                    if (expirationHours.intValue() == 0 || expirationMinutes.intValue() == 0)
+                    if (expirationHours.intValue() == 0 && expirationMinutes.intValue() == 0)
                     {
+                        LOGGER.debug("Expired license found!");
                         throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
                     }
                 }
@@ -1404,65 +1401,7 @@ public class ESXiCollector extends AbstractCollector
             throw new NoManagedException(MessageValues.NOMAN_ESXI_LIC);
         }
 
-    }
-
-    /**
-     * Check if host system has the internetSCSI software controller enable, if not try to enabling
-     * it. TODO only look for software controller, add hardware support
-     */
-    private Boolean isInternetSCSIEnable(final ObjectContent hostSystemOc,
-        final ManagedObjectReference storageSystemMor) throws CollectorException
-    {
-        Object objIscsiEnable;
-        Boolean isIscsiEnable;
-
-        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
-        String iscsiEnableProp = "config.storageDevice.softwareInternetScsiEnabled";
-
-        try
-        {
-            objIscsiEnable = getDynamicProperty(hostSystemMor, iscsiEnableProp);
-            // propISCSIEnable = utils.getProperties(hostSystemMOR, props);
-        }
-        catch (Exception e)
-        {
-            final String cause =
-                "Can not get the ''config.storageDevice.softwareInternetScsiEnabled'' property ";
-            LOGGER.error(cause, e);
-            throw new CollectorException(cause, e);// internal
-            // message
-        }
-
-        if (objIscsiEnable == null)
-        {
-            final String cause = "No such softwareInternetScsiEnabled property";
-            LOGGER.equals(cause);
-            throw new CollectorException(cause); // internal
-            // message
-        }
-
-        isIscsiEnable = (Boolean) objIscsiEnable;
-
-        if (!isIscsiEnable)
-        {
-            LOGGER.debug("iSCSI software initiator is not enabled, try to setting up");
-
-            try
-            {
-                getMyConn().updateSoftwareInternetScsiEnabled(storageSystemMor, true);
-
-                // TODO check realy is enableenableInternetSCSI();
-                isIscsiEnable = true;
-
-                LOGGER.debug("iSCSI software initiator enabled");
-            }
-            catch (Exception e)
-            {
-                LOGGER.error("Can not enable the software iSCSI initiator.\n {}", e);
-            }
-        }
-
-        return isIscsiEnable;
+        LOGGER.debug("Valid license found");
     }
 
     /**
@@ -1530,4 +1469,64 @@ public class ESXiCollector extends AbstractCollector
         return diskType;
 
     }
+
+    /**
+     * Check if host system has the internetSCSI software controller enable, if not try to enabling
+     * it. TODO only look for software controller, add hardware support
+     */
+    private Boolean isInternetSCSIEnable(final ObjectContent hostSystemOc,
+        final ManagedObjectReference storageSystemMor) throws CollectorException
+    {
+        Object objIscsiEnable;
+        Boolean isIscsiEnable;
+
+        ManagedObjectReference hostSystemMor = hostSystemOc.getObj();
+        String iscsiEnableProp = "config.storageDevice.softwareInternetScsiEnabled";
+
+        try
+        {
+            objIscsiEnable = getDynamicProperty(hostSystemMor, iscsiEnableProp);
+            // propISCSIEnable = utils.getProperties(hostSystemMOR, props);
+        }
+        catch (Exception e)
+        {
+            final String cause =
+                "Can not get the ''config.storageDevice.softwareInternetScsiEnabled'' property ";
+            LOGGER.error(cause, e);
+            throw new CollectorException(cause, e);// internal
+            // message
+        }
+
+        if (objIscsiEnable == null)
+        {
+            final String cause = "No such softwareInternetScsiEnabled property";
+            LOGGER.equals(cause);
+            throw new CollectorException(cause); // internal
+            // message
+        }
+
+        isIscsiEnable = (Boolean) objIscsiEnable;
+
+        if (!isIscsiEnable)
+        {
+            LOGGER.debug("iSCSI software initiator is not enabled, try to setting up");
+
+            try
+            {
+                getMyConn().updateSoftwareInternetScsiEnabled(storageSystemMor, true);
+
+                // TODO check realy is enableenableInternetSCSI();
+                isIscsiEnable = true;
+
+                LOGGER.debug("iSCSI software initiator enabled");
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Can not enable the software iSCSI initiator.\n {}", e);
+            }
+        }
+
+        return isIscsiEnable;
+    }
+
 }
