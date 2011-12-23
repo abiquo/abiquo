@@ -46,8 +46,8 @@ public class AMNotifier extends AMProducer
     }
 
     // used on AMSink to discrimitate the Datacenter it belongs to .
-    private final static String REPO_LOCATION =
-        AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryLocation();
+    private final static String REPO_LOCATION = AMConfigurationManager.getInstance()
+        .getAMConfiguration().getRepositoryLocation();
 
     /**
      * Change the status for the provided OVF package Id.
@@ -124,7 +124,9 @@ public class AMNotifier extends AMProducer
         {
             try
             {
+                openChannel();
                 publish(event);
+                closeChannel();
             }
             catch (IOException e)
             {
