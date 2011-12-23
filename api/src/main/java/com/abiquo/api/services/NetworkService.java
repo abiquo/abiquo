@@ -436,8 +436,7 @@ public class NetworkService extends DefaultApiService
         {
             // get the enterprise and datacenter and get the external and unmanaged ips
             List<IpPoolManagement> ips =
-                repo.findPublicIpsByDatacenter(vdc.getDatacenter().getId(), firstElem, numElem,
-                    has, orderByEnum, asc, netType);
+                repo.findPublicIpsByEnterprise(vdc.getDatacenter().getId(), vdc.getEnterprise().getId(), firstElem, numElem, has, orderByEnum, asc, netType);
             LOGGER
                 .debug("Returning the list of external and unmanaged IPs used by VirtualDatacenter '"
                     + vdc.getName() + "'.");
