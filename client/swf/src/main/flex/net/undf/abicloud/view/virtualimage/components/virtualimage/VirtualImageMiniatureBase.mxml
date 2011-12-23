@@ -180,7 +180,7 @@
                 }
             }
 
-            private function onClickEdit():void
+            public function onClickEdit():void
             {
                 var event:VirtualImageAccordionEvent = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_EDITION_REQUESTED,
                                                                                       true);
@@ -188,7 +188,7 @@
                 dispatchEvent(event);
             }
 
-            private function onClickDownload():void
+            public function onClickDownload():void
             {
                 var event:VirtualImageAccordionEvent = new VirtualImageAccordionEvent(VirtualImageAccordionEvent.VIRTUAL_IMAGE_MINIATURE_DOWNLOAD_REQUESTED,
                                                                                       true);
@@ -196,7 +196,7 @@
                 dispatchEvent(event);
             }
 
-            private function onClickErase():void
+            public function onClickErase():void
             {
                 AbiCloudAlert.showAlert(ResourceManager.getInstance().getString("Common",
                                                                                 "ALERT_TITLE_LABEL"),
