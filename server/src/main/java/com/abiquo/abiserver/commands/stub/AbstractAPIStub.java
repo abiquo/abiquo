@@ -116,8 +116,10 @@ public class AbstractAPIStub
             // Do not retry methods that fail with 5xx error codes
             props.put("jclouds.max-retries", "0");
             // Custom timeouts in ms
-            props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction", "90000");
-            props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
+            props.put("jclouds.timeouts.CloudClient.deployVirtualMachine",
+                nodecollectorTimeout() * 2); // allocator will retry to another machine
+            props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction",
+                nodecollectorTimeout() * 2 * 4); // avg 4 nodes
 
             context =
                 new AbiquoContextFactory().createContext(token,
@@ -125,6 +127,12 @@ public class AbstractAPIStub
         }
 
         return context;
+    }
+
+    /* Set the timeout to the double fo time of the set in the system properties */
+    private Integer nodecollectorTimeout()
+    {
+        return Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "90000"));
     }
 
     protected void releaseApiClient()
