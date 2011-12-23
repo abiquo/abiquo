@@ -290,6 +290,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
             var virtualImage:VirtualImage;
             var virtualImageMiniature:VirtualImageMiniature;
             var isCorrect:Boolean = false;
+            var count:int = 0;
             for (i = 0; i < length; i++)
             {
                 virtualImage = virtualImages.getItemAt(i) as VirtualImage;
@@ -311,11 +312,13 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 //if the image matches with all search criteria
                 if(isCorrect){
                 	virtualImageMiniature = new VirtualImageMiniature();
+                	virtualImageMiniature.id = "virtual_image_" + count;
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.editable = editable;
                     virtualImageMiniature.addEventListener(MouseEvent.CLICK, onElementClicked);
                     virtualImageMiniatures.addItem(virtualImageMiniature); 
+                    count ++;
                 }
                 
                 //after showing all master image
@@ -381,7 +384,9 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
             var i:int;
             for (i = 0; i < length; i++)
             {
-                this.addChild(virtualImageMiniatures.getItemAt(i) as VirtualImageMiniature);
+            	var virtualImageMiniature:VirtualImageMiniature = virtualImageMiniatures.getItemAt(i) as VirtualImageMiniature;
+                virtualImageMiniature.id = "virtual_image_" + i;
+                this.addChild(virtualImageMiniature);
             }
         }
 
@@ -442,6 +447,7 @@ package net.undf.abicloud.view.virtualimage.components.virtualimage
                 {
                     //Build the miniature immediately
                     var virtualImageMiniature:VirtualImageMiniature = new VirtualImageMiniature();
+                    virtualImageMiniature.id = "virtual_image_" + (virtualImageMiniatures.length + 1);
                     virtualImageMiniature.sizeMultiplier = sizeMultiplier;
                     virtualImageMiniature.virtualImage = virtualImage;
                     virtualImageMiniature.editable = editable;
