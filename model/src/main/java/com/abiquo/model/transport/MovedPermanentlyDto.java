@@ -21,44 +21,30 @@
 
 package com.abiquo.model.transport;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.server.core.infrastructure.storage.VolumeManagementDto;
 
 /**
- * This Entity is the response of 301. It is a link location.
+ * This Entity is the response of 301
  * 
  * @author sacedo
  */
-@XmlRootElement(name = "moved")
-public class MovedPermanentlyDto
+// IMPORTANT: To avoid unmarshalling issues this class should be kept abstract and add a concrete
+// implementation for each concrete entity that supports move operations
+// Also, to avoid unmarshalling issues, ALL JAXB ANNOTATIONS should be set only in the concrete
+// subclasses
+public abstract class MovedPermanentlyDto
 {
-    protected RESTLink locationLink;
+    /** The link to the new location of the moved resource. */
+    private RESTLink location;
 
-    private VolumeManagementDto volumeDto;
-
-    @XmlElement(name = "location")
-    public RESTLink getLocationLink()
+    public RESTLink getLocation()
     {
-        return locationLink;
+        return location;
     }
 
-    public void setLocationLink(final RESTLink locationLink)
+    public void setLocation(final RESTLink locationLink)
     {
-        this.locationLink = locationLink;
-    }
-
-    @XmlElement(name = "volume")
-    public VolumeManagementDto getVolumeDto()
-    {
-        return volumeDto;
-    }
-
-    public void setVolumeDto(final VolumeManagementDto volumeDto)
-    {
-        this.volumeDto = volumeDto;
+        this.location = locationLink;
     }
 
 }

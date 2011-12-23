@@ -23,6 +23,7 @@ package com.abiquo.api.resources.cloud;
 
 import java.beans.ConstructorProperties;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -39,6 +40,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -46,6 +49,7 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
+import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
@@ -59,6 +63,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineSnapshotDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
@@ -78,6 +83,12 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
+
+    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineResource.class);
+
+    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
+        "abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
+
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
@@ -458,9 +469,11 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
+        final VirtualMachineSnapshotDto snapshotData, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId = vmService.snapshotVirtualMachine(vmId, vappId, vdcId);
+        String taskId =
+            vmService.snapshotVirtualMachine(vmId, vappId, vdcId, snapshotData.getSnapshotName());
 
         if (taskId == null)
         {

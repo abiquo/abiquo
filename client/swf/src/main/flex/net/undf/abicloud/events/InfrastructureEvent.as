@@ -92,6 +92,8 @@ package net.undf.abicloud.events
         public static const DELETE_RACK:String = "deleteClusterInfrastructureEvent";
 
         public static const EDIT_RACK:String = "saveRackInfrastructureEvent";
+        
+        public static const RACK_CREATED:String = "rackCreatedInfrastructureEvent";
 
         /* ------------------------------------ */
 
@@ -112,6 +114,8 @@ package net.undf.abicloud.events
         public static const EDIT_HYPERVISOR:String = "editHypervisorInfrastructureEvent";
 
         public static const DELETE_HYPERVISOR:String = "deleteHypervisorInfrastructureEvent";
+        
+        public static const GET_HYPERVISOR_REMOTE_ACCESS_INFO:String = "getHypervisorRemoteAccessInfoInfrastructureEvent";
 
         /* ------------------------------------ */
 

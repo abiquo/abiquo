@@ -207,7 +207,10 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             updateUsagePhysicalMachine(physicalMachine, virtualMachine, true);
             rollbackNetworkingResources(physicalMachine, virtualMachine);
 
-            virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
+            // TODO Ignasi must review this
+            virtualMachine.setVdrpIP(null);
+            virtualMachine.setVdrpPort(0);
+
             vmachineDao.flush();
         }
         catch (final Exception e)

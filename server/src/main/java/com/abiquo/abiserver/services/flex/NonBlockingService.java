@@ -258,11 +258,12 @@ public class NonBlockingService
     public BasicResult applyChangesVirtualAppliance(final UserSession session,
         final VirtualAppliance virtualAppliance, final Boolean force)
     {
-        VirtualApplianceCommand command =
-            BusinessDelegateProxy.getInstance(session, virtualAppCommand,
-                VirtualApplianceCommand.class);
-
-        return command.applyChangesVirtualAppliance(session, virtualAppliance, force);
+        // VirtualApplianceCommand command =
+        // BusinessDelegateProxy.getInstance(session, virtualAppCommand,
+        // VirtualApplianceCommand.class);
+        VirtualApplianceResourceStub resourceStub = this.proxyVirtualApplianceResourceStub(session);
+        return resourceStub.applyChangesVirtualAppliance(virtualAppliance, session);
+        // return command.applyChangesVirtualAppliance(session, virtualAppliance, force);
 
     }
 

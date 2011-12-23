@@ -112,7 +112,7 @@ public class VSMSubscriberImpl implements VSMSubscriber
                 {
                     if (vMachine.isDeployed())
                     {
-                        vsmStub.subscribe(remoteService, vMachine);
+                        vsmStub.subscribe(remoteService, vMachine, Boolean.FALSE);
                     }
                 }
             }

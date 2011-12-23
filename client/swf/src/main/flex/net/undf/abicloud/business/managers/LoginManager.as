@@ -21,6 +21,8 @@
 
 package net.undf.abicloud.business.managers
 {
+    import mx.collections.ArrayCollection;
+    
     import net.undf.abicloud.vo.authentication.Session;
     import net.undf.abicloud.vo.user.User;
 
@@ -102,9 +104,9 @@ package net.undf.abicloud.business.managers
 
     /* ------------- Public methods ------------- */
     	//function to return selected language passed in the URL -> singleSignOn
-	    public function returnLanguageIndex(languageArray:Array , language:String):int{
+	    public function returnLanguageIndex(languageArray:ArrayCollection , language:String):int{
 	    	for(var i:Number = 0 ; i < languageArray.length ; i++){
-	    		if(languageArray[i].data == language){
+	    		if(languageArray.getItemAt(i).value == language){
 	    			return i;
 	    		}
 	    	}

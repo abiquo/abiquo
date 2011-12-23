@@ -605,8 +605,7 @@
         text="{this._nodeNameSource}" truncateToFit="true"
         doubleClickEnabled="true"
         mouseDown="stopMouseDownUpPropagation(event)"
-        mouseUp="stopMouseDownUpPropagation(event)"
-        doubleClick="onDoubleClickNameLabel()"/>
+        mouseUp="stopMouseDownUpPropagation(event)"/>
 
     <mx:TextInput id="nameInput"
         width="95%" height="18"

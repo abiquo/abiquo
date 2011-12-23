@@ -21,6 +21,7 @@
 
 package net.undf.abicloud.vo.configuration
 {
+	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectProxy;
 	
 	import net.undf.abicloud.vo.systemproperties.SystemProperty;
@@ -182,6 +183,18 @@ package net.undf.abicloud.vo.configuration
 
 			propertiesIndex[propName] = this[propName]; 
 
+		}
+		
+		public function updateProperties(properties:ArrayCollection):void
+		{
+			var systemProperty:SystemProperty;
+			var propName:String;
+            for (var i:int = 0; i < properties.length; i++)
+            {
+            	systemProperty = properties.getItemAt(i) as SystemProperty;
+            	propName = systemProperty.name.split(".").join("_");
+	            this[propName].value = systemProperty.value;
+            }
 		}
 	}
 }

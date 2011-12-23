@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.abiquo.virtualfactory.exception.VirtualMachineException;
 
 /**
@@ -36,6 +39,8 @@ import com.abiquo.virtualfactory.exception.VirtualMachineException;
  */
 public class VirtualApplianceModel extends Observable
 {
+
+    private final static Logger LOG = LoggerFactory.getLogger(VirtualApplianceModel.class);
 
     /** The singleton instance for this class. */
     private static VirtualApplianceModel singleton;
@@ -72,7 +77,7 @@ public class VirtualApplianceModel extends Observable
      * @param virtualApplianceId the virtual appliance id
      * @return the virtual appliance
      */
-    public VirtualAppliance createVirtualAppliance(String virtualApplianceId)
+    public VirtualAppliance createVirtualAppliance(final String virtualApplianceId)
     {
         VirtualAppliance virtualAppliance = new VirtualAppliance();
         virtualAppliance.setVirtualApplianceId(virtualApplianceId);
@@ -85,7 +90,7 @@ public class VirtualApplianceModel extends Observable
      * @param virtualAppliance
      * @return
      */
-    private boolean hasVMnotDeployed(VirtualAppliance virtualAppliance)
+    private boolean hasVMnotDeployed(final VirtualAppliance virtualAppliance)
     {
         boolean hasVMnotDeployed = false;
         Collection<AbsVirtualMachine> machines = virtualAppliance.getMachines();
@@ -108,7 +113,7 @@ public class VirtualApplianceModel extends Observable
      * @throws Exception
      * @throws Exception
      */
-    public void rollbackVirtualAppliance(VirtualAppliance virtualAppliance)
+    public void rollbackVirtualAppliance(final VirtualAppliance virtualAppliance)
         throws VirtualMachineException
     {
         List<AbsVirtualMachine> machinesToRemove = new ArrayList<AbsVirtualMachine>();
@@ -118,8 +123,25 @@ public class VirtualApplianceModel extends Observable
             // In the powering off (undeploy time) we don't do the rollback
             if (virtualAppliance.getState().compareTo(State.POWER_OFF) != 0)
             {
-                machine.powerOffMachine();
-                machine.deleteMachine();
+                try
+                {
+                    machine.powerOffMachine();
+                }
+                catch (Throwable e)
+                {
+                    LOG.warn("rollback {} . Can't power-off {}", machine.getConfiguration()
+                        .getMachineName(), e);
+                }
+
+                try
+                {
+                    machine.deleteMachine();
+                }
+                catch (Throwable e)
+                {
+                    LOG.warn("rollback {} . Can't delete {}", machine.getConfiguration()
+                        .getMachineName(), e);
+                }
             }
         }
     }

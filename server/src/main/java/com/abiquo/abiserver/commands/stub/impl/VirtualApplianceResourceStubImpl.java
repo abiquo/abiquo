@@ -33,6 +33,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientResponse;
 import org.jclouds.abiquo.domain.DomainWrapper;
 import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
+import org.jclouds.abiquo.domain.exception.AbiquoException;
+import org.jclouds.rest.AuthorizationException;
 
 import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
 import com.abiquo.abiserver.business.UserSessionException;
@@ -42,7 +44,6 @@ import com.abiquo.abiserver.business.hibernate.pojohb.virtualhardware.ResourceMa
 import com.abiquo.abiserver.commands.BasicCommand;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualApplianceResourceStub;
-import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.HyperVisorType;
@@ -213,7 +214,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                             createVirtualMachineUrl(virtualDatacenterId, virtualAppliance.getId(),
                                 n.getVirtualMachine().getId());
 
-                        ClientResponse put  =
+                        ClientResponse put =
                             put(linkVirtualMachine, virtualMachineDto, VM_NODE_MEDIA_TYPE);
                         if (put.getStatusCode() != Status.OK.getStatusCode())
                         {
@@ -466,7 +467,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
         else
         {
-            errors.append("\n").append("Unexpected Error");
+            errors.append("\n").append(response.getEntity(String.class));
         }
     }
 
@@ -782,7 +783,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             for (VirtualDatacenterDto dto : dtos.getCollection())
             {
                 VirtualDataCenter virtualDatacenter = dtoToVirtualDatacenter(dto, enterprise);
-                RESTLink app = dto.searchLink("virtualappliance");
+                RESTLink app = dto.searchLink("virtualappliances");
                 ClientResponse response = get(app.getHref());
                 VirtualAppliancesDto virtualAppliancesDto =
                     response.getEntity(VirtualAppliancesDto.class);
@@ -1022,5 +1023,85 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         }
 
         return result;
+    }
+
+    @Override
+    public DataResult applyChangesVirtualAppliance(final VirtualAppliance virtualAppliance,
+        final UserSession userSession)
+    {
+        DataResult result = new DataResult();
+        result.setSuccess(Boolean.TRUE);
+        StringBuilder errors = new StringBuilder();
+        try
+        {
+            // Retrieve the VirtualDatacenter to associate the new virtual appliance
+            VirtualDatacenter vdc =
+                getApiClient().getCloudService().getVirtualDatacenter(
+                    virtualAppliance.getVirtualDataCenter().getId());
+
+            org.jclouds.abiquo.domain.cloud.VirtualAppliance appliance =
+                vdc.getVirtualAppliance(virtualAppliance.getId());
+
+            for (Node node : virtualAppliance.getNodes())
+            {
+                try
+                {
+                    if (node instanceof NodeVirtualImage)
+                    {
+                        NodeVirtualImage nvi = (NodeVirtualImage) node;
+                        if (!nvi.getVirtualMachine().getState().toEnum().existsInHypervisor())
+                        {
+                            org.jclouds.abiquo.domain.cloud.VirtualMachine virtualMachine =
+                                appliance.getVirtualMachine(nvi.getVirtualMachine().getId());
+                            virtualMachine.deploy();
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    this.populateErrors(e, result, errors, "applyChangesVirtualAppliance");
+                }
+            }
+        }
+        finally
+        {
+            releaseApiClient();
+        }
+        result.setMessage(errors.toString());
+        return result;
+
+    }
+
+    protected void populateErrors(final Exception ex, final BasicResult result,
+        final StringBuilder errors, final String methodName)
+    {
+        result.setSuccess(false);
+        if (ex instanceof AuthorizationException)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", methodName);
+            result.setMessage(ex.getMessage());
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
+        else if (ex instanceof AbiquoException)
+        {
+            AbiquoException abiquoException = (AbiquoException) ex;
+            if (abiquoException.hasError("LIMIT_EXCEEDED")
+                || BasicResult.HARD_LIMT_EXCEEDED == result.getResultCode())
+            {
+                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            }
+            else
+            {
+                errors.append(abiquoException.getMessage()).append("\n")
+                    .append(abiquoException.getErrors().get(0).getCode());
+            }
+        }
+        else
+        {
+            errors.append(ex.getMessage()).append("\n");
+        }
     }
 }

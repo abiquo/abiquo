@@ -89,6 +89,7 @@ import com.abiquo.abiserver.exception.RemoteServiceException;
 import com.abiquo.abiserver.exception.SchedulerException;
 import com.abiquo.abiserver.exception.SoftLimitExceededException;
 import com.abiquo.abiserver.exception.VirtualApplianceCommandException;
+import com.abiquo.abiserver.exception.VirtualApplianceTimeoutException;
 import com.abiquo.abiserver.exception.VirtualFactoryHealthException;
 import com.abiquo.abiserver.persistence.DAOFactory;
 import com.abiquo.abiserver.persistence.dao.networking.IpPoolManagementDAO;
@@ -118,12 +119,15 @@ import com.abiquo.abiserver.pojo.virtualappliance.VirtualDataCenter;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImage;
 import com.abiquo.abiserver.pojo.virtualimage.VirtualImageConversions;
 import com.abiquo.model.enumerator.NetworkType;
+import com.abiquo.commons.amqp.impl.vsm.VSMProducer;
+import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.ovfmanager.cim.CIMTypesUtils.CIMResourceTypeEnum;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.util.ErrorManager;
 import com.abiquo.util.resources.ResourceManager;
+import com.abiquo.vsm.events.VMEventType;
 import com.sun.ws.management.client.exceptions.FaultException;
 
 /**
@@ -144,9 +148,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         try
         {
             virtualApplianceWs =
-                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader()
-                    .loadClass("com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium")
-                    .newInstance();
+                (IVirtualApplianceWS) Thread.currentThread().getContextClassLoader().loadClass(
+                    "com.abiquo.abiserver.abicloudws.VirtualApplianceWSPremium").newInstance();
         }
         catch (Exception e)
         {
@@ -187,7 +190,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             }
             else
             {
-                errorManager.reportError(resourceManager, dataResult, "checkVirtualAppliance");
+                logger
+                    .trace("Unexpected error when refreshing the information of the virtual appliance");
             }
 
             transaction.commit();
@@ -199,7 +203,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 transaction.rollback();
             }
 
-            errorManager.reportError(resourceManager, dataResult, "checkVirtualAppliance", e);
+            logger.trace(
+                "Unexpected error when refreshing the information of the virtual appliance", e);
         }
 
         return dataResult;
@@ -364,8 +369,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 virtualApplianceId);
 
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_CREATE,
-                userSession, null, virtualAppliance.getVirtualDataCenter().getName(),
-                e.getMessage(), null, null, null, null, null);
+                userSession, null, virtualAppliance.getVirtualDataCenter().getName(), e
+                    .getMessage(), null, null, null, null, null);
 
             return dataResult;
         }
@@ -399,8 +404,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_CREATE, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -487,8 +492,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (Exception e)
         {
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_DELETE,
-                userSession, null, virtualAppliance.getVirtualDataCenter().getName(),
-                e.getMessage(), virtualAppliance, null, null, null, null);
+                userSession, null, virtualAppliance.getVirtualDataCenter().getName(), e
+                    .getMessage(), virtualAppliance, null, null, null, null);
 
             if (transaction != null && transaction.isActive())
             {
@@ -535,8 +540,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_DELETE, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -662,8 +667,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             traceLog(SeverityType.MINOR, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
                 userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(),
-                "Hard limit exceeded exception\nCaused by:" + hl.getMessage(),
-                virtualappHBPojoOld.toPojo(), null, null, null, null);
+                "Hard limit exceeded exception\nCaused by:" + hl.getMessage(), virtualappHBPojoOld
+                    .toPojo(), null, null, null, null);
 
             dataResult.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
 
@@ -686,8 +691,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             traceLog(SeverityType.MINOR, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
                 userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(),
-                "Soft limit exceeded exception\nCaused by: " + sl.getMessage(),
-                virtualappHBPojoOld.toPojo(), null, null, null, null);
+                "Soft limit exceeded exception\nCaused by: " + sl.getMessage(), virtualappHBPojoOld
+                    .toPojo(), null, null, null, null);
 
             dataResult.setResultCode(BasicResult.SOFT_LIMT_EXCEEDED);
 
@@ -710,8 +715,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             traceLog(SeverityType.MINOR, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
                 userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(),
-                "Not enough resource on the datacenter : " + nl.getMessage(),
-                virtualappHBPojoOld.toPojo(), null, null, null, null);
+                "Not enough resource on the datacenter : " + nl.getMessage(), virtualappHBPojoOld
+                    .toPojo(), null, null, null, null);
 
             dataResult.setResultCode(BasicResult.CLOUD_LIMT_EXCEEDED);
 
@@ -733,8 +738,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (SchedulerException e)
         {
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
-                userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(),
-                e.getMessage(), virtualappHBPojoOld.toPojo(), null, null, null, null);
+                userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(), e
+                    .getMessage(), virtualappHBPojoOld.toPojo(), null, null, null, null);
 
             // TODO other BasicResult id
             dataResult.setResultCode(BasicResult.CLOUD_LIMT_EXCEEDED);
@@ -778,8 +783,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         catch (Exception e)
         {
             traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_MODIFY,
-                userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(),
-                e.getMessage(), null, null, null, null, null);
+                userSession, null, virtualappHBPojoOld.toPojo().getVirtualDataCenter().getName(), e
+                    .getMessage(), null, null, null, null, null);
 
             if (transaction != null && transaction.isActive())
             {
@@ -1059,13 +1064,39 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     EventType.VAPP_MODIFY, userSession, null, virtualAppliance
                         .getVirtualDataCenter().getName(), e.getMessage(), virtualAppliance, null,
                     null, null, null);
-                virtualAppliance =
-                    updateStateInDB(virtualappOld, originalVirtualApplianceState.toEnum())
-                        .getData();
+
+                StateEnum newState = originalVirtualApplianceState.toEnum();
+
+                if (e instanceof VirtualApplianceTimeoutException)
+                {
+                    newState = StateEnum.UNKNOWN;
+
+                    traceLog(SeverityType.MAJOR, ComponentType.VIRTUAL_APPLIANCE,
+                        EventType.VAPP_UNKNOWN, userSession, null, virtualAppliance
+                            .getVirtualDataCenter().getName(),
+                        "Could not complete the operation in virtual appliance "
+                            + virtualAppliance.getName() + ". Please, contact the administrator.",
+                        virtualAppliance, null, null, null, null);
+
+                    traceSystemLog(
+                        SeverityType.CRITICAL,
+                        ComponentType.VIRTUAL_APPLIANCE,
+                        EventType.VAPP_UNKNOWN,
+                        null,
+                        virtualAppliance.getVirtualDataCenter().getName(),
+                        "Operation in virtual appliance ["
+                            + virtualAppliance.getName()
+                            + "] timed out and could not determine the state of its virtual machines",
+                        virtualAppliance, null, null);
+                }
+
+                virtualAppliance = updateStateInDB(virtualappOld, newState).getData();
+
                 dataResult.setData(virtualappOld);
                 dataResult.setSuccess(Boolean.FALSE);
                 dataResult.setMessage(e.getMessage());
-                updateVMStateInDB(virtualappOld, originalVirtualApplianceState.toEnum());
+                updateVMStateInDB(virtualappOld, e instanceof VirtualApplianceTimeoutException
+                    ? StateEnum.UNKNOWN : StateEnum.NOT_DEPLOYED);
                 return dataResult;
             }
         }
@@ -1348,8 +1379,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         if (!result.getSuccess())
         {
             BasicCommand.traceLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_DATACENTER,
-                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(),
-                result.getMessage(), null, null, null, null, null);
+                EventType.VDC_MODIFY, userSession, null, virtualDataCenter.getName(), result
+                    .getMessage(), null, null, null, null, null);
         }
         else
         {
@@ -1819,7 +1850,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 if (basicResult.getSuccess())
                 {
                     basicResult = virtualApplianceWs.deleteVirtualAppliance(virtualAppliance);
-                    undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+                    undeployVirtualMachines(userSession, virtualAppliance, dataResult, null);
                 }
                 else
                 {
@@ -1843,8 +1874,39 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             }
             catch (Exception e)
             {
-                // Leaving the virtual appliance with its original state
-                virtualAppliance = updateStateInDB(virtualAppliance, oldState.toEnum()).getData();
+                if (e instanceof VirtualApplianceTimeoutException)
+                {
+                    virtualAppliance =
+                        updateStateInDB(virtualAppliance, StateEnum.UNKNOWN).getData();
+
+                    traceLog(SeverityType.MAJOR, ComponentType.VIRTUAL_APPLIANCE,
+                        EventType.VAPP_UNKNOWN, userSession, null, virtualAppliance
+                            .getVirtualDataCenter().getName(),
+                        "Could not complete the operation in virtual appliance "
+                            + virtualAppliance.getName() + ". Please, contact the administrator.",
+                        virtualAppliance, null, null, null, null);
+
+                    traceSystemLog(
+                        SeverityType.CRITICAL,
+                        ComponentType.VIRTUAL_APPLIANCE,
+                        EventType.VAPP_UNKNOWN,
+                        null,
+                        virtualAppliance.getVirtualDataCenter().getName(),
+                        "Operation in virtual appliance ["
+                            + virtualAppliance.getName()
+                            + "] timed out and could not determine the state of its virtual machines",
+                        virtualAppliance, null, null);
+
+                }
+                else
+                {
+                    virtualAppliance =
+                        updateStateInDB(virtualAppliance, oldState.toEnum()).getData();
+                }
+
+                updateVMStateInDB(virtualAppliance, e instanceof VirtualApplianceTimeoutException
+                    ? StateEnum.UNKNOWN : StateEnum.NOT_DEPLOYED);
+
                 errorManager.reportError(resourceManager, dataResult, "shutdownVirtualAppliance",
                     e, virtualApplianceId);
                 dataResult.setData(virtualAppliance);
@@ -1920,8 +1982,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             NodeVirtualImage nodeVi = (NodeVirtualImage) node;
             if (!nodeVi.isManaged())
             {
-                deleteRasdFromNode(session,
-                    (NodeVirtualImageHB) session.get(NodeVirtualImageHB.class, nodeVi.getId()));
+                deleteRasdFromNode(session, (NodeVirtualImageHB) session.get(
+                    NodeVirtualImageHB.class, nodeVi.getId()));
 
             }
         }
@@ -2067,8 +2129,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             DataResult<VirtualAppliance> dataResult = new DataResult<VirtualAppliance>();
 
-            errorManager.reportError(resourceManager, dataResult, "startVirtualAppliance", e,
-                vApp.getId());
+            errorManager.reportError(resourceManager, dataResult, "startVirtualAppliance", e, vApp
+                .getId());
 
             vApp.setState(sourceState);
             dataResult.setSuccess(false);
@@ -2082,10 +2144,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     }
 
     protected DataResult<VirtualAppliance> traceErrorStartingVirtualAppliance(
-        final UserSession userSession, VirtualAppliance vApp, final State state,
-        final State subState, final UserHB userHB, final ComponentType componentType,
-        final String message, final String reportErrorKey, final Exception exception,
-        EventType eventType, final int... resultCode)
+        final UserSession userSession, VirtualAppliance vApp, State state, State subState,
+        final UserHB userHB, final ComponentType componentType, final String message,
+        final String reportErrorKey, final Exception exception, EventType eventType,
+        final int... resultCode)
     {
 
         eventType = eventType == null ? EventType.VAPP_POWERON : eventType;
@@ -2096,7 +2158,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         {
             traceLog(SeverityType.INFO, componentType, eventType, userSession, null, vApp
                 .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
-
         }
         else
         {
@@ -2104,8 +2165,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 .getVirtualDataCenter().getName(), message, vApp, null, null, null, null);
         }
 
-        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception,
-            vApp.getId());
+        errorManager.reportError(resourceManager, dataResult, reportErrorKey, exception, vApp
+            .getId());
+
+        if (exception instanceof VirtualApplianceTimeoutException)
+        {
+            state = new State(StateEnum.UNKNOWN);
+            subState = new State(StateEnum.UNKNOWN);
+        }
 
         vApp = updateStateAndSubStateInDB(vApp, state, subState).getData();
         dataResult.setData(vApp);
@@ -2255,7 +2322,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (HardLimitExceededException hl)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, hl);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, hl.getMessage(),
                 "createVirtualMachines", hl, EventType.WORKLOAD_HARD_LIMIT_EXCEEDED,
@@ -2263,14 +2330,14 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (SoftLimitExceededException sl)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, sl);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, sl.getMessage(),
                 "createVirtualMachines", sl, BasicResult.SOFT_LIMT_EXCEEDED);
         }
         catch (NotEnoughResourcesException nl)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, nl);
             final String cause =
                 String.format("There are not enough resources in the datacenter "
                     + "to deploy the Virtual Appliance:%s", virtualAppliance.getName());
@@ -2289,7 +2356,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e1)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, e1);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e1.getMessage(),
                 "createVirtualMachines", e1);
@@ -2303,8 +2370,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, e);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE, e.getMessage(),
                 "createVirtualMachines", e);
@@ -2317,8 +2383,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (EventingException e)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, e);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
                 "The datacenter is not well configured. Contact your Cloud Administrator",
@@ -2326,8 +2391,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
         catch (Exception e)
         {
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
-
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, e);
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             return traceErrorStartingVirtualAppliance(userSession, virtualAppliance, sourceState,
                 sourceSubState, userHB, ComponentType.VIRTUAL_APPLIANCE,
@@ -2343,9 +2407,12 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             // As the event sink will update the virtual appliance state the
             // state will be in
             // progress
-            State newState = new State(StateEnum.LOCKED);
-            virtualAppliance.setState(newState);
-            dataResult.setData(virtualAppliance);
+
+            // WTF! If event arrives before that the appliance remains in PROGRESS
+            // State newState = new State(StateEnum.IN_PROGRESS);
+            // virtualAppliance.setState(newState);
+            // dataResult.setData(virtualAppliance);
+            publishVirtualMachineEvents(virtualAppliance.getNodes(), VMEventType.POWER_ON);
 
             traceLog(SeverityType.INFO, ComponentType.VIRTUAL_APPLIANCE, EventType.VAPP_POWERON,
                 userSession, null, virtualAppliance.getVirtualDataCenter().getName(), null,
@@ -2357,7 +2424,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                 EventType.VAPP_POWERON, userSession, null, virtualAppliance.getVirtualDataCenter()
                     .getName(), dataResult.getMessage(), virtualAppliance, null, null, null, null);
 
-            undeployVirtualMachines(userSession, virtualAppliance, dataResult);
+            undeployVirtualMachines(userSession, virtualAppliance, dataResult, null);
 
             virtualApplianceWs.rollbackEventSubscription(virtualAppliance);
             virtualAppliance = updateStateInDB(virtualAppliance, sourceState.toEnum()).getData();
@@ -2369,6 +2436,42 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
         }
 
         return dataResult;
+    }
+
+    protected void publishVirtualMachineEvents(final Collection<Node> nodes,
+        final VMEventType eventType)
+    {
+        try
+        {
+            VSMProducer producer = new VSMProducer();
+
+            producer.openChannel();
+
+            for (Node< ? > node : nodes)
+            {
+                if (node.isNodeTypeVirtualImage())
+                {
+                    NodeVirtualImage nvi = (NodeVirtualImage) node;
+                    VirtualMachine vm = nvi.getVirtualMachine();
+                    HyperVisor hv = (HyperVisor) vm.getAssignedTo();
+
+                    VirtualSystemEvent event = new VirtualSystemEvent();
+                    event.setEventType(eventType.name());
+                    event.setVirtualSystemAddress(String.format("http://%s:%d/", hv.getIp(), hv
+                        .getPort()));
+                    event.setVirtualSystemId(vm.getName());
+                    event.setVirtualSystemType(hv.getType().getName());
+
+                    producer.publish(event);
+                }
+            }
+
+            producer.closeChannel();
+        }
+        catch (IOException e)
+        {
+            logger.error("Can not connect RabbitMQ to refresh virtual machine states.");
+        }
     }
 
     /**
@@ -2729,6 +2832,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
     {
 
         Session session = HibernateDAOFactory.getSessionFactory().getCurrentSession();
+
         // transaction = session.beginTransaction();
         session = checkOpenTransaction(session);
 
@@ -2820,8 +2924,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                         session = checkOpenTransaction(session);
 
                         VirtualmachineHB virtualMachineHB =
-                            (VirtualmachineHB) session.get(VirtualmachineHB.class,
-                                vmDeployed.getIdVm());
+                            (VirtualmachineHB) session.get(VirtualmachineHB.class, vmDeployed
+                                .getIdVm());
 
                         virtualMachineHB.setHypervisor(null);
 
@@ -2886,21 +2990,27 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
      * 
      * @param virtualAppliance the virtual appliance to delete the virtual machines
      * @param dataResult the data result for populating the errors
+     * @param cause The exception that opriginated the rollback.
      */
     private List<VirtualmachineHB> undeployVirtualMachines(final UserSession userSession,
-        final VirtualAppliance virtualAppliance, final DataResult<VirtualAppliance> dataResult)
+        final VirtualAppliance virtualAppliance, final DataResult<VirtualAppliance> dataResult,
+        final Exception cause)
     {
         VirtualMachineResourceStub vmachineResource =
             APIStubFactory.getInstance(userSession, new VirtualMachineResourceStubImpl(),
                 VirtualMachineResourceStub.class);
 
+        boolean isTimeoutException =
+            cause != null && cause instanceof VirtualApplianceTimeoutException;
+        StringBuffer timeoutMsg = new StringBuffer();
+
         Transaction transaction = null;
         List<VirtualmachineHB> undeployedVMs = new ArrayList<VirtualmachineHB>();
+
         try
         {
             Session session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            // Recovering Nodes
             Collection<Node> nodes = getNodesFromVirtualApp(session, virtualAppliance);
             transaction.commit();
 
@@ -2909,7 +3019,7 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
 
             for (Node node : nodes)
             {
-                // Assure that the node is Virtual Image Type
+                // Ensure that the node is Virtual Image Type
                 if (node.isNodeTypeVirtualImage())
                 {
                     // Convert to virtualImage node
@@ -2919,22 +3029,13 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         HyperVisor hypervisor = (HyperVisor) virtualMachine.getAssignedTo();
 
-                        if (hypervisor != null)
+                        // Deallocate VM if necessary (if timeout occured, we don't
+                        // know if the VMs exist in the hypervisor, so shouldn't deallocate)
+                        if (hypervisor != null && !isTimeoutException)
                         {
                             logger.debug("Undeploy all the virtual machines");
-
-                            session = HibernateUtil.getSession();
-                            transaction = session.beginTransaction();
-                            HypervisorHB hypervisorHB =
-                                (HypervisorHB) session.get(HypervisorHB.class, hypervisor.getId());
-                            transaction.commit();
-
-                            PhysicalmachineHB physicalMachineHB = hypervisorHB.getPhysicalMachine();
-                            PhysicalMachine physicalMachine = physicalMachineHB.toPojo();
                             logger.debug("cpu used: " + virtualMachine.getCpu() + "ram used: "
                                 + virtualMachine.getRam() + "hd used: " + virtualMachine.getHd());
-
-                            // scheduler.rollback(virtualMachine, physicalMachine);
 
                             try
                             {
@@ -2943,17 +3044,19 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                             }
                             catch (Exception e)
                             {
-                                throw new VirtualApplianceCommandException(e);
+                                logger.error("Could not rollback allocated resources "
+                                    + "(CPU, RAM, HD, network) for physical machine.", e);
                             }
-                        } // vm is allocated
+                        }
 
                         session = HibernateUtil.getSession();
                         transaction = session.beginTransaction();
 
                         // Deleting the virtual machine instance from DB
                         VirtualmachineHB vmachineHB =
-                            (VirtualmachineHB) session.get(VirtualmachineHB.class,
-                                virtualMachine.getId());
+                            (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine
+                                .getId());
+
                         if (vmachineHB != null)
                         {
                             vmachineHB.setState(StateEnum.NOT_ALLOCATED);
@@ -2961,9 +3064,10 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                             // virtualMachine
                             // and physicalMachine
                             vmachineHB.setHypervisor(null);
-                            // Datastore == null in order to delete the relation virtualmachine
-                            // datastore
                             vmachineHB.setDatastore(null);
+                            vmachineHB.setVdrpIp(null);
+                            vmachineHB.setVdrpPort(0);
+
                             if (nodeVI.getModified() == Node.NODE_ERASED)
                             {
                                 NodeHB nodePojo = (NodeHB) session.get(NodeHB.class, node.getId());
@@ -2976,11 +3080,6 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                                 undeployedVMs.add(vmachineHB);
                             }
                         }
-                        else
-                        {
-                            session.update(vmachineHB);
-                            undeployedVMs.add(vmachineHB);
-                        }
 
                         transaction.commit();
                     }
@@ -2992,18 +3091,39 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             // Get the user POJO from the DB
             // UserHB userHB = SessionUtil.findUserHBByName(session.getUser());
 
-            for (Object element : undeployedVMs)
+            if (isTimeoutException)
             {
-                VirtualmachineHB vm = (VirtualmachineHB) element;
+                traceLog(SeverityType.MAJOR, ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VAPP_UNKNOWN, userSession, null, virtualAppliance
+                        .getVirtualDataCenter().getName(),
+                    "Could not complete the operation in virtual appliance "
+                        + virtualAppliance.getName() + ". Please, contact the administrator.",
+                    virtualAppliance, null, null, null, null);
 
-                // Log the event
-                traceLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, EventType.VM_DESTROY,
-                    userSession, null, virtualAppliance.getVirtualDataCenter().getName(), "VM "
-                        + vm.getName() + " was Undeployed", virtualAppliance, null, null, null,
-                    null);
-
+                traceSystemLog(
+                    SeverityType.CRITICAL,
+                    ComponentType.VIRTUAL_APPLIANCE,
+                    EventType.VAPP_UNKNOWN,
+                    null,
+                    virtualAppliance.getVirtualDataCenter().getName(),
+                    "Operation in virtual appliance ["
+                        + virtualAppliance.getName()
+                        + "] timed out and could not determine the state of the following virtual machines:\n"
+                        + timeoutMsg.toString(), virtualAppliance, null, null);
             }
+            else
+            {
+                for (Object element : undeployedVMs)
+                {
+                    VirtualmachineHB vm = (VirtualmachineHB) element;
 
+                    // Log the event
+                    traceLog(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE,
+                        EventType.VM_DESTROY, userSession, null, virtualAppliance
+                            .getVirtualDataCenter().getName(), "VM " + vm.getName()
+                            + " was Undeployed", virtualAppliance, null, null, null, null);
+                }
+            }
         }
         catch (HibernateException e)
         {
@@ -3057,8 +3177,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
                     {
                         // Deleting the virtual machine instance from DB
                         VirtualmachineHB vmachineHB =
-                            (VirtualmachineHB) session.get(VirtualmachineHB.class,
-                                virtualMachine.getId());
+                            (VirtualmachineHB) session.get(VirtualmachineHB.class, virtualMachine
+                                .getId());
                         Set<ResourceManagementHB> resmanSet = vmachineHB.getResman();
                         for (ResourceManagementHB resourceManagementHB : resmanSet)
                         {
@@ -3455,8 +3575,8 @@ public class VirtualApplianceCommandImpl extends BasicCommand implements Virtual
             ResourceAllocationSettingData rasd = netMan.getRasd();
             session.delete(rasd);
 
-            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType()
-                .equals(NetworkType.UNMANAGED.name()))
+            if (resourceManagement.getVirtualDataCenter().getDefaultVlan().getNetworkType().equals(
+                NetworkType.UNMANAGED.name()))
             {
                 session.delete(netMan);
             }
