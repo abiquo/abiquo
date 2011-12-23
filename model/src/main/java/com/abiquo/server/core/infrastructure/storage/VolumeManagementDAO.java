@@ -288,7 +288,9 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     public VolumeManagement getVolumeFromImage(final Integer idImage)
     {
-        Criteria criteria = createCriteria(Restrictions.eq("virtualImage.id", idImage));
+        Criteria criteria =
+            createCriteria(Restrictions.eq(VolumeManagement.VIRTUAL_MACHINE_TEMPLATE_PROPERTY + "."
+                + PersistentEntity.ID_PROPERTY, idImage));
         Object obj = criteria.uniqueResult();
         return (VolumeManagement) obj;
     }

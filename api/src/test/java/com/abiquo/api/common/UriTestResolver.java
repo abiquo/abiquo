@@ -45,6 +45,7 @@ import com.abiquo.api.resources.RemoteServiceResource;
 import com.abiquo.api.resources.RemoteServicesResource;
 import com.abiquo.api.resources.RoleResource;
 import com.abiquo.api.resources.RolesResource;
+import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.resources.UserResource;
 import com.abiquo.api.resources.UsersResource;
 import com.abiquo.api.resources.VirtualMachinesInfrastructureResource;
@@ -674,6 +675,37 @@ public class UriTestResolver
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
         values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
         values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+
+        return resolveURI(template, values);
+    }
+
+    /**
+     * Creates something like
+     * http://example.com/cloud/virtualdatacenters/{vdcId}/virtualappliances/{
+     * vappId}/virtualmachines/{vmId}/tasks/{taskId}
+     * 
+     * @param vdcId identifier of the virtual datacenter
+     * @param vappId identifier of the virtual appliance
+     * @param vmId identifier of the virtual machine
+     * @param taskId The id of the task.
+     * @return URI of the virtual appliance resource into string object
+     */
+    public static String resolveVirtualMachineTaskURI(final Integer vdcId, final Integer vappId,
+        final Integer vmId, final String taskId)
+    {
+        String template =
+            buildPath(VirtualDatacentersResource.VIRTUAL_DATACENTERS_PATH,
+                VirtualDatacenterResource.VIRTUAL_DATACENTER_PARAM,
+                VirtualAppliancesResource.VIRTUAL_APPLIANCES_PATH,
+                VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
+                VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
+                VirtualMachineResource.VIRTUAL_MACHINE_PARAM, TaskResourceUtils.TASK_PATH);
+
+        Map<String, String> values = new HashMap<String, String>();
+        values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        values.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+        values.put(VirtualMachineResource.VIRTUAL_MACHINE, vmId.toString());
+        values.put(TaskResourceUtils.TASK, taskId);
 
         return resolveURI(template, values);
     }
