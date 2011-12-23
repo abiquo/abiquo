@@ -24,6 +24,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyString;
 
 import java.util.UUID;
 
@@ -64,9 +65,9 @@ public class TarantinoServiceMock extends TarantinoService
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
         when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), 
-            randomString())).thenReturn(randomTaskId());
+            anyString())).thenReturn(randomTaskId());
         when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
-            randomString(), randomString(), randomString())).thenReturn(randomTaskId());
+            anyString(), anyString(), anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
             .thenReturn(randomTaskId());
 
@@ -172,11 +173,6 @@ public class TarantinoServiceMock extends TarantinoService
     }
 
     private static String randomTaskId()
-    {
-        return UUID.randomUUID().toString();
-    }
-
-    private static String randomString()
     {
         return UUID.randomUUID().toString();
     }
