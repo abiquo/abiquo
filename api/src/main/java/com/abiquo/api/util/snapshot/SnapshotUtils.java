@@ -108,7 +108,7 @@ public class SnapshotUtils
      * @param template The {@link VirtualMachineTemplate} to consider
      * @return The snapshot filename
      */
-    public static String formatSnapshotName(final VirtualMachineTemplate template)
+    public static String formatSnapshotFilename(final VirtualMachineTemplate template)
     {
         String name = FilenameUtils.getName(template.getPath());
 

@@ -611,27 +611,45 @@ public class TarantinoService extends DefaultApiService
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
-        final VirtualMachine virtualMachine, final String snapshotName,
-        final VirtualMachineState originalState)
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
-        // Build destination DiskSnapshot
-        VirtualMachineDescriptionBuilder definitionBuilder =
-            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
-
         VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
-        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
-        VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+        return snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName, SnapshotUtils.formatSnapshotPath(template),
+            SnapshotUtils.formatSnapshotFilename(template));
+    }
+
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName, final String snapshotPath, final String snapshotFilename)
+    {
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
 
         DiskSnapshot destinationDisk = new DiskSnapshot();
         destinationDisk.setRepository(infrastructureService.getRepository(datacenter).getUrl());
-        destinationDisk.setPath(SnapshotUtils.formatSnapshotPath(template));
-        destinationDisk.setSnapshotFilename(SnapshotUtils.formatSnapshotName(template));
+        destinationDisk.setPath(snapshotPath);
+        destinationDisk.setSnapshotFilename(snapshotFilename);
         destinationDisk.setName(snapshotName);
         destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
             datacenter).getUri());
 
+        return snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            destinationDisk);
+    }
+
+    private String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final DiskSnapshot destinationDisk)
+    {
         // Build the job sequence
+        VirtualMachineDescriptionBuilder definitionBuilder =
+            jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+        VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+
         HypervisorConnection connection =
             jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
 
@@ -651,6 +669,7 @@ public class TarantinoService extends DefaultApiService
         }
 
         // Unsubscribe the virtual machine to prevent unlock
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
         vsm.unsubscribe(service, virtualMachine);
 
