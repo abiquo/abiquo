@@ -83,7 +83,10 @@ public enum ComponentType implements Serializable
     COSTCODE(16777216, "Cost Code"),
 
     // STORAGE DEVICES
-    STORAGE_DEVICE(5242888, "Storage device");
+    STORAGE_DEVICE(5242888, "Storage device"),
+
+    // INSTANCE_CONVERTER
+    INSTANCE_CONVERTER(33554432 | VIRTUAL_APPLIANCE.getValue(), "Instance converter");
 
     private final int component;
 
