@@ -24,17 +24,12 @@
  */
 package com.abiquo.model.transport;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.model.enumerator.LinkOrder;
 import com.abiquo.model.rest.RESTLink;
-import com.abiquo.model.util.CompositeComparator;
 
 /**
  * This Entity is the response of 202. It is a list of links (most of the cases one) and an optional
@@ -43,7 +38,7 @@ import com.abiquo.model.util.CompositeComparator;
  * @author ssedano
  */
 @XmlRootElement(name = "acceptedrequest")
-public class AcceptedRequestDto<T> implements Serializable//extends SingleResourceTransportDto
+public class AcceptedRequestDto<T> extends SingleResourceTransportDto
 {
     private static final long serialVersionUID = -7743440222172054557L;
 
@@ -64,44 +59,15 @@ public class AcceptedRequestDto<T> implements Serializable//extends SingleResour
         this.entity = entity;
     }
 
-    @SuppressWarnings("unchecked")
-    @XmlElement(name = "link")
-    public List<RESTLink> getLinks()
-    {
-        if (links != null)
-        {
-            Collections.<RESTLink> sort(links,
-                CompositeComparator.<RESTLink> build(LinkOrder.BY_REL, LinkOrder.BY_TITLE));
-        }
-        return links;
-    }
-
-    public void setLinks(final List<RESTLink> links)
-    {
-        this.links = links;
-    }
-
     public void setStatusUrlLink(final String url)
     {
         RESTLink link = new RESTLink(STATUS_REL, url);
         addLink(link);
     }
 
-    public void addLink(final RESTLink link)
+    public RESTLink getStatusLink()
     {
-        if (this.links == null)
-        {
-            this.links = new ArrayList<RESTLink>();
-        }
-        this.links.add(link);
+        return searchLink(STATUS_REL);
     }
 
-    public void addLinks(final List<RESTLink> links)
-    {
-        if (this.links == null)
-        {
-            this.links = new ArrayList<RESTLink>();
-        }
-        this.links.addAll(links);
-    }
 }

@@ -113,7 +113,11 @@ public class AbstractAPIStub
 
             Properties props = new Properties();
             props.put("abiquo.endpoint", apiUri);
+            // Do not retry methods that fail with 5xx error codes
             props.put("jclouds.max-retries", "0");
+            // Custom timeouts in ms
+            props.put("jclouds.timeouts.CloudClient.deployVirtualApplianceAction", "90000");
+            props.put("jclouds.timeouts.CloudClient.deployVirtualMachine", "90000");
 
             context =
                 new AbiquoContextFactory().createContext(token,
