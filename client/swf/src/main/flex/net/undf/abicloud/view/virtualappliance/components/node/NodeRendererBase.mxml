@@ -437,7 +437,7 @@
             /**
              * Announces that user wants to delete this node
              **/
-            private function onClickEraseNodeButton():void
+            public function onClickEraseNodeButton():void
             {
                 if (this._isSelected)
                 {
@@ -471,7 +471,7 @@
              * Launches an event asking to show a configuration window
              * for this NodeRenderer
              */
-            private function onClickConfigurationButton():void
+            public function onClickConfigurationButton():void
             {
                 if (_node.modified == Node.CRASH)
                 {
