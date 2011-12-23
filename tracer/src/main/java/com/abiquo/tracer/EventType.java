@@ -92,9 +92,10 @@ public enum EventType implements Serializable
         "Volume deleted"), VOLUME_ASSIGN(409, "VOLUME_ATTACHED", "Volume attached"), VOLUME_UNASSIGN(
         410, "VOLUME_DETACHED", "Volume detached"), VOLUME_ATTACH(411, "VOLUME_ATTACH",
         "Volume attached"), VOLUME_DETACH(412, "VOLUME_DETACH", "Volume detached"), GET_INITIATOR_MAPPINGS(
-        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414, "HARD_DISK_CREATE", "Hard disk created"),
-        HARD_DISK_DELETE(415, "HARD_DISK_DELETE", "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"),
-        HARD_DISK_UNASSIGN(417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
+        413, "GET_INITIATOR_MAPPINGS", "Initiator mappings retrieved"), HARD_DISK_CREATE(414,
+        "HARD_DISK_CREATE", "Hard disk created"), HARD_DISK_DELETE(415, "HARD_DISK_DELETE",
+        "Hard disk deleted"), HARD_DISK_ASSIGN(416, "HARD_DISK_ASSIGN", "Hard disk assigned"), HARD_DISK_UNASSIGN(
+        417, "HARD_DISK_UNASSIGN", "Hard disk unassigned"),
 
     // Image-related events
     VI_DOWNLOAD(500, "VI_DOWNLOAD", "Virtual Image download from a Remote Repository"), VI_ADD(501,
@@ -104,7 +105,6 @@ public enum EventType implements Serializable
         "RAW_IMPORT_CONVERSION", "Raw import conversion started"), VI_UPDATE(505, "VI_UPDATE",
         "Virtual Image updated"),
 
-    // Stateful related events
     // Stateful related events
     PERSISTENT_PROCESS_START(600, "PERSISTENT_PROCESS_START",
         "A Persistent conversion process has started"), PERSISTENT_RAW_FINISHED(601,
@@ -216,8 +216,13 @@ public enum EventType implements Serializable
     // OVF PACKAGES LISTS
     OVF_PACKAGES_LIST_CREATED(1800, "OVFPACKAGE LIST CREATED", "OVFPackage list created"), TEMPLATE_DEFINITION_LIST_DELETED(
         1801, "OVFPACKAGE LIST DELETED", "OVFPackage list deleted"), TEMPLATE_DEFINITION_LIST_MODIFIED(
-        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified") //
-    ;
+        1802, "OVFPACKAGE LIST MODIFIED", "OVFPackage list modified"),
+
+    // INSTANCE PROCESS
+    INSTANCE_PROCESS_START(1803, "INSTANCE_PROCESS_START",
+        "A Intance conversion process has started"), INSTANCE_PROCESS_FINISHED(1804,
+        "INSTANCE_PROCESS_FINISHED", "A Instance conversion process has finished succesfuly"), INSTANCE_PROCESS_FAILED(
+        1805, "INSTANCE_PROCESS_FAILED", "A Instance conversion process has failed");
 
     private final int event;
 
