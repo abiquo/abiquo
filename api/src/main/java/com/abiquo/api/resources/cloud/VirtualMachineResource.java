@@ -21,9 +21,7 @@
 
 package com.abiquo.api.resources.cloud;
 
-import java.beans.ConstructorProperties;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -49,7 +47,6 @@ import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
-import com.abiquo.api.exceptions.ServiceUnavailableException;
 import com.abiquo.api.resources.AbstractResource;
 import com.abiquo.api.resources.TaskResourceUtils;
 import com.abiquo.api.services.TaskService;
@@ -110,9 +107,9 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_DEPLOY_REL = "deploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "snapshot";
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "instance";
 
-    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/snapshot";
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/instance";
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
@@ -465,6 +462,7 @@ public class VirtualMachineResource extends AbstractResource
      */
     @POST
     @Path(VIRTUAL_MACHINE_ACTION_SNAPSHOT)
+    @Consumes(MediaType.APPLICATION_XML)
     public AcceptedRequestDto<String> snapshotVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

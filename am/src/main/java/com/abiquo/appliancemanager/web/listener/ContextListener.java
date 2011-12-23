@@ -49,32 +49,32 @@ public class ContextListener implements ServletContextListener
     {
 
         OVFSerializer.getInstance().setValidateXML(false); // TODO delme
-
-        try
-        {
-            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean("AMNotifier", AMNotifier.class).openChannel();
-            LOG.debug("AM amqp producer channel open");
-        }
-        catch (IOException e)
-        {
-            LOG.error("Can not open the AMQP channel ", e);
-            AMConfigurationManager.getInstance().addConfigurationError(e.getLocalizedMessage());
-        }
+        //
+        // try
+        // {
+        // WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+        // .getBean("AMNotifier", AMNotifier.class).openChannel();
+        // LOG.debug("AM amqp producer channel open");
+        // }
+        // catch (IOException e)
+        // {
+        // LOG.error("Can not open the AMQP channel ", e);
+        // AMConfigurationManager.getInstance().addConfigurationError(e.getLocalizedMessage());
+        // }
     }
 
     @Override
     public void contextDestroyed(final ServletContextEvent sce)
     {
-        try
-        {
-            WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
-                .getBean("AMNotifier", AMNotifier.class).closeChannel();
-            LOG.debug("AM amqp producer channel closed");
-        }
-        catch (Exception e)
-        {
-            LOG.error("Can not close the AMQP channel ", e);
-        }
+        // try
+        // {
+        // WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())
+        // .getBean("AMNotifier", AMNotifier.class).closeChannel();
+        // LOG.debug("AM amqp producer channel closed");
+        // }
+        // catch (Exception e)
+        // {
+        // LOG.error("Can not close the AMQP channel ", e);
+        // }
     }
 }
