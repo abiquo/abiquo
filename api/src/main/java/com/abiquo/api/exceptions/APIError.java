@@ -43,8 +43,8 @@ public enum APIError
         "409-CONFLICT", "Conflict"), STATUS_UNSUPPORTED_MEDIA_TYPE("415-UNSUPPORTED MEDIA TYPE",
         "Abiquo API currently only supports application/XML Media Type"), STATUS_INTERNAL_SERVER_ERROR(
         "500-INTERNAL SERVER ERROR", "Unexpected exception"), STATUS_UNPROVISIONED(
-        "412 - Unprovisioned", "Error releasing resources on the hypervisor"),
-        SERVICE_UNAVAILABLE_ERROR("503- Service Unavailable", "Service Unavailable: try again in a few moments"),
+        "412 - Unprovisioned", "Error releasing resources on the hypervisor"), SERVICE_UNAVAILABLE_ERROR(
+        "503- Service Unavailable", "Service Unavailable: try again in a few moments"),
 
     // GENERIC
     MALFORMED_URI("GEN-0", "Malformed URI"), INVALID_ID("GEN-1", "Identifier cannot be 0"), CONSTRAINT_VIOLATION(
@@ -84,7 +84,8 @@ public enum APIError
         "ENTERPRISE-10", "The Enterprise does not have permissions to use the requested datacenter"), INVALID_ENTERPRISE_LINK(
         "ENTERPRISE-11", "Invalid Enterprise identifier in the Enterprise link"), MISSING_PRICING_TEMPLATE_LINK(
         "ENTERPRISE-12", "Missing link to the pricing template"), PRICING_TEMPLATE_PARAM_NOT_FOUND(
-        "ENTERPRISE-13", "Missing pricing template parameter"),
+        "ENTERPRISE-13", "Missing pricing template parameter"), NON_EXISTENT_ENTERPRISE_PROPS(
+        "EN-0", "The requested enterprise properties do not exist"),
 
     // LIMITS: Common for Enterprise and virtual datacenter
     LIMITS_INVALID_HARD_LIMIT_FOR_VLANS_PER_VDC(
@@ -649,8 +650,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
-                .name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
+                error.name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");

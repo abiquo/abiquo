@@ -48,7 +48,7 @@ import com.google.common.collect.Iterables;
 
 public class RESTHandler extends CheckLocationHeaderHandler
 {
-    protected Class REST_BUILDER_INTERFACE = IRESTBuilder.class;
+    protected Class<IRESTBuilder> REST_BUILDER_INTERFACE = IRESTBuilder.class;
 
     @Override
     public void handleRequest(final MessageContext context)
@@ -74,8 +74,7 @@ public class RESTHandler extends CheckLocationHeaderHandler
                 }
             }
         }
-        org.apache.wink.server.internal.handlers.SearchResult a =
-            context.getAttribute(org.apache.wink.server.internal.handlers.SearchResult.class);
+
         searchResult
             .setInvocationParameters(newParameters.toArray(new Object[newParameters.size()]));
 
@@ -83,7 +82,6 @@ public class RESTHandler extends CheckLocationHeaderHandler
         createRESTBuilder(context, builder);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void handleResponse(final MessageContext context) throws Throwable
     {
@@ -93,32 +91,16 @@ public class RESTHandler extends CheckLocationHeaderHandler
             && context.getResponseEntity() instanceof AcceptedRequestDto)
         {
             context.setResponseStatusCode(HttpServletResponse.SC_ACCEPTED);
-            // Object entity = ((AcceptedRequestDto) context.getResponseEntity()).getEntity();
-
-            // if (entity instanceof SingleResourceTransportDto)
-            // {
-            // SingleResourceTransportDto resource = (SingleResourceTransportDto) entity;
-            //
-            // ResponseBuilder builder = new ResponseBuilderImpl();
-            // if (!(entity instanceof WrapperDto))
-            // {
-            // builder.location(new URI(resource.getEditLink().getHref()));
-            // }
-            // builder.entity(resource);
-            // builder.status(HttpServletResponse.SC_ACCEPTED);
-            //
-            // context.setResponseEntity(builder.build());
-            // }
         }
         else if (context.getResponseStatusCode() == HttpServletResponse.SC_OK
             && context.getResponseEntity() != null
             && context.getResponseEntity() instanceof MovedPermanentlyDto)
         {
             context.setResponseStatusCode(HttpServletResponse.SC_MOVED_PERMANENTLY);
-            MovedPermanentlyDto resource = (MovedPermanentlyDto) context.getResponseEntity();
             ResponseBuilder builder = new ResponseBuilderImpl();
-            builder.location(new URI(resource.getLocationLink().getHref()));
-            builder.entity(resource);
+            builder.location(new URI(((MovedPermanentlyDto) context.getResponseEntity())
+                .getLocation().getHref()));
+            builder.entity(context.getResponseEntity());
             builder.status(HttpServletResponse.SC_MOVED_PERMANENTLY);
             context.setResponseEntity(builder.build());
         }
@@ -147,7 +129,6 @@ public class RESTHandler extends CheckLocationHeaderHandler
         super.handleRequest(context);
     }
 
-    @SuppressWarnings("unchecked")
     protected void createRESTBuilder(final MessageContext context, final LinkBuilders linksProcessor)
     {
         ServletContext servletContext = context.getAttribute(ServletContext.class);

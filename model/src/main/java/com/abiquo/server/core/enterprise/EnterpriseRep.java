@@ -123,12 +123,6 @@ public class EnterpriseRep extends DefaultRepBase
         enterprisePropertiesDAO.flush();
     }
 
-    public void removeEnterpriseProperties(final Enterprise enterprise)
-    {
-        EnterpriseProperties ep = findPropertiesByEnterprise(enterprise);
-        removeEnterpriseProperties(ep);
-    }
-
     public void removeEnterpriseProperties(final EnterpriseProperties ep)
     {
         enterprisePropertiesDAO.remove(ep);

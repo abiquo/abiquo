@@ -19,28 +19,30 @@
  * Boston, MA 02111-1307, USA.
  */
 
-package com.abiquo;
+package com.abiquo.server.core.infrastructure.storage;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import com.abiquo.server.core.enterprise.EnterpriseProperties;
+import com.abiquo.model.transport.MovedPermanentlyDto;
 
-public class test
+/**
+ * This Entity is the response of 301 moved volume.
+ * 
+ * @author sacedo
+ */
+@XmlRootElement(name = "moved")
+public class MovedVolumeDto extends MovedPermanentlyDto
 {
+    private VolumeManagementDto volume;
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args)
+    public VolumeManagementDto getVolume()
     {
-        EnterpriseProperties ep = new EnterpriseProperties();
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("Support e-mail", "support@abiquo.com");
-
-        ep.setProperties(map);
-
-        ep.isValid();
-
+        return volume;
     }
+
+    public void setVolume(final VolumeManagementDto volume)
+    {
+        this.volume = volume;
+    }
+
 }
