@@ -68,8 +68,6 @@ import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
  * @author apuig
  */
 @Service
-@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-// TODO method level
 public class VirtualMachineAllocatorService extends DefaultApiService
 {
     protected final static Logger LOG = LoggerFactory
@@ -120,7 +118,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     }
 
-
     /**
      * Check if we can allocate the new virtual machine according to the new values.
      * 
@@ -129,6 +126,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param newvmachine
      * @param foreceEnterpriseSoftLimits
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public void checkAllocate(final Integer idVirtualApp, final Integer virtualMachineId,
         final VirtualMachineRequirements increaseRequirements,
         final boolean foreceEnterpriseSoftLimits)
@@ -154,7 +152,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
             if (!check)
             {
-                final String cause = 
+                final String cause =
                     String.format("Current workload rules (RAM and CPU oversubscription) "
                         + "on the target machine: %s disallow the required resources increment.",
                         machine.getName());
@@ -302,8 +300,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    private VirtualMachine selectPhysicalMachineAndAllocateResources(final VirtualMachine vmachine,
-        final Integer vappId, final FitPolicy fitPolicy,
+    private synchronized VirtualMachine selectPhysicalMachineAndAllocateResources(
+        final VirtualMachine vmachine, final Integer vappId, final FitPolicy fitPolicy,
         final VirtualMachineRequirements requirements)
     {
 
@@ -348,6 +346,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param, vmachineId, an already allocated virtual machine (hypervisor and datastore are set)
      *         but we wants to move it.
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine allocateHAVirtualMachine(final Integer vmId,
         final VirtualMachineRequirements requirements, final VirtualMachineState targetState)
         throws AllocatorException, ResourceAllocationException
@@ -373,6 +372,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @param machine, the target machine holding the virtual machine to be undeployed.
      * @throws AllocationException, it there are some problem updating the physical machine
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deallocateVirtualMachine(final Integer idVirtualMachine)
     {
         VirtualMachine vmachine = virtualMachineDao.findById(idVirtualMachine);
@@ -419,9 +419,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      *             {@link SoftLimitExceededException} on ''foreceEnterpriseSoftLimits'' = false and
      *             the soft limit is exceeded.
      */
-    protected void checkLimist(final VirtualAppliance vapp,
-        final VirtualMachineRequirements required, final Boolean force)
-        throws LimitExceededException
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    public void checkLimist(final VirtualAppliance vapp, final VirtualMachineRequirements required,
+        final Boolean force) throws LimitExceededException
     {
 
         checkLimist(vapp, required, force, true);

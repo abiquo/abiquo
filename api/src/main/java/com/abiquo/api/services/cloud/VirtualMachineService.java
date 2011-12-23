@@ -1089,6 +1089,15 @@ public class VirtualMachineService extends DefaultApiService
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
+        allocate(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
+
+        return sendDeploy(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void allocate(final Integer vmId, final Integer vappId, final Integer vdcId,
+        final Boolean foreceEnterpriseSoftLimits)
+    {
         LOGGER.debug("Starting the deploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
@@ -1137,12 +1146,6 @@ public class VirtualMachineService extends DefaultApiService
             // We need to map all attached volumes if any
             initiatorMappings(virtualMachine);
             LOGGER.debug("Mapping done!");
-
-            VirtualMachineDescriptionBuilder vmDesc =
-                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
-
-            LOGGER.info("Generating the link to the status! {}", virtualMachine.getId());
-            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
         }
         catch (APIException e)
         {
@@ -1168,6 +1171,56 @@ public class VirtualMachineService extends DefaultApiService
                 EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
 
             unlockVirtualMachineState(virtualMachine, originalState);
+            vmAllocatorService.deallocateVirtualMachine(vmId);
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+        }
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public String sendDeploy(final Integer vmId, final Integer vappId, final Integer vdcId,
+        final Boolean foreceEnterpriseSoftLimits)
+    {
+
+        VirtualAppliance virtualAppliance =
+            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+
+        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        try
+        {
+
+            VirtualMachineDescriptionBuilder vmDesc =
+                jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
+
+            LOGGER.info("Generating the link to the status! {}", virtualMachine.getId());
+            return tarantino.deployVirtualMachine(virtualMachine, vmDesc);
+        }
+        catch (APIException e)
+        {
+            unlockVirtualMachineState(virtualMachine, VirtualMachineState.NOT_ALLOCATED);
+            /*
+             * Select a machine to allocate the virtual machine, Check limits, Check resources If
+             * one of the above fail we cannot allocate the VirtualMachine It also perform the
+             * resource recompute
+             */
+            if (virtualMachine.getHypervisor() != null)
+            {
+                vmAllocatorService.deallocateVirtualMachine(vmId);
+            }
+
+            throw e;
+        }
+        catch (Exception ex)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                "virtualMachine.deploy", virtualMachine.getName());
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
+
+            unlockVirtualMachineState(virtualMachine, VirtualMachineState.NOT_ALLOCATED);
             vmAllocatorService.deallocateVirtualMachine(vmId);
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);

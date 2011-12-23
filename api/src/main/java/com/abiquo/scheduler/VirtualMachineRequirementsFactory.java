@@ -23,8 +23,9 @@ package com.abiquo.scheduler;
 
 import org.springframework.stereotype.Component;
 
+import com.abiquo.server.core.cloud.NodeVirtualImage;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
 
 @Component
@@ -36,11 +37,28 @@ public class VirtualMachineRequirementsFactory
         long cpu = vmachine.getCpu();
         long ram = vmachine.getRam();
         long hd = vmachine.getHdInBytes();
-        long repository = vmachine.getVirtualMachineTemplate().getDiskFileSize(); // XXX or conversion
+        long repository = vmachine.getVirtualMachineTemplate().getDiskFileSize(); // XXX or
+                                                                                  // conversion
         // TODO get publicIps number
         // TODO get storage size
         // TODO get volume size
         return new VirtualMachineRequirements(cpu, ram, hd, repository, 0l, 0l, 0l);
+    }
+
+    public VirtualMachineRequirements createVirtualMachineRequirements(final VirtualAppliance vapp)
+    {
+        VirtualMachineRequirements allRequired =
+            new VirtualMachineRequirements(0l, 0l, 0l, 0l, 0l, 0l, 0l);
+
+        for (NodeVirtualImage nvi : vapp.getNodes())
+        {
+            VirtualMachineRequirements reqvm =
+                createVirtualMachineRequirements(nvi.getVirtualMachine());
+
+            allRequired.addRequirement(reqvm);
+        }
+
+        return allRequired;
     }
 
     public VirtualMachineRequirements createVirtualMachineRequirements(

@@ -42,8 +42,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
@@ -59,6 +61,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -424,6 +427,52 @@ public class VirtualApplianceService extends DefaultApiService
         }
     }
 
+    @Autowired
+    private VirtualMachineAllocatorService vmallocator;
+
+    private void allocateVirtualAppliance(final VirtualAppliance vapp,
+        final boolean foreceEnterpriseSoftLimits)
+    {
+        final Integer idVirtualApp = vapp.getId();
+        final Integer idVdc = vapp.getVirtualDatacenter().getId();
+
+        VirtualMachineRequirements required = requirements.createVirtualMachineRequirements(vapp);
+        vmallocator.checkLimist(vapp, required, foreceEnterpriseSoftLimits);
+
+        try
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+                final Integer virtualMachineId = nvi.getVirtualMachine().getId();
+
+                // XXX duplicated limit checker
+                vmService.allocate(virtualMachineId, idVirtualApp, idVdc,
+                    foreceEnterpriseSoftLimits);
+            }
+        }
+        catch (Exception e)
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+
+                VirtualMachine vm = nvi.getVirtualMachine();
+                if (vm.getState() == VirtualMachineState.ALLOCATED)
+                {
+                    vmallocator.deallocateVirtualMachine(vm.getId());
+
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vm.setDatastore(null);
+                    vm.setHypervisor(null);
+                    vm.setVdrpIP(null);
+                    vm.setVdrpPort(0);
+
+                    vmService.updateVirtualMachineBySystem(vm);
+                }
+            }
+        }
+
+    }
+
     /**
      * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
      * 
@@ -435,14 +484,16 @@ public class VirtualApplianceService extends DefaultApiService
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
+        allocateVirtualAppliance(virtualAppliance, Boolean.TRUE); // TODO force
+
         List<String> dto = new ArrayList<String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {
             try
             {
                 String link =
-                    vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
-                        vdcId, false);
+                    vmService.sendDeploy(machine.getVirtualMachine().getId(), vappId, vdcId, false);
+
                 dto.add(link);
             }
             catch (Exception e)
