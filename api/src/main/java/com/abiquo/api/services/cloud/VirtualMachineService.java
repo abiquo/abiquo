@@ -33,6 +33,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,9 +66,8 @@ import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoJobCreator;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.api.util.URIResolver;
-import com.abiquo.api.util.snapshot.SnapshotUtils;
-import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
-import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
+import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.enumerator.NetworkType;
@@ -1560,7 +1560,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param vdcId Virtual Datacenter Id
      * @return
      */
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final String snapshotName)
     {
@@ -1572,41 +1572,49 @@ public class VirtualMachineService extends DefaultApiService
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
         checkSnapshotAllowed(virtualMachine);
 
-        VirtualMachineState state = virtualMachine.getState();
+        VirtualMachineState originalState = virtualMachine.getState();
         lockVirtualMachine(virtualMachine);
 
         // Do the snapshot
-        VirtualMachineDescriptionBuilder definitionBuilder =
-            jobCreator.toTarantinoDto(virtualMachine, virtualApp);
-
-        if (!virtualMachine.isStateful() && virtualMachine.isManaged())
+        switch (SnapshotType.getSnapshotType(virtualMachine))
         {
-            VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
-            Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+            case FROM_ORIGINAL_DISK:
+            case FROM_DISK_CONVERSION:
+                return tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
+                    snapshotName);
 
-            VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+            case FROM_NOT_MANAGED_VIRTUALMACHINE:
+                return snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
+                    snapshotName);
 
-            DiskSnapshot destinationDisk = new DiskSnapshot();
-            destinationDisk.setRepository(infRep.findRepositoryByDatacenter(datacenter).getUrl());
-            destinationDisk.setPath(SnapshotUtils.formatSnapshotPath(template));
-            destinationDisk.setSnapshotFilename(SnapshotUtils.formatSnapshotName(template));
-            destinationDisk.setName(snapshotName);
-            destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
-                datacenter).getUri());
+            case FROM_STATEFUL_DISK:
+                // TODO
+                return null;
 
-            return tarantino.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
-                mustPowerOffToSnapshot(state));
+            default:
+                return null;
         }
-        // else if (!virtualMachine.isManaged()) // TODO
-        // else if (virtualMachine.isStateful()) // TODO
-
-        return null;
     }
 
-    protected boolean mustPowerOffToSnapshot(final VirtualMachineState virtualMachineState)
+    private String snapshotNotManagedVirtualMachine(VirtualAppliance virtualAppliance,
+        VirtualMachine virtualMachine, VirtualMachineState originalState, final String snapshotName)
     {
-        return virtualMachineState == VirtualMachineState.ON
-            || virtualMachineState == VirtualMachineState.PAUSED;
+        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
+        RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
+
+        ApplianceManagerResourceStubImpl am =
+            new ApplianceManagerResourceStubImpl(service.getUri());
+
+        String ovfPath =
+            am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
+                snapshotName);
+
+        String snapshotPath = FilenameUtils.getFullPath(ovfPath);
+        String snapshotFilename =
+            FilenameUtils.getName(virtualMachine.getVirtualMachineTemplate().getPath());
+
+        return tarantino.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName, snapshotPath, snapshotFilename);
     }
 
     /**
