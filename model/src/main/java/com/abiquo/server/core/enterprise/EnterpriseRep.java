@@ -128,7 +128,7 @@ public class EnterpriseRep extends DefaultRepBase
         enterprisePropertiesDAO.remove(ep);
     }
 
-    public void createEnterprisProperties(final Enterprise enterprise)
+    public void createEnterpriseProperties(final Enterprise enterprise)
     {
         enterprisePropertiesDAO.persist(new EnterpriseProperties(enterprise));
     }
