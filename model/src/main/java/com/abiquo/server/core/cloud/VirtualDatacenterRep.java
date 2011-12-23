@@ -382,6 +382,15 @@ public class VirtualDatacenterRep extends DefaultRepBase
             orderByEnum, descOrAsc, netType);
     }
 
+    public List<IpPoolManagement> findPublicIpsByEnterprise(final Integer datacenterId,
+        final Integer enterpriseId, final Integer startwith, final Integer limit,
+        final String filter, final OrderByEnum orderByEnum, final Boolean descOrAsc,
+        final NetworkType netType)
+    {
+        return ipManagementDAO.findPublicIpsByEnterpriseAndDatacenter(datacenterId, enterpriseId,
+            startwith, limit, filter, orderByEnum, descOrAsc, netType);
+    }
+
     public List<IpPoolManagement> findPublicIpsByVlan(final Integer datacenterId,
         final Integer vlanId, final Integer startwith, final Integer limit, final String filter,
         final OrderByEnum orderByEnum, final Boolean descOrAsc, final Boolean all)

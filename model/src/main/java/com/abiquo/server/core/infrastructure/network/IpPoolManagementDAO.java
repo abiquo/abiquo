@@ -71,6 +71,20 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
             + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
             + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
 
+    public static final String BY_DATACENTER_AND_ENTERPRISE =
+        " SELECT ip FROM "
+            + "Datacenter dc INNER JOIN dc.network net, VLANNetwork vlan "
+            + "INNER JOIN vlan.configuration conf, "
+            // "INNER JOIN conf.dhcp dhcp, "
+            + "IpPoolManagement ip LEFT JOIN ip.virtualMachine vm LEFT JOIN ip.virtualAppliance vapp "
+            + "LEFT JOIN ip.virtualDatacenter vdc LEFT JOIN vlan.enterprise ent "
+            + "WHERE net.id = vlan.network.id "
+            // +"AND dhcp.id = ip.dhcp.id"
+            + "AND ip.vlanNetwork.id = vlan.id "
+            + " AND dc.id = :datacenter_id AND "
+            + "( ip.ip LIKE :filterLike OR ip.mac LIKE :filterLike OR ip.networkName LIKE :filterLike OR "
+            + " vm.name like :filterLike OR vapp.name LIKE :filterLike OR ent.name LIKE :filterLike )";//
+
     public static final String BY_DEFAULT_VLAN_USED_BY_ANY_VDC =
         " SELECT ip FROM  virtualdatacenter vdc, ip_pool_management ip where "
             + "vdc.default_vlan_network_id=ip.vlan_network_id and vdc.default_vlan_network_id=:vlan_id";
@@ -705,6 +719,63 @@ public class IpPoolManagementDAO extends DefaultDAOBase<Integer, IpPoolManagemen
         {
             finalQuery.setParameter("type", type);
             finalQuery.setParameter("type2", type2);
+        }
+
+        // Check if the page requested is bigger than the last one
+        Integer totalResults = finalQuery.list().size();
+
+        if (limit != null)
+        {
+            finalQuery.setMaxResults(limit);
+        }
+
+        if (startwith >= totalResults)
+        {
+            startwith = totalResults - limit;
+        }
+        finalQuery.setFirstResult(startwith);
+        finalQuery.setMaxResults(limit);
+
+        PagedList<IpPoolManagement> ipList = new PagedList<IpPoolManagement>(finalQuery.list());
+        ipList.setTotalResults(totalResults);
+        ipList.setPageSize(limit);
+        ipList.setCurrentElement(startwith);
+
+        return ipList;
+    }
+
+    public List<IpPoolManagement> findPublicIpsByEnterpriseAndDatacenter(
+        final Integer datacenterId, final Integer enterpriseId, Integer startwith,
+        final Integer limit, final String filter, final OrderByEnum orderByEnum,
+        final Boolean descOrAsc, NetworkType type)
+    {
+        NetworkType type2 = type;
+        String query = BY_DATACENTER;
+        if (type != null)
+        {
+
+            if (type.equals(NetworkType.EXTERNAL_UNMANAGED))
+            {
+                type = NetworkType.EXTERNAL;
+                // to check. unecessary because with unmanaged vlan doesn't exist ips
+                type2 = NetworkType.UNMANAGED;
+            }
+            // Get the query that counts the total results.
+            query =
+                BY_DATACENTER
+                    + " AND ent.id = :enterpriseId AND (vlan.type = :type OR vlan.type  = :type2 )  ";
+        }
+
+        Query finalQuery =
+            getSession().createQuery(query + " " + defineOrderBy(orderByEnum, descOrAsc));
+        finalQuery.setParameter("datacenter_id", datacenterId);
+        finalQuery.setParameter("filterLike", filter == null || filter.isEmpty() ? "%" : "%"
+            + filter + "%");
+        if (type != null)
+        {
+            finalQuery.setParameter("type", type);
+            finalQuery.setParameter("type2", type2);
+            finalQuery.setParameter("enterpriseId", enterpriseId);
         }
 
         // Check if the page requested is bigger than the last one
