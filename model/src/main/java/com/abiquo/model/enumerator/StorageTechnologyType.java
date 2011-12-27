@@ -31,7 +31,9 @@ public enum StorageTechnologyType
 
     NETAPP(80, 3260),
 
-    GENERIC_ISCSI(3260, 3260);
+    GENERIC_ISCSI(3260, 3260),
+
+    VNX(80, 3260);
 
     private Integer defaultManagementPort;
 
