@@ -24,10 +24,8 @@ package com.abiquo.abiserver.services.flex;
 import java.util.ArrayList;
 
 import com.abiquo.abiserver.business.BusinessDelegateProxy;
-import com.abiquo.abiserver.commands.BundleCommand;
 import com.abiquo.abiserver.commands.InfrastructureCommand;
 import com.abiquo.abiserver.commands.VirtualApplianceCommand;
-import com.abiquo.abiserver.commands.impl.BundleCommandImpl;
 import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.impl.VirtualApplianceCommandImpl;
 import com.abiquo.abiserver.commands.stub.APIStubFactory;
@@ -352,33 +350,8 @@ public class NonBlockingService
         final VirtualAppliance virtualAppliance, final ArrayList<Node> nodes,
         final Boolean updateNodes)
     {
-        BundleCommand bundleCommand = null;
-
-        try
-        {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            bundleCommand =
-                (BundleCommand) cl.loadClass(
-                    "com.abiquo.abiserver.commands.impl.BundleCommandPremium").newInstance();
-        }
-        catch (ClassNotFoundException ex)
-        {
-            bundleCommand = new BundleCommandImpl();
-        }
-        catch (Exception ex)
-        {
-            BasicResult result = new BasicResult();
-            result.setSuccess(false);
-            result.setMessage("Unable to instance the implementation of bundle service.");
-
-            return result;
-        }
-
-        BundleCommand command =
-            BusinessDelegateProxy.getInstance(session, bundleCommand, BundleCommand.class);
-
-        return command
-            .bundleVirtualAppliance(session, virtualAppliance, new ArrayList<Node>(nodes));
+        return proxyVirtualMachineResourceStub(session).instanceVirtualMachines(
+            virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId(), nodes);
     }
 
     public BasicResult getVirtualApplianceLogs(final UserSession userSession,

@@ -323,26 +323,6 @@ public class VirtualMachineService extends DefaultApiService
         newvm.setDatastore(virtualMachine.getDatastore());
         newvm.setHypervisor(virtualMachine.getHypervisor());
 
-        if (checkReconfigureTemplate(virtualMachine.getVirtualMachineTemplate(),
-            newvm.getVirtualMachineTemplate()))
-        {
-            LOGGER.debug("Will reconfigure the vm template");
-
-            if (virtualMachine.getState().existsInHypervisor())
-            {
-                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
-                flushErrors();
-            }
-
-            // already checked is not attached
-            if (newvm.getVirtualMachineTemplate().isStateful())
-            {
-                LOGGER.debug("Attaching virtual machine template volume");
-                newvm.getVirtualMachineTemplate().getVolume().attach(0, virtualMachine);
-                // primary disk sequence == 0
-            }
-        }
-
         return reconfigureVirtualMachine(vdc, virtualAppliance, virtualMachine, newvm);
     }
 
@@ -370,6 +350,26 @@ public class VirtualMachineService extends DefaultApiService
     public String reconfigureVirtualMachine(final VirtualDatacenter vdc,
         final VirtualAppliance vapp, final VirtualMachine vm, final VirtualMachine newValues)
     {
+        if (checkReconfigureTemplate(vm.getVirtualMachineTemplate(),
+            newValues.getVirtualMachineTemplate()))
+        {
+            LOGGER.debug("Will reconfigure the vm template");
+
+            if (vm.getState().existsInHypervisor())
+            {
+                addConflictErrors(APIError.VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR);
+                flushErrors();
+            }
+
+            // already checked is not attached
+            if (newValues.getVirtualMachineTemplate().isStateful())
+            {
+                LOGGER.debug("Attaching virtual machine template volume");
+                newValues.getVirtualMachineTemplate().getVolume().attach(0, vm);
+                // primary disk sequence == 0
+            }
+        }
+
         LOGGER.debug("Starting the reconfigure of the virtual machine {}", vm.getId());
 
         LOGGER.debug("Check for permissions");
@@ -1543,8 +1543,9 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    private String snapshotNotManagedVirtualMachine(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, VirtualMachineState originalState, final String snapshotName)
+    private String snapshotNotManagedVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
