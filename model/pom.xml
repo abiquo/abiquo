@@ -331,6 +331,7 @@
                                 <include>**/cloud/VirtualMachineState.class</include>
                                 <include>**/cloud/VirtualMachineStateTransition.class</include>
                                 <include>**/Job*.class</include>
+                                <include>com/abiquo/server/core/task/enums/*.class</include>
                             </includes>
                         </configuration>
                     </execution>

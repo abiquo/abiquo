@@ -24,6 +24,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyString;
 
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescr
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 
 /**
  * Mock class to simulate {@link TarantinoService} behavior.
@@ -62,8 +64,10 @@ public class TarantinoServiceMock extends TarantinoService
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
-        when(mock.snapshotVirtualMachine(anyVM(), anyDef(), anyDiskSnapshot(), anyBoolean()))
-            .thenReturn(randomTaskId());
+        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), 
+            anyString())).thenReturn(randomTaskId());
+        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
+            anyString(), anyString(), anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
             .thenReturn(randomTaskId());
 
@@ -115,12 +119,20 @@ public class TarantinoServiceMock extends TarantinoService
     }
 
     @Override
-    public String snapshotVirtualMachine(final VirtualMachine virtualMachine,
-        final VirtualMachineDefinition definition, final DiskSnapshot destinationDisk,
-        final boolean mustPowerOffToSnapshot)
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
-        return mock.snapshotVirtualMachine(virtualMachine, definition, destinationDisk,
-            mustPowerOffToSnapshot);
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState, 
+            snapshotName);
+    }
+
+    public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName, final String snapshotPath, final String snapshotFilename)
+    {
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState, 
+            snapshotName, snapshotPath, snapshotFilename);
     }
 
     // Helper methods
@@ -155,9 +167,13 @@ public class TarantinoServiceMock extends TarantinoService
         return (DiskSnapshot) any();
     }
 
+    private static VirtualAppliance anyVirtualAppliance()
+    {
+        return (VirtualAppliance) any();
+    }
+
     private static String randomTaskId()
     {
         return UUID.randomUUID().toString();
     }
-
 }
