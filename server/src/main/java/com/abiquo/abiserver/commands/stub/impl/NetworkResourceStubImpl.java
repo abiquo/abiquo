@@ -485,7 +485,7 @@ public class NetworkResourceStubImpl extends AbstractAPIStub implements NetworkR
             }
             ListResponse<Enterprise> listResponse = new ListResponse<Enterprise>();
             listResponse.setList(listEnt);
-            listResponse.setTotalNumEntities(listEnt.size());
+            listResponse.setTotalNumEntities(enterprises.getTotalSize());
 
             dataResult.setData(listResponse);
             dataResult.setSuccess(Boolean.TRUE);
