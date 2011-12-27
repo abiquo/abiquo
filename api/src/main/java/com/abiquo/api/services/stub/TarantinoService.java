@@ -609,6 +609,20 @@ public class TarantinoService extends DefaultApiService
         return null;
     }
 
+    /**
+     * Wrapper of
+     * {@link TarantinoService#snapshotVirtualMachine(VirtualAppliance, VirtualMachine, VirtualMachineState, String, String, String)}
+     * that uses {@link SnapshotUtils#formatSnapshotPath(VirtualMachineTemplate)} and
+     * {@link SnapshotUtils#formatSnapshotFilename(VirtualMachineTemplate)} to build the instance
+     * path and filename.
+     * 
+     * @param virtualAppliance The {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            located.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param snapshotName The final name of the {@link VirtualMachineTemplate}.
+     * @return The {@link Task} UUID for progress tracking
+     */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
@@ -621,6 +635,20 @@ public class TarantinoService extends DefaultApiService
             SnapshotUtils.formatSnapshotFilename(template));
     }
 
+    /**
+     * Builds a {@link DiskSnapshot} from a {@link VirtualMachine} and call to
+     * {@link TarantinoService#createAndSendVirtualMachineInstance(VirtualAppliance, VirtualMachine, VirtualMachineState, DiskSnapshot)}
+     * to start the instance process.
+     * 
+     * @param virtualAppliance The {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            located.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param snapshotName The final name of the {@link VirtualMachineTemplate}.
+     * @param snapshotPath Path where the instance will be created.
+     * @param snapshotFilename Filename of the instance.
+     * @return The {@link Task} UUID for progress tracking
+     */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
@@ -636,11 +664,21 @@ public class TarantinoService extends DefaultApiService
         destinationDisk.setRepositoryManagerAddress(remoteServiceService.getAMRemoteService(
             datacenter).getUri());
 
-        return snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+        return createAndSendVirtualMachineInstance(virtualAppliance, virtualMachine, originalState,
             destinationDisk);
     }
 
-    private String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
+    /**
+     * Creates and sends an instance operation.
+     * 
+     * @param virtualAppliance The {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            located.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param destinationDisk The destination {@link DiskSnapshot}.
+     * @return The {@link Task} UUID for progress tracking
+     */
+    private String createAndSendVirtualMachineInstance(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final DiskSnapshot destinationDisk)
     {
@@ -708,67 +746,6 @@ public class TarantinoService extends DefaultApiService
         // addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
         // flushErrors();
         // }
-    }
-
-    /**
-     * Creates and sends a deploy operation.
-     * 
-     * @param virtualMachine The virtual machine to reconfigure.
-     * @param originalConfig The original configuration for the virtual machine.
-     * @param newConfig The new configuration for the virtual machine.
-     * @return The identifier of the reconfigure task.
-     */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    public String virtualMachineSnapshot(final VirtualMachine virtualMachine,
-        final VirtualMachineDescriptionBuilder virtualMachineDesciptionBuilder,
-        final DiskSnapshot diskSnapshot)
-    {
-        Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
-        // ignoreVSMEventsIfNecessary(datacenter, virtualMachine);
-
-        try
-        {
-            HypervisorConnection conn =
-                jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
-            DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
-
-            DatacenterTasks deployTask = builder.addSnapshot(diskSnapshot).buildTarantinoTask();
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                getTaskTypeFromTransition(VirtualMachineStateTransition.SNAPSHOT)));
-
-            send(datacenter, deployTask, EventType.VM_STATE);
-
-            return deployTask.getId();
-        }
-        catch (NotFoundException e)
-        {
-            // We need to unsuscribe the machine
-            logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
-                + e.getMessage() + " machine: " + virtualMachine.getName());
-
-            throw e;
-        }
-        catch (RuntimeException e)
-        {
-            logger.error("Error enqueuing the state change task dto to Tarantino with error: "
-                + e.getMessage());
-
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-                APIError.GENERIC_OPERATION_ERROR.getMessage());
-
-            // For the Admin to know all errors
-            tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
-
-            // There is no point in continue
-            addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
-            flushErrors();
-        }
-        return null;
     }
 
     /**

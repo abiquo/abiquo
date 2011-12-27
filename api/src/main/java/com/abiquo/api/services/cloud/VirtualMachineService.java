@@ -109,6 +109,7 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -1500,12 +1501,12 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Snapshot a {@link VirtualMachine}.
+     * Instance a {@link VirtualMachine}, handles all instance types {@link SnapshotType}.
      * 
-     * @param vmId Virtual Machine Id
-     * @param vappId Virtual Appliance Id
-     * @param vdcId Virtual Datacenter Id
-     * @return
+     * @param vmId {@link VirtualMachine} Id
+     * @param vappId {@link VirtualAppliance} Id
+     * @param vdcId {@link VirtualDatacenter} Id
+     * @return The {@link Task} UUID
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
@@ -1522,7 +1523,7 @@ public class VirtualMachineService extends DefaultApiService
         VirtualMachineState originalState = virtualMachine.getState();
         lockVirtualMachine(virtualMachine);
 
-        // Do the snapshot
+        // Do the instance
         switch (SnapshotType.getSnapshotType(virtualMachine))
         {
             case FROM_ORIGINAL_DISK:
@@ -1543,6 +1544,16 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
+    /**
+     * Performs an instance of type {@link SnapshotType#FROM_NOT_MANAGED_VIRTUALMACHINE}
+     * 
+     * @param virtualAppliance {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            contained.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param snapshotName The final name of the {@link VirtualMachineTemplate}
+     * @return The {@link Task} UUID for progress tracking
+     */
     private String snapshotNotManagedVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final String snapshotName)
@@ -1550,6 +1561,7 @@ public class VirtualMachineService extends DefaultApiService
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
 
+        // Create the folder structure in the destination repository
         ApplianceManagerResourceStubImpl am =
             new ApplianceManagerResourceStubImpl(service.getUri());
 
@@ -1557,6 +1569,7 @@ public class VirtualMachineService extends DefaultApiService
             am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
                 snapshotName);
 
+        // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
         String snapshotFilename =
             FilenameUtils.getName(virtualMachine.getVirtualMachineTemplate().getPath());
