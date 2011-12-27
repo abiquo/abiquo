@@ -21,21 +21,24 @@
 
 package com.abiquo.abiserver.commands.stub.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wink.client.ClientConfig;
 import org.apache.wink.client.ClientResponse;
 import org.apache.wink.client.Resource;
 import org.apache.wink.client.RestClient;
 import org.apache.wink.common.internal.utils.UriHelper;
-import org.jclouds.abiquo.domain.cloud.VirtualDatacenter;
 
+import com.abiquo.abiserver.abicloudws.AbiCloudConstants;
+import com.abiquo.abiserver.business.UserSessionException;
 import com.abiquo.abiserver.commands.BasicCommand;
-import com.abiquo.abiserver.commands.impl.InfrastructureCommandImpl;
 import com.abiquo.abiserver.commands.stub.AbstractAPIStub;
 import com.abiquo.abiserver.commands.stub.VirtualMachineResourceStub;
 import com.abiquo.abiserver.exception.HardLimitExceededException;
@@ -46,10 +49,13 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
-import com.abiquo.abiserver.pojo.virtualappliance.VirtualAppliance;
+import com.abiquo.abiserver.pojo.virtualappliance.Node;
+import com.abiquo.abiserver.pojo.virtualappliance.NodeVirtualImage;
+import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
+import com.abiquo.server.core.cloud.VirtualMachineSnapshotDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.tracer.ComponentType;
@@ -57,7 +63,9 @@ import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.Platform;
 import com.abiquo.tracer.SeverityType;
 import com.abiquo.tracer.client.TracerFactory;
+import com.abiquo.util.ErrorManager;
 import com.abiquo.util.URIResolver;
+import com.abiquo.util.resources.ResourceManager;
 
 public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
     VirtualMachineResourceStub
@@ -365,7 +373,76 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
             VirtualMachineState.PAUSED);
     }
 
-    // private VirtualMachineDto getVirtualMachine(Integer virtualMachineId) {
-    //
-    // }
+    @Override
+    public DataResult instanceVirtualMachines(Integer virtualDatacenterId,
+        Integer virtualApplianceId, Collection<Node> nodes)
+    {
+        Collection<RESTLink> links = new HashSet<RESTLink>();
+        StringBuilder errors = new StringBuilder();
+        DataResult result = new DataResult();
+
+        for (Node node : nodes)
+        {
+            NodeVirtualImage nvi = (NodeVirtualImage) node;
+            Integer virtualMachineId = nvi.getVirtualMachine().getId();
+            String instanceName = node.getName();
+
+            String url =
+                createVirtualMachineInstanceUrl(virtualDatacenterId, virtualApplianceId,
+                    virtualMachineId);
+
+            VirtualMachineSnapshotDto options = new VirtualMachineSnapshotDto();
+            options.setSnapshotName(instanceName);
+
+            ClientResponse response = post(url, options);
+
+            if (response.getStatusCode() == 202)
+            {
+                AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
+                links.addAll(entity.getLinks());
+            }
+            else
+            {
+                addErrors(result, errors, response, "instanceVirtualMachines");
+            }
+        }
+
+        result.setData(links);
+        result.setMessage(errors.toString());
+        result.setSuccess(StringUtils.isBlank(result.getMessage()));
+
+        return result;
+    }
+
+    private void addErrors(final DataResult result, final StringBuilder errors,
+        final ClientResponse response, final String method)
+    {
+        if (response.getStatusCode() == 401 || response.getStatusCode() == 403)
+        {
+            ErrorManager.getInstance(AbiCloudConstants.ERROR_PREFIX).reportError(
+                new ResourceManager(BasicCommand.class), result,
+                "onFaultAuthorization.noPermission", method);
+
+            result.setMessage(response.getMessage());
+            result.setResultCode(BasicResult.NOT_AUTHORIZED);
+            throw new UserSessionException(result);
+        }
+
+        Object entity = response.getEntity(Object.class);
+
+        if (entity instanceof ErrorsDto)
+        {
+            ErrorsDto error = (ErrorsDto) entity;
+            errors.append("\n").append(error.toString());
+
+            if (error.getCollection().get(0).getCode().equals("LIMIT_EXCEEDED"))
+            {
+                result.setResultCode(BasicResult.HARD_LIMT_EXCEEDED);
+            }
+        }
+        else
+        {
+            errors.append("\n").append(response.getEntity(String.class));
+        }
+    }
 }

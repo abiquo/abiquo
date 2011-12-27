@@ -707,7 +707,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             result.setSuccess(Boolean.TRUE);
             AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
             result.setData(entity.getLinks());
-
         }
         else
         {
