@@ -146,7 +146,7 @@ public class RoleResource extends AbstractResource
                 .getPrivileges());
         }
 
-        return addPrivilegeLinks(restBuilder, role.getPrivileges());
+        return PrivilegesResource.addPrivilegesLinks(restBuilder, role.getPrivileges());
     }
 
     /**
