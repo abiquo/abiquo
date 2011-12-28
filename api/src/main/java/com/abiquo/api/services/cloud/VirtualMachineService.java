@@ -1038,7 +1038,7 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Create node virtual image with name virtual machine: {}",
             virtualMachine.getName());
         NodeVirtualImage nodeVirtualImage =
-            new NodeVirtualImage(virtualMachine.getName(),
+            new NodeVirtualImage(virtualMachine.getVirtualMachineTemplate().getName(),
                 virtualAppliance,
                 virtualMachine.getVirtualMachineTemplate(),
                 virtualMachine);
