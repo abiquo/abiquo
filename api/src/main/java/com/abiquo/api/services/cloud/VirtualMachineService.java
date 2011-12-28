@@ -77,6 +77,7 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -1089,6 +1090,7 @@ public class VirtualMachineService extends DefaultApiService
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
+
         allocate(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
 
         return sendDeploy(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
@@ -1098,6 +1100,7 @@ public class VirtualMachineService extends DefaultApiService
     public void allocate(final Integer vmId, final Integer vappId, final Integer vdcId,
         final Boolean foreceEnterpriseSoftLimits)
     {
+
         LOGGER.debug("Starting the deploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
@@ -1139,8 +1142,12 @@ public class VirtualMachineService extends DefaultApiService
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
              * one of the above fail we cannot allocate the VirtualMachine
              */
-            vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
+            virtualMachine =
+                vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
+
+            // refresh due SchedulerLock modifications
+            repo.detachHypervisor(virtualMachine);
 
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
@@ -1171,7 +1178,11 @@ public class VirtualMachineService extends DefaultApiService
                 EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
 
             unlockVirtualMachineState(virtualMachine, originalState);
-            vmAllocatorService.deallocateVirtualMachine(vmId);
+
+            if (virtualMachine.getHypervisor() != null)
+            {
+                vmAllocatorService.deallocateVirtualMachine(vmId);
+            }
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();
@@ -1596,8 +1607,9 @@ public class VirtualMachineService extends DefaultApiService
         }
     }
 
-    private String snapshotNotManagedVirtualMachine(VirtualAppliance virtualAppliance,
-        VirtualMachine virtualMachine, VirtualMachineState originalState, final String snapshotName)
+    private String snapshotNotManagedVirtualMachine(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final VirtualMachineState originalState,
+        final String snapshotName)
     {
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getAMRemoteService(datacenter);

@@ -36,6 +36,7 @@ import com.abiquo.model.enumerator.FitPolicy;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.scheduler.ResourceUpgradeUseException;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineFactory;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.scheduler.check.IMachineCheck;
@@ -72,9 +73,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 {
     protected final static Logger LOG = LoggerFactory
         .getLogger(VirtualMachineAllocatorService.class);
-
-    /** If the check machine fails, how many times the allocator try a new target machine. */
-    protected final static Integer RETRIES_AFTER_CHECK = 5;
 
     @Autowired
     private VirtualMachineRequirementsFactory vmRequirements;
@@ -189,6 +187,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
     /**
      * Creates a virtual machine using some hypervisor on the current virtual appliance datacenter.
+     * <p>
+     * Physical Infrastructure synchronized. @see {@link SchedulerLock}
      * 
      * @param targetImage, target vmtemplate to deploy (virtual machine template). Determine basic
      *            resource utilization (CPU, RAM, HD) (additionally repository utilization)
@@ -213,64 +213,24 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         final Integer idVirtualApp, final Boolean foreceEnterpriseSoftLimits)
     {
 
-        VirtualMachine allocatedVirtualMachine = null;
-        final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
-        final VirtualMachineRequirements requirements =
-            vmRequirements.createVirtualMachineRequirements(vmachine);
-        final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+        final String msg = String.format("Allocate %d", virtualMachineId);
 
         try
         {
+            SchedulerLock.acquire(msg);
+
+            final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
+            final VirtualMachineRequirements requirements =
+                vmRequirements.createVirtualMachineRequirements(vmachine);
+            final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
 
-            /*
-             * ENTERPRISE LIMIT CHECK
-             */
             checkLimist(vapp, requirements, foreceEnterpriseSoftLimits);
 
-            /*
-             * PHYSICAL MACHINE ALLOCATION
-             */
-            Machine targetMachine = null;
-
-            int retry = 0;
-            String errorCause = null;
-            while (targetMachine == null && retry < RETRIES_AFTER_CHECK)
-            {
-                retry++;
-
-                allocatedVirtualMachine =
-                    selectPhysicalMachineAndAllocateResources(vmachine, idVirtualApp, fitPolicy,
-                        requirements);
-                targetMachine = allocatedVirtualMachine.getHypervisor().getMachine();
-
-                // BEST REAL MACHINE
-                if (!machineChecker.check(targetMachine))
-                {
-                    upgradeUse.rollbackUse(allocatedVirtualMachine);
-
-                    LOG.error("Machine [{}] is not MANAGED", targetMachine.getName());
-                    errorCause =
-                        String.format("Machine : %s error: %s", targetMachine.getName(),
-                            "is not MANAGED");
-                    targetMachine = null;
-
-                }
-            }// retry until check
-
-            // SOME CANDIDATE ?
-            if (targetMachine == null)
-            {
-                final String cause =
-                    String.format(
-                        "Allocator can not select a machine on the current virtual datacenter. "
-                            + "Last candidate error : %s.", errorCause != null ? errorCause
-                            : "can not be confirmed as MANAGED.");
-                throw new NotEnoughResourcesException(cause);
-            }
-
-            return allocatedVirtualMachine;
+            return selectPhysicalMachineAndAllocateResources(vmachine, idVirtualApp, fitPolicy,
+                requirements);
         }
         catch (NotEnoughResourcesException e)
         {
@@ -293,15 +253,16 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         finally
         {
+            SchedulerLock.release(msg);
             flushErrors();
         }
 
-        return vmachine; // unreachable code
+        return null; // unreachable code
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
-    private synchronized VirtualMachine selectPhysicalMachineAndAllocateResources(
-        final VirtualMachine vmachine, final Integer vappId, final FitPolicy fitPolicy,
+    private VirtualMachine selectPhysicalMachineAndAllocateResources(final VirtualMachine vmachine,
+        final Integer vappId, final FitPolicy fitPolicy,
         final VirtualMachineRequirements requirements)
     {
 
@@ -313,9 +274,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         // CREATE THE VIRTUAL MACHINE
         VirtualMachine allocatedVirtualMachine =
             vmFactory.createVirtualMachine(targetMachine, vmachine);
-
-        // refresh vmachine with the information added on the VirtualMachineFactory
-        // virtualMachineDao.flush(); // FIXME
 
         try
         {
@@ -355,7 +313,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return null;
     }
 
-    private CommonError createErrorWithExceptionDetails(final APIError apiError,
+    protected CommonError createErrorWithExceptionDetails(final APIError apiError,
         final Integer virtualMachineId, final Exception e)
     {
         final String msg =
@@ -368,6 +326,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     /**
      * Roll back the changes on the target physical machine after the virtual machine is destroyed
      * (of excluded by some exception on the virtual machine creation on the hypervisor).
+     * <p>
+     * Physical Infrastructure synchronized. @see {@link SchedulerLock}
      * 
      * @param machine, the target machine holding the virtual machine to be undeployed.
      * @throws AllocationException, it there are some problem updating the physical machine
@@ -375,10 +335,14 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deallocateVirtualMachine(final Integer idVirtualMachine)
     {
-        VirtualMachine vmachine = virtualMachineDao.findById(idVirtualMachine);
 
+        final String msg = String.format("Deallocate %d", idVirtualMachine);
         try
         {
+            SchedulerLock.acquire(msg);
+
+            VirtualMachine vmachine = virtualMachineDao.findById(idVirtualMachine);
+
             upgradeUse.rollbackUse(vmachine);
         }
         catch (ResourceUpgradeUseException e)
@@ -390,11 +354,13 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         finally
         {
+            SchedulerLock.release(msg);
+
             flushErrors();
         }
     }
 
-    private String virtualMachineInfo(final Integer vmid)
+    protected String virtualMachineInfo(final Integer vmid)
     {
         VirtualMachine vm = virtualMachineDao.findById(vmid);
 

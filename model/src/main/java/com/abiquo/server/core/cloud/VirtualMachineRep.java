@@ -241,4 +241,14 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         return dao.findBackup(vmachine);
     }
+
+    public void refresh(final VirtualMachine vmachine)
+    {
+        dao.refresh(vmachine);
+    }
+
+    public void detachHypervisor(final VirtualMachine vm)
+    {
+        dao.detachHypervisor(vm);
+    }
 }
