@@ -27,12 +27,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -58,7 +60,7 @@ import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -114,6 +116,8 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
+    
+    public static final String FORCE_UNDEPLOY = "force";
 
     @Autowired
     private VirtualMachineService vmService;
@@ -352,7 +356,7 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineDeployDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
+        final VirtualMachineTaskDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
         String taskId =
@@ -437,9 +441,19 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
+        final VirtualMachineTaskDto taskOptions,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId = vmService.undeployVirtualMachine(vmId, vappId, vdcId);
+        Boolean forceUndeploy;
+        if (taskOptions.getForceUndeploy() == null)
+        {
+            forceUndeploy = Boolean.FALSE;
+        }
+        else
+        {
+            forceUndeploy = taskOptions.getForceUndeploy();
+        }
+        String taskId = vmService.undeployVirtualMachine(vmId, vappId, vdcId, forceUndeploy);
 
         // If the link is null no Task was performed
         if (taskId == null)
@@ -530,9 +544,12 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineTemplate virtualImage =
             v.getVirtualImage() == null ? null : v.getVirtualImage();
 
-        dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-            .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
-
+        if (!v.getVirtualMachine().isImported())
+        {
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
+                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
+        }
+        
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),

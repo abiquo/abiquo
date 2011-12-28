@@ -49,6 +49,7 @@ import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualApplianceStateDto;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpsPoolManagementDto;
 
@@ -224,10 +225,20 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
+        final VirtualMachineTaskDto taskOptions,
         @Context final IRESTBuilder restBuilder)
     {
+        Boolean forceUndeploy;
+        if (taskOptions.getForceUndeploy() == null)
+        {
+            forceUndeploy = Boolean.FALSE;
+        }
+        else
+        {
+            forceUndeploy = taskOptions.getForceUndeploy();
+        }
+        List<String> links = service.undeployVirtualAppliance(vdcId, vappId, forceUndeploy);
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-        List<String> links = service.undeployVirtualAppliance(vdcId, vappId);
         addStatusLinks(links, dto);
         return dto;
     }

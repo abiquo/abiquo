@@ -316,6 +316,13 @@ public class VirtualMachineService extends DefaultApiService
         VirtualAppliance virtualAppliance =
             getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
+        // we currently don't allow to reconfigure imported virtual machines
+        if (virtualMachine.isImported())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
+            flushErrors();
+        }
+        
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
                                                    // to update the virtualMachine.
@@ -1238,7 +1245,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine with a state void
      */
     private void checkVirtualMachineStateAllowsReconfigure(final VirtualMachine virtualMachine)
-    {
+    {   
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
@@ -1253,6 +1260,15 @@ public class VirtualMachineService extends DefaultApiService
                     + "\n" + current);
 
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
+            flushErrors();
+        }
+        
+        if (virtualMachine.isImported())
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
+        
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
         }
 
@@ -1331,7 +1347,7 @@ public class VirtualMachineService extends DefaultApiService
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public String undeployVirtualMachine(final Integer vmId, final Integer vappId,
-        final Integer vdcId)
+        final Integer vdcId, final Boolean forceUndeploy)
     {
         LOGGER.debug("Starting the undeploy of the virtual machine {}", vmId);
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
@@ -1360,6 +1376,12 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER
             .debug("The virtual machine id {} is in an appropriate state", virtualMachine.getId());
 
+        if (!forceUndeploy && virtualMachine.isImported())
+        {
+            addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
+            flushErrors();
+        }
+        
         VirtualMachineState originalState = virtualMachine.getState();
 
         try
