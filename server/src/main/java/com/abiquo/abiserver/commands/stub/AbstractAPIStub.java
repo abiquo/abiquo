@@ -1556,6 +1556,21 @@ public class AbstractAPIStub
                 params);
     }
 
+    protected String createVirtualMachineInstanceUrl(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, final Integer virtualMachineId)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("virtualDatacenter", String.valueOf(virtualDatacenterId));
+        params.put("virtualApplianceId", String.valueOf(virtualApplianceId));
+        params.put("virtualMachineId", String.valueOf(virtualMachineId));
+
+        return URIResolver
+            .resolveURI(
+                apiUri,
+                "cloud/virtualdatacenters/{virtualDatacenter}/virtualappliances/{virtualApplianceId}/virtualmachines/{virtualMachineId}/action/instance",
+                params);
+    }
+
     protected String createVirtualApplianceUrl(final Integer virtualDatacenterId,
         final Integer virtualApplianceId)
     {

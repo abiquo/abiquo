@@ -521,10 +521,23 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId)
+    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId, final Boolean forceUndeploy)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-
+        
+        // first check if there is any imported virtualmachine.
+        if (!forceUndeploy)
+        {
+            for(NodeVirtualImage node : virtualAppliance.getNodes())
+            {
+                if (node.getVirtualMachine().isImported())
+                {
+                    addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
+                    flushErrors();
+                }
+            }
+        }
+        
         List<String> dto = new ArrayList<String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {
@@ -532,7 +545,7 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 String link =
                     vmService.undeployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
-                        vdcId);
+                        vdcId, forceUndeploy);
                 dto.add(link);
             }
             catch (Exception e)

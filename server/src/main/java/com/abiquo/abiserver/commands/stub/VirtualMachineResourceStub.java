@@ -21,6 +21,8 @@
 
 package com.abiquo.abiserver.commands.stub;
 
+import java.util.Collection;
+
 import com.abiquo.abiserver.exception.HardLimitExceededException;
 import com.abiquo.abiserver.exception.NotEnoughResourcesException;
 import com.abiquo.abiserver.exception.SchedulerException;
@@ -29,12 +31,12 @@ import com.abiquo.abiserver.pojo.authentication.UserSession;
 import com.abiquo.abiserver.pojo.infrastructure.VirtualMachine;
 import com.abiquo.abiserver.pojo.result.BasicResult;
 import com.abiquo.abiserver.pojo.result.DataResult;
+import com.abiquo.abiserver.pojo.virtualappliance.Node;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 
 public interface VirtualMachineResourceStub
 
 {
-
     @Deprecated
     void allocate(UserSession userSession, Integer virtualDatacenterId, Integer virtualApplianceId,
         Integer virtualMachineId, boolean forceEnterpirseLimits) throws HardLimitExceededException,
@@ -64,4 +66,6 @@ public interface VirtualMachineResourceStub
     DataResult pauseVirtualMachine(final Integer virtualDatacenterId,
         final Integer virtualApplianceId, VirtualMachine virtualMachine);
 
+    DataResult instanceVirtualMachines(final Integer virtualDatacenterId,
+        final Integer virtualApplianceId, Collection<Node> nodes);
 }

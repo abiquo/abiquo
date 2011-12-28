@@ -72,7 +72,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
-import com.abiquo.server.core.cloud.VirtualMachineDeployDto;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
@@ -112,7 +112,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
         DataResult result = new DataResult();
         String link = createVirtualApplianceDeployLink(virtualDatacenterId, virtualApplianceId);
 
-        VirtualMachineDeployDto options = new VirtualMachineDeployDto();
+        VirtualMachineTaskDto options = new VirtualMachineTaskDto();
         options.setForceEnterpriseSoftLimits(forceEnterpriseSoftLimits);
 
         ClientResponse response = post(link, options);
@@ -707,7 +707,6 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             result.setSuccess(Boolean.TRUE);
             AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
             result.setData(entity.getLinks());
-
         }
         else
         {

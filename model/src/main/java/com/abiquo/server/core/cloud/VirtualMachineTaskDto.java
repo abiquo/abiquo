@@ -32,8 +32,8 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
  * 
  * @author ssedano
  */
-@XmlRootElement(name = "virtualMachineDeploy")
-public class VirtualMachineDeployDto extends SingleResourceTransportDto implements Serializable
+@XmlRootElement(name = "virtualMachineTask")
+public class VirtualMachineTaskDto extends SingleResourceTransportDto implements Serializable
 {
 
     /**
@@ -50,6 +50,15 @@ public class VirtualMachineDeployDto extends SingleResourceTransportDto implemen
      * </ul>
      */
     private Boolean forceEnterpriseSoftLimits;
+    
+    
+    /**
+     * Imported machines does not have the image stored in an Abiquo repo. If we 
+     * undpeloy them, we have lost the image and it is unrecoverable. Use it if you
+     * force to undeploy imported VirtualMachines.
+     */
+    private Boolean forceUndeploy;
+    
 
     /**
      * Force the soft limits defined for the enterprise in the deploy. <br>
@@ -86,5 +95,21 @@ public class VirtualMachineDeployDto extends SingleResourceTransportDto implemen
     public void setForceEnterpriseSoftLimits(final Boolean forceEnterpriseSoftLimits)
     {
         this.forceEnterpriseSoftLimits = forceEnterpriseSoftLimits;
+    }
+
+    /**
+     * @param forceUndeploy
+     */
+    public void setForceUndeploy(Boolean forceUndeploy)
+    {
+        this.forceUndeploy = forceUndeploy;
+    }
+
+    /**
+     * @return
+     */
+    public Boolean getForceUndeploy()
+    {
+        return forceUndeploy;
     }
 }
