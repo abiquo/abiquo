@@ -499,7 +499,6 @@ public class VirtualApplianceService extends DefaultApiService
             catch (Exception e)
             {
                 // The virtual appliance is in an unknown state
-                // The virtual appliance is in an unknown state
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                     EventType.VM_DEPLOY, APIError.GENERIC_OPERATION_ERROR.getMessage());
 
@@ -521,14 +520,15 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId, final Boolean forceUndeploy)
+    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final Boolean forceUndeploy)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-        
+
         // first check if there is any imported virtualmachine.
         if (!forceUndeploy)
         {
-            for(NodeVirtualImage node : virtualAppliance.getNodes())
+            for (NodeVirtualImage node : virtualAppliance.getNodes())
             {
                 if (node.getVirtualMachine().isImported())
                 {
@@ -537,7 +537,7 @@ public class VirtualApplianceService extends DefaultApiService
                 }
             }
         }
-        
+
         List<String> dto = new ArrayList<String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {

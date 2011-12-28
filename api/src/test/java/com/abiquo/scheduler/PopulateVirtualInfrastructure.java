@@ -509,4 +509,9 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     {
         vmachineDao.updateVirtualMachineState(virtualMachineId, VirtualMachineState.ON);
     }
+
+    public VirtualMachine getVirtualMachine(final Integer virtualMachineId)
+    {
+        return vmachineDao.findById(virtualMachineId);
+    }
 }

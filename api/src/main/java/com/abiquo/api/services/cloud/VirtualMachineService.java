@@ -322,7 +322,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
         }
-        
+
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
                                                    // to update the virtualMachine.
@@ -1130,8 +1130,8 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Remote services are ok!");
 
         // Tasks needs the definition of the virtual machine
-        VirtualAppliance virtualAppliance =
-            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        // VirtualAppliance virtualAppliance =
+        getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachineState originalState = virtualMachine.getState();
 
@@ -1149,17 +1149,20 @@ public class VirtualMachineService extends DefaultApiService
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
              * one of the above fail we cannot allocate the VirtualMachine
              */
-            virtualMachine =
-                vmAllocatorService.allocateVirtualMachine(vmId, vappId, foreceEnterpriseSoftLimits);
+            // virtualMachine =
+            vmAllocatorService.allocateVirtualMachine(virtualMachine, foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
 
             // refresh due SchedulerLock modifications
-            repo.detachHypervisor(virtualMachine);
+            // repo.refresh(virtualMachine);
+            // repo.detachHypervisor(virtualMachine);
 
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
-            initiatorMappings(virtualMachine);
+            initiatorMappings(repo.findVirtualMachineById(vmId));
             LOGGER.debug("Mapping done!");
+
+            repo.detachVirtualMachine(virtualMachine);
         }
         catch (APIException e)
         {
@@ -1308,7 +1311,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine with a state void
      */
     private void checkVirtualMachineStateAllowsReconfigure(final VirtualMachine virtualMachine)
-    {   
+    {
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
@@ -1325,12 +1328,13 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
         }
-        
+
         if (virtualMachine.isImported())
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
-        
+                EventType.VM_RECONFIGURE,
+                APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
+
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
         }
@@ -1444,7 +1448,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
             flushErrors();
         }
-        
+
         VirtualMachineState originalState = virtualMachine.getState();
 
         try

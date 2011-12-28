@@ -46,6 +46,7 @@ import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
+import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -81,6 +82,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     private VirtualApplianceDAO virtualAppDao;
 
     @Autowired
+    private NodeVirtualImageDAO nodeDao;
+
+    @Autowired
     protected VirtualimageAllocationService allocationService;
 
     @Autowired
@@ -113,7 +117,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         this.checkEnterpirse = new EnterpriseLimitChecker(em);
         this.upgradeUse = new ResourceUpgradeUse(em);
         this.vmRequirements = new VirtualMachineRequirementsFactory();
-
+        this.nodeDao = new NodeVirtualImageDAO(em);
     }
 
     /**
@@ -209,28 +213,33 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      *             perform this operation.
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public VirtualMachine allocateVirtualMachine(final Integer virtualMachineId,
-        final Integer idVirtualApp, final Boolean foreceEnterpriseSoftLimits)
+    public VirtualMachine allocateVirtualMachine(final VirtualMachine vmachine,
+        final Boolean foreceEnterpriseSoftLimits)
     {
 
+        final Integer virtualMachineId = vmachine.getId();
         final String msg = String.format("Allocate %d", virtualMachineId);
 
         try
         {
             SchedulerLock.acquire(msg);
 
-            final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
+            // final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
             final VirtualMachineRequirements requirements =
                 vmRequirements.createVirtualMachineRequirements(vmachine);
-            final VirtualAppliance vapp = virtualAppDao.findById(idVirtualApp);
+            final VirtualAppliance vapp = nodeDao.findVirtualAppliance(vmachine); // virtualAppDao.findById(idVirtualApp);
 
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
 
             checkLimist(vapp, requirements, foreceEnterpriseSoftLimits);
 
-            return selectPhysicalMachineAndAllocateResources(vmachine, idVirtualApp, fitPolicy,
-                requirements);
+            VirtualMachine allocatedvm =
+                selectPhysicalMachineAndAllocateResources(vmachine, vapp, fitPolicy, requirements);
+
+            vmdao.detachVirtualMachine(vmachine);
+
+            return allocatedvm;
         }
         catch (NotEnoughResourcesException e)
         {
@@ -260,12 +269,16 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return null; // unreachable code
     }
 
+    @Autowired
+    private VirtualMachineDAO vmdao;
+
     @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
     private VirtualMachine selectPhysicalMachineAndAllocateResources(final VirtualMachine vmachine,
-        final Integer vappId, final FitPolicy fitPolicy,
+        final VirtualAppliance vapp, final FitPolicy fitPolicy,
         final VirtualMachineRequirements requirements)
     {
 
+        final Integer vappId = vapp.getId();
         Machine targetMachine = allocationService.findBestTarget(requirements, fitPolicy, vappId);
 
         LOG.info("Attemp to use physical machine [{}] to allocate VirtualMachine [{}]",
@@ -274,6 +287,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         // CREATE THE VIRTUAL MACHINE
         VirtualMachine allocatedVirtualMachine =
             vmFactory.createVirtualMachine(targetMachine, vmachine);
+
+        // vmdao.detachVirtualMachine(vmachine);
 
         try
         {

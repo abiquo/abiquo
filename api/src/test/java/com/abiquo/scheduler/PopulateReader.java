@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
+import com.abiquo.server.core.cloud.VirtualMachine;
+
 @Component
 public class PopulateReader extends PopulateConstants
 {
@@ -128,5 +130,10 @@ public class PopulateReader extends PopulateConstants
     public void runningVirtualMachine(final Integer virtualMachineId)
     {
         populateVirtualInfrastructure.runningVirtualMachine(virtualMachineId);
+    }
+
+    public VirtualMachine getVirtualMachine(final Integer virtualMachineId)
+    {
+        return populateVirtualInfrastructure.getVirtualMachine(virtualMachineId);
     }
 }

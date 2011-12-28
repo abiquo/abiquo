@@ -254,4 +254,8 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         getEntityManager().detach(vm.getHypervisor());
     }
 
+    public void detachVirtualMachine(final VirtualMachine vm)
+    {
+        getEntityManager().detach(vm);
+    }
 }

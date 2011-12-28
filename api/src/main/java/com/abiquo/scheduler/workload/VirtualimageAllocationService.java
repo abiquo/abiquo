@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.FitPolicy;
@@ -118,7 +120,6 @@ import com.abiquo.tracer.client.TracerFactory;
  * NOTE: the current implementation only fetch once the physical machine rules.
  */
 @Service
-@Transactional
 public class VirtualimageAllocationService
 {
 
@@ -149,7 +150,6 @@ public class VirtualimageAllocationService
         this.ruleFinder = new PhysicalmachineRuleFinder(em);
     }
 
-
     /** Starting best fit. (none ''computeRank'' can be higher) */
     private static final long NO_FIT = Long.MIN_VALUE;
 
@@ -160,6 +160,7 @@ public class VirtualimageAllocationService
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED, isolation = Isolation.READ_UNCOMMITTED)
     public Machine findBestTarget(final VirtualMachineRequirements requirements,
         final FitPolicy fitPolicy, final Integer idVirtualAppliance)
     {
@@ -220,6 +221,7 @@ public class VirtualimageAllocationService
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Machine findBestTarget(final VirtualMachineRequirements requirements,
         final FitPolicy fitPolicy, final Integer idVirtualAppliance, final String datastoreUuid,
         final Integer originalHypervisorId, final Integer rackId)
@@ -230,7 +232,6 @@ public class VirtualimageAllocationService
         final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
 
         final Collection<Machine> firstPassCandidates =
-
             datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
                 datastoreUuid, originalHypervisorId);
 

@@ -183,7 +183,6 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
 
         // img.setIdEnterprise(idEnterprise); // // XXX (in AppslLibraryService this value is set
         // properly)
-        // private VirtualImage master; // TODO master instance images
 
         final String master = getMasterIdFromLink(getLink("master", vi.getLinks()));
 
@@ -195,18 +194,6 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         }
 
         return img;
-    }
-
-    /**
-     * Return null if not master
-     */
-    private String getMasterIdFromLink(final RESTLink link)
-    {
-        if (link == null)
-        {
-            return null;
-        }
-        return link.getHref().substring(link.getHref().lastIndexOf("/") + 1);
     }
 
     private com.abiquo.abiserver.pojo.virtualimage.DiskFormatType createDiskFormatType(

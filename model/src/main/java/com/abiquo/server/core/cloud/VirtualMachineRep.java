@@ -251,4 +251,9 @@ public class VirtualMachineRep extends DefaultRepBase
     {
         dao.detachHypervisor(vm);
     }
+
+    public void detachVirtualMachine(final VirtualMachine vm)
+    {
+        dao.detachVirtualMachine(vm);
+    }
 }
