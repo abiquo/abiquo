@@ -118,6 +118,8 @@ public class TarantinoJobCreator extends DefaultApiService
 
         final VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
 
+        vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName());
+        
         logger.debug("Creating disk information");
         primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId);
         logger.debug("Disk information created!");
@@ -224,7 +226,7 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineStateTransition stateTransition)
     {
         ApplyVirtualMachineStateOp stateJob = new ApplyVirtualMachineStateOp();
-        stateJob.setVirtualMachine(vmDesc.build(virtualMachine.getUuid()));
+        stateJob.setVirtualMachine(vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName()).build());
         stateJob.setHypervisorConnection(hypervisorConnection);
         stateJob.setTransaction(com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition
             .fromValue(stateTransition.name()));
@@ -253,8 +255,8 @@ public class TarantinoJobCreator extends DefaultApiService
             hypervisorConnectionConfiguration(vm.getHypervisor());
 
         ReconfigureVirtualMachineOp reconfigureJob = new ReconfigureVirtualMachineOp();
-        reconfigureJob.setVirtualMachine(originalConfig.build(vm.getUuid()));
-        reconfigureJob.setNewVirtualMachine(newConfig.build(vm.getUuid()));
+        reconfigureJob.setVirtualMachine(originalConfig.setBasics(vm.getUuid(), vm.getName()).build());
+        reconfigureJob.setNewVirtualMachine(newConfig.setBasics(vm.getUuid(), vm.getName()).build());
         reconfigureJob.setHypervisorConnection(hypervisorConnection);
         reconfigureJob.setId(reconfigureTask.getId() + "." + vm.getUuid() + "reconfigure");
 
@@ -289,7 +291,7 @@ public class TarantinoJobCreator extends DefaultApiService
     protected void primaryDiskDefinitionConfiguration(final VirtualMachine virtualMachine,
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
-        String datastore;
+        String datastore = "";
         if (virtualMachine.getDatastore().getDirectory() != null
             && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
         {
@@ -297,7 +299,7 @@ public class TarantinoJobCreator extends DefaultApiService
                 FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
                     .getDatastore().getDirectory());
         }
-        else
+        if (virtualMachine.getDatastore() != null)
         {
             datastore = virtualMachine.getDatastore().getRootPath();
         }
@@ -336,9 +338,13 @@ public class TarantinoJobCreator extends DefaultApiService
             flushErrors();
         }
 
+        String url = "";
+        if (virtualMachine.getVirtualMachineTemplate().getRepository() != null) // repo null when imported.
+        {
+            url = virtualMachine.getVirtualMachineTemplate().getRepository().getUrl();
+        }
         vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
-            virtualMachine.getVirtualMachineTemplate().getRepository().getUrl(), path, datastore,
-            repositoryManager.getUri(), cntrlType);
+            url, path, datastore, repositoryManager.getUri(), cntrlType);
     }
 
     /**

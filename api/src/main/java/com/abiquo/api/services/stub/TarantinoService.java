@@ -230,8 +230,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             DatacenterTasks deployTask =
                 builder.add(VirtualMachineStateTransition.CONFIGURE)
@@ -284,11 +285,11 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(vm.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(originalConfig.build(vm.getUuid()), conn, userService
+                new DatacenterTaskBuilder(originalConfig.build(), conn, userService
                     .getCurrentUser().getNick());
 
             DatacenterTasks reconfigTask =
-                builder.addReconfigure(newConfig.build(vm.getUuid())).buildTarantinoTask();
+                builder.addReconfigure(newConfig.build()).buildTarantinoTask();
 
             // We retrieve the progress from task service. We add it before just in case the task is
             // performed before we actually add it to redis
@@ -350,8 +351,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             DatacenterTasks deployTask = null;
 
@@ -440,8 +442,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             if (VirtualMachineState.ON.equals(currentState))
             {
@@ -502,8 +505,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             if (VirtualMachineState.ON.equals(currentState))
             {
@@ -569,8 +573,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             DatacenterTasks deployTask = builder.add(machineStateTransition).buildTarantinoTask();
             // We retrieve the progress from task service. We add it before just in case the task is
@@ -648,7 +653,7 @@ public class TarantinoService extends DefaultApiService
         VirtualMachineDescriptionBuilder definitionBuilder =
             jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 
-        VirtualMachineDefinition definition = definitionBuilder.build(virtualMachine.getUuid());
+        VirtualMachineDefinition definition = definitionBuilder.build();
 
         HypervisorConnection connection =
             jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
@@ -731,8 +736,9 @@ public class TarantinoService extends DefaultApiService
             HypervisorConnection conn =
                 jobCreator.hypervisorConnectionConfiguration(virtualMachine.getHypervisor());
             DatacenterTaskBuilder builder =
-                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(virtualMachine
-                    .getUuid()), conn, userService.getCurrentUser().getNick());
+                new DatacenterTaskBuilder(virtualMachineDesciptionBuilder.build(),
+                    conn,
+                    userService.getCurrentUser().getNick());
 
             DatacenterTasks deployTask = builder.addSnapshot(diskSnapshot).buildTarantinoTask();
             // We retrieve the progress from task service. We add it before just in case the task is
