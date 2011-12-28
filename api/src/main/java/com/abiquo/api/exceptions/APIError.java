@@ -273,7 +273,10 @@ public enum APIError
         "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
         "VM-31", "Provided virtual machine template for reconfigure is an already attached volume"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
-        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"),
+        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
+        "VM-33", "Currently we don't allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
+        "VM-44",
+        "You are trying to undeploy an imported virtual machine. If you undeploy it, its virtual image it's unrecoverable. If you are confident with you are doing, please recall this functionality with the option 'forceUndeploy=true'"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -595,7 +598,7 @@ public enum APIError
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
 
     // HYPERVISOR TYPE
-    INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid")
+    INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid"),
 
     ;
 

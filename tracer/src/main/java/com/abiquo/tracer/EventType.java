@@ -62,7 +62,7 @@ public enum EventType implements Serializable
         226, "VM_DELETE", "Deleted Virtual Machine"), VM_UNDEPLOY(227, "VM_UNDEPLOY",
         "Undeploy Virtual Machine"), VM_DEPLOY(228, "VM_DEPLOY", "Deploy Virtual Machine"), VM_STATE(
         229, "VM_STATE", "Apply state Virtual Machine"), VM_RECONFIGURE(230, "VM_RECONFIGURE",
-        "Reconfigure Virtual Machine"),
+        "Reconfigure Virtual Machine"), VM_INSTANCE(231, "VM_INSTANCE", "Instance Virtual Machine"),
 
     // Infrastructure-related events
     DC_CREATE(300, "DC_CREATE", "Datacenter Created"), DC_MODIFY(301, "DC_MODIFY",

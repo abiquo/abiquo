@@ -710,6 +710,11 @@ public class VirtualMachine extends DefaultEntityBase
     {
         return virtualMachineTemplate.isStateful();
     }
+    
+    public boolean isImported()
+    {
+        return getVirtualMachineTemplate().getRepository() == null;
+    }
 
     public VirtualMachine(final String name, final Enterprise enterprise, final User user,
         final Hypervisor hypervisor, final VirtualMachineTemplate virtualMachineTemplate,
