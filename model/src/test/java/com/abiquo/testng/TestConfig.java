@@ -52,7 +52,7 @@ public class TestConfig
 
     /** TestNG group for appslibrary integration tests. */
     public static final String APPS_INTEGRATION_TESTS = "it-appslibrary";
-    
+
     /** TestNG group for the edit and reconfigure virtual machine. */
     public static final String EDIT_VM_INTEGRATION_TESTS = "it-editvm";
 
@@ -73,7 +73,10 @@ public class TestConfig
 
     /** TestNG group for networking premium integration tests. */
     public static final String PREMIUM_NETWORK_INTEGRATION_TESTS = "it-premium-network";
-    
+
+    /** TestNG group for virtual appliance unit tests. */
+    public static final String VAPP_UNIT_TESTS = "test-vapp";
+
     /** TestNG group for the edit and reconfigure virtual machine. */
     public static final String PREMIUM_EDIT_VM_INTEGRATION_TESTS = "it-premium-editvm";
 
@@ -83,7 +86,6 @@ public class TestConfig
     /** TestNG group for all VirtualMachineAllocatorServicePremiumTest. */
     public static final String PREMIUM_ALLOCATOR_TESTS = "test-premium-allocator";
 
-    
     /** TestNG group for all premium integration tests. */
     public static final String PREMIUM_ALL_INTEGRATION_TESTS = "it-premium-all";
 

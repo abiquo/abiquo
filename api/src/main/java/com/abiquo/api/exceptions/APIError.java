@@ -250,7 +250,7 @@ public enum APIError
         "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12", "The allowed power states for Virtual Machines is ON, OFF, PAUSED  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
-        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED or POWER-OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
         "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(

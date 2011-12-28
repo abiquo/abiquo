@@ -33,7 +33,7 @@ import com.abiquo.model.transport.SingleResourceTransportDto;
  * @author eruiz@abiquo.com 
  */
 @XmlRootElement(name = "virtualMachineSnapshot")
-public class VirtualMachineSnapshotDto extends SingleResourceTransportDto implements Serializable
+public class VirtualMachineInstanceDto extends SingleResourceTransportDto implements Serializable
 {
     private static final long serialVersionUID = -372239566628574960L;
     

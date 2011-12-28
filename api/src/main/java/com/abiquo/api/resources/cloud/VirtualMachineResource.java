@@ -62,7 +62,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.cloud.VirtualMachineSnapshotDto;
+import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
@@ -481,7 +481,7 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineSnapshotDto snapshotData, @Context final IRESTBuilder restBuilder,
+        final VirtualMachineInstanceDto snapshotData, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
         String taskId =
