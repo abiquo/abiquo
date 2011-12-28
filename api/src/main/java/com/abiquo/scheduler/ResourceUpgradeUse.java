@@ -210,6 +210,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // TODO Ignasi must review this
             virtualMachine.setVdrpIP(null);
             virtualMachine.setVdrpPort(0);
+            virtualMachine.setHypervisor(null);
+            virtualMachine.setDatastore(null);
 
             vmachineDao.flush();
         }

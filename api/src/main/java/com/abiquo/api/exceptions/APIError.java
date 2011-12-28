@@ -250,7 +250,7 @@ public enum APIError
         "The Virtual Machine is not in any Hypervisor. Therefore the change of the state cannot be applied"), VIRTUAL_MACHINE_INVALID_STATE_UNDEPLOY(
         "VM-12", "The allowed power states for Virtual Machines is ON, OFF, PAUSED  or ALLOCATED"), VIRTUAL_MACHINE_INCOHERENT_STATE(
         "VM-13",
-        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
+        "Virtual Machine configuration actions can only be performed when the Virtual Machine is NOT-DEPLOYED or POWER-OFF"), VIRTUAL_MACHINE_NETWORK_CONFIGURATION_CAN_NOT_BE_CHANGED(
         "VM-14",
         "Only the 'used' attribute of the Virtual Machine Network Configuration can be changed"), VIRTUAL_MACHINE_AT_LEAST_ONE_USED_CONFIGURATION(
         "VM-15", "It should be at least one 'used' configuration in each Virtual Machine"), VIRTUAL_MACHINE_MACHINE_TEMPLATE_NOT_IN_DATACENTER(
@@ -273,7 +273,10 @@ public enum APIError
         "Cannot reconfigure to change the virtual machine template to another master (only instances or persistent)"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_ATTACHED_PRESISTENT(
         "VM-31", "Provided virtual machine template for reconfigure is an already attached volume"), VIRTUAL_MACHINE_RECONFIGURE_TEMPLATE_IN_THE_HYPERVISOR(
         "VM-32",
-        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"),
+        "Cannot reconfigure the virual machine template once the virtual machine is present in the hypervisor"), VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE(
+        "VM-33", "Currently we don't allow imported virtual machines to be reconfigured"), VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED(
+        "VM-44",
+        "You are trying to undeploy an imported virtual machine. If you undeploy it, its virtual image it's unrecoverable. If you are confident with you are doing, please recall this functionality with the option 'forceUndeploy=true'"),
 
     // ROLE
     NON_EXISTENT_ROLE("ROLE-0", "The requested role does not exist"), NON_MODIFICABLE_ROLE(
@@ -595,7 +598,7 @@ public enum APIError
         "PRICING_TIER-3", "This tier is not related to the datacenter indicated"),
 
     // HYPERVISOR TYPE
-    INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid")
+    INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid"),
 
     ;
 

@@ -27,7 +27,6 @@ import static com.abiquo.server.core.infrastructure.RemoteService.STATUS_SUCCESS
 
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
@@ -117,9 +116,10 @@ public class RemoteServiceService extends DefaultApiService
      * @return TransferObject: RemoteServiceDto if OK, ErrorsDto else
      */
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public RemoteServiceDto addRemoteService(final RemoteService rs, final Datacenter datacenter)
+    public SingleResourceTransportDto addRemoteService(final RemoteService rs,
+        final Datacenter datacenter)
     {
-        return (RemoteServiceDto) addRemoteService(rs, datacenter, false);
+        return addRemoteService(rs, datacenter, false);
     }
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
