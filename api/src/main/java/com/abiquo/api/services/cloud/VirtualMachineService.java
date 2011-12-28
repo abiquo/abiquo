@@ -249,7 +249,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
             flushErrors();
         }
-        LOGGER.debug("virtual machine {} found", vmId);
+        LOGGER.debug("Virtual machine {} found", vmId);
         return vm;
     }
 
@@ -1512,12 +1512,12 @@ public class VirtualMachineService extends DefaultApiService
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final String snapshotName)
     {
-        LOGGER.debug("Starting the instance of the virtual machine {}", vmId);
-
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
         VirtualMachineState originalState = virtualMachine.getState();
+
+        LOGGER.debug("Starting the instance of the virtual machine {}", virtualMachine.getName());
 
         // Check if the operation is allowed and lock the virtual machine
         LOGGER.debug("Check for permissions");
@@ -1528,9 +1528,9 @@ public class VirtualMachineService extends DefaultApiService
         checkSnapshotAllowed(virtualMachine);
         LOGGER.debug("The state is valid for instance");
 
-        LOGGER.debug("Locking virtual machine id {}", virtualMachine.getId());
+        LOGGER.debug("Locking virtual machine {}", virtualMachine.getName());
         lockVirtualMachine(virtualMachine);
-        LOGGER.debug("Virtual machine id {} locked!", virtualMachine.getId());
+        LOGGER.debug("Virtual machine {} locked!", virtualMachine.getName());
 
         try
         {
@@ -1538,7 +1538,7 @@ public class VirtualMachineService extends DefaultApiService
             SnapshotType type = SnapshotType.getSnapshotType(virtualMachine);
             String taskId = null;
 
-            LOGGER.debug("Instance type for virtual machine id {} is {}", virtualMachine.getId(),
+            LOGGER.debug("Instance type for virtual machine {} is {}", virtualMachine.getName(),
                 type.name());
 
             switch (type)
@@ -1548,16 +1548,16 @@ public class VirtualMachineService extends DefaultApiService
                     taskId =
                         tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
                             snapshotName);
-                    LOGGER.debug("Instance of virtual machine id {} enqueued!",
-                        virtualMachine.getId());
+                    LOGGER.debug("Instance of virtual machine {} enqueued!",
+                        virtualMachine.getName());
                     break;
 
                 case FROM_NOT_MANAGED_VIRTUALMACHINE:
                     taskId =
                         snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
                             snapshotName);
-                    LOGGER.debug("Instance of virtual machine id {} enqueued!",
-                        virtualMachine.getId());
+                    LOGGER.debug("Instance of virtual machine {} enqueued!",
+                        virtualMachine.getName());
                     break;
 
                 case FROM_STATEFUL_DISK:
@@ -1566,6 +1566,22 @@ public class VirtualMachineService extends DefaultApiService
             }
 
             return taskId;
+        }
+        catch (APIException e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_INSTANCE,
+                "virtualMachine.instanceFailed", virtualMachine.getName());
+
+            tracer
+                .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
+
+            LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
+            unlockVirtualMachineState(virtualMachine, originalState);
+            LOGGER.debug("Virtual machine {} unlocked!", virtualMachine.getName());
+
+            throw e;
         }
         catch (Exception e)
         {
@@ -1577,9 +1593,9 @@ public class VirtualMachineService extends DefaultApiService
                     EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
                     virtualMachine.getName());
 
-            LOGGER.debug("Unlocking virtual machine id {}", virtualMachine.getId());
+            LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
             unlockVirtualMachineState(virtualMachine, originalState);
-            LOGGER.debug("Virtual machine id {} unlocked!", virtualMachine.getId());
+            LOGGER.debug("Virtual machine {} unlocked!", virtualMachine.getName());
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();

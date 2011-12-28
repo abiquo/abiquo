@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.exceptions.NotFoundException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.InfrastructureService;
@@ -112,15 +113,38 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
-     * Send the given datacenter tasks.
+     * Persist the {@link Task} for progress tracking and send the given {@link DatacenterTasks} to
+     * tarantino. Steps:
+     * <ol>
+     * <li>Persist the {@link Task} to redis</li>
+     * <li>Send {@link DatacenterTasks} to Tarantino using AMQP</li>
+     * <li>If can not connect to AMQP broker, the {@link Task} is deleted from redis</li>
+     * </ol>
      * 
-     * @param datacenter The datacenter where the tasks will be sent to.
-     * @param tasks The tasks to send.
-     * @param event The event associated to the task (power on, reconfigure, etc).
+     * @param datacenter The {@link Datacenter} where the tasks will be sent to.
+     * @param task The {@link Task} to persist.
+     * @param tasks The {@link DatacenterTasks} to send.
+     * @param eventType The {@link EventType} associated to the task (power on, reconfigure, etc).
      */
-    private void send(final Datacenter datacenter, final DatacenterTasks tasks,
-        final EventType event)
+    private void enqueueTask(final Datacenter datacenter, final Task task,
+        final DatacenterTasks tasks, final EventType eventType)
     {
+        try
+        {
+            taskService.addTask(task);
+        }
+        catch (RuntimeException e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
+                APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
+                "redis.persistTaskError", e.getMessage());
+
+            addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
+            flushErrors();
+        }
+
         TarantinoRequestProducer producer = getTarantinoProducer(datacenter);
 
         try
@@ -128,23 +152,37 @@ public class TarantinoService extends DefaultApiService
             producer.openChannel();
             producer.publish(tasks);
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event,
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
                 APIError.GENERIC_OPERATION_ERROR.getMessage());
 
-            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
-                "tarantino.sendError", ex.getMessage());
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType, e,
+                "tarantino.sendError", e.getMessage());
+
+            try
+            {
+                // Delete redis stored task
+                taskService.deleteTask(task);
+            }
+            catch (RuntimeException r)
+            {
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
+                    APIError.GENERIC_OPERATION_ERROR.getMessage());
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, eventType,
+                    r, "redis.deleteTaskError", r.getMessage());
+            }
 
             addNotFoundErrors(APIError.GENERIC_OPERATION_ERROR);
             flushErrors();
         }
         finally
         {
-            closeProducerChannel(producer, event);
+            closeProducerChannel(producer, eventType);
         }
 
-        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, event,
+        tracer.log(SeverityType.INFO, ComponentType.VIRTUAL_MACHINE, eventType,
             "tarantino.taskEnqueued");
     }
 
@@ -183,7 +221,6 @@ public class TarantinoService extends DefaultApiService
 
             tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, event, ex,
                 "tarantino.closeProducer", ex.getMessage());
-
         }
     }
 
@@ -236,11 +273,10 @@ public class TarantinoService extends DefaultApiService
             DatacenterTasks deployTask =
                 builder.add(VirtualMachineStateTransition.CONFIGURE)
                     .add(VirtualMachineStateTransition.POWERON).buildTarantinoTask();
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.DEPLOY));
-            send(datacenter, deployTask, EventType.VM_DEPLOY);
+
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.DEPLOY),
+                deployTask, EventType.VM_DEPLOY);
 
             return deployTask.getId();
         }
@@ -290,11 +326,9 @@ public class TarantinoService extends DefaultApiService
             DatacenterTasks reconfigTask =
                 builder.addReconfigure(newConfig.build(vm.getUuid())).buildTarantinoTask();
 
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(vm.getId()), TaskType.RECONFIGURE));
-
-            send(datacenter, builder.buildTarantinoTask(), EventType.VM_RECONFIGURE);
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(vm.getId()), TaskType.RECONFIGURE),
+                builder.buildTarantinoTask(), EventType.VM_RECONFIGURE);
 
             return reconfigTask.getId();
 
@@ -367,11 +401,8 @@ public class TarantinoService extends DefaultApiService
                     builder.add(VirtualMachineStateTransition.CONFIGURE).buildTarantinoTask();
             }
 
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.HIGH_AVAILABILITY));
-            send(datacenter, deployTask, EventType.VM_MOVING_BY_HA);
+            enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                TaskType.HIGH_AVAILABILITY), deployTask, EventType.VM_MOVING_BY_HA);
 
             return deployTask.getId();
         }
@@ -409,18 +440,6 @@ public class TarantinoService extends DefaultApiService
     }
 
     /**
-     * Adds a task to redis. This task become available for all the resources implementing
-     * {@link AbstractResourceWithTasks}.
-     * 
-     * @param task
-     * @param deployTask void
-     */
-    private void addAsyncTask(final Task task)
-    {
-        taskService.addTask(task);
-    }
-
-    /**
      * Creates and sends a deploy operation.
      * 
      * @param virtualMachine The virtual machine to reconfigure.
@@ -449,12 +468,10 @@ public class TarantinoService extends DefaultApiService
             }
             DatacenterTasks deployTask =
                 builder.add(VirtualMachineStateTransition.DECONFIGURE).buildTarantinoTask();
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.UNDEPLOY));
 
-            send(datacenter, deployTask, EventType.VM_UNDEPLOY);
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY),
+                deployTask, EventType.VM_UNDEPLOY);
 
             return deployTask.getId();
         }
@@ -516,12 +533,10 @@ public class TarantinoService extends DefaultApiService
             DatacenterTasks deployTask =
                 builder.add(VirtualMachineStateTransition.DECONFIGURE, extraData)
                     .buildTarantinoTask();
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                TaskType.UNDEPLOY));
 
-            send(datacenter, deployTask, EventType.VM_UNDEPLOY);
+            enqueueTask(datacenter,
+                builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.UNDEPLOY),
+                deployTask, EventType.VM_UNDEPLOY);
 
             return deployTask.getId();
         }
@@ -573,12 +588,9 @@ public class TarantinoService extends DefaultApiService
                     .getUuid()), conn, userService.getCurrentUser().getNick());
 
             DatacenterTasks deployTask = builder.add(machineStateTransition).buildTarantinoTask();
-            // We retrieve the progress from task service. We add it before just in case the task is
-            // performed before we actually add it to redis
-            addAsyncTask(builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
-                getTaskTypeFromTransition(machineStateTransition)));
 
-            send(datacenter, deployTask, EventType.VM_STATE);
+            enqueueTask(datacenter, builder.buildAsyncTask(String.valueOf(virtualMachine.getId()),
+                getTaskTypeFromTransition(machineStateTransition)), deployTask, EventType.VM_STATE);
 
             return deployTask.getId();
         }
@@ -697,6 +709,9 @@ public class TarantinoService extends DefaultApiService
 
         if (SnapshotUtils.mustPowerOffToSnapshot(originalState))
         {
+            logger.debug("Instance of virtual machine {} requires a power off",
+                virtualMachine.getName());
+
             builder.add(VirtualMachineStateTransition.POWEROFF);
             builder.addSnapshot(destinationDisk);
             builder.add(VirtualMachineStateTransition.POWERON);
@@ -706,46 +721,40 @@ public class TarantinoService extends DefaultApiService
             builder.addSnapshot(destinationDisk);
         }
 
+        // Build redis task
+        Task redisTask =
+            builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.SNAPSHOT);
+
+        // Build tarantino task
+        DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
+
         // Unsubscribe the virtual machine to prevent unlock
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getVSMRemoteService(datacenter);
+
+        logger.debug("Unsubscribing virtual machine {} from VSM", virtualMachine.getName());
         vsm.unsubscribe(service, virtualMachine);
+        logger.debug("Virtual machine {} unsubscribed from VSM", virtualMachine.getName());
 
-        // Add Redis task for progress tracking
-        Task redisTask =
-            builder.buildAsyncTask(String.valueOf(virtualMachine.getId()), TaskType.SNAPSHOT);
-        addAsyncTask(redisTask);
-
-        // Send Tarantino task
-        DatacenterTasks tarantinoTask = builder.buildTarantinoTask();
-        send(datacenter, tarantinoTask, EventType.VAPP_BUNDLE); // TODO eventType
+        try
+        {
+            // Add Redis task for progress tracking and send the tarantino task
+            logger
+                .debug("Enqueuing instance task for virtual machine {}", virtualMachine.getName());
+            enqueueTask(datacenter, redisTask, tarantinoTask, EventType.VM_INSTANCE);
+            logger.debug("Instance task for virtual machine {} enqueued", virtualMachine.getName());
+        }
+        catch (APIException e)
+        {
+            // Restore the virtual machine subscription on error
+            logger.debug("Subscribing virtual machine {} to VSM due an send error.",
+                virtualMachine.getName());
+            vsm.subscribe(service, virtualMachine);
+            logger.debug("Virtual machine {} subscribed to VSM", virtualMachine.getName());
+            throw e;
+        }
 
         return tarantinoTask.getId();
-        // TODO
-        // catch (NotFoundException e)
-        // {
-        // // We need to unsuscribe the machine
-        // logger.debug("Error enqueuing the state change task dto to Tarantino with error: "
-        // + e.getMessage() + " machine: " + virtualMachine.getName());
-        //
-        // throw e;
-        // }
-        // catch (RuntimeException e)
-        // {
-        // logger.error("Error enqueuing the state change task dto to Tarantino with error: "
-        // + e.getMessage());
-        //
-        // tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_STATE,
-        // APIError.GENERIC_OPERATION_ERROR.getMessage());
-        //
-        // // For the Admin to know all errors
-        // tracer.systemLog(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-        // EventType.VM_DEPLOY, "tarantino.applyChangesVMError", e.getMessage());
-        //
-        // // There is no point in continue
-        // addUnexpectedErrors(APIError.GENERIC_OPERATION_ERROR);
-        // flushErrors();
-        // }
     }
 
     /**
