@@ -1512,35 +1512,79 @@ public class VirtualMachineService extends DefaultApiService
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final String snapshotName)
     {
+        LOGGER.debug("Starting the instance of the virtual machine {}", vmId);
+
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachineState originalState = virtualMachine.getState();
 
         // Check if the operation is allowed and lock the virtual machine
+        LOGGER.debug("Check for permissions");
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        LOGGER.debug("Permission granted");
+
+        LOGGER.debug("Checking the virtual machine state. It must be in a DEPLOYED state.");
         checkSnapshotAllowed(virtualMachine);
+        LOGGER.debug("The state is valid for instance");
 
-        VirtualMachineState originalState = virtualMachine.getState();
+        LOGGER.debug("Locking virtual machine id {}", virtualMachine.getId());
         lockVirtualMachine(virtualMachine);
+        LOGGER.debug("Virtual machine id {} locked!", virtualMachine.getId());
 
-        // Do the instance
-        switch (SnapshotType.getSnapshotType(virtualMachine))
+        try
         {
-            case FROM_ORIGINAL_DISK:
-            case FROM_DISK_CONVERSION:
-                return tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
-                    snapshotName);
+            // Do the instance
+            SnapshotType type = SnapshotType.getSnapshotType(virtualMachine);
+            String taskId = null;
 
-            case FROM_NOT_MANAGED_VIRTUALMACHINE:
-                return snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
-                    snapshotName);
+            LOGGER.debug("Instance type for virtual machine id {} is {}", virtualMachine.getId(),
+                type.name());
 
-            case FROM_STATEFUL_DISK:
-                // TODO
-                return null;
+            switch (type)
+            {
+                case FROM_ORIGINAL_DISK:
+                case FROM_DISK_CONVERSION:
+                    taskId =
+                        tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
+                            snapshotName);
+                    LOGGER.debug("Instance of virtual machine id {} enqueued!",
+                        virtualMachine.getId());
+                    break;
 
-            default:
-                return null;
+                case FROM_NOT_MANAGED_VIRTUALMACHINE:
+                    taskId =
+                        snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
+                            snapshotName);
+                    LOGGER.debug("Instance of virtual machine id {} enqueued!",
+                        virtualMachine.getId());
+                    break;
+
+                case FROM_STATEFUL_DISK:
+                    // TODO
+                    break;
+            }
+
+            return taskId;
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_INSTANCE,
+                "virtualMachine.instanceFailed", virtualMachine.getName());
+
+            tracer
+                .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
+
+            LOGGER.debug("Unlocking virtual machine id {}", virtualMachine.getId());
+            unlockVirtualMachineState(virtualMachine, originalState);
+            LOGGER.debug("Virtual machine id {} unlocked!", virtualMachine.getId());
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+
+            return null;
         }
     }
 
