@@ -25,6 +25,7 @@ import static com.abiquo.api.resources.appslibrary.VirtualMachineTemplateResourc
 
 import java.util.List;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -58,6 +59,8 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         "hypervisorTypeName";
 
     public final static String VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM = "stateful";
+    
+    public final static String VIRTUAL_MACHINE_TEMPLATE_IMPORTED = "imported";
 
     @Autowired
     private VirtualMachineTemplateService service;
@@ -71,7 +74,8 @@ public class VirtualMachineTemplatesResource extends AbstractResource
         @PathParam(DatacenterRepositoryResource.DATACENTER_REPOSITORY) final Integer datacenterId,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_CATEGORY_QUERY_PARAM) final String categoryName,
         @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_HYPERVISOR_COMATIBLE_QUERY_PARAM) final String hypervisorTypeName,
-        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) final Boolean stateful,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_GET_STATEFUL_QUERY_PARAM) @DefaultValue("false") final Boolean stateful,
+        @QueryParam(VIRTUAL_MACHINE_TEMPLATE_IMPORTED) @DefaultValue("false") final Boolean imported,
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         // TODO use categoryName and hypervisorType (optinals)
@@ -82,11 +86,11 @@ public class VirtualMachineTemplatesResource extends AbstractResource
 
         List<VirtualMachineTemplate> all = null;
 
-        if (stateful == null || !stateful)
+        if (!stateful)
         {
             all =
                 service.getVirtualMachineTemplates(enterpriseId, datacenterId, categoryName,
-                    hypervisorTypeName);
+                    hypervisorTypeName, imported);
         }
         else
         {

@@ -289,13 +289,13 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    public void addImportedVirtualMachine(final VirtualMachine virtualMachine)
     {
         validate(virtualMachine);
         repo.insert(virtualMachine);
     }
 
-/**
+    /**
      * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine} object
      * and sends the object to the method {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine).
      * 
