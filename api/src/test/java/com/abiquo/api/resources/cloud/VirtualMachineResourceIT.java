@@ -671,8 +671,7 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), new Random().nextInt(1000),
-                vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId() + 1, vm.getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 

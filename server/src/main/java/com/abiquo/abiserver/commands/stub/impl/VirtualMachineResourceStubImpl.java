@@ -55,7 +55,7 @@ import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
-import com.abiquo.server.core.cloud.VirtualMachineSnapshotDto;
+import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.tracer.ComponentType;
@@ -391,7 +391,7 @@ public class VirtualMachineResourceStubImpl extends AbstractAPIStub implements
                 createVirtualMachineInstanceUrl(virtualDatacenterId, virtualApplianceId,
                     virtualMachineId);
 
-            VirtualMachineSnapshotDto options = new VirtualMachineSnapshotDto();
+            VirtualMachineInstanceDto options = new VirtualMachineInstanceDto();
             options.setSnapshotName(instanceName);
 
             ClientResponse response = post(url, options);
