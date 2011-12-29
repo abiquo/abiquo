@@ -215,19 +215,21 @@ public class VirtualApplianceResource
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @Context final IRESTBuilder restBuilder)
     {
-        try
-        {
-            SchedulerLock.acquire("taputa");
+        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
 
-            AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
-            addStatusLinks(links, dto);
-            return dto;
-        }
-        finally
-        {
-            SchedulerLock.release("taputa");
-        }
+        // try
+        // {
+        // SchedulerLock.acquire("taputa");
+
+        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+        addStatusLinks(links, dto);
+        // }
+        // finally
+        // {
+        // SchedulerLock.release("taputa");
+        // }
+
+        return dto;
     }
 
     @POST

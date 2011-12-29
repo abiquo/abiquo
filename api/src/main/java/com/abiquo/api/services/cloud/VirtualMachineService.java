@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,7 +77,6 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
-import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -814,7 +812,7 @@ public class VirtualMachineService extends DefaultApiService
         if (virtualMachine.getState().equals(VirtualMachineState.ALLOCATED))
         {
             LOGGER.debug("Delete of the virtualMachine that has resources allocated. Deallocating");
-            vmAllocatorService.deallocateVirtualMachine(vmId);
+            vmAllocatorService.deallocateVirtualMachine(virtualMachine);
             LOGGER
                 .debug("Delete of the virtualMachine that has resources allocated. Deallocating successful");
         }
@@ -1098,24 +1096,26 @@ public class VirtualMachineService extends DefaultApiService
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
-
-        allocate(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
-
-        return sendDeploy(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
+        //
+        // allocate(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
+        //
+        // return sendDeploy(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
+        // FIXME
+        throw new RuntimeException("unimplemented");
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     // , isolation = Isolation.READ_COMMITTED)
     // org.springframework.transaction.InvalidIsolationLevelException: Standard JPA does not support
     // custom isolation levels - use a special JpaDialect for your JPA implementation
-    public void allocate(final Integer vmId, final Integer vappId, final Integer vdcId,
+    public void allocate(final VirtualMachine virtualMachine, final VirtualAppliance vapp,
         final Boolean foreceEnterpriseSoftLimits)
     {
 
-        LOGGER.debug("Starting the deploy of the virtual machine {}", vmId);
+        LOGGER.debug("Starting the deploy of the virtual machine {}", virtualMachine.getId());
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
-        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
+        // FIXME VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
         LOGGER.debug("Check for permissions");
         // The user must have the proper permission
@@ -1154,7 +1154,8 @@ public class VirtualMachineService extends DefaultApiService
              * one of the above fail we cannot allocate the VirtualMachine
              */
             // virtualMachine =
-            vmAllocatorService.allocateVirtualMachine(virtualMachine, foreceEnterpriseSoftLimits);
+            vmAllocatorService.allocateVirtualMachine(virtualMachine, vapp,
+                foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
 
             // refresh due SchedulerLock modifications
@@ -1163,7 +1164,7 @@ public class VirtualMachineService extends DefaultApiService
 
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
-            initiatorMappings(repo.findVirtualMachineById(vmId));
+            initiatorMappings(virtualMachine);// repo.findVirtualMachineById(vmId));
             LOGGER.debug("Mapping done!");
 
             repo.detachVirtualMachine(virtualMachine);
@@ -1178,7 +1179,7 @@ public class VirtualMachineService extends DefaultApiService
              */
             if (virtualMachine.getHypervisor() != null)
             {
-                vmAllocatorService.deallocateVirtualMachine(vmId);
+                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
             }
 
             throw e;
@@ -1195,7 +1196,7 @@ public class VirtualMachineService extends DefaultApiService
 
             if (virtualMachine.getHypervisor() != null)
             {
-                vmAllocatorService.deallocateVirtualMachine(vmId);
+                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
             }
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
@@ -1204,17 +1205,20 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public String sendDeploy(final Integer vmId, final Integer vappId, final Integer vdcId,
+    public String sendDeploy(VirtualMachine virtualMachine, final VirtualAppliance virtualAppliance,
         final Boolean foreceEnterpriseSoftLimits)
     {
 
-        VirtualAppliance virtualAppliance =
-            getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
-
-        VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
-
         try
         {
+
+            // virtualAppliance =
+            // getVirtualApplianceAndCheckVirtualDatacenter(virtualAppliance
+            // .getVirtualDatacenter().getId(), virtualAppliance.getId());
+
+            virtualMachine =
+                getVirtualMachine(virtualAppliance.getVirtualDatacenter().getId(),
+                    virtualAppliance.getId(), virtualMachine.getId());
 
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
@@ -1232,7 +1236,7 @@ public class VirtualMachineService extends DefaultApiService
              */
             if (virtualMachine.getHypervisor() != null)
             {
-                vmAllocatorService.deallocateVirtualMachine(vmId);
+                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
             }
 
             throw e;
@@ -1246,7 +1250,7 @@ public class VirtualMachineService extends DefaultApiService
                 EventType.VM_DEPLOY, ex, "virtualMachine.deploy", virtualMachine.getName());
 
             unlockVirtualMachineState(virtualMachine, VirtualMachineState.NOT_ALLOCATED);
-            vmAllocatorService.deallocateVirtualMachine(vmId);
+            vmAllocatorService.deallocateVirtualMachine(virtualMachine);
 
             addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
             flushErrors();

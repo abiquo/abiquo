@@ -46,7 +46,6 @@ import com.abiquo.scheduler.limit.LimitExceededException;
 import com.abiquo.scheduler.workload.AllocatorException;
 import com.abiquo.scheduler.workload.NotEnoughResourcesException;
 import com.abiquo.scheduler.workload.VirtualimageAllocationService;
-import com.abiquo.server.core.cloud.NodeVirtualImageDAO;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDAO;
 import com.abiquo.server.core.cloud.VirtualMachine;
@@ -82,9 +81,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     private VirtualApplianceDAO virtualAppDao;
 
     @Autowired
-    private NodeVirtualImageDAO nodeDao;
-
-    @Autowired
     protected VirtualimageAllocationService allocationService;
 
     @Autowired
@@ -117,7 +113,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         this.checkEnterpirse = new EnterpriseLimitChecker(em);
         this.upgradeUse = new ResourceUpgradeUse(em);
         this.vmRequirements = new VirtualMachineRequirementsFactory();
-        this.nodeDao = new NodeVirtualImageDAO(em);
     }
 
     /**
@@ -167,7 +162,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
-                vmachine.getId(), e));
+                vmachine, e));
         }
         catch (LimitExceededException limite)
         {
@@ -175,13 +170,12 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (AllocatorException e)
         {
-            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                vmachine.getId(), e));
+            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR, vmachine, e));
         }
         catch (Exception e)
         {
-            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                vmachine.getId(), e));
+            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR, vmachine,
+                e));
         }
         finally
         {
@@ -214,10 +208,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine allocateVirtualMachine(final VirtualMachine vmachine,
-        final Boolean foreceEnterpriseSoftLimits)
+        final VirtualAppliance vapp, final Boolean foreceEnterpriseSoftLimits)
     {
-
-        final Integer virtualMachineId = vmachine.getId();
 
         try
         {
@@ -225,7 +217,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             // final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
             final VirtualMachineRequirements requirements =
                 vmRequirements.createVirtualMachineRequirements(vmachine);
-            final VirtualAppliance vapp = nodeDao.findVirtualAppliance(vmachine); // virtualAppDao.findById(idVirtualApp);
 
             final Integer idDatacenter = vapp.getVirtualDatacenter().getDatacenter().getId();
             final FitPolicy fitPolicy = getAllocationFitPolicyOnDatacenter(idDatacenter);
@@ -242,7 +233,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (NotEnoughResourcesException e)
         {
             addConflictErrors(createErrorWithExceptionDetails(APIError.NOT_ENOUGH_RESOURCES,
-                virtualMachineId, e));
+                vmachine, e));
         }
         catch (LimitExceededException limite)
         {
@@ -250,13 +241,12 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         catch (AllocatorException e)
         {
-            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));
+            addConflictErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR, vmachine, e));
         }
         catch (Exception e)
         {
-            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR,
-                virtualMachineId, e));
+            addUnexpectedErrors(createErrorWithExceptionDetails(APIError.ALLOCATOR_ERROR, vmachine,
+                e));
         }
         finally
         {
@@ -296,8 +286,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         catch (ResourceUpgradeUseException e) // TODO with this error no other machine candidate
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(vmachine.getId()),
-                e.getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(vmachine), e.getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -327,11 +316,11 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     }
 
     protected CommonError createErrorWithExceptionDetails(final APIError apiError,
-        final Integer virtualMachineId, final Exception e)
+        final VirtualMachine virtualMachine, final Exception e)
     {
         final String msg =
-            String.format("%s (%s)\n%s", apiError.getMessage(),
-                virtualMachineInfo(virtualMachineId), e.getMessage());
+            String.format("%s (%s)\n%s", apiError.getMessage(), virtualMachineInfo(virtualMachine),
+                e.getMessage());
 
         return new CommonError(apiError.getCode(), msg);
     }
@@ -346,23 +335,20 @@ public class VirtualMachineAllocatorService extends DefaultApiService
      * @throws AllocationException, it there are some problem updating the physical machine
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public void deallocateVirtualMachine(final Integer idVirtualMachine)
+    public void deallocateVirtualMachine(final VirtualMachine vmachine)
     {
 
-        final String msg = String.format("Deallocate %d", idVirtualMachine);
+        final String msg = String.format("Deallocate %d", vmachine.getId());
         try
         {
             SchedulerLock.acquire(msg);
-
-            VirtualMachine vmachine = virtualMachineDao.findById(idVirtualMachine);
 
             upgradeUse.rollbackUse(vmachine);
         }
         catch (ResourceUpgradeUseException e)
         {
             APIError error = APIError.NOT_ENOUGH_RESOURCES;
-            error.addCause(String.format("%s\n%s", virtualMachineInfo(idVirtualMachine),
-                e.getMessage()));
+            error.addCause(String.format("%s\n%s", virtualMachineInfo(vmachine), e.getMessage()));
             addConflictErrors(error);
         }
         finally
@@ -373,9 +359,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
     }
 
-    protected String virtualMachineInfo(final Integer vmid)
+    protected String virtualMachineInfo(final VirtualMachine vm)
     {
-        VirtualMachine vm = virtualMachineDao.findById(vmid);
 
         return String.format("Virtual Machine id:%d name:%s UUID:%s.", vm.getId(), vm.getName(),
             vm.getUuid());

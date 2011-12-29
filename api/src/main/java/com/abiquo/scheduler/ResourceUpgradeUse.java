@@ -261,6 +261,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         throws NotEnoughResourcesException, NoSuchObjectException
     {
 
+        // virtualMachine = vmachineDao.findById(virtualMachine.getId());// XXX
+
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
 
         final List<NetworkAssignment> networksAssignedList =
@@ -273,6 +275,9 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         {
             // Get the network and the rack, entities that perform the network assignment
             VLANNetwork vlanNetwork = ipPoolManagement.getVlanNetwork();
+
+            VLANNetwork vlanNetwork2 = vlanNetworkDao.findById(vlanNetwork.getId());
+
             Rack rack = physicalTarget.getRack();
 
             // Discover the tag of the vlan if it is the first address to be deployed.
