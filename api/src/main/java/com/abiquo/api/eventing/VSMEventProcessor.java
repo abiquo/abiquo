@@ -33,13 +33,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
+import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -64,6 +69,12 @@ public class VSMEventProcessor implements VSMCallback
 
     @Autowired
     protected ResourceUpgradeUse resourceUpgrader;
+    
+    @Autowired
+    private RemoteServiceService remoteServiceService;
+    
+    @Autowired
+    protected VsmServiceStub vsmStub;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -233,8 +244,38 @@ public class VSMEventProcessor implements VSMCallback
 
         // Resources are freed
         // State NOT_ALLOCATED is set in this method too
+        unsubscribeVMToVSM(vMachine);
         resourceUpgrader.rollbackUse(vMachine);
         logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
 
+    }
+    
+    /**
+     * TODO: Auxiliary methods to be included in Helper Class. Also in HighAvailabilityEventProcessor
+     * 
+     * @param vMachine
+     * @return
+     */
+    protected boolean unsubscribeVMToVSM(final VirtualMachine vMachine)
+    {
+        try
+        {
+            Datacenter datacenter = vMachine.getHypervisor().getMachine().getDatacenter();
+            RemoteService remoteService = remoteServiceService.getVSMRemoteService(datacenter);
+            vsmStub.unsubscribe(remoteService, vMachine);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LOGGER
+                .error(
+                    "HA Move task on virtual machine name {} failed: Unsubscribing to VSM with Exception {}",
+                    new Object[] {vMachine.getName(), e.getMessage()});
+            tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_MOVING_BY_HA,
+                "HA Move Task on virtual machine name {} failed: Unsubscribing to VSM",
+                vMachine.getName());
+            return false;
+        }
     }
 }
