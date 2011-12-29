@@ -74,14 +74,20 @@ public class VirtualMachineGenerator extends DefaultEntityGenerator<VirtualMachi
         return createInstance(hypervisor);
     }
 
-    public VirtualMachine createInstance(final Hypervisor hypervisor)
+    public VirtualMachine createInstance(final Hypervisor hypervisor, final Enterprise e, final User user)
     {
-        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
-        VirtualMachineTemplate vimage = vImageGenerator.createInstance(enterprise);
+        VirtualMachineTemplate vimage = vImageGenerator.createInstance(e);
         String name =
             newString(nextSeed(), VirtualMachine.NAME_LENGTH_MIN, VirtualMachine.NAME_LENGTH_MAX);
 
-        return createInstance(vimage, enterprise, hypervisor, name);
+        return createInstance(vimage, e, hypervisor, user, name);
+    }
+    
+    public VirtualMachine createInstance(final Hypervisor hypervisor)
+    {
+        Enterprise enterprise = enterpriseGenerator.createUniqueInstance();
+        User user = userGenerator.createInstance(enterprise);
+        return createInstance(hypervisor, enterprise, user);
     }
 
     public VirtualMachine createInstance(final VirtualMachineTemplate vimage)

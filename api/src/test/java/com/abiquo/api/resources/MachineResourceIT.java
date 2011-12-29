@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import junit.framework.Assert;
 
@@ -71,6 +72,12 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     private String validMachineUri;
 
     private Machine validMachine;
+    
+    private Hypervisor validHypervisor;
+    
+    private Enterprise e;
+    
+    private User u;
 
     @Override
     @BeforeMethod
@@ -85,13 +92,14 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         setup(machine.getDatacenter(), machine.getRack(), machine, hypervisor, rs);
 
         validMachine = machine;
+        validHypervisor = hypervisor;
         validMachineUri =
             resolveMachineURI(machine.getDatacenter().getId(), machine.getRack().getId(),
                 machine.getId());
 
-        Enterprise e = enterpriseGenerator.createUniqueInstance();
+        e = enterpriseGenerator.createUniqueInstance();
         Role r = roleGenerator.createInstanceSysAdmin();
-        User u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
+        u = userGenerator.createInstance(e, r, "sysadmin", "sysadmin");
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
         entitiesToSetup.add(e);
@@ -324,7 +332,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     public void getMachineActionVirtualMachines()
     {
 
-        VirtualMachine vm = vmGenerator.createUniqueInstance();
+        VirtualMachine vm = vmGenerator.createInstance(validHypervisor, e, u);
         VirtualDatacenter vdc =
             vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
                 vm.getEnterprise());
@@ -335,19 +343,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(vm.getEnterprise());
-        for (Privilege p : vm.getUser().getRole().getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(vm.getUser().getRole());
-        entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
-        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
-        entitiesToSetup.add(vm.getHypervisor().getMachine());
-        entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
-        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
         entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
         entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
@@ -384,14 +380,15 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
     @Test
     public void notManagedActionVirtualMachines()
     {
-        VirtualMachine vm = vmGenerator.createUniqueInstance();
+        VirtualMachine vm = vmGenerator.createInstance(validHypervisor, e, u);
         vm.setIdType(VirtualMachine.NOT_MANAGED);
-        VirtualMachine vm2 = vmGenerator.createInstance(vm.getHypervisor());
+        VirtualMachine vm2 = vmGenerator.createInstance(validHypervisor, e, u);
         vm.setIdType(VirtualMachine.MANAGED);
         vm.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
         vm2.getVirtualMachineTemplate().getRepository()
             .setDatacenter(vm2.getHypervisor().getMachine().getDatacenter());
+        
         VirtualDatacenter vdc =
             vdcGenerator.createInstance(vm.getHypervisor().getMachine().getDatacenter(),
                 vm.getEnterprise());
@@ -406,29 +403,10 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
-        entitiesToSetup.add(vm.getEnterprise());
-        for (Privilege p : vm.getUser().getRole().getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(vm.getUser().getRole());
-        entitiesToSetup.add(vm.getUser());
-        entitiesToSetup.add(vm.getHypervisor().getMachine().getDatacenter());
-        entitiesToSetup.add(vm.getHypervisor().getMachine().getRack());
-        entitiesToSetup.add(vm.getHypervisor().getMachine());
-        entitiesToSetup.add(vm.getHypervisor());
         entitiesToSetup.add(vm.getVirtualMachineTemplate().getRepository());
-        entitiesToSetup.add(vm.getVirtualMachineTemplate().getEnterprise());
         entitiesToSetup.add(vm.getVirtualMachineTemplate().getCategory());
         entitiesToSetup.add(vm.getVirtualMachineTemplate());
         entitiesToSetup.add(vm);
-        entitiesToSetup.add(vm2.getEnterprise());
-        for (Privilege p : vm2.getUser().getRole().getPrivileges())
-        {
-            entitiesToSetup.add(p);
-        }
-        entitiesToSetup.add(vm2.getUser().getRole());
-        entitiesToSetup.add(vm2.getUser());
         entitiesToSetup.add(vm2.getVirtualMachineTemplate().getRepository());
         entitiesToSetup.add(vm2.getVirtualMachineTemplate().getCategory());
         entitiesToSetup.add(vm2.getVirtualMachineTemplate());
@@ -453,7 +431,7 @@ public class MachineResourceIT extends AbstractJpaGeneratorIT
         Assert.assertEquals(vms.getCollection().size(), 2);
 
         response = delete(uri);
-        Assert.assertEquals(response.getStatusCode(), 204);
+        Assert.assertEquals(response.getStatusCode(), Status.NO_CONTENT.getStatusCode());
 
         response = get(uri, "sysadmin", "sysadmin");
         vms = response.getEntity(VirtualMachinesDto.class);
