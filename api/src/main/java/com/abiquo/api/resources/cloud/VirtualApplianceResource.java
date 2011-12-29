@@ -44,6 +44,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -214,10 +215,19 @@ public class VirtualApplianceResource
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @Context final IRESTBuilder restBuilder)
     {
-        AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
-        addStatusLinks(links, dto);
-        return dto;
+        try
+        {
+            SchedulerLock.acquire("taputa");
+
+            AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
+            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+            addStatusLinks(links, dto);
+            return dto;
+        }
+        finally
+        {
+            SchedulerLock.release("taputa");
+        }
     }
 
     @POST
@@ -225,8 +235,7 @@ public class VirtualApplianceResource
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
-        final VirtualMachineTaskDto taskOptions,
-        @Context final IRESTBuilder restBuilder)
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder)
     {
         Boolean forceUndeploy;
         if (taskOptions.getForceUndeploy() == null)

@@ -48,6 +48,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.model.transport.error.CommonError;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
 import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
@@ -428,7 +429,7 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Autowired
-    private VirtualMachineAllocatorService vmallocator;
+    private VirtualMachineAllocatorService vmallocator; // XXX moveme
 
     private void allocateVirtualAppliance(final VirtualAppliance vapp,
         final boolean foreceEnterpriseSoftLimits)
@@ -445,9 +446,20 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 final Integer virtualMachineId = nvi.getVirtualMachine().getId();
 
-                // XXX duplicated limit checker
-                vmService.allocate(virtualMachineId, idVirtualApp, idVdc,
-                    foreceEnterpriseSoftLimits);
+                final String msg = String.format("Allocate %d", virtualMachineId);
+
+                try
+                {
+                    // SchedulerLock.acquire(msg);
+
+                    // XXX duplicated limit checker
+                    vmService.allocate(virtualMachineId, idVirtualApp, idVdc,
+                        foreceEnterpriseSoftLimits);
+                }
+                finally
+                {
+                    // SchedulerLock.release(msg);
+                }
             }
         }
         catch (Exception e)

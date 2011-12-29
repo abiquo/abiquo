@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -659,7 +660,7 @@ public class VirtualMachineService extends DefaultApiService
         // vmLock.lock(vm.getId());
         // Temporal fix to avoid stale objects
         vm.setState(VirtualMachineState.LOCKED);
-        repo.update(vm);
+        // FIXME repo.update(vm);
 
         // Refresh the locked virtual machine from database, to avoid StaleObject issues
         // repo.refreshLock(vm);
@@ -1104,6 +1105,9 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    // , isolation = Isolation.READ_COMMITTED)
+    // org.springframework.transaction.InvalidIsolationLevelException: Standard JPA does not support
+    // custom isolation levels - use a special JpaDialect for your JPA implementation
     public void allocate(final Integer vmId, final Integer vappId, final Integer vdcId,
         final Boolean foreceEnterpriseSoftLimits)
     {
@@ -1126,12 +1130,12 @@ public class VirtualMachineService extends DefaultApiService
 
         LOGGER.debug("Check remote services");
         // The remote services must be up for this Datacenter if we are to deploy
-        checkRemoteServicesByVirtualDatacenter(vdcId);
+        // FIXME checkRemoteServicesByVirtualDatacenter(vdcId);
         LOGGER.debug("Remote services are ok!");
 
         // Tasks needs the definition of the virtual machine
         // VirtualAppliance virtualAppliance =
-        getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        // getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
 
         VirtualMachineState originalState = virtualMachine.getState();
 

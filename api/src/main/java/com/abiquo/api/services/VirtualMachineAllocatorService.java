@@ -218,11 +218,9 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     {
 
         final Integer virtualMachineId = vmachine.getId();
-        final String msg = String.format("Allocate %d", virtualMachineId);
 
         try
         {
-            SchedulerLock.acquire(msg);
 
             // final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
             final VirtualMachineRequirements requirements =
@@ -237,7 +235,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
             VirtualMachine allocatedvm =
                 selectPhysicalMachineAndAllocateResources(vmachine, vapp, fitPolicy, requirements);
 
-            vmdao.detachVirtualMachine(vmachine);
+            // vmdao.detachVirtualMachine(vmachine);
 
             return allocatedvm;
         }
@@ -262,24 +260,24 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         finally
         {
-            SchedulerLock.release(msg);
             flushErrors();
         }
 
         return null; // unreachable code
     }
 
-    @Autowired
-    private VirtualMachineDAO vmdao;
+    // @Autowired
+    // private VirtualMachineDAO vmdao;
 
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    // REQUIRES_NEW
     private VirtualMachine selectPhysicalMachineAndAllocateResources(final VirtualMachine vmachine,
         final VirtualAppliance vapp, final FitPolicy fitPolicy,
         final VirtualMachineRequirements requirements)
     {
 
-        final Integer vappId = vapp.getId();
-        Machine targetMachine = allocationService.findBestTarget(requirements, fitPolicy, vappId);
+        // final Integer vappId = vapp.getId();
+        Machine targetMachine = allocationService.findBestTarget(requirements, fitPolicy, vapp);
 
         LOG.info("Attemp to use physical machine [{}] to allocate VirtualMachine [{}]",
             targetMachine.getName(), vmachine.getName());
@@ -293,7 +291,7 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         try
         {
             // UPGRADE PHYSICAL MACHINE USE
-            upgradeUse.updateUse(vappId, allocatedVirtualMachine);
+            upgradeUse.updateUse(vapp, allocatedVirtualMachine);
         }
         catch (ResourceUpgradeUseException e) // TODO with this error no other machine candidate
         {

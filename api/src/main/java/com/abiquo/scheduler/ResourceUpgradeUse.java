@@ -76,13 +76,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     private final static Logger log = LoggerFactory.getLogger(ResourceUpgradeUse.class);
 
     @Autowired
-    private InfrastructureRep datacenterRepo;
-
-    @Autowired
     private DatastoreDAO datastoreDao;
-
-    @Autowired
-    private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
     private NetworkAssignmentDAO netAssignDao;
@@ -93,11 +87,18 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
     @Autowired
     private VLANNetworkDAO vlanNetworkDao;
 
+    // FIXME
+    @Autowired
+    private InfrastructureRep datacenterRepo;
+
     @Autowired
     private RasdDAO rasdDao;
 
     @Autowired
     private VirtualMachineDAO vmachineDao;
+
+    @Autowired
+    private VirtualApplianceDAO virtualApplianceDao;
 
     @Autowired
     private HypervisorDAO hypervisorDao;
@@ -127,25 +128,25 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      *             virtual datacenter.
      */
     @Override
-    public void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine)
-        throws ResourceUpgradeUseException
+    public void updateUse(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine) throws ResourceUpgradeUseException
     {
-        updateUse(virtualApplianceId, virtualMachine, false);
+        updateUse(virtualAppliance, virtualMachine, false);
     }
 
     @Override
-    public void updateUseHa(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
-        final Integer sourceHypervisorId)
+    public void updateUseHa(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final Integer sourceHypervisorId)
     {
-        updateUse(virtualApplianceId, virtualMachine, true); // upgrade resources on the target HA
-                                                             // hypervisor
+        updateUse(virtualAppliance, virtualMachine, true); // upgrade resources on the target HA
+                                                           // hypervisor
         // free resources on the original hypervisor
         Machine sourceMachine = hypervisorDao.findById(sourceHypervisorId).getMachine();
         updateUsagePhysicalMachine(sourceMachine, virtualMachine, true);
     }
 
-    private void updateUse(final Integer virtualApplianceId, final VirtualMachine virtualMachine,
-        final boolean isHA)
+    private void updateUse(final VirtualAppliance virtualAppliance,
+        final VirtualMachine virtualMachine, final boolean isHA)
     {
         if (virtualMachine.getHypervisor() == null
             || virtualMachine.getHypervisor().getMachine() == null)
@@ -162,16 +163,16 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             if (!isHA)
             {
                 updateUsageDatastore(virtualMachine, false);
-                updateNetworkingResources(physicalMachine, virtualMachine, virtualApplianceId);
+                updateNetworkingResources(physicalMachine, virtualMachine, virtualAppliance);
 
-                virtualMachine.setState(VirtualMachineState.LOCKED);
+                virtualMachine.setState(VirtualMachineState.LOCKED); // FIXME
             }
             else
             {
                 updateNewtorkingResourcesHA(physicalMachine, virtualMachine);
             }
 
-            vmachineDao.flush();
+            // XXX tx vmachineDao.flush();
         }
         catch (final ConstraintViolationException cve)
         {
@@ -213,7 +214,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             virtualMachine.setHypervisor(null);
             virtualMachine.setDatastore(null);
 
-            vmachineDao.flush();
+            // XXX txvmachineDao.flush();
         }
         catch (final Exception e)
         {
@@ -240,7 +241,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             // already assigned VLAN TAG if (vlanNetwork.getTag() == null)
             Rasd rasd = ipPoolManagement.getRasd();
             rasd.setConnection(vswitch);
-            rasdDao.flush();
+            // XXX tx rasdDao.flush();
         }// iterate over VlanNetwork
 
     }
@@ -256,18 +257,17 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
      * @throws NoSuchObjectException
      */
     private void updateNetworkingResources(final Machine physicalTarget,
-        final VirtualMachine virtualMachine, final int virtualApplianceId)
+        final VirtualMachine virtualMachine, final VirtualAppliance vapp)
         throws NotEnoughResourcesException, NoSuchObjectException
     {
-        final VirtualAppliance vapp = virtualApplianceDao.findById(virtualApplianceId);
 
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
 
         final List<NetworkAssignment> networksAssignedList =
             netAssignDao.findByVirtualDatacenter(virtualDatacenter);
 
-        List<IpPoolManagement> ippoolManagementList =
-            ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
+        List<IpPoolManagement> ippoolManagementList = virtualMachine.getIps();
+        // ipPoolManDao.findIpsByVirtualMachine(virtualMachine);
 
         for (final IpPoolManagement ipPoolManagement : ippoolManagementList)
         {
@@ -288,13 +288,13 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                     vlanNetwork.getId(), freeTag);
                 vlanNetwork.setTag(freeTag);
 
-                vlanNetworkDao.flush();
+                // XXX txvlanNetworkDao.flush();
             }
             Rasd rasd = ipPoolManagement.getRasd();
             rasd.setAllocationUnits(String.valueOf(vlanNetwork.getTag()));
             rasd.setParent(ipPoolManagement.getNetworkName());
             rasd.setConnection(physicalTarget.getVirtualSwitch());
-            rasdDao.flush();
+            // XXX tx rasdDao.flush();
 
             final NetworkAssignment nb =
                 new NetworkAssignment(virtualDatacenter, rack, vlanNetwork);
@@ -331,8 +331,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
                 if (!vlanNetworkDao.isPublic(vlanNetwork))
                 {
                     vlanNetwork.setTag(null);
-                    vlanNetworkDao.flush();
-                    // vlanNetworkDao.persist(vlanNetwork);
+                    // XXX tx vlanNetworkDao.flush();
                 }
 
                 NetworkAssignment na = netAssignDao.findByVlanNetwork(vlanNetwork);
@@ -376,7 +375,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         machine.setVirtualCpusUsed(newCpu >= 0 ? newCpu : 0);
         machine.setVirtualRamUsedInMb(newRam >= 0 ? newRam : 0);
 
-        datacenterRepo.updateMachine(machine);
+        // XXX tx datacenterRepo.updateMachine(machine);
     }
 
     @Override
@@ -386,7 +385,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
         machine.setVirtualRamUsedInMb((int) (machine.getVirtualRamUsedInMb() + requirements
             .getRam()));
 
-        datacenterRepo.updateMachine(machine);
+        // XXX tx datacenterRepo.updateMachine(machine);
     }
 
     /**
@@ -415,7 +414,7 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             updateDatastore(dstore, virtual.getHdInBytes(), isRollback);
         }
 
-        datastoreDao.flush();
+        // XXX tx datastoreDao.flush();
     }
 
     private void updateDatastore(final Datastore datastore, final Long requestSize,
