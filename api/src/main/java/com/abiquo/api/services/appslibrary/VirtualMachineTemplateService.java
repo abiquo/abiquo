@@ -160,7 +160,7 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
      */
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> getVirtualMachineTemplates(final Integer enterpriseId,
-        final Integer datacenterId, final String categoryName, final String hypervisorName)
+        final Integer datacenterId, final String categoryName, final String hypervisorName, final Boolean imported)
     {
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Repository repository = getDatacenterRepository(datacenterId, enterpriseId);
@@ -185,8 +185,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             }
         }
 
-        return appsLibraryRep.findVirtualMachineTemplates(enterprise, repository, category,
+        List<VirtualMachineTemplate> templates = appsLibraryRep.findVirtualMachineTemplates(enterprise, repository, category,
             hypervisor);
+        
+        if (imported)
+        {
+            // adds the virtual machine templates from imported virtual machines. aka: they are not in the repository.
+            templates.addAll(appsLibraryRep.findImportedVirtualMachineTemplates(enterprise, datacenterId, category, hypervisor));
+        }
+        
+        return templates;
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

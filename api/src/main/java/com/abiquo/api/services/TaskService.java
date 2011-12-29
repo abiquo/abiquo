@@ -88,4 +88,9 @@ public class TaskService extends DefaultApiService
     {
         return repo.save(task);
     }
+
+    public void deleteTask(final Task task)
+    {
+        repo.delete(task);
+    }
 }

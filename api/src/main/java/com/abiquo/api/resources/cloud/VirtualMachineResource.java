@@ -549,6 +549,12 @@ public class VirtualMachineResource extends AbstractResource
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
                 .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
         }
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
+                .getId(), v.getVirtualMachine().getHypervisor().getMachine().getRack().getDatacenter().getId(), v.getVirtualImage().getId()));
+        }
         
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
@@ -596,12 +602,18 @@ public class VirtualMachineResource extends AbstractResource
             : user.getId()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
-        if (vmtemplate != null)
+        if (vmtemplate.getRepository() != null)
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
                 .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
         }
-
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(), vmtemplate.getId()));
+        }
+        
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
 
         return dto;
@@ -651,10 +663,16 @@ public class VirtualMachineResource extends AbstractResource
             v.isChefEnabled(), volumeIds, diskIds, ips));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
-        if (vmtemplate != null)
+        if (vmtemplate.getRepository() != null)
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
                 .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+        }
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(), vmtemplate.getId()));
         }
 
         return dto;

@@ -74,6 +74,13 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         return getResultList(criteria);
     }
 
+    public List<VirtualMachineTemplate> findImportedByEnterprise(Enterprise enterprise)
+    {
+        Criteria criteria = createCriteria(importedVirtualMachineTemplate(enterprise));
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        return getResultList(criteria);
+    }
+    
     public List<VirtualMachineTemplate> findBy(final Enterprise enterprise,
         final com.abiquo.server.core.infrastructure.Repository repository, final Category category,
         final HypervisorType hypervisor)
@@ -93,6 +100,31 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
         List<VirtualMachineTemplate> result = getResultList(criteria);
         return result;
+    }
+
+    public List<VirtualMachineTemplate> findImportedBy(Enterprise enterprise, Category category,
+        HypervisorType hypervisor)
+    {
+        Criteria criteria = createCriteria(importedVirtualMachineTemplate(enterprise));
+
+        if (category != null)
+        {
+            criteria.add(sameCategory(category));
+        }
+
+        if (hypervisor != null)
+        {
+            criteria.add(compatibleOrConversions(hypervisor, criteria));
+        }
+
+        criteria.addOrder(Order.asc(VirtualMachine.NAME_PROPERTY));
+        List<VirtualMachineTemplate> result = getResultList(criteria);
+        return result;
+    }
+    
+    private Criterion importedVirtualMachineTemplate(Enterprise enterprise)
+    {
+        return Restrictions.and(sameEnterprise(enterprise), repositoryNull());
     }
 
     /** Virtual Machine Template compatible or some conversion compatible. */
@@ -211,12 +243,17 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
     {
         return Restrictions.eq(VirtualMachineTemplate.REPOSITORY_PROPERTY, repository);
     }
+    
+    private static Criterion repositoryNull()
+    {
+        return Restrictions.isNull(VirtualMachineTemplate.REPOSITORY_PROPERTY);
+    }
 
     private static Criterion sharedVirtualMachineTemplate()
     {
         return Restrictions.eq(VirtualMachineTemplate.SHARED_PROPERTY, true);
     }
-
+    
     private static Criterion statefulVirtualMachineTemplate()
     {
         return Restrictions.and(Restrictions.eq(VirtualMachineTemplate.STATEFUL_PROPERTY, true),
@@ -264,4 +301,6 @@ import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
         crit.createAlias("pool." + StoragePool.DEVICE_PROPERTY, "device");
         return crit;
     }
+
+
 }
