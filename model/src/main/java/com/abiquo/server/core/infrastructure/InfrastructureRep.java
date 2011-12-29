@@ -44,6 +44,8 @@ import com.abiquo.server.core.common.DefaultRepBase;
 import com.abiquo.server.core.enterprise.DatacenterLimits;
 import com.abiquo.server.core.enterprise.DatacenterLimitsDAO;
 import com.abiquo.server.core.enterprise.Enterprise;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
+import com.abiquo.server.core.infrastructure.network.DhcpOptionDAO;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagementDAO;
 import com.abiquo.server.core.infrastructure.network.Network;
@@ -123,6 +125,9 @@ public class InfrastructureRep extends DefaultRepBase
     @Autowired
     private DatacenterLimitsDAO datacenterLimitDao;
 
+    @Autowired
+    private DhcpOptionDAO dhcpOptionDAO;
+
     public InfrastructureRep()
     {
 
@@ -148,6 +153,7 @@ public class InfrastructureRep extends DefaultRepBase
         this.storageRep = new StorageRep(entityManager);
         this.vlanDao = new VLANNetworkDAO(entityManager);
         this.ipPoolDao = new IpPoolManagementDAO(entityManager);
+        this.dhcpOptionDAO = new DhcpOptionDAO(entityManager);
     }
 
     public Datacenter findById(final Integer id)
@@ -850,6 +856,36 @@ public class InfrastructureRep extends DefaultRepBase
         final Integer vmId)
     {
         return virtualMachineDao.findVirtualMachineByHypervisor(hypervisor, vmId);
+    }
+
+    public Collection<DhcpOption> findAllDhcp()
+    {
+        return this.dhcpOptionDAO.findAll();
+    }
+
+    public DhcpOption findDhcpOptionById(final Integer id)
+    {
+        return dhcpOptionDAO.findById(id);
+    }
+
+    public void insertDhcpOption(final DhcpOption opt)
+    {
+        assert opt != null;
+        assert !dhcpOptionDAO.isManaged(opt);
+        dhcpOptionDAO.persist(opt);
+        dhcpOptionDAO.flush();
+
+    }
+
+    public void deleteAllDhcpOption(final Collection<DhcpOption> dhcpOption)
+    {
+        for (DhcpOption opt : dhcpOption)
+        {
+            this.dhcpOptionDAO.remove(opt);
+
+        }
+        this.dhcpOptionDAO.flush();
+
     }
 
     public List<Integer> findUsedRemoteDesktopPortsInRack(final Rack rack)

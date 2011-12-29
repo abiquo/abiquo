@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.collections.ArrayCollection;
         	import net.undf.abicloud.vo.virtualappliance.VirtualDataCenter;
             import mx.controls.Button;
             import mx.controls.TextInput;
@@ -83,6 +84,7 @@
                 networkingEvent.networkName = privateNetworkForm.networkName;
                 networkingEvent.networkConfiguration = privateNetworkForm.networkConfiguration;
                 networkingEvent.defaultNetwork = privateNetworkForm.isDefaultNetwork;
+                networkingEvent.staticRules = privateNetworkForm.staticRules ? privateNetworkForm.staticRules : new ArrayCollection();
 
                 dispatchEvent(networkingEvent);
             }
