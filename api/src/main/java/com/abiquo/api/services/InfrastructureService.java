@@ -182,8 +182,8 @@ public class InfrastructureService extends DefaultApiService
         validate(rack);
         repo.insertRack(rack);
 
-        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE, "Rack '"
-            + rack.getName() + "' has been created succesfully");
+        tracer.log(SeverityType.INFO, ComponentType.RACK, EventType.RACK_CREATE,
+            "Rack '" + rack.getName() + "' has been created succesfully");
 
         return rack;
     }
@@ -209,8 +209,8 @@ public class InfrastructureService extends DefaultApiService
         validateCreateInfo(createInfo);
 
         return addMachines(datacenterId, rackId, createInfo.getIpFrom(), createInfo.getIpTo(),
-            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(), createInfo
-                .getPort(), createInfo.getvSwitch());
+            createInfo.getHypervisor(), createInfo.getUser(), createInfo.getPassword(),
+            createInfo.getPort(), createInfo.getvSwitch());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -239,7 +239,7 @@ public class InfrastructureService extends DefaultApiService
         HypervisorType hyType = HypervisorType.fromValue(hypervisor);
         List<Machine> discoveredMachines =
         // nodecollectorServiceStub.getRemoteHypervisors(nodecollector, ipFromOK, ipToOK, hyType,
-            // user, password, port);
+        // user, password, port);
             this.discoverRemoteHypevisors(datacenterId, ipFromOK, ipToOK, hyType, user, password,
                 port, vSwitch);
 
@@ -551,8 +551,8 @@ public class InfrastructureService extends DefaultApiService
         RemoteService old = getRemoteService(id);
 
         ErrorsDto configurationErrors =
-            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(), dto
-                .getUri());
+            remoteServiceService.checkRemoteServiceStatus(old.getDatacenter(), dto.getType(),
+                dto.getUri());
         int status = configurationErrors.isEmpty() ? STATUS_SUCCESS : STATUS_ERROR;
         dto.setStatus(status);
 
@@ -686,8 +686,7 @@ public class InfrastructureService extends DefaultApiService
                 remoteService.setStatus(STATUS_ERROR);
                 APIError error = APIError.REMOTE_SERVICE_CONNECTION_FAILED;
                 configurationErrors.add(new ErrorDto(error.getCode(), remoteService.getType()
-                    .getName()
-                    + ", " + error.getMessage()));
+                    .getName() + ", " + error.getMessage()));
                 return configurationErrors;
             }
         }
@@ -1031,9 +1030,8 @@ public class InfrastructureService extends DefaultApiService
             {
                 if (pd.getReadMethod().invoke(dto) == null)
                 {
-                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(), pd
-                        .getName()
-                        + " can't be null"));
+                    addValidationErrors(new CommonError(APIError.STATUS_BAD_REQUEST.getCode(),
+                        pd.getName() + " can't be null"));
                     flushErrors();
                 }
             }

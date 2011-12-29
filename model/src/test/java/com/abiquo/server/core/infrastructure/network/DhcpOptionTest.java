@@ -19,30 +19,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+  package com.abiquo.server.core.infrastructure.network;
 
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
-{
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED, EXTERNAL_UNMANAGED;
+  import com.abiquo.server.core.common.DefaultEntityTestBase;
+  import com.softwarementors.bzngine.entities.test.InstanceTester;
 
-    public static NetworkType fromValue(final String orderBy)
-    {
-        for (NetworkType currentOrder : NetworkType.values())
-        {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
-        }
+  public class DhcpOptionTest extends DefaultEntityTestBase<DhcpOption>
+  {
 
-        return null;
-    }
-}
+      @Override
+      protected InstanceTester<DhcpOption> createEntityInstanceGenerator()
+      {
+          return new DhcpOptionGenerator(getSeed());
+      }
+  }

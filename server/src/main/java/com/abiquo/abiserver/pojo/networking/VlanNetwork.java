@@ -25,7 +25,10 @@
 package com.abiquo.abiserver.pojo.networking;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.abiquo.abiserver.business.hibernate.pojohb.networking.DhcpOptionHB;
 import com.abiquo.abiserver.business.hibernate.pojohb.networking.VlanNetworkHB;
 import com.abiquo.abiserver.pojo.IPojo;
 import com.abiquo.server.core.infrastructure.network.VLANNetworkDto;
@@ -70,6 +73,8 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
     private Boolean defaultNetwork;
 
     private String networkType;
+
+    Set<DhcpOption> dhcpOptions;
 
     /**
      * @return the vlanNetworkId
@@ -151,6 +156,16 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         this.configuration = configuration;
     }
 
+    public Set<DhcpOption> getDhcpOptions()
+    {
+        return dhcpOptions;
+    }
+
+    public void setDhcpOptions(final Set<DhcpOption> dhcpOptions)
+    {
+        this.dhcpOptions = dhcpOptions;
+    }
+
     @Override
     public VlanNetworkHB toPojoHB()
     {
@@ -165,6 +180,17 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         {
             vnetHB.setConfiguration(getConfiguration().toPojoHB());
         }
+
+        Set<DhcpOptionHB> dhcpOptionHB = new HashSet<DhcpOptionHB>();
+        if (dhcpOptions != null)
+        {
+            for (DhcpOption dhcpOption : dhcpOptions)
+            {
+                dhcpOptionHB.add(dhcpOption.toPojoHB());
+            }
+        }
+
+        vnetHB.setDhcpOptionsHB(dhcpOptionHB);
 
         return vnetHB;
     }
@@ -210,7 +236,6 @@ public class VlanNetwork implements Serializable, IPojo<VlanNetworkHB>
         vlan.setVlanNetworkId(dto.getId());
         vlan.setVlanTag(dto.getTag());
         vlan.setNetworkId(networkId);
-
         return vlan;
     }
 }

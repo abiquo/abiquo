@@ -82,6 +82,41 @@ CREATE TABLE  `kinton`.`enterprise_properties_map` (
   `map_key` varchar(30) NOT NULL,
   `value` varchar(50) default NULL, 
   CONSTRAINT `FK2_enterprise_properties` FOREIGN KEY (`enterprise_properties`) REFERENCES `enterprise_properties` (`idProperties`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+-- Definition of table `kinton`.`dhcpOption`
+--
+CREATE TABLE `kinton`.`dhcpOption` (
+  `idDhcpOption` int(10) unsigned NOT NULL AUTO_INCREMENT ,
+  `dhcp_opt` int(20) NOT NULL ,
+   `gateway` varchar(40),
+  `network_address` varchar(40) NOT NULL,
+  `mask` int(4) NOT NULL,
+  `netmask` varchar(20) NOT NULL,
+  `version_c` int(11) default 0,
+  PRIMARY KEY (`idDhcpOption`)
+  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+--
+-- Definition of table `kinton`.`vlans_dhcpOption`
+--
+
+CREATE  TABLE `kinton`.`vlans_dhcpOption` (
+  `idVlan` INT(10) UNSIGNED NOT NULL ,
+  `idDhcpOption` INT(10) UNSIGNED NOT NULL ,
+  `version_c` INT(11) default 0,
+  INDEX `fk_vlans_dhcp_vlan` (`idVlan` ASC) ,
+  INDEX `fk_vlans_dhcp_dhcp` (`idDhcpOption` ASC) ,
+  CONSTRAINT `fk_vlans_dhcp_vlan`
+    FOREIGN KEY (`idVlan` )
+    REFERENCES `kinton`.`vlan_network` (`vlan_network_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_vlans_dhcp_dhcp`
+    FOREIGN KEY (`idDhcpOption` )
+    REFERENCES `kinton`.`dhcpOption` (`idDhcpOption` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- PRICING --
@@ -1565,3 +1600,4 @@ CREATE TRIGGER `KINTON`.`DELETE_NODEVIRTUALIMAGE_UPDATE_STATS` AFTER DELETE ON `
 --
 
 DELIMITER ;
+
