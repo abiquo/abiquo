@@ -38,7 +38,6 @@ import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
-import com.abiquo.model.enumerator.RemoteServiceType;
 import com.abiquo.scheduler.ResourceUpgradeUse;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
@@ -69,12 +68,18 @@ public class VSMEventProcessor implements VSMCallback
 
     @Autowired
     protected ResourceUpgradeUse resourceUpgrader;
-    
+
     @Autowired
     private RemoteServiceService remoteServiceService;
-    
+
     @Autowired
     protected VsmServiceStub vsmStub;
+
+    @Autowired
+    protected VsmServiceStub vsm;
+
+    @Autowired
+    protected RemoteServiceService remoteService;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -109,7 +114,7 @@ public class VSMEventProcessor implements VSMCallback
      * 
      * @param em The entity manager to use.
      */
-    public VSMEventProcessor(EntityManager em)
+    public VSMEventProcessor(final EntityManager em)
     {
         this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
@@ -152,7 +157,7 @@ public class VSMEventProcessor implements VSMCallback
      * @param notification The notification.
      * @return The virtual machine instance.
      */
-    protected VirtualMachine updateMachineState(VirtualMachine machine,
+    protected VirtualMachine updateMachineState(final VirtualMachine machine,
         final VirtualSystemEvent notification)
     {
         return processEvent(machine, eventFromString(notification.getEventType()), notification);
@@ -162,13 +167,13 @@ public class VSMEventProcessor implements VSMCallback
      * Process the given notification and if it affects to the virtual machine, updates the state of
      * a virtual machine instance.
      * 
-     * @param machine The instance to update.
+     * @param virtualMachine The instance to update.
      * @param event The event notified.
      * @param notification The complete notification.
      * @return The virtual machine instance.
      */
-    protected VirtualMachine processEvent(VirtualMachine machine, VMEventType event,
-        VirtualSystemEvent notification)
+    protected VirtualMachine processEvent(final VirtualMachine virtualMachine,
+        final VMEventType event, final VirtualSystemEvent notification)
     {
         switch (event)
         {
@@ -177,10 +182,10 @@ public class VSMEventProcessor implements VSMCallback
             case POWER_ON:
             case RESUMED:
             case SAVED:
-                machine.setState(stateByEvent.get(event));
+                virtualMachine.setState(stateByEvent.get(event));
                 break;
             case DESTROYED:
-                onVMDestroyedEvent(machine, event, notification);
+                onVMDestroyedEvent(virtualMachine, event, notification);
                 break;
 
             default:
@@ -188,7 +193,7 @@ public class VSMEventProcessor implements VSMCallback
                 break;
         }
 
-        return machine;
+        return virtualMachine;
     }
 
     protected void logAndTraceVirtualMachineStateUpdated(final VirtualMachine machine,
@@ -236,22 +241,23 @@ public class VSMEventProcessor implements VSMCallback
      * Fires on Virtual Machine Destroyed event detection. - Sets VM state to NOT_ALLOCATED -
      * Resources ARE freed
      * 
-     * @param vm
+     * @param virtualMachine virtual machine that has been destroyed
      */
-    protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
+    protected void onVMDestroyedEvent(final VirtualMachine virtualMachine, final VMEventType event,
         final VirtualSystemEvent notification)
     {
 
         // Resources are freed
         // State NOT_ALLOCATED is set in this method too
-        unsubscribeVMToVSM(vMachine);
-        resourceUpgrader.rollbackUse(vMachine);
-        logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
+        unsubscribeVMToVSM(virtualMachine);
+        resourceUpgrader.rollbackUse(virtualMachine);
+        logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
 
     }
-    
+
     /**
-     * TODO: Auxiliary methods to be included in Helper Class. Also in HighAvailabilityEventProcessor
+     * TODO: Auxiliary methods to be included in Helper Class. Also in
+     * HighAvailabilityEventProcessor
      * 
      * @param vMachine
      * @return
