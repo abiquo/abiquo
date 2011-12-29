@@ -77,6 +77,7 @@ import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
@@ -800,7 +801,7 @@ public class VirtualMachineService extends DefaultApiService
         // The user must have the proper permission
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
 
-        if (virtualMachine.getState().equals(VirtualMachineState.LOCKED))
+        if (VirtualMachineState.LOCKED.equals(virtualMachine.getState()))
         {
             LOGGER.error("Delete virtual machine error, the state is LOCKED");
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DELETE,
@@ -809,12 +810,22 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_INVALID_STATE_DELETE);
             flushErrors();
         }
-        if (virtualMachine.getState().equals(VirtualMachineState.ALLOCATED))
+        if (VirtualMachineState.ALLOCATED.equals(virtualMachine.getState()))
         {
-            LOGGER.debug("Delete of the virtualMachine that has resources allocated. Deallocating");
-            vmAllocatorService.deallocateVirtualMachine(virtualMachine);
-            LOGGER
-                .debug("Delete of the virtualMachine that has resources allocated. Deallocating successful");
+            final String lockMsg = "Deallocate " + virtualMachine.getId();
+            try
+            {
+                LOGGER
+                    .warn("Delete of the ALLOCATED virtualMachine that has resources allocated. Deallocating");
+                SchedulerLock.acquire(lockMsg);
+                vmAllocatorService.deallocateVirtualMachine(virtualMachine);
+            }
+            finally
+            {
+                SchedulerLock.release(lockMsg);
+                LOGGER
+                    .warn("Delete of the ALLOCATED virtualMachine that has resources allocated. Deallocating successful");
+            }
         }
         else if (virtualMachine.getState().existsInHypervisor())
         {
@@ -1096,18 +1107,15 @@ public class VirtualMachineService extends DefaultApiService
     public String deployVirtualMachine(final Integer vmId, final Integer vappId,
         final Integer vdcId, final Boolean foreceEnterpriseSoftLimits)
     {
-        //
-        // allocate(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
-        //
-        // return sendDeploy(vmId, vappId, vdcId, foreceEnterpriseSoftLimits);
-        // FIXME
-        throw new RuntimeException("unimplemented");
+        VirtualAppliance vapp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachine vmachine = getVirtualMachine(vdcId, vappId, vmId);
+
+        allocate(vmachine, vapp, foreceEnterpriseSoftLimits);
+
+        return sendDeploy(vmachine, vapp);
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    // , isolation = Isolation.READ_COMMITTED)
-    // org.springframework.transaction.InvalidIsolationLevelException: Standard JPA does not support
-    // custom isolation levels - use a special JpaDialect for your JPA implementation
     public void allocate(final VirtualMachine virtualMachine, final VirtualAppliance vapp,
         final Boolean foreceEnterpriseSoftLimits)
     {
@@ -1115,7 +1123,6 @@ public class VirtualMachineService extends DefaultApiService
         LOGGER.debug("Starting the deploy of the virtual machine {}", virtualMachine.getId());
         // We need to operate with concrete and this also check that the VirtualMachine belongs to
         // those VirtualAppliance and VirtualDatacenter
-        // FIXME VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
 
         LOGGER.debug("Check for permissions");
         // The user must have the proper permission
@@ -1128,10 +1135,10 @@ public class VirtualMachineService extends DefaultApiService
         checkVirtualMachineStateAllowsDeploy(virtualMachine);
         LOGGER.debug("The state is valid for deploy");
 
-        LOGGER.debug("Check remote services");
         // The remote services must be up for this Datacenter if we are to deploy
+        // LOGGER.debug("Check remote services");
         // FIXME checkRemoteServicesByVirtualDatacenter(vdcId);
-        LOGGER.debug("Remote services are ok!");
+        // LOGGER.debug("Remote services are ok!");
 
         // Tasks needs the definition of the virtual machine
         // VirtualAppliance virtualAppliance =
@@ -1153,18 +1160,13 @@ public class VirtualMachineService extends DefaultApiService
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
              * one of the above fail we cannot allocate the VirtualMachine
              */
-            // virtualMachine =
             vmAllocatorService.allocateVirtualMachine(virtualMachine, vapp,
                 foreceEnterpriseSoftLimits);
             LOGGER.debug("Allocated!");
 
-            // refresh due SchedulerLock modifications
-            // repo.refresh(virtualMachine);
-            // repo.detachHypervisor(virtualMachine);
-
             LOGGER.debug("Mapping the external volumes");
             // We need to map all attached volumes if any
-            initiatorMappings(virtualMachine);// repo.findVirtualMachineById(vmId));
+            initiatorMappings(virtualMachine);
             LOGGER.debug("Mapping done!");
 
             repo.detachVirtualMachine(virtualMachine);
@@ -1205,21 +1207,12 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public String sendDeploy(VirtualMachine virtualMachine, final VirtualAppliance virtualAppliance,
-        final Boolean foreceEnterpriseSoftLimits)
+    public String sendDeploy(final VirtualMachine virtualMachine,
+        final VirtualAppliance virtualAppliance)
     {
 
         try
         {
-
-            // virtualAppliance =
-            // getVirtualApplianceAndCheckVirtualDatacenter(virtualAppliance
-            // .getVirtualDatacenter().getId(), virtualAppliance.getId());
-
-            virtualMachine =
-                getVirtualMachine(virtualAppliance.getVirtualDatacenter().getId(),
-                    virtualAppliance.getId(), virtualMachine.getId());
-
             VirtualMachineDescriptionBuilder vmDesc =
                 jobCreator.toTarantinoDto(virtualMachine, virtualAppliance);
 

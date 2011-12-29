@@ -63,8 +63,6 @@ import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
  * Before select the machine check if the current allowed limits are exceeded.
  * <p>
  * Enterprise edition support the definition of affinity, exclusion and work load rules.
- * <p>
- * TODO transactional required. read-only
  * 
  * @author apuig
  */
@@ -213,8 +211,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
 
         try
         {
-
-            // final VirtualMachine vmachine = virtualMachineDao.findById(virtualMachineId);
             final VirtualMachineRequirements requirements =
                 vmRequirements.createVirtualMachineRequirements(vmachine);
 
@@ -256,17 +252,12 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         return null; // unreachable code
     }
 
-    // @Autowired
-    // private VirtualMachineDAO vmdao;
-
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    // REQUIRES_NEW
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     private VirtualMachine selectPhysicalMachineAndAllocateResources(final VirtualMachine vmachine,
         final VirtualAppliance vapp, final FitPolicy fitPolicy,
         final VirtualMachineRequirements requirements)
     {
 
-        // final Integer vappId = vapp.getId();
         Machine targetMachine = allocationService.findBestTarget(requirements, fitPolicy, vapp);
 
         LOG.info("Attemp to use physical machine [{}] to allocate VirtualMachine [{}]",
@@ -276,11 +267,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         VirtualMachine allocatedVirtualMachine =
             vmFactory.createVirtualMachine(targetMachine, vmachine);
 
-        // vmdao.detachVirtualMachine(vmachine);
-
         try
         {
-            // UPGRADE PHYSICAL MACHINE USE
             upgradeUse.updateUse(vapp, allocatedVirtualMachine);
         }
         catch (ResourceUpgradeUseException e) // TODO with this error no other machine candidate
@@ -337,12 +325,8 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void deallocateVirtualMachine(final VirtualMachine vmachine)
     {
-
-        final String msg = String.format("Deallocate %d", vmachine.getId());
         try
         {
-            SchedulerLock.acquire(msg);
-
             upgradeUse.rollbackUse(vmachine);
         }
         catch (ResourceUpgradeUseException e)
@@ -353,8 +337,6 @@ public class VirtualMachineAllocatorService extends DefaultApiService
         }
         finally
         {
-            SchedulerLock.release(msg);
-
             flushErrors();
         }
     }

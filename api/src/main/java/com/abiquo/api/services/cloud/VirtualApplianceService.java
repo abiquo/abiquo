@@ -42,13 +42,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
-import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.model.transport.error.CommonError;
-import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
 import com.abiquo.scheduler.limit.VirtualMachinePrice;
 import com.abiquo.scheduler.limit.VirtualMachinePrice.PricingModelVariables;
@@ -115,6 +113,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     private VirtualMachineRequirementsFactory requirements;
 
+    @Autowired
+    private VirtualMachineAllocatorService vmallocator;
+
     public VirtualApplianceService()
     {
 
@@ -129,7 +130,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.pricingRep = new PricingRep(em);
         this.rasdManDao = new RasdManagementDAO(em);
         this.vmService = new VirtualMachineService(em);
-        this.requirements = new VirtualMachineRequirementsFactory(); // XXX
+        this.vmallocator = new VirtualMachineAllocatorService(em);
+        this.requirements = new VirtualMachineRequirementsFactory();
     }
 
     /**
@@ -428,14 +430,9 @@ public class VirtualApplianceService extends DefaultApiService
         }
     }
 
-    @Autowired
-    private VirtualMachineAllocatorService vmallocator; // XXX moveme
-
     private void allocateVirtualAppliance(final VirtualAppliance vapp,
         final boolean foreceEnterpriseSoftLimits)
     {
-        // final Integer idVirtualApp = vapp.getId();
-        // final Integer idVdc = vapp.getVirtualDatacenter().getId();
 
         VirtualMachineRequirements required = requirements.createVirtualMachineRequirements(vapp);
         vmallocator.checkLimist(vapp, required, foreceEnterpriseSoftLimits);
@@ -446,20 +443,16 @@ public class VirtualApplianceService extends DefaultApiService
             {
                 final VirtualMachine virtualMachine = nvi.getVirtualMachine();
 
-                final String msg = String.format("Allocate %d", virtualMachine.getId());
+                // XXX duplicated limit checker
+                vmService.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
 
-                try
-                {
-                    SchedulerLock.acquire(msg);
-
-                    // XXX duplicated limit checker
-                    vmService.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
-                }
-                finally
-                {
-                    SchedulerLock.release(msg);
-                }
             }
+            // XXX consider (try to) having the SchechedulerLock by each VM
+            // for (Integer vmid : nviDao.findVirtualMachineIdsByVirtualAppliance(vapp))
+            // { final String msg = String.format("Allocate %d", vmid); try {
+            // SchedulerLock.acquire(msg); final VirtualMachine virtualMachine =
+            // vmService.getVirtualMachine(vmid); vmService.allocate(virtualMachine, vapp,
+            // foreceEnterpriseSoftLimits); } finally { SchedulerLock.release(msg); } }
         }
         catch (Exception e)
         {
@@ -471,12 +464,8 @@ public class VirtualApplianceService extends DefaultApiService
                 {
                     vmallocator.deallocateVirtualMachine(vm);
 
+                    // TODO consider moving the set NOT_ALLOCATED in deallocateVM
                     vm.setState(VirtualMachineState.NOT_ALLOCATED);
-                    vm.setDatastore(null);
-                    vm.setHypervisor(null);
-                    vm.setVdrpIP(null);
-                    vm.setVdrpPort(0);
-
                     vmService.updateVirtualMachineBySystem(vm);
                 }
             }
@@ -486,6 +475,8 @@ public class VirtualApplianceService extends DefaultApiService
 
     /**
      * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
+     * <p>
+     * TODO force TRUE
      * 
      * @param vdcId {@link VirtualDatacenter}
      * @param vappId {@link VirtualAppliance}
@@ -494,9 +485,10 @@ public class VirtualApplianceService extends DefaultApiService
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
+
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
-        allocateVirtualAppliance(virtualAppliance, Boolean.TRUE); // TODO force
+        allocateVirtualAppliance(virtualAppliance, Boolean.TRUE);
 
         List<String> dto = new ArrayList<String>();
         for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
@@ -505,7 +497,7 @@ public class VirtualApplianceService extends DefaultApiService
 
             try
             {
-                String link = vmService.sendDeploy(vmachine, virtualAppliance, false);
+                String link = vmService.sendDeploy(vmachine, virtualAppliance);
 
                 dto.add(link);
             }

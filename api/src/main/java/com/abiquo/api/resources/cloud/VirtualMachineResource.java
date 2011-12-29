@@ -27,21 +27,17 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -55,17 +51,18 @@ import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
-import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateDto;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.enterprise.Enterprise;
 import com.abiquo.server.core.enterprise.User;
@@ -82,12 +79,6 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
-
-    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineResource.class);
-
-    private final static Integer TIMEOUT = Integer.parseInt(System.getProperty(
-        "abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
-
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
@@ -116,7 +107,7 @@ public class VirtualMachineResource extends AbstractResource
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
     public static final String VIRTUAL_MACHINE_STATE_REL = "state";
-    
+
     public static final String FORCE_UNDEPLOY = "force";
 
     @Autowired
@@ -359,17 +350,22 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineTaskDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId =
-            vmService.deployVirtualMachine(vmId, vappId, vdcId,
-                forceSoftLimits.isForceEnterpriseSoftLimits());
-
-        // If the link is null no Task was performed
-        if (taskId == null)
+        final String lockMsg = "Allocate vm " + vmId;
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            SchedulerLock.acquire(lockMsg);
+
+            String taskId =
+                vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                    forceSoftLimits.isForceEnterpriseSoftLimits());
+
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
         }
 
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -403,16 +399,19 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-
-        String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
-
-        // If the link is null no Task was performed
-        if (taskId == null)
+        final String lockMsg = "Allocate vm " + vmId;
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
-        }
+            SchedulerLock.acquire(lockMsg);
 
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+            String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
     }
 
     /**
@@ -441,8 +440,8 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
-        final VirtualMachineTaskDto taskOptions,
-        @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
+        final VirtualMachineTaskDto taskOptions, @Context final IRESTBuilder restBuilder,
+        @Context final UriInfo uriInfo) throws Exception
     {
         Boolean forceUndeploy;
         if (taskOptions.getForceUndeploy() == null)
@@ -547,9 +546,10 @@ public class VirtualMachineResource extends AbstractResource
         if (!v.getVirtualMachine().isImported())
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
-                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage.getId()));
+                .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
+                .getId()));
         }
-        
+
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
             rack == null ? null : rack.getId(), machine == null ? null : machine.getId(),

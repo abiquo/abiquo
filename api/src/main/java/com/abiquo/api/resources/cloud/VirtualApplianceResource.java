@@ -217,17 +217,18 @@ public class VirtualApplianceResource
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
 
-        // try
-        // {
-        // SchedulerLock.acquire("taputa");
+        final String lockMsg = "Allocate vapp " + vappId;
+        try
+        {
+            SchedulerLock.acquire(lockMsg);
 
-        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
-        addStatusLinks(links, dto);
-        // }
-        // finally
-        // {
-        // SchedulerLock.release("taputa");
-        // }
+            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+            addStatusLinks(links, dto);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
 
         return dto;
     }
@@ -263,7 +264,7 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private void addStatusLinks(final List<String> links, final AcceptedRequestDto dto)
+    private void addStatusLinks(final List<String> links, final AcceptedRequestDto<String> dto)
     {
         for (String url : links)
         {

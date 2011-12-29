@@ -160,7 +160,6 @@ public class VirtualimageAllocationService
      *             target.
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-    // FIXME, isolation = Isolation.READ_COMMITTED)
     public Machine findBestTarget(final VirtualMachineRequirements requirements,
         final FitPolicy fitPolicy, final VirtualAppliance virtualAppliance)
     {
