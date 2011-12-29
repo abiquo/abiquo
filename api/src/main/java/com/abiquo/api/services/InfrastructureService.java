@@ -61,6 +61,7 @@ import com.abiquo.model.transport.error.ErrorDto;
 import com.abiquo.model.transport.error.ErrorsDto;
 import com.abiquo.model.util.AddressingUtils;
 import com.abiquo.server.core.cloud.Hypervisor;
+import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
@@ -112,6 +113,9 @@ public class InfrastructureService extends DefaultApiService
 
     @Autowired
     protected VsmServiceStub vsmServiceStub;
+    
+    @Autowired
+    protected VirtualDatacenterRep vdcRep;
 
     public InfrastructureService()
     {
@@ -121,6 +125,7 @@ public class InfrastructureService extends DefaultApiService
     public InfrastructureService(final EntityManager em)
     {
         repo = new InfrastructureRep(em);
+        vdcRep = new VirtualDatacenterRep(em);
         remoteServiceService = new RemoteServiceService(em);
         virtualMachineService = new VirtualMachineService(em);
         tracer = new TracerLogger();
@@ -1172,6 +1177,14 @@ public class InfrastructureService extends DefaultApiService
 
     protected void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
-        repo.deleteNotManagedVirtualMachines(hypervisor);
+        List<VirtualMachine> vmachines = repo.getNotManagedVirtualMachines(hypervisor);
+        RemoteService vsm =
+            getRemoteService(hypervisor.getMachine().getDatacenter().getId(),
+                RemoteServiceType.VIRTUAL_SYSTEM_MONITOR);
+        for (VirtualMachine vm : vmachines)
+        {
+            vsmServiceStub.unsubscribe(vsm, vm);
+            vdcRep.deleteVirtualMachine(vm);
+        }
     }
 }

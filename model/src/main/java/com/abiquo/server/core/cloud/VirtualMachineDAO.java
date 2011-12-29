@@ -85,16 +85,10 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         super(VirtualMachine.class, entityManager);
     }
 
-    public void deleteNotManagedVirtualMachines(final Hypervisor hypervisor)
+    public List<VirtualMachine> getNotManagedVirtualMachines(final Hypervisor hypervisor)
     {
         Criteria criteria = createCriteria(sameHypervisor(hypervisor), notManaged());
-        List<VirtualMachine> notManaged = getResultList(criteria);
-
-        for (VirtualMachine vm : notManaged)
-        {
-            remove(vm);
-        }
-        flush();
+        return getResultList(criteria);
     }
 
     public boolean existsAnyWithName(final String name)
