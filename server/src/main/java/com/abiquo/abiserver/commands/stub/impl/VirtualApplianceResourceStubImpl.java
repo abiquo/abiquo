@@ -697,13 +697,13 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId)
+        final Integer virtualApplianceId, final boolean force)
     {
         DataResult result = new DataResult();
         String link = createVirtualApplianceUndeployLink(virtualDatacenterId, virtualApplianceId);
 
         VirtualMachineTaskDto virtualMachineTaskDto = new VirtualMachineTaskDto();
-        virtualMachineTaskDto.setForceUndeploy(Boolean.FALSE);
+        virtualMachineTaskDto.setForceUndeploy(force);
         ClientResponse response = post(link, virtualMachineTaskDto);
 
         if (response.getStatusCode() == 202)
