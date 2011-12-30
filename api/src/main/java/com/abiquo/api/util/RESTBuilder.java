@@ -598,40 +598,46 @@ public class RESTBuilder implements IRESTBuilder
 
         links.add(builder.buildRestLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+
         links.add(builder.buildRestLink(EnterpriseResource.class, EnterpriseResource.ENTERPRISE,
             params));
 
         links.add(builder.buildRestLink(VirtualMachinesResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE, params));
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH, params));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_RESUME, "resume", params));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_RESUME_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_RESUME_REL, params));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_PAUSE, "pause", params));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_PAUSE_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_PAUSE_REL, params));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_POWEROFF, "power off", params));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWEROFF_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWEROFF_REL, params));
 
-        links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_POWERON, "power on", params));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWERON_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_POWERON_REL, params));
 
-        links.add(builder.buildRelLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE, "state", params, "state"));
-        links.add(builder.buildRelLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
-        links.add(builder.buildRelLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL, params,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL));
-        links.add(builder.buildRelLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL, params,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL));
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL, params));
+
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH,
+            IpAddressesResource.IP_ADDRESSES, params));
+
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_UNDEPLOY_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_UNDEPLOY_REL, params));
+
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_DEPLOY_PATH,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_DEPLOY_REL, params));
 
         return links;
-
     }
 
     @Override
@@ -732,27 +738,30 @@ public class RESTBuilder implements IRESTBuilder
         AbiquoLinkBuilder builder = AbiquoLinkBuilder.createBuilder(linkProcessor);
         links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH,
-            VirtualMachineNetworkConfigurationResource.CONFIGURATION, params));
-        links.add(builder.buildRelLink(VirtualMachineNetworkConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.CONFIGURATION_PATH, params));
+
+        links.add(builder.buildRestLink(VirtualMachineNetworkConfigurationResource.class,
             VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NICS_PATH, params,
-            VirtualMachineNetworkConfigurationResource.NICS_PATH));
-        links.add(builder.buildRelLink(VirtualMachineStorageConfigurationResource.class,
+            VirtualMachineNetworkConfigurationResource.NICS_PATH, params));
+
+        links.add(builder.buildRestLink(VirtualMachineStorageConfigurationResource.class,
             VirtualMachineStorageConfigurationResource.DISKS_PATH,
-            VirtualMachineStorageConfigurationResource.DISKS_PATH, params,
-            VirtualMachineStorageConfigurationResource.DISKS_PATH));
-        links.add(builder.buildRelLink(VirtualMachineResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS,
-            IpAddressesResource.IP_ADDRESSES, params, IpAddressesResource.IP_ADDRESSES));
+            VirtualMachineStorageConfigurationResource.DISKS_PATH, params));
+
+        links.add(builder.buildRestLink(VirtualMachineResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH,
+            IpAddressesResource.IP_ADDRESSES, params));
+
         links.add(builder.buildRestLink(VirtualMachineResource.class,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE,
             VirtualMachineResource.VIRTUAL_MACHINE_STATE_REL, params));
+
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY,
+            VirtualMachineResource.VIRTUAL_MACHINE_UNDEPLOY_PATH,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL, params));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
-            VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY,
+            VirtualMachineResource.VIRTUAL_MACHINE_DEPLOY_PATH,
             VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY_REL, params));
 
         links.add(builder.buildRestLink(VirtualMachineResource.class,
@@ -779,8 +788,14 @@ public class RESTBuilder implements IRESTBuilder
             userId));
         Map<String, String> params = new HashMap<String, String>();
         params.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
+        params.put(VirtualApplianceResource.VIRTUAL_APPLIANCE, vappId.toString());
+
         links.add(builder.buildRestLink(VirtualDatacenterResource.class,
             VirtualDatacenterResource.VIRTUAL_DATACENTER, params));
+
+        links.add(builder.buildRestLink(VirtualApplianceResource.class,
+            VirtualApplianceResource.VIRTUAL_APPLIANCE, params));
+
         links.addAll(buildVirtualMachineCloudLinks(vdcId, vappId, vmId, chefEnabled, volumeIds,
             diskIds, ips));
 
@@ -1104,7 +1119,7 @@ public class RESTBuilder implements IRESTBuilder
         links.add(builder.buildRestLink(VirtualDatacenterResource.class, "parent", params));
 
         links.add(builder.buildActionLink(VirtualApplianceResource.class,
-            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE, REL_EDIT, params));
+            VirtualApplianceResource.VIRTUAL_APPLIANCE_STATE_REL, REL_EDIT, params));
         return links;
     }
 

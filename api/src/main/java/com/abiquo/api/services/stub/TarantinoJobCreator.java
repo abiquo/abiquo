@@ -15,7 +15,6 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
 
@@ -295,12 +294,19 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore = "";
-        if (virtualMachine.getDatastore() != null
-            && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+        if (virtualMachine.getDatastore() != null)
         {
-            datastore =
-                FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
-                    .getDatastore().getDirectory());
+            if (virtualMachine.getDatastore().getDirectory() != null
+                && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
+            {
+                datastore =
+                    FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(),
+                        virtualMachine.getDatastore().getDirectory());
+            }
+            else
+            {
+                datastore = virtualMachine.getDatastore().getRootPath();
+            }
         }
 
         // Repository Manager address
@@ -425,6 +431,7 @@ public class TarantinoJobCreator extends DefaultApiService
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
                 null, null, null, i.getSequence(), i.getVlanNetwork().getDhcpOption());
+
         }
     }
 
