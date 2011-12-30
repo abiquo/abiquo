@@ -119,7 +119,7 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc = new VirtualMachineDescriptionBuilder();
 
         vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName());
-        
+
         logger.debug("Creating disk information");
         primaryDiskDefinitionConfiguration(virtualMachine, vmDesc, dcId);
         logger.debug("Disk information created!");
@@ -226,7 +226,8 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineStateTransition stateTransition)
     {
         ApplyVirtualMachineStateOp stateJob = new ApplyVirtualMachineStateOp();
-        stateJob.setVirtualMachine(vmDesc.setBasics(virtualMachine.getUuid(), virtualMachine.getName()).build());
+        stateJob.setVirtualMachine(vmDesc.setBasics(virtualMachine.getUuid(),
+            virtualMachine.getName()).build());
         stateJob.setHypervisorConnection(hypervisorConnection);
         stateJob.setTransaction(com.abiquo.commons.amqp.impl.tarantino.domain.StateTransition
             .fromValue(stateTransition.name()));
@@ -255,8 +256,10 @@ public class TarantinoJobCreator extends DefaultApiService
             hypervisorConnectionConfiguration(vm.getHypervisor());
 
         ReconfigureVirtualMachineOp reconfigureJob = new ReconfigureVirtualMachineOp();
-        reconfigureJob.setVirtualMachine(originalConfig.setBasics(vm.getUuid(), vm.getName()).build());
-        reconfigureJob.setNewVirtualMachine(newConfig.setBasics(vm.getUuid(), vm.getName()).build());
+        reconfigureJob.setVirtualMachine(originalConfig.setBasics(vm.getUuid(), vm.getName())
+            .build());
+        reconfigureJob
+            .setNewVirtualMachine(newConfig.setBasics(vm.getUuid(), vm.getName()).build());
         reconfigureJob.setHypervisorConnection(hypervisorConnection);
         reconfigureJob.setId(reconfigureTask.getId() + "." + vm.getUuid() + "reconfigure");
 
@@ -335,12 +338,13 @@ public class TarantinoJobCreator extends DefaultApiService
         }
 
         String url = "";
-        if (virtualMachine.getVirtualMachineTemplate().getRepository() != null) // repo null when imported.
+        if (virtualMachine.getVirtualMachineTemplate().getRepository() != null) // repo null when
+                                                                                // imported.
         {
             url = virtualMachine.getVirtualMachineTemplate().getRepository().getUrl();
         }
-        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size,
-            url, path, datastore, repositoryManager.getUri(), cntrlType);
+        vmDesc.primaryDisk(DiskDescription.DiskFormatType.valueOf(format.name()), size, url, path,
+            datastore, repositoryManager.getUri(), cntrlType);
     }
 
     /**
@@ -410,7 +414,8 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getTag() == null ? 0 : i.getVlanNetwork().getTag(), i.getName(), configuration
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
-                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence());
+                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(), i
+                        .getVlanNetwork().getDhcpOption());
                 continue;
             }
             logger.debug("Network configuration without gateway");
@@ -418,8 +423,8 @@ public class TarantinoJobCreator extends DefaultApiService
             // configureNetwork parameter
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
-                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(),
-                null, null, null, null, null, null, null, i.getSequence());
+                .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
+                null, null, null, i.getSequence(), i.getVlanNetwork().getDhcpOption());
         }
     }
 
