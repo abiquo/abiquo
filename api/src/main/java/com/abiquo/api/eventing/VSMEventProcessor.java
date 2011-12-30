@@ -34,8 +34,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
+import com.abiquo.commons.amqp.impl.tarantino.domain.State;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
 import com.abiquo.scheduler.ResourceUpgradeUse;
@@ -44,6 +46,7 @@ import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.Datacenter;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.task.enums.TaskOwnerType;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -80,7 +83,7 @@ public class VSMEventProcessor implements VSMCallback
 
     @Autowired
     protected RemoteServiceService remoteService;
-
+    
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
         new HashMap<VMEventType, VirtualMachineState>()
@@ -247,11 +250,15 @@ public class VSMEventProcessor implements VSMCallback
         final VirtualSystemEvent notification)
     {
 
-        // Resources are freed
-        // State NOT_ALLOCATED is set in this method too
-        unsubscribeVMToVSM(virtualMachine);
-        resourceUpgrader.rollbackUse(virtualMachine);
-        logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
+        // only apply the destroyedevent when there is and event not started by Abiquo
+        if (!virtualMachine.getState().equals(State.LOCKED) && !virtualMachine.getState().equals(State.NOT_ALLOCATED))
+        {
+            // Resources are freed
+            // State NOT_ALLOCATED is set in this method too
+            unsubscribeVMToVSM(virtualMachine);
+            resourceUpgrader.rollbackUse(virtualMachine);
+            logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
+        }
 
     }
 

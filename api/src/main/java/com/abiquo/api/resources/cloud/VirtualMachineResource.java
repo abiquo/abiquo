@@ -674,7 +674,7 @@ public class VirtualMachineResource extends AbstractResource
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
                 .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(), vmtemplate.getId()));
         }
-
+        
         return dto;
     }
 
