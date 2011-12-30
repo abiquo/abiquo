@@ -295,7 +295,7 @@ public class VirtualMachineService extends DefaultApiService
         repo.insert(virtualMachine);
     }
 
-    /**
+/**
      * Gets the DTO object and validates all of its parameters. Prepares the {@link VirtualMachine} object
      * and sends the object to the method {@link VirtualMachineService#reconfigureVirtualMachine(VirtualDatacenter, VirtualAppliance, VirtualMachine, VirtualMachine).
      * 
@@ -322,7 +322,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
         }
-        
+
         VirtualMachine newvm = buildVirtualMachineFromDto(vdc, virtualAppliance, dto);
         newvm.setTemporal(virtualMachine.getId()); // we set the id to temporal since we are trying
                                                    // to update the virtualMachine.
@@ -1245,7 +1245,7 @@ public class VirtualMachineService extends DefaultApiService
      * @param virtualMachine with a state void
      */
     private void checkVirtualMachineStateAllowsReconfigure(final VirtualMachine virtualMachine)
-    {   
+    {
         if (!virtualMachine.getState().reconfigureAllowed())
         {
             final String current =
@@ -1262,12 +1262,13 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_INCOHERENT_STATE);
             flushErrors();
         }
-        
+
         if (virtualMachine.isImported())
         {
             tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                EventType.VM_RECONFIGURE, APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
-        
+                EventType.VM_RECONFIGURE,
+                APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE.getMessage());
+
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_CAN_NOT_RECONFIGURE);
             flushErrors();
         }
@@ -1381,7 +1382,7 @@ public class VirtualMachineService extends DefaultApiService
             addConflictErrors(APIError.VIRTUAL_MACHINE_IMPORTED_WILL_BE_DELETED);
             flushErrors();
         }
-        
+
         VirtualMachineState originalState = virtualMachine.getState();
 
         try
@@ -1569,7 +1570,7 @@ public class VirtualMachineService extends DefaultApiService
                 case FROM_DISK_CONVERSION:
                     taskId =
                         tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
-                            snapshotName);
+                            snapshotName, type);
                     LOGGER.debug("Instance of virtual machine {} enqueued!",
                         virtualMachine.getName());
                     break;

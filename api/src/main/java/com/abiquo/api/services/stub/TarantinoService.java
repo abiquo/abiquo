@@ -46,6 +46,7 @@ import com.abiquo.api.services.UserService;
 import com.abiquo.api.tasks.util.DatacenterTaskBuilder;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.api.util.snapshot.SnapshotUtils;
+import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.commons.amqp.impl.tarantino.TarantinoRequestProducer;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -643,13 +644,17 @@ public class TarantinoService extends DefaultApiService
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName)
+        final String snapshotName, final SnapshotType type)
     {
         VirtualMachineTemplate template = virtualMachine.getVirtualMachineTemplate();
 
+        String snapshotFilename =
+            type.equals(SnapshotType.FROM_DISK_CONVERSION) ? SnapshotUtils
+                .formatSnapshotRawFilename(template) : SnapshotUtils
+                .formatSnapshotFilename(template);
+
         return snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
-            snapshotName, SnapshotUtils.formatSnapshotPath(template),
-            SnapshotUtils.formatSnapshotFilename(template));
+            snapshotName, SnapshotUtils.formatSnapshotPath(template), snapshotFilename);
     }
 
     /**
