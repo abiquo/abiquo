@@ -170,8 +170,11 @@ public class VirtualMachineTemplateResourceStubImpl extends AbstractAPIStub impl
         img.setRamRequired(vi.getRamRequired());
         img.setCpuRequired(vi.getCpuRequired());
         img.setShared(vi.isShared());
-        img.setStateful(vi.isShared());
-        img.setOvfId(getLink("templatedefinition", vi.getLinks()).getHref());
+        img.setStateful(getLink("volume", vi.getLinks()) != null);
+        if (!img.isStateful())
+        {
+            img.setOvfId(getLink("templatedefinition", vi.getLinks()).getHref());
+        }
         img.setDiskFileSize(vi.getDiskFileSize());
         img.setCostCode(vi.getCostCode());
         img.setCategory(createCategoryFromLink(getLink("category", vi.getLinks())));

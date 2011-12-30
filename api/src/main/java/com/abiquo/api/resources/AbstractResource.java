@@ -62,6 +62,8 @@ public abstract class AbstractResource
     public static final String LIMIT = "limit";
 
     public static final String ASC = "asc";
+    
+    public static final String TYPE = "type";
 
     public static final Integer DEFAULT_PAGE_LENGTH = 25;
 

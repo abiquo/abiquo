@@ -33,13 +33,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.api.services.VirtualMachineAllocatorService;
+import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
-import com.abiquo.scheduler.ResourceUpgradeUse;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.infrastructure.Datacenter;
+import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
 import com.abiquo.tracer.SeverityType;
@@ -63,7 +68,19 @@ public class VSMEventProcessor implements VSMCallback
     protected TracerLogger tracer;
 
     @Autowired
-    protected ResourceUpgradeUse resourceUpgrader;
+    protected VirtualMachineAllocatorService allocatorService;
+
+    @Autowired
+    private RemoteServiceService remoteServiceService;
+
+    @Autowired
+    protected VsmServiceStub vsmStub;
+
+    @Autowired
+    protected VsmServiceStub vsm;
+
+    @Autowired
+    protected RemoteServiceService remoteService;
 
     /** Event to virtual machine state translations */
     protected final Map<VMEventType, VirtualMachineState> stateByEvent =
@@ -98,11 +115,11 @@ public class VSMEventProcessor implements VSMCallback
      * 
      * @param em The entity manager to use.
      */
-    public VSMEventProcessor(EntityManager em)
+    public VSMEventProcessor(final EntityManager em)
     {
         this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
-        this.resourceUpgrader = new ResourceUpgradeUse(em);
+        this.allocatorService = new VirtualMachineAllocatorService(em);
     }
 
     public VSMEventProcessor()
@@ -141,7 +158,7 @@ public class VSMEventProcessor implements VSMCallback
      * @param notification The notification.
      * @return The virtual machine instance.
      */
-    protected VirtualMachine updateMachineState(VirtualMachine machine,
+    protected VirtualMachine updateMachineState(final VirtualMachine machine,
         final VirtualSystemEvent notification)
     {
         return processEvent(machine, eventFromString(notification.getEventType()), notification);
@@ -151,13 +168,13 @@ public class VSMEventProcessor implements VSMCallback
      * Process the given notification and if it affects to the virtual machine, updates the state of
      * a virtual machine instance.
      * 
-     * @param machine The instance to update.
+     * @param virtualMachine The instance to update.
      * @param event The event notified.
      * @param notification The complete notification.
      * @return The virtual machine instance.
      */
-    protected VirtualMachine processEvent(VirtualMachine machine, VMEventType event,
-        VirtualSystemEvent notification)
+    protected VirtualMachine processEvent(final VirtualMachine virtualMachine,
+        final VMEventType event, final VirtualSystemEvent notification)
     {
         switch (event)
         {
@@ -166,10 +183,10 @@ public class VSMEventProcessor implements VSMCallback
             case POWER_ON:
             case RESUMED:
             case SAVED:
-                machine.setState(stateByEvent.get(event));
+                virtualMachine.setState(stateByEvent.get(event));
                 break;
             case DESTROYED:
-                onVMDestroyedEvent(machine, event, notification);
+                onVMDestroyedEvent(virtualMachine, event, notification);
                 break;
 
             default:
@@ -177,7 +194,7 @@ public class VSMEventProcessor implements VSMCallback
                 break;
         }
 
-        return machine;
+        return virtualMachine;
     }
 
     protected void logAndTraceVirtualMachineStateUpdated(final VirtualMachine machine,
@@ -225,16 +242,58 @@ public class VSMEventProcessor implements VSMCallback
      * Fires on Virtual Machine Destroyed event detection. - Sets VM state to NOT_ALLOCATED -
      * Resources ARE freed
      * 
-     * @param vm
+     * @param virtualMachine virtual machine that has been destroyed
      */
-    protected void onVMDestroyedEvent(VirtualMachine vMachine, final VMEventType event,
+    protected void onVMDestroyedEvent(final VirtualMachine virtualMachine, final VMEventType event,
         final VirtualSystemEvent notification)
     {
 
         // Resources are freed
         // State NOT_ALLOCATED is set in this method too
-        resourceUpgrader.rollbackUse(vMachine);
-        logAndTraceVirtualMachineStateUpdated(vMachine, event, notification);
+        unsubscribeVMToVSM(virtualMachine);
+        final String lockMsg = "Undeploy " + virtualMachine.getId();
+        try
+        {
+            SchedulerLock.acquire(lockMsg);
 
+            // XXX virtualMachine should be loaded inside the LOCK
+            allocatorService.deallocateVirtualMachine(virtualMachine);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
+
+        logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
+    }
+
+    /**
+     * TODO: Auxiliary methods to be included in Helper Class. Also in
+     * HighAvailabilityEventProcessor
+     * 
+     * @param vMachine
+     * @return
+     */
+    protected boolean unsubscribeVMToVSM(final VirtualMachine vMachine)
+    {
+        try
+        {
+            Datacenter datacenter = vMachine.getHypervisor().getMachine().getDatacenter();
+            RemoteService remoteService = remoteServiceService.getVSMRemoteService(datacenter);
+            vsmStub.unsubscribe(remoteService, vMachine);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LOGGER
+                .error(
+                    "HA Move task on virtual machine name {} failed: Unsubscribing to VSM with Exception {}",
+                    new Object[] {vMachine.getName(), e.getMessage()});
+            tracer.systemLog(SeverityType.MAJOR, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_MOVING_BY_HA,
+                "HA Move Task on virtual machine name {} failed: Unsubscribing to VSM",
+                vMachine.getName());
+            return false;
+        }
     }
 }

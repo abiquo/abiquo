@@ -192,6 +192,8 @@ public class ResourceUpgradeUse implements IResourceUpgradeUse
             virtualMachine.setVdrpPort(0);
             virtualMachine.setHypervisor(null);
             virtualMachine.setDatastore(null);
+
+            virtualMachine.setState(VirtualMachineState.NOT_ALLOCATED);
         }
         catch (final Exception e)
         {

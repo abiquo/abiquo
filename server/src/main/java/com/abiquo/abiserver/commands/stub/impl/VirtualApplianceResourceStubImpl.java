@@ -72,9 +72,9 @@ import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualAppliancesDto;
 import com.abiquo.server.core.cloud.VirtualDatacenterDto;
 import com.abiquo.server.core.cloud.VirtualDatacentersDto;
-import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineState;
+import com.abiquo.server.core.cloud.VirtualMachineTaskDto;
 import com.abiquo.server.core.cloud.VirtualMachineWithNodeDto;
 import com.abiquo.server.core.cloud.VirtualMachinesWithNodeDto;
 import com.abiquo.server.core.enterprise.EnterpriseDto;
@@ -122,6 +122,8 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
             result.setSuccess(Boolean.TRUE);
             AcceptedRequestDto entity = response.getEntity(AcceptedRequestDto.class);
             result.setData(entity.getLinks());
+
+            return this.getVirtualApplianceNodes(virtualDatacenterId, virtualApplianceId);
 
         }
         else
@@ -488,7 +490,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
 
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
-                RESTLink virtualMachines = entity.searchLink("virtualmachine");
+                RESTLink virtualMachines = entity.searchLink("virtualmachines");
                 if (virtualMachines != null)
                 {
                     DataResult<List<Node>> nodeVirtualImages =
@@ -695,12 +697,14 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
 
     @Override
     public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId)
+        final Integer virtualApplianceId, final boolean force)
     {
         DataResult result = new DataResult();
         String link = createVirtualApplianceUndeployLink(virtualDatacenterId, virtualApplianceId);
 
-        ClientResponse response = post(link, null);
+        VirtualMachineTaskDto virtualMachineTaskDto = new VirtualMachineTaskDto();
+        virtualMachineTaskDto.setForceUndeploy(force);
+        ClientResponse response = post(link, virtualMachineTaskDto);
 
         if (response.getStatusCode() == 202)
         {

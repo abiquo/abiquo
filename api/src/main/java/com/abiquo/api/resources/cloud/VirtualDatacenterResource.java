@@ -87,6 +87,8 @@ public class VirtualDatacenterResource extends AbstractResource
 
     public static final String DEFAULT_NETWORK_REL = "defaultnetwork";
 
+    public static final String TYPE = "type";
+
     // @Autowired
     @Resource(name = "virtualDatacenterService")
     VirtualDatacenterService service;
@@ -135,12 +137,13 @@ public class VirtualDatacenterResource extends AbstractResource
         @QueryParam(FILTER) @DefaultValue("") final String filter,
         @QueryParam(LIMIT) @DefaultValue(DEFAULT_PAGE_LENGTH_STRING) @Min(1) final Integer limit,
         @QueryParam(ASC) @DefaultValue("true") final Boolean desc_or_asc,
-        @Context final IRESTBuilder restBuilder) throws Exception
+        @QueryParam(TYPE) final String type, @Context final IRESTBuilder restBuilder)
+        throws Exception
     {
 
         List<IpPoolManagement> all =
             netService.getListIpPoolManagementByVdc(id, startwith, limit, filter, orderBy,
-                desc_or_asc);
+                desc_or_asc, type);
         /*
          * if (all == null || all.isEmpty()) { throw new
          * ConflictException(APIError.VIRTUAL_DATACENTER_INVALID_NETWORKS); }
@@ -166,7 +169,8 @@ public class VirtualDatacenterResource extends AbstractResource
         @Context final IRESTBuilder restBuilder) throws Exception
     {
         List<IpPoolManagement> all =
-            netService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true);
+            netService.getListIpPoolManagementByVdc(id, 0, DEFAULT_PAGE_LENGTH, "", "ip", true,
+                null);
         StringBuilder formattedData = new StringBuilder();
         formattedData.append("## AbiCloud DHCP configuration for network "
             + service.getVirtualDatacenter(id).getNetwork().getUuid() + "\n");

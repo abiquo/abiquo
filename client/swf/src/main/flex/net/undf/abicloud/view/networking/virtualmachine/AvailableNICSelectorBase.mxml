@@ -31,6 +31,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import mx.events.FlexEvent;
         	import net.undf.abicloud.vo.networking.VlanNetwork;
         	import net.undf.abicloud.vo.virtualappliance.VirtualAppliance;
         	import net.undf.abicloud.model.AbiCloudModel;
@@ -63,12 +64,18 @@
                 super.createChildren();
 
                 privateNICSelector = new PrivateNICSelector();
+                privateNICSelector.type = VlanNetwork.INTERNAL;
                 privateNICSelector.addEventListener("onAssignNicToVirtualMachine",onAssignNicToVirtualMachine);
-                privateNICSelector.addEventListener("onAssignExternalNicToVirtualMachine",onAssignExternalNicToVirtualMachine);
+                privateNICSelector.addEventListener(FlexEvent.SHOW, onShowPrivateNICSelector);
                 privateNICSelector.addEventListener("close", onClose);
 
                 toggledContainer.addContent(privateNICSelector, ResourceManager.getInstance().getString("Networking",
-                                                                                                        "LABEL_PRIVATE_EXTERNAL"));
+                                                                                                        "LABEL_PRIVATE"));
+            }
+            
+            private function onShowPrivateNICSelector(event:FlexEvent):void
+            {
+                privateNICSelector.init(_virtualDatacenter, _virtualMachine);
             }
             
             public function onAssignNicToVirtualMachine(evt:Event):void{
@@ -83,24 +90,6 @@
                privateNICSelector.close();
             }
             
-            public function onAssignExternalNicToVirtualMachine(evt:Event):void{
-                 //Assign the selected NIC to the Virtual Machine
-               var event:NetworkingEvent = new NetworkingEvent(NetworkingEvent.ASSIGN_EXTERNAL_NIC_TO_VIRTUAL_MACHINE);
-               event.enterprise = AbiCloudModel.getInstance().loginManager.user.enterprise;
-               event.virtualDatacenter = _virtualDatacenter;
-               event.virtualAppliance = _virtualAppliance;
-               if(!privateNICSelector.availableIPList.selectedItem){
-               	    var ipPoolManagement:IPPoolManagement = new IPPoolManagement();
-               	    ipPoolManagement.vlanNetworkId = VlanNetwork(privateNICSelector.vlanList.selectedItem).vlanNetworkId;
-               	    event.ipPoolManagement = ipPoolManagement;
-               }else{
-	               event.ipPoolManagement = privateNICSelector.availableIPList.selectedItem as IPPoolManagement;
-               }
-               event.virtualMachine = _virtualMachine;
-               dispatchEvent(event);
-
-               privateNICSelector.close();
-            }
             
             public function init(virtualDatacenter:VirtualDataCenter, virtualAppliance:VirtualAppliance, virtualMachine:VirtualMachine):void
             {

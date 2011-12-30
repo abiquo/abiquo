@@ -110,6 +110,7 @@ import com.abiquo.server.core.infrastructure.storage.DiskManagement;
 import com.abiquo.server.core.infrastructure.storage.StorageRep;
 import com.abiquo.server.core.infrastructure.storage.VolumeManagement;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
+import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.util.network.IPNetworkRang;
 import com.abiquo.tracer.ComponentType;
 import com.abiquo.tracer.EventType;
@@ -249,7 +250,7 @@ public class VirtualMachineService extends DefaultApiService
             addNotFoundErrors(APIError.NON_EXISTENT_VIRTUALMACHINE);
             flushErrors();
         }
-        LOGGER.debug("virtual machine {} found", vmId);
+        LOGGER.debug("Virtual machine {} found", vmId);
         return vm;
     }
 
@@ -289,7 +290,7 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     @Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
-    public void addVirtualMachine(final VirtualMachine virtualMachine)
+    public void addImportedVirtualMachine(final VirtualMachine virtualMachine)
     {
         validate(virtualMachine);
         repo.insert(virtualMachine);
@@ -1219,6 +1220,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
+            traceApiExceptionVm(e, virtualMachine.getName());
+
             unlockVirtualMachineState(virtualMachine, VirtualMachineState.NOT_ALLOCATED);
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
@@ -1247,6 +1250,32 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
 
             return null;
+        }
+    }
+
+    private void traceApiExceptionVm(final APIException exception, final String vmName)
+    {
+        if (exception.getErrors().isEmpty())
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                exception.getMessage(), vmName);
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, exception, exception.getMessage(), vmName);
+        }
+        else
+        {
+            for (CommonError e : exception.getErrors())
+            {
+                String msg = e.getCode() + " " + e.getMessage();
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, "virtualMachine.deploy.notEnoughResources", e.getCode(),
+                    vmName);
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, exception, msg, vmName);
+            }
+
         }
     }
 
@@ -1589,12 +1618,12 @@ public class VirtualMachineService extends DefaultApiService
     }
 
     /**
-     * Snapshot a {@link VirtualMachine}.
+     * Instance a {@link VirtualMachine}, handles all instance types {@link SnapshotType}.
      * 
-     * @param vmId Virtual Machine Id
-     * @param vappId Virtual Appliance Id
-     * @param vdcId Virtual Datacenter Id
-     * @return
+     * @param vmId {@link VirtualMachine} Id
+     * @param vappId {@link VirtualAppliance} Id
+     * @param vdcId {@link VirtualDatacenter} Id
+     * @return The {@link Task} UUID
      */
     @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public String snapshotVirtualMachine(final Integer vmId, final Integer vappId,
@@ -1603,35 +1632,105 @@ public class VirtualMachineService extends DefaultApiService
         // Retrieve entities
         VirtualMachine virtualMachine = getVirtualMachine(vdcId, vappId, vmId);
         VirtualAppliance virtualApp = getVirtualApplianceAndCheckVirtualDatacenter(vdcId, vappId);
+        VirtualMachineState originalState = virtualMachine.getState();
+
+        LOGGER.debug("Starting the instance of the virtual machine {}", virtualMachine.getName());
 
         // Check if the operation is allowed and lock the virtual machine
+        LOGGER.debug("Check for permissions");
         userService.checkCurrentEnterpriseForPostMethods(virtualMachine.getEnterprise());
+        LOGGER.debug("Permission granted");
+
+        LOGGER.debug("Checking the virtual machine state. It must be in a DEPLOYED state.");
         checkSnapshotAllowed(virtualMachine);
+        LOGGER.debug("The state is valid for instance");
 
-        VirtualMachineState originalState = virtualMachine.getState();
+        LOGGER.debug("Locking virtual machine {}", virtualMachine.getName());
         lockVirtualMachine(virtualMachine);
+        LOGGER.debug("Virtual machine {} locked!", virtualMachine.getName());
 
-        // Do the snapshot
-        switch (SnapshotType.getSnapshotType(virtualMachine))
+        try
         {
-            case FROM_ORIGINAL_DISK:
-            case FROM_DISK_CONVERSION:
-                return tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
-                    snapshotName);
+            // Do the instance
+            SnapshotType type = SnapshotType.getSnapshotType(virtualMachine);
+            String taskId = null;
 
-            case FROM_NOT_MANAGED_VIRTUALMACHINE:
-                return snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
-                    snapshotName);
+            LOGGER.debug("Instance type for virtual machine {} is {}", virtualMachine.getName(),
+                type.name());
 
-            case FROM_STATEFUL_DISK:
-                // TODO
-                return null;
+            switch (type)
+            {
+                case FROM_ORIGINAL_DISK:
+                case FROM_DISK_CONVERSION:
+                    taskId =
+                        tarantino.snapshotVirtualMachine(virtualApp, virtualMachine, originalState,
+                            snapshotName, type);
+                    LOGGER.debug("Instance of virtual machine {} enqueued!",
+                        virtualMachine.getName());
+                    break;
 
-            default:
-                return null;
+                case FROM_NOT_MANAGED_VIRTUALMACHINE:
+                    taskId =
+                        snapshotNotManagedVirtualMachine(virtualApp, virtualMachine, originalState,
+                            snapshotName);
+                    LOGGER.debug("Instance of virtual machine {} enqueued!",
+                        virtualMachine.getName());
+                    break;
+
+                case FROM_STATEFUL_DISK:
+                    // TODO
+                    break;
+            }
+
+            return taskId;
+        }
+        catch (APIException e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_INSTANCE,
+                "virtualMachine.instanceFailed", virtualMachine.getName());
+
+            tracer
+                .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
+
+            LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
+            unlockVirtualMachineState(virtualMachine, originalState);
+            LOGGER.debug("Virtual machine {} unlocked!", virtualMachine.getName());
+
+            throw e;
+        }
+        catch (Exception e)
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_INSTANCE,
+                "virtualMachine.instanceFailed", virtualMachine.getName());
+
+            tracer
+                .systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_INSTANCE, e, "virtualMachine.instanceFailed",
+                    virtualMachine.getName());
+
+            LOGGER.debug("Unlocking virtual machine {}", virtualMachine.getName());
+            unlockVirtualMachineState(virtualMachine, originalState);
+            LOGGER.debug("Virtual machine {} unlocked!", virtualMachine.getName());
+
+            addUnexpectedErrors(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            flushErrors();
+
+            return null;
         }
     }
 
+    /**
+     * Performs an instance of type {@link SnapshotType#FROM_NOT_MANAGED_VIRTUALMACHINE}
+     * 
+     * @param virtualAppliance {@link VirtualAppliance} where the {@link VirtualMachine} is
+     *            contained.
+     * @param virtualMachine The {@link VirtualMachine} to instance.
+     * @param originalState The original {@link VirtualMachineState}.
+     * @param snapshotName The final name of the {@link VirtualMachineTemplate}
+     * @return The {@link Task} UUID for progress tracking
+     */
     private String snapshotNotManagedVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final String snapshotName)
@@ -1639,6 +1738,7 @@ public class VirtualMachineService extends DefaultApiService
         Datacenter datacenter = virtualMachine.getHypervisor().getMachine().getDatacenter();
         RemoteService service = remoteServiceService.getAMRemoteService(datacenter);
 
+        // Create the folder structure in the destination repository
         ApplianceManagerResourceStubImpl am =
             new ApplianceManagerResourceStubImpl(service.getUri());
 
@@ -1646,6 +1746,7 @@ public class VirtualMachineService extends DefaultApiService
             am.preBundleTemplate(String.valueOf(virtualAppliance.getEnterprise().getId()),
                 snapshotName);
 
+        // Do the instance
         String snapshotPath = FilenameUtils.getFullPath(ovfPath);
         String snapshotFilename =
             FilenameUtils.getName(virtualMachine.getVirtualMachineTemplate().getPath());

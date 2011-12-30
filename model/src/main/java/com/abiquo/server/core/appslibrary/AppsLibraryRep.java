@@ -226,6 +226,12 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         return virtualMachineTemplateDAO.findByEnterpriseAndRepository(enterprise, repository);
     }
+    
+    public List<VirtualMachineTemplate> findImportedVirtualMachineTemplatesByEnterprise(
+        final Enterprise enterprise)
+    {
+        return virtualMachineTemplateDAO.findImportedByEnterprise(enterprise);
+    }
 
     /**
      * Gets the list of compatible(*) virtual machine templates available in the provided enterprise and
@@ -245,6 +251,17 @@ public class AppsLibraryRep extends DefaultRepBase
         }
 
         return virtualMachineTemplateDAO.findBy(enterprise, repository, category, hypervisor);
+    }
+    
+    public List<VirtualMachineTemplate> findImportedVirtualMachineTemplates(Enterprise enterprise, Integer datacenterId,
+        Category category, HypervisorType hypervisor)
+    {
+        if (category == null && hypervisor == null)
+        {
+            return virtualMachineTemplateDAO.findImportedByEnterprise(enterprise);
+        }
+
+        return virtualMachineTemplateDAO.findImportedBy(enterprise, category, hypervisor);
     }
 
     public boolean existVirtualMachineTemplateWithSamePath(final Enterprise enterprise,
@@ -304,5 +321,7 @@ public class AppsLibraryRep extends DefaultRepBase
     {
         conversionDAO.persist(conversion);
     }
+
+
 
 }

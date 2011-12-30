@@ -111,9 +111,9 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vappdto);
         assertLinkExist(vappdto,
             resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp1.getId()),
-            IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp1.getId()),
-            VirtualMachineResource.VIRTUAL_MACHINE);
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
 
         // Check for vapp2
         response = get(resolveVirtualApplianceURI(vdc.getId(), vapp2.getId()));
@@ -122,9 +122,9 @@ public class VirtualApplianceResourceIT extends AbstractJpaGeneratorIT
         assertNotNull(vappdto);
         assertLinkExist(vappdto,
             resolveVirtualApplianceActionGetIPsURI(vdc.getId(), vapp2.getId()),
-            IpAddressesResource.IP_ADDRESSES, IpAddressesResource.IP_ADDRESSES);
+            IpAddressesResource.IP_ADDRESSES);
         assertLinkExist(vappdto, resolveVirtualMachinesURI(vdc.getId(), vapp2.getId()),
-            VirtualMachineResource.VIRTUAL_MACHINE);
+            VirtualMachinesResource.VIRTUAL_MACHINES_PATH);
     }
 
     /**

@@ -63,29 +63,37 @@ public class VirtualApplianceResource
 
     public static final String VIRTUAL_APPLIANCE_PARAM = "{" + VIRTUAL_APPLIANCE + "}";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_GET_IPS = "/action/ips";
+    public static final String VIRTUAL_APPLIANCE_GET_IPS_PATH = "action/ips";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "/action/addImage";
+    public static final String VIRTUAL_APPLIANCE_ACTION_ADD_IMAGE = "action/addImage";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY = "/action/deploy";
+    public static final String VIRTUAL_APPLIANCE_DEPLOY_PATH = "action/deploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_PRICE = "/action/price";
+    public static final String VIRTUAL_APPLIANCE_DEPLOY_REL = "deploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_POWERON = "/action/poweron";
+    public static final String VIRTUAL_APPLIANCE_UNDEPLOY_PATH = "action/undeploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_POWEROFF = "/action/poweroff";
+    public static final String VIRTUAL_APPLIANCE_UNDEPLOY_REL = "undeploy";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_PAUSE = "/action/pause";
+    public static final String VIRTUAL_APPLIANCE_PRICE_PATH = "action/price";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY_REL = "undeploy";
+    public static final String VIRTUAL_APPLIANCE_POWERON_PATH = "action/poweron";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_DEPLOY_REL = "deploy";
+    public static final String VIRTUAL_APPLIANCE_POWERON_REL = "poweron";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_RESUME = "/action/resume";
+    public static final String VIRTUAL_APPLIANCE_POWEROFF_PATH = "action/poweroff";
 
-    public static final String VIRTUAL_APPLIANCE_STATE = "/state";
+    public static final String VIRTUAL_APPLIANCE_POWEROFF_REL = "poweroff";
 
-    public static final String VIRTUAL_APPLIANCE_ACTION_UNDEPLOY = "/action/undeploy";
+    public static final String VIRTUAL_APPLIANCE_PAUSE_PATH = "action/pause";
+
+    public static final String VIRTUAL_APPLIANCE_PAUSE_REL = "pause";
+
+    public static final String VIRTUAL_APPLIANCE_RESUME_PATH = "action/resume";
+
+    public static final String VIRTUAL_APPLIANCE_RESUME_REL = "resume";
+
+    public static final String VIRTUAL_APPLIANCE_STATE_REL = "state";
 
     public static final String VIRTUAL_APPLIANCE_FORCE_DELETE_PARAM = "force";
 
@@ -130,7 +138,7 @@ public class VirtualApplianceResource
     }
 
     @GET
-    @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS)
+    @Path(VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH)
     public IpsPoolManagementDto getIPsByVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -195,7 +203,7 @@ public class VirtualApplianceResource
     }
 
     @GET
-    @Path(VIRTUAL_APPLIANCE_STATE)
+    @Path(VIRTUAL_APPLIANCE_STATE_REL)
     public VirtualApplianceStateDto getChangeState(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -209,7 +217,7 @@ public class VirtualApplianceResource
     }
 
     @POST
-    @Path(VIRTUAL_APPLIANCE_ACTION_DEPLOY)
+    @Path(VIRTUAL_APPLIANCE_DEPLOY_PATH)
     public AcceptedRequestDto<String> deploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -234,7 +242,7 @@ public class VirtualApplianceResource
     }
 
     @POST
-    @Path(VIRTUAL_APPLIANCE_ACTION_UNDEPLOY)
+    @Path(VIRTUAL_APPLIANCE_UNDEPLOY_PATH)
     public AcceptedRequestDto<String> undeploy(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -293,7 +301,7 @@ public class VirtualApplianceResource
     }
 
     @GET
-    @Path(VIRTUAL_APPLIANCE_ACTION_PRICE)
+    @Path(VIRTUAL_APPLIANCE_PRICE_PATH)
     public String getPriceVirtualAppliance(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,

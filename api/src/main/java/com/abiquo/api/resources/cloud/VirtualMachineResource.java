@@ -41,7 +41,6 @@ import org.apache.wink.common.annotations.Parent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import com.abiquo.aimstub.Datastore;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.BadRequestException;
 import com.abiquo.api.exceptions.InternalServerErrorException;
@@ -55,7 +54,6 @@ import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
-import com.abiquo.server.core.cloud.VirtualApplianceDto;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineDto;
 import com.abiquo.server.core.cloud.VirtualMachineInstanceDto;
@@ -83,18 +81,26 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
 
-    public static final String VIRTUAL_MACHINE_ACTION_DEPLOY = "/action/deploy";
+    public static final String VIRTUAL_MACHINE_DEPLOY_PATH = "action/deploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY = "/action/undeploy";
+    public static final String VIRTUAL_MACHINE_DEPLOY_REL = "deploy";
 
-    public static final String VIRTUAL_MACHINE_ACTION_RESET = "/action/reset";
+    public static final String VIRTUAL_MACHINE_UNDEPLOY_PATH = "action/undeploy";
 
-    public static final String VIRTUAL_MACHINE_STATE = "/state";
+    public static final String VIRTUAL_MACHINE_UNDEPLOY_REL = "undeploy";
+
+    public static final String VIRTUAL_MACHINE_ACTION_RESET = "action/reset";
+
+    public static final String VIRTUAL_MACHINE_STATE = "state";
 
     // Chef constants to help link builders. Method implementation are premium.
-    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "/config/runlist";
+    public static final String VIRTUAL_MACHINE_RUNLIST_PATH = "config/runlist";
 
-    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "/config/bootstrap";
+    public static final String VIRTUAL_MACHINE_RUNLIST_REL = "runlist";
+
+    public static final String VIRTUAL_MACHINE_BOOTSTRAP_PATH = "config/bootstrap";
+
+    public static final String VIRTUAL_MACHINE_BOOTSTRAP_REL = "bootstrap";
 
     public static final String VM_NODE_MEDIA_TYPE = "application/vnd.vm-node+xml";
 
@@ -102,7 +108,7 @@ public class VirtualMachineResource extends AbstractResource
 
     public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT_REL = "instance";
 
-    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "/action/instance";
+    public static final String VIRTUAL_MACHINE_ACTION_SNAPSHOT = "action/instance";
 
     public static final String VIRTUAL_MACHINE_ACTION_UNDEPLOY_REL = "undeploy";
 
@@ -341,7 +347,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path(VIRTUAL_MACHINE_ACTION_DEPLOY)
+    @Path(VIRTUAL_MACHINE_DEPLOY_PATH)
     @Consumes(MediaType.APPLICATION_XML)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
@@ -392,7 +398,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path(VIRTUAL_MACHINE_ACTION_DEPLOY)
+    @Path(VIRTUAL_MACHINE_DEPLOY_PATH)
     public AcceptedRequestDto<String> deployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -435,7 +441,7 @@ public class VirtualMachineResource extends AbstractResource
      * @throws Exception
      */
     @POST
-    @Path(VIRTUAL_MACHINE_ACTION_UNDEPLOY)
+    @Path(VIRTUAL_MACHINE_UNDEPLOY_PATH)
     public AcceptedRequestDto<String> undeployVirtualMachine(
         @PathParam(VirtualDatacenterResource.VIRTUAL_DATACENTER) final Integer vdcId,
         @PathParam(VirtualApplianceResource.VIRTUAL_APPLIANCE) final Integer vappId,
@@ -549,6 +555,13 @@ public class VirtualMachineResource extends AbstractResource
                 .getId(), virtualImage.getRepository().getDatacenter().getId(), virtualImage
                 .getId()));
         }
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(virtualImage.getEnterprise()
+                .getId(), v.getVirtualMachine().getHypervisor().getMachine().getRack()
+                .getDatacenter().getId(), v.getVirtualImage().getId()));
+        }
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v
             .getVirtualMachine().getId(), rack == null ? null : rack.getDatacenter().getId(),
@@ -596,10 +609,17 @@ public class VirtualMachineResource extends AbstractResource
             : user.getId()));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
-        if (vmtemplate != null)
+        if (vmtemplate.getRepository() != null)
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
                 .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+        }
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                vmtemplate.getId()));
         }
 
         TaskResourceUtils.addTasksLink(dto, dto.getEditLink());
@@ -651,10 +671,17 @@ public class VirtualMachineResource extends AbstractResource
             v.isChefEnabled(), volumeIds, diskIds, ips));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
-        if (vmtemplate != null)
+        if (vmtemplate.getRepository() != null)
         {
             dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
                 .getId(), vmtemplate.getRepository().getDatacenter().getId(), vmtemplate.getId()));
+        }
+        else
+        {
+            // imported virtual machines
+            dto.addLink(restBuilder.buildVirtualMachineTemplateLink(vmtemplate.getEnterprise()
+                .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
+                vmtemplate.getId()));
         }
 
         return dto;
