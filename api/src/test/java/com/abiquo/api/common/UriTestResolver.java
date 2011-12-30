@@ -111,8 +111,8 @@ public class UriTestResolver
             buildPath(EnterprisesResource.ENTERPRISES_PATH + "/",
                 EnterpriseResource.ENTERPRISE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(EnterpriseResource.ENTERPRISE, enterpriseId.toString()));
+        return resolveURI(template, Collections.singletonMap(EnterpriseResource.ENTERPRISE,
+            enterpriseId.toString()));
     }
 
     public static String resolveEnterpriseActionGetIPsURI(final Integer entId)
@@ -143,8 +143,8 @@ public class UriTestResolver
         String template =
             buildPath(PrivilegesResource.PRIVILEGES_PATH, PrivilegeResource.PRIVILEGE_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(PrivilegeResource.PRIVILEGE, privilegeId.toString()));
+        return resolveURI(template, Collections.singletonMap(PrivilegeResource.PRIVILEGE,
+            privilegeId.toString()));
     }
 
     public static String resolveRoleURI(final Integer roleId)
@@ -207,8 +207,8 @@ public class UriTestResolver
     {
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRacksURI(final Integer datacenterId)
@@ -216,8 +216,8 @@ public class UriTestResolver
         String template =
             buildPath(DatacentersResource.DATACENTERS_PATH, DatacenterResource.DATACENTER_PARAM,
                 RacksResource.RACKS_PATH);
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolveRackURI(final Integer datacenterId, final Integer rackId)
@@ -391,8 +391,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(DatacenterResource.DATACENTER, datacenterId.toString());
-        values.put(RemoteServiceResource.REMOTE_SERVICE,
-            type.toString().toLowerCase().replace("_", ""));
+        values.put(RemoteServiceResource.REMOTE_SERVICE, type.toString().toLowerCase().replace("_",
+            ""));
 
         return resolveURI(template, values);
     }
@@ -420,8 +420,8 @@ public class UriTestResolver
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
-        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST,
-            ovfPackageListId.toString());
+        values.put(TemplateDefinitionListResource.TEMPLATE_DEFINITION_LIST, ovfPackageListId
+            .toString());
 
         return resolveURI(template, values);
 
@@ -503,8 +503,8 @@ public class UriTestResolver
         String template =
             DatacentersResource.DATACENTERS_PATH + "/" + DatacenterResource.DATACENTER_PARAM + "/"
                 + RacksResource.RACKS_PATH;
-        return resolveURI(template,
-            Collections.singletonMap(DatacenterResource.DATACENTER, datacenterId.toString()));
+        return resolveURI(template, Collections.singletonMap(DatacenterResource.DATACENTER,
+            datacenterId.toString()));
     }
 
     public static String resolvePrivateNetworksURI(final Integer virtualDatacenterId)
@@ -621,8 +621,8 @@ public class UriTestResolver
     public static String resolveVirtualApplianceActionGetIPsURI(final Integer vdcId,
         final Integer vappId)
     {
-        return resolveVirtualApplianceURI(vdcId, vappId)
-            + VirtualApplianceResource.VIRTUAL_APPLIANCE_ACTION_GET_IPS;
+        return resolveVirtualApplianceURI(vdcId, vappId) + "/"
+            + VirtualApplianceResource.VIRTUAL_APPLIANCE_GET_IPS_PATH;
     }
 
     /**
@@ -760,7 +760,7 @@ public class UriTestResolver
                 VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
                 VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
                 VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
-                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_DEPLOY);
+                VirtualMachineResource.VIRTUAL_MACHINE_DEPLOY_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
@@ -790,7 +790,7 @@ public class UriTestResolver
                 VirtualApplianceResource.VIRTUAL_APPLIANCE_PARAM,
                 VirtualMachinesResource.VIRTUAL_MACHINES_PATH,
                 VirtualMachineResource.VIRTUAL_MACHINE_PARAM,
-                VirtualMachineResource.VIRTUAL_MACHINE_ACTION_UNDEPLOY);
+                VirtualMachineResource.VIRTUAL_MACHINE_UNDEPLOY_PATH);
 
         Map<String, String> values = new HashMap<String, String>();
         values.put(VirtualDatacenterResource.VIRTUAL_DATACENTER, vdcId.toString());
@@ -1126,8 +1126,8 @@ public class UriTestResolver
         values.put(EnterpriseResource.ENTERPRISE, String.valueOf(enterpriseId));
         values
             .put(DatacenterRepositoryResource.DATACENTER_REPOSITORY, String.valueOf(datacenterId));
-        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE,
-            String.valueOf(virtualMachineTemplateId));
+        values.put(VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE, String
+            .valueOf(virtualMachineTemplateId));
 
         return resolveURI(template, values);
     }
@@ -1167,8 +1167,8 @@ public class UriTestResolver
         String template =
             buildPath(SystemPropertiesResource.SYSTEM_PROPERTIES_PATH,
                 SystemPropertyResource.SYSTEM_PROPERTY_PARAM);
-        return resolveURI(template,
-            Collections.singletonMap(SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
+        return resolveURI(template, Collections.singletonMap(
+            SystemPropertyResource.SYSTEM_PROPERTY, propertyId.toString()));
     }
 
     public static String resolveLoginURI()
@@ -1187,8 +1187,8 @@ public class UriTestResolver
         String template =
             buildPath(CategoriesResource.CATEGORIES_PATH, CategoryResource.CATEGORY_PARAM);
 
-        return resolveURI(template,
-            Collections.singletonMap(CategoryResource.CATEGORY, categoryId.toString()));
+        return resolveURI(template, Collections.singletonMap(CategoryResource.CATEGORY, categoryId
+            .toString()));
     }
 
     public static String resolveCategoriesURI()

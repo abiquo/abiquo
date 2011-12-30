@@ -490,7 +490,7 @@ public class VirtualApplianceResourceStubImpl extends AbstractAPIStub implements
                 VirtualApplianceDto entity = response.getEntity(VirtualApplianceDto.class);
 
                 VirtualAppliance app = dtoToVirtualAppliance(entity, virtualDatacenterId, result);
-                RESTLink virtualMachines = entity.searchLink("virtualmachine");
+                RESTLink virtualMachines = entity.searchLink("virtualmachines");
                 if (virtualMachines != null)
                 {
                     DataResult<List<Node>> nodeVirtualImages =
