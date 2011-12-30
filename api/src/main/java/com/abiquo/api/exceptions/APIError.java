@@ -600,7 +600,9 @@ public enum APIError
     // HYPERVISOR TYPE
     INVALID_HYPERVISOR_TYPE("HYPERVISOR_TYPE-0", "The requested Hypervisor Type is invalid"),
 
-    ;
+    // DHCP_OPTION
+    NON_EXISTENT_DHCP_OPTION("DHCP_OPTION-0", "The requested dhcp option does not exist"), DHCP_OPTION_PARAM_NOT_FOUND(
+        "DHCP_OPTION-12", "Missing dhcp option parameter");
 
     /**
      * Internal error code

@@ -19,30 +19,28 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+package com.abiquo.server.core.infrastructure.network;
 
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import com.abiquo.model.transport.WrapperDto;
+
+@XmlRootElement(name = "dhcpoptions")
+public class DhcpOptionsDto extends WrapperDto<DhcpOptionDto>
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED, EXTERNAL_UNMANAGED;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-    public static NetworkType fromValue(final String orderBy)
+    @Override
+    @XmlElement(name = "dhcpoption")
+    public List<DhcpOptionDto> getCollection()
     {
-        for (NetworkType currentOrder : NetworkType.values())
-        {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
-        }
-
-        return null;
+        return collection;
     }
+
 }
