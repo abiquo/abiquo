@@ -384,9 +384,12 @@ public class VirtualApplianceService
     public BasicResult forceRefreshVirtualApplianceState(final UserSession session,
         final VirtualAppliance virtualAppliance)
     {
-        VirtualApplianceCommand command = proxyCommand(session);
-
-        return command.forceRefreshVirtualApplianceState(virtualAppliance);
+        // VirtualApplianceCommand command = proxyCommand(session);
+        DataResult<VirtualAppliance> virtualApplianceNodes =
+            proxyVirtualApplianceResourceStub(session).getVirtualApplianceNodes(
+                virtualAppliance.getVirtualDataCenter().getId(), virtualAppliance.getId());
+        return virtualApplianceNodes;
+        // return command.forceRefreshVirtualApplianceState(virtualAppliance);
 
     }
 

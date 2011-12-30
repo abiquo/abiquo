@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.exceptions.APIError;
+import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
 import com.abiquo.api.services.stub.TarantinoService;
@@ -444,6 +445,11 @@ public class VirtualApplianceService extends DefaultApiService
                     vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
                         vdcId, false);
                 dto.add(link);
+            }
+            catch (APIException e)
+            {
+                logger.error("Error deploying virtual appliance name {}. {}",
+                    virtualAppliance.getName(), e.toString());
             }
             catch (Exception e)
             {
