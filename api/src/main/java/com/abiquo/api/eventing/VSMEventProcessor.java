@@ -34,13 +34,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.api.services.RemoteServiceService;
-import com.abiquo.api.services.TaskService;
+import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.VsmServiceStub;
 import com.abiquo.api.tracer.TracerLogger;
 import com.abiquo.commons.amqp.impl.tarantino.domain.State;
 import com.abiquo.commons.amqp.impl.vsm.VSMCallback;
 import com.abiquo.commons.amqp.impl.vsm.domain.VirtualSystemEvent;
-import com.abiquo.scheduler.ResourceUpgradeUse;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineRep;
 import com.abiquo.server.core.cloud.VirtualMachineState;
@@ -70,7 +70,7 @@ public class VSMEventProcessor implements VSMCallback
     protected TracerLogger tracer;
 
     @Autowired
-    protected ResourceUpgradeUse resourceUpgrader;
+    protected VirtualMachineAllocatorService allocatorService;
 
     @Autowired
     private RemoteServiceService remoteServiceService;
@@ -121,7 +121,7 @@ public class VSMEventProcessor implements VSMCallback
     {
         this.vmRepo = new VirtualMachineRep(em);
         this.tracer = new TracerLogger();
-        this.resourceUpgrader = new ResourceUpgradeUse(em);
+        this.allocatorService = new VirtualMachineAllocatorService(em);
     }
 
     public VSMEventProcessor()
@@ -256,10 +256,21 @@ public class VSMEventProcessor implements VSMCallback
             // Resources are freed
             // State NOT_ALLOCATED is set in this method too
             unsubscribeVMToVSM(virtualMachine);
-            resourceUpgrader.rollbackUse(virtualMachine);
-            logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
+            final String lockMsg = "DESTROY event for virtualmachine '" + virtualMachine.getId() + "'";
+            try
+            {
+                SchedulerLock.acquire(lockMsg);
+
+                // XXX virtualMachine should be loaded inside the LOCK
+                allocatorService.deallocateVirtualMachine(virtualMachine);
+            }
+            finally
+            {
+                SchedulerLock.release(lockMsg);
+            }
         }
 
+        logAndTraceVirtualMachineStateUpdated(virtualMachine, event, notification);
     }
 
     /**

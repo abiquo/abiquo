@@ -109,7 +109,7 @@ public class TarantinoJobCreator extends DefaultApiService
      * @param virtualAppliance, virtual machine context info (app and virtualdatacenter)
      * @return VirtualMachineDescriptionBuilder to represent the current virtual machine
      */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachineDescriptionBuilder toTarantinoDto(final VirtualMachine virtualMachine,
         final VirtualAppliance virtualAppliance)
     {

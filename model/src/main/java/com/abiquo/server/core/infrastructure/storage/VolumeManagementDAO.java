@@ -421,7 +421,7 @@ import com.softwarementors.bzngine.entities.PersistentEntity;
 
     private static Criterion sameVirtualMachine(final VirtualMachine vm)
     {
-        return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY, vm);
+        return Restrictions.eq(RasdManagement.VIRTUAL_MACHINE_PROPERTY + ".id", vm.getId());
     }
 
     private static Criterion sameState(final VolumeState state)

@@ -127,6 +127,12 @@ public class AbstractAPIStub
         return context;
     }
 
+    /* Set the timeout to the double fo time of the set in the system properties */
+    private Integer nodecollectorTimeout()
+    {
+        return Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "90000"));
+    }
+
     protected void releaseApiClient()
     {
         if (context != null)

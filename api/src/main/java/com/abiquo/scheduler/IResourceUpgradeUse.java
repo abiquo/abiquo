@@ -21,6 +21,7 @@
 
 package com.abiquo.scheduler;
 
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.scheduler.VirtualMachineRequirements;
@@ -41,14 +42,14 @@ public interface IResourceUpgradeUse
      *             resources to allocate the virtual machine, the virtual appliances is not on any
      *             virtual datacenter.
      */
-    public void updateUse(Integer virtualApplianceId, VirtualMachine virtualMachine);
+    public void updateUse(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine);
 
     /**
      * Do not update the datastore utilization.
      * 
      * @param sourceMachineId, the machine id of the source (where the HA vmachine were deployed)
      */
-    public void updateUseHa(Integer virtualApplianceId, VirtualMachine virtualMachine,
+    public void updateUseHa(VirtualAppliance virtualAppliance, VirtualMachine virtualMachine,
         Integer sourceMachineId);
 
     /**

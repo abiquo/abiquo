@@ -33,16 +33,16 @@ package com.abiquo.server.core.scheduler;
 public class VirtualMachineRequirements
 {
     /** Required CPU by the virtual image. */
-    protected final Long cpu;
+    protected Long cpu;
 
     /** Required RAM by the virtual image. TODO units. */
-    protected final Long ram;
+    protected Long ram;
 
     /** Required HD by the virtual image. TODO units. */
-    protected final Long hd;
+    protected Long hd;
 
     /** Required space on the Datacenter repository (NFS) virtual image disk file size. TODO units. */
-    protected final Long repository;
+    protected Long repository;
 
     /** Required space on external storage (all the attached volume size). */
     protected Long storage;
@@ -74,6 +74,17 @@ public class VirtualMachineRequirements
         this.storage = requirements.storage;
         this.publicVLAN = requirements.publicVLAN;
         this.publicIP = requirements.publicIP;
+    }
+
+    public void addRequirement(final VirtualMachineRequirements addReq)
+    {
+        this.cpu += addReq.cpu;
+        this.ram += addReq.ram;
+        this.hd += addReq.hd;
+        this.repository += addReq.repository;
+        this.storage += addReq.storage;
+        this.publicIP += addReq.publicIP;
+        this.publicVLAN += addReq.publicVLAN;
     }
 
     public Long getCpu()

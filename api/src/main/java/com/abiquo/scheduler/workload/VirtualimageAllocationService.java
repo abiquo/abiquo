@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.abiquo.model.enumerator.FitPolicy;
@@ -118,7 +119,6 @@ import com.abiquo.tracer.client.TracerFactory;
  * NOTE: the current implementation only fetch once the physical machine rules.
  */
 @Service
-@Transactional
 public class VirtualimageAllocationService
 {
 
@@ -149,7 +149,6 @@ public class VirtualimageAllocationService
         this.ruleFinder = new PhysicalmachineRuleFinder(em);
     }
 
-
     /** Starting best fit. (none ''computeRank'' can be higher) */
     private static final long NO_FIT = Long.MIN_VALUE;
 
@@ -160,10 +159,11 @@ public class VirtualimageAllocationService
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Machine findBestTarget(final VirtualMachineRequirements requirements,
-        final FitPolicy fitPolicy, final Integer idVirtualAppliance)
+        final FitPolicy fitPolicy, final VirtualAppliance virtualAppliance)
     {
-        final List<Integer> rackCandidates = getCandidateRacks(idVirtualAppliance);
+        final List<Integer> rackCandidates = getCandidateRacks(virtualAppliance);
 
         if (rackCandidates.isEmpty())
         {
@@ -181,14 +181,14 @@ public class VirtualimageAllocationService
             try
             {
                 final Collection<Machine> firstPassCandidates =
-                    findFirstPassCandidates(requirements, idVirtualAppliance, rack);
+                    findFirstPassCandidates(requirements, virtualAppliance, rack);
 
                 log.debug(String.format(
                     "All the virtual machines of the current virtual datacenter "
                         + "will be deployed on the rack id : %d", idRack));
 
                 return findSecondPassCandidates(firstPassCandidates, requirements,
-                    idVirtualAppliance, fitPolicy);
+                    virtualAppliance, fitPolicy);
             }
             catch (Exception e) // NotEnoughResourcesException or PersistenceException
             {
@@ -220,22 +220,20 @@ public class VirtualimageAllocationService
      * @throws ResourceAllocationException, it there isn't enough resources to fulfilling the
      *             target.
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public Machine findBestTarget(final VirtualMachineRequirements requirements,
-        final FitPolicy fitPolicy, final Integer idVirtualAppliance, final String datastoreUuid,
+        final FitPolicy fitPolicy, final VirtualAppliance vapp, final String datastoreUuid,
         final Integer originalHypervisorId, final Integer rackId)
         throws ResourceAllocationException
     {
 
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualAppliance);
         final Integer virtualDatacenterId = vapp.getVirtualDatacenter().getId();
 
         final Collection<Machine> firstPassCandidates =
-
             datacenterRepo.findCandidateMachines(rackId, virtualDatacenterId, vapp.getEnterprise(),
                 datastoreUuid, originalHypervisorId);
 
-        return findSecondPassCandidates(firstPassCandidates, requirements, idVirtualAppliance,
-            fitPolicy);
+        return findSecondPassCandidates(firstPassCandidates, requirements, vapp, fitPolicy);
 
     }
 
@@ -243,9 +241,8 @@ public class VirtualimageAllocationService
      * Return a sorted list of racks (sorted by rack goodness based on network params). If some
      * network assigment on the datacenter then the rack is already defined.
      */
-    protected List<Integer> getCandidateRacks(final Integer idVirtualApp)
+    protected List<Integer> getCandidateRacks(final VirtualAppliance vapp)
     {
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
 
@@ -277,12 +274,10 @@ public class VirtualimageAllocationService
     }
 
     protected Collection<Machine> findFirstPassCandidates(
-        final VirtualMachineRequirements requirements, final Integer idVirtualApp, final Rack rack)
+        final VirtualMachineRequirements requirements, final VirtualAppliance vapp, final Rack rack)
         throws NotEnoughResourcesException
     {
         Collection<Machine> candidateMachines;
-
-        final VirtualAppliance vapp = virtualApplianceDao.findById(idVirtualApp);
 
         final Enterprise enterprise = vapp.getEnterprise();
         final VirtualDatacenter virtualDatacenter = vapp.getVirtualDatacenter();
@@ -383,7 +378,7 @@ public class VirtualimageAllocationService
      *             target.
      */
     protected final Machine findSecondPassCandidates(final Collection<Machine> firstPassCandidates,
-        final VirtualMachineRequirements requirements, final Integer virtualApplianceId,
+        final VirtualMachineRequirements requirements, final VirtualAppliance virtualAppliance,
         final FitPolicy fitPolicy) throws NotEnoughResourcesException
     {
         IAllocationFit physicalMachineFit;
@@ -408,13 +403,15 @@ public class VirtualimageAllocationService
 
                 if (rules == null || rules.isEmpty())
                 {
-                    pass = DEFAULT_RULE.pass(requirements, target, virtualApplianceId);
+                    // XXX unused vappid
+                    pass = DEFAULT_RULE.pass(requirements, target, virtualAppliance.getId());
                 }
                 else
                 {
                     for (final MachineLoadRule rule : rules)
                     {
-                        if (!rule.pass(requirements, target, virtualApplianceId))
+                        // XXX unused vappid
+                        if (!rule.pass(requirements, target, virtualAppliance.getId()))
                         {
                             pass = false;
                             break;
@@ -425,7 +422,8 @@ public class VirtualimageAllocationService
             else
             // default rule is to check the actual resource utilization (load = 100%)
             {
-                pass = DEFAULT_RULE.pass(requirements, target, virtualApplianceId);
+                // XXX unused vappid
+                pass = DEFAULT_RULE.pass(requirements, target, virtualAppliance.getId());
             }
 
             if (pass)
