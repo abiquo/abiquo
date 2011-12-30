@@ -292,12 +292,18 @@ public class TarantinoJobCreator extends DefaultApiService
         final VirtualMachineDescriptionBuilder vmDesc, final Integer idDatacenter)
     {
         String datastore = "";
-        if (virtualMachine.getDatastore() != null
+        /* This lines does actually nothing
+        if (virtualMachine.getDatastore().getDirectory() != null
             && !StringUtils.isEmpty(virtualMachine.getDatastore().getDirectory()))
         {
             datastore =
                 FilenameUtils.concat(virtualMachine.getDatastore().getRootPath(), virtualMachine
                     .getDatastore().getDirectory());
+        }
+        */
+        if (virtualMachine.getDatastore() != null)
+        {
+            datastore = virtualMachine.getDatastore().getRootPath();
         }
 
         // Repository Manager address
