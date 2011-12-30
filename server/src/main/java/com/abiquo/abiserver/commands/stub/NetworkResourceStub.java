@@ -25,10 +25,12 @@
 package com.abiquo.abiserver.commands.stub;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import com.abiquo.abiserver.exception.NetworkCommandException;
 import com.abiquo.abiserver.networking.IPAddress;
 import com.abiquo.abiserver.pojo.authentication.UserSession;
+import com.abiquo.abiserver.pojo.networking.DhcpOption;
 import com.abiquo.abiserver.pojo.networking.IpPoolManagement;
 import com.abiquo.abiserver.pojo.networking.NetworkConfiguration;
 import com.abiquo.abiserver.pojo.result.BasicResult;
@@ -47,7 +49,8 @@ public interface NetworkResourceStub
     public BasicResult createPrivateVlan(UserSession userSession, Integer vdcId, VLANNetworkDto dto);
 
     public BasicResult createPublicVlan(Integer idDatacenter, String networkName, Integer vlanTag,
-        NetworkConfiguration configuration, Enterprise enterprise, boolean unmanaged);
+        NetworkConfiguration configuration, Enterprise enterprise, boolean unmanaged,
+        Set<DhcpOption> dhcpOptions);
 
     public BasicResult deletePrivateVlan(Integer vdcId, Integer vlanNetworkId);
 
@@ -63,7 +66,7 @@ public interface NetworkResourceStub
 
     public BasicResult editPublicVlan(Integer datacenterId, Integer vlanNetworkId, String vlanName,
         Integer vlanTag, NetworkConfiguration configuration, Boolean defaultNetwork,
-        Enterprise enterprise);
+        Enterprise enterprise, Set<DhcpOption> dhcpOptions);
 
     public BasicResult getEnterpriseFromReservedVlanId(Integer datacenterId, Integer vlanId);
 
@@ -95,11 +98,11 @@ public interface NetworkResourceStub
         Boolean onlyAvailable, Boolean freeIps);
 
     public BasicResult getListNetworkPoolByVirtualDatacenter(Integer vdcId, Integer offset,
-        Integer numElem, String filterLike, String orderBy, Boolean asc)
+        Integer numElem, String filterLike, String orderBy, Boolean asc, String type)
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByDatacenter(Integer datacenterId, Integer offset,
-        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc)
+        Integer numberOfNodes, String filterLike, String orderBy, Boolean asc, String type)
         throws NetworkCommandException;
 
     public BasicResult getListNetworkPublicPoolByVlan(Integer datacenterId, Integer vlanId,

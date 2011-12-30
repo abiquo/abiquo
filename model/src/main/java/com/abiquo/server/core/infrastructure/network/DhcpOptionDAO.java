@@ -19,30 +19,32 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * 
- */
-package com.abiquo.model.enumerator;
+package com.abiquo.server.core.infrastructure.network;
 
-/**
- * All kind of VLAN networks.
- * 
- * @author jdevesa@abiquo.com
- */
-public enum NetworkType
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
+import com.abiquo.server.core.common.persistence.DefaultDAOBase;
+
+@Repository("jpaDhcpOptionDAO")
+public class DhcpOptionDAO extends DefaultDAOBase<Integer, DhcpOption>
 {
-    INTERNAL, EXTERNAL, PUBLIC, UNMANAGED, EXTERNAL_UNMANAGED;
-
-    public static NetworkType fromValue(final String orderBy)
+    public DhcpOptionDAO()
     {
-        for (NetworkType currentOrder : NetworkType.values())
-        {
-            if (currentOrder.name().equalsIgnoreCase(orderBy))
-            {
-                return currentOrder;
-            }
-        }
+        super(DhcpOption.class);
+    }
 
-        return null;
+    public DhcpOptionDAO(final EntityManager entityManager)
+    {
+        super(DhcpOption.class, entityManager);
+    }
+
+    public List<DhcpOption> findDhcpOptionByOption(final int option)
+    {
+        return findByCriterions(Restrictions.eq(DhcpOption.OPTION_PROPERTY, option));
     }
 }

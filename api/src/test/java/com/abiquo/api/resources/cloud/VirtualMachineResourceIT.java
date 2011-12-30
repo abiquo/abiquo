@@ -81,12 +81,12 @@ import com.abiquo.server.core.infrastructure.Machine;
 import com.abiquo.server.core.infrastructure.RemoteService;
 import com.abiquo.server.core.infrastructure.network.NicsDto;
 import com.abiquo.server.core.task.Job;
-import com.abiquo.server.core.task.Job.JobType;
 import com.abiquo.server.core.task.JobGenerator;
 import com.abiquo.server.core.task.Task;
 import com.abiquo.server.core.task.TaskDto;
 import com.abiquo.server.core.task.TaskGenerator;
 import com.abiquo.server.core.task.TasksDto;
+import com.abiquo.server.core.task.Job.JobType;
 import com.abiquo.server.core.task.enums.TaskType;
 import com.abiquo.tracer.Constants;
 
@@ -369,18 +369,13 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
             get(resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()));
         assertEquals(response.getStatusCode(), Status.OK.getStatusCode());
         VirtualMachineDto vmDto = response.getEntity(VirtualMachineDto.class);
-        assertLinkExist(vmDto,
-            resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm.getId()),
-            VirtualMachineNetworkConfigurationResource.NICS_PATH,
-            VirtualMachineNetworkConfigurationResource.NICS_PATH);
+        assertLinkExist(vmDto, resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm
+            .getId()), VirtualMachineNetworkConfigurationResource.NICS_PATH);
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm.getId()),
             "edit");
-        assertLinkExist(
-            vmDto,
-            resolveVirtualMachineTemplateURI(
-                vm.getVirtualMachineTemplate().getEnterprise().getId(), vm
-                    .getVirtualMachineTemplate().getRepository().getDatacenter().getId(), vm
-                    .getVirtualMachineTemplate().getId()),
+        assertLinkExist(vmDto, resolveVirtualMachineTemplateURI(vm.getVirtualMachineTemplate()
+            .getEnterprise().getId(), vm.getVirtualMachineTemplate().getRepository()
+            .getDatacenter().getId(), vm.getVirtualMachineTemplate().getId()),
             VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
@@ -392,11 +387,9 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), vm2.getId());
         assertLinkExist(vmDto, resolveVirtualMachineURI(vdc.getId(), vapp.getId(), vm2.getId()),
             "edit");
-        assertLinkExist(
-            vmDto,
-            resolveVirtualMachineTemplateURI(vm2.getVirtualMachineTemplate().getEnterprise()
-                .getId(), vm2.getVirtualMachineTemplate().getRepository().getDatacenter().getId(),
-                vm2.getVirtualMachineTemplate().getId()),
+        assertLinkExist(vmDto, resolveVirtualMachineTemplateURI(vm2.getVirtualMachineTemplate()
+            .getEnterprise().getId(), vm2.getVirtualMachineTemplate().getRepository()
+            .getDatacenter().getId(), vm2.getVirtualMachineTemplate().getId()),
             VirtualMachineTemplateResource.VIRTUAL_MACHINE_TEMPLATE);
 
         assertNotNull(vmDto);
@@ -535,8 +528,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         machine.setDatacenter(vdc.getDatacenter());
         machine.setRack(null);
 
-        vm.getVirtualMachineTemplate().getRepository()
-            .setDatacenter(vm.getHypervisor().getMachine().getDatacenter());
+        vm.getVirtualMachineTemplate().getRepository().setDatacenter(
+            vm.getHypervisor().getMachine().getDatacenter());
 
         List<Object> entitiesToSetup = new ArrayList<Object>();
 
@@ -581,8 +574,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
     {
         setup(ent, datacenter, vdc, vapp);
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(),
-                new Random().nextInt(1000)));
+            get(resolveVirtualMachineActionGetIPsURI(vdc.getId(), vapp.getId(), new Random()
+                .nextInt(1000)));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 
@@ -626,8 +619,8 @@ public class VirtualMachineResourceIT extends AbstractJpaGeneratorIT
         setup(entitiesToSetup.toArray());
 
         ClientResponse response =
-            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(),
-                vm.getId()));
+            get(resolveVirtualMachineActionGetIPsURI(new Random().nextInt(1000), vapp.getId(), vm
+                .getId()));
         assertEquals(response.getStatusCode(), Status.NOT_FOUND.getStatusCode());
     }
 

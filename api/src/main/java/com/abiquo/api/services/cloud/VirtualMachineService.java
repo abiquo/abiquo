@@ -1154,6 +1154,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
+            traceApiExceptionVm(e, virtualMachine.getName());
+
             unlockVirtualMachineState(virtualMachine, originalState);
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
@@ -1182,6 +1184,31 @@ public class VirtualMachineService extends DefaultApiService
             flushErrors();
 
             return null;
+        }
+    }
+
+    private void traceApiExceptionVm(final APIException exception, final String vmName)
+    {
+        if (exception.getErrors().isEmpty())
+        {
+            tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE, EventType.VM_DEPLOY,
+                exception.getMessage(), vmName);
+
+            tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                EventType.VM_DEPLOY, exception, exception.getMessage(), vmName);
+        }
+        else
+        {
+            for (CommonError e : exception.getErrors())
+            {
+                String msg = e.getCode() + e.getMessage();
+                tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, e.getCode(), vmName);
+
+                tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
+                    EventType.VM_DEPLOY, exception, msg, vmName);
+            }
+
         }
     }
 

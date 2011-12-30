@@ -41,7 +41,7 @@ public interface VirtualApplianceResourceStub
         final Integer virtualApplianceId, Boolean forceEnterpriseLimit);
 
     public DataResult undeployVirtualAppliance(final Integer virtualDatacenterId,
-        final Integer virtualApplianceId);
+        final Integer virtualApplianceId, final boolean force);
 
     /**
      * Queries to allocate a new virtual machine
