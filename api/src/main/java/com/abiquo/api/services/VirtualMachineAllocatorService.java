@@ -182,6 +182,23 @@ public class VirtualMachineAllocatorService extends DefaultApiService
     }
 
     /**
+     * Test entrance
+     */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    protected VirtualMachine allocate(final Integer vmid, final Integer vapid,
+        final Boolean foreceEnterpriseSoftLimits)
+    {
+        return allocateVirtualMachine(virtualMachineDao.findById(vmid),
+            virtualAppDao.findById(vapid), foreceEnterpriseSoftLimits);
+    }
+
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void deallocate(final Integer vmid)
+    {
+        deallocateVirtualMachine(virtualMachineDao.findById(vmid));
+    }
+
+    /**
      * Creates a virtual machine using some hypervisor on the current virtual appliance datacenter.
      * <p>
      * Physical Infrastructure synchronized. @see {@link SchedulerLock}

@@ -40,6 +40,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.abiquo.api.common.AbstractGeneratorTest;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 
 @Test(groups = ALL_UNIT_TESTS)
@@ -157,5 +158,10 @@ public class TestPopulate extends AbstractGeneratorTest
     protected VirtualMachine getVirtualMachine(final Integer virtualMachineId)
     {
         return populateReader.getVirtualMachine(virtualMachineId);
+    }
+
+    protected VirtualAppliance getVirtualAppliance(final Integer virtualApplianceId)
+    {
+        return populateReader.getVirtualAppliance(virtualApplianceId);
     }
 }

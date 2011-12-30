@@ -514,4 +514,9 @@ public class PopulateVirtualInfrastructure extends PopulateConstants
     {
         return vmachineDao.findById(virtualMachineId);
     }
+
+    public VirtualAppliance getVirtualAppliance(final Integer virtualAppId)
+    {
+        return vdcRep.findVirtualApplianceById(virtualAppId);
+    }
 }

@@ -1168,8 +1168,6 @@ public class VirtualMachineService extends DefaultApiService
             // We need to map all attached volumes if any
             initiatorMappings(virtualMachine);
             LOGGER.debug("Mapping done!");
-
-            repo.detachVirtualMachine(virtualMachine);
         }
         catch (APIException e)
         {
