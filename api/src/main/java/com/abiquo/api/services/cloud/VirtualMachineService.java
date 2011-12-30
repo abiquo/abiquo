@@ -1201,9 +1201,10 @@ public class VirtualMachineService extends DefaultApiService
         {
             for (CommonError e : exception.getErrors())
             {
-                String msg = e.getCode() + e.getMessage();
+                String msg = e.getCode() + " " + e.getMessage();
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
-                    EventType.VM_DEPLOY, e.getCode(), vmName);
+                    EventType.VM_DEPLOY, "virtualMachine.deploy.notEnoughResources", e.getCode(),
+                    vmName);
 
                 tracer.systemError(SeverityType.CRITICAL, ComponentType.VIRTUAL_MACHINE,
                     EventType.VM_DEPLOY, exception, msg, vmName);
