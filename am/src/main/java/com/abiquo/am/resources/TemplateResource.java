@@ -58,6 +58,7 @@ import com.abiquo.appliancemanager.exceptions.DownloadException;
 import com.abiquo.appliancemanager.transport.TemplateDto;
 import com.abiquo.appliancemanager.transport.TemplateStateDto;
 import com.abiquo.appliancemanager.transport.TemplateStatusEnumType;
+import com.ning.http.client.Response.ResponseBuilder;
 
 @Parent(TemplatesResource.class)
 @Path(TemplateResource.TEMPLATE_PATH)
@@ -112,8 +113,8 @@ public class TemplateResource extends AbstractResource
 
                 // XXX deleted
             default:
-                return Response.status(Status.NOT_FOUND)
-                    .entity("UNKNOW STATUS:" + status.getStatus().name()).build();
+                return Response.status(Status.NOT_FOUND).entity(
+                    "UNKNOW STATUS:" + status.getStatus().name()).build();
         }
     }
 
@@ -244,13 +245,20 @@ public class TemplateResource extends AbstractResource
      * delete
      */
     @DELETE
-    public void deleteTemplate(
+    public Response deleteTemplate(
         @PathParam(EnterpriseRepositoryResource.ENTERPRISE_REPOSITORY) final String idEnterprise,
         @PathParam(TemplateResource.TEMPLATE) final String ovfIdIn)
     {
         final String ovfId = ovfUrl(ovfIdIn);
-
-        service.delete(idEnterprise, ovfId);
+        try
+        {
+            service.delete(idEnterprise, ovfId);
+        }
+        catch (AMException e)
+        {
+            return Response.status(409).build();
+        }
+        return Response.noContent().build();
     }
 
     /*

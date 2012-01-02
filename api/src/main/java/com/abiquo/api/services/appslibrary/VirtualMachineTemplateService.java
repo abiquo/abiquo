@@ -29,6 +29,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -70,6 +72,10 @@ import com.abiquo.tracer.SeverityType;
 @Service
 public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianceManagerClient
 {
+
+    final private static Logger logger =
+        LoggerFactory.getLogger(VirtualMachineTemplateService.class);
+
     @Autowired
     private RepositoryDAO repositoryDao;
 
@@ -160,7 +166,8 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
      */
     @Transactional(readOnly = true)
     public List<VirtualMachineTemplate> getVirtualMachineTemplates(final Integer enterpriseId,
-        final Integer datacenterId, final String categoryName, final String hypervisorName, final Boolean imported)
+        final Integer datacenterId, final String categoryName, final String hypervisorName,
+        final Boolean imported)
     {
         Enterprise enterprise = enterpriseService.getEnterprise(enterpriseId);
         Repository repository = getDatacenterRepository(datacenterId, enterpriseId);
@@ -185,15 +192,18 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
             }
         }
 
-        List<VirtualMachineTemplate> templates = appsLibraryRep.findVirtualMachineTemplates(enterprise, repository, category,
-            hypervisor);
-        
+        List<VirtualMachineTemplate> templates =
+            appsLibraryRep
+                .findVirtualMachineTemplates(enterprise, repository, category, hypervisor);
+
         if (imported)
         {
-            // adds the virtual machine templates from imported virtual machines. aka: they are not in the repository.
-            templates.addAll(appsLibraryRep.findImportedVirtualMachineTemplates(enterprise, datacenterId, category, hypervisor));
+            // adds the virtual machine templates from imported virtual machines. aka: they are not
+            // in the repository.
+            templates.addAll(appsLibraryRep.findImportedVirtualMachineTemplates(enterprise,
+                datacenterId, category, hypervisor));
         }
-        
+
         return templates;
     }
 
