@@ -38,8 +38,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.wink.common.annotations.Parent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -52,6 +50,7 @@ import com.abiquo.api.services.TaskService;
 import com.abiquo.api.services.cloud.VirtualMachineService;
 import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.transport.AcceptedRequestDto;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplate;
 import com.abiquo.server.core.cloud.Hypervisor;
 import com.abiquo.server.core.cloud.NodeVirtualImage;
@@ -78,12 +77,6 @@ import com.abiquo.server.core.task.enums.TaskOwnerType;
 @Path(VirtualMachineResource.VIRTUAL_MACHINE_PARAM)
 public class VirtualMachineResource extends AbstractResource
 {
-
-    private static final Logger logger = LoggerFactory.getLogger(VirtualMachineResource.class);
-
-    private final static Integer TIMEOUT =
-        Integer.parseInt(System.getProperty("abiquo.nodecollector.timeout", "0")) * 2; // 3 minutes
-
     public static final String VIRTUAL_MACHINE = "virtualmachine";
 
     public static final String VIRTUAL_MACHINE_PARAM = "{" + VIRTUAL_MACHINE + "}";
@@ -363,17 +356,22 @@ public class VirtualMachineResource extends AbstractResource
         final VirtualMachineTaskDto forceSoftLimits, @Context final IRESTBuilder restBuilder,
         @Context final UriInfo uriInfo) throws Exception
     {
-        String taskId =
-            vmService.deployVirtualMachine(vmId, vappId, vdcId, forceSoftLimits
-                .isForceEnterpriseSoftLimits());
-
-        // If the link is null no Task was performed
-        if (taskId == null)
+        final String lockMsg = "Allocate vm " + vmId;
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
+            SchedulerLock.acquire(lockMsg);
+
+            String taskId =
+                vmService.deployVirtualMachine(vmId, vappId, vdcId,
+                    forceSoftLimits.isForceEnterpriseSoftLimits());
+
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
         }
 
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
     }
 
     /**
@@ -407,16 +405,19 @@ public class VirtualMachineResource extends AbstractResource
         @PathParam(VirtualMachineResource.VIRTUAL_MACHINE) final Integer vmId,
         @Context final IRESTBuilder restBuilder, @Context final UriInfo uriInfo) throws Exception
     {
-
-        String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
-
-        // If the link is null no Task was performed
-        if (taskId == null)
+        final String lockMsg = "Allocate vm " + vmId;
+        try
         {
-            throw new InternalServerErrorException(APIError.STATUS_INTERNAL_SERVER_ERROR);
-        }
+            SchedulerLock.acquire(lockMsg);
 
-        return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+            String taskId = vmService.deployVirtualMachine(vmId, vappId, vdcId, false);
+
+            return buildAcceptedRequestDtoWithTaskLink(taskId, uriInfo);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
     }
 
     /**
@@ -665,9 +666,9 @@ public class VirtualMachineResource extends AbstractResource
 
         dto.addLinks(restBuilder.buildVirtualMachineCloudAdminLinks(vdcId, vappId, v.getId(),
             rack == null ? null : rack.getDatacenter().getId(), rack == null ? null : rack.getId(),
-            machine == null ? null : machine.getId(), enterprise == null ? null : enterprise
-                .getId(), user == null ? null : user.getId(), v.isChefEnabled(), volumeIds,
-            diskIds, ips));
+            machine == null ? null : machine.getId(),
+            enterprise == null ? null : enterprise.getId(), user == null ? null : user.getId(),
+            v.isChefEnabled(), volumeIds, diskIds, ips));
 
         final VirtualMachineTemplate vmtemplate = v.getVirtualMachineTemplate();
         if (vmtemplate.getRepository() != null)
@@ -682,7 +683,7 @@ public class VirtualMachineResource extends AbstractResource
                 .getId(), v.getHypervisor().getMachine().getRack().getDatacenter().getId(),
                 vmtemplate.getId()));
         }
-
+        
         return dto;
     }
 
@@ -705,9 +706,9 @@ public class VirtualMachineResource extends AbstractResource
     {
         NodeVirtualImage node = vmService.getNodeVirtualImage(vdcId, vappId, vmId);
 
-        return createNodeTransferObject(node, vdcId, vappId, restBuilder, getVolumeIds(node
-            .getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node.getVirtualMachine()
-            .getIps());
+        return createNodeTransferObject(node, vdcId, vappId, restBuilder,
+            getVolumeIds(node.getVirtualMachine()), getDiskIds(node.getVirtualMachine()), node
+                .getVirtualMachine().getIps());
     }
 
     @GET

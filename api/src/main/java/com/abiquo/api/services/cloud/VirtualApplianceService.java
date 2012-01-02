@@ -45,6 +45,7 @@ import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.exceptions.APIException;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.UserService;
+import com.abiquo.api.services.VirtualMachineAllocatorService;
 import com.abiquo.api.services.stub.TarantinoService;
 import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.scheduler.VirtualMachineRequirementsFactory;
@@ -60,6 +61,7 @@ import com.abiquo.server.core.cloud.VirtualApplianceState;
 import com.abiquo.server.core.cloud.VirtualDatacenter;
 import com.abiquo.server.core.cloud.VirtualDatacenterRep;
 import com.abiquo.server.core.cloud.VirtualMachine;
+import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.infrastructure.management.RasdManagement;
 import com.abiquo.server.core.infrastructure.management.RasdManagementDAO;
 import com.abiquo.server.core.infrastructure.storage.Tier;
@@ -112,6 +114,9 @@ public class VirtualApplianceService extends DefaultApiService
     @Autowired
     private VirtualMachineRequirementsFactory requirements;
 
+    @Autowired
+    private VirtualMachineAllocatorService vmallocator;
+
     public VirtualApplianceService()
     {
 
@@ -126,7 +131,8 @@ public class VirtualApplianceService extends DefaultApiService
         this.pricingRep = new PricingRep(em);
         this.rasdManDao = new RasdManagementDAO(em);
         this.vmService = new VirtualMachineService(em);
-        this.requirements = new VirtualMachineRequirementsFactory(); // XXX
+        this.vmallocator = new VirtualMachineAllocatorService(em);
+        this.requirements = new VirtualMachineRequirementsFactory();
     }
 
     /**
@@ -156,7 +162,7 @@ public class VirtualApplianceService extends DefaultApiService
      * @param vappId
      * @return
      */
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualAppliance getVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
 
@@ -425,25 +431,75 @@ public class VirtualApplianceService extends DefaultApiService
         }
     }
 
+    private void allocateVirtualAppliance(final VirtualAppliance vapp,
+        final boolean foreceEnterpriseSoftLimits)
+    {
+
+        VirtualMachineRequirements required = requirements.createVirtualMachineRequirements(vapp);
+        vmallocator.checkLimist(vapp, required, foreceEnterpriseSoftLimits);
+
+        try
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+                final VirtualMachine virtualMachine = nvi.getVirtualMachine();
+
+                // XXX duplicated limit checker
+                vmService.allocate(virtualMachine, vapp, foreceEnterpriseSoftLimits);
+
+            }
+            // XXX consider (try to) having the SchechedulerLock by each VM
+            // for (Integer vmid : nviDao.findVirtualMachineIdsByVirtualAppliance(vapp))
+            // { final String msg = String.format("Allocate %d", vmid); try {
+            // SchedulerLock.acquire(msg); final VirtualMachine virtualMachine =
+            // vmService.getVirtualMachine(vmid); vmService.allocate(virtualMachine, vapp,
+            // foreceEnterpriseSoftLimits); } finally { SchedulerLock.release(msg); } }
+        }
+        catch (Exception e)
+        {
+            for (NodeVirtualImage nvi : vapp.getNodes())
+            {
+
+                VirtualMachine vm = nvi.getVirtualMachine();
+                if (vm.getState() == VirtualMachineState.ALLOCATED)
+                {
+                    vmallocator.deallocateVirtualMachine(vm);
+
+                    // TODO consider moving the set NOT_ALLOCATED in deallocateVM
+                    vm.setState(VirtualMachineState.NOT_ALLOCATED);
+                    vmService.updateVirtualMachineBySystem(vm);
+                }
+            }
+        }
+
+    }
+
     /**
      * Deploys all of the {@link VirtualMachine} belonging to this {@link VirtualAppliance}
+     * <p>
+     * TODO force TRUE
      * 
      * @param vdcId {@link VirtualDatacenter}
      * @param vappId {@link VirtualAppliance}
      * @return List<String>
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public List<String> deployVirtualAppliance(final Integer vdcId, final Integer vappId)
     {
+
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
 
+        allocateVirtualAppliance(virtualAppliance, Boolean.TRUE);
+
         List<String> dto = new ArrayList<String>();
-        for (NodeVirtualImage machine : virtualAppliance.getNodes())
+        for (NodeVirtualImage nodevi : virtualAppliance.getNodes())
         {
+            VirtualMachine vmachine = nodevi.getVirtualMachine();
+
             try
             {
-                String link =
-                    vmService.deployVirtualMachine(machine.getVirtualMachine().getId(), vappId,
-                        vdcId, false);
+                String link = vmService.sendDeploy(vmachine, virtualAppliance);
+
                 dto.add(link);
             }
             catch (APIException e)
@@ -453,7 +509,6 @@ public class VirtualApplianceService extends DefaultApiService
             }
             catch (Exception e)
             {
-                // The virtual appliance is in an unknown state
                 // The virtual appliance is in an unknown state
                 tracer.log(SeverityType.CRITICAL, ComponentType.VIRTUAL_APPLIANCE,
                     EventType.VM_DEPLOY, APIError.GENERIC_OPERATION_ERROR.getMessage());
@@ -476,14 +531,15 @@ public class VirtualApplianceService extends DefaultApiService
     }
 
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId, final Boolean forceUndeploy)
+    public List<String> undeployVirtualAppliance(final Integer vdcId, final Integer vappId,
+        final Boolean forceUndeploy)
     {
         VirtualAppliance virtualAppliance = getVirtualAppliance(vdcId, vappId);
-        
+
         // first check if there is any imported virtualmachine.
         if (!forceUndeploy)
         {
-            for(NodeVirtualImage node : virtualAppliance.getNodes())
+            for (NodeVirtualImage node : virtualAppliance.getNodes())
             {
                 if (node.getVirtualMachine().isImported())
                 {
@@ -492,7 +548,7 @@ public class VirtualApplianceService extends DefaultApiService
                 }
             }
         }
-        
+
         List<String> dto = new ArrayList<String>();
         for (NodeVirtualImage machine : virtualAppliance.getNodes())
         {

@@ -54,7 +54,6 @@ import com.abiquo.server.core.infrastructure.Machine;
  * TODO this should be a @Repository
  */
 @Component
-@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 public class VirtualMachineFactory
 {
     /** Use an invalid port to indicate a disabled vrdp. */
@@ -88,9 +87,11 @@ public class VirtualMachineFactory
     protected final static String ALLOW_RDP_PROPERTY = "client.virtual.allowVMRemoteAccess";
 
     /**
-     * Create a Virtual Machine on the given PhysicalMachine to deploy the given VirtualMachineTemplate.
+     * Create a Virtual Machine on the given PhysicalMachine to deploy the given
+     * VirtualMachineTemplate.
      * 
-     * @param machine, the machine hypervisor will be used to create the new virtual machine template.
+     * @param machine, the machine hypervisor will be used to create the new virtual machine
+     *            template.
      * @return a new VirtualMachine instance inside physical to load image.
      *         <p>
      *         TODO: creating default Hypervisor instance
@@ -100,6 +101,7 @@ public class VirtualMachineFactory
      * @throws NotEnoughResourcesException, if the target machine haven't enough resources to hold
      *             the virtual machine
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public VirtualMachine createVirtualMachine(final Machine machine,
         final VirtualMachine virtualMachine) throws NotEnoughResourcesException
     {

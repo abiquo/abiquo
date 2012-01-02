@@ -26,6 +26,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -110,5 +111,17 @@ public class NodeVirtualImageDAO extends DefaultDAOBase<Integer, NodeVirtualImag
         Criteria crit = createNestedCriteria(Node.VIRTUAL_APPLIANCE_PROPERTY);
         crit.add(Restrictions.eq(PersistentEntity.ID_PROPERTY, virtualAppliance.getId()));
         return crit;
+    }
+
+    static final String MY_QUERY =
+        "select nvi.virtualMachine.id from VirtualAppliance v inner join v.nodesVirtualImage nvi where v.id =:vappid";
+
+    public List<Integer> findVirtualMachineIdsByVirtualAppliance(
+        final VirtualAppliance virtualAppliance)
+    {
+        Query query = getSession().createQuery(MY_QUERY);
+        query.setInteger("vappid", virtualAppliance.getId());
+
+        return query.list();
     }
 }

@@ -22,21 +22,22 @@ package com.abiquo.api.services.stub;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.anyString;
 
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.abiquo.api.util.snapshot.SnapshotUtils.SnapshotType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskSnapshot;
 import com.abiquo.commons.amqp.impl.tarantino.domain.VirtualMachineDefinition;
 import com.abiquo.commons.amqp.impl.tarantino.domain.builder.VirtualMachineDescriptionBuilder;
+import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualMachine;
 import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
-import com.abiquo.server.core.cloud.VirtualAppliance;
 
 /**
  * Mock class to simulate {@link TarantinoService} behavior.
@@ -64,10 +65,12 @@ public class TarantinoServiceMock extends TarantinoService
             randomTaskId());
         when(mock.reconfigureVirtualMachine(anyVM(), anyDesc(), anyDesc())).thenReturn(
             randomTaskId());
-        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), 
-            anyString())).thenReturn(randomTaskId());
-        when(mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(),
-            anyString(), anyString(), anyString())).thenReturn(randomTaskId());
+        when(
+            mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
+                anyType())).thenReturn(randomTaskId());
+        when(
+            mock.snapshotVirtualMachine(anyVirtualAppliance(), anyVM(), anyState(), anyString(),
+                anyString(), anyString())).thenReturn(randomTaskId());
         when(mock.undeployVirtualMachine(anyVM(), anyDesc(), anyState()))
             .thenReturn(randomTaskId());
 
@@ -121,17 +124,18 @@ public class TarantinoServiceMock extends TarantinoService
     @Override
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
-        final String snapshotName)
+        final String snapshotName, final SnapshotType type)
     {
-        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState, 
-            snapshotName);
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
+            snapshotName, type);
     }
 
+    @Override
     public String snapshotVirtualMachine(final VirtualAppliance virtualAppliance,
         final VirtualMachine virtualMachine, final VirtualMachineState originalState,
         final String snapshotName, final String snapshotPath, final String snapshotFilename)
     {
-        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState, 
+        return mock.snapshotVirtualMachine(virtualAppliance, virtualMachine, originalState,
             snapshotName, snapshotPath, snapshotFilename);
     }
 
@@ -175,5 +179,10 @@ public class TarantinoServiceMock extends TarantinoService
     private static String randomTaskId()
     {
         return UUID.randomUUID().toString();
+    }
+
+    private static SnapshotType anyType()
+    {
+        return (SnapshotType) any();
     }
 }

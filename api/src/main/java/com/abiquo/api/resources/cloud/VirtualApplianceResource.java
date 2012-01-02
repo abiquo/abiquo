@@ -44,6 +44,7 @@ import com.abiquo.api.util.IRESTBuilder;
 import com.abiquo.model.rest.RESTLink;
 import com.abiquo.model.transport.AcceptedRequestDto;
 import com.abiquo.model.util.ModelTransformer;
+import com.abiquo.scheduler.SchedulerLock;
 import com.abiquo.server.core.appslibrary.VirtualMachineTemplateDto;
 import com.abiquo.server.core.cloud.VirtualAppliance;
 import com.abiquo.server.core.cloud.VirtualApplianceDto;
@@ -223,8 +224,20 @@ public class VirtualApplianceResource
         @Context final IRESTBuilder restBuilder)
     {
         AcceptedRequestDto<String> dto = new AcceptedRequestDto<String>();
-        List<String> links = service.deployVirtualAppliance(vdcId, vappId);
-        addStatusLinks(links, dto);
+
+        final String lockMsg = "Allocate vapp " + vappId;
+        try
+        {
+            SchedulerLock.acquire(lockMsg);
+
+            List<String> links = service.deployVirtualAppliance(vdcId, vappId);
+            addStatusLinks(links, dto);
+        }
+        finally
+        {
+            SchedulerLock.release(lockMsg);
+        }
+
         return dto;
     }
 
@@ -259,7 +272,7 @@ public class VirtualApplianceResource
         return dto;
     }
 
-    private void addStatusLinks(final List<String> links, final AcceptedRequestDto dto)
+    private void addStatusLinks(final List<String> links, final AcceptedRequestDto<String> dto)
     {
         for (String url : links)
         {

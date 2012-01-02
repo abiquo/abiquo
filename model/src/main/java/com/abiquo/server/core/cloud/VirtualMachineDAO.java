@@ -238,4 +238,18 @@ public class VirtualMachineDAO extends DefaultDAOBase<Integer, VirtualMachine>
         getEntityManager().refresh(vm, LockModeType.PESSIMISTIC_FORCE_INCREMENT);
     }
 
+    public void refresh(final VirtualMachine vm)
+    {
+        getEntityManager().refresh(vm);
+    }
+
+    public void detachHypervisor(final VirtualMachine vm)
+    {
+        getEntityManager().detach(vm.getHypervisor());
+    }
+
+    public void detachVirtualMachine(final VirtualMachine vm)
+    {
+        getEntityManager().detach(vm);
+    }
 }
