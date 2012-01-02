@@ -72,8 +72,8 @@ public class EnterpriseRepositoryService
 {
     private final static Logger LOG = LoggerFactory.getLogger(EnterpriseRepositoryService.class);
 
-    private final static String BASE_REPO_PATH = AMConfigurationManager.getInstance()
-        .getAMConfiguration().getRepositoryPath();
+    private final static String BASE_REPO_PATH =
+        AMConfigurationManager.getInstance().getAMConfiguration().getRepositoryPath();
 
     /** Repository path particular of the current enterprise. */
     private final String erepoPath;
@@ -168,6 +168,7 @@ public class EnterpriseRepositoryService
         final String packagePath = getTemplatePath(erepoPath, ovfId);
 
         TemplateFileSystem.deleteTemplate(packagePath);
+
     }
 
     public String path()
@@ -285,8 +286,7 @@ public class EnterpriseRepositoryService
         }
 
         envelopeBundle =
-            TemplateToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot,
-                packagePath);
+            TemplateToOVFEnvelope.fixFilePathsAndSize(envelopeBundle, snapshot, packagePath);
 
         try
         {

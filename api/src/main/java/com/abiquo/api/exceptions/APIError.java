@@ -655,8 +655,8 @@ public enum APIError
         // Outputs all errors in wiki table format
         for (APIError error : errors)
         {
-            System.out.println(String.format("| %s | %s | %s |", error.code, error.message,
-                error.name()));
+            System.out.println(String.format("| %s | %s | %s |", error.code, error.message, error
+                .name()));
         }
 
         System.out.println("\n ************ Flex client labels ************** \n");
