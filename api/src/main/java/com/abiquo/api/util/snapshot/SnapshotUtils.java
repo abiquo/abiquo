@@ -62,7 +62,7 @@ public class SnapshotUtils
          * @param virtualMachine The {@link VirtualMachine} instance
          * @return The {@link SnapshotType} to do.
          */
-        public static SnapshotType getSnapshotType(VirtualMachine virtualMachine)
+        public static SnapshotType getSnapshotType(final VirtualMachine virtualMachine)
         {
             if (!virtualMachine.isManaged())
             {
@@ -118,6 +118,24 @@ public class SnapshotUtils
         }
 
         return String.format("%s-snapshot-%s", UUID.randomUUID().toString(), name);
+    }
+
+    /**
+     * Generates a snapshot filename of a certain {@link VirtualMachineTemplate}.
+     * 
+     * @param template The {@link VirtualMachineTemplate} to consider
+     * @return The snapshot filename
+     */
+    public static String formatSnapshotRawFilename(final VirtualMachineTemplate template)
+    {
+        String name = FilenameUtils.getBaseName(template.getPath());
+
+        if (!template.isMaster())
+        {
+            name = FilenameUtils.getBaseName(template.getMaster().getPath());
+        }
+
+        return String.format("%s-snapshot-%s.raw", UUID.randomUUID().toString(), name);
     }
 
     /**
