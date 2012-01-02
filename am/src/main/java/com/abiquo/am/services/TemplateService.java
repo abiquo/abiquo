@@ -30,6 +30,8 @@ import static com.abiquo.am.services.TemplateConventions.isBundleOvfId;
 import java.io.File;
 import java.io.IOException;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.dmtf.schemas.ovf.envelope._1.EnvelopeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +81,8 @@ public class TemplateService
         notifier.setTemplateStatus(erId, ovfId, TemplateStatusEnumType.DOWNLOADING);
     }
 
-    public void upload(final TemplateDto diskinfo, final File diskFile,
-        final String errorMsg) throws IOException, EventException
+    public void upload(final TemplateDto diskinfo, final File diskFile, final String errorMsg)
+        throws IOException, EventException
     {
 
         if (!StringUtils.isBlank(errorMsg))
@@ -92,14 +94,14 @@ public class TemplateService
         downloader.uploadTemplate(diskinfo, diskFile);
 
         // sets the current state to start downloading
-        notifier.setTemplateStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo.getUrl(),
-            TemplateStatusEnumType.DOWNLOAD);
+        notifier.setTemplateStatus(String.valueOf(diskinfo.getEnterpriseRepositoryId()), diskinfo
+            .getUrl(), TemplateStatusEnumType.DOWNLOAD);
     }
-
 
     public void delete(final String erId, final String ovfId)
     {
-        TemplateStatusEnumType status = ErepoFactory.getRepo(erId).getTemplateStatus(ovfId).getStatus();
+        TemplateStatusEnumType status =
+            ErepoFactory.getRepo(erId).getTemplateStatus(ovfId).getStatus();
 
         boolean requireNotifyError = true;
         switch (status)
@@ -134,15 +136,14 @@ public class TemplateService
 
     /** ######### GET ######### **/
 
-
-    public TemplateStateDto getTemplateStatusIncludeProgress(final String ovfId,
-        final String erId) throws DownloadException
+    public TemplateStateDto getTemplateStatusIncludeProgress(final String ovfId, final String erId)
+        throws DownloadException
     {
         TemplateStateDto state = new TemplateStateDto();
         state.setOvfId(ovfId);
-        
+
         AMRedisDao dao = AMRedisDao.getDao();
-        TemplateStatusEnumType status =  dao.getStatus(erId, ovfId);
+        TemplateStatusEnumType status = dao.getStatus(erId, ovfId);
         state.setStatus(status);
         switch (status)
         {
@@ -156,7 +157,7 @@ public class TemplateService
                 break;
         }
         AMRedisDao.returnDao(dao);
-        
+
         return state;
     }
 
@@ -173,8 +174,7 @@ public class TemplateService
 
             envelope = validateOrTryToFix(envelope, ovfId);
 
-            TemplateDto packDto =
-                TemplateFromOVFEnvelope.createTemplateDto(ovfId, envelope);
+            TemplateDto packDto = TemplateFromOVFEnvelope.createTemplateDto(ovfId, envelope);
             packDto = fixFilePathWithRelativeTemplatePath(packDto, relativePackagePath);
             packDto.setEnterpriseRepositoryId(Integer.valueOf(erId));
 
@@ -216,8 +216,8 @@ public class TemplateService
         }
     }
 
-    private TemplateDto fixFilePathWithRelativeTemplatePath(
-        final TemplateDto ovfpi, final String relativePackagePath)
+    private TemplateDto fixFilePathWithRelativeTemplatePath(final TemplateDto ovfpi,
+        final String relativePackagePath)
     {
         ovfpi.setDiskFilePath(relativePackagePath + ovfpi.getDiskFilePath());
 

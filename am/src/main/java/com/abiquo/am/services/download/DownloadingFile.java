@@ -158,9 +158,9 @@ public class DownloadingFile implements AsyncHandler<Boolean>
     {
         final long now = System.currentTimeMillis();
 
-        if ((now - lastNotifyMs) > 100 * NOTIFY_EVERY_X_SEC)
+        if (now - lastNotifyMs > 100 * NOTIFY_EVERY_X_SEC)
         {
-            final Integer progress = (int) ((currentBytes * 100) / expectedBytes);
+            final Integer progress = (int) (currentBytes * 100 / expectedBytes);
             LOG.trace("{} {}", ovfId, progress);
 
             AMRedisDao dao = AMRedisDao.getDao();
@@ -236,18 +236,19 @@ public class DownloadingFile implements AsyncHandler<Boolean>
         File destiantion = new File(destinationPath);
         destiantion.delete();
 
-        // AMRedisDao dao = AMRedisDao.getDao();
-        // dao.setDownloadProgress(erepoId, ovfId, 0);
-        // // dao.setState(ovfId, OVFStatusEnumType.NOT_DOWNLOAD);
-        // AMRedisDao.returnDao(dao);
-
         if (deleteFolder)
         {
             ErepoFactory.getRepo(erepoId).deleteTemplate(ovfId);
 
             notifier.setTemplateStatus(erepoId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
         }
-
+        else
+        {
+            AMRedisDao dao = AMRedisDao.getDao();
+            dao.setDownloadProgress(erepoId, ovfId, 0);
+            dao.setState(erepoId, ovfId, TemplateStatusEnumType.NOT_DOWNLOAD);
+            AMRedisDao.returnDao(dao);
+        }
     }
 
     private void onError(final String msg)

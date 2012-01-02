@@ -42,8 +42,8 @@ public class AMRedisDao
     // TODO move to AMConfig
     public static final String REDIS_HOS = getProperty("abiquo.redis.host", "localhost");
 
-    public static final Integer REDIS_PORT = Integer.parseInt(getProperty("abiquo.redis.port",
-        "6379"));
+    public static final Integer REDIS_PORT =
+        Integer.parseInt(getProperty("abiquo.redis.port", "6379"));
 
     private static JedisPoolConfig REDIS_POOL_CONF;
 
@@ -80,7 +80,7 @@ public class AMRedisDao
         redis = REDIS_POOL.getResource();
     }
 
-    public static AMRedisDao getDao()
+    public static synchronized AMRedisDao getDao()
     {
         return new AMRedisDao();
     }
@@ -184,8 +184,7 @@ public class AMRedisDao
 
     public List<TemplateStateDto> getAll(final String erId)
     {
-        final List<TemplateStateDto> statusLst =
-            new LinkedList<TemplateStateDto>();
+        final List<TemplateStateDto> statusLst = new LinkedList<TemplateStateDto>();
 
         for (String keyOvf : getOvfKeys(erId))
         {
@@ -198,8 +197,7 @@ public class AMRedisDao
 
     /** ########## ########## */
 
-    private static TemplateStateDto createOVFStatus(final String keyOvf,
-        final List<String> fields)
+    private static TemplateStateDto createOVFStatus(final String keyOvf, final List<String> fields)
     {
         TemplateStateDto status = new TemplateStateDto();
         status.setOvfId(ovfId(keyOvf));

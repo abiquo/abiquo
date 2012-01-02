@@ -71,5 +71,5 @@ public class ConfigService
     public static String getApiLocation()
     {
         return System.getProperty(API_LOCATION);
-    }
+    } 
 }
