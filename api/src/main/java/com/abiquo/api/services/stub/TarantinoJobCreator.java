@@ -22,6 +22,7 @@ package com.abiquo.api.services.stub;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.abiquo.api.exceptions.APIError;
 import com.abiquo.api.services.DefaultApiService;
 import com.abiquo.api.services.RemoteServiceService;
+import com.abiquo.commons.amqp.impl.tarantino.domain.DhcpOptionCom;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription;
 import com.abiquo.commons.amqp.impl.tarantino.domain.DiskDescription.DiskControllerType;
 import com.abiquo.commons.amqp.impl.tarantino.domain.HypervisorConnection;
@@ -60,6 +62,7 @@ import com.abiquo.server.core.cloud.VirtualMachineState;
 import com.abiquo.server.core.cloud.VirtualMachineStateTransition;
 import com.abiquo.server.core.infrastructure.InfrastructureRep;
 import com.abiquo.server.core.infrastructure.RemoteService;
+import com.abiquo.server.core.infrastructure.network.DhcpOption;
 import com.abiquo.server.core.infrastructure.network.IpPoolManagement;
 import com.abiquo.server.core.infrastructure.network.NetworkConfiguration;
 import com.abiquo.server.core.infrastructure.storage.DiskManagement;
@@ -408,6 +411,8 @@ public class TarantinoJobCreator extends DefaultApiService
     {
         for (IpPoolManagement i : virtualMachine.getIps())
         {
+            List<DhcpOption> dhcplist = i.getVlanNetwork().getDhcpOption();
+
             if (i.getConfigureGateway())
             {
                 // This interface is the one that configures the Network parameters.
@@ -420,8 +425,8 @@ public class TarantinoJobCreator extends DefaultApiService
                     .getTag() == null ? 0 : i.getVlanNetwork().getTag(), i.getName(), configuration
                     .getFenceMode(), configuration.getAddress(), configuration.getGateway(),
                     configuration.getNetMask(), configuration.getPrimaryDNS(), configuration
-                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(), i
-                        .getVlanNetwork().getDhcpOption());
+                        .getSecondaryDNS(), configuration.getSufixDNS(), i.getSequence(),
+                    toDchpOptionCom(dhcplist));
                 continue;
             }
             logger.debug("Network configuration without gateway");
@@ -430,9 +435,28 @@ public class TarantinoJobCreator extends DefaultApiService
             Integer tag = i.getVlanNetwork().getTag();
             vmDesc.addNetwork(i.getMac(), i.getIp(), virtualMachine.getHypervisor().getMachine()
                 .getVirtualSwitch(), i.getNetworkName(), tag, i.getName(), null, null, null, null,
-                null, null, null, i.getSequence(), i.getVlanNetwork().getDhcpOption());
+                null, null, null, i.getSequence(), toDchpOptionCom(dhcplist));
 
         }
+    }
+
+    private List<DhcpOptionCom> toDchpOptionCom(final List<DhcpOption> dhcplist)
+    {
+
+        List<DhcpOptionCom> dhcpComList = new ArrayList<DhcpOptionCom>();
+
+        for (DhcpOption d : dhcplist)
+        {
+            DhcpOptionCom dchp =
+                new DhcpOptionCom(d.getOption(),
+                    d.getGateway(),
+                    d.getNetworkAddress(),
+                    d.getMask(),
+                    d.getNetmask());
+            dhcpComList.add(dchp);
+        }
+        return dhcpComList;
+
     }
 
     protected void bootstrapConfiguration(final VirtualMachine virtualMachine,
