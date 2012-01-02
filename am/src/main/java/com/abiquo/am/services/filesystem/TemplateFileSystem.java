@@ -151,8 +151,9 @@ public class TemplateFileSystem
      * 
      * @throws RepositoryException
      */
-    public static synchronized void createTemplateStatusMarks(final String enterpriseRepositoryPath,
-        final String ovfId, final TemplateStatusEnumType status, final String errorMsg)
+    public static synchronized void createTemplateStatusMarks(
+        final String enterpriseRepositoryPath, final String ovfId,
+        final TemplateStatusEnumType status, final String errorMsg)
     {
         final String packagePath = getTemplatePath(enterpriseRepositoryPath, ovfId);
 
@@ -292,7 +293,7 @@ public class TemplateFileSystem
         {
             if (!formatsFolder.mkdir())
             {
-                throw new AMException(AMError.TEMPLATE_INSTALL, "creating format folder");
+                // throw new AMException(AMError.TEMPLATE_INSTALL, "creating format folder");
 
             }
         }
@@ -313,7 +314,7 @@ public class TemplateFileSystem
         {
             if (!packFile.mkdirs())
             {
-                throw new AMException(AMError.TEMPLATE_INSTALL, packagePath);
+                // throw new AMException(AMError.TEMPLATE_INSTALL, packagePath);
 
             }
         }
@@ -432,9 +433,8 @@ public class TemplateFileSystem
                     }
                     catch (IOException e1)
                     {
-                        throw new AMException(AMError.TEMPLATE_DELETE,
-                            packageFile.getAbsolutePath(),
-                            e1);
+                        throw new AMException(AMError.TEMPLATE_DELETE, packageFile
+                            .getAbsolutePath(), e1);
                     }
                 }// nfs issue
 

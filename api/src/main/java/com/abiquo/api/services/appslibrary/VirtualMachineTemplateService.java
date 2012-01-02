@@ -51,9 +51,11 @@ import com.abiquo.api.services.EnterpriseService;
 import com.abiquo.api.services.InfrastructureService;
 import com.abiquo.api.util.URIResolver;
 import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl;
+import com.abiquo.appliancemanager.client.ApplianceManagerResourceStubImpl.ApplianceManagerStubException;
 import com.abiquo.model.enumerator.DiskFormatType;
 import com.abiquo.model.enumerator.HypervisorType;
 import com.abiquo.model.rest.RESTLink;
+import com.abiquo.model.transport.error.CommonError;
 import com.abiquo.server.core.appslibrary.AppsLibraryRep;
 import com.abiquo.server.core.appslibrary.Category;
 import com.abiquo.server.core.appslibrary.Icon;
@@ -434,8 +436,16 @@ public class VirtualMachineTemplateService extends DefaultApiServiceWithApplianc
         }
 
         final ApplianceManagerResourceStubImpl amClient = getApplianceManagerClient(datacenterId);
-        amClient.delete(enterpriseId.toString(), viOvf);
-
+        try
+        {
+            amClient.delete(enterpriseId.toString(), viOvf);
+        }
+        catch (ApplianceManagerStubException e)
+        {
+            CommonError error = new CommonError("409", e.getMessage());
+            addConflictErrors(error);
+            flushErrors();
+        }
         // delete
         appsLibraryRep.deleteVirtualMachineTemplate(vmtemplateToDelete);
 
