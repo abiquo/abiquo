@@ -24,6 +24,7 @@ package com.abiquo.server.core.pricing;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.abiquo.model.transport.SingleResourceTransportDto;
@@ -75,6 +76,7 @@ public class PricingTemplateDto extends SingleResourceTransportDto
         this.id = id;
     }
 
+    @NotNull
     private String name;
 
     public String getName()

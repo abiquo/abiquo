@@ -37,8 +37,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 
 import org.hibernate.annotations.ForeignKey;
 import org.hibernate.validator.constraints.Length;
@@ -105,9 +103,9 @@ public class PricingTemplate extends DefaultEntityBase
 
     private final static boolean NAME_REQUIRED = true;
 
-    private final static int NAME_LENGTH_MIN = 0;
+    private final static int NAME_LENGTH_MIN = 1;
 
-    private final static int NAME_LENGTH_MAX = 256;
+    private final static int NAME_LENGTH_MAX = 20;
 
     private final static boolean NAME_LEADING_OR_TRAILING_WHITESPACES_ALLOWED = false;
 
@@ -249,8 +247,6 @@ public class PricingTemplate extends DefaultEntityBase
     private BigDecimal minimumChargePeriod;
 
     @Required(value = MINIMUM_CHARGE_PERIOD_REQUIRED)
-    @Min(value = 0)
-    @Max(value = 6)
     @BigDec
     public BigDecimal getMinimumChargePeriod()
     {

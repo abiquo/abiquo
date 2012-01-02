@@ -189,6 +189,11 @@ public class PricingRep extends DefaultRepBase
         pricingTemplateDao.remove(pricingTemplate);
     }
 
+    public void deletePricingTier(final PricingTier pricingTier)
+    {
+        pricingTierDao.remove(pricingTier);
+    }
+
     public CostCode findCostCodeById(final Integer costCodeId)
     {
         return costCodeDao.findById(costCodeId);
@@ -346,6 +351,11 @@ public class PricingRep extends DefaultRepBase
 
     }
 
+    public Collection<PricingTier> findPricingTierByTier(final Tier tier)
+    {
+        return pricingTierDao.findPricingTiers(tier);
+    }
+
     public Tier findTierById(final Integer id)
     {
         return storageRep.findTierById(id);
@@ -354,6 +364,12 @@ public class PricingRep extends DefaultRepBase
     public boolean existAnyOtherCurrencyWithName(final Currency currency, final String name)
     {
         return currencyDao.existAnyOtherCurrencyWithName(currency, name);
+    }
+
+    public Collection<Currency> findAllCurrency(final String filter, final String orderBy,
+        final boolean desc, final Integer page, final Integer numResults)
+    {
+        return currencyDao.find(filter, orderBy, desc, page, numResults);
     }
 
 }

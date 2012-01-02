@@ -132,25 +132,37 @@ public class EnterpriseService extends DefaultApiService
     }
 
     public Collection<Enterprise> getEnterprises(final int idPricingTempl, final boolean included,
-        final String filterName, final Integer offset, final Integer numResults)
+        final String filterName, final Integer offset, final Integer numResults,
+        final String orderBy, final boolean desc)
     {
         User user = userService.getCurrentUser();
-        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
-        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
-            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
-            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
-        {
-            return Collections.singletonList(user.getEnterprise());
-        }
-
         PricingTemplate pt = null;
+
         if (idPricingTempl != -1)
         {
             if (idPricingTempl != 0)
             {
                 pt = findPricingTemplate(idPricingTempl);
             }
-            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults);
+        }
+
+        // if (user.getRole().getType() == Role.Type.ENTERPRISE_ADMIN)
+        if (!securityService.hasPrivilege(Privileges.ENTERPRISE_ENUMERATE)
+            && !securityService.hasPrivilege(Privileges.USERS_MANAGE_OTHER_ENTERPRISES)
+            && !securityService.hasPrivilege(Privileges.ENTERPRISE_ADMINISTER_ALL))
+        {
+            if (idPricingTempl != -1)
+            {
+                return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
+                    orderBy, desc, user.getEnterprise().getId());
+            }
+            return Collections.singletonList(user.getEnterprise());
+        }
+
+        if (idPricingTempl != -1)
+        {
+            return repo.findByPricingTemplate(pt, included, filterName, offset, numResults,
+                orderBy, desc, null);
         }
 
         if (!StringUtils.isEmpty(filterName))

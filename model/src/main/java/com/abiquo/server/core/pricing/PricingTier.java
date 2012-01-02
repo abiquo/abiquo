@@ -34,6 +34,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ForeignKey;
 
+import com.abiquo.model.validation.BigDec;
 import com.abiquo.server.core.common.DefaultEntityBase;
 import com.abiquo.server.core.infrastructure.storage.Tier;
 import com.softwarementors.validation.constraints.Required;
@@ -78,9 +79,11 @@ public class PricingTier extends DefaultEntityBase
 
     private final static String PRICE_COLUMN = "price";
 
-    @Column(name = PRICE_COLUMN, nullable = true)
+    @Column(name = PRICE_COLUMN, nullable = false)
     private BigDecimal price;
 
+    @Required(value = true)
+    @BigDec
     public BigDecimal getPrice()
     {
         return this.price;

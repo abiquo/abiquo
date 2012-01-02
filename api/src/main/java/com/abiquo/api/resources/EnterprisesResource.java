@@ -63,7 +63,8 @@ public class EnterprisesResource extends AbstractResource
     @GET
     public EnterprisesDto getEnterprises(@QueryParam("idPricingTemplate") final String idPricTempl,
         @QueryParam("included") final boolean included,
-        @QueryParam("filter") final String filterName, @QueryParam("page") Integer page,
+        @QueryParam("filter") final String filterName, @QueryParam("orderBy") final String orderBy,
+        @QueryParam("desc") final boolean desc, @QueryParam("page") Integer page,
         @QueryParam("numResults") Integer numResults, @Context final IRESTBuilder restBuilder)
         throws Exception
     {
@@ -84,7 +85,8 @@ public class EnterprisesResource extends AbstractResource
         }
 
         Collection<Enterprise> all =
-            service.getEnterprises(idPricingTempl, included, filterName, page, numResults);
+            service.getEnterprises(idPricingTempl, included, filterName, page, numResults, orderBy,
+                desc);
         EnterprisesDto enterprises = new EnterprisesDto();
 
         if (all != null && !all.isEmpty())

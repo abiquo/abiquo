@@ -352,7 +352,8 @@ public enum APIError
         "TIER-4", "Datacenter param in tier link not found"), TIER_LINK_DATACENTER_DIFFERENT(
         "TIER-5",
         "Tier's datacenter does not belong to the same datacenter where you want to create the StoragePool"), TIER_CONFLICT_DISABLING_TIER(
-        "TIER-6", "Can not disable a Tier with associated Storage Pools"),
+        "TIER-6", "Can not disable a Tier with associated Storage Pools"), TIER_LINK_WRONG_DATACENTER(
+        "TIER-7", "The Tier does not belong to indicated datacenter"),
 
     // DEVICES
     NON_EXISTENT_DEVICE("DEVICE-0", "The requested device does not exist"), DEVICE_DUPLICATED(
@@ -407,7 +408,8 @@ public enum APIError
         "PRICINGTEMPLATE-5", "The smallest charging period is for DAY"), PRICING_TEMPLATE_EMPTY_NAME(
         "PRICINGTEMPLATE-6", "Pricing Template name can't be empty"), MISSING_CURRENCY_LINK(
         "PRICINGTEMPLATE-7", "Missing link to the currency"), CHARGING_PERIOD_VALUES(
-        "PRICINGTEMPLATE-8", "Charging period values should be between 0 and 6"),
+        "PRICINGTEMPLATE-8", "Charging period values should be between 2 and 6"), MINIMUM_CHARGE_EMPTY(
+        "PRICINGTEMPLATE-9", "Check Minimum Charge value is not null or wrong type"),
 
     // CURRENCY
     NON_EXISTENT_CURRENCY("CURRENCY-0", "The requested Currency does not exist"), ONE_CURRENCY_REQUIRED(
@@ -446,7 +448,9 @@ public enum APIError
         "PRICING_TIER-1", "The requested Tier-PricingTemplate does not exist"), PRICING_TIER_WRONG_RELATION(
         "PRICING_TIER-2",
         "The pricing tier doesn't have any relation with the pricing model indicated"), PRICING_TIER_DATACENTER(
-        "PRICING_TIER-3", "This tier is not related to the datacenter indicated")
+        "PRICING_TIER-3", "This tier is not related to the datacenter indicated"), NOT_ASSIGNED_PRICING_TIER_PRICE(
+        "PRICING_TIER-4", "Price is required"), NOT_TIER_IN_PRICING_TIER("PRICING_TIER_5",
+        "Indicated tier in link does not have relation with this pricing tier"),
 
     ;
 

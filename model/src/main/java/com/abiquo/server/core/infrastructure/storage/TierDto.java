@@ -35,6 +35,11 @@ public class TierDto extends SingleResourceTransportDto
 
     private Integer id;
 
+    public TierDto()
+    {
+        super();
+    }
+
     public Integer getId()
     {
         return id;
