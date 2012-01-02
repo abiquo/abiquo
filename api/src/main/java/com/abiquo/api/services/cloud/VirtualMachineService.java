@@ -1173,6 +1173,8 @@ public class VirtualMachineService extends DefaultApiService
         }
         catch (APIException e)
         {
+            traceApiExceptionVm(e, virtualMachine.getName());
+
             unlockVirtualMachineState(virtualMachine, originalState);
             /*
              * Select a machine to allocate the virtual machine, Check limits, Check resources If
